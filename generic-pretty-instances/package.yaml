@@ -55,10 +55,12 @@ ghc-options:
 - -Wno-unsafe # Don’t use Safe Haskell warnings
 - -Wno-safe # Don’t use Safe Haskell warnings
 - -Wno-missing-local-signatures # Warning for polymorphic local bindings; nothing wrong with those.
-# GHC9 warnings
-- -Wno-prepositive-qualified-module
-- -Wno-missing-safe-haskell-mode
-- -Wno-unused-packages
+when:
+  - condition: impl(ghc >= 9)
+    ghc-options:
+    - -Wno-unused-packages # Because of some proto-lens-runtime magic
+    - -Wno-prepositive-qualified-module
+    - -Wno-missing-safe-haskell-mode
 
 library: {}
 
