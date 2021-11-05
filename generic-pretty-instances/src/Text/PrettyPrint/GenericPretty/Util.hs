@@ -1,10 +1,10 @@
 module Text.PrettyPrint.GenericPretty.Util
-  ( show,
-    showStr,
-    showGen,
-    showStyle,
-    showStyleStr,
-    showStyleGen,
+  ( log,
+    logStr,
+    logGen,
+    logStyle,
+    logStyleStr,
+    logStyleGen,
   )
 where
 
@@ -16,28 +16,49 @@ import Text.PrettyPrint.GenericPretty (Out)
 import qualified Text.PrettyPrint.GenericPretty as GenericPretty
 import Universum hiding (show)
 
-show :: (Out a) => a -> T.Text
-show =
-  showStyle Pretty.style
+log :: (Out a) => a -> T.Text
+log =
+  logStyle simpleStyle
 
-showStr :: (Out a) => a -> String
-showStr =
-  showStyleStr Pretty.style
+logStr :: (Out a) => a -> String
+logStr =
+  logStyleStr simpleStyle
 
-showGen :: (Out a, IsString b) => a -> b
-showGen =
-  showStyleGen Pretty.style
+logGen :: (Out a, IsString b) => a -> b
+logGen =
+  logStyleGen simpleStyle
 
-showStyle :: (Out a) => Pretty.Style -> a -> T.Text
-showStyle style =
+logStyle ::
+  (Out a) =>
+  PrettySimple.OutputOptions ->
+  a ->
+  T.Text
+logStyle style =
   TL.toStrict
-    . PrettySimple.pString
-    . GenericPretty.prettyStyle style
+    . PrettySimple.pStringOpt style
+    . GenericPretty.prettyStyle
+      Pretty.style
+        { Pretty.mode = Pretty.OneLineMode
+        }
 
-showStyleStr :: (Out a) => Pretty.Style -> a -> String
-showStyleStr style =
-  T.unpack . showStyle style
+logStyleStr ::
+  (Out a) =>
+  PrettySimple.OutputOptions ->
+  a ->
+  String
+logStyleStr style =
+  T.unpack . logStyle style
 
-showStyleGen :: (Out a, IsString b) => Pretty.Style -> a -> b
-showStyleGen style =
-  fromString . showStyleStr style
+logStyleGen ::
+  ( Out a,
+    IsString b
+  ) =>
+  PrettySimple.OutputOptions ->
+  a ->
+  b
+logStyleGen style =
+  fromString . logStyleStr style
+
+simpleStyle :: PrettySimple.OutputOptions
+simpleStyle =
+  PrettySimple.defaultOutputOptionsDarkBg
