@@ -15,13 +15,17 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Time.Calendar as Calendar
 import Data.Time.Clock (UTCTime)
+import qualified Data.Time.Clock as Clock
 import qualified Data.Time.LocalTime as LocalTime
 import qualified Data.Vector.Unboxed as Unboxed
 import qualified Database.Persist as Psql
 import qualified GHC.Conc.Sync as GHC
-import qualified Text.Pretty.Simple as PrettySimple
 import Text.PrettyPrint.GenericPretty
 import Universum
+
+--
+-- Trivial
+--
 
 deriving stock instance Generic Wire.Tag
 
@@ -47,6 +51,10 @@ deriving stock instance Generic LocalTime.TimeOfDay
 
 instance Out LocalTime.TimeOfDay
 
+deriving stock instance Generic UTCTime
+
+instance Out UTCTime
+
 deriving stock instance Generic (Fixed.Fixed a)
 
 instance Out (Fixed.Fixed a)
@@ -58,6 +66,26 @@ instance Out Psql.PersistValue
 deriving stock instance Generic Psql.LiteralType
 
 instance Out Psql.LiteralType
+
+--
+-- Show
+--
+
+instance Out GHC.ThreadId where
+  docPrec = const Universum.show
+  doc = Universum.show
+
+instance Out Clock.DiffTime where
+  docPrec = const Universum.show
+  doc = Universum.show
+
+instance (Psql.PersistEntity a) => Out (Psql.Key a) where
+  docPrec = const Universum.show
+  doc = Universum.show
+
+--
+-- Composite
+--
 
 instance Out Word32 where
   docPrec n = docPrec n . fromIntegral @Word32 @Integer
@@ -75,10 +103,6 @@ instance Out Int64 where
   docPrec n = docPrec n . fromIntegral @Int64 @Integer
   doc = doc . fromIntegral @Int64 @Integer
 
-instance Out ByteString where
-  docPrec n = docPrec n . newBsDoc
-  doc = doc . newBsDoc
-
 instance Out Text where
   docPrec n = docPrec n . T.unpack
   doc = doc . T.unpack
@@ -87,9 +111,9 @@ instance Out TL.Text where
   docPrec n = docPrec n . TL.unpack
   doc = doc . TL.unpack
 
-instance Out GHC.ThreadId where
-  docPrec = const Universum.show
-  doc = Universum.show
+instance Out ByteString where
+  docPrec n = docPrec n . newBsDoc
+  doc = doc . newBsDoc
 
 instance (Out a) => Out (Vector a) where
   docPrec n = docPrec n . toList
@@ -102,20 +126,9 @@ instance
   docPrec n = docPrec n . Unboxed.toList
   doc = doc . Unboxed.toList
 
---
--- TODO : proper instance
---
-instance (Show a, Show b) => Out (Map a b) where
-  docPrec n = docPrec n . PrettySimple.pShow
-  doc = doc . TL.unpack . PrettySimple.pShow
-
-instance Out UTCTime where
-  docPrec = const Universum.show
-  doc = Universum.show
-
-instance (Psql.PersistEntity a) => Out (Psql.Key a) where
-  docPrec = const Universum.show
-  doc = Universum.show
+instance (Out a, Out b) => Out (Map a b) where
+  docPrec n = docPrec n . toList
+  doc = doc . toList
 
 --
 -- Misc
