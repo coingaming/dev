@@ -1,10 +1,10 @@
 module Text.PrettyPrint.GenericPretty.Util
-  ( log,
-    logStr,
-    logGen,
-    logStyle,
-    logStyleStr,
-    logStyleGen,
+  ( inspect,
+    inspectStr,
+    inspectGen,
+    inspectStyle,
+    inspectStyleStr,
+    inspectStyleGen,
   )
 where
 
@@ -16,24 +16,24 @@ import Text.PrettyPrint.GenericPretty (Out)
 import qualified Text.PrettyPrint.GenericPretty as GenericPretty
 import Universum hiding (show)
 
-log :: (Out a) => a -> T.Text
-log =
-  logStyle simpleStyle
+inspect :: (Out a) => a -> T.Text
+inspect =
+  inspectStyle simpleStyle
 
-logStr :: (Out a) => a -> String
-logStr =
-  logStyleStr simpleStyle
+inspectStr :: (Out a) => a -> String
+inspectStr =
+  inspectStyleStr simpleStyle
 
-logGen :: (Out a, IsString b) => a -> b
-logGen =
-  logStyleGen simpleStyle
+inspectGen :: (Out a, IsString b) => a -> b
+inspectGen =
+  inspectStyleGen simpleStyle
 
-logStyle ::
+inspectStyle ::
   (Out a) =>
   PrettySimple.OutputOptions ->
   a ->
   T.Text
-logStyle style =
+inspectStyle style =
   TL.toStrict
     . PrettySimple.pStringOpt style
     . GenericPretty.prettyStyle
@@ -41,23 +41,23 @@ logStyle style =
         { Pretty.mode = Pretty.OneLineMode
         }
 
-logStyleStr ::
+inspectStyleStr ::
   (Out a) =>
   PrettySimple.OutputOptions ->
   a ->
   String
-logStyleStr style =
-  T.unpack . logStyle style
+inspectStyleStr style =
+  T.unpack . inspectStyle style
 
-logStyleGen ::
+inspectStyleGen ::
   ( Out a,
     IsString b
   ) =>
   PrettySimple.OutputOptions ->
   a ->
   b
-logStyleGen style =
-  fromString . logStyleStr style
+inspectStyleGen style =
+  fromString . inspectStyleStr style
 
 simpleStyle :: PrettySimple.OutputOptions
 simpleStyle =
