@@ -18,6 +18,7 @@ import Data.Time.Clock (UTCTime)
 import qualified Data.Time.LocalTime as LocalTime
 import qualified Data.Vector.Unboxed as Unboxed
 import qualified Database.Persist as Psql
+import qualified GHC.Conc.Sync as GHC
 import qualified Text.Pretty.Simple as PrettySimple
 import Text.PrettyPrint.GenericPretty
 import Universum
@@ -85,6 +86,10 @@ instance Out Text where
 instance Out TL.Text where
   docPrec n = docPrec n . TL.unpack
   doc = doc . TL.unpack
+
+instance Out GHC.ThreadId where
+  docPrec = const Universum.show
+  doc = Universum.show
 
 instance (Out a) => Out (Vector a) where
   docPrec n = docPrec n . toList
