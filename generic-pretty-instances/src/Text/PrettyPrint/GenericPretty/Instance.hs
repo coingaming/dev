@@ -1,5 +1,6 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Text.PrettyPrint.GenericPretty.Instance
@@ -66,6 +67,14 @@ instance Out Psql.PersistValue
 deriving stock instance Generic Psql.LiteralType
 
 instance Out Psql.LiteralType
+
+instance
+  ( Generic a,
+    Generic (Psql.Key a),
+    Out a,
+    Out (Psql.Key a)
+  ) =>
+  Out (Psql.Entity a)
 
 --
 -- Show
