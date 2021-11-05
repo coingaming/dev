@@ -88,10 +88,6 @@ instance Out Clock.DiffTime where
   docPrec = const Universum.show
   doc = Universum.show
 
-instance (Psql.PersistEntity a) => Out (Psql.Key a) where
-  docPrec = const Universum.show
-  doc = Universum.show
-
 --
 -- Composite
 --
