@@ -40,6 +40,9 @@ stdenv.mkDerivation {
   name = "haskell-shell";
   buildInputs = [
     haskell-ide
+    # Crypto
+    secp256k1
+    pkg-config
   ];
   TERM="xterm-256color";
   LC_ALL="C.UTF-8";

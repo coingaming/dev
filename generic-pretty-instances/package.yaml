@@ -31,6 +31,8 @@ dependencies:
 - proto-lens-runtime
 - persistent
 - time
+- signable
+- secp256k1-haskell
 
 source-dirs:
 - src

@@ -9,9 +9,11 @@ module Text.PrettyPrint.GenericPretty.Instance
 where
 
 import qualified Control.Exception as Exception
+import qualified Crypto.Secp256k1 as Secp256k1
 import Data.ByteString.Base16 as B16 (encode)
 import qualified Data.Fixed as Fixed
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Wire
+import qualified Data.Signable as Signable
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Data.Time.Calendar as Calendar
@@ -76,6 +78,20 @@ instance
   ) =>
   Out (Psql.Entity a)
 
+instance Out Secp256k1.PubKey
+
+instance Out Signable.PubKey
+
+instance Out Secp256k1.Sig
+
+instance Out Signable.Sig
+
+instance Out Signable.Alg
+
+instance Out Signable.SignableError
+
+instance Out Signable.ECPointFormat
+
 --
 -- Show
 --
@@ -85,6 +101,10 @@ instance Out GHC.ThreadId where
   doc = Universum.show
 
 instance Out Clock.DiffTime where
+  docPrec = const Universum.show
+  doc = Universum.show
+
+instance Out Signable.PrvKey where
   docPrec = const Universum.show
   doc = Universum.show
 

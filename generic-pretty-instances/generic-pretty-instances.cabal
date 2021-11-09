@@ -52,6 +52,8 @@ library
     , pretty-simple
     , proto-lens
     , proto-lens-runtime
+    , secp256k1-haskell
+    , signable
     , text
     , time
     , universum
@@ -90,6 +92,8 @@ test-suite generic-pretty-instances-test
     , pretty-simple
     , proto-lens
     , proto-lens-runtime
+    , secp256k1-haskell
+    , signable
     , text
     , time
     , universum

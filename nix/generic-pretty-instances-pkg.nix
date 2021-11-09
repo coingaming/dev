@@ -1,6 +1,7 @@
 { mkDerivation, base, base16-bytestring, bytestring, GenericPretty
-, hpack, hspec, lib, persistent, pretty, pretty-simple, proto-lens
-, proto-lens-runtime, text, time, universum, vector
+, hpack, hspec, persistent, pretty, pretty-simple, proto-lens
+, proto-lens-runtime, secp256k1-haskell, signable, stdenv, text
+, time, universum, vector
 }:
 mkDerivation {
   pname = "generic-pretty-instances";
@@ -8,17 +9,17 @@ mkDerivation {
   src = ./../generic-pretty-instances;
   libraryHaskellDepends = [
     base base16-bytestring bytestring GenericPretty persistent pretty
-    pretty-simple proto-lens proto-lens-runtime text time universum
-    vector
+    pretty-simple proto-lens proto-lens-runtime secp256k1-haskell
+    signable text time universum vector
   ];
   libraryToolDepends = [ hpack ];
   testHaskellDepends = [
     base base16-bytestring bytestring GenericPretty hspec persistent
-    pretty pretty-simple proto-lens proto-lens-runtime text time
-    universum vector
+    pretty pretty-simple proto-lens proto-lens-runtime
+    secp256k1-haskell signable text time universum vector
   ];
   prePatch = "hpack";
   homepage = "https://github.com/coingaming/hs/generic-pretty-instances";
   description = "GenericPretty canonical instances";
-  license = lib.licenses.bsd3;
+  license = stdenv.lib.licenses.bsd3;
 }

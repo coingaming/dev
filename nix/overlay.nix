@@ -10,11 +10,11 @@
     in
       {
         haskell-ide = import (
-          fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/98f417d1d61981e891bf7539427a889ab2d05739"
+          fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/26b9292cdde4a7977309dbb98291929c7f740d2a"
           ) {
             inherit vimBackground vimColorScheme;
           };
-        haskellPackages = super.haskell.packages.ghc901.extend(
+        haskellPackages = super.haskell.packages.ghc865Binary.extend(
           self': super': {
 
           }
