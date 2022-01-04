@@ -1,6 +1,6 @@
-# lsp
+# btc-lsp
 
-Lightning Service Provider. Nix is the only program required to get started. Development environment is packed into nix-shell.
+Bitcoin Lightning Service Provider. Nix is the only program required to get started. Development environment is packed into nix-shell.
 
 ## Quickstart
 

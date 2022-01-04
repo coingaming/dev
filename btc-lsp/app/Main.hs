@@ -3,4 +3,4 @@ module Main
   )
 where
 
-import Lsp.Thread.Main (main)
+import BtcLsp.Thread.Main (main)

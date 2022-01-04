@@ -3,7 +3,7 @@ module Main
   )
 where
 
-import Lsp.Import
+import BtcLsp.Import
 import qualified Spec
 import Test.Hspec.Formatters
 import Test.Hspec.Runner

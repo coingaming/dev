@@ -19,6 +19,10 @@ module TestAppM
   )
 where
 
+import BtcLsp.Data.Env as Env
+import BtcLsp.Import as I
+import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Model.LnChannel as Storage (getByChannelPoint)
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString.Char8 as C8 hiding (filter, length)
 import qualified Env as E
@@ -26,10 +30,6 @@ import LndClient (LndEnv (..))
 import qualified LndClient as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
-import Lsp.Data.Env as Env
-import Lsp.Import as I
-import qualified Lsp.Import.Psql as Psql
-import qualified Lsp.Storage.Model.LnChannel as Storage (getByChannelPoint)
 import Network.Bitcoin as BTC (Client, getClient)
 import Test.Hspec
 

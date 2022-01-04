@@ -6,9 +6,9 @@ module TestWithPaymentsPartner
   )
 where
 
-import Lsp.Import
-import Lsp.Storage (migrateAll)
-import Lsp.Storage.Util (cleanDb)
+import BtcLsp.Import
+import BtcLsp.Storage (migrateAll)
+import BtcLsp.Storage.Util (cleanDb)
 import Test.Hspec
 import TestAppM as ReExport hiding (itEnv, xitEnv)
 import qualified TestAppM

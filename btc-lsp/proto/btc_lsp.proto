@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package BtcLsp;
+
+import "btc_lsp/custody/deposit_on_chain.proto";
+import "btc_lsp/custody/deposit_ln.proto";
+
+service Service {
+  rpc CustodyDepositOnChain(.BtcLsp.Custody.DepositOnChain.Request)
+    returns (.BtcLsp.Custody.DepositOnChain.Response);
+  rpc CustodyDepositLn(.BtcLsp.Custody.DepositLn.Request)
+    returns (.BtcLsp.Custody.DepositLn.Response);
+}

@@ -1,0 +1,22 @@
+syntax="proto3";
+
+package BtcLsp.Custody.DepositOnChain;
+
+import "btc_lsp/newtype.proto";
+import "btc_lsp/type.proto";
+
+message Request {
+  .BtcLsp.Type.Ctx ctx = 1;
+}
+
+message Response {
+  .BtcLsp.Type.Ctx ctx = 1;
+  oneof either {
+    Success success = 2;
+    .BtcLsp.Type.Failure failure = 3;
+  }
+
+  message Success {
+    .BtcLsp.Newtype.OnChainAddress address = 1;
+  }
+}

@@ -4,10 +4,10 @@ module TestAppTH
   )
 where
 
+import BtcLsp.Import hiding (lift)
 import Data.ByteString as BS
 import qualified Data.Signable as Signable
 import Language.Haskell.TH.Syntax
-import Lsp.Import hiding (lift)
 
 mkPrvKey :: Q Exp
 mkPrvKey = do

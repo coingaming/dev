@@ -5,7 +5,7 @@ module TestWithMerchantPartner
   )
 where
 
-import Lsp.Import
+import BtcLsp.Import
 import Test.Hspec
 import TestAppM as ReExport hiding (itEnv, xitEnv)
 import qualified TestAppM
