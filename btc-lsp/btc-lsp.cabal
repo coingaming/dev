@@ -1,0 +1,371 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           btc-lsp
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
+homepage:       https://github.com/githubuser/btc-lsp#readme
+bug-reports:    https://github.com/githubuser/btc-lsp/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/btc-lsp
+
+library
+  exposed-modules:
+      Lsp.Class.Env
+      Lsp.Class.Storage
+      Lsp.Data.AppM
+      Lsp.Data.Env
+      Lsp.Data.Model
+      Lsp.Data.Type
+      Lsp.Import
+      Lsp.Import.External
+      Lsp.Import.Psql
+      Lsp.ProtoLensGrpc.Client
+      Lsp.ProtoLensGrpc.Data
+      Lsp.ProtoLensGrpc.Server
+      Lsp.Storage
+      Lsp.Storage.Model.LnChannel
+      Lsp.Storage.Util
+      Lsp.Thread.Main
+      Lsp.Thread.Server
+      Proto.Lsp
+      Proto.Lsp.Custody.DepositLn
+      Proto.Lsp.Custody.DepositLn_Fields
+      Proto.Lsp.Custody.DepositOnChain
+      Proto.Lsp.Custody.DepositOnChain_Fields
+      Proto.Lsp.Newtype
+      Proto.Lsp.Newtype_Fields
+      Proto.Lsp.Type
+      Proto.Lsp.Type_Fields
+      Proto.Lsp_Fields
+      Proto.SignableOrphan
+  other-modules:
+      Paths_btc_lsp
+  hs-source-dirs:
+      src
+  default-extensions:
+      NoImplicitPrelude
+      MultiParamTypeClasses
+      LambdaCase
+      OverloadedStrings
+      ScopedTypeVariables
+      DeriveGeneric
+      GeneralizedNewtypeDeriving
+      TupleSections
+      DataKinds
+      DerivingStrategies
+      KindSignatures
+      FlexibleContexts
+      StrictData
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists
+  build-depends:
+      Decimal
+    , GenericPretty
+    , QuickCheck
+    , aeson
+    , async
+    , base >=4.7 && <5
+    , base16-bytestring
+    , binary
+    , bytestring
+    , case-insensitive
+    , casing
+    , chronos
+    , containers
+    , cryptonite
+    , envparse
+    , errors
+    , esqueleto >=3.5.3
+    , extra
+    , generic-arbitrary
+    , generic-pretty-instances
+    , http2
+    , http2-client
+    , http2-client-grpc
+    , http2-grpc-proto-lens
+    , http2-grpc-types
+    , katip <0.8.5
+    , lens
+    , lnd-client
+    , memory
+    , microlens
+    , monad-logger
+    , network-bitcoin
+    , persistent >=2.13.2.1
+    , persistent-migration
+    , persistent-postgresql >=2.13.2.1
+    , persistent-template >=2.12
+    , pretty
+    , pretty-simple
+    , proto-lens
+    , proto-lens-arbitrary
+    , proto-lens-runtime
+    , quickcheck-instances
+    , resource-pool
+    , retry
+    , scientific
+    , signable
+    , stm
+    , template-haskell
+    , text
+    , time
+    , transformers
+    , unbounded-delays
+    , universum
+    , unliftio
+    , uuid
+    , vector
+    , wai
+    , warp
+    , warp-grpc
+    , warp-tls
+  default-language: Haskell2010
+
+executable btc-lsp-exe
+  main-is: Main.hs
+  other-modules:
+      Lsp.Class.Env
+      Lsp.Class.Storage
+      Lsp.Data.AppM
+      Lsp.Data.Env
+      Lsp.Data.Model
+      Lsp.Data.Type
+      Lsp.Import
+      Lsp.Import.External
+      Lsp.Import.Psql
+      Lsp.ProtoLensGrpc.Client
+      Lsp.ProtoLensGrpc.Data
+      Lsp.ProtoLensGrpc.Server
+      Lsp.Storage
+      Lsp.Storage.Model.LnChannel
+      Lsp.Storage.Util
+      Lsp.Thread.Main
+      Lsp.Thread.Server
+      Proto.Lsp
+      Proto.Lsp.Custody.DepositLn
+      Proto.Lsp.Custody.DepositLn_Fields
+      Proto.Lsp.Custody.DepositOnChain
+      Proto.Lsp.Custody.DepositOnChain_Fields
+      Proto.Lsp.Newtype
+      Proto.Lsp.Newtype_Fields
+      Proto.Lsp.Type
+      Proto.Lsp.Type_Fields
+      Proto.Lsp_Fields
+      Proto.SignableOrphan
+      Paths_btc_lsp
+  hs-source-dirs:
+      src
+      app
+  default-extensions:
+      NoImplicitPrelude
+      MultiParamTypeClasses
+      LambdaCase
+      OverloadedStrings
+      ScopedTypeVariables
+      DeriveGeneric
+      GeneralizedNewtypeDeriving
+      TupleSections
+      DataKinds
+      DerivingStrategies
+      KindSignatures
+      FlexibleContexts
+      StrictData
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Decimal
+    , GenericPretty
+    , QuickCheck
+    , aeson
+    , async
+    , base >=4.7 && <5
+    , base16-bytestring
+    , binary
+    , bytestring
+    , case-insensitive
+    , casing
+    , chronos
+    , containers
+    , cryptonite
+    , envparse
+    , errors
+    , esqueleto >=3.5.3
+    , extra
+    , generic-arbitrary
+    , generic-pretty-instances
+    , http2
+    , http2-client
+    , http2-client-grpc
+    , http2-grpc-proto-lens
+    , http2-grpc-types
+    , katip <0.8.5
+    , lens
+    , lnd-client
+    , memory
+    , microlens
+    , monad-logger
+    , network-bitcoin
+    , persistent >=2.13.2.1
+    , persistent-migration
+    , persistent-postgresql >=2.13.2.1
+    , persistent-template >=2.12
+    , pretty
+    , pretty-simple
+    , proto-lens
+    , proto-lens-arbitrary
+    , proto-lens-runtime
+    , quickcheck-instances
+    , resource-pool
+    , retry
+    , scientific
+    , signable
+    , stm
+    , template-haskell
+    , text
+    , time
+    , transformers
+    , unbounded-delays
+    , universum
+    , unliftio
+    , uuid
+    , vector
+    , wai
+    , warp
+    , warp-grpc
+    , warp-tls
+  default-language: Haskell2010
+
+test-suite btc-lsp-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Lsp.Class.Env
+      Lsp.Class.Storage
+      Lsp.Data.AppM
+      Lsp.Data.Env
+      Lsp.Data.Model
+      Lsp.Data.Type
+      Lsp.Import
+      Lsp.Import.External
+      Lsp.Import.Psql
+      Lsp.ProtoLensGrpc.Client
+      Lsp.ProtoLensGrpc.Data
+      Lsp.ProtoLensGrpc.Server
+      Lsp.Storage
+      Lsp.Storage.Model.LnChannel
+      Lsp.Storage.Util
+      Lsp.Thread.Main
+      Lsp.Thread.Server
+      Proto.Lsp
+      Proto.Lsp.Custody.DepositLn
+      Proto.Lsp.Custody.DepositLn_Fields
+      Proto.Lsp.Custody.DepositOnChain
+      Proto.Lsp.Custody.DepositOnChain_Fields
+      Proto.Lsp.Newtype
+      Proto.Lsp.Newtype_Fields
+      Proto.Lsp.Type
+      Proto.Lsp.Type_Fields
+      Proto.Lsp_Fields
+      Proto.SignableOrphan
+      Spec
+      TestAppM
+      TestAppTH
+      TestWithMerchantPartner
+      TestWithPaymentsPartner
+      Paths_btc_lsp
+  hs-source-dirs:
+      src
+      test
+  default-extensions:
+      NoImplicitPrelude
+      MultiParamTypeClasses
+      LambdaCase
+      OverloadedStrings
+      ScopedTypeVariables
+      DeriveGeneric
+      GeneralizedNewtypeDeriving
+      TupleSections
+      DataKinds
+      DerivingStrategies
+      KindSignatures
+      FlexibleContexts
+      StrictData
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Decimal
+    , GenericPretty
+    , QuickCheck
+    , aeson
+    , async
+    , base >=4.7 && <5
+    , base16-bytestring
+    , binary
+    , bytestring
+    , case-insensitive
+    , casing
+    , chronos
+    , containers
+    , cryptonite
+    , envparse
+    , errors
+    , esqueleto >=3.5.3
+    , extra
+    , generic-arbitrary
+    , generic-pretty-instances
+    , hspec
+    , hspec-expectations
+    , hspec-wai
+    , http2
+    , http2-client
+    , http2-client-grpc
+    , http2-grpc-proto-lens
+    , http2-grpc-types
+    , katip <0.8.5
+    , lens
+    , lnd-client
+    , memory
+    , microlens
+    , monad-logger
+    , network-bitcoin
+    , persistent >=2.13.2.1
+    , persistent-migration
+    , persistent-postgresql >=2.13.2.1
+    , persistent-template >=2.12
+    , pretty
+    , pretty-simple
+    , proto-lens
+    , proto-lens-arbitrary
+    , proto-lens-runtime
+    , quickcheck-instances
+    , resource-pool
+    , retry
+    , scientific
+    , signable
+    , stm
+    , template-haskell
+    , text
+    , time
+    , transformers
+    , unbounded-delays
+    , universum
+    , unliftio
+    , uuid
+    , vector
+    , wai
+    , warp
+    , warp-grpc
+    , warp-tls
+  default-language: Haskell2010

@@ -1,0 +1,14 @@
+-- Syntax for this file here:
+-- https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
+
+LnChannel
+  fundingTxId (TxId 'Funding)
+  fundingVout (Vout 'Funding)
+  closingTxId (TxId 'Closing) Maybe
+  status LnChannelStatus
+  localBalance MSat Maybe
+  remoteBalance MSat Maybe
+  UniqueLnChannel fundingTxId fundingVout
+  nodeKey Lnd.NodePubKey Maybe
+  nodeLoc Lnd.NodeLocation Maybe
+  deriving Eq Show Generic

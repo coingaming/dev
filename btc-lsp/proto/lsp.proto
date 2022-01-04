@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package Lsp;
+
+import "lsp/custody/deposit_on_chain.proto";
+import "lsp/custody/deposit_ln.proto";
+
+service Service {
+  rpc CustodyDepositOnChain(.Lsp.Custody.DepositOnChain.Request)
+    returns (.Lsp.Custody.DepositOnChain.Response);
+  rpc CustodyDepositLn(.Lsp.Custody.DepositLn.Request)
+    returns (.Lsp.Custody.DepositLn.Response);
+}

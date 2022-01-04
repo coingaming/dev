@@ -1,0 +1,6 @@
+--test=":main --fail-fast --color -f failed-examples"
+--restart=cabal.project
+--restart=package.yaml
+--restart=config/model
+--restart=nix/export-test-envs.sh
+--command="((kill -0 `cat ./.bitcoin/regtest/bitcoind.pid` && kill -0 `cat ./.lnd-merchant/lnd.pid` && kill -0 `cat ./.lnd-payments/lnd.pid` && pg_ctl -D ./postgres status) || ((./nix/shutdown-test-deps.sh || true) && (setsid ./nix/prepare.sh & wait))) && . ./nix/export-test-envs.sh && hpack && cabal new-repl test:btc-lsp-test --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j"

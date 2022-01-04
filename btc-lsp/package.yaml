@@ -1,0 +1,155 @@
+name:                btc-lsp
+version:             0.1.0.0
+github:              "githubuser/btc-lsp"
+license:             BSD3
+author:              "Author name here"
+maintainer:          "example@example.com"
+copyright:           "2020 Author name here"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
+
+dependencies:
+# foundation
+- base >= 4.7 && < 5
+- universum
+- transformers
+- errors
+- extra
+# time
+- time
+- chronos
+- unbounded-delays
+- retry
+# storage
+- persistent >= 2.13.2.1
+#- persistent-mtl
+- persistent-postgresql >= 2.13.2.1
+- persistent-template >= 2.12
+- persistent-migration
+- esqueleto >= 3.5.3
+# logging
+- katip < 0.8.5
+- monad-logger
+- pretty
+- pretty-simple
+- GenericPretty
+- generic-pretty-instances
+# lens
+- lens
+- microlens
+# bytes and text
+- case-insensitive
+- bytestring
+- text
+- proto-lens
+- proto-lens-runtime
+- binary
+- casing
+- memory
+- aeson
+- base16-bytestring
+# threads
+- async
+- stm
+- resource-pool
+# th
+- template-haskell
+# crypto
+- uuid
+- network-bitcoin
+- lnd-client
+- cryptonite
+- signable
+# web
+- warp
+# other
+- unliftio
+- containers
+- envparse
+- extra
+- Decimal
+- scientific
+- vector
+# tests
+- QuickCheck
+- quickcheck-instances
+- generic-arbitrary
+- proto-lens-arbitrary
+# grpc
+- wai
+- warp-tls
+- warp-grpc
+- http2
+- http2-grpc-types
+- http2-grpc-proto-lens
+- http2-client
+- http2-client-grpc
+
+source-dirs:
+- src
+
+default-extensions:
+- NoImplicitPrelude
+- MultiParamTypeClasses
+- LambdaCase
+- OverloadedStrings
+- ScopedTypeVariables
+- DeriveGeneric
+- GeneralizedNewtypeDeriving
+- TupleSections
+- DataKinds
+- DerivingStrategies
+- KindSignatures
+- FlexibleContexts
+- StrictData
+
+ghc-options:
+# For details on warnings: https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html
+# Enable all warnings with -Weverything, then disable the ones we don’t care about
+- -Weverything
+- -Werror
+- -Wno-missing-exported-signatures # missing-exported-signatures turns off the more strict -Wmissing-signatures. See https://ghc.haskell.org/trac/ghc/ticket/14794#ticket
+- -Wno-missing-import-lists # Requires explicit imports of _every_ function (e.g. ‘$’); too strict
+- -Wno-missed-specialisations # When GHC can’t specialize a polymorphic function. No big deal and requires fixing underlying libraries to solve.
+- -Wno-all-missed-specialisations # See missed-specialisations
+- -Wno-unsafe # Don’t use Safe Haskell warnings
+- -Wno-safe # Don’t use Safe Haskell warnings
+- -Wno-missing-local-signatures # Warning for polymorphic local bindings; nothing wrong with those.
+- -Wno-missing-export-lists # Because of proto-lens
+
+library: {}
+
+executables:
+  btc-lsp-exe:
+    main: Main.hs
+    source-dirs:
+    - app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+
+tests:
+  btc-lsp-test:
+    main: Main.hs
+    source-dirs:
+    - test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hspec
+    - hspec-expectations
+    - hspec-wai

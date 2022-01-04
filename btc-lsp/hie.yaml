@@ -1,0 +1,8 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: lib:lsp
+    - path: "./app"
+      component: exe:lsp-exe
+    - path: "./test"
+      component: test:lsp-test

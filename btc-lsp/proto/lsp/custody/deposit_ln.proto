@@ -1,0 +1,23 @@
+syntax="proto3";
+package Lsp.Custody.DepositLn;
+
+import "lsp/newtype.proto";
+import "lsp/type.proto";
+
+message Request {
+  .Lsp.Type.Ctx ctx = 1;
+  .Lsp.Newtype.Msat msat = 2;
+}
+
+message Response {
+  .Lsp.Type.Ctx ctx = 1;
+
+  oneof either {
+    Success success = 2;
+    .Lsp.Type.Failure failure = 3;
+  }
+
+  message Success {
+    .Lsp.Newtype.LnInvoice invoice = 1;
+  }
+}

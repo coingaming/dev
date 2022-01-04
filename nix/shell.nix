@@ -40,7 +40,6 @@ stdenv.mkDerivation {
   name = "haskell-shell";
   buildInputs = [
     haskell-ide
-    # Crypto
     secp256k1
     pkg-config
   ];
