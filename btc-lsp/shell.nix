@@ -1,23 +1,27 @@
 {
-  extraBuildInputs ? [],
+  withHaskellIde ? false,
   withShellHook ? false,
   profile ? false,
 }:
 with (import ./nix/haskell.nix);
-let p = import ./nix/proto-lens-protoc.nix;
+let proto = import ./nix/proto-lens-protoc.nix;
+    ideBuildInputs =
+      if withHaskellIde
+      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/a625bc12de236824c337a2df3f626b2c662434ca") {bundle = "haskell";})]
+      else [];
 in
 (project {
 
 }).shellFor {
   withHoogle = true;
-  buildInputs = extraBuildInputs ++ [
+  buildInputs = ideBuildInputs ++ [
     pkgs.haskellPackages.hpack
     pkgs.haskellPackages.fswatcher
     pkgs.haskellPackages.cabal-plan
     pkgs.zlib
     pkgs.protobuf
-    p.protoc-haskell-bin
-    p.protoc-signable-bin
+    proto.protoc-haskell-bin
+    proto.protoc-signable-bin
   ];
   tools = {
     cabal = "3.2.0.0";

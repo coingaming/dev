@@ -1,11 +1,11 @@
 let
   header = (import ./header.nix);
   protolens = fetchGit {
-    url = "git@github.com:coingaming/proto-lens.git";
+    url = "https://github.com/coingaming/proto-lens.git";
     rev = "845fc11ad95ca9edd73d5ff0a5994d1a5232e1e9";
   };
   signable = fetchGit {
-    url = "git@github.com:coingaming/signable.git";
+    url = "https://github.com/coingaming/signable.git";
     rev = "192beaf4cd951144385f63516370607014a29dd5";
   };
   protoc-haskell = header.pkgs.haskell-nix.project {

@@ -44,7 +44,6 @@ import Data.Aeson as X
 import Data.Bifunctor as X (bimap, first, second)
 import Data.Coerce as X (coerce)
 import Data.Containers.ListUtils as X (nubOrd)
-import Data.Decimal as X (DecimalRaw (..), eitherFromRational)
 import Data.Either.Extra as X (fromEither)
 import Data.EitherR as X (flipET, handleE)
 import Data.List as X (partition)

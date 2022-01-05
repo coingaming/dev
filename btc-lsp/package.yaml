@@ -22,7 +22,9 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 # foundation
 - base >= 4.7 && < 5
+- unliftio
 - universum
+- containers
 - transformers
 - errors
 - extra
@@ -30,10 +32,8 @@ dependencies:
 - time
 - chronos
 - unbounded-delays
-- retry
 # storage
 - persistent >= 2.13.2.1
-#- persistent-mtl
 - persistent-postgresql >= 2.13.2.1
 - persistent-template >= 2.12
 - persistent-migration
@@ -48,7 +48,7 @@ dependencies:
 # lens
 - lens
 - microlens
-# bytes and text
+# bytes
 - case-insensitive
 - bytestring
 - text
@@ -72,22 +72,8 @@ dependencies:
 - cryptonite
 - signable
 # web
-- warp
-# other
-- unliftio
-- containers
-- envparse
-- extra
-- Decimal
-- scientific
-- vector
-# tests
-- QuickCheck
-- quickcheck-instances
-- generic-arbitrary
-- proto-lens-arbitrary
-# grpc
 - wai
+- warp
 - warp-tls
 - warp-grpc
 - http2
@@ -95,6 +81,10 @@ dependencies:
 - http2-grpc-proto-lens
 - http2-client
 - http2-client-grpc
+# other
+- envparse
+- scientific
+- vector
 
 source-dirs:
 - src
@@ -150,6 +140,10 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - QuickCheck
+    - quickcheck-instances
+    - generic-arbitrary
+    - proto-lens-arbitrary
     - hspec
     - hspec-expectations
     - hspec-wai
