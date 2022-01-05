@@ -13,10 +13,19 @@ message Response {
   .BtcLsp.Type.Ctx ctx = 1;
   oneof either {
     Success success = 2;
-    .BtcLsp.Type.Failure failure = 3;
+    Failure failure = 3;
   }
 
   message Success {
     .BtcLsp.Newtype.OnChainAddress address = 1;
+  }
+
+  message Failure {
+    repeated .BtcLsp.Type.InputFailure input = 1;
+    repeated InternalFailure internal = 2;
+
+    message InternalFailure {
+
+    }
   }
 }

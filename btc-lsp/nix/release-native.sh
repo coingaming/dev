@@ -3,6 +3,7 @@
 set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
+
 nix-build \
   "$THIS_DIR/docker.nix" \
   --option extra-substituters "https://cache.nixos.org https://hydra.iohk.io https://all-hies.cachix.org" \

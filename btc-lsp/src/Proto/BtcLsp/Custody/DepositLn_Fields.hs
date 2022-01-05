@@ -39,6 +39,17 @@ failure ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failure" a) =>
   Lens.Family2.LensLike' f s a
 failure = Data.ProtoLens.Field.field @"failure"
+input ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "input" a) =>
+  Lens.Family2.LensLike' f s a
+input = Data.ProtoLens.Field.field @"input"
+internal ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "internal" a) =>
+  Lens.Family2.LensLike' f s a
+internal = Data.ProtoLens.Field.field @"internal"
 invoice ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "invoice" a) =>
@@ -90,3 +101,15 @@ success ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "success" a) =>
   Lens.Family2.LensLike' f s a
 success = Data.ProtoLens.Field.field @"success"
+vec'input ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'input" a) =>
+  Lens.Family2.LensLike' f s a
+vec'input = Data.ProtoLens.Field.field @"vec'input"
+vec'internal ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'internal" a) =>
+  Lens.Family2.LensLike' f s a
+vec'internal = Data.ProtoLens.Field.field @"vec'internal"
