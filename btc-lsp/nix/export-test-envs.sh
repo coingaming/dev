@@ -145,8 +145,8 @@ S/0jIwsLJkf61mIl2tMViaZ4nWjrLyS7cQPZO2lW47NFHbF4q7bheA==
 -----END PUBLIC KEY-----
 ")"
 
-export GRPC_TLS_KEY="$(cat "$THIS_DIR/.grpc-tls/key.pem" | esc)"
-export GRPC_TLS_CERT="$(cat "$THIS_DIR/.grpc-tls/certificate.pem" | esc)"
+export GRPC_TLS_CERT="$(cat "$THIS_DIR/.grpc-tls/certificate.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export GRPC_TLS_KEY="$(cat "$THIS_DIR/.grpc-tls/key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export LSP_GRPC_CLIENT_ENV="
 {
   \"host\":\"localhost\",
