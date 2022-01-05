@@ -18,18 +18,18 @@ migrateBefore = []
 --
 migrateAfter :: PsqlMig.Migration
 migrateAfter =
-  [ 0 PsqlMig.~> 1 PsqlMig.:= [lnInvoiceSearchIndexes]
+  [ 0 PsqlMig.~> 1 PsqlMig.:= [lnChannelSearchIndexes]
   ]
   where
-    lnInvoiceSearchIndexesSql :: Text
-    lnInvoiceSearchIndexesSql =
+    lnChannelSearchIndexesSql :: Text
+    lnChannelSearchIndexesSql =
       "CREATE INDEX IF NOT EXISTS "
-        <> "merchant_external_payment_expires_at_idx "
-        <> "ON merchant_external_payment (expires_at);"
-    lnInvoiceSearchIndexes =
-      PsqlMig.RawOperation "Create LnInvoiceIn search indexes" $
+        <> "ln_channel_status_idx "
+        <> "ON ln_channel (status);"
+    lnChannelSearchIndexes =
+      PsqlMig.RawOperation "Create LnChannel search indexes" $
         lift . return $
-          [PsqlMig.MigrateSql lnInvoiceSearchIndexesSql []]
+          [PsqlMig.MigrateSql lnChannelSearchIndexesSql []]
 
 migrateAll :: (Storage m, KatipContext m) => m ()
 migrateAll = do
