@@ -17,3 +17,4 @@ nohup.out
 test_run.txt
 core
 docker-image-*
+build/
