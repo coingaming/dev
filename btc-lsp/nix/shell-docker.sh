@@ -40,6 +40,7 @@ if [ "$SHELL_KIND" = "maxishell" ]; then
     adduser $USER -D &&
     echo \"$NIX_CONF\" >> /etc/nix/nix.conf &&
     (nix-daemon &) &&
+    sleep 5 &&
     su $USER -c \"NIX_REMOTE=daemon nix-shell ./shell.nix \
         --pure \
         --show-trace -v \
@@ -57,6 +58,7 @@ else
     adduser $USER -D &&
     echo \"$NIX_CONF\" >> /etc/nix/nix.conf &&
     (nix-daemon &) &&
+    sleep 5 &&
     su $USER -c \"NIX_REMOTE=daemon nix-shell ./nix/minishell.nix \
         --pure \
         --show-trace -v \

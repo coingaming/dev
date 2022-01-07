@@ -27,6 +27,7 @@ in  { networks.global.external = True
       =
       { image = ../build/docker-image-btc-lsp.txt as Text
       , hostname = "btc-lsp"
+      , ports = [ "8443:8443/tcp" ]
       , environment =
         { -- General
           LSP_LIBPQ_CONN_STR = "postgresql://btc-lsp:developer@postgres/btc-lsp"

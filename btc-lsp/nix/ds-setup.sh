@@ -8,7 +8,15 @@ BUILD_DIR="$THIS_DIR/../build"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
+echo "==> docker swarm network setup"
+sh "$THIS_DIR/ds-down.sh" || true
+docker swarm leave --force || true
+docker swarm init || true
+docker network create -d overlay --attachable global || true
+
 echo "==> keys generation"
+echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
+     > "$BUILD_DIR/subjectAltName"
 sh "$THIS_DIR/shell-docker.sh" --mini \
    "--run 'cd ./build && \
    echo DEPRECATED_ECDSA && \
@@ -21,6 +29,7 @@ sh "$THIS_DIR/shell-docker.sh" --mini \
    openssl req -new -key btc_lsp_tls_key.pem \
      -out csr.csr -subj /CN=btc-lsp/O=btc-lsp && \
    openssl x509 -req -in csr.csr \
+     -extfile subjectAltName \
      -signkey btc_lsp_tls_key.pem -out btc_lsp_tls_cert.pem && \
    rm csr.csr && \
    echo LND_TLS && \
@@ -33,7 +42,6 @@ sh "$THIS_DIR/shell-docker.sh" --mini \
    "
 
 echo "==> docker image build"
-sleep 7
 sh "$THIS_DIR/release-docker.sh"
 docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | awk '{print $NF}' \
@@ -41,7 +49,6 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
 echo "==> dhall compilation"
-sleep 7
 sh "$THIS_DIR/shell-docker.sh" --mini \
    "--run './nix/dhall-compile.sh'"
 
