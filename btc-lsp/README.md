@@ -11,7 +11,7 @@ To spawn `btc-lsp` running [Docker/Swarm](https://docs.docker.com/engine/swarm/s
 
 docker service ls
 
-curl -d '' -v --cacert ./build/btc_lsp_tls_cert.pem https://127.0.0.1:8443/BtcLsp.Service/CustodyDepositLn
+curl -d '' -v --cacert ./build/btc_lsp_tls_cert.pem https://127.0.0.1:8443/BtcLsp.Service/CustodyOpenChanLn
 ```
 
 ## Haskell/Nix

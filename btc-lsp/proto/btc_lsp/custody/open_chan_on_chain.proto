@@ -1,0 +1,33 @@
+syntax="proto3";
+
+package BtcLsp.Custody.OpenChanOnChain;
+
+import "btc_lsp/newtype.proto";
+import "btc_lsp/type.proto";
+
+message Request {
+  .BtcLsp.Type.Ctx ctx = 1;
+  .BtcLsp.Newtype.Sat channel_local_balance = 2;
+}
+
+message Response {
+  .BtcLsp.Type.Ctx ctx = 1;
+  oneof either {
+    Success success = 2;
+    Failure failure = 3;
+  }
+
+  message Success {
+    .BtcLsp.Newtype.LnSocketAddress connect_to = 1;
+    .BtcLsp.Newtype.OnChainAddress pay_funding_address = 2;
+  }
+
+  message Failure {
+    repeated .BtcLsp.Type.InputFailure input = 1;
+    repeated InternalFailure internal = 2;
+
+    message InternalFailure {
+
+    }
+  }
+}

@@ -28,6 +28,12 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Gener
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.BtcLsp.Newtype
+denominator ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "denominator" a) =>
+  Lens.Family2.LensLike' f s a
+denominator = Data.ProtoLens.Field.field @"denominator"
 fieldLocation ::
   forall f s a.
   (Prelude.Functor f,
@@ -39,28 +45,127 @@ kind ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "kind" a) =>
   Lens.Family2.LensLike' f s a
 kind = Data.ProtoLens.Field.field @"kind"
+lnPubKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "lnPubKey" a) =>
+  Lens.Family2.LensLike' f s a
+lnPubKey = Data.ProtoLens.Field.field @"lnPubKey"
+max ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "max" a) =>
+  Lens.Family2.LensLike' f s a
+max = Data.ProtoLens.Field.field @"max"
+maybe'lnPubKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'lnPubKey" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'lnPubKey = Data.ProtoLens.Field.field @"maybe'lnPubKey"
+maybe'max ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'max" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'max = Data.ProtoLens.Field.field @"maybe'max"
+maybe'min ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'min" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'min = Data.ProtoLens.Field.field @"maybe'min"
 maybe'nonce ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'nonce" a) =>
   Lens.Family2.LensLike' f s a
 maybe'nonce = Data.ProtoLens.Field.field @"maybe'nonce"
-maybe'pubKey ::
+maybe'openChanFeeRate ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'pubKey" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'openChanFeeRate" a) =>
   Lens.Family2.LensLike' f s a
-maybe'pubKey = Data.ProtoLens.Field.field @"maybe'pubKey"
+maybe'openChanFeeRate
+  = Data.ProtoLens.Field.field @"maybe'openChanFeeRate"
+maybe'openChanLnLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'openChanLnLimit" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'openChanLnLimit
+  = Data.ProtoLens.Field.field @"maybe'openChanLnLimit"
+maybe'openChanMinFee ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'openChanMinFee" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'openChanMinFee
+  = Data.ProtoLens.Field.field @"maybe'openChanMinFee"
+maybe'openChanOnChainLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'openChanOnChainLimit" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'openChanOnChainLimit
+  = Data.ProtoLens.Field.field @"maybe'openChanOnChainLimit"
+maybe'val ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'val" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'val = Data.ProtoLens.Field.field @"maybe'val"
+min ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "min" a) =>
+  Lens.Family2.LensLike' f s a
+min = Data.ProtoLens.Field.field @"min"
+negative ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "negative" a) =>
+  Lens.Family2.LensLike' f s a
+negative = Data.ProtoLens.Field.field @"negative"
 nonce ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "nonce" a) =>
   Lens.Family2.LensLike' f s a
 nonce = Data.ProtoLens.Field.field @"nonce"
-pubKey ::
+numerator ::
   forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "pubKey" a) =>
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "numerator" a) =>
   Lens.Family2.LensLike' f s a
-pubKey = Data.ProtoLens.Field.field @"pubKey"
+numerator = Data.ProtoLens.Field.field @"numerator"
+openChanFeeRate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "openChanFeeRate" a) =>
+  Lens.Family2.LensLike' f s a
+openChanFeeRate = Data.ProtoLens.Field.field @"openChanFeeRate"
+openChanLnLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "openChanLnLimit" a) =>
+  Lens.Family2.LensLike' f s a
+openChanLnLimit = Data.ProtoLens.Field.field @"openChanLnLimit"
+openChanMinFee ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "openChanMinFee" a) =>
+  Lens.Family2.LensLike' f s a
+openChanMinFee = Data.ProtoLens.Field.field @"openChanMinFee"
+openChanOnChainLimit ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "openChanOnChainLimit" a) =>
+  Lens.Family2.LensLike' f s a
+openChanOnChainLimit
+  = Data.ProtoLens.Field.field @"openChanOnChainLimit"
+val ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>
+  Lens.Family2.LensLike' f s a
+val = Data.ProtoLens.Field.field @"val"
 vec'fieldLocation ::
   forall f s a.
   (Prelude.Functor f,

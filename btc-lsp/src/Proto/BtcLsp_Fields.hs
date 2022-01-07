@@ -27,5 +27,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.BtcLsp.Custody.DepositLn
-import qualified Proto.BtcLsp.Custody.DepositOnChain
+import qualified Proto.BtcLsp.Custody.OpenChanLn
+import qualified Proto.BtcLsp.Custody.OpenChanOnChain
+import qualified Proto.BtcLsp.General.GetCfg

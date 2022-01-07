@@ -34,26 +34,34 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.BtcLsp.Custody.DepositLn
-import qualified Proto.BtcLsp.Custody.DepositOnChain
+import qualified Proto.BtcLsp.Custody.OpenChanLn
+import qualified Proto.BtcLsp.Custody.OpenChanOnChain
+import qualified Proto.BtcLsp.General.GetCfg
 data Service = Service {}
 instance Data.ProtoLens.Service.Types.Service Service where
   type ServiceName Service = "Service"
   type ServicePackage Service = "BtcLsp"
-  type ServiceMethods Service = '["custodyDepositLn",
-                                  "custodyDepositOnChain"]
+  type ServiceMethods Service = '["custodyOpenChanLn",
+                                  "custodyOpenChanOnChain",
+                                  "generalGetCfg"]
   packedServiceDescriptor _
     = "\n\
-      \\aService\DC2h\n\
-      \\NAKCustodyDepositOnChain\DC2&.BtcLsp.Custody.DepositOnChain.Request\SUB'.BtcLsp.Custody.DepositOnChain.Response\DC2Y\n\
-      \\DLECustodyDepositLn\DC2!.BtcLsp.Custody.DepositLn.Request\SUB\".BtcLsp.Custody.DepositLn.Response"
-instance Data.ProtoLens.Service.Types.HasMethodImpl Service "custodyDepositOnChain" where
-  type MethodName Service "custodyDepositOnChain" = "CustodyDepositOnChain"
-  type MethodInput Service "custodyDepositOnChain" = Proto.BtcLsp.Custody.DepositOnChain.Request
-  type MethodOutput Service "custodyDepositOnChain" = Proto.BtcLsp.Custody.DepositOnChain.Response
-  type MethodStreamingType Service "custodyDepositOnChain" =  'Data.ProtoLens.Service.Types.NonStreaming
-instance Data.ProtoLens.Service.Types.HasMethodImpl Service "custodyDepositLn" where
-  type MethodName Service "custodyDepositLn" = "CustodyDepositLn"
-  type MethodInput Service "custodyDepositLn" = Proto.BtcLsp.Custody.DepositLn.Request
-  type MethodOutput Service "custodyDepositLn" = Proto.BtcLsp.Custody.DepositLn.Response
-  type MethodStreamingType Service "custodyDepositLn" =  'Data.ProtoLens.Service.Types.NonStreaming
+      \\aService\DC2P\n\
+      \\rGeneralGetCfg\DC2\RS.BtcLsp.General.GetCfg.Request\SUB\US.BtcLsp.General.GetCfg.Response\DC2\\\n\
+      \\DC1CustodyOpenChanLn\DC2\".BtcLsp.Custody.OpenChanLn.Request\SUB#.BtcLsp.Custody.OpenChanLn.Response\DC2k\n\
+      \\SYNCustodyOpenChanOnChain\DC2'.BtcLsp.Custody.OpenChanOnChain.Request\SUB(.BtcLsp.Custody.OpenChanOnChain.Response"
+instance Data.ProtoLens.Service.Types.HasMethodImpl Service "generalGetCfg" where
+  type MethodName Service "generalGetCfg" = "GeneralGetCfg"
+  type MethodInput Service "generalGetCfg" = Proto.BtcLsp.General.GetCfg.Request
+  type MethodOutput Service "generalGetCfg" = Proto.BtcLsp.General.GetCfg.Response
+  type MethodStreamingType Service "generalGetCfg" =  'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl Service "custodyOpenChanLn" where
+  type MethodName Service "custodyOpenChanLn" = "CustodyOpenChanLn"
+  type MethodInput Service "custodyOpenChanLn" = Proto.BtcLsp.Custody.OpenChanLn.Request
+  type MethodOutput Service "custodyOpenChanLn" = Proto.BtcLsp.Custody.OpenChanLn.Response
+  type MethodStreamingType Service "custodyOpenChanLn" =  'Data.ProtoLens.Service.Types.NonStreaming
+instance Data.ProtoLens.Service.Types.HasMethodImpl Service "custodyOpenChanOnChain" where
+  type MethodName Service "custodyOpenChanOnChain" = "CustodyOpenChanOnChain"
+  type MethodInput Service "custodyOpenChanOnChain" = Proto.BtcLsp.Custody.OpenChanOnChain.Request
+  type MethodOutput Service "custodyOpenChanOnChain" = Proto.BtcLsp.Custody.OpenChanOnChain.Response
+  type MethodStreamingType Service "custodyOpenChanOnChain" =  'Data.ProtoLens.Service.Types.NonStreaming

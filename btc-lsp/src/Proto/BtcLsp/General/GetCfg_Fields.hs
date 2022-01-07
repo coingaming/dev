@@ -1,9 +1,9 @@
-{- This file was auto-generated from btc_lsp/custody/deposit_ln.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from btc_lsp/general/get_cfg.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies, DeriveGeneric#-}
 {-# OPTIONS_GHC -Wno-unused-imports#-}
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.BtcLsp.Custody.DepositLn_Fields where
+module Proto.BtcLsp.General.GetCfg_Fields where
 import qualified Data.ProtoLens.Runtime.Prelude as Prelude
 import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
 import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
@@ -27,8 +27,12 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.BtcLsp.Newtype
 import qualified Proto.BtcLsp.Type
+cfg ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "cfg" a) =>
+  Lens.Family2.LensLike' f s a
+cfg = Data.ProtoLens.Field.field @"cfg"
 ctx ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "ctx" a) =>
@@ -50,11 +54,12 @@ internal ::
    Data.ProtoLens.Field.HasField s "internal" a) =>
   Lens.Family2.LensLike' f s a
 internal = Data.ProtoLens.Field.field @"internal"
-invoice ::
+maybe'cfg ::
   forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "invoice" a) =>
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'cfg" a) =>
   Lens.Family2.LensLike' f s a
-invoice = Data.ProtoLens.Field.field @"invoice"
+maybe'cfg = Data.ProtoLens.Field.field @"maybe'cfg"
 maybe'ctx ::
   forall f s a.
   (Prelude.Functor f,
@@ -73,29 +78,12 @@ maybe'failure ::
    Data.ProtoLens.Field.HasField s "maybe'failure" a) =>
   Lens.Family2.LensLike' f s a
 maybe'failure = Data.ProtoLens.Field.field @"maybe'failure"
-maybe'invoice ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'invoice" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'invoice = Data.ProtoLens.Field.field @"maybe'invoice"
-maybe'msat ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'msat" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'msat = Data.ProtoLens.Field.field @"maybe'msat"
 maybe'success ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'success" a) =>
   Lens.Family2.LensLike' f s a
 maybe'success = Data.ProtoLens.Field.field @"maybe'success"
-msat ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "msat" a) =>
-  Lens.Family2.LensLike' f s a
-msat = Data.ProtoLens.Field.field @"msat"
 success ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "success" a) =>

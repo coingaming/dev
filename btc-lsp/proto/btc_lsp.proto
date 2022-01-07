@@ -2,12 +2,15 @@ syntax = "proto3";
 
 package BtcLsp;
 
-import "btc_lsp/custody/deposit_on_chain.proto";
-import "btc_lsp/custody/deposit_ln.proto";
+import "btc_lsp/general/get_cfg.proto";
+import "btc_lsp/custody/open_chan_ln.proto";
+import "btc_lsp/custody/open_chan_on_chain.proto";
 
 service Service {
-  rpc CustodyDepositOnChain(.BtcLsp.Custody.DepositOnChain.Request)
-    returns (.BtcLsp.Custody.DepositOnChain.Response);
-  rpc CustodyDepositLn(.BtcLsp.Custody.DepositLn.Request)
-    returns (.BtcLsp.Custody.DepositLn.Response);
+  rpc GeneralGetCfg(.BtcLsp.General.GetCfg.Request)
+    returns (.BtcLsp.General.GetCfg.Response);
+  rpc CustodyOpenChanLn(.BtcLsp.Custody.OpenChanLn.Request)
+    returns (.BtcLsp.Custody.OpenChanLn.Response);
+  rpc CustodyOpenChanOnChain(.BtcLsp.Custody.OpenChanOnChain.Request)
+    returns (.BtcLsp.Custody.OpenChanOnChain.Response);
 }

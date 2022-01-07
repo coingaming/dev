@@ -10,19 +10,27 @@ message FieldIndex {
   uint32 val = 1;
 }
 
+message Sat {
+  uint64 val = 1;
+}
+
 message Msat {
   uint64 val = 1;
 }
 
-message InternalFailure {
+message LnSocketAddress {
   string val = 1;
 }
 
-message NodePubKey {
-  bytes val = 1;
+message LnPubKey {
+  string val = 1;
 }
 
 message LnInvoice {
+  string val = 1;
+}
+
+message LnHodlInvoice {
   string val = 1;
 }
 

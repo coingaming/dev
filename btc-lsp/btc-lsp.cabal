@@ -43,10 +43,12 @@ library
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       Proto.BtcLsp
-      Proto.BtcLsp.Custody.DepositLn
-      Proto.BtcLsp.Custody.DepositLn_Fields
-      Proto.BtcLsp.Custody.DepositOnChain
-      Proto.BtcLsp.Custody.DepositOnChain_Fields
+      Proto.BtcLsp.Custody.OpenChanLn
+      Proto.BtcLsp.Custody.OpenChanLn_Fields
+      Proto.BtcLsp.Custody.OpenChanOnChain
+      Proto.BtcLsp.Custody.OpenChanOnChain_Fields
+      Proto.BtcLsp.General.GetCfg
+      Proto.BtcLsp.General.GetCfg_Fields
       Proto.BtcLsp.Newtype
       Proto.BtcLsp.Newtype_Fields
       Proto.BtcLsp.Type
@@ -150,10 +152,12 @@ executable btc-lsp-exe
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       Proto.BtcLsp
-      Proto.BtcLsp.Custody.DepositLn
-      Proto.BtcLsp.Custody.DepositLn_Fields
-      Proto.BtcLsp.Custody.DepositOnChain
-      Proto.BtcLsp.Custody.DepositOnChain_Fields
+      Proto.BtcLsp.Custody.OpenChanLn
+      Proto.BtcLsp.Custody.OpenChanLn_Fields
+      Proto.BtcLsp.Custody.OpenChanOnChain
+      Proto.BtcLsp.Custody.OpenChanOnChain_Fields
+      Proto.BtcLsp.General.GetCfg
+      Proto.BtcLsp.General.GetCfg_Fields
       Proto.BtcLsp.Newtype
       Proto.BtcLsp.Newtype_Fields
       Proto.BtcLsp.Type
@@ -258,10 +262,12 @@ test-suite btc-lsp-test
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       Proto.BtcLsp
-      Proto.BtcLsp.Custody.DepositLn
-      Proto.BtcLsp.Custody.DepositLn_Fields
-      Proto.BtcLsp.Custody.DepositOnChain
-      Proto.BtcLsp.Custody.DepositOnChain_Fields
+      Proto.BtcLsp.Custody.OpenChanLn
+      Proto.BtcLsp.Custody.OpenChanLn_Fields
+      Proto.BtcLsp.Custody.OpenChanOnChain
+      Proto.BtcLsp.Custody.OpenChanOnChain_Fields
+      Proto.BtcLsp.General.GetCfg
+      Proto.BtcLsp.General.GetCfg_Fields
       Proto.BtcLsp.Newtype
       Proto.BtcLsp.Newtype_Fields
       Proto.BtcLsp.Type

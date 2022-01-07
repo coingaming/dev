@@ -1,23 +1,26 @@
 syntax="proto3";
 
-package BtcLsp.Custody.DepositOnChain;
+package BtcLsp.Custody.OpenChanLn;
 
 import "btc_lsp/newtype.proto";
 import "btc_lsp/type.proto";
 
 message Request {
   .BtcLsp.Type.Ctx ctx = 1;
+  .BtcLsp.Newtype.Msat channel_local_balance = 2;
 }
 
 message Response {
   .BtcLsp.Type.Ctx ctx = 1;
+
   oneof either {
     Success success = 2;
     Failure failure = 3;
   }
 
   message Success {
-    .BtcLsp.Newtype.OnChainAddress address = 1;
+    .BtcLsp.Newtype.LnSocketAddress connect_to = 1;
+    .BtcLsp.Newtype.LnHodlInvoice pay_funding_invoice = 2;
   }
 
   message Failure {

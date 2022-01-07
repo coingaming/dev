@@ -6,7 +6,39 @@ import "btc_lsp/newtype.proto";
 
 message Ctx {
   .BtcLsp.Newtype.Nonce nonce = 1;
-  .BtcLsp.Newtype.NodePubKey pub_key = 2;
+  .BtcLsp.Newtype.LnPubKey ln_pub_key = 2;
+}
+
+message Cfg {
+  MsatLimit open_chan_ln_limit = 1;
+  SatLimit open_chan_on_chain_limit = 2;
+  FeeRate open_chan_fee_rate = 3;
+  .BtcLsp.Newtype.Msat open_chan_min_fee = 4;
+}
+
+message MsatLimit {
+  .BtcLsp.Newtype.Msat min = 1;
+  .BtcLsp.Newtype.Msat max = 2;
+}
+
+message SatLimit {
+  .BtcLsp.Newtype.Sat min = 1;
+  .BtcLsp.Newtype.Sat max = 2;
+}
+
+message Rational {
+  bool negative = 1;
+  uint64 numerator = 2;
+  uint64 denominator = 3;
+}
+
+message URational {
+  uint64 numerator = 1;
+  uint64 denominator = 2;
+}
+
+message FeeRate {
+  URational val = 1;
 }
 
 message InputFailure {

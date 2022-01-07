@@ -1,13 +1,11 @@
 syntax="proto3";
 
-package BtcLsp.Custody.DepositLn;
+package BtcLsp.General.GetCfg;
 
-import "btc_lsp/newtype.proto";
 import "btc_lsp/type.proto";
 
 message Request {
   .BtcLsp.Type.Ctx ctx = 1;
-  .BtcLsp.Newtype.Msat msat = 2;
 }
 
 message Response {
@@ -19,7 +17,7 @@ message Response {
   }
 
   message Success {
-    .BtcLsp.Newtype.LnInvoice invoice = 1;
+    .BtcLsp.Type.Cfg cfg = 1;
   }
 
   message Failure {

@@ -10,8 +10,8 @@ import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Network.GRPC.Server
 import qualified Network.Wai.Internal as Wai
 import Proto.BtcLsp (Service)
-import qualified Proto.BtcLsp.Custody.DepositLn as CustodyDepositLn
-import qualified Proto.BtcLsp.Custody.DepositOnChain as CustodyDepositOnChain
+import qualified Proto.BtcLsp.Custody.OpenChanLn as CustodyOpenChanLn
+import qualified Proto.BtcLsp.Custody.OpenChanOnChain as CustodyOpenChanOnChain
 
 apply :: (Env m) => m ()
 apply = do
@@ -27,10 +27,13 @@ handlers ::
   MVar (Sig 'Server) ->
   [ServiceHandler]
 handlers run _ _ =
-  [ unary (RPC :: RPC Service "custodyDepositOnChain") . sig $
-      custodyDepositOnChain run,
-    unary (RPC :: RPC Service "custodyDepositLn") . sig $
-      custodyDepositLn run
+  --
+  -- TODO : add GetCfg method!!!
+  --
+  [ unary (RPC :: RPC Service "custodyOpenChanLn") . sig $
+      custodyOpenChanLn run,
+    unary (RPC :: RPC Service "custodyOpenChanOnChain") . sig $
+      custodyOpenChanOnChain run
   ]
   where
     --
@@ -50,20 +53,20 @@ handlers run _ _ =
     sig f =
       const f
 
-custodyDepositOnChain ::
+custodyOpenChanOnChain ::
   ( Monad m
   ) =>
   UnliftIO m ->
-  CustodyDepositOnChain.Request ->
-  IO CustodyDepositOnChain.Response
-custodyDepositOnChain (UnliftIO run) _ =
+  CustodyOpenChanOnChain.Request ->
+  IO CustodyOpenChanOnChain.Response
+custodyOpenChanOnChain (UnliftIO run) _ =
   run $ pure defMessage
 
-custodyDepositLn ::
+custodyOpenChanLn ::
   ( Monad m
   ) =>
   UnliftIO m ->
-  CustodyDepositLn.Request ->
-  IO CustodyDepositLn.Response
-custodyDepositLn (UnliftIO run) _ =
+  CustodyOpenChanLn.Request ->
+  IO CustodyOpenChanLn.Response
+custodyOpenChanLn (UnliftIO run) _ =
   run $ pure defMessage
