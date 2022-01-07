@@ -4,7 +4,7 @@ Bitcoin Lightning Service Provider. Nix or Docker/Swarm is the only program requ
 
 ## Docker/Swarm
 
-To spawn `btc-lsp` running [Docker/Swarm](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/) is required.
+To spawn `btc-lsp` running [Docker/Swarm](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/) is required. On Mac you also need `brew install coreutils`.
 
 ```sh
 ./nix/ds-setup.sh
