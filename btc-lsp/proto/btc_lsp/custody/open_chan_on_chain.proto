@@ -7,19 +7,22 @@ import "btc_lsp/type.proto";
 
 message Request {
   .BtcLsp.Type.Ctx ctx = 1;
-  .BtcLsp.Newtype.Sat channel_local_balance = 2;
+  .BtcLsp.Newtype.LocalBalance local_balance = 2;
+  .BtcLsp.Newtype.RemoteBalance remote_balance = 3;
 }
 
 message Response {
   .BtcLsp.Type.Ctx ctx = 1;
+
   oneof either {
     Success success = 2;
     Failure failure = 3;
   }
 
   message Success {
-    .BtcLsp.Newtype.LnSocketAddress connect_to = 1;
+    .BtcLsp.Newtype.SocketAddress connect_to_node = 1;
     .BtcLsp.Newtype.OnChainAddress pay_funding_address = 2;
+    .BtcLsp.Newtype.Msat pay_funding_amt = 3;
   }
 
   message Failure {

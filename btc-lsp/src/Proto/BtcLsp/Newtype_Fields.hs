@@ -27,6 +27,12 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+maybe'val ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'val" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'val = Data.ProtoLens.Field.field @"maybe'val"
 val ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>

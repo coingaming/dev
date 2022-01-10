@@ -10,20 +10,15 @@ message Ctx {
 }
 
 message Cfg {
-  MsatLimit open_chan_ln_limit = 1;
-  SatLimit open_chan_on_chain_limit = 2;
-  FeeRate open_chan_fee_rate = 3;
-  .BtcLsp.Newtype.Msat open_chan_min_fee = 4;
-}
-
-message MsatLimit {
-  .BtcLsp.Newtype.Msat min = 1;
-  .BtcLsp.Newtype.Msat max = 2;
-}
-
-message SatLimit {
-  .BtcLsp.Newtype.Sat min = 1;
-  .BtcLsp.Newtype.Sat max = 2;
+  .BtcLsp.Newtype.LocalBalance open_chan_min_local_balance = 1;
+  .BtcLsp.Newtype.LocalBalance open_chan_max_local_balance = 2;
+  .BtcLsp.Newtype.RemoteBalance open_chan_min_remote_balance = 3;
+  .BtcLsp.Newtype.RemoteBalance open_chan_max_remote_balance = 4;
+  FeeRate open_chan_remote_balance_fee_rate = 5;
+  .BtcLsp.Newtype.Msat open_chan_min_fee_amt = 6;
+  //
+  // TODO : add open/close sat/vb fees
+  //
 }
 
 message Rational {
@@ -32,13 +27,13 @@ message Rational {
   uint64 denominator = 3;
 }
 
-message URational {
+message Urational {
   uint64 numerator = 1;
   uint64 denominator = 2;
 }
 
 message FeeRate {
-  URational val = 1;
+  Urational val = 1;
 }
 
 message InputFailure {

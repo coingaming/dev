@@ -10,16 +10,20 @@ message FieldIndex {
   uint32 val = 1;
 }
 
-message Sat {
-  uint64 val = 1;
+message SocketAddress {
+  string val = 1;
 }
 
 message Msat {
   uint64 val = 1;
 }
 
-message LnSocketAddress {
-  string val = 1;
+message LocalBalance {
+  Msat val = 1;
+}
+
+message RemoteBalance {
+  Msat val = 1;
 }
 
 message LnPubKey {

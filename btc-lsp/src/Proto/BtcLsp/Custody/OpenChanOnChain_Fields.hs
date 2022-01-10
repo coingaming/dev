@@ -29,19 +29,12 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unbox
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.BtcLsp.Newtype
 import qualified Proto.BtcLsp.Type
-channelLocalBalance ::
+connectToNode ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "channelLocalBalance" a) =>
+   Data.ProtoLens.Field.HasField s "connectToNode" a) =>
   Lens.Family2.LensLike' f s a
-channelLocalBalance
-  = Data.ProtoLens.Field.field @"channelLocalBalance"
-connectTo ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "connectTo" a) =>
-  Lens.Family2.LensLike' f s a
-connectTo = Data.ProtoLens.Field.field @"connectTo"
+connectToNode = Data.ProtoLens.Field.field @"connectToNode"
 ctx ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "ctx" a) =>
@@ -63,19 +56,19 @@ internal ::
    Data.ProtoLens.Field.HasField s "internal" a) =>
   Lens.Family2.LensLike' f s a
 internal = Data.ProtoLens.Field.field @"internal"
-maybe'channelLocalBalance ::
+localBalance ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'channelLocalBalance" a) =>
+   Data.ProtoLens.Field.HasField s "localBalance" a) =>
   Lens.Family2.LensLike' f s a
-maybe'channelLocalBalance
-  = Data.ProtoLens.Field.field @"maybe'channelLocalBalance"
-maybe'connectTo ::
+localBalance = Data.ProtoLens.Field.field @"localBalance"
+maybe'connectToNode ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'connectTo" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'connectToNode" a) =>
   Lens.Family2.LensLike' f s a
-maybe'connectTo = Data.ProtoLens.Field.field @"maybe'connectTo"
+maybe'connectToNode
+  = Data.ProtoLens.Field.field @"maybe'connectToNode"
 maybe'ctx ::
   forall f s a.
   (Prelude.Functor f,
@@ -94,6 +87,13 @@ maybe'failure ::
    Data.ProtoLens.Field.HasField s "maybe'failure" a) =>
   Lens.Family2.LensLike' f s a
 maybe'failure = Data.ProtoLens.Field.field @"maybe'failure"
+maybe'localBalance ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'localBalance" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'localBalance
+  = Data.ProtoLens.Field.field @"maybe'localBalance"
 maybe'payFundingAddress ::
   forall f s a.
   (Prelude.Functor f,
@@ -101,6 +101,20 @@ maybe'payFundingAddress ::
   Lens.Family2.LensLike' f s a
 maybe'payFundingAddress
   = Data.ProtoLens.Field.field @"maybe'payFundingAddress"
+maybe'payFundingAmt ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'payFundingAmt" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'payFundingAmt
+  = Data.ProtoLens.Field.field @"maybe'payFundingAmt"
+maybe'remoteBalance ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'remoteBalance" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'remoteBalance
+  = Data.ProtoLens.Field.field @"maybe'remoteBalance"
 maybe'success ::
   forall f s a.
   (Prelude.Functor f,
@@ -113,6 +127,18 @@ payFundingAddress ::
    Data.ProtoLens.Field.HasField s "payFundingAddress" a) =>
   Lens.Family2.LensLike' f s a
 payFundingAddress = Data.ProtoLens.Field.field @"payFundingAddress"
+payFundingAmt ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "payFundingAmt" a) =>
+  Lens.Family2.LensLike' f s a
+payFundingAmt = Data.ProtoLens.Field.field @"payFundingAmt"
+remoteBalance ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "remoteBalance" a) =>
+  Lens.Family2.LensLike' f s a
+remoteBalance = Data.ProtoLens.Field.field @"remoteBalance"
 success ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "success" a) =>

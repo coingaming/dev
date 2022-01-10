@@ -7,7 +7,8 @@ import "btc_lsp/type.proto";
 
 message Request {
   .BtcLsp.Type.Ctx ctx = 1;
-  .BtcLsp.Newtype.Msat channel_local_balance = 2;
+  .BtcLsp.Newtype.LocalBalance local_balance = 2;
+  .BtcLsp.Newtype.RemoteBalance remote_balance = 3;
 }
 
 message Response {
@@ -19,7 +20,7 @@ message Response {
   }
 
   message Success {
-    .BtcLsp.Newtype.LnSocketAddress connect_to = 1;
+    .BtcLsp.Newtype.SocketAddress connect_to_node = 1;
     .BtcLsp.Newtype.LnHodlInvoice pay_funding_invoice = 2;
   }
 

@@ -51,74 +51,66 @@ lnPubKey ::
    Data.ProtoLens.Field.HasField s "lnPubKey" a) =>
   Lens.Family2.LensLike' f s a
 lnPubKey = Data.ProtoLens.Field.field @"lnPubKey"
-max ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "max" a) =>
-  Lens.Family2.LensLike' f s a
-max = Data.ProtoLens.Field.field @"max"
 maybe'lnPubKey ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'lnPubKey" a) =>
   Lens.Family2.LensLike' f s a
 maybe'lnPubKey = Data.ProtoLens.Field.field @"maybe'lnPubKey"
-maybe'max ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'max" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'max = Data.ProtoLens.Field.field @"maybe'max"
-maybe'min ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'min" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'min = Data.ProtoLens.Field.field @"maybe'min"
 maybe'nonce ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'nonce" a) =>
   Lens.Family2.LensLike' f s a
 maybe'nonce = Data.ProtoLens.Field.field @"maybe'nonce"
-maybe'openChanFeeRate ::
+maybe'openChanMaxLocalBalance ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanFeeRate" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'openChanMaxLocalBalance" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanFeeRate
-  = Data.ProtoLens.Field.field @"maybe'openChanFeeRate"
-maybe'openChanLnLimit ::
+maybe'openChanMaxLocalBalance
+  = Data.ProtoLens.Field.field @"maybe'openChanMaxLocalBalance"
+maybe'openChanMaxRemoteBalance ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanLnLimit" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'openChanMaxRemoteBalance" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanLnLimit
-  = Data.ProtoLens.Field.field @"maybe'openChanLnLimit"
-maybe'openChanMinFee ::
+maybe'openChanMaxRemoteBalance
+  = Data.ProtoLens.Field.field @"maybe'openChanMaxRemoteBalance"
+maybe'openChanMinFeeAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanMinFee" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'openChanMinFeeAmt" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanMinFee
-  = Data.ProtoLens.Field.field @"maybe'openChanMinFee"
-maybe'openChanOnChainLimit ::
+maybe'openChanMinFeeAmt
+  = Data.ProtoLens.Field.field @"maybe'openChanMinFeeAmt"
+maybe'openChanMinLocalBalance ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanOnChainLimit" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'openChanMinLocalBalance" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanOnChainLimit
-  = Data.ProtoLens.Field.field @"maybe'openChanOnChainLimit"
+maybe'openChanMinLocalBalance
+  = Data.ProtoLens.Field.field @"maybe'openChanMinLocalBalance"
+maybe'openChanMinRemoteBalance ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'openChanMinRemoteBalance" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'openChanMinRemoteBalance
+  = Data.ProtoLens.Field.field @"maybe'openChanMinRemoteBalance"
+maybe'openChanRemoteBalanceFeeRate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'openChanRemoteBalanceFeeRate" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'openChanRemoteBalanceFeeRate
+  = Data.ProtoLens.Field.field @"maybe'openChanRemoteBalanceFeeRate"
 maybe'val ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "maybe'val" a) =>
   Lens.Family2.LensLike' f s a
 maybe'val = Data.ProtoLens.Field.field @"maybe'val"
-min ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "min" a) =>
-  Lens.Family2.LensLike' f s a
-min = Data.ProtoLens.Field.field @"min"
 negative ::
   forall f s a.
   (Prelude.Functor f,
@@ -136,31 +128,47 @@ numerator ::
    Data.ProtoLens.Field.HasField s "numerator" a) =>
   Lens.Family2.LensLike' f s a
 numerator = Data.ProtoLens.Field.field @"numerator"
-openChanFeeRate ::
+openChanMaxLocalBalance ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanFeeRate" a) =>
+   Data.ProtoLens.Field.HasField s "openChanMaxLocalBalance" a) =>
   Lens.Family2.LensLike' f s a
-openChanFeeRate = Data.ProtoLens.Field.field @"openChanFeeRate"
-openChanLnLimit ::
+openChanMaxLocalBalance
+  = Data.ProtoLens.Field.field @"openChanMaxLocalBalance"
+openChanMaxRemoteBalance ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanLnLimit" a) =>
+   Data.ProtoLens.Field.HasField s "openChanMaxRemoteBalance" a) =>
   Lens.Family2.LensLike' f s a
-openChanLnLimit = Data.ProtoLens.Field.field @"openChanLnLimit"
-openChanMinFee ::
+openChanMaxRemoteBalance
+  = Data.ProtoLens.Field.field @"openChanMaxRemoteBalance"
+openChanMinFeeAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanMinFee" a) =>
+   Data.ProtoLens.Field.HasField s "openChanMinFeeAmt" a) =>
   Lens.Family2.LensLike' f s a
-openChanMinFee = Data.ProtoLens.Field.field @"openChanMinFee"
-openChanOnChainLimit ::
+openChanMinFeeAmt = Data.ProtoLens.Field.field @"openChanMinFeeAmt"
+openChanMinLocalBalance ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanOnChainLimit" a) =>
+   Data.ProtoLens.Field.HasField s "openChanMinLocalBalance" a) =>
   Lens.Family2.LensLike' f s a
-openChanOnChainLimit
-  = Data.ProtoLens.Field.field @"openChanOnChainLimit"
+openChanMinLocalBalance
+  = Data.ProtoLens.Field.field @"openChanMinLocalBalance"
+openChanMinRemoteBalance ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "openChanMinRemoteBalance" a) =>
+  Lens.Family2.LensLike' f s a
+openChanMinRemoteBalance
+  = Data.ProtoLens.Field.field @"openChanMinRemoteBalance"
+openChanRemoteBalanceFeeRate ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "openChanRemoteBalanceFeeRate" a) =>
+  Lens.Family2.LensLike' f s a
+openChanRemoteBalanceFeeRate
+  = Data.ProtoLens.Field.field @"openChanRemoteBalanceFeeRate"
 val ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>

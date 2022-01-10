@@ -41,7 +41,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.FieldIndex where
                   (Data.Signable.toBinary
                      Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.Sat where
+instance Data.Signable.Signable Proto.BtcLsp.Newtype.SocketAddress where
   toBinary
     = Universum.mconcat
         Universum..
@@ -61,15 +61,29 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.Msat where
                   (Data.Signable.toBinary
                      Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnSocketAddress where
+instance Data.Signable.Signable Proto.BtcLsp.Newtype.LocalBalance where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
-             [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                Universum..
-                  (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Newtype.RemoteBalance where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
              Universum.. (Universum.&))
 instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnPubKey where
   toBinary
@@ -143,64 +157,44 @@ instance Data.Signable.Signable Proto.BtcLsp.Type.Cfg where
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'openChanLnLimit)
+                (Universum.view
+                   Proto.BtcLsp.Type_Fields.maybe'openChanMinLocalBalance)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Type_Fields.maybe'openChanOnChainLimit)
+                   Proto.BtcLsp.Type_Fields.maybe'openChanMaxLocalBalance)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'openChanFeeRate)
+                (Universum.view
+                   Proto.BtcLsp.Type_Fields.maybe'openChanMinRemoteBalance)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'openChanMinFee)
+                (Universum.view
+                   Proto.BtcLsp.Type_Fields.maybe'openChanMaxRemoteBalance)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (4 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
-                Universum.mempty]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.MsatLimit where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'min)
+                Universum.mempty,
+              Data.Signable.applyWithDef
+                (Universum.view
+                   Proto.BtcLsp.Type_Fields.maybe'openChanRemoteBalanceFeeRate)
                 Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                ((Universum.<>) (Data.Signable.toBinary (5 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'max)
+                (Universum.view Proto.BtcLsp.Type_Fields.maybe'openChanMinFeeAmt)
                 Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.SatLimit where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'min)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty,
-              Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'max)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                ((Universum.<>) (Data.Signable.toBinary (6 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
@@ -222,7 +216,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Type.Rational where
                   (Data.Signable.toBinary
                      Universum.. Universum.view Proto.BtcLsp.Type_Fields.denominator)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.URational where
+instance Data.Signable.Signable Proto.BtcLsp.Type.Urational where
   toBinary
     = Universum.mconcat
         Universum..
@@ -347,9 +341,16 @@ instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Request where
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'channelLocalBalance)
+                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'localBalance)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              Data.Signable.applyWithDef
+                (Universum.view
+                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'remoteBalance)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
@@ -386,7 +387,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Response'Success
           ((Universum.<&>)
              [Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'connectTo)
+                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'connectToNode)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
@@ -435,9 +436,16 @@ instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Request whe
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'channelLocalBalance)
+                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'localBalance)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              Data.Signable.applyWithDef
+                (Universum.view
+                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'remoteBalance)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
@@ -475,7 +483,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Response'Su
           ((Universum.<&>)
              [Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'connectTo)
+                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'connectToNode)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
@@ -485,6 +493,13 @@ instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Response'Su
                    Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAddress)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              Data.Signable.applyWithDef
+                (Universum.view
+                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAmt)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))

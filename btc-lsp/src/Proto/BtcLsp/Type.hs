@@ -5,8 +5,8 @@
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.BtcLsp.Type (
         Cfg(), Ctx(), FeeRate(), InputFailure(), InputFailureKind(..),
-        InputFailureKind(), InputFailureKind'UnrecognizedValue,
-        MsatLimit(), Rational(), SatLimit(), URational()
+        InputFailureKind(), InputFailureKind'UnrecognizedValue, Rational(),
+        Urational()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -39,19 +39,25 @@ import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.BtcLsp.Newtype
 {- | Fields :
      
-         * 'Proto.BtcLsp.Type_Fields.openChanLnLimit' @:: Lens' Cfg MsatLimit@
-         * 'Proto.BtcLsp.Type_Fields.maybe'openChanLnLimit' @:: Lens' Cfg (Prelude.Maybe MsatLimit)@
-         * 'Proto.BtcLsp.Type_Fields.openChanOnChainLimit' @:: Lens' Cfg SatLimit@
-         * 'Proto.BtcLsp.Type_Fields.maybe'openChanOnChainLimit' @:: Lens' Cfg (Prelude.Maybe SatLimit)@
-         * 'Proto.BtcLsp.Type_Fields.openChanFeeRate' @:: Lens' Cfg FeeRate@
-         * 'Proto.BtcLsp.Type_Fields.maybe'openChanFeeRate' @:: Lens' Cfg (Prelude.Maybe FeeRate)@
-         * 'Proto.BtcLsp.Type_Fields.openChanMinFee' @:: Lens' Cfg Proto.BtcLsp.Newtype.Msat@
-         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMinFee' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.Msat)@ -}
+         * 'Proto.BtcLsp.Type_Fields.openChanMinLocalBalance' @:: Lens' Cfg Proto.BtcLsp.Newtype.LocalBalance@
+         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMinLocalBalance' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance)@
+         * 'Proto.BtcLsp.Type_Fields.openChanMaxLocalBalance' @:: Lens' Cfg Proto.BtcLsp.Newtype.LocalBalance@
+         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMaxLocalBalance' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance)@
+         * 'Proto.BtcLsp.Type_Fields.openChanMinRemoteBalance' @:: Lens' Cfg Proto.BtcLsp.Newtype.RemoteBalance@
+         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMinRemoteBalance' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.RemoteBalance)@
+         * 'Proto.BtcLsp.Type_Fields.openChanMaxRemoteBalance' @:: Lens' Cfg Proto.BtcLsp.Newtype.RemoteBalance@
+         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMaxRemoteBalance' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.RemoteBalance)@
+         * 'Proto.BtcLsp.Type_Fields.openChanRemoteBalanceFeeRate' @:: Lens' Cfg FeeRate@
+         * 'Proto.BtcLsp.Type_Fields.maybe'openChanRemoteBalanceFeeRate' @:: Lens' Cfg (Prelude.Maybe FeeRate)@
+         * 'Proto.BtcLsp.Type_Fields.openChanMinFeeAmt' @:: Lens' Cfg Proto.BtcLsp.Newtype.Msat@
+         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMinFeeAmt' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.Msat)@ -}
 data Cfg
-  = Cfg'_constructor {_Cfg'openChanLnLimit :: !(Prelude.Maybe MsatLimit),
-                      _Cfg'openChanOnChainLimit :: !(Prelude.Maybe SatLimit),
-                      _Cfg'openChanFeeRate :: !(Prelude.Maybe FeeRate),
-                      _Cfg'openChanMinFee :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Msat),
+  = Cfg'_constructor {_Cfg'openChanMinLocalBalance :: !(Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance),
+                      _Cfg'openChanMaxLocalBalance :: !(Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance),
+                      _Cfg'openChanMinRemoteBalance :: !(Prelude.Maybe Proto.BtcLsp.Newtype.RemoteBalance),
+                      _Cfg'openChanMaxRemoteBalance :: !(Prelude.Maybe Proto.BtcLsp.Newtype.RemoteBalance),
+                      _Cfg'openChanRemoteBalanceFeeRate :: !(Prelude.Maybe FeeRate),
+                      _Cfg'openChanMinFeeAmt :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Msat),
                       _Cfg'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show Cfg where
@@ -61,119 +67,173 @@ instance Prelude.Show Cfg where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out Cfg
-instance Data.ProtoLens.Field.HasField Cfg "openChanLnLimit" MsatLimit where
+instance Data.ProtoLens.Field.HasField Cfg "openChanMinLocalBalance" Proto.BtcLsp.Newtype.LocalBalance where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanLnLimit
-           (\ x__ y__ -> x__ {_Cfg'openChanLnLimit = y__}))
+           _Cfg'openChanMinLocalBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMinLocalBalance = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanLnLimit" (Prelude.Maybe MsatLimit) where
+instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanMinLocalBalance" (Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanLnLimit
-           (\ x__ y__ -> x__ {_Cfg'openChanLnLimit = y__}))
+           _Cfg'openChanMinLocalBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMinLocalBalance = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField Cfg "openChanOnChainLimit" SatLimit where
+instance Data.ProtoLens.Field.HasField Cfg "openChanMaxLocalBalance" Proto.BtcLsp.Newtype.LocalBalance where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanOnChainLimit
-           (\ x__ y__ -> x__ {_Cfg'openChanOnChainLimit = y__}))
+           _Cfg'openChanMaxLocalBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMaxLocalBalance = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanOnChainLimit" (Prelude.Maybe SatLimit) where
+instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanMaxLocalBalance" (Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanOnChainLimit
-           (\ x__ y__ -> x__ {_Cfg'openChanOnChainLimit = y__}))
+           _Cfg'openChanMaxLocalBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMaxLocalBalance = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField Cfg "openChanFeeRate" FeeRate where
+instance Data.ProtoLens.Field.HasField Cfg "openChanMinRemoteBalance" Proto.BtcLsp.Newtype.RemoteBalance where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanFeeRate
-           (\ x__ y__ -> x__ {_Cfg'openChanFeeRate = y__}))
+           _Cfg'openChanMinRemoteBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMinRemoteBalance = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanFeeRate" (Prelude.Maybe FeeRate) where
+instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanMinRemoteBalance" (Prelude.Maybe Proto.BtcLsp.Newtype.RemoteBalance) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanFeeRate
-           (\ x__ y__ -> x__ {_Cfg'openChanFeeRate = y__}))
+           _Cfg'openChanMinRemoteBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMinRemoteBalance = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField Cfg "openChanMinFee" Proto.BtcLsp.Newtype.Msat where
+instance Data.ProtoLens.Field.HasField Cfg "openChanMaxRemoteBalance" Proto.BtcLsp.Newtype.RemoteBalance where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanMinFee (\ x__ y__ -> x__ {_Cfg'openChanMinFee = y__}))
+           _Cfg'openChanMaxRemoteBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMaxRemoteBalance = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanMinFee" (Prelude.Maybe Proto.BtcLsp.Newtype.Msat) where
+instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanMaxRemoteBalance" (Prelude.Maybe Proto.BtcLsp.Newtype.RemoteBalance) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Cfg'openChanMinFee (\ x__ y__ -> x__ {_Cfg'openChanMinFee = y__}))
+           _Cfg'openChanMaxRemoteBalance
+           (\ x__ y__ -> x__ {_Cfg'openChanMaxRemoteBalance = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Cfg "openChanRemoteBalanceFeeRate" FeeRate where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cfg'openChanRemoteBalanceFeeRate
+           (\ x__ y__ -> x__ {_Cfg'openChanRemoteBalanceFeeRate = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanRemoteBalanceFeeRate" (Prelude.Maybe FeeRate) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cfg'openChanRemoteBalanceFeeRate
+           (\ x__ y__ -> x__ {_Cfg'openChanRemoteBalanceFeeRate = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Cfg "openChanMinFeeAmt" Proto.BtcLsp.Newtype.Msat where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cfg'openChanMinFeeAmt
+           (\ x__ y__ -> x__ {_Cfg'openChanMinFeeAmt = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanMinFeeAmt" (Prelude.Maybe Proto.BtcLsp.Newtype.Msat) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cfg'openChanMinFeeAmt
+           (\ x__ y__ -> x__ {_Cfg'openChanMinFeeAmt = y__}))
         Prelude.id
 instance Data.ProtoLens.Message Cfg where
   messageName _ = Data.Text.pack "BtcLsp.Type.Cfg"
   packedMessageDescriptor _
     = "\n\
-      \\ETXCfg\DC2C\n\
-      \\DC2open_chan_ln_limit\CAN\SOH \SOH(\v2\SYN.BtcLsp.Type.MsatLimitR\SIopenChanLnLimit\DC2M\n\
-      \\CANopen_chan_on_chain_limit\CAN\STX \SOH(\v2\NAK.BtcLsp.Type.SatLimitR\DC4openChanOnChainLimit\DC2A\n\
-      \\DC2open_chan_fee_rate\CAN\ETX \SOH(\v2\DC4.BtcLsp.Type.FeeRateR\SIopenChanFeeRate\DC2?\n\
-      \\DC1open_chan_min_fee\CAN\EOT \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\SOopenChanMinFee"
+      \\ETXCfg\DC2Z\n\
+      \\ESCopen_chan_min_local_balance\CAN\SOH \SOH(\v2\FS.BtcLsp.Newtype.LocalBalanceR\ETBopenChanMinLocalBalance\DC2Z\n\
+      \\ESCopen_chan_max_local_balance\CAN\STX \SOH(\v2\FS.BtcLsp.Newtype.LocalBalanceR\ETBopenChanMaxLocalBalance\DC2]\n\
+      \\FSopen_chan_min_remote_balance\CAN\ETX \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMinRemoteBalance\DC2]\n\
+      \\FSopen_chan_max_remote_balance\CAN\EOT \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMaxRemoteBalance\DC2]\n\
+      \!open_chan_remote_balance_fee_rate\CAN\ENQ \SOH(\v2\DC4.BtcLsp.Type.FeeRateR\FSopenChanRemoteBalanceFeeRate\DC2F\n\
+      \\NAKopen_chan_min_fee_amt\CAN\ACK \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\DC1openChanMinFeeAmt"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
-        openChanLnLimit__field_descriptor
+        openChanMinLocalBalance__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "open_chan_ln_limit"
+              "open_chan_min_local_balance"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor MsatLimit)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.LocalBalance)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'openChanLnLimit")) ::
+                 (Data.ProtoLens.Field.field @"maybe'openChanMinLocalBalance")) ::
               Data.ProtoLens.FieldDescriptor Cfg
-        openChanOnChainLimit__field_descriptor
+        openChanMaxLocalBalance__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "open_chan_on_chain_limit"
+              "open_chan_max_local_balance"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor SatLimit)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.LocalBalance)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'openChanOnChainLimit")) ::
+                 (Data.ProtoLens.Field.field @"maybe'openChanMaxLocalBalance")) ::
               Data.ProtoLens.FieldDescriptor Cfg
-        openChanFeeRate__field_descriptor
+        openChanMinRemoteBalance__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "open_chan_fee_rate"
+              "open_chan_min_remote_balance"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.RemoteBalance)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'openChanMinRemoteBalance")) ::
+              Data.ProtoLens.FieldDescriptor Cfg
+        openChanMaxRemoteBalance__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "open_chan_max_remote_balance"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.RemoteBalance)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'openChanMaxRemoteBalance")) ::
+              Data.ProtoLens.FieldDescriptor Cfg
+        openChanRemoteBalanceFeeRate__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "open_chan_remote_balance_fee_rate"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor FeeRate)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'openChanFeeRate")) ::
+                 (Data.ProtoLens.Field.field
+                    @"maybe'openChanRemoteBalanceFeeRate")) ::
               Data.ProtoLens.FieldDescriptor Cfg
-        openChanMinFee__field_descriptor
+        openChanMinFeeAmt__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "open_chan_min_fee"
+              "open_chan_min_fee_amt"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.Msat)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'openChanMinFee")) ::
+                 (Data.ProtoLens.Field.field @"maybe'openChanMinFeeAmt")) ::
               Data.ProtoLens.FieldDescriptor Cfg
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, openChanLnLimit__field_descriptor),
-           (Data.ProtoLens.Tag 2, openChanOnChainLimit__field_descriptor),
-           (Data.ProtoLens.Tag 3, openChanFeeRate__field_descriptor),
-           (Data.ProtoLens.Tag 4, openChanMinFee__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, openChanMinLocalBalance__field_descriptor),
+           (Data.ProtoLens.Tag 2, openChanMaxLocalBalance__field_descriptor),
+           (Data.ProtoLens.Tag 3, openChanMinRemoteBalance__field_descriptor),
+           (Data.ProtoLens.Tag 4, openChanMaxRemoteBalance__field_descriptor),
+           (Data.ProtoLens.Tag 5, 
+            openChanRemoteBalanceFeeRate__field_descriptor),
+           (Data.ProtoLens.Tag 6, openChanMinFeeAmt__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Cfg'_unknownFields (\ x__ y__ -> x__ {_Cfg'_unknownFields = y__})
   defMessage
     = Cfg'_constructor
-        {_Cfg'openChanLnLimit = Prelude.Nothing,
-         _Cfg'openChanOnChainLimit = Prelude.Nothing,
-         _Cfg'openChanFeeRate = Prelude.Nothing,
-         _Cfg'openChanMinFee = Prelude.Nothing, _Cfg'_unknownFields = []}
+        {_Cfg'openChanMinLocalBalance = Prelude.Nothing,
+         _Cfg'openChanMaxLocalBalance = Prelude.Nothing,
+         _Cfg'openChanMinRemoteBalance = Prelude.Nothing,
+         _Cfg'openChanMaxRemoteBalance = Prelude.Nothing,
+         _Cfg'openChanRemoteBalanceFeeRate = Prelude.Nothing,
+         _Cfg'openChanMinFeeAmt = Prelude.Nothing, _Cfg'_unknownFields = []}
   parseMessage
     = let
         loop :: Cfg -> Data.ProtoLens.Encoding.Bytes.Parser Cfg
@@ -200,37 +260,57 @@ instance Data.ProtoLens.Message Cfg where
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "open_chan_ln_limit"
+                                       "open_chan_min_local_balance"
                                 loop
                                   (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"openChanLnLimit") y x)
+                                     (Data.ProtoLens.Field.field @"openChanMinLocalBalance") y x)
                         18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "open_chan_on_chain_limit"
+                                       "open_chan_max_local_balance"
                                 loop
                                   (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"openChanOnChainLimit") y x)
+                                     (Data.ProtoLens.Field.field @"openChanMaxLocalBalance") y x)
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "open_chan_fee_rate"
+                                       "open_chan_min_remote_balance"
                                 loop
                                   (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"openChanFeeRate") y x)
+                                     (Data.ProtoLens.Field.field @"openChanMinRemoteBalance") y x)
                         34
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "open_chan_min_fee"
+                                       "open_chan_max_remote_balance"
                                 loop
                                   (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"openChanMinFee") y x)
+                                     (Data.ProtoLens.Field.field @"openChanMaxRemoteBalance") y x)
+                        42
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "open_chan_remote_balance_fee_rate"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"openChanRemoteBalanceFeeRate")
+                                     y
+                                     x)
+                        50
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "open_chan_min_fee_amt"
+                                loop
+                                  (Lens.Family2.set
+                                     (Data.ProtoLens.Field.field @"openChanMinFeeAmt") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -245,7 +325,7 @@ instance Data.ProtoLens.Message Cfg where
         -> (Data.Monoid.<>)
              (case
                   Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'openChanLnLimit") _x
+                    (Data.ProtoLens.Field.field @"maybe'openChanMinLocalBalance") _x
               of
                 Prelude.Nothing -> Data.Monoid.mempty
                 (Prelude.Just _v)
@@ -262,7 +342,7 @@ instance Data.ProtoLens.Message Cfg where
              ((Data.Monoid.<>)
                 (case
                      Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'openChanOnChainLimit") _x
+                       (Data.ProtoLens.Field.field @"maybe'openChanMaxLocalBalance") _x
                  of
                    Prelude.Nothing -> Data.Monoid.mempty
                    (Prelude.Just _v)
@@ -279,7 +359,7 @@ instance Data.ProtoLens.Message Cfg where
                 ((Data.Monoid.<>)
                    (case
                         Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'openChanFeeRate") _x
+                          (Data.ProtoLens.Field.field @"maybe'openChanMinRemoteBalance") _x
                     of
                       Prelude.Nothing -> Data.Monoid.mempty
                       (Prelude.Just _v)
@@ -296,7 +376,7 @@ instance Data.ProtoLens.Message Cfg where
                    ((Data.Monoid.<>)
                       (case
                            Lens.Family2.view
-                             (Data.ProtoLens.Field.field @"maybe'openChanMinFee") _x
+                             (Data.ProtoLens.Field.field @"maybe'openChanMaxRemoteBalance") _x
                        of
                          Prelude.Nothing -> Data.Monoid.mempty
                          (Prelude.Just _v)
@@ -310,20 +390,60 @@ instance Data.ProtoLens.Message Cfg where
                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                    Data.ProtoLens.encodeMessage
                                    _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+                      ((Data.Monoid.<>)
+                         (case
+                              Lens.Family2.view
+                                (Data.ProtoLens.Field.field @"maybe'openChanRemoteBalanceFeeRate")
+                                _x
+                          of
+                            Prelude.Nothing -> Data.Monoid.mempty
+                            (Prelude.Just _v)
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt 42)
+                                   ((Prelude..)
+                                      (\ bs
+                                         -> (Data.Monoid.<>)
+                                              (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                 (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                              (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                      Data.ProtoLens.encodeMessage
+                                      _v))
+                         ((Data.Monoid.<>)
+                            (case
+                                 Lens.Family2.view
+                                   (Data.ProtoLens.Field.field @"maybe'openChanMinFeeAmt") _x
+                             of
+                               Prelude.Nothing -> Data.Monoid.mempty
+                               (Prelude.Just _v)
+                                 -> (Data.Monoid.<>)
+                                      (Data.ProtoLens.Encoding.Bytes.putVarInt 50)
+                                      ((Prelude..)
+                                         (\ bs
+                                            -> (Data.Monoid.<>)
+                                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                    (Prelude.fromIntegral
+                                                       (Data.ByteString.length bs)))
+                                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                         Data.ProtoLens.encodeMessage
+                                         _v))
+                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
 instance Control.DeepSeq.NFData Cfg where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_Cfg'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_Cfg'openChanLnLimit x__)
+                (_Cfg'openChanMinLocalBalance x__)
                 (Control.DeepSeq.deepseq
-                   (_Cfg'openChanOnChainLimit x__)
+                   (_Cfg'openChanMaxLocalBalance x__)
                    (Control.DeepSeq.deepseq
-                      (_Cfg'openChanFeeRate x__)
-                      (Control.DeepSeq.deepseq (_Cfg'openChanMinFee x__) ()))))
+                      (_Cfg'openChanMinRemoteBalance x__)
+                      (Control.DeepSeq.deepseq
+                         (_Cfg'openChanMaxRemoteBalance x__)
+                         (Control.DeepSeq.deepseq
+                            (_Cfg'openChanRemoteBalanceFeeRate x__)
+                            (Control.DeepSeq.deepseq (_Cfg'openChanMinFeeAmt x__) ()))))))
 {- | Fields :
      
          * 'Proto.BtcLsp.Type_Fields.nonce' @:: Lens' Ctx Proto.BtcLsp.Newtype.Nonce@
@@ -494,10 +614,10 @@ instance Control.DeepSeq.NFData Ctx where
                 (_Ctx'nonce x__) (Control.DeepSeq.deepseq (_Ctx'lnPubKey x__) ()))
 {- | Fields :
      
-         * 'Proto.BtcLsp.Type_Fields.val' @:: Lens' FeeRate URational@
-         * 'Proto.BtcLsp.Type_Fields.maybe'val' @:: Lens' FeeRate (Prelude.Maybe URational)@ -}
+         * 'Proto.BtcLsp.Type_Fields.val' @:: Lens' FeeRate Urational@
+         * 'Proto.BtcLsp.Type_Fields.maybe'val' @:: Lens' FeeRate (Prelude.Maybe Urational)@ -}
 data FeeRate
-  = FeeRate'_constructor {_FeeRate'val :: !(Prelude.Maybe URational),
+  = FeeRate'_constructor {_FeeRate'val :: !(Prelude.Maybe Urational),
                           _FeeRate'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show FeeRate where
@@ -507,13 +627,13 @@ instance Prelude.Show FeeRate where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out FeeRate
-instance Data.ProtoLens.Field.HasField FeeRate "val" URational where
+instance Data.ProtoLens.Field.HasField FeeRate "val" Urational where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FeeRate'val (\ x__ y__ -> x__ {_FeeRate'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FeeRate "maybe'val" (Prelude.Maybe URational) where
+instance Data.ProtoLens.Field.HasField FeeRate "maybe'val" (Prelude.Maybe Urational) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -524,7 +644,7 @@ instance Data.ProtoLens.Message FeeRate where
   packedMessageDescriptor _
     = "\n\
       \\aFeeRate\DC2(\n\
-      \\ETXval\CAN\SOH \SOH(\v2\SYN.BtcLsp.Type.URationalR\ETXval"
+      \\ETXval\CAN\SOH \SOH(\v2\SYN.BtcLsp.Type.UrationalR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -532,7 +652,7 @@ instance Data.ProtoLens.Message FeeRate where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor URational)
+                 Data.ProtoLens.FieldTypeDescriptor Urational)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor FeeRate
@@ -883,174 +1003,6 @@ instance Control.DeepSeq.NFData InputFailureKind where
 instance Text.PrettyPrint.GenericPretty.Out InputFailureKind
 {- | Fields :
      
-         * 'Proto.BtcLsp.Type_Fields.min' @:: Lens' MsatLimit Proto.BtcLsp.Newtype.Msat@
-         * 'Proto.BtcLsp.Type_Fields.maybe'min' @:: Lens' MsatLimit (Prelude.Maybe Proto.BtcLsp.Newtype.Msat)@
-         * 'Proto.BtcLsp.Type_Fields.max' @:: Lens' MsatLimit Proto.BtcLsp.Newtype.Msat@
-         * 'Proto.BtcLsp.Type_Fields.maybe'max' @:: Lens' MsatLimit (Prelude.Maybe Proto.BtcLsp.Newtype.Msat)@ -}
-data MsatLimit
-  = MsatLimit'_constructor {_MsatLimit'min :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Msat),
-                            _MsatLimit'max :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Msat),
-                            _MsatLimit'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show MsatLimit where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out MsatLimit
-instance Data.ProtoLens.Field.HasField MsatLimit "min" Proto.BtcLsp.Newtype.Msat where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _MsatLimit'min (\ x__ y__ -> x__ {_MsatLimit'min = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField MsatLimit "maybe'min" (Prelude.Maybe Proto.BtcLsp.Newtype.Msat) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _MsatLimit'min (\ x__ y__ -> x__ {_MsatLimit'min = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField MsatLimit "max" Proto.BtcLsp.Newtype.Msat where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _MsatLimit'max (\ x__ y__ -> x__ {_MsatLimit'max = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField MsatLimit "maybe'max" (Prelude.Maybe Proto.BtcLsp.Newtype.Msat) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _MsatLimit'max (\ x__ y__ -> x__ {_MsatLimit'max = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message MsatLimit where
-  messageName _ = Data.Text.pack "BtcLsp.Type.MsatLimit"
-  packedMessageDescriptor _
-    = "\n\
-      \\tMsatLimit\DC2&\n\
-      \\ETXmin\CAN\SOH \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\ETXmin\DC2&\n\
-      \\ETXmax\CAN\STX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\ETXmax"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        min__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "min"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.Msat)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'min")) ::
-              Data.ProtoLens.FieldDescriptor MsatLimit
-        max__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "max"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.Msat)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'max")) ::
-              Data.ProtoLens.FieldDescriptor MsatLimit
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, min__field_descriptor),
-           (Data.ProtoLens.Tag 2, max__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _MsatLimit'_unknownFields
-        (\ x__ y__ -> x__ {_MsatLimit'_unknownFields = y__})
-  defMessage
-    = MsatLimit'_constructor
-        {_MsatLimit'min = Prelude.Nothing,
-         _MsatLimit'max = Prelude.Nothing, _MsatLimit'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: MsatLimit -> Data.ProtoLens.Encoding.Bytes.Parser MsatLimit
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "min"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"min") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "max"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"max") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "MsatLimit"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'min") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'max") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage
-                             _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData MsatLimit where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_MsatLimit'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_MsatLimit'min x__)
-                (Control.DeepSeq.deepseq (_MsatLimit'max x__) ()))
-{- | Fields :
-     
          * 'Proto.BtcLsp.Type_Fields.negative' @:: Lens' Rational Prelude.Bool@
          * 'Proto.BtcLsp.Type_Fields.numerator' @:: Lens' Rational Data.Word.Word64@
          * 'Proto.BtcLsp.Type_Fields.denominator' @:: Lens' Rational Data.Word.Word64@ -}
@@ -1235,207 +1187,39 @@ instance Control.DeepSeq.NFData Rational where
                    (Control.DeepSeq.deepseq (_Rational'denominator x__) ())))
 {- | Fields :
      
-         * 'Proto.BtcLsp.Type_Fields.min' @:: Lens' SatLimit Proto.BtcLsp.Newtype.Sat@
-         * 'Proto.BtcLsp.Type_Fields.maybe'min' @:: Lens' SatLimit (Prelude.Maybe Proto.BtcLsp.Newtype.Sat)@
-         * 'Proto.BtcLsp.Type_Fields.max' @:: Lens' SatLimit Proto.BtcLsp.Newtype.Sat@
-         * 'Proto.BtcLsp.Type_Fields.maybe'max' @:: Lens' SatLimit (Prelude.Maybe Proto.BtcLsp.Newtype.Sat)@ -}
-data SatLimit
-  = SatLimit'_constructor {_SatLimit'min :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Sat),
-                           _SatLimit'max :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Sat),
-                           _SatLimit'_unknownFields :: !Data.ProtoLens.FieldSet}
+         * 'Proto.BtcLsp.Type_Fields.numerator' @:: Lens' Urational Data.Word.Word64@
+         * 'Proto.BtcLsp.Type_Fields.denominator' @:: Lens' Urational Data.Word.Word64@ -}
+data Urational
+  = Urational'_constructor {_Urational'numerator :: !Data.Word.Word64,
+                            _Urational'denominator :: !Data.Word.Word64,
+                            _Urational'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show SatLimit where
+instance Prelude.Show Urational where
   showsPrec _ __x __s
     = Prelude.showChar
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out SatLimit
-instance Data.ProtoLens.Field.HasField SatLimit "min" Proto.BtcLsp.Newtype.Sat where
+instance Text.PrettyPrint.GenericPretty.Out Urational
+instance Data.ProtoLens.Field.HasField Urational "numerator" Data.Word.Word64 where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _SatLimit'min (\ x__ y__ -> x__ {_SatLimit'min = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField SatLimit "maybe'min" (Prelude.Maybe Proto.BtcLsp.Newtype.Sat) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SatLimit'min (\ x__ y__ -> x__ {_SatLimit'min = y__}))
+           _Urational'numerator
+           (\ x__ y__ -> x__ {_Urational'numerator = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField SatLimit "max" Proto.BtcLsp.Newtype.Sat where
+instance Data.ProtoLens.Field.HasField Urational "denominator" Data.Word.Word64 where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _SatLimit'max (\ x__ y__ -> x__ {_SatLimit'max = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField SatLimit "maybe'max" (Prelude.Maybe Proto.BtcLsp.Newtype.Sat) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SatLimit'max (\ x__ y__ -> x__ {_SatLimit'max = y__}))
+           _Urational'denominator
+           (\ x__ y__ -> x__ {_Urational'denominator = y__}))
         Prelude.id
-instance Data.ProtoLens.Message SatLimit where
-  messageName _ = Data.Text.pack "BtcLsp.Type.SatLimit"
+instance Data.ProtoLens.Message Urational where
+  messageName _ = Data.Text.pack "BtcLsp.Type.Urational"
   packedMessageDescriptor _
     = "\n\
-      \\bSatLimit\DC2%\n\
-      \\ETXmin\CAN\SOH \SOH(\v2\DC3.BtcLsp.Newtype.SatR\ETXmin\DC2%\n\
-      \\ETXmax\CAN\STX \SOH(\v2\DC3.BtcLsp.Newtype.SatR\ETXmax"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        min__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "min"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.Sat)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'min")) ::
-              Data.ProtoLens.FieldDescriptor SatLimit
-        max__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "max"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.Sat)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'max")) ::
-              Data.ProtoLens.FieldDescriptor SatLimit
-      in
-        Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, min__field_descriptor),
-           (Data.ProtoLens.Tag 2, max__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SatLimit'_unknownFields
-        (\ x__ y__ -> x__ {_SatLimit'_unknownFields = y__})
-  defMessage
-    = SatLimit'_constructor
-        {_SatLimit'min = Prelude.Nothing, _SatLimit'max = Prelude.Nothing,
-         _SatLimit'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: SatLimit -> Data.ProtoLens.Encoding.Bytes.Parser SatLimit
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "min"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"min") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "max"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"max") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SatLimit"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'min") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
-             ((Data.Monoid.<>)
-                (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'max") _x
-                 of
-                   Prelude.Nothing -> Data.Monoid.mempty
-                   (Prelude.Just _v)
-                     -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                          ((Prelude..)
-                             (\ bs
-                                -> (Data.Monoid.<>)
-                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage
-                             _v))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData SatLimit where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_SatLimit'_unknownFields x__)
-             (Control.DeepSeq.deepseq
-                (_SatLimit'min x__)
-                (Control.DeepSeq.deepseq (_SatLimit'max x__) ()))
-{- | Fields :
-     
-         * 'Proto.BtcLsp.Type_Fields.numerator' @:: Lens' URational Data.Word.Word64@
-         * 'Proto.BtcLsp.Type_Fields.denominator' @:: Lens' URational Data.Word.Word64@ -}
-data URational
-  = URational'_constructor {_URational'numerator :: !Data.Word.Word64,
-                            _URational'denominator :: !Data.Word.Word64,
-                            _URational'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show URational where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out URational
-instance Data.ProtoLens.Field.HasField URational "numerator" Data.Word.Word64 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _URational'numerator
-           (\ x__ y__ -> x__ {_URational'numerator = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField URational "denominator" Data.Word.Word64 where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _URational'denominator
-           (\ x__ y__ -> x__ {_URational'denominator = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message URational where
-  messageName _ = Data.Text.pack "BtcLsp.Type.URational"
-  packedMessageDescriptor _
-    = "\n\
-      \\tURational\DC2\FS\n\
+      \\tUrational\DC2\FS\n\
       \\tnumerator\CAN\SOH \SOH(\EOTR\tnumerator\DC2 \n\
       \\vdenominator\CAN\STX \SOH(\EOTR\vdenominator"
   packedFileDescriptor _ = packedFileDescriptor
@@ -1449,7 +1233,7 @@ instance Data.ProtoLens.Message URational where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"numerator")) ::
-              Data.ProtoLens.FieldDescriptor URational
+              Data.ProtoLens.FieldDescriptor Urational
         denominator__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "denominator"
@@ -1458,23 +1242,23 @@ instance Data.ProtoLens.Message URational where
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional
                  (Data.ProtoLens.Field.field @"denominator")) ::
-              Data.ProtoLens.FieldDescriptor URational
+              Data.ProtoLens.FieldDescriptor Urational
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, numerator__field_descriptor),
            (Data.ProtoLens.Tag 2, denominator__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
-        _URational'_unknownFields
-        (\ x__ y__ -> x__ {_URational'_unknownFields = y__})
+        _Urational'_unknownFields
+        (\ x__ y__ -> x__ {_Urational'_unknownFields = y__})
   defMessage
-    = URational'_constructor
-        {_URational'numerator = Data.ProtoLens.fieldDefault,
-         _URational'denominator = Data.ProtoLens.fieldDefault,
-         _URational'_unknownFields = []}
+    = Urational'_constructor
+        {_Urational'numerator = Data.ProtoLens.fieldDefault,
+         _Urational'denominator = Data.ProtoLens.fieldDefault,
+         _Urational'_unknownFields = []}
   parseMessage
     = let
-        loop :: URational -> Data.ProtoLens.Encoding.Bytes.Parser URational
+        loop :: Urational -> Data.ProtoLens.Encoding.Bytes.Parser Urational
         loop x
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
@@ -1510,7 +1294,7 @@ instance Data.ProtoLens.Message URational where
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "URational"
+          (do loop Data.ProtoLens.defMessage) "Urational"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
@@ -1536,14 +1320,14 @@ instance Data.ProtoLens.Message URational where
                          (Data.ProtoLens.Encoding.Bytes.putVarInt _v))
                 (Data.ProtoLens.Encoding.Wire.buildFieldSet
                    (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
-instance Control.DeepSeq.NFData URational where
+instance Control.DeepSeq.NFData Urational where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
-             (_URational'_unknownFields x__)
+             (_Urational'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_URational'numerator x__)
-                (Control.DeepSeq.deepseq (_URational'denominator x__) ()))
+                (_Urational'numerator x__)
+                (Control.DeepSeq.deepseq (_Urational'denominator x__) ()))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
@@ -1551,27 +1335,23 @@ packedFileDescriptor
     \\ETXCtx\DC2+\n\
     \\ENQnonce\CAN\SOH \SOH(\v2\NAK.BtcLsp.Newtype.NonceR\ENQnonce\DC26\n\
     \\n\
-    \ln_pub_key\CAN\STX \SOH(\v2\CAN.BtcLsp.Newtype.LnPubKeyR\blnPubKey\"\157\STX\n\
-    \\ETXCfg\DC2C\n\
-    \\DC2open_chan_ln_limit\CAN\SOH \SOH(\v2\SYN.BtcLsp.Type.MsatLimitR\SIopenChanLnLimit\DC2M\n\
-    \\CANopen_chan_on_chain_limit\CAN\STX \SOH(\v2\NAK.BtcLsp.Type.SatLimitR\DC4openChanOnChainLimit\DC2A\n\
-    \\DC2open_chan_fee_rate\CAN\ETX \SOH(\v2\DC4.BtcLsp.Type.FeeRateR\SIopenChanFeeRate\DC2?\n\
-    \\DC1open_chan_min_fee\CAN\EOT \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\SOopenChanMinFee\"[\n\
-    \\tMsatLimit\DC2&\n\
-    \\ETXmin\CAN\SOH \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\ETXmin\DC2&\n\
-    \\ETXmax\CAN\STX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\ETXmax\"X\n\
-    \\bSatLimit\DC2%\n\
-    \\ETXmin\CAN\SOH \SOH(\v2\DC3.BtcLsp.Newtype.SatR\ETXmin\DC2%\n\
-    \\ETXmax\CAN\STX \SOH(\v2\DC3.BtcLsp.Newtype.SatR\ETXmax\"f\n\
+    \ln_pub_key\CAN\STX \SOH(\v2\CAN.BtcLsp.Newtype.LnPubKeyR\blnPubKey\"\162\EOT\n\
+    \\ETXCfg\DC2Z\n\
+    \\ESCopen_chan_min_local_balance\CAN\SOH \SOH(\v2\FS.BtcLsp.Newtype.LocalBalanceR\ETBopenChanMinLocalBalance\DC2Z\n\
+    \\ESCopen_chan_max_local_balance\CAN\STX \SOH(\v2\FS.BtcLsp.Newtype.LocalBalanceR\ETBopenChanMaxLocalBalance\DC2]\n\
+    \\FSopen_chan_min_remote_balance\CAN\ETX \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMinRemoteBalance\DC2]\n\
+    \\FSopen_chan_max_remote_balance\CAN\EOT \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMaxRemoteBalance\DC2]\n\
+    \!open_chan_remote_balance_fee_rate\CAN\ENQ \SOH(\v2\DC4.BtcLsp.Type.FeeRateR\FSopenChanRemoteBalanceFeeRate\DC2F\n\
+    \\NAKopen_chan_min_fee_amt\CAN\ACK \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\DC1openChanMinFeeAmt\"f\n\
     \\bRational\DC2\SUB\n\
     \\bnegative\CAN\SOH \SOH(\bR\bnegative\DC2\FS\n\
     \\tnumerator\CAN\STX \SOH(\EOTR\tnumerator\DC2 \n\
     \\vdenominator\CAN\ETX \SOH(\EOTR\vdenominator\"K\n\
-    \\tURational\DC2\FS\n\
+    \\tUrational\DC2\FS\n\
     \\tnumerator\CAN\SOH \SOH(\EOTR\tnumerator\DC2 \n\
     \\vdenominator\CAN\STX \SOH(\EOTR\vdenominator\"3\n\
     \\aFeeRate\DC2(\n\
-    \\ETXval\CAN\SOH \SOH(\v2\SYN.BtcLsp.Type.URationalR\ETXval\"\132\SOH\n\
+    \\ETXval\CAN\SOH \SOH(\v2\SYN.BtcLsp.Type.UrationalR\ETXval\"\132\SOH\n\
     \\fInputFailure\DC2A\n\
     \\SOfield_location\CAN\SOH \ETX(\v2\SUB.BtcLsp.Newtype.FieldIndexR\rfieldLocation\DC21\n\
     \\EOTkind\CAN\STX \SOH(\SO2\GS.BtcLsp.Type.InputFailureKindR\EOTkind*\\\n\
@@ -1579,8 +1359,8 @@ packedFileDescriptor
     \\bREQUIRED\DLE\NUL\DC2\r\n\
     \\tNOT_FOUND\DLE\SOH\DC2\DC2\n\
     \\SOPARSING_FAILED\DLE\STX\DC2\ETB\n\
-    \\DC3VERIFICATION_FAILED\DLE\ETXJ\238\SI\n\
-    \\ACK\DC2\EOT\NUL\NULA\SOH\n\
+    \\DC3VERIFICATION_FAILED\DLE\ETXJ\247\SO\n\
+    \\ACK\DC2\EOT\NUL\NUL<\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1611,219 +1391,193 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\b()\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\v\NUL\DLE\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\v\NUL\NAK\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\SOH\SOH\DC2\ETX\v\b\v\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\f\STX#\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\f\STX?\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\f\STX\v\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\f\STX\RS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\f\f\RS\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\f\US:\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\f!\"\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\f=>\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\r\STX(\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\r\STX?\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\r\STX\n\
-    \\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\r\STX\RS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\r\v#\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\r\US:\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\r&'\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\r=>\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX\SO\STX!\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\SO\STXA\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\SO\STX\t\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\SO\STX\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\SO\n\
-    \\FS\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\SO <\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\SO\US \n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\SO?@\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\ETX\DC2\ETX\SI\STX-\n\
+    \\EOT\EOT\SOH\STX\ETX\DC2\ETX\SI\STXA\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX\SI\STX\SYN\n\
+    \\ENQ\EOT\SOH\STX\ETX\ACK\DC2\ETX\SI\STX\US\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX\SI\ETB(\n\
+    \\ENQ\EOT\SOH\STX\ETX\SOH\DC2\ETX\SI <\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX\SI+,\n\
-    \\n\
-    \\n\
-    \\STX\EOT\STX\DC2\EOT\DC2\NUL\NAK\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\DC2\b\DC1\n\
+    \\ENQ\EOT\SOH\STX\ETX\ETX\DC2\ETX\SI?@\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX\DC3\STX\US\n\
+    \\EOT\EOT\SOH\STX\EOT\DC2\ETX\DLE\STX0\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX\DC3\STX\SYN\n\
+    \\ENQ\EOT\SOH\STX\EOT\ACK\DC2\ETX\DLE\STX\t\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\DC3\ETB\SUB\n\
+    \\ENQ\EOT\SOH\STX\EOT\SOH\DC2\ETX\DLE\n\
+    \+\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\DC3\GS\RS\n\
+    \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX\DLE./\n\
+    \2\n\
+    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX\DC1\STX1\"%\n\
+    \ TODO : add open/close sat/vb fees\n\
+    \\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ACK\DC2\ETX\DC1\STX\SYN\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETX\DC1\ETB,\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETX\DC1/0\n\
+    \\n\
+    \\n\
+    \\STX\EOT\STX\DC2\EOT\ETB\NUL\ESC\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\ETB\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX\DC4\STX\US\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\CAN\STX\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ACK\DC2\ETX\DC4\STX\SYN\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\CAN\STX\ACK\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\DC4\ETB\SUB\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\CAN\a\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\DC4\GS\RS\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ETX\DC2\EOT\ETB\NUL\SUB\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX\ETB\b\DLE\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\CAN\DC2\DC3\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\CAN\STX\RS\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX\EM\STX\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX\CAN\STX\NAK\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX\EM\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\CAN\SYN\EM\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\EM\t\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\CAN\FS\GS\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\EM\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETX\EM\STX\RS\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX\SUB\STX\EM\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ACK\DC2\ETX\EM\STX\NAK\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX\SUB\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX\EM\SYN\EM\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX\SUB\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX\EM\FS\GS\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX\SUB\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT\FS\NUL \SOH\n\
+    \\STX\EOT\ETX\DC2\EOT\GS\NUL \SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX\FS\b\DLE\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX\GS\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX\GS\STX\DC4\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\RS\STX\ETB\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX\GS\STX\ACK\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX\RS\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX\GS\a\SI\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\RS\t\DC2\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX\GS\DC2\DC3\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\RS\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\SOH\DC2\ETX\RS\STX\ETB\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETX\US\STX\EM\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ENQ\DC2\ETX\RS\STX\b\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX\US\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\SOH\DC2\ETX\RS\t\DC2\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX\US\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\SOH\ETX\DC2\ETX\RS\NAK\SYN\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX\US\ETB\CAN\n\
+    \\n\
+    \\n\
+    \\STX\EOT\EOT\DC2\EOT\"\NUL$\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX\"\b\SI\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\STX\DC2\ETX\US\STX\EM\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX#\STX\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ENQ\DC2\ETX\US\STX\b\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX#\STX\v\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\SOH\DC2\ETX\US\t\DC4\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX#\f\SI\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\STX\ETX\DC2\ETX\US\ETB\CAN\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX#\DC2\DC3\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT\"\NUL%\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT&\NUL)\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX\"\b\DC1\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX&\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX#\STX\ETB\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX'\STX9\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX#\STX\b\n\
+    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETX'\STX\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX#\t\DC2\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX'\v%\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX#\NAK\SYN\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX'&4\n\
+    \\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX'78\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX$\STX\EM\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX(\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ENQ\DC2\ETX$\STX\b\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETX(\STX\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX$\t\DC4\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX(\DC3\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX$\ETB\CAN\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX(\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOT'\NUL)\SOH\n\
+    \\STX\ENQ\NUL\DC2\EOT+\NUL<\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETX'\b\SI\n\
-    \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETX(\STX\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETX(\STX\v\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX(\f\SI\n\
-    \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX(\DC2\DC3\n\
-    \\n\
-    \\n\
-    \\STX\EOT\a\DC2\EOT+\NUL.\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX+\b\DC4\n\
-    \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX,\STX9\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\EOT\DC2\ETX,\STX\n\
-    \\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ACK\DC2\ETX,\v%\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX,&4\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX,78\n\
-    \\v\n\
-    \\EOT\EOT\a\STX\SOH\DC2\ETX-\STX\FS\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ACK\DC2\ETX-\STX\DC2\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\SOH\SOH\DC2\ETX-\DC3\ETB\n\
-    \\f\n\
-    \\ENQ\EOT\a\STX\SOH\ETX\DC2\ETX-\SUB\ESC\n\
-    \\n\
-    \\n\
-    \\STX\ENQ\NUL\DC2\EOT0\NULA\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\ENQ\NUL\SOH\DC2\ETX0\ENQ\NAK\n\
+    \\ETX\ENQ\NUL\SOH\DC2\ETX+\ENQ\NAK\n\
     \l\n\
-    \\EOT\ENQ\NUL\STX\NUL\DC2\ETX3\STX\SI\SUB_ All proto3 messages are optional, but sometimes\n\
+    \\EOT\ENQ\NUL\STX\NUL\DC2\ETX.\STX\SI\SUB_ All proto3 messages are optional, but sometimes\n\
     \ message presence is required by source code.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETX3\STX\n\
+    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETX.\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETX3\r\SO\n\
+    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETX.\r\SO\n\
     \\182\SOH\n\
-    \\EOT\ENQ\NUL\STX\SOH\DC2\ETX7\STX\DLE\SUB\168\SOH Sometimes protobuf term is not data itself, but reference\n\
+    \\EOT\ENQ\NUL\STX\SOH\DC2\ETX2\STX\DLE\SUB\168\SOH Sometimes protobuf term is not data itself, but reference\n\
     \ to some other data, located somewhere else, for example\n\
     \ in database, and this resource might be not found.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETX7\STX\v\n\
+    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETX2\STX\v\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETX7\SO\SI\n\
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETX2\SO\SI\n\
     \\201\SOH\n\
-    \\EOT\ENQ\NUL\STX\STX\DC2\ETX<\STX\NAK\SUB\187\SOH Sometimes data is required to be in some\n\
+    \\EOT\ENQ\NUL\STX\STX\DC2\ETX7\STX\NAK\SUB\187\SOH Sometimes data is required to be in some\n\
     \ specific format (for example DER binary encoding)\n\
     \ which is not the part of proto3 type system.\n\
     \ This error shows the failure of custom parser.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETX<\STX\DLE\n\
+    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETX7\STX\DLE\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETX<\DC3\DC4\n\
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETX7\DC3\DC4\n\
     \\157\SOH\n\
-    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX@\STX\SUB\SUB\143\SOH Even if custom parser succeeded, sometimes data\n\
+    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX;\STX\SUB\SUB\143\SOH Even if custom parser succeeded, sometimes data\n\
     \ needs to be verified somehow, for example\n\
     \ signature needs to be cryptographically verified.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX@\STX\NAK\n\
+    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX;\STX\NAK\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX@\CAN\EMb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX;\CAN\EMb\ACKproto3"
