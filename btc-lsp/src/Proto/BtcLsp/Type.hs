@@ -50,7 +50,9 @@ import qualified Proto.BtcLsp.Newtype
          * 'Proto.BtcLsp.Type_Fields.openChanRemoteBalanceFeeRate' @:: Lens' Cfg FeeRate@
          * 'Proto.BtcLsp.Type_Fields.maybe'openChanRemoteBalanceFeeRate' @:: Lens' Cfg (Prelude.Maybe FeeRate)@
          * 'Proto.BtcLsp.Type_Fields.openChanMinFeeAmt' @:: Lens' Cfg Proto.BtcLsp.Newtype.Msat@
-         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMinFeeAmt' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.Msat)@ -}
+         * 'Proto.BtcLsp.Type_Fields.maybe'openChanMinFeeAmt' @:: Lens' Cfg (Prelude.Maybe Proto.BtcLsp.Newtype.Msat)@
+         * 'Proto.BtcLsp.Type_Fields.btcLspLnNodes' @:: Lens' Cfg [Proto.BtcLsp.Newtype.SocketAddress]@
+         * 'Proto.BtcLsp.Type_Fields.vec'btcLspLnNodes' @:: Lens' Cfg (Data.Vector.Vector Proto.BtcLsp.Newtype.SocketAddress)@ -}
 data Cfg
   = Cfg'_constructor {_Cfg'openChanMinLocalBalance :: !(Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance),
                       _Cfg'openChanMaxLocalBalance :: !(Prelude.Maybe Proto.BtcLsp.Newtype.LocalBalance),
@@ -58,6 +60,7 @@ data Cfg
                       _Cfg'openChanMaxRemoteBalance :: !(Prelude.Maybe Proto.BtcLsp.Newtype.RemoteBalance),
                       _Cfg'openChanRemoteBalanceFeeRate :: !(Prelude.Maybe FeeRate),
                       _Cfg'openChanMinFeeAmt :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Msat),
+                      _Cfg'btcLspLnNodes :: !(Data.Vector.Vector Proto.BtcLsp.Newtype.SocketAddress),
                       _Cfg'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show Cfg where
@@ -151,6 +154,20 @@ instance Data.ProtoLens.Field.HasField Cfg "maybe'openChanMinFeeAmt" (Prelude.Ma
            _Cfg'openChanMinFeeAmt
            (\ x__ y__ -> x__ {_Cfg'openChanMinFeeAmt = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField Cfg "btcLspLnNodes" [Proto.BtcLsp.Newtype.SocketAddress] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cfg'btcLspLnNodes (\ x__ y__ -> x__ {_Cfg'btcLspLnNodes = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField Cfg "vec'btcLspLnNodes" (Data.Vector.Vector Proto.BtcLsp.Newtype.SocketAddress) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Cfg'btcLspLnNodes (\ x__ y__ -> x__ {_Cfg'btcLspLnNodes = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message Cfg where
   messageName _ = Data.Text.pack "BtcLsp.Type.Cfg"
   packedMessageDescriptor _
@@ -161,7 +178,8 @@ instance Data.ProtoLens.Message Cfg where
       \\FSopen_chan_min_remote_balance\CAN\ETX \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMinRemoteBalance\DC2]\n\
       \\FSopen_chan_max_remote_balance\CAN\EOT \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMaxRemoteBalance\DC2]\n\
       \!open_chan_remote_balance_fee_rate\CAN\ENQ \SOH(\v2\DC4.BtcLsp.Type.FeeRateR\FSopenChanRemoteBalanceFeeRate\DC2F\n\
-      \\NAKopen_chan_min_fee_amt\CAN\ACK \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\DC1openChanMinFeeAmt"
+      \\NAKopen_chan_min_fee_amt\CAN\ACK \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\DC1openChanMinFeeAmt\DC2F\n\
+      \\DLEbtc_lsp_ln_nodes\CAN\a \ETX(\v2\GS.BtcLsp.Newtype.SocketAddressR\rbtcLspLnNodes"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -214,6 +232,15 @@ instance Data.ProtoLens.Message Cfg where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'openChanMinFeeAmt")) ::
               Data.ProtoLens.FieldDescriptor Cfg
+        btcLspLnNodes__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "btc_lsp_ln_nodes"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.SocketAddress)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"btcLspLnNodes")) ::
+              Data.ProtoLens.FieldDescriptor Cfg
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, openChanMinLocalBalance__field_descriptor),
@@ -222,7 +249,8 @@ instance Data.ProtoLens.Message Cfg where
            (Data.ProtoLens.Tag 4, openChanMaxRemoteBalance__field_descriptor),
            (Data.ProtoLens.Tag 5, 
             openChanRemoteBalanceFeeRate__field_descriptor),
-           (Data.ProtoLens.Tag 6, openChanMinFeeAmt__field_descriptor)]
+           (Data.ProtoLens.Tag 6, openChanMinFeeAmt__field_descriptor),
+           (Data.ProtoLens.Tag 7, btcLspLnNodes__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Cfg'_unknownFields (\ x__ y__ -> x__ {_Cfg'_unknownFields = y__})
@@ -233,14 +261,22 @@ instance Data.ProtoLens.Message Cfg where
          _Cfg'openChanMinRemoteBalance = Prelude.Nothing,
          _Cfg'openChanMaxRemoteBalance = Prelude.Nothing,
          _Cfg'openChanRemoteBalanceFeeRate = Prelude.Nothing,
-         _Cfg'openChanMinFeeAmt = Prelude.Nothing, _Cfg'_unknownFields = []}
+         _Cfg'openChanMinFeeAmt = Prelude.Nothing,
+         _Cfg'btcLspLnNodes = Data.Vector.Generic.empty,
+         _Cfg'_unknownFields = []}
   parseMessage
     = let
-        loop :: Cfg -> Data.ProtoLens.Encoding.Bytes.Parser Cfg
-        loop x
+        loop ::
+          Cfg
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.BtcLsp.Newtype.SocketAddress
+             -> Data.ProtoLens.Encoding.Bytes.Parser Cfg
+        loop x mutable'btcLspLnNodes
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
-                   do (let missing = []
+                   do frozen'btcLspLnNodes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                   mutable'btcLspLnNodes)
+                      (let missing = []
                        in
                          if Prelude.null missing then
                              Prelude.return ()
@@ -251,7 +287,12 @@ instance Data.ProtoLens.Message Cfg where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+                           Data.ProtoLens.unknownFields
+                           (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'btcLspLnNodes")
+                              frozen'btcLspLnNodes
+                              x))
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
@@ -264,6 +305,7 @@ instance Data.ProtoLens.Message Cfg where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"openChanMinLocalBalance") y x)
+                                  mutable'btcLspLnNodes
                         18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -273,6 +315,7 @@ instance Data.ProtoLens.Message Cfg where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"openChanMaxLocalBalance") y x)
+                                  mutable'btcLspLnNodes
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -282,6 +325,7 @@ instance Data.ProtoLens.Message Cfg where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"openChanMinRemoteBalance") y x)
+                                  mutable'btcLspLnNodes
                         34
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -291,6 +335,7 @@ instance Data.ProtoLens.Message Cfg where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"openChanMaxRemoteBalance") y x)
+                                  mutable'btcLspLnNodes
                         42
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -302,6 +347,7 @@ instance Data.ProtoLens.Message Cfg where
                                      (Data.ProtoLens.Field.field @"openChanRemoteBalanceFeeRate")
                                      y
                                      x)
+                                  mutable'btcLspLnNodes
                         50
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -311,15 +357,31 @@ instance Data.ProtoLens.Message Cfg where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"openChanMinFeeAmt") y x)
+                                  mutable'btcLspLnNodes
+                        58
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "btc_lsp_ln_nodes"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'btcLspLnNodes y)
+                                loop x v
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
                                 loop
                                   (Lens.Family2.over
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'btcLspLnNodes
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Cfg"
+          (do mutable'btcLspLnNodes <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                         Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'btcLspLnNodes)
+          "Cfg"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
@@ -426,8 +488,24 @@ instance Data.ProtoLens.Message Cfg where
                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                          Data.ProtoLens.encodeMessage
                                          _v))
-                            (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                               (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))))
+                            ((Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                                  (\ _v
+                                     -> (Data.Monoid.<>)
+                                          (Data.ProtoLens.Encoding.Bytes.putVarInt 58)
+                                          ((Prelude..)
+                                             (\ bs
+                                                -> (Data.Monoid.<>)
+                                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                                        (Prelude.fromIntegral
+                                                           (Data.ByteString.length bs)))
+                                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                             Data.ProtoLens.encodeMessage
+                                             _v))
+                                  (Lens.Family2.view
+                                     (Data.ProtoLens.Field.field @"vec'btcLspLnNodes") _x))
+                               (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                                  (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
 instance Control.DeepSeq.NFData Cfg where
   rnf
     = \ x__
@@ -443,7 +521,9 @@ instance Control.DeepSeq.NFData Cfg where
                          (_Cfg'openChanMaxRemoteBalance x__)
                          (Control.DeepSeq.deepseq
                             (_Cfg'openChanRemoteBalanceFeeRate x__)
-                            (Control.DeepSeq.deepseq (_Cfg'openChanMinFeeAmt x__) ()))))))
+                            (Control.DeepSeq.deepseq
+                               (_Cfg'openChanMinFeeAmt x__)
+                               (Control.DeepSeq.deepseq (_Cfg'btcLspLnNodes x__) ())))))))
 {- | Fields :
      
          * 'Proto.BtcLsp.Type_Fields.nonce' @:: Lens' Ctx Proto.BtcLsp.Newtype.Nonce@
@@ -1335,14 +1415,15 @@ packedFileDescriptor
     \\ETXCtx\DC2+\n\
     \\ENQnonce\CAN\SOH \SOH(\v2\NAK.BtcLsp.Newtype.NonceR\ENQnonce\DC26\n\
     \\n\
-    \ln_pub_key\CAN\STX \SOH(\v2\CAN.BtcLsp.Newtype.LnPubKeyR\blnPubKey\"\162\EOT\n\
+    \ln_pub_key\CAN\STX \SOH(\v2\CAN.BtcLsp.Newtype.LnPubKeyR\blnPubKey\"\234\EOT\n\
     \\ETXCfg\DC2Z\n\
     \\ESCopen_chan_min_local_balance\CAN\SOH \SOH(\v2\FS.BtcLsp.Newtype.LocalBalanceR\ETBopenChanMinLocalBalance\DC2Z\n\
     \\ESCopen_chan_max_local_balance\CAN\STX \SOH(\v2\FS.BtcLsp.Newtype.LocalBalanceR\ETBopenChanMaxLocalBalance\DC2]\n\
     \\FSopen_chan_min_remote_balance\CAN\ETX \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMinRemoteBalance\DC2]\n\
     \\FSopen_chan_max_remote_balance\CAN\EOT \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\CANopenChanMaxRemoteBalance\DC2]\n\
     \!open_chan_remote_balance_fee_rate\CAN\ENQ \SOH(\v2\DC4.BtcLsp.Type.FeeRateR\FSopenChanRemoteBalanceFeeRate\DC2F\n\
-    \\NAKopen_chan_min_fee_amt\CAN\ACK \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\DC1openChanMinFeeAmt\"f\n\
+    \\NAKopen_chan_min_fee_amt\CAN\ACK \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\DC1openChanMinFeeAmt\DC2F\n\
+    \\DLEbtc_lsp_ln_nodes\CAN\a \ETX(\v2\GS.BtcLsp.Newtype.SocketAddressR\rbtcLspLnNodes\"f\n\
     \\bRational\DC2\SUB\n\
     \\bnegative\CAN\SOH \SOH(\bR\bnegative\DC2\FS\n\
     \\tnumerator\CAN\STX \SOH(\EOTR\tnumerator\DC2 \n\
@@ -1359,8 +1440,8 @@ packedFileDescriptor
     \\bREQUIRED\DLE\NUL\DC2\r\n\
     \\tNOT_FOUND\DLE\SOH\DC2\DC2\n\
     \\SOPARSING_FAILED\DLE\STX\DC2\ETB\n\
-    \\DC3VERIFICATION_FAILED\DLE\ETXJ\247\SO\n\
-    \\ACK\DC2\EOT\NUL\NUL<\SOH\n\
+    \\DC3VERIFICATION_FAILED\DLE\ETXJ\188\SI\n\
+    \\ACK\DC2\EOT\NUL\NUL=\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1391,7 +1472,7 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\b()\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\v\NUL\NAK\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\v\NUL\SYN\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\SOH\SOH\DC2\ETX\v\b\v\n\
@@ -1436,148 +1517,159 @@ packedFileDescriptor
     \+\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\EOT\ETX\DC2\ETX\DLE./\n\
-    \2\n\
-    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX\DC1\STX1\"%\n\
-    \ TODO : add open/close sat/vb fees\n\
-    \\n\
-    \\n\
+    \\v\n\
+    \\EOT\EOT\SOH\STX\ENQ\DC2\ETX\DC1\STX1\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\ENQ\ACK\DC2\ETX\DC1\STX\SYN\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\ENQ\SOH\DC2\ETX\DC1\ETB,\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\ENQ\ETX\DC2\ETX\DC1/0\n\
+    \2\n\
+    \\EOT\EOT\SOH\STX\ACK\DC2\ETX\DC2\STX>\"%\n\
+    \ TODO : add open/close sat/vb fees\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT\ETB\NUL\ESC\SOH\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ACK\EOT\DC2\ETX\DC2\STX\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ACK\ACK\DC2\ETX\DC2\v(\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ACK\SOH\DC2\ETX\DC2)9\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\ACK\ETX\DC2\ETX\DC2<=\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\ETB\b\DLE\n\
+    \\STX\EOT\STX\DC2\EOT\CAN\NUL\FS\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\CAN\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX\CAN\STX\DC4\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\EM\STX\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\CAN\STX\ACK\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\EM\STX\ACK\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\CAN\a\SI\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\EM\a\SI\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\CAN\DC2\DC3\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\EM\DC2\DC3\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\SOH\DC2\ETX\EM\STX\ETB\n\
+    \\EOT\EOT\STX\STX\SOH\DC2\ETX\SUB\STX\ETB\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX\EM\STX\b\n\
+    \\ENQ\EOT\STX\STX\SOH\ENQ\DC2\ETX\SUB\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\EM\t\DC2\n\
+    \\ENQ\EOT\STX\STX\SOH\SOH\DC2\ETX\SUB\t\DC2\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\EM\NAK\SYN\n\
+    \\ENQ\EOT\STX\STX\SOH\ETX\DC2\ETX\SUB\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\STX\DC2\ETX\SUB\STX\EM\n\
+    \\EOT\EOT\STX\STX\STX\DC2\ETX\ESC\STX\EM\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX\SUB\STX\b\n\
+    \\ENQ\EOT\STX\STX\STX\ENQ\DC2\ETX\ESC\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX\SUB\t\DC4\n\
+    \\ENQ\EOT\STX\STX\STX\SOH\DC2\ETX\ESC\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX\SUB\ETB\CAN\n\
+    \\ENQ\EOT\STX\STX\STX\ETX\DC2\ETX\ESC\ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT\GS\NUL \SOH\n\
+    \\STX\EOT\ETX\DC2\EOT\RS\NUL!\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX\GS\b\DC1\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX\RS\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\RS\STX\ETB\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\US\STX\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX\RS\STX\b\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX\US\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\RS\t\DC2\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\US\t\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\RS\NAK\SYN\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\US\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\SOH\DC2\ETX\US\STX\EM\n\
+    \\EOT\EOT\ETX\STX\SOH\DC2\ETX \STX\EM\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX\US\STX\b\n\
+    \\ENQ\EOT\ETX\STX\SOH\ENQ\DC2\ETX \STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX\US\t\DC4\n\
+    \\ENQ\EOT\ETX\STX\SOH\SOH\DC2\ETX \t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX\US\ETB\CAN\n\
+    \\ENQ\EOT\ETX\STX\SOH\ETX\DC2\ETX \ETB\CAN\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT\"\NUL$\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT#\NUL%\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX\"\b\SI\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX#\b\SI\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX#\STX\DC4\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX$\STX\DC4\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX#\STX\v\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX$\STX\v\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX#\f\SI\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX$\f\SI\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX#\DC2\DC3\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX$\DC2\DC3\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT&\NUL)\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT'\NUL*\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX&\b\DC4\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX'\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX'\STX9\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX(\STX9\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETX'\STX\n\
+    \\ENQ\EOT\ENQ\STX\NUL\EOT\DC2\ETX(\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX'\v%\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX(\v%\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX'&4\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX(&4\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX'78\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX(78\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX(\STX\FS\n\
+    \\EOT\EOT\ENQ\STX\SOH\DC2\ETX)\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETX(\STX\DC2\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ACK\DC2\ETX)\STX\DC2\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX(\DC3\ETB\n\
+    \\ENQ\EOT\ENQ\STX\SOH\SOH\DC2\ETX)\DC3\ETB\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX(\SUB\ESC\n\
+    \\ENQ\EOT\ENQ\STX\SOH\ETX\DC2\ETX)\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\ENQ\NUL\DC2\EOT+\NUL<\SOH\n\
+    \\STX\ENQ\NUL\DC2\EOT,\NUL=\SOH\n\
     \\n\
     \\n\
-    \\ETX\ENQ\NUL\SOH\DC2\ETX+\ENQ\NAK\n\
+    \\ETX\ENQ\NUL\SOH\DC2\ETX,\ENQ\NAK\n\
     \l\n\
-    \\EOT\ENQ\NUL\STX\NUL\DC2\ETX.\STX\SI\SUB_ All proto3 messages are optional, but sometimes\n\
+    \\EOT\ENQ\NUL\STX\NUL\DC2\ETX/\STX\SI\SUB_ All proto3 messages are optional, but sometimes\n\
     \ message presence is required by source code.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETX.\STX\n\
+    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETX/\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETX.\r\SO\n\
+    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETX/\r\SO\n\
     \\182\SOH\n\
-    \\EOT\ENQ\NUL\STX\SOH\DC2\ETX2\STX\DLE\SUB\168\SOH Sometimes protobuf term is not data itself, but reference\n\
+    \\EOT\ENQ\NUL\STX\SOH\DC2\ETX3\STX\DLE\SUB\168\SOH Sometimes protobuf term is not data itself, but reference\n\
     \ to some other data, located somewhere else, for example\n\
     \ in database, and this resource might be not found.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETX2\STX\v\n\
+    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETX3\STX\v\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETX2\SO\SI\n\
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETX3\SO\SI\n\
     \\201\SOH\n\
-    \\EOT\ENQ\NUL\STX\STX\DC2\ETX7\STX\NAK\SUB\187\SOH Sometimes data is required to be in some\n\
+    \\EOT\ENQ\NUL\STX\STX\DC2\ETX8\STX\NAK\SUB\187\SOH Sometimes data is required to be in some\n\
     \ specific format (for example DER binary encoding)\n\
     \ which is not the part of proto3 type system.\n\
     \ This error shows the failure of custom parser.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETX7\STX\DLE\n\
+    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETX8\STX\DLE\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETX7\DC3\DC4\n\
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETX8\DC3\DC4\n\
     \\157\SOH\n\
-    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX;\STX\SUB\SUB\143\SOH Even if custom parser succeeded, sometimes data\n\
+    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX<\STX\SUB\SUB\143\SOH Even if custom parser succeeded, sometimes data\n\
     \ needs to be verified somehow, for example\n\
     \ signature needs to be cryptographically verified.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX;\STX\NAK\n\
+    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX<\STX\NAK\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX;\CAN\EMb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX<\CAN\EMb\ACKproto3"

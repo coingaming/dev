@@ -372,11 +372,10 @@ instance Data.ProtoLens.Message Response where
       \\bResponse\DC2\"\n\
       \\ETXctx\CAN\SOH \SOH(\v2\DLE.BtcLsp.Type.CtxR\ETXctx\DC2L\n\
       \\asuccess\CAN\STX \SOH(\v20.BtcLsp.Custody.OpenChanOnChain.Response.SuccessH\NULR\asuccess\DC2L\n\
-      \\afailure\CAN\ETX \SOH(\v20.BtcLsp.Custody.OpenChanOnChain.Response.FailureH\NULR\afailure\SUB\222\SOH\n\
-      \\aSuccess\DC2E\n\
-      \\SIconnect_to_node\CAN\SOH \SOH(\v2\GS.BtcLsp.Newtype.SocketAddressR\rconnectToNode\DC2N\n\
-      \\DC3pay_funding_address\CAN\STX \SOH(\v2\RS.BtcLsp.Newtype.OnChainAddressR\DC1payFundingAddress\DC2<\n\
-      \\SIpay_funding_amt\CAN\ETX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\rpayFundingAmt\SUB\171\SOH\n\
+      \\afailure\CAN\ETX \SOH(\v20.BtcLsp.Custody.OpenChanOnChain.Response.FailureH\NULR\afailure\SUB\151\SOH\n\
+      \\aSuccess\DC2N\n\
+      \\DC3pay_funding_address\CAN\SOH \SOH(\v2\RS.BtcLsp.Newtype.OnChainAddressR\DC1payFundingAddress\DC2<\n\
+      \\SIpay_funding_amt\CAN\STX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\rpayFundingAmt\SUB\171\SOH\n\
       \\aFailure\DC2/\n\
       \\ENQinput\CAN\SOH \ETX(\v2\EM.BtcLsp.Type.InputFailureR\ENQinput\DC2\\\n\
       \\binternal\CAN\STX \ETX(\v2@.BtcLsp.Custody.OpenChanOnChain.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
@@ -826,15 +825,12 @@ instance Control.DeepSeq.NFData Response'Failure'InternalFailure where
              (_Response'Failure'InternalFailure'_unknownFields x__) ()
 {- | Fields :
      
-         * 'Proto.BtcLsp.Custody.OpenChanOnChain_Fields.connectToNode' @:: Lens' Response'Success Proto.BtcLsp.Newtype.SocketAddress@
-         * 'Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'connectToNode' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Newtype.SocketAddress)@
          * 'Proto.BtcLsp.Custody.OpenChanOnChain_Fields.payFundingAddress' @:: Lens' Response'Success Proto.BtcLsp.Newtype.OnChainAddress@
          * 'Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAddress' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Newtype.OnChainAddress)@
          * 'Proto.BtcLsp.Custody.OpenChanOnChain_Fields.payFundingAmt' @:: Lens' Response'Success Proto.BtcLsp.Newtype.Msat@
          * 'Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAmt' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Newtype.Msat)@ -}
 data Response'Success
-  = Response'Success'_constructor {_Response'Success'connectToNode :: !(Prelude.Maybe Proto.BtcLsp.Newtype.SocketAddress),
-                                   _Response'Success'payFundingAddress :: !(Prelude.Maybe Proto.BtcLsp.Newtype.OnChainAddress),
+  = Response'Success'_constructor {_Response'Success'payFundingAddress :: !(Prelude.Maybe Proto.BtcLsp.Newtype.OnChainAddress),
                                    _Response'Success'payFundingAmt :: !(Prelude.Maybe Proto.BtcLsp.Newtype.Msat),
                                    _Response'Success'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
@@ -845,20 +841,6 @@ instance Prelude.Show Response'Success where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out Response'Success
-instance Data.ProtoLens.Field.HasField Response'Success "connectToNode" Proto.BtcLsp.Newtype.SocketAddress where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Response'Success'connectToNode
-           (\ x__ y__ -> x__ {_Response'Success'connectToNode = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Response'Success "maybe'connectToNode" (Prelude.Maybe Proto.BtcLsp.Newtype.SocketAddress) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Response'Success'connectToNode
-           (\ x__ y__ -> x__ {_Response'Success'connectToNode = y__}))
-        Prelude.id
 instance Data.ProtoLens.Field.HasField Response'Success "payFundingAddress" Proto.BtcLsp.Newtype.OnChainAddress where
   fieldOf _
     = (Prelude..)
@@ -892,21 +874,12 @@ instance Data.ProtoLens.Message Response'Success where
     = Data.Text.pack "BtcLsp.Custody.OpenChanOnChain.Response.Success"
   packedMessageDescriptor _
     = "\n\
-      \\aSuccess\DC2E\n\
-      \\SIconnect_to_node\CAN\SOH \SOH(\v2\GS.BtcLsp.Newtype.SocketAddressR\rconnectToNode\DC2N\n\
-      \\DC3pay_funding_address\CAN\STX \SOH(\v2\RS.BtcLsp.Newtype.OnChainAddressR\DC1payFundingAddress\DC2<\n\
-      \\SIpay_funding_amt\CAN\ETX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\rpayFundingAmt"
+      \\aSuccess\DC2N\n\
+      \\DC3pay_funding_address\CAN\SOH \SOH(\v2\RS.BtcLsp.Newtype.OnChainAddressR\DC1payFundingAddress\DC2<\n\
+      \\SIpay_funding_amt\CAN\STX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\rpayFundingAmt"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
-        connectToNode__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "connect_to_node"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Newtype.SocketAddress)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'connectToNode")) ::
-              Data.ProtoLens.FieldDescriptor Response'Success
         payFundingAddress__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "pay_funding_address"
@@ -925,17 +898,15 @@ instance Data.ProtoLens.Message Response'Success where
               Data.ProtoLens.FieldDescriptor Response'Success
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, connectToNode__field_descriptor),
-           (Data.ProtoLens.Tag 2, payFundingAddress__field_descriptor),
-           (Data.ProtoLens.Tag 3, payFundingAmt__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, payFundingAddress__field_descriptor),
+           (Data.ProtoLens.Tag 2, payFundingAmt__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Response'Success'_unknownFields
         (\ x__ y__ -> x__ {_Response'Success'_unknownFields = y__})
   defMessage
     = Response'Success'_constructor
-        {_Response'Success'connectToNode = Prelude.Nothing,
-         _Response'Success'payFundingAddress = Prelude.Nothing,
+        {_Response'Success'payFundingAddress = Prelude.Nothing,
          _Response'Success'payFundingAmt = Prelude.Nothing,
          _Response'Success'_unknownFields = []}
   parseMessage
@@ -966,20 +937,11 @@ instance Data.ProtoLens.Message Response'Success where
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "connect_to_node"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"connectToNode") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "pay_funding_address"
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"payFundingAddress") y x)
-                        26
+                        18
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
@@ -1002,7 +964,7 @@ instance Data.ProtoLens.Message Response'Success where
         -> (Data.Monoid.<>)
              (case
                   Lens.Family2.view
-                    (Data.ProtoLens.Field.field @"maybe'connectToNode") _x
+                    (Data.ProtoLens.Field.field @"maybe'payFundingAddress") _x
               of
                 Prelude.Nothing -> Data.Monoid.mempty
                 (Prelude.Just _v)
@@ -1019,7 +981,7 @@ instance Data.ProtoLens.Message Response'Success where
              ((Data.Monoid.<>)
                 (case
                      Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'payFundingAddress") _x
+                       (Data.ProtoLens.Field.field @"maybe'payFundingAmt") _x
                  of
                    Prelude.Nothing -> Data.Monoid.mempty
                    (Prelude.Just _v)
@@ -1033,36 +995,16 @@ instance Data.ProtoLens.Message Response'Success where
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                              Data.ProtoLens.encodeMessage
                              _v))
-                ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'payFundingAmt") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage
-                                _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData Response'Success where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_Response'Success'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_Response'Success'connectToNode x__)
-                (Control.DeepSeq.deepseq
-                   (_Response'Success'payFundingAddress x__)
-                   (Control.DeepSeq.deepseq
-                      (_Response'Success'payFundingAmt x__) ())))
+                (_Response'Success'payFundingAddress x__)
+                (Control.DeepSeq.deepseq (_Response'Success'payFundingAmt x__) ()))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
@@ -1070,21 +1012,20 @@ packedFileDescriptor
     \\aRequest\DC2\"\n\
     \\ETXctx\CAN\SOH \SOH(\v2\DLE.BtcLsp.Type.CtxR\ETXctx\DC2A\n\
     \\rlocal_balance\CAN\STX \SOH(\v2\FS.BtcLsp.Newtype.LocalBalanceR\flocalBalance\DC2D\n\
-    \\SOremote_balance\CAN\ETX \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\rremoteBalance\"\227\EOT\n\
+    \\SOremote_balance\CAN\ETX \SOH(\v2\GS.BtcLsp.Newtype.RemoteBalanceR\rremoteBalance\"\156\EOT\n\
     \\bResponse\DC2\"\n\
     \\ETXctx\CAN\SOH \SOH(\v2\DLE.BtcLsp.Type.CtxR\ETXctx\DC2L\n\
     \\asuccess\CAN\STX \SOH(\v20.BtcLsp.Custody.OpenChanOnChain.Response.SuccessH\NULR\asuccess\DC2L\n\
-    \\afailure\CAN\ETX \SOH(\v20.BtcLsp.Custody.OpenChanOnChain.Response.FailureH\NULR\afailure\SUB\222\SOH\n\
-    \\aSuccess\DC2E\n\
-    \\SIconnect_to_node\CAN\SOH \SOH(\v2\GS.BtcLsp.Newtype.SocketAddressR\rconnectToNode\DC2N\n\
-    \\DC3pay_funding_address\CAN\STX \SOH(\v2\RS.BtcLsp.Newtype.OnChainAddressR\DC1payFundingAddress\DC2<\n\
-    \\SIpay_funding_amt\CAN\ETX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\rpayFundingAmt\SUB\171\SOH\n\
+    \\afailure\CAN\ETX \SOH(\v20.BtcLsp.Custody.OpenChanOnChain.Response.FailureH\NULR\afailure\SUB\151\SOH\n\
+    \\aSuccess\DC2N\n\
+    \\DC3pay_funding_address\CAN\SOH \SOH(\v2\RS.BtcLsp.Newtype.OnChainAddressR\DC1payFundingAddress\DC2<\n\
+    \\SIpay_funding_amt\CAN\STX \SOH(\v2\DC4.BtcLsp.Newtype.MsatR\rpayFundingAmt\SUB\171\SOH\n\
     \\aFailure\DC2/\n\
     \\ENQinput\CAN\SOH \ETX(\v2\EM.BtcLsp.Type.InputFailureR\ENQinput\DC2\\\n\
     \\binternal\CAN\STX \ETX(\v2@.BtcLsp.Custody.OpenChanOnChain.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
     \\SIInternalFailureB\b\n\
-    \\ACKeitherJ\251\ACK\n\
-    \\ACK\DC2\EOT\NUL\NUL#\SOH\n\
+    \\ACKeitherJ\188\ACK\n\
+    \\ACK\DC2\EOT\NUL\NUL\"\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1129,7 +1070,7 @@ packedFileDescriptor
     \12\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\r\NUL#\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\r\NUL\"\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\SOH\SOH\DC2\ETX\r\b\DLE\n\
@@ -1162,60 +1103,52 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\DC2\SYN\ETB\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\NAK\STX\EM\ETX\n\
+    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\NAK\STX\CAN\ETX\n\
     \\f\n\
     \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\NAK\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\SYN\EOT6\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\SYN\EOT;\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\SYN\EOT!\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\SYN\EOT\"\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\SYN\"1\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\SYN#6\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\SYN45\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\SYN9:\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\ETB\EOT;\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\ETB\EOT-\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\ETB\EOT\"\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\ETB\EOT\CAN\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\ETB#6\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\ETB\EM(\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\ETB9:\n\
-    \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\STX\DC2\ETX\CAN\EOT-\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\STX\ACK\DC2\ETX\CAN\EOT\CAN\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\STX\SOH\DC2\ETX\CAN\EM(\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\STX\ETX\DC2\ETX\CAN+,\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\ETB+,\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\ESC\STX\"\ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\SUB\STX!\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\ESC\n\
+    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\SUB\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX\FS\EOT1\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX\ESC\EOT1\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX\FS\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX\ESC\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX\FS\r&\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX\ESC\r&\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX\FS',\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX\ESC',\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX\FS/0\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX\ESC/0\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX\GS\EOT*\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX\FS\EOT*\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX\GS\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX\FS\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX\GS\r\FS\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX\FS\r\FS\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX\GS\GS%\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX\FS\GS%\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\GS()\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\FS()\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT\US\EOT!\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT\RS\EOT \ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX\US\f\ESCb\ACKproto3"
+    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX\RS\f\ESCb\ACKproto3"

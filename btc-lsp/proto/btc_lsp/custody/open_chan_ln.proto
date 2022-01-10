@@ -20,8 +20,7 @@ message Response {
   }
 
   message Success {
-    .BtcLsp.Newtype.SocketAddress connect_to_node = 1;
-    .BtcLsp.Newtype.LnHodlInvoice pay_funding_invoice = 2;
+    .BtcLsp.Newtype.LnHodlInvoice pay_funding_invoice = 1;
   }
 
   message Failure {

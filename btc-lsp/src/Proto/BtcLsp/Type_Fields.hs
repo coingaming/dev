@@ -28,6 +28,12 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Gener
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.BtcLsp.Newtype
+btcLspLnNodes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "btcLspLnNodes" a) =>
+  Lens.Family2.LensLike' f s a
+btcLspLnNodes = Data.ProtoLens.Field.field @"btcLspLnNodes"
 denominator ::
   forall f s a.
   (Prelude.Functor f,
@@ -174,6 +180,12 @@ val ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>
   Lens.Family2.LensLike' f s a
 val = Data.ProtoLens.Field.field @"val"
+vec'btcLspLnNodes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'btcLspLnNodes" a) =>
+  Lens.Family2.LensLike' f s a
+vec'btcLspLnNodes = Data.ProtoLens.Field.field @"vec'btcLspLnNodes"
 vec'fieldLocation ::
   forall f s a.
   (Prelude.Functor f,

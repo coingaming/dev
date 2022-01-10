@@ -29,12 +29,6 @@ import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unbox
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
 import qualified Proto.BtcLsp.Newtype
 import qualified Proto.BtcLsp.Type
-connectToNode ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "connectToNode" a) =>
-  Lens.Family2.LensLike' f s a
-connectToNode = Data.ProtoLens.Field.field @"connectToNode"
 ctx ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "ctx" a) =>
@@ -62,13 +56,6 @@ localBalance ::
    Data.ProtoLens.Field.HasField s "localBalance" a) =>
   Lens.Family2.LensLike' f s a
 localBalance = Data.ProtoLens.Field.field @"localBalance"
-maybe'connectToNode ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'connectToNode" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'connectToNode
-  = Data.ProtoLens.Field.field @"maybe'connectToNode"
 maybe'ctx ::
   forall f s a.
   (Prelude.Functor f,

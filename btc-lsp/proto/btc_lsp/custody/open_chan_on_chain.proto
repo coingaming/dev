@@ -20,9 +20,8 @@ message Response {
   }
 
   message Success {
-    .BtcLsp.Newtype.SocketAddress connect_to_node = 1;
-    .BtcLsp.Newtype.OnChainAddress pay_funding_address = 2;
-    .BtcLsp.Newtype.Msat pay_funding_amt = 3;
+    .BtcLsp.Newtype.OnChainAddress pay_funding_address = 1;
+    .BtcLsp.Newtype.Msat pay_funding_amt = 2;
   }
 
   message Failure {

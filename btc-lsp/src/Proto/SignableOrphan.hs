@@ -196,6 +196,12 @@ instance Data.Signable.Signable Proto.BtcLsp.Type.Cfg where
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (6 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Type_Fields.btcLspLnNodes)
+                (Universum.not Universum.. Universum.null)
+                ((Universum.<>) (Data.Signable.toBinary (7 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
 instance Data.Signable.Signable Proto.BtcLsp.Type.Rational where
@@ -387,16 +393,9 @@ instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Response'Success
           ((Universum.<&>)
              [Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'connectToNode)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty,
-              Data.Signable.applyWithDef
-                (Universum.view
                    Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'payFundingInvoice)
                 Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
@@ -483,23 +482,16 @@ instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Response'Su
           ((Universum.<&>)
              [Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'connectToNode)
+                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAddress)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAddress)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty,
-              Data.Signable.applyWithDef
-                (Universum.view
                    Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAmt)
                 Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
+                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))

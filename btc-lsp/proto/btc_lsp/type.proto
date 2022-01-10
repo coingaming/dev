@@ -16,6 +16,7 @@ message Cfg {
   .BtcLsp.Newtype.RemoteBalance open_chan_max_remote_balance = 4;
   FeeRate open_chan_remote_balance_fee_rate = 5;
   .BtcLsp.Newtype.Msat open_chan_min_fee_amt = 6;
+  repeated .BtcLsp.Newtype.SocketAddress btc_lsp_ln_nodes = 7;
   //
   // TODO : add open/close sat/vb fees
   //
