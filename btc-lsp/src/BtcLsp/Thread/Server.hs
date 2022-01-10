@@ -12,6 +12,7 @@ import qualified Network.Wai.Internal as Wai
 import Proto.BtcLsp (Service)
 import qualified Proto.BtcLsp.Custody.OpenChanLn as CustodyOpenChanLn
 import qualified Proto.BtcLsp.Custody.OpenChanOnChain as CustodyOpenChanOnChain
+import qualified Proto.BtcLsp.General.GetCfg as GeneralGetCfg
 
 apply :: (Env m) => m ()
 apply = do
@@ -27,10 +28,9 @@ handlers ::
   MVar (Sig 'Server) ->
   [ServiceHandler]
 handlers run _ _ =
-  --
-  -- TODO : add GetCfg method!!!
-  --
-  [ unary (RPC :: RPC Service "custodyOpenChanLn") . sig $
+  [ unary (RPC :: RPC Service "generalGetCfg") . sig $
+      generalGetCfg run,
+    unary (RPC :: RPC Service "custodyOpenChanLn") . sig $
       custodyOpenChanLn run,
     unary (RPC :: RPC Service "custodyOpenChanOnChain") . sig $
       custodyOpenChanOnChain run
@@ -53,13 +53,13 @@ handlers run _ _ =
     sig f =
       const f
 
-custodyOpenChanOnChain ::
+generalGetCfg ::
   ( Monad m
   ) =>
   UnliftIO m ->
-  CustodyOpenChanOnChain.Request ->
-  IO CustodyOpenChanOnChain.Response
-custodyOpenChanOnChain (UnliftIO run) _ =
+  GeneralGetCfg.Request ->
+  IO GeneralGetCfg.Response
+generalGetCfg (UnliftIO run) _ =
   run $ pure defMessage
 
 custodyOpenChanLn ::
@@ -69,4 +69,13 @@ custodyOpenChanLn ::
   CustodyOpenChanLn.Request ->
   IO CustodyOpenChanLn.Response
 custodyOpenChanLn (UnliftIO run) _ =
+  run $ pure defMessage
+
+custodyOpenChanOnChain ::
+  ( Monad m
+  ) =>
+  UnliftIO m ->
+  CustodyOpenChanOnChain.Request ->
+  IO CustodyOpenChanOnChain.Response
+custodyOpenChanOnChain (UnliftIO run) _ =
   run $ pure defMessage
