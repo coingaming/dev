@@ -30,7 +30,6 @@ in
           pkgs.openssl
           pkgs.bitcoin
           lnd
-          boltz-lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''
           ./nix/shutdown-test-deps.sh
