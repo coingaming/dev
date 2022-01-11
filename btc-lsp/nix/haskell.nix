@@ -29,6 +29,7 @@ in
           pkgs.postgresql
           pkgs.openssl
           pkgs.bitcoin
+          pkgs.electrs
           lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''

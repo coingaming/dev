@@ -8,5 +8,6 @@ set -m
 ./nix/spawn-bitcoind.sh
 ./nix/spawn-lnd.sh "$LND_MERCHANT_DIR" "merchant"
 ./nix/spawn-lnd.sh "$LND_PAYMENTS_DIR" "payments"
+./nix/spawn-electrs.sh
 
 echo "spawn-test-deps executed"
