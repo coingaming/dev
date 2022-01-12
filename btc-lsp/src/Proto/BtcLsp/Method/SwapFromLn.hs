@@ -367,7 +367,7 @@ instance Data.ProtoLens.Message Response where
       \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.SuccessH\NULR\asuccess\DC2F\n\
       \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.FailureH\NULR\afailure\SUBb\n\
       \\aSuccess\DC2W\n\
-      \\DC4fund_ln_hodl_invoice\CAN\ETX \SOH(\v2&.BtcLsp.Data.Newtype.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\170\SOH\n\
+      \\DC4fund_ln_hodl_invoice\CAN\SOH \SOH(\v2&.BtcLsp.Data.Newtype.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\170\SOH\n\
       \\aFailure\DC24\n\
       \\ENQinput\CAN\SOH \ETX(\v2\RS.BtcLsp.Data.Type.InputFailureR\ENQinput\DC2V\n\
       \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapFromLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
@@ -850,7 +850,7 @@ instance Data.ProtoLens.Message Response'Success where
   packedMessageDescriptor _
     = "\n\
       \\aSuccess\DC2W\n\
-      \\DC4fund_ln_hodl_invoice\CAN\ETX \SOH(\v2&.BtcLsp.Data.Newtype.FundLnHodlInvoiceR\DC1fundLnHodlInvoice"
+      \\DC4fund_ln_hodl_invoice\CAN\SOH \SOH(\v2&.BtcLsp.Data.Newtype.FundLnHodlInvoiceR\DC1fundLnHodlInvoice"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -864,7 +864,7 @@ instance Data.ProtoLens.Message Response'Success where
               Data.ProtoLens.FieldDescriptor Response'Success
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 3, fundLnHodlInvoice__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, fundLnHodlInvoice__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Response'Success'_unknownFields
@@ -896,7 +896,7 @@ instance Data.ProtoLens.Message Response'Success where
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
-                        26
+                        10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
@@ -924,7 +924,7 @@ instance Data.ProtoLens.Message Response'Success where
                 Prelude.Nothing -> Data.Monoid.mempty
                 (Prelude.Just _v)
                   -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
                        ((Prelude..)
                           (\ bs
                              -> (Data.Monoid.<>)
@@ -955,7 +955,7 @@ packedFileDescriptor
     \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.SuccessH\NULR\asuccess\DC2F\n\
     \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.FailureH\NULR\afailure\SUBb\n\
     \\aSuccess\DC2W\n\
-    \\DC4fund_ln_hodl_invoice\CAN\ETX \SOH(\v2&.BtcLsp.Data.Newtype.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\170\SOH\n\
+    \\DC4fund_ln_hodl_invoice\CAN\SOH \SOH(\v2&.BtcLsp.Data.Newtype.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\170\SOH\n\
     \\aFailure\DC24\n\
     \\ENQinput\CAN\SOH \ETX(\v2\RS.BtcLsp.Data.Type.InputFailureR\ENQinput\DC2V\n\
     \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapFromLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\

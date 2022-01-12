@@ -20,7 +20,7 @@ message Response {
   }
 
   message Success {
-    .BtcLsp.Data.Newtype.FundLnHodlInvoice fund_ln_hodl_invoice = 3;
+    .BtcLsp.Data.Newtype.FundLnHodlInvoice fund_ln_hodl_invoice = 1;
   }
 
   message Failure {

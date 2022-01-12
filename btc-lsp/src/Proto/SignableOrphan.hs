@@ -559,7 +559,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Method.SwapFromLn.Response'Success 
                 (Universum.view
                    Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundLnHodlInvoice)
                 Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
