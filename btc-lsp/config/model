@@ -12,3 +12,20 @@ LnChannel
   nodeKey Lnd.NodePubKey Maybe
   nodeLoc Lnd.NodeLocation Maybe
   deriving Eq Show Generic
+
+User
+  nodePubKey NodePubKey
+  latestNonce Nonce
+  insertedAt UTCTime
+  updatedAt UTCTime
+  deriving Eq Show Generic
+
+SwapIntoLn
+  userId UserId
+  fund_invoice (LnInvoice 'Fund)
+  fund_address (OnChainAddress 'Fund)
+  refund_address (OnChainAddress 'Refund)
+  status SwapStatus
+  insertedAt UTCTime
+  updatedAt UTCTime
+  deriving Eq Show Generic
