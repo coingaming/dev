@@ -2,15 +2,15 @@ syntax = "proto3";
 
 package BtcLsp;
 
-import "btc_lsp/general/get_cfg.proto";
-import "btc_lsp/custody/open_chan_ln.proto";
-import "btc_lsp/custody/open_chan_on_chain.proto";
+import "btc_lsp/method/get_cfg.proto";
+import "btc_lsp/method/swap_into_ln.proto";
+import "btc_lsp/method/swap_from_ln.proto";
 
 service Service {
-  rpc GeneralGetCfg(.BtcLsp.General.GetCfg.Request)
-    returns (.BtcLsp.General.GetCfg.Response);
-  rpc CustodyOpenChanLn(.BtcLsp.Custody.OpenChanLn.Request)
-    returns (.BtcLsp.Custody.OpenChanLn.Response);
-  rpc CustodyOpenChanOnChain(.BtcLsp.Custody.OpenChanOnChain.Request)
-    returns (.BtcLsp.Custody.OpenChanOnChain.Response);
+  rpc GetCfg(.BtcLsp.Method.GetCfg.Request)
+    returns (.BtcLsp.Method.GetCfg.Response);
+  rpc SwapIntoLn(.BtcLsp.Method.SwapIntoLn.Request)
+    returns (.BtcLsp.Method.SwapIntoLn.Response);
+  rpc SwapFromLn(.BtcLsp.Method.SwapFromLn.Request)
+    returns (.BtcLsp.Method.SwapFromLn.Response);
 }

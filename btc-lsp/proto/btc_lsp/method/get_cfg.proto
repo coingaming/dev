@@ -1,0 +1,41 @@
+syntax="proto3";
+
+package BtcLsp.Method.GetCfg;
+
+import "btc_lsp/data/newtype.proto";
+import "btc_lsp/data/type.proto";
+
+message Request {
+  .BtcLsp.Data.Type.Ctx ctx = 1;
+}
+
+message Response {
+  .BtcLsp.Data.Type.Ctx ctx = 1;
+
+  oneof either {
+    Success success = 2;
+    Failure failure = 3;
+  }
+
+  message Success {
+    repeated .BtcLsp.Data.Newtype.SocketAddress btc_lsp_ln_nodes = 1;
+    .BtcLsp.Data.Newtype.LocalBalance swap_into_ln_min_amt = 2;
+    .BtcLsp.Data.Newtype.LocalBalance swap_into_ln_max_amt = 3;
+    .BtcLsp.Data.Newtype.LocalBalance swap_from_ln_min_amt = 4;
+    .BtcLsp.Data.Newtype.LocalBalance swap_from_ln_max_amt = 5;
+    .BtcLsp.Data.Type.FeeRate swap_ln_fee_rate = 6;
+    .BtcLsp.Data.Newtype.FeeAmt swap_ln_min_fee = 7;
+    //
+    // TODO : add open/close sat/vb fees???
+    //
+  }
+
+  message Failure {
+    repeated .BtcLsp.Data.Type.InputFailure input = 1;
+    repeated InternalFailure internal = 2;
+
+    message InternalFailure {
+
+    }
+  }
+}

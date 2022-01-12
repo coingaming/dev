@@ -1,0 +1,34 @@
+syntax="proto3";
+
+package BtcLsp.Method.SwapFromLn;
+
+import "btc_lsp/data/newtype.proto";
+import "btc_lsp/data/type.proto";
+
+message Request {
+  .BtcLsp.Data.Type.Ctx ctx = 1;
+  .BtcLsp.Data.Newtype.FundAmt fund_amt = 2;
+  .BtcLsp.Data.Newtype.FundOnChainAddress fund_on_chain_address = 3;
+}
+
+message Response {
+  .BtcLsp.Data.Type.Ctx ctx = 1;
+
+  oneof either {
+    Success success = 2;
+    Failure failure = 3;
+  }
+
+  message Success {
+    .BtcLsp.Data.Newtype.FundLnHodlInvoice fund_ln_hodl_invoice = 3;
+  }
+
+  message Failure {
+    repeated .BtcLsp.Data.Type.InputFailure input = 1;
+    repeated InternalFailure internal = 2;
+
+    message InternalFailure {
+
+    }
+  }
+}

@@ -9,19 +9,19 @@ module Proto.SignableOrphan (
 import qualified Universum
 import qualified Data.Signable
 import qualified GHC.List
-import qualified Proto.BtcLsp.Newtype
-import qualified Proto.BtcLsp.Newtype_Fields
-import qualified Proto.BtcLsp.Type
-import qualified Proto.BtcLsp.Type_Fields
-import qualified Proto.BtcLsp.General.GetCfg
-import qualified Proto.BtcLsp.General.GetCfg_Fields
-import qualified Proto.BtcLsp.Custody.OpenChanLn
-import qualified Proto.BtcLsp.Custody.OpenChanLn_Fields
-import qualified Proto.BtcLsp.Custody.OpenChanOnChain
-import qualified Proto.BtcLsp.Custody.OpenChanOnChain_Fields
+import qualified Proto.BtcLsp.Data.Newtype
+import qualified Proto.BtcLsp.Data.Newtype_Fields
+import qualified Proto.BtcLsp.Data.Type
+import qualified Proto.BtcLsp.Data.Type_Fields
+import qualified Proto.BtcLsp.Method.GetCfg
+import qualified Proto.BtcLsp.Method.GetCfg_Fields
+import qualified Proto.BtcLsp.Method.SwapIntoLn
+import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields
+import qualified Proto.BtcLsp.Method.SwapFromLn
+import qualified Proto.BtcLsp.Method.SwapFromLn_Fields
 import qualified Proto.BtcLsp
 import qualified Proto.BtcLsp_Fields
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.Nonce where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.Nonce where
   toBinary
     = Universum.mconcat
         Universum..
@@ -29,9 +29,9 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.Nonce where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.FieldIndex where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.FieldIndex where
   toBinary
     = Universum.mconcat
         Universum..
@@ -39,9 +39,9 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.FieldIndex where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.SocketAddress where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.SocketAddress where
   toBinary
     = Universum.mconcat
         Universum..
@@ -49,9 +49,9 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.SocketAddress where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.Msat where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.Msat where
   toBinary
     = Universum.mconcat
         Universum..
@@ -59,33 +59,69 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.Msat where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.LocalBalance where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.FeeAmt where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Newtype_Fields.maybe'val)
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.RemoteBalance where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.FundAmt where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Newtype_Fields.maybe'val)
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnPubKey where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.RefundAmt where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.LocalBalance where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.RemoteBalance where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.LnPubKey where
   toBinary
     = Universum.mconcat
         Universum..
@@ -93,9 +129,9 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnPubKey where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnInvoice where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.LnInvoice where
   toBinary
     = Universum.mconcat
         Universum..
@@ -103,9 +139,9 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnInvoice where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnHodlInvoice where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.LnHodlInvoice where
   toBinary
     = Universum.mconcat
         Universum..
@@ -113,9 +149,33 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.LnHodlInvoice where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Newtype.OnChainAddress where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.FundLnInvoice where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.FundLnHodlInvoice where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.OnChainAddress where
   toBinary
     = Universum.mconcat
         Universum..
@@ -123,9 +183,33 @@ instance Data.Signable.Signable Proto.BtcLsp.Newtype.OnChainAddress where
              [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                 Universum..
                   (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Newtype_Fields.val)]
+                     Universum.. Universum.view Proto.BtcLsp.Data.Newtype_Fields.val)]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.InputFailureKind where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.FundOnChainAddress where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Newtype.RefundOnChainAddress where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Newtype_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Type.InputFailureKind where
   toBinary
     = Universum.maybe
         (Universum.error "ENUM_OVERFLOW") Data.Signable.toBinary
@@ -133,388 +217,371 @@ instance Data.Signable.Signable Proto.BtcLsp.Type.InputFailureKind where
           ((Data.Signable.safeFromIntegral ::
               Universum.Int -> Universum.Maybe Universum.Int32)
              Universum.. Universum.fromEnum)
-instance Data.Signable.Signable Proto.BtcLsp.Type.Ctx where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Type.Ctx where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'nonce)
+                (Universum.view Proto.BtcLsp.Data.Type_Fields.maybe'nonce)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'lnPubKey)
+                (Universum.view Proto.BtcLsp.Data.Type_Fields.maybe'lnPubKey)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.Cfg where
+instance Data.Signable.Signable Proto.BtcLsp.Data.Type.Rational where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                Universum..
+                  (Data.Signable.toBinary
+                     Universum.. Universum.view Proto.BtcLsp.Data.Type_Fields.negative),
+              (Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                Universum..
+                  (Data.Signable.toBinary
+                     Universum..
+                       Universum.view Proto.BtcLsp.Data.Type_Fields.numerator),
+              (Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
+                Universum..
+                  (Data.Signable.toBinary
+                     Universum..
+                       Universum.view Proto.BtcLsp.Data.Type_Fields.denominator)]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Type.Urational where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                Universum..
+                  (Data.Signable.toBinary
+                     Universum..
+                       Universum.view Proto.BtcLsp.Data.Type_Fields.numerator),
+              (Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                Universum..
+                  (Data.Signable.toBinary
+                     Universum..
+                       Universum.view Proto.BtcLsp.Data.Type_Fields.denominator)]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Type.FeeRate where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view
-                   Proto.BtcLsp.Type_Fields.maybe'openChanMinLocalBalance)
+                (Universum.view Proto.BtcLsp.Data.Type_Fields.maybe'val)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Data.Type.InputFailure where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Data.Type_Fields.fieldLocation)
+                (Universum.not Universum.. Universum.null)
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              (Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                Universum..
+                  (Data.Signable.toBinary
+                     Universum.. Universum.view Proto.BtcLsp.Data.Type_Fields.kind)]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Method.GetCfg.Request where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Method.GetCfg_Fields.maybe'ctx)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Method.GetCfg.Response where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Method.GetCfg_Fields.maybe'ctx)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Method.GetCfg_Fields.maybe'success)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Method.GetCfg_Fields.maybe'failure)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty]
+             Universum.. (Universum.&))
+instance Data.Signable.Signable Proto.BtcLsp.Method.GetCfg.Response'Success where
+  toBinary
+    = Universum.mconcat
+        Universum..
+          ((Universum.<&>)
+             [Data.Signable.applyWithDef
+                (Universum.view Proto.BtcLsp.Method.GetCfg_Fields.btcLspLnNodes)
+                (Universum.not Universum.. Universum.null)
+                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Type_Fields.maybe'openChanMaxLocalBalance)
+                   Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapIntoLnMinAmt)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Type_Fields.maybe'openChanMinRemoteBalance)
+                   Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapIntoLnMaxAmt)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Type_Fields.maybe'openChanMaxRemoteBalance)
+                   Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapFromLnMinAmt)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (4 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Type_Fields.maybe'openChanRemoteBalanceFeeRate)
+                   Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapFromLnMaxAmt)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (5 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'openChanMinFeeAmt)
+                (Universum.view
+                   Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapLnFeeRate)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (6 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.btcLspLnNodes)
-                (Universum.not Universum.. Universum.null)
+                (Universum.view
+                   Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapLnMinFee)
+                Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (7 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.Rational where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                Universum..
-                  (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Type_Fields.negative),
-              (Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
-                Universum..
-                  (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Type_Fields.numerator),
-              (Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
-                Universum..
-                  (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Type_Fields.denominator)]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.Urational where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [(Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                Universum..
-                  (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Type_Fields.numerator),
-              (Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
-                Universum..
-                  (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Type_Fields.denominator)]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.FeeRate where
+instance Data.Signable.Signable Proto.BtcLsp.Method.GetCfg.Response'Failure where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.maybe'val)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Type.InputFailure where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Type_Fields.fieldLocation)
-                (Universum.not Universum.. Universum.null)
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty,
-              (Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
-                Universum..
-                  (Data.Signable.toBinary
-                     Universum.. Universum.view Proto.BtcLsp.Type_Fields.kind)]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.General.GetCfg.Request where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.General.GetCfg_Fields.maybe'ctx)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.General.GetCfg.Response where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.General.GetCfg_Fields.maybe'ctx)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty,
-              Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.General.GetCfg_Fields.maybe'success)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty,
-              Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.General.GetCfg_Fields.maybe'failure)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.General.GetCfg.Response'Success where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.General.GetCfg_Fields.maybe'cfg)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty]
-             Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.General.GetCfg.Response'Failure where
-  toBinary
-    = Universum.mconcat
-        Universum..
-          ((Universum.<&>)
-             [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.General.GetCfg_Fields.input)
+                (Universum.view Proto.BtcLsp.Method.GetCfg_Fields.input)
                 (Universum.not Universum.. Universum.null)
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.General.GetCfg_Fields.internal)
+                (Universum.view Proto.BtcLsp.Method.GetCfg_Fields.internal)
                 (Universum.not Universum.. Universum.null)
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.General.GetCfg.Response'Failure'InternalFailure where
+instance Data.Signable.Signable Proto.BtcLsp.Method.GetCfg.Response'Failure'InternalFailure where
   toBinary
     = Universum.mconcat
         Universum.. ((Universum.<&>) [] Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Request where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Request where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'ctx)
+                (Universum.view Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'ctx)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'localBalance)
+                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundLnInvoice)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'remoteBalance)
+                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'refundOnChainAddress)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Response where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Response where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'ctx)
+                (Universum.view Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'ctx)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'success)
+                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'success)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'failure)
+                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'failure)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Response'Success where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Response'Success where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanLn_Fields.maybe'payFundingInvoice)
+                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundOnChainAddress)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Response'Failure where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Response'Failure where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Custody.OpenChanLn_Fields.input)
+                (Universum.view Proto.BtcLsp.Method.SwapIntoLn_Fields.input)
                 (Universum.not Universum.. Universum.null)
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Custody.OpenChanLn_Fields.internal)
+                (Universum.view Proto.BtcLsp.Method.SwapIntoLn_Fields.internal)
                 (Universum.not Universum.. Universum.null)
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanLn.Response'Failure'InternalFailure where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Response'Failure'InternalFailure where
   toBinary
     = Universum.mconcat
         Universum.. ((Universum.<&>) [] Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Request where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapFromLn.Request where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'ctx)
+                (Universum.view Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'ctx)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'localBalance)
+                   Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundAmt)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'remoteBalance)
+                   Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundOnChainAddress)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Response where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapFromLn.Response where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'ctx)
+                (Universum.view Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'ctx)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'success)
+                   Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'success)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'failure)
+                   Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'failure)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Response'Success where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapFromLn.Response'Success where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAddress)
+                   Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundLnHodlInvoice)
                 Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
-                   Universum.. Data.Signable.toBinary)
-                Universum.mempty,
-              Data.Signable.applyWithDef
-                (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.maybe'payFundingAmt)
-                Universum.isJust
-                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                ((Universum.<>) (Data.Signable.toBinary (3 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Response'Failure where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapFromLn.Response'Failure where
   toBinary
     = Universum.mconcat
         Universum..
           ((Universum.<&>)
              [Data.Signable.applyWithDef
-                (Universum.view Proto.BtcLsp.Custody.OpenChanOnChain_Fields.input)
+                (Universum.view Proto.BtcLsp.Method.SwapFromLn_Fields.input)
                 (Universum.not Universum.. Universum.null)
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty,
               Data.Signable.applyWithDef
-                (Universum.view
-                   Proto.BtcLsp.Custody.OpenChanOnChain_Fields.internal)
+                (Universum.view Proto.BtcLsp.Method.SwapFromLn_Fields.internal)
                 (Universum.not Universum.. Universum.null)
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Custody.OpenChanOnChain.Response'Failure'InternalFailure where
+instance Data.Signable.Signable Proto.BtcLsp.Method.SwapFromLn.Response'Failure'InternalFailure where
   toBinary
     = Universum.mconcat
         Universum.. ((Universum.<&>) [] Universum.. (Universum.&))

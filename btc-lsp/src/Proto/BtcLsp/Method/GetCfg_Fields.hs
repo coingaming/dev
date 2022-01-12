@@ -1,9 +1,9 @@
-{- This file was auto-generated from btc_lsp/type.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from btc_lsp/method/get_cfg.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies, DeriveGeneric#-}
 {-# OPTIONS_GHC -Wno-unused-imports#-}
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.BtcLsp.Type_Fields where
+module Proto.BtcLsp.Method.GetCfg_Fields where
 import qualified Data.ProtoLens.Runtime.Prelude as Prelude
 import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
 import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
@@ -27,168 +27,157 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.BtcLsp.Newtype
+import qualified Proto.BtcLsp.Data.Newtype
+import qualified Proto.BtcLsp.Data.Type
 btcLspLnNodes ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "btcLspLnNodes" a) =>
   Lens.Family2.LensLike' f s a
 btcLspLnNodes = Data.ProtoLens.Field.field @"btcLspLnNodes"
-denominator ::
+ctx ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "ctx" a) =>
+  Lens.Family2.LensLike' f s a
+ctx = Data.ProtoLens.Field.field @"ctx"
+failure ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failure" a) =>
+  Lens.Family2.LensLike' f s a
+failure = Data.ProtoLens.Field.field @"failure"
+input ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "input" a) =>
+  Lens.Family2.LensLike' f s a
+input = Data.ProtoLens.Field.field @"input"
+internal ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "denominator" a) =>
+   Data.ProtoLens.Field.HasField s "internal" a) =>
   Lens.Family2.LensLike' f s a
-denominator = Data.ProtoLens.Field.field @"denominator"
-fieldLocation ::
+internal = Data.ProtoLens.Field.field @"internal"
+maybe'ctx ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "fieldLocation" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'ctx" a) =>
   Lens.Family2.LensLike' f s a
-fieldLocation = Data.ProtoLens.Field.field @"fieldLocation"
-kind ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "kind" a) =>
-  Lens.Family2.LensLike' f s a
-kind = Data.ProtoLens.Field.field @"kind"
-lnPubKey ::
+maybe'ctx = Data.ProtoLens.Field.field @"maybe'ctx"
+maybe'either ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "lnPubKey" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'either" a) =>
   Lens.Family2.LensLike' f s a
-lnPubKey = Data.ProtoLens.Field.field @"lnPubKey"
-maybe'lnPubKey ::
+maybe'either = Data.ProtoLens.Field.field @"maybe'either"
+maybe'failure ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'lnPubKey" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'failure" a) =>
   Lens.Family2.LensLike' f s a
-maybe'lnPubKey = Data.ProtoLens.Field.field @"maybe'lnPubKey"
-maybe'nonce ::
+maybe'failure = Data.ProtoLens.Field.field @"maybe'failure"
+maybe'success ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'nonce" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'success" a) =>
   Lens.Family2.LensLike' f s a
-maybe'nonce = Data.ProtoLens.Field.field @"maybe'nonce"
-maybe'openChanMaxLocalBalance ::
+maybe'success = Data.ProtoLens.Field.field @"maybe'success"
+maybe'swapFromLnMaxAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanMaxLocalBalance" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'swapFromLnMaxAmt" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanMaxLocalBalance
-  = Data.ProtoLens.Field.field @"maybe'openChanMaxLocalBalance"
-maybe'openChanMaxRemoteBalance ::
+maybe'swapFromLnMaxAmt
+  = Data.ProtoLens.Field.field @"maybe'swapFromLnMaxAmt"
+maybe'swapFromLnMinAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanMaxRemoteBalance" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'swapFromLnMinAmt" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanMaxRemoteBalance
-  = Data.ProtoLens.Field.field @"maybe'openChanMaxRemoteBalance"
-maybe'openChanMinFeeAmt ::
+maybe'swapFromLnMinAmt
+  = Data.ProtoLens.Field.field @"maybe'swapFromLnMinAmt"
+maybe'swapIntoLnMaxAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanMinFeeAmt" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'swapIntoLnMaxAmt" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanMinFeeAmt
-  = Data.ProtoLens.Field.field @"maybe'openChanMinFeeAmt"
-maybe'openChanMinLocalBalance ::
+maybe'swapIntoLnMaxAmt
+  = Data.ProtoLens.Field.field @"maybe'swapIntoLnMaxAmt"
+maybe'swapIntoLnMinAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanMinLocalBalance" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'swapIntoLnMinAmt" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanMinLocalBalance
-  = Data.ProtoLens.Field.field @"maybe'openChanMinLocalBalance"
-maybe'openChanMinRemoteBalance ::
+maybe'swapIntoLnMinAmt
+  = Data.ProtoLens.Field.field @"maybe'swapIntoLnMinAmt"
+maybe'swapLnFeeRate ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanMinRemoteBalance" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'swapLnFeeRate" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanMinRemoteBalance
-  = Data.ProtoLens.Field.field @"maybe'openChanMinRemoteBalance"
-maybe'openChanRemoteBalanceFeeRate ::
+maybe'swapLnFeeRate
+  = Data.ProtoLens.Field.field @"maybe'swapLnFeeRate"
+maybe'swapLnMinFee ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'openChanRemoteBalanceFeeRate" a) =>
+   Data.ProtoLens.Field.HasField s "maybe'swapLnMinFee" a) =>
   Lens.Family2.LensLike' f s a
-maybe'openChanRemoteBalanceFeeRate
-  = Data.ProtoLens.Field.field @"maybe'openChanRemoteBalanceFeeRate"
-maybe'val ::
+maybe'swapLnMinFee
+  = Data.ProtoLens.Field.field @"maybe'swapLnMinFee"
+success ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "success" a) =>
+  Lens.Family2.LensLike' f s a
+success = Data.ProtoLens.Field.field @"success"
+swapFromLnMaxAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'val" a) =>
+   Data.ProtoLens.Field.HasField s "swapFromLnMaxAmt" a) =>
   Lens.Family2.LensLike' f s a
-maybe'val = Data.ProtoLens.Field.field @"maybe'val"
-negative ::
+swapFromLnMaxAmt = Data.ProtoLens.Field.field @"swapFromLnMaxAmt"
+swapFromLnMinAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "negative" a) =>
+   Data.ProtoLens.Field.HasField s "swapFromLnMinAmt" a) =>
   Lens.Family2.LensLike' f s a
-negative = Data.ProtoLens.Field.field @"negative"
-nonce ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "nonce" a) =>
-  Lens.Family2.LensLike' f s a
-nonce = Data.ProtoLens.Field.field @"nonce"
-numerator ::
+swapFromLnMinAmt = Data.ProtoLens.Field.field @"swapFromLnMinAmt"
+swapIntoLnMaxAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "numerator" a) =>
+   Data.ProtoLens.Field.HasField s "swapIntoLnMaxAmt" a) =>
   Lens.Family2.LensLike' f s a
-numerator = Data.ProtoLens.Field.field @"numerator"
-openChanMaxLocalBalance ::
+swapIntoLnMaxAmt = Data.ProtoLens.Field.field @"swapIntoLnMaxAmt"
+swapIntoLnMinAmt ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanMaxLocalBalance" a) =>
+   Data.ProtoLens.Field.HasField s "swapIntoLnMinAmt" a) =>
   Lens.Family2.LensLike' f s a
-openChanMaxLocalBalance
-  = Data.ProtoLens.Field.field @"openChanMaxLocalBalance"
-openChanMaxRemoteBalance ::
+swapIntoLnMinAmt = Data.ProtoLens.Field.field @"swapIntoLnMinAmt"
+swapLnFeeRate ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanMaxRemoteBalance" a) =>
+   Data.ProtoLens.Field.HasField s "swapLnFeeRate" a) =>
   Lens.Family2.LensLike' f s a
-openChanMaxRemoteBalance
-  = Data.ProtoLens.Field.field @"openChanMaxRemoteBalance"
-openChanMinFeeAmt ::
+swapLnFeeRate = Data.ProtoLens.Field.field @"swapLnFeeRate"
+swapLnMinFee ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanMinFeeAmt" a) =>
+   Data.ProtoLens.Field.HasField s "swapLnMinFee" a) =>
   Lens.Family2.LensLike' f s a
-openChanMinFeeAmt = Data.ProtoLens.Field.field @"openChanMinFeeAmt"
-openChanMinLocalBalance ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanMinLocalBalance" a) =>
-  Lens.Family2.LensLike' f s a
-openChanMinLocalBalance
-  = Data.ProtoLens.Field.field @"openChanMinLocalBalance"
-openChanMinRemoteBalance ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanMinRemoteBalance" a) =>
-  Lens.Family2.LensLike' f s a
-openChanMinRemoteBalance
-  = Data.ProtoLens.Field.field @"openChanMinRemoteBalance"
-openChanRemoteBalanceFeeRate ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "openChanRemoteBalanceFeeRate" a) =>
-  Lens.Family2.LensLike' f s a
-openChanRemoteBalanceFeeRate
-  = Data.ProtoLens.Field.field @"openChanRemoteBalanceFeeRate"
-val ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>
-  Lens.Family2.LensLike' f s a
-val = Data.ProtoLens.Field.field @"val"
+swapLnMinFee = Data.ProtoLens.Field.field @"swapLnMinFee"
 vec'btcLspLnNodes ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "vec'btcLspLnNodes" a) =>
   Lens.Family2.LensLike' f s a
 vec'btcLspLnNodes = Data.ProtoLens.Field.field @"vec'btcLspLnNodes"
-vec'fieldLocation ::
+vec'input ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'fieldLocation" a) =>
+   Data.ProtoLens.Field.HasField s "vec'input" a) =>
   Lens.Family2.LensLike' f s a
-vec'fieldLocation = Data.ProtoLens.Field.field @"vec'fieldLocation"
+vec'input = Data.ProtoLens.Field.field @"vec'input"
+vec'internal ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'internal" a) =>
+  Lens.Family2.LensLike' f s a
+vec'internal = Data.ProtoLens.Field.field @"vec'internal"

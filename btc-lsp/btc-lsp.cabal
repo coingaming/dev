@@ -43,16 +43,16 @@ library
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       Proto.BtcLsp
-      Proto.BtcLsp.Custody.OpenChanLn
-      Proto.BtcLsp.Custody.OpenChanLn_Fields
-      Proto.BtcLsp.Custody.OpenChanOnChain
-      Proto.BtcLsp.Custody.OpenChanOnChain_Fields
-      Proto.BtcLsp.General.GetCfg
-      Proto.BtcLsp.General.GetCfg_Fields
-      Proto.BtcLsp.Newtype
-      Proto.BtcLsp.Newtype_Fields
-      Proto.BtcLsp.Type
-      Proto.BtcLsp.Type_Fields
+      Proto.BtcLsp.Data.Newtype
+      Proto.BtcLsp.Data.Newtype_Fields
+      Proto.BtcLsp.Data.Type
+      Proto.BtcLsp.Data.Type_Fields
+      Proto.BtcLsp.Method.GetCfg
+      Proto.BtcLsp.Method.GetCfg_Fields
+      Proto.BtcLsp.Method.SwapFromLn
+      Proto.BtcLsp.Method.SwapFromLn_Fields
+      Proto.BtcLsp.Method.SwapIntoLn
+      Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
       Proto.SignableOrphan
   other-modules:
@@ -152,16 +152,16 @@ executable btc-lsp-exe
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       Proto.BtcLsp
-      Proto.BtcLsp.Custody.OpenChanLn
-      Proto.BtcLsp.Custody.OpenChanLn_Fields
-      Proto.BtcLsp.Custody.OpenChanOnChain
-      Proto.BtcLsp.Custody.OpenChanOnChain_Fields
-      Proto.BtcLsp.General.GetCfg
-      Proto.BtcLsp.General.GetCfg_Fields
-      Proto.BtcLsp.Newtype
-      Proto.BtcLsp.Newtype_Fields
-      Proto.BtcLsp.Type
-      Proto.BtcLsp.Type_Fields
+      Proto.BtcLsp.Data.Newtype
+      Proto.BtcLsp.Data.Newtype_Fields
+      Proto.BtcLsp.Data.Type
+      Proto.BtcLsp.Data.Type_Fields
+      Proto.BtcLsp.Method.GetCfg
+      Proto.BtcLsp.Method.GetCfg_Fields
+      Proto.BtcLsp.Method.SwapFromLn
+      Proto.BtcLsp.Method.SwapFromLn_Fields
+      Proto.BtcLsp.Method.SwapIntoLn
+      Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
       Proto.SignableOrphan
       Paths_btc_lsp
@@ -262,16 +262,16 @@ test-suite btc-lsp-test
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       Proto.BtcLsp
-      Proto.BtcLsp.Custody.OpenChanLn
-      Proto.BtcLsp.Custody.OpenChanLn_Fields
-      Proto.BtcLsp.Custody.OpenChanOnChain
-      Proto.BtcLsp.Custody.OpenChanOnChain_Fields
-      Proto.BtcLsp.General.GetCfg
-      Proto.BtcLsp.General.GetCfg_Fields
-      Proto.BtcLsp.Newtype
-      Proto.BtcLsp.Newtype_Fields
-      Proto.BtcLsp.Type
-      Proto.BtcLsp.Type_Fields
+      Proto.BtcLsp.Data.Newtype
+      Proto.BtcLsp.Data.Newtype_Fields
+      Proto.BtcLsp.Data.Type
+      Proto.BtcLsp.Data.Type_Fields
+      Proto.BtcLsp.Method.GetCfg
+      Proto.BtcLsp.Method.GetCfg_Fields
+      Proto.BtcLsp.Method.SwapFromLn
+      Proto.BtcLsp.Method.SwapFromLn_Fields
+      Proto.BtcLsp.Method.SwapIntoLn
+      Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
       Proto.SignableOrphan
       Spec

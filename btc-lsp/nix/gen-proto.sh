@@ -29,7 +29,6 @@ gen_haskell() {
   mkdir -p $HASKELL_SRC_PROTO_LENS_DIR
   (cd $PROTO_DIR && protoc \
     ./*.proto \
-    ./**/*.proto \
     ./**/**/*.proto \
     --plugin=protoc-gen-haskell=`which proto-lens-protoc` \
     --haskell_out=$HASKELL_SRC_DIR \
@@ -37,7 +36,6 @@ gen_haskell() {
   echo "==> Haskell (proto-lens) - generated proto types in $HASKELL_SRC_PROTO_LENS_DIR"
   (cd $PROTO_DIR && protoc \
     ./*.proto \
-    ./**/*.proto \
     ./**/**/*.proto \
     --plugin=protoc-gen-signable=`which signable-haskell-protoc` \
     --signable_out=$HASKELL_SRC_DIR)

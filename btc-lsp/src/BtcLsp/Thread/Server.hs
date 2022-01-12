@@ -10,9 +10,9 @@ import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Network.GRPC.Server
 import qualified Network.Wai.Internal as Wai
 import Proto.BtcLsp (Service)
-import qualified Proto.BtcLsp.Custody.OpenChanLn as CustodyOpenChanLn
-import qualified Proto.BtcLsp.Custody.OpenChanOnChain as CustodyOpenChanOnChain
-import qualified Proto.BtcLsp.General.GetCfg as GeneralGetCfg
+import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
+import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
+import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 
 apply :: (Env m) => m ()
 apply = do
@@ -28,12 +28,12 @@ handlers ::
   MVar (Sig 'Server) ->
   [ServiceHandler]
 handlers run _ _ =
-  [ unary (RPC :: RPC Service "generalGetCfg") . sig $
-      generalGetCfg run,
-    unary (RPC :: RPC Service "custodyOpenChanLn") . sig $
-      custodyOpenChanLn run,
-    unary (RPC :: RPC Service "custodyOpenChanOnChain") . sig $
-      custodyOpenChanOnChain run
+  [ unary (RPC :: RPC Service "getCfg") . sig $
+      getCfg run,
+    unary (RPC :: RPC Service "swapIntoLn") . sig $
+      swapIntoLn run,
+    unary (RPC :: RPC Service "swapFromLn") . sig $
+      swapFromLn run
   ]
   where
     --
@@ -53,29 +53,29 @@ handlers run _ _ =
     sig f =
       const f
 
-generalGetCfg ::
+getCfg ::
   ( Monad m
   ) =>
   UnliftIO m ->
-  GeneralGetCfg.Request ->
-  IO GeneralGetCfg.Response
-generalGetCfg (UnliftIO run) _ =
+  GetCfg.Request ->
+  IO GetCfg.Response
+getCfg (UnliftIO run) _ =
   run $ pure defMessage
 
-custodyOpenChanLn ::
+swapIntoLn ::
   ( Monad m
   ) =>
   UnliftIO m ->
-  CustodyOpenChanLn.Request ->
-  IO CustodyOpenChanLn.Response
-custodyOpenChanLn (UnliftIO run) _ =
+  SwapIntoLn.Request ->
+  IO SwapIntoLn.Response
+swapIntoLn (UnliftIO run) _ =
   run $ pure defMessage
 
-custodyOpenChanOnChain ::
+swapFromLn ::
   ( Monad m
   ) =>
   UnliftIO m ->
-  CustodyOpenChanOnChain.Request ->
-  IO CustodyOpenChanOnChain.Response
-custodyOpenChanOnChain (UnliftIO run) _ =
+  SwapFromLn.Request ->
+  IO SwapFromLn.Response
+swapFromLn (UnliftIO run) _ =
   run $ pure defMessage
