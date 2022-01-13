@@ -62,6 +62,7 @@ import Data.Time.Clock as X
     addUTCTime,
     diffTimeToPicoseconds,
     diffUTCTime,
+    getCurrentTime,
     secondsToDiffTime,
   )
 import Data.Word as X (Word64)

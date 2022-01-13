@@ -467,6 +467,13 @@ instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Response'Success 
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (1 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
+                Universum.mempty,
+              Data.Signable.applyWithDef
+                (Universum.view
+                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundAmt)
+                Universum.isJust
+                ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
+                   Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
 instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Response'Failure where

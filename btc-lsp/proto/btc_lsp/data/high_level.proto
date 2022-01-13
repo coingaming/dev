@@ -58,6 +58,16 @@ message Ctx {
   LnPubKey ln_pub_key = 2;
 }
 
+//
+// All requests do require a nonce. The nonce is used
+// for security reasons and is used to guard against
+// replay attacks. The server will reject any request
+// that comes with an incorrect nonce. The only requirement
+// for the nonce is that it needs to be strictly increasing.
+// Nonce generation is often achieved by using the
+// current UNIX timestamp.
+//
+
 message Nonce {
   uint64 val = 1;
 }

@@ -11,7 +11,7 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module BtcLsp.Data.Model where
+module BtcLsp.Storage.Model where
 
 import BtcLsp.Class.Storage
 import BtcLsp.Data.Kind
@@ -20,7 +20,6 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import Database.Persist.Quasi
 import Database.Persist.TH
-import qualified LndClient as Lnd
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities
@@ -30,13 +29,22 @@ share
   [mkPersist sqlSettings, mkMigrate "migrateAuto"]
   $(persistFileWith lowerCaseSettings "config/model")
 
-instance HasTableName LnChannel where
-  getTableName = const LnChannelTable
+instance HasTableName User where
+  getTableName = const UserTable
+
+instance HasTableName LnChan where
+  getTableName = const LnChanTable
 
 instance Out (Psql.BackendKey Psql.SqlBackend)
 
-deriving stock instance Generic (Psql.Key LnChannel)
+deriving stock instance Generic (Psql.Key User)
 
-instance Out (Psql.Key LnChannel)
+instance Out (Psql.Key User)
 
-instance Out LnChannel
+instance Out User
+
+deriving stock instance Generic (Psql.Key LnChan)
+
+instance Out (Psql.Key LnChan)
+
+instance Out LnChan

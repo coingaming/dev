@@ -9,7 +9,7 @@ module BtcLsp.Data.Type
     TableName (..),
     LnInvoice (..),
     LnInvoiceStatus (..),
-    LnChannelStatus (..),
+    LnChanStatus (..),
     OnChainAddress (..),
     FieldIndex (..),
     ReversedFieldLocation (..),
@@ -100,7 +100,8 @@ data TaskRes
     )
 
 data TableName
-  = LnChannelTable
+  = UserTable
+  | LnChanTable
   deriving
     ( Enum
     )
@@ -134,13 +135,13 @@ data LnInvoiceStatus
 
 instance Out LnInvoiceStatus
 
-data LnChannelStatus
-  = LnChannelStatusPendingOpen
-  | LnChannelStatusOpened
-  | LnChannelStatusActive
-  | LnChannelStatusInactive
-  | LnChannelStatusPendingClose
-  | LnChannelStatusClosed
+data LnChanStatus
+  = LnChanStatusPendingOpen
+  | LnChanStatusOpened
+  | LnChanStatusActive
+  | LnChanStatusInactive
+  | LnChanStatusPendingClose
+  | LnChanStatusClosed
   deriving
     ( Generic,
       Show,
@@ -149,7 +150,7 @@ data LnChannelStatus
       Ord
     )
 
-instance Out LnChannelStatus
+instance Out LnChanStatus
 
 newtype OnChainAddress (tdir :: TxDirection)
   = OnChainAddress Text
@@ -209,6 +210,6 @@ data Error a = Error
 
 Psql.derivePersistField "LnInvoiceStatus"
 
-Psql.derivePersistField "LnChannelStatus"
+Psql.derivePersistField "LnChanStatus"
 
 Psql.derivePersistField "SwapStatus"

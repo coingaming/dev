@@ -1,31 +1,39 @@
 -- Syntax for this file here:
 -- https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
 
-LnChannel
-  fundingTxId (TxId 'Funding)
-  fundingVout (Vout 'Funding)
-  closingTxId (TxId 'Closing) Maybe
-  status LnChannelStatus
-  localBalance MSat Maybe
-  remoteBalance MSat Maybe
-  UniqueLnChannel fundingTxId fundingVout
-  nodeKey Lnd.NodePubKey Maybe
-  nodeLoc Lnd.NodeLocation Maybe
-  deriving Eq Show Generic
-
 User
   nodePubKey NodePubKey
   latestNonce Nonce
   insertedAt UTCTime
   updatedAt UTCTime
+  UniqueUser nodePubKey
+  deriving Eq Show Generic
+
+LnChan
+  userId UserId
+  fundingTxId (TxId 'Funding)
+  fundingVout (Vout 'Funding)
+  closingTxId (TxId 'Closing) Maybe
+  numUpdates Word64
+  status LnChanStatus
+  insertedAt UTCTime
+  updatedAt UTCTime
+  UniqueLnChan fundingTxId fundingVout
   deriving Eq Show Generic
 
 SwapIntoLn
   userId UserId
-  fund_invoice (LnInvoice 'Fund)
-  fund_address (OnChainAddress 'Fund)
-  refund_address (OnChainAddress 'Refund)
+  fundInvoice (LnInvoice 'Fund)
+  fundAddress (OnChainAddress 'Fund)
+  refundAddress (OnChainAddress 'Refund)
+  amtUser
+  amtLsp
+  feeOnChain
+  feeLsp
   status SwapStatus
+  expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
+  UniqueSwapIntoLnFundInvoice fundInvoice
+  UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic

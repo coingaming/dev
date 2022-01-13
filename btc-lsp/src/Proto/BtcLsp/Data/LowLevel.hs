@@ -758,8 +758,8 @@ packedFileDescriptor
     \\rLnHodlInvoice\DC2\DLE\n\
     \\ETXval\CAN\SOH \SOH(\tR\ETXval\"\"\n\
     \\SOOnChainAddress\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXvalJ\157\ENQ\n\
-    \\ACK\DC2\EOT\NUL\NUL!\SOH\n\
+    \\ETXval\CAN\SOH \SOH(\tR\ETXvalJ\194\ACK\n\
+    \\ACK\DC2\EOT\NUL\NUL0\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \x\n\
@@ -807,59 +807,72 @@ packedFileDescriptor
     \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\DLE\t\DC4\n\
     \\f\n\
     \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\DLE\ETB\CAN\n\
+    \\174\SOH\n\
+    \\STX\EOT\STX\DC2\EOT\"\NUL$\SOH2\161\SOH\n\
+    \ TODO : maybe have a sum-type like this:\n\
+    \\n\
+    \ message Btc {\n\
+    \   oneof either {\n\
+    \     Sat sat = 1;\n\
+    \     Msat msat = 2;\n\
+    \   }\n\
+    \ }\n\
+    \\n\
+    \ message Sat {\n\
+    \   uint64 val = 1;\n\
+    \ }\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT\DC3\NUL\NAK\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\DC3\b\f\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\"\b\f\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX\DC4\STX\DC1\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX#\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\DC4\STX\b\n\
+    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX#\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\DC4\t\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX#\t\f\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\DC4\SI\DLE\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX#\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT\ETB\NUL\EM\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT&\NUL(\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX\ETB\b\DC1\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX&\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\CAN\STX\DC1\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX'\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX\CAN\STX\b\n\
+    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX'\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\CAN\t\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX'\t\f\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\CAN\SI\DLE\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX'\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT\ESC\NUL\GS\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT*\NUL,\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX\ESC\b\NAK\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX*\b\NAK\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX\FS\STX\DC1\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX+\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX\FS\STX\b\n\
+    \\ENQ\EOT\EOT\STX\NUL\ENQ\DC2\ETX+\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX\FS\t\f\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX+\t\f\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX\FS\SI\DLE\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX+\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT\US\NUL!\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT.\NUL0\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX\US\b\SYN\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX.\b\SYN\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX \STX\DC1\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX/\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX \STX\b\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX/\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX \t\f\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX/\t\f\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX \SI\DLEb\ACKproto3"
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX/\SI\DLEb\ACKproto3"

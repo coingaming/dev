@@ -2152,8 +2152,8 @@ packedFileDescriptor
     \\bREQUIRED\DLE\NUL\DC2\r\n\
     \\tNOT_FOUND\DLE\SOH\DC2\DC2\n\
     \\SOPARSING_FAILED\DLE\STX\DC2\ETB\n\
-    \\DC3VERIFICATION_FAILED\DLE\ETXJ\246\DC1\n\
-    \\ACK\DC2\EOT\NUL\NUL^\SOH\n\
+    \\DC3VERIFICATION_FAILED\DLE\ETXJ\214\DC4\n\
+    \\ACK\DC2\EOT\NUL\NULh\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \P\n\
@@ -2347,113 +2347,121 @@ packedFileDescriptor
     \\ENQ\EOT\v\STX\SOH\SOH\DC2\ETX9\v\NAK\n\
     \\f\n\
     \\ENQ\EOT\v\STX\SOH\ETX\DC2\ETX9\CAN\EM\n\
+    \\233\STX\n\
+    \\STX\EOT\f\DC2\EOTF\NULH\SOH2\220\STX\n\
+    \ All requests do require a nonce. The nonce is used\n\
+    \ for security reasons and is used to guard against\n\
+    \ replay attacks. The server will reject any request\n\
+    \ that comes with an incorrect nonce. The only requirement\n\
+    \ for the nonce is that it needs to be strictly increasing.\n\
+    \ Nonce generation is often achieved by using the\n\
+    \ current UNIX timestamp.\n\
     \\n\
     \\n\
-    \\STX\EOT\f\DC2\EOT<\NUL>\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\f\SOH\DC2\ETX<\b\r\n\
+    \\ETX\EOT\f\SOH\DC2\ETXF\b\r\n\
     \\v\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETX=\STX\DC1\n\
+    \\EOT\EOT\f\STX\NUL\DC2\ETXG\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETX=\STX\b\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETXG\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETX=\t\f\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETXG\t\f\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETX=\SI\DLE\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETXG\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\EOT\r\DC2\EOT@\NULB\SOH\n\
+    \\STX\EOT\r\DC2\EOTJ\NULL\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETX@\b\DLE\n\
+    \\ETX\EOT\r\SOH\DC2\ETXJ\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\r\STX\NUL\DC2\ETXA\STX\DC1\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETXK\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\ETXA\STX\b\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\ETXK\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXA\t\f\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXK\t\f\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXA\SI\DLE\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXK\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\EOT\SO\DC2\EOTD\NULG\SOH\n\
+    \\STX\EOT\SO\DC2\EOTN\NULQ\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SO\SOH\DC2\ETXD\b\DC4\n\
+    \\ETX\EOT\SO\SOH\DC2\ETXN\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\ETXE\STX)\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\ETXO\STX)\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\EOT\DC2\ETXE\STX\n\
+    \\ENQ\EOT\SO\STX\NUL\EOT\DC2\ETXO\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\ETXE\v\NAK\n\
+    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\ETXO\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXE\SYN$\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXO\SYN$\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXE'(\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXO'(\n\
     \\v\n\
-    \\EOT\EOT\SO\STX\SOH\DC2\ETXF\STX\FS\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\ETXP\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\ETXF\STX\DC2\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\ETXP\STX\DC2\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXF\DC3\ETB\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXP\DC3\ETB\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXF\SUB\ESC\n\
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXP\SUB\ESC\n\
     \\n\
     \\n\
-    \\STX\EOT\SI\DC2\EOTI\NULK\SOH\n\
+    \\STX\EOT\SI\DC2\EOTS\NULU\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SI\SOH\DC2\ETXI\b\DC2\n\
+    \\ETX\EOT\SI\SOH\DC2\ETXS\b\DC2\n\
     \\v\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\ETXJ\STX\DC1\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\ETXT\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\ETXJ\STX\b\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\ETXT\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETXJ\t\f\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETXT\t\f\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETXJ\SI\DLE\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETXT\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\ENQ\NUL\DC2\EOTM\NUL^\SOH\n\
+    \\STX\ENQ\NUL\DC2\EOTW\NULh\SOH\n\
     \\n\
     \\n\
-    \\ETX\ENQ\NUL\SOH\DC2\ETXM\ENQ\NAK\n\
+    \\ETX\ENQ\NUL\SOH\DC2\ETXW\ENQ\NAK\n\
     \l\n\
-    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXP\STX\SI\SUB_ All proto3 messages are optional, but sometimes\n\
+    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXZ\STX\SI\SUB_ All proto3 messages are optional, but sometimes\n\
     \ message presence is required by source code.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXP\STX\n\
+    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXZ\STX\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXP\r\SO\n\
+    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXZ\r\SO\n\
     \\182\SOH\n\
-    \\EOT\ENQ\NUL\STX\SOH\DC2\ETXT\STX\DLE\SUB\168\SOH Sometimes protobuf term is not data itself, but reference\n\
+    \\EOT\ENQ\NUL\STX\SOH\DC2\ETX^\STX\DLE\SUB\168\SOH Sometimes protobuf term is not data itself, but reference\n\
     \ to some other data, located somewhere else, for example\n\
     \ in database, and this resource might be not found.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXT\STX\v\n\
+    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETX^\STX\v\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXT\SO\SI\n\
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETX^\SO\SI\n\
     \\201\SOH\n\
-    \\EOT\ENQ\NUL\STX\STX\DC2\ETXY\STX\NAK\SUB\187\SOH Sometimes data is required to be in some\n\
+    \\EOT\ENQ\NUL\STX\STX\DC2\ETXc\STX\NAK\SUB\187\SOH Sometimes data is required to be in some\n\
     \ specific format (for example DER binary encoding)\n\
     \ which is not the part of proto3 type system.\n\
     \ This error shows the failure of custom parser.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXY\STX\DLE\n\
+    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXc\STX\DLE\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXY\DC3\DC4\n\
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXc\DC3\DC4\n\
     \\157\SOH\n\
-    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX]\STX\SUB\SUB\143\SOH Even if custom parser succeeded, sometimes data\n\
+    \\EOT\ENQ\NUL\STX\ETX\DC2\ETXg\STX\SUB\SUB\143\SOH Even if custom parser succeeded, sometimes data\n\
     \ needs to be verified somehow, for example\n\
     \ signature needs to be cryptographically verified.\n\
     \\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX]\STX\NAK\n\
+    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETXg\STX\NAK\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX]\CAN\EMb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETXg\CAN\EMb\ACKproto3"

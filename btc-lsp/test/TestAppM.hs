@@ -22,7 +22,7 @@ where
 import BtcLsp.Data.Env as Env
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
-import qualified BtcLsp.Storage.Model.LnChannel as Storage (getByChannelPoint)
+import qualified BtcLsp.Storage.Model.LnChan as LnChan (getByChannelPoint)
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString.Char8 as C8 hiding (filter, length)
 import qualified Env as E
@@ -216,20 +216,20 @@ waitForChannelStatus ::
   (I.Env m) =>
   TxId 'Funding ->
   Vout 'Funding ->
-  LnChannelStatus ->
+  LnChanStatus ->
   Int ->
-  m (Either Expectation LnChannel)
+  m (Either Expectation LnChan)
 waitForChannelStatus _ _ expectedStatus 0 =
   pure . Left . expectationFailure $
     "waiting for channel " <> inspectStr expectedStatus <> " tries exceeded"
 waitForChannelStatus txid vout expectedStatus tries = do
   let loop = waitForChannelStatus txid vout expectedStatus (tries - 1)
-  dbChannel <- Storage.getByChannelPoint txid vout
+  dbChannel <- LnChan.getByChannelPoint txid vout
   liftIO $ delay 1000000
   case dbChannel of
     Just db -> do
       let chModel = Psql.entityVal db
-      let status = lnChannelStatus chModel
+      let status = lnChanStatus chModel
       if status == expectedStatus
         then pure $ Right chModel
         else loop
@@ -239,10 +239,10 @@ assertChannelState ::
   (I.Env m) =>
   TxId 'Funding ->
   Vout 'Funding ->
-  LnChannelStatus ->
+  LnChanStatus ->
   m ()
 assertChannelState txid vout state = do
   dbChannelPending <- waitForChannelStatus txid vout state 30
   liftIO $ case dbChannelPending of
-    Right channel -> shouldBe (lnChannelStatus channel) state
+    Right channel -> shouldBe (lnChanStatus channel) state
     Left triesExceded -> triesExceded

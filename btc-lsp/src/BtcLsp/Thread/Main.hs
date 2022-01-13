@@ -8,7 +8,7 @@ where
 
 import BtcLsp.Data.AppM (runApp)
 import BtcLsp.Import
-import qualified BtcLsp.Storage as Storage
+import qualified BtcLsp.Storage.Migration as StorageMigration
 import qualified BtcLsp.Thread.Server as ThreadServer
 
 main :: IO ()
@@ -19,7 +19,7 @@ main = do
 
 apply :: (Env m) => m ()
 apply = do
-  Storage.migrateAll
+  StorageMigration.migrateAll
   xs <-
     mapM
       spawnLink

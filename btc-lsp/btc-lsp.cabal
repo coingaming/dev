@@ -30,7 +30,6 @@ library
       BtcLsp.Data.AppM
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
-      BtcLsp.Data.Model
       BtcLsp.Data.Type
       BtcLsp.Import
       BtcLsp.Import.External
@@ -38,8 +37,9 @@ library
       BtcLsp.ProtoLensGrpc.Client
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
-      BtcLsp.Storage
-      BtcLsp.Storage.Model.LnChannel
+      BtcLsp.Storage.Migration
+      BtcLsp.Storage.Model
+      BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
@@ -140,7 +140,6 @@ executable btc-lsp-exe
       BtcLsp.Data.AppM
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
-      BtcLsp.Data.Model
       BtcLsp.Data.Type
       BtcLsp.Import
       BtcLsp.Import.External
@@ -148,8 +147,9 @@ executable btc-lsp-exe
       BtcLsp.ProtoLensGrpc.Client
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
-      BtcLsp.Storage
-      BtcLsp.Storage.Model.LnChannel
+      BtcLsp.Storage.Migration
+      BtcLsp.Storage.Model
+      BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
@@ -251,7 +251,6 @@ test-suite btc-lsp-test
       BtcLsp.Data.AppM
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
-      BtcLsp.Data.Model
       BtcLsp.Data.Type
       BtcLsp.Import
       BtcLsp.Import.External
@@ -259,8 +258,9 @@ test-suite btc-lsp-test
       BtcLsp.ProtoLensGrpc.Client
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
-      BtcLsp.Storage
-      BtcLsp.Storage.Model.LnChannel
+      BtcLsp.Storage.Migration
+      BtcLsp.Storage.Model
+      BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server

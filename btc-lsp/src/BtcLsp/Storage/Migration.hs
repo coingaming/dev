@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Storage
+module BtcLsp.Storage.Migration
   ( migrateAll,
   )
 where
@@ -18,18 +18,18 @@ migrateBefore = []
 --
 migrateAfter :: PsqlMig.Migration
 migrateAfter =
-  [ 0 PsqlMig.~> 1 PsqlMig.:= [lnChannelSearchIndexes]
+  [ 0 PsqlMig.~> 1 PsqlMig.:= [lnChanSearchIndexes]
   ]
   where
-    lnChannelSearchIndexesSql :: Text
-    lnChannelSearchIndexesSql =
+    lnChanSearchIndexesSql :: Text
+    lnChanSearchIndexesSql =
       "CREATE INDEX IF NOT EXISTS "
-        <> "ln_channel_status_idx "
-        <> "ON ln_channel (status);"
-    lnChannelSearchIndexes =
-      PsqlMig.RawOperation "Create LnChannel search indexes" $
+        <> "ln_chan_status_idx "
+        <> "ON ln_chan (status);"
+    lnChanSearchIndexes =
+      PsqlMig.RawOperation "Create LnChan search indexes" $
         lift . return $
-          [PsqlMig.MigrateSql lnChannelSearchIndexesSql []]
+          [PsqlMig.MigrateSql lnChanSearchIndexesSql []]
 
 migrateAll :: (Storage m, KatipContext m) => m ()
 migrateAll = do

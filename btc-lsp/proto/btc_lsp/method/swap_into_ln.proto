@@ -20,6 +20,7 @@ message Response {
 
   message Success {
     .BtcLsp.Data.HighLevel.FundOnChainAddress fund_on_chain_address = 1;
+    .BtcLsp.Data.HighLevel.FundAmt fund_amt = 2;
   }
 
   message Failure {
