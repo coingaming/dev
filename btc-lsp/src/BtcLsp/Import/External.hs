@@ -66,6 +66,9 @@ import Data.Time.Clock as X
     secondsToDiffTime,
   )
 import Data.Word as X (Word64)
+import Database.Esqueleto.Legacy as X
+  ( Entity (..),
+  )
 import GHC.Generics as X (Generic)
 import Katip as X
   ( ColorStrategy (..),

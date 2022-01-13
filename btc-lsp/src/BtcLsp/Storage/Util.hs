@@ -3,7 +3,6 @@
 module BtcLsp.Storage.Util
   ( lockByTable,
     lockByRow,
-    lockByRow',
     rollback,
     commit,
     cleanDb,
@@ -44,7 +43,7 @@ lockByRow ::
     Psql.ToBackendKey Psql.SqlBackend a
   ) =>
   Psql.Key a ->
-  Psql.SqlPersistT m a
+  Psql.SqlPersistT m (Entity a)
 lockByRow rowId = do
   void
     ( Psql.rawSql
@@ -56,18 +55,8 @@ lockByRow rowId = do
     )
   maybeM
     (error $ "Impossible missing row " <> Universum.show rowId)
-    (pure . id)
+    (pure . Entity rowId)
     $ Psql.get rowId
-
-lockByRow' ::
-  ( MonadIO m,
-    HasTableName a,
-    Psql.ToBackendKey Psql.SqlBackend a
-  ) =>
-  Psql.Key a ->
-  Psql.SqlPersistT m (Psql.Entity a)
-lockByRow' rowId =
-  Psql.Entity rowId <$> lockByRow rowId
 
 rollback :: (KatipContext m, Out a) => a -> Psql.SqlPersistT m (Either a b)
 rollback e = do

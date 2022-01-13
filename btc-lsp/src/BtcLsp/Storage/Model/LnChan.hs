@@ -16,7 +16,7 @@ createIgnore ::
   TxId 'Funding ->
   Vout 'Funding ->
   LnChanStatus ->
-  m (Psql.Entity LnChan)
+  m (Entity LnChan)
 createIgnore uid txid vout ss = runSql $ do
   ct <- liftIO getCurrentTime
   Psql.upsertBy
@@ -52,7 +52,7 @@ getByChannelPoint ::
   (Env m) =>
   TxId 'Funding ->
   Vout 'Funding ->
-  m (Maybe (Psql.Entity LnChan))
+  m (Maybe (Entity LnChan))
 getByChannelPoint txid vout =
   runSql
     . Psql.getBy

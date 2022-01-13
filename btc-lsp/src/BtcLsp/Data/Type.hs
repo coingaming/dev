@@ -19,6 +19,7 @@ module BtcLsp.Data.Type
     TaskRes (..),
     Timing (..),
     SwapStatus (..),
+    Failure (..),
   )
 where
 
@@ -207,6 +208,17 @@ data Error a = Error
       Eq,
       Ord
     )
+
+data Failure
+  = FailureNonce
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
+
+instance Out Failure
 
 Psql.derivePersistField "LnInvoiceStatus"
 

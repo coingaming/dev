@@ -40,6 +40,7 @@ library
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
+      BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
@@ -150,6 +151,7 @@ executable btc-lsp-exe
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
+      BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
@@ -261,6 +263,7 @@ test-suite btc-lsp-test
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
+      BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
