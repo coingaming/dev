@@ -27,14 +27,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.BtcLsp.Data.Newtype
-import qualified Proto.BtcLsp.Data.Type
-btcLspLnNodes ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "btcLspLnNodes" a) =>
-  Lens.Family2.LensLike' f s a
-btcLspLnNodes = Data.ProtoLens.Field.field @"btcLspLnNodes"
+import qualified Proto.BtcLsp.Data.HighLevel
 ctx ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "ctx" a) =>
@@ -56,6 +49,12 @@ internal ::
    Data.ProtoLens.Field.HasField s "internal" a) =>
   Lens.Family2.LensLike' f s a
 internal = Data.ProtoLens.Field.field @"internal"
+lspLnNodes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "lspLnNodes" a) =>
+  Lens.Family2.LensLike' f s a
+lspLnNodes = Data.ProtoLens.Field.field @"lspLnNodes"
 maybe'ctx ::
   forall f s a.
   (Prelude.Functor f,
@@ -163,12 +162,6 @@ swapLnMinFee ::
    Data.ProtoLens.Field.HasField s "swapLnMinFee" a) =>
   Lens.Family2.LensLike' f s a
 swapLnMinFee = Data.ProtoLens.Field.field @"swapLnMinFee"
-vec'btcLspLnNodes ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'btcLspLnNodes" a) =>
-  Lens.Family2.LensLike' f s a
-vec'btcLspLnNodes = Data.ProtoLens.Field.field @"vec'btcLspLnNodes"
 vec'input ::
   forall f s a.
   (Prelude.Functor f,
@@ -181,3 +174,9 @@ vec'internal ::
    Data.ProtoLens.Field.HasField s "vec'internal" a) =>
   Lens.Family2.LensLike' f s a
 vec'internal = Data.ProtoLens.Field.field @"vec'internal"
+vec'lspLnNodes ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'lspLnNodes" a) =>
+  Lens.Family2.LensLike' f s a
+vec'lspLnNodes = Data.ProtoLens.Field.field @"vec'lspLnNodes"

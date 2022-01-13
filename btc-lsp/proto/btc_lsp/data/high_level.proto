@@ -1,0 +1,95 @@
+syntax="proto3";
+
+//
+// HighLevel types are the only types
+// used directly in Grpc Methods.
+//
+
+package BtcLsp.Data.HighLevel;
+
+import "btc_lsp/data/low_level.proto";
+
+message LspLnSocketAddress {
+  .BtcLsp.Data.LowLevel.SocketAddress val = 1;
+}
+
+message FeeRate {
+  .BtcLsp.Data.LowLevel.Urational val = 1;
+}
+
+message FeeAmt {
+  .BtcLsp.Data.LowLevel.Msat val = 1;
+}
+
+message FundAmt {
+  .BtcLsp.Data.LowLevel.Msat val = 1;
+}
+
+message RefundAmt {
+  .BtcLsp.Data.LowLevel.Msat val = 1;
+}
+
+message LocalBalance {
+  .BtcLsp.Data.LowLevel.Msat val = 1;
+}
+
+message RemoteBalance {
+  .BtcLsp.Data.LowLevel.Msat val = 1;
+}
+
+message FundLnInvoice {
+  .BtcLsp.Data.LowLevel.LnInvoice val = 1;
+}
+
+message FundLnHodlInvoice {
+  .BtcLsp.Data.LowLevel.LnHodlInvoice val = 1;
+}
+
+message FundOnChainAddress {
+  .BtcLsp.Data.LowLevel.OnChainAddress val = 1;
+}
+
+message RefundOnChainAddress {
+  .BtcLsp.Data.LowLevel.OnChainAddress val = 1;
+}
+
+message Ctx {
+  Nonce nonce = 1;
+  LnPubKey ln_pub_key = 2;
+}
+
+message Nonce {
+  uint64 val = 1;
+}
+
+message LnPubKey {
+  string val = 1;
+}
+
+message InputFailure {
+  repeated FieldIndex field_location = 1;
+  InputFailureKind kind = 2;
+}
+
+message FieldIndex {
+  uint32 val = 1;
+}
+
+enum InputFailureKind {
+  // All proto3 messages are optional, but sometimes
+  // message presence is required by source code.
+  REQUIRED = 0;
+  // Sometimes protobuf term is not data itself, but reference
+  // to some other data, located somewhere else, for example
+  // in database, and this resource might be not found.
+  NOT_FOUND = 1;
+  // Sometimes data is required to be in some
+  // specific format (for example DER binary encoding)
+  // which is not the part of proto3 type system.
+  // This error shows the failure of custom parser.
+  PARSING_FAILED = 2;
+  // Even if custom parser succeeded, sometimes data
+  // needs to be verified somehow, for example
+  // signature needs to be cryptographically verified.
+  VERIFICATION_FAILED = 3;
+}

@@ -1,14 +1,15 @@
-{- This file was auto-generated from btc_lsp/data/newtype.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from btc_lsp/data/high_level.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies, DeriveGeneric#-}
 {-# OPTIONS_GHC -Wno-unused-imports#-}
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.BtcLsp.Data.Newtype (
-        FeeAmt(), FieldIndex(), FundAmt(), FundLnHodlInvoice(),
-        FundLnInvoice(), FundOnChainAddress(), LnHodlInvoice(),
-        LnInvoice(), LnPubKey(), LocalBalance(), Msat(), Nonce(),
-        OnChainAddress(), RefundAmt(), RefundOnChainAddress(),
-        RemoteBalance(), SocketAddress()
+module Proto.BtcLsp.Data.HighLevel (
+        Ctx(), FeeAmt(), FeeRate(), FieldIndex(), FundAmt(),
+        FundLnHodlInvoice(), FundLnInvoice(), FundOnChainAddress(),
+        InputFailure(), InputFailureKind(..), InputFailureKind(),
+        InputFailureKind'UnrecognizedValue, LnPubKey(), LocalBalance(),
+        LspLnSocketAddress(), Nonce(), RefundAmt(), RefundOnChainAddress(),
+        RemoteBalance()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -38,12 +39,181 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
+import qualified Proto.BtcLsp.Data.LowLevel
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' FeeAmt Msat@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' FeeAmt (Prelude.Maybe Msat)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.nonce' @:: Lens' Ctx Nonce@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'nonce' @:: Lens' Ctx (Prelude.Maybe Nonce)@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.lnPubKey' @:: Lens' Ctx LnPubKey@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'lnPubKey' @:: Lens' Ctx (Prelude.Maybe LnPubKey)@ -}
+data Ctx
+  = Ctx'_constructor {_Ctx'nonce :: !(Prelude.Maybe Nonce),
+                      _Ctx'lnPubKey :: !(Prelude.Maybe LnPubKey),
+                      _Ctx'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
+instance Prelude.Show Ctx where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Text.PrettyPrint.GenericPretty.Out Ctx
+instance Data.ProtoLens.Field.HasField Ctx "nonce" Nonce where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Ctx'nonce (\ x__ y__ -> x__ {_Ctx'nonce = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Ctx "maybe'nonce" (Prelude.Maybe Nonce) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Ctx'nonce (\ x__ y__ -> x__ {_Ctx'nonce = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Ctx "lnPubKey" LnPubKey where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Ctx'lnPubKey (\ x__ y__ -> x__ {_Ctx'lnPubKey = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField Ctx "maybe'lnPubKey" (Prelude.Maybe LnPubKey) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Ctx'lnPubKey (\ x__ y__ -> x__ {_Ctx'lnPubKey = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message Ctx where
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.Ctx"
+  packedMessageDescriptor _
+    = "\n\
+      \\ETXCtx\DC22\n\
+      \\ENQnonce\CAN\SOH \SOH(\v2\FS.BtcLsp.Data.HighLevel.NonceR\ENQnonce\DC2=\n\
+      \\n\
+      \ln_pub_key\CAN\STX \SOH(\v2\US.BtcLsp.Data.HighLevel.LnPubKeyR\blnPubKey"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        nonce__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "nonce"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Nonce)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'nonce")) ::
+              Data.ProtoLens.FieldDescriptor Ctx
+        lnPubKey__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "ln_pub_key"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor LnPubKey)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'lnPubKey")) ::
+              Data.ProtoLens.FieldDescriptor Ctx
+      in
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, nonce__field_descriptor),
+           (Data.ProtoLens.Tag 2, lnPubKey__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _Ctx'_unknownFields (\ x__ y__ -> x__ {_Ctx'_unknownFields = y__})
+  defMessage
+    = Ctx'_constructor
+        {_Ctx'nonce = Prelude.Nothing, _Ctx'lnPubKey = Prelude.Nothing,
+         _Ctx'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: Ctx -> Data.ProtoLens.Encoding.Bytes.Parser Ctx
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "nonce"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"nonce") y x)
+                        18
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "ln_pub_key"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"lnPubKey") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "Ctx"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'nonce") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage
+                          _v))
+             ((Data.Monoid.<>)
+                (case
+                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'lnPubKey") _x
+                 of
+                   Prelude.Nothing -> Data.Monoid.mempty
+                   (Prelude.Just _v)
+                     -> (Data.Monoid.<>)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          ((Prelude..)
+                             (\ bs
+                                -> (Data.Monoid.<>)
+                                     (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                             Data.ProtoLens.encodeMessage
+                             _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData Ctx where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_Ctx'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_Ctx'nonce x__) (Control.DeepSeq.deepseq (_Ctx'lnPubKey x__) ()))
+{- | Fields :
+     
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FeeAmt Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FeeAmt (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
 data FeeAmt
-  = FeeAmt'_constructor {_FeeAmt'val :: !(Prelude.Maybe Msat),
+  = FeeAmt'_constructor {_FeeAmt'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
                          _FeeAmt'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show FeeAmt where
@@ -53,24 +223,24 @@ instance Prelude.Show FeeAmt where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out FeeAmt
-instance Data.ProtoLens.Field.HasField FeeAmt "val" Msat where
+instance Data.ProtoLens.Field.HasField FeeAmt "val" Proto.BtcLsp.Data.LowLevel.Msat where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FeeAmt'val (\ x__ y__ -> x__ {_FeeAmt'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FeeAmt "maybe'val" (Prelude.Maybe Msat) where
+instance Data.ProtoLens.Field.HasField FeeAmt "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FeeAmt'val (\ x__ y__ -> x__ {_FeeAmt'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message FeeAmt where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.FeeAmt"
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FeeAmt"
   packedMessageDescriptor _
     = "\n\
-      \\ACKFeeAmt\DC2+\n\
-      \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval"
+      \\ACKFeeAmt\DC2,\n\
+      \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -78,7 +248,7 @@ instance Data.ProtoLens.Message FeeAmt where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Msat)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor FeeAmt
@@ -156,7 +326,123 @@ instance Control.DeepSeq.NFData FeeAmt where
              (Control.DeepSeq.deepseq (_FeeAmt'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' FieldIndex Data.Word.Word32@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FeeRate Proto.BtcLsp.Data.LowLevel.Urational@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FeeRate (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Urational)@ -}
+data FeeRate
+  = FeeRate'_constructor {_FeeRate'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Urational),
+                          _FeeRate'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
+instance Prelude.Show FeeRate where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Text.PrettyPrint.GenericPretty.Out FeeRate
+instance Data.ProtoLens.Field.HasField FeeRate "val" Proto.BtcLsp.Data.LowLevel.Urational where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _FeeRate'val (\ x__ y__ -> x__ {_FeeRate'val = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField FeeRate "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Urational) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _FeeRate'val (\ x__ y__ -> x__ {_FeeRate'val = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message FeeRate where
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FeeRate"
+  packedMessageDescriptor _
+    = "\n\
+      \\aFeeRate\DC21\n\
+      \\ETXval\CAN\SOH \SOH(\v2\US.BtcLsp.Data.LowLevel.UrationalR\ETXval"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        val__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "val"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Urational)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'val")) ::
+              Data.ProtoLens.FieldDescriptor FeeRate
+      in
+        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _FeeRate'_unknownFields
+        (\ x__ y__ -> x__ {_FeeRate'_unknownFields = y__})
+  defMessage
+    = FeeRate'_constructor
+        {_FeeRate'val = Prelude.Nothing, _FeeRate'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: FeeRate -> Data.ProtoLens.Encoding.Bytes.Parser FeeRate
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "val"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "FeeRate"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'val") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage
+                          _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData FeeRate where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_FeeRate'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_FeeRate'val x__) ())
+{- | Fields :
+     
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FieldIndex Data.Word.Word32@ -}
 data FieldIndex
   = FieldIndex'_constructor {_FieldIndex'val :: !Data.Word.Word32,
                              _FieldIndex'_unknownFields :: !Data.ProtoLens.FieldSet}
@@ -175,7 +461,7 @@ instance Data.ProtoLens.Field.HasField FieldIndex "val" Data.Word.Word32 where
            _FieldIndex'val (\ x__ y__ -> x__ {_FieldIndex'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message FieldIndex where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.FieldIndex"
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FieldIndex"
   packedMessageDescriptor _
     = "\n\
       \\n\
@@ -261,10 +547,10 @@ instance Control.DeepSeq.NFData FieldIndex where
              (Control.DeepSeq.deepseq (_FieldIndex'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' FundAmt Msat@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' FundAmt (Prelude.Maybe Msat)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundAmt Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FundAmt (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
 data FundAmt
-  = FundAmt'_constructor {_FundAmt'val :: !(Prelude.Maybe Msat),
+  = FundAmt'_constructor {_FundAmt'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
                           _FundAmt'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show FundAmt where
@@ -274,24 +560,24 @@ instance Prelude.Show FundAmt where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out FundAmt
-instance Data.ProtoLens.Field.HasField FundAmt "val" Msat where
+instance Data.ProtoLens.Field.HasField FundAmt "val" Proto.BtcLsp.Data.LowLevel.Msat where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FundAmt'val (\ x__ y__ -> x__ {_FundAmt'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FundAmt "maybe'val" (Prelude.Maybe Msat) where
+instance Data.ProtoLens.Field.HasField FundAmt "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FundAmt'val (\ x__ y__ -> x__ {_FundAmt'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message FundAmt where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.FundAmt"
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FundAmt"
   packedMessageDescriptor _
     = "\n\
-      \\aFundAmt\DC2+\n\
-      \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval"
+      \\aFundAmt\DC2,\n\
+      \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -299,7 +585,7 @@ instance Data.ProtoLens.Message FundAmt where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Msat)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor FundAmt
@@ -377,10 +663,10 @@ instance Control.DeepSeq.NFData FundAmt where
              (Control.DeepSeq.deepseq (_FundAmt'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' FundLnHodlInvoice LnHodlInvoice@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' FundLnHodlInvoice (Prelude.Maybe LnHodlInvoice)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundLnHodlInvoice Proto.BtcLsp.Data.LowLevel.LnHodlInvoice@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FundLnHodlInvoice (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.LnHodlInvoice)@ -}
 data FundLnHodlInvoice
-  = FundLnHodlInvoice'_constructor {_FundLnHodlInvoice'val :: !(Prelude.Maybe LnHodlInvoice),
+  = FundLnHodlInvoice'_constructor {_FundLnHodlInvoice'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.LnHodlInvoice),
                                     _FundLnHodlInvoice'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show FundLnHodlInvoice where
@@ -390,14 +676,14 @@ instance Prelude.Show FundLnHodlInvoice where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out FundLnHodlInvoice
-instance Data.ProtoLens.Field.HasField FundLnHodlInvoice "val" LnHodlInvoice where
+instance Data.ProtoLens.Field.HasField FundLnHodlInvoice "val" Proto.BtcLsp.Data.LowLevel.LnHodlInvoice where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FundLnHodlInvoice'val
            (\ x__ y__ -> x__ {_FundLnHodlInvoice'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FundLnHodlInvoice "maybe'val" (Prelude.Maybe LnHodlInvoice) where
+instance Data.ProtoLens.Field.HasField FundLnHodlInvoice "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.LnHodlInvoice) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -406,11 +692,11 @@ instance Data.ProtoLens.Field.HasField FundLnHodlInvoice "maybe'val" (Prelude.Ma
         Prelude.id
 instance Data.ProtoLens.Message FundLnHodlInvoice where
   messageName _
-    = Data.Text.pack "BtcLsp.Data.Newtype.FundLnHodlInvoice"
+    = Data.Text.pack "BtcLsp.Data.HighLevel.FundLnHodlInvoice"
   packedMessageDescriptor _
     = "\n\
-      \\DC1FundLnHodlInvoice\DC24\n\
-      \\ETXval\CAN\SOH \SOH(\v2\".BtcLsp.Data.Newtype.LnHodlInvoiceR\ETXval"
+      \\DC1FundLnHodlInvoice\DC25\n\
+      \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.LowLevel.LnHodlInvoiceR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -418,7 +704,7 @@ instance Data.ProtoLens.Message FundLnHodlInvoice where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor LnHodlInvoice)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.LnHodlInvoice)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor FundLnHodlInvoice
@@ -499,10 +785,10 @@ instance Control.DeepSeq.NFData FundLnHodlInvoice where
              (Control.DeepSeq.deepseq (_FundLnHodlInvoice'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' FundLnInvoice LnInvoice@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' FundLnInvoice (Prelude.Maybe LnInvoice)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundLnInvoice Proto.BtcLsp.Data.LowLevel.LnInvoice@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FundLnInvoice (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.LnInvoice)@ -}
 data FundLnInvoice
-  = FundLnInvoice'_constructor {_FundLnInvoice'val :: !(Prelude.Maybe LnInvoice),
+  = FundLnInvoice'_constructor {_FundLnInvoice'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.LnInvoice),
                                 _FundLnInvoice'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show FundLnInvoice where
@@ -512,24 +798,25 @@ instance Prelude.Show FundLnInvoice where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out FundLnInvoice
-instance Data.ProtoLens.Field.HasField FundLnInvoice "val" LnInvoice where
+instance Data.ProtoLens.Field.HasField FundLnInvoice "val" Proto.BtcLsp.Data.LowLevel.LnInvoice where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FundLnInvoice'val (\ x__ y__ -> x__ {_FundLnInvoice'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FundLnInvoice "maybe'val" (Prelude.Maybe LnInvoice) where
+instance Data.ProtoLens.Field.HasField FundLnInvoice "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.LnInvoice) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FundLnInvoice'val (\ x__ y__ -> x__ {_FundLnInvoice'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message FundLnInvoice where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.FundLnInvoice"
+  messageName _
+    = Data.Text.pack "BtcLsp.Data.HighLevel.FundLnInvoice"
   packedMessageDescriptor _
     = "\n\
-      \\rFundLnInvoice\DC20\n\
-      \\ETXval\CAN\SOH \SOH(\v2\RS.BtcLsp.Data.Newtype.LnInvoiceR\ETXval"
+      \\rFundLnInvoice\DC21\n\
+      \\ETXval\CAN\SOH \SOH(\v2\US.BtcLsp.Data.LowLevel.LnInvoiceR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -537,7 +824,7 @@ instance Data.ProtoLens.Message FundLnInvoice where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor LnInvoice)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.LnInvoice)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor FundLnInvoice
@@ -617,10 +904,10 @@ instance Control.DeepSeq.NFData FundLnInvoice where
              (Control.DeepSeq.deepseq (_FundLnInvoice'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' FundOnChainAddress OnChainAddress@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' FundOnChainAddress (Prelude.Maybe OnChainAddress)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundOnChainAddress Proto.BtcLsp.Data.LowLevel.OnChainAddress@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FundOnChainAddress (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.OnChainAddress)@ -}
 data FundOnChainAddress
-  = FundOnChainAddress'_constructor {_FundOnChainAddress'val :: !(Prelude.Maybe OnChainAddress),
+  = FundOnChainAddress'_constructor {_FundOnChainAddress'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.OnChainAddress),
                                      _FundOnChainAddress'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show FundOnChainAddress where
@@ -630,14 +917,14 @@ instance Prelude.Show FundOnChainAddress where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out FundOnChainAddress
-instance Data.ProtoLens.Field.HasField FundOnChainAddress "val" OnChainAddress where
+instance Data.ProtoLens.Field.HasField FundOnChainAddress "val" Proto.BtcLsp.Data.LowLevel.OnChainAddress where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _FundOnChainAddress'val
            (\ x__ y__ -> x__ {_FundOnChainAddress'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FundOnChainAddress "maybe'val" (Prelude.Maybe OnChainAddress) where
+instance Data.ProtoLens.Field.HasField FundOnChainAddress "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.OnChainAddress) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -646,11 +933,11 @@ instance Data.ProtoLens.Field.HasField FundOnChainAddress "maybe'val" (Prelude.M
         Prelude.id
 instance Data.ProtoLens.Message FundOnChainAddress where
   messageName _
-    = Data.Text.pack "BtcLsp.Data.Newtype.FundOnChainAddress"
+    = Data.Text.pack "BtcLsp.Data.HighLevel.FundOnChainAddress"
   packedMessageDescriptor _
     = "\n\
-      \\DC2FundOnChainAddress\DC25\n\
-      \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.Newtype.OnChainAddressR\ETXval"
+      \\DC2FundOnChainAddress\DC26\n\
+      \\ETXval\CAN\SOH \SOH(\v2$.BtcLsp.Data.LowLevel.OnChainAddressR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -658,7 +945,7 @@ instance Data.ProtoLens.Message FundOnChainAddress where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor OnChainAddress)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.OnChainAddress)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor FundOnChainAddress
@@ -739,59 +1026,96 @@ instance Control.DeepSeq.NFData FundOnChainAddress where
              (Control.DeepSeq.deepseq (_FundOnChainAddress'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' LnHodlInvoice Data.Text.Text@ -}
-data LnHodlInvoice
-  = LnHodlInvoice'_constructor {_LnHodlInvoice'val :: !Data.Text.Text,
-                                _LnHodlInvoice'_unknownFields :: !Data.ProtoLens.FieldSet}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.fieldLocation' @:: Lens' InputFailure [FieldIndex]@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.vec'fieldLocation' @:: Lens' InputFailure (Data.Vector.Vector FieldIndex)@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.kind' @:: Lens' InputFailure InputFailureKind@ -}
+data InputFailure
+  = InputFailure'_constructor {_InputFailure'fieldLocation :: !(Data.Vector.Vector FieldIndex),
+                               _InputFailure'kind :: !InputFailureKind,
+                               _InputFailure'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show LnHodlInvoice where
+instance Prelude.Show InputFailure where
   showsPrec _ __x __s
     = Prelude.showChar
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out LnHodlInvoice
-instance Data.ProtoLens.Field.HasField LnHodlInvoice "val" Data.Text.Text where
+instance Text.PrettyPrint.GenericPretty.Out InputFailure
+instance Data.ProtoLens.Field.HasField InputFailure "fieldLocation" [FieldIndex] where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _LnHodlInvoice'val (\ x__ y__ -> x__ {_LnHodlInvoice'val = y__}))
+           _InputFailure'fieldLocation
+           (\ x__ y__ -> x__ {_InputFailure'fieldLocation = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField InputFailure "vec'fieldLocation" (Data.Vector.Vector FieldIndex) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InputFailure'fieldLocation
+           (\ x__ y__ -> x__ {_InputFailure'fieldLocation = y__}))
         Prelude.id
-instance Data.ProtoLens.Message LnHodlInvoice where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.LnHodlInvoice"
+instance Data.ProtoLens.Field.HasField InputFailure "kind" InputFailureKind where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InputFailure'kind (\ x__ y__ -> x__ {_InputFailure'kind = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message InputFailure where
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.InputFailure"
   packedMessageDescriptor _
     = "\n\
-      \\rLnHodlInvoice\DC2\DLE\n\
-      \\ETXval\CAN\SOH \SOH(\tR\ETXval"
+      \\fInputFailure\DC2H\n\
+      \\SOfield_location\CAN\SOH \ETX(\v2!.BtcLsp.Data.HighLevel.FieldIndexR\rfieldLocation\DC2;\n\
+      \\EOTkind\CAN\STX \SOH(\SO2'.BtcLsp.Data.HighLevel.InputFailureKindR\EOTkind"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
-        val__field_descriptor
+        fieldLocation__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "val"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              "field_location"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor FieldIndex)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Unpacked
+                 (Data.ProtoLens.Field.field @"fieldLocation")) ::
+              Data.ProtoLens.FieldDescriptor InputFailure
+        kind__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "kind"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor InputFailureKind)
               (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"val")) ::
-              Data.ProtoLens.FieldDescriptor LnHodlInvoice
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"kind")) ::
+              Data.ProtoLens.FieldDescriptor InputFailure
       in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
+        Data.Map.fromList
+          [(Data.ProtoLens.Tag 1, fieldLocation__field_descriptor),
+           (Data.ProtoLens.Tag 2, kind__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
-        _LnHodlInvoice'_unknownFields
-        (\ x__ y__ -> x__ {_LnHodlInvoice'_unknownFields = y__})
+        _InputFailure'_unknownFields
+        (\ x__ y__ -> x__ {_InputFailure'_unknownFields = y__})
   defMessage
-    = LnHodlInvoice'_constructor
-        {_LnHodlInvoice'val = Data.ProtoLens.fieldDefault,
-         _LnHodlInvoice'_unknownFields = []}
+    = InputFailure'_constructor
+        {_InputFailure'fieldLocation = Data.Vector.Generic.empty,
+         _InputFailure'kind = Data.ProtoLens.fieldDefault,
+         _InputFailure'_unknownFields = []}
   parseMessage
     = let
         loop ::
-          LnHodlInvoice -> Data.ProtoLens.Encoding.Bytes.Parser LnHodlInvoice
-        loop x
+          InputFailure
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld FieldIndex
+             -> Data.ProtoLens.Encoding.Bytes.Parser InputFailure
+        loop x mutable'fieldLocation
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
-                   do (let missing = []
+                   do frozen'fieldLocation <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                                   mutable'fieldLocation)
+                      (let missing = []
                        in
                          if Prelude.null missing then
                              Prelude.return ()
@@ -802,175 +1126,180 @@ instance Data.ProtoLens.Message LnHodlInvoice where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+                           Data.ProtoLens.unknownFields
+                           (\ !t -> Prelude.reverse t)
+                           (Lens.Family2.set
+                              (Data.ProtoLens.Field.field @"vec'fieldLocation")
+                              frozen'fieldLocation
+                              x))
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
                         10
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                            Data.ProtoLens.Encoding.Bytes.isolate
+                                              (Prelude.fromIntegral len)
+                                              Data.ProtoLens.parseMessage)
+                                        "field_location"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append
+                                          mutable'fieldLocation y)
+                                loop x v
+                        16
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
-                                       "val"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "kind"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"kind") y x)
+                                  mutable'fieldLocation
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
                                 loop
                                   (Lens.Family2.over
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+                                  mutable'fieldLocation
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "LnHodlInvoice"
+          (do mutable'fieldLocation <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                         Data.ProtoLens.Encoding.Growing.new
+              loop Data.ProtoLens.defMessage mutable'fieldLocation)
+          "InputFailure"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"val") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8
-                         _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData LnHodlInvoice where
+             (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                (\ _v
+                   -> (Data.Monoid.<>)
+                        (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                        ((Prelude..)
+                           (\ bs
+                              -> (Data.Monoid.<>)
+                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                           Data.ProtoLens.encodeMessage
+                           _v))
+                (Lens.Family2.view
+                   (Data.ProtoLens.Field.field @"vec'fieldLocation") _x))
+             ((Data.Monoid.<>)
+                (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"kind") _x
+                 in
+                   if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 16)
+                         ((Prelude..)
+                            ((Prelude..)
+                               Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                            Prelude.fromEnum
+                            _v))
+                (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+instance Control.DeepSeq.NFData InputFailure where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
-             (_LnHodlInvoice'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_LnHodlInvoice'val x__) ())
-{- | Fields :
-     
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' LnInvoice Data.Text.Text@ -}
-data LnInvoice
-  = LnInvoice'_constructor {_LnInvoice'val :: !Data.Text.Text,
-                            _LnInvoice'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show LnInvoice where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out LnInvoice
-instance Data.ProtoLens.Field.HasField LnInvoice "val" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _LnInvoice'val (\ x__ y__ -> x__ {_LnInvoice'val = y__}))
+             (_InputFailure'_unknownFields x__)
+             (Control.DeepSeq.deepseq
+                (_InputFailure'fieldLocation x__)
+                (Control.DeepSeq.deepseq (_InputFailure'kind x__) ()))
+newtype InputFailureKind'UnrecognizedValue
+  = InputFailureKind'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq,
+                  Prelude.Ord,
+                  Prelude.Show,
+                  GHC.Generics.Generic)
+instance Text.PrettyPrint.GenericPretty.Out InputFailureKind'UnrecognizedValue
+data InputFailureKind
+  = REQUIRED |
+    NOT_FOUND |
+    PARSING_FAILED |
+    VERIFICATION_FAILED |
+    InputFailureKind'Unrecognized !InputFailureKind'UnrecognizedValue
+  deriving stock (Prelude.Show,
+                  Prelude.Eq,
+                  Prelude.Ord,
+                  GHC.Generics.Generic)
+instance Data.ProtoLens.MessageEnum InputFailureKind where
+  maybeToEnum 0 = Prelude.Just REQUIRED
+  maybeToEnum 1 = Prelude.Just NOT_FOUND
+  maybeToEnum 2 = Prelude.Just PARSING_FAILED
+  maybeToEnum 3 = Prelude.Just VERIFICATION_FAILED
+  maybeToEnum k
+    = Prelude.Just
+        (InputFailureKind'Unrecognized
+           (InputFailureKind'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum REQUIRED = "REQUIRED"
+  showEnum NOT_FOUND = "NOT_FOUND"
+  showEnum PARSING_FAILED = "PARSING_FAILED"
+  showEnum VERIFICATION_FAILED = "VERIFICATION_FAILED"
+  showEnum
+    (InputFailureKind'Unrecognized (InputFailureKind'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "REQUIRED" = Prelude.Just REQUIRED
+    | (Prelude.==) k "NOT_FOUND" = Prelude.Just NOT_FOUND
+    | (Prelude.==) k "PARSING_FAILED" = Prelude.Just PARSING_FAILED
+    | (Prelude.==) k "VERIFICATION_FAILED"
+    = Prelude.Just VERIFICATION_FAILED
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded InputFailureKind where
+  minBound = REQUIRED
+  maxBound = VERIFICATION_FAILED
+instance Prelude.Enum InputFailureKind where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum InputFailureKind: "
+              (Prelude.show k__)))
         Prelude.id
-instance Data.ProtoLens.Message LnInvoice where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.LnInvoice"
-  packedMessageDescriptor _
-    = "\n\
-      \\tLnInvoice\DC2\DLE\n\
-      \\ETXval\CAN\SOH \SOH(\tR\ETXval"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        val__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "val"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"val")) ::
-              Data.ProtoLens.FieldDescriptor LnInvoice
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _LnInvoice'_unknownFields
-        (\ x__ y__ -> x__ {_LnInvoice'_unknownFields = y__})
-  defMessage
-    = LnInvoice'_constructor
-        {_LnInvoice'val = Data.ProtoLens.fieldDefault,
-         _LnInvoice'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: LnInvoice -> Data.ProtoLens.Encoding.Bytes.Parser LnInvoice
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
-                                       "val"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "LnInvoice"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"val") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8
-                         _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData LnInvoice where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_LnInvoice'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_LnInvoice'val x__) ())
+        (Data.ProtoLens.maybeToEnum k__)
+  fromEnum REQUIRED = 0
+  fromEnum NOT_FOUND = 1
+  fromEnum PARSING_FAILED = 2
+  fromEnum VERIFICATION_FAILED = 3
+  fromEnum
+    (InputFailureKind'Unrecognized (InputFailureKind'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ VERIFICATION_FAILED
+    = Prelude.error
+        "InputFailureKind.succ: bad argument VERIFICATION_FAILED. This value would be out of bounds."
+  succ REQUIRED = NOT_FOUND
+  succ NOT_FOUND = PARSING_FAILED
+  succ PARSING_FAILED = VERIFICATION_FAILED
+  succ (InputFailureKind'Unrecognized _)
+    = Prelude.error
+        "InputFailureKind.succ: bad argument: unrecognized value"
+  pred REQUIRED
+    = Prelude.error
+        "InputFailureKind.pred: bad argument REQUIRED. This value would be out of bounds."
+  pred NOT_FOUND = REQUIRED
+  pred PARSING_FAILED = NOT_FOUND
+  pred VERIFICATION_FAILED = PARSING_FAILED
+  pred (InputFailureKind'Unrecognized _)
+    = Prelude.error
+        "InputFailureKind.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault InputFailureKind where
+  fieldDefault = REQUIRED
+instance Control.DeepSeq.NFData InputFailureKind where
+  rnf x__ = Prelude.seq x__ ()
+instance Text.PrettyPrint.GenericPretty.Out InputFailureKind
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' LnPubKey Data.Text.Text@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' LnPubKey Data.Text.Text@ -}
 data LnPubKey
   = LnPubKey'_constructor {_LnPubKey'val :: !Data.Text.Text,
                            _LnPubKey'_unknownFields :: !Data.ProtoLens.FieldSet}
@@ -989,7 +1318,7 @@ instance Data.ProtoLens.Field.HasField LnPubKey "val" Data.Text.Text where
            _LnPubKey'val (\ x__ y__ -> x__ {_LnPubKey'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message LnPubKey where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.LnPubKey"
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.LnPubKey"
   packedMessageDescriptor _
     = "\n\
       \\bLnPubKey\DC2\DLE\n\
@@ -1085,10 +1414,10 @@ instance Control.DeepSeq.NFData LnPubKey where
              (Control.DeepSeq.deepseq (_LnPubKey'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' LocalBalance Msat@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' LocalBalance (Prelude.Maybe Msat)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' LocalBalance Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' LocalBalance (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
 data LocalBalance
-  = LocalBalance'_constructor {_LocalBalance'val :: !(Prelude.Maybe Msat),
+  = LocalBalance'_constructor {_LocalBalance'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
                                _LocalBalance'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show LocalBalance where
@@ -1098,24 +1427,24 @@ instance Prelude.Show LocalBalance where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out LocalBalance
-instance Data.ProtoLens.Field.HasField LocalBalance "val" Msat where
+instance Data.ProtoLens.Field.HasField LocalBalance "val" Proto.BtcLsp.Data.LowLevel.Msat where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _LocalBalance'val (\ x__ y__ -> x__ {_LocalBalance'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField LocalBalance "maybe'val" (Prelude.Maybe Msat) where
+instance Data.ProtoLens.Field.HasField LocalBalance "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _LocalBalance'val (\ x__ y__ -> x__ {_LocalBalance'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message LocalBalance where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.LocalBalance"
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.LocalBalance"
   packedMessageDescriptor _
     = "\n\
-      \\fLocalBalance\DC2+\n\
-      \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval"
+      \\fLocalBalance\DC2,\n\
+      \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1123,7 +1452,7 @@ instance Data.ProtoLens.Message LocalBalance where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Msat)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor LocalBalance
@@ -1203,54 +1532,66 @@ instance Control.DeepSeq.NFData LocalBalance where
              (Control.DeepSeq.deepseq (_LocalBalance'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' Msat Data.Word.Word64@ -}
-data Msat
-  = Msat'_constructor {_Msat'val :: !Data.Word.Word64,
-                       _Msat'_unknownFields :: !Data.ProtoLens.FieldSet}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' LspLnSocketAddress Proto.BtcLsp.Data.LowLevel.SocketAddress@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' LspLnSocketAddress (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.SocketAddress)@ -}
+data LspLnSocketAddress
+  = LspLnSocketAddress'_constructor {_LspLnSocketAddress'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.SocketAddress),
+                                     _LspLnSocketAddress'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show Msat where
+instance Prelude.Show LspLnSocketAddress where
   showsPrec _ __x __s
     = Prelude.showChar
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out Msat
-instance Data.ProtoLens.Field.HasField Msat "val" Data.Word.Word64 where
+instance Text.PrettyPrint.GenericPretty.Out LspLnSocketAddress
+instance Data.ProtoLens.Field.HasField LspLnSocketAddress "val" Proto.BtcLsp.Data.LowLevel.SocketAddress where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Msat'val (\ x__ y__ -> x__ {_Msat'val = y__}))
+           _LspLnSocketAddress'val
+           (\ x__ y__ -> x__ {_LspLnSocketAddress'val = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField LspLnSocketAddress "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.SocketAddress) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _LspLnSocketAddress'val
+           (\ x__ y__ -> x__ {_LspLnSocketAddress'val = y__}))
         Prelude.id
-instance Data.ProtoLens.Message Msat where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.Msat"
+instance Data.ProtoLens.Message LspLnSocketAddress where
+  messageName _
+    = Data.Text.pack "BtcLsp.Data.HighLevel.LspLnSocketAddress"
   packedMessageDescriptor _
     = "\n\
-      \\EOTMsat\DC2\DLE\n\
-      \\ETXval\CAN\SOH \SOH(\EOTR\ETXval"
+      \\DC2LspLnSocketAddress\DC25\n\
+      \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.LowLevel.SocketAddressR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
         val__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "val"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.UInt64Field ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Word.Word64)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"val")) ::
-              Data.ProtoLens.FieldDescriptor Msat
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.SocketAddress)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'val")) ::
+              Data.ProtoLens.FieldDescriptor LspLnSocketAddress
       in
         Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
-        _Msat'_unknownFields
-        (\ x__ y__ -> x__ {_Msat'_unknownFields = y__})
+        _LspLnSocketAddress'_unknownFields
+        (\ x__ y__ -> x__ {_LspLnSocketAddress'_unknownFields = y__})
   defMessage
-    = Msat'_constructor
-        {_Msat'val = Data.ProtoLens.fieldDefault,
-         _Msat'_unknownFields = []}
+    = LspLnSocketAddress'_constructor
+        {_LspLnSocketAddress'val = Prelude.Nothing,
+         _LspLnSocketAddress'_unknownFields = []}
   parseMessage
     = let
-        loop :: Msat -> Data.ProtoLens.Encoding.Bytes.Parser Msat
+        loop ::
+          LspLnSocketAddress
+          -> Data.ProtoLens.Encoding.Bytes.Parser LspLnSocketAddress
         loop x
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
@@ -1269,8 +1610,12 @@ instance Data.ProtoLens.Message Msat where
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
-                        8 -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       Data.ProtoLens.Encoding.Bytes.getVarInt "val"
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "val"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
@@ -1280,29 +1625,36 @@ instance Data.ProtoLens.Message Msat where
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "Msat"
+          (do loop Data.ProtoLens.defMessage) "LspLnSocketAddress"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"val") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 8)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt _v))
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'val") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage
+                          _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData Msat where
+instance Control.DeepSeq.NFData LspLnSocketAddress where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
-             (_Msat'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_Msat'val x__) ())
+             (_LspLnSocketAddress'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_LspLnSocketAddress'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' Nonce Data.Word.Word64@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' Nonce Data.Word.Word64@ -}
 data Nonce
   = Nonce'_constructor {_Nonce'val :: !Data.Word.Word64,
                         _Nonce'_unknownFields :: !Data.ProtoLens.FieldSet}
@@ -1321,7 +1673,7 @@ instance Data.ProtoLens.Field.HasField Nonce "val" Data.Word.Word64 where
            _Nonce'val (\ x__ y__ -> x__ {_Nonce'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message Nonce where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.Nonce"
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.Nonce"
   packedMessageDescriptor _
     = "\n\
       \\ENQNonce\DC2\DLE\n\
@@ -1401,127 +1753,10 @@ instance Control.DeepSeq.NFData Nonce where
              (Control.DeepSeq.deepseq (_Nonce'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' OnChainAddress Data.Text.Text@ -}
-data OnChainAddress
-  = OnChainAddress'_constructor {_OnChainAddress'val :: !Data.Text.Text,
-                                 _OnChainAddress'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show OnChainAddress where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out OnChainAddress
-instance Data.ProtoLens.Field.HasField OnChainAddress "val" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _OnChainAddress'val (\ x__ y__ -> x__ {_OnChainAddress'val = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message OnChainAddress where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.OnChainAddress"
-  packedMessageDescriptor _
-    = "\n\
-      \\SOOnChainAddress\DC2\DLE\n\
-      \\ETXval\CAN\SOH \SOH(\tR\ETXval"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        val__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "val"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"val")) ::
-              Data.ProtoLens.FieldDescriptor OnChainAddress
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _OnChainAddress'_unknownFields
-        (\ x__ y__ -> x__ {_OnChainAddress'_unknownFields = y__})
-  defMessage
-    = OnChainAddress'_constructor
-        {_OnChainAddress'val = Data.ProtoLens.fieldDefault,
-         _OnChainAddress'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          OnChainAddress
-          -> Data.ProtoLens.Encoding.Bytes.Parser OnChainAddress
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
-                                       "val"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "OnChainAddress"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"val") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8
-                         _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData OnChainAddress where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_OnChainAddress'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_OnChainAddress'val x__) ())
-{- | Fields :
-     
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' RefundAmt Msat@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' RefundAmt (Prelude.Maybe Msat)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' RefundAmt Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' RefundAmt (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
 data RefundAmt
-  = RefundAmt'_constructor {_RefundAmt'val :: !(Prelude.Maybe Msat),
+  = RefundAmt'_constructor {_RefundAmt'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
                             _RefundAmt'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show RefundAmt where
@@ -1531,24 +1766,24 @@ instance Prelude.Show RefundAmt where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out RefundAmt
-instance Data.ProtoLens.Field.HasField RefundAmt "val" Msat where
+instance Data.ProtoLens.Field.HasField RefundAmt "val" Proto.BtcLsp.Data.LowLevel.Msat where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _RefundAmt'val (\ x__ y__ -> x__ {_RefundAmt'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RefundAmt "maybe'val" (Prelude.Maybe Msat) where
+instance Data.ProtoLens.Field.HasField RefundAmt "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _RefundAmt'val (\ x__ y__ -> x__ {_RefundAmt'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message RefundAmt where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.RefundAmt"
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.RefundAmt"
   packedMessageDescriptor _
     = "\n\
-      \\tRefundAmt\DC2+\n\
-      \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval"
+      \\tRefundAmt\DC2,\n\
+      \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1556,7 +1791,7 @@ instance Data.ProtoLens.Message RefundAmt where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Msat)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor RefundAmt
@@ -1634,10 +1869,10 @@ instance Control.DeepSeq.NFData RefundAmt where
              (Control.DeepSeq.deepseq (_RefundAmt'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' RefundOnChainAddress OnChainAddress@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' RefundOnChainAddress (Prelude.Maybe OnChainAddress)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' RefundOnChainAddress Proto.BtcLsp.Data.LowLevel.OnChainAddress@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' RefundOnChainAddress (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.OnChainAddress)@ -}
 data RefundOnChainAddress
-  = RefundOnChainAddress'_constructor {_RefundOnChainAddress'val :: !(Prelude.Maybe OnChainAddress),
+  = RefundOnChainAddress'_constructor {_RefundOnChainAddress'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.OnChainAddress),
                                        _RefundOnChainAddress'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show RefundOnChainAddress where
@@ -1647,14 +1882,14 @@ instance Prelude.Show RefundOnChainAddress where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out RefundOnChainAddress
-instance Data.ProtoLens.Field.HasField RefundOnChainAddress "val" OnChainAddress where
+instance Data.ProtoLens.Field.HasField RefundOnChainAddress "val" Proto.BtcLsp.Data.LowLevel.OnChainAddress where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _RefundOnChainAddress'val
            (\ x__ y__ -> x__ {_RefundOnChainAddress'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RefundOnChainAddress "maybe'val" (Prelude.Maybe OnChainAddress) where
+instance Data.ProtoLens.Field.HasField RefundOnChainAddress "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.OnChainAddress) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -1663,11 +1898,11 @@ instance Data.ProtoLens.Field.HasField RefundOnChainAddress "maybe'val" (Prelude
         Prelude.id
 instance Data.ProtoLens.Message RefundOnChainAddress where
   messageName _
-    = Data.Text.pack "BtcLsp.Data.Newtype.RefundOnChainAddress"
+    = Data.Text.pack "BtcLsp.Data.HighLevel.RefundOnChainAddress"
   packedMessageDescriptor _
     = "\n\
-      \\DC4RefundOnChainAddress\DC25\n\
-      \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.Newtype.OnChainAddressR\ETXval"
+      \\DC4RefundOnChainAddress\DC26\n\
+      \\ETXval\CAN\SOH \SOH(\v2$.BtcLsp.Data.LowLevel.OnChainAddressR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1675,7 +1910,7 @@ instance Data.ProtoLens.Message RefundOnChainAddress where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor OnChainAddress)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.OnChainAddress)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor RefundOnChainAddress
@@ -1756,10 +1991,10 @@ instance Control.DeepSeq.NFData RefundOnChainAddress where
              (Control.DeepSeq.deepseq (_RefundOnChainAddress'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' RemoteBalance Msat@
-         * 'Proto.BtcLsp.Data.Newtype_Fields.maybe'val' @:: Lens' RemoteBalance (Prelude.Maybe Msat)@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' RemoteBalance Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' RemoteBalance (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
 data RemoteBalance
-  = RemoteBalance'_constructor {_RemoteBalance'val :: !(Prelude.Maybe Msat),
+  = RemoteBalance'_constructor {_RemoteBalance'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
                                 _RemoteBalance'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show RemoteBalance where
@@ -1769,24 +2004,25 @@ instance Prelude.Show RemoteBalance where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out RemoteBalance
-instance Data.ProtoLens.Field.HasField RemoteBalance "val" Msat where
+instance Data.ProtoLens.Field.HasField RemoteBalance "val" Proto.BtcLsp.Data.LowLevel.Msat where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _RemoteBalance'val (\ x__ y__ -> x__ {_RemoteBalance'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RemoteBalance "maybe'val" (Prelude.Maybe Msat) where
+instance Data.ProtoLens.Field.HasField RemoteBalance "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _RemoteBalance'val (\ x__ y__ -> x__ {_RemoteBalance'val = y__}))
         Prelude.id
 instance Data.ProtoLens.Message RemoteBalance where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.RemoteBalance"
+  messageName _
+    = Data.Text.pack "BtcLsp.Data.HighLevel.RemoteBalance"
   packedMessageDescriptor _
     = "\n\
-      \\rRemoteBalance\DC2+\n\
-      \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval"
+      \\rRemoteBalance\DC2,\n\
+      \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -1794,7 +2030,7 @@ instance Data.ProtoLens.Message RemoteBalance where
           = Data.ProtoLens.FieldDescriptor
               "val"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Msat)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
               Data.ProtoLens.FieldDescriptor RemoteBalance
@@ -1872,414 +2108,352 @@ instance Control.DeepSeq.NFData RemoteBalance where
         -> Control.DeepSeq.deepseq
              (_RemoteBalance'_unknownFields x__)
              (Control.DeepSeq.deepseq (_RemoteBalance'val x__) ())
-{- | Fields :
-     
-         * 'Proto.BtcLsp.Data.Newtype_Fields.val' @:: Lens' SocketAddress Data.Text.Text@ -}
-data SocketAddress
-  = SocketAddress'_constructor {_SocketAddress'val :: !Data.Text.Text,
-                                _SocketAddress'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show SocketAddress where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out SocketAddress
-instance Data.ProtoLens.Field.HasField SocketAddress "val" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SocketAddress'val (\ x__ y__ -> x__ {_SocketAddress'val = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message SocketAddress where
-  messageName _ = Data.Text.pack "BtcLsp.Data.Newtype.SocketAddress"
-  packedMessageDescriptor _
-    = "\n\
-      \\rSocketAddress\DC2\DLE\n\
-      \\ETXval\CAN\SOH \SOH(\tR\ETXval"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        val__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "val"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"val")) ::
-              Data.ProtoLens.FieldDescriptor SocketAddress
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SocketAddress'_unknownFields
-        (\ x__ y__ -> x__ {_SocketAddress'_unknownFields = y__})
-  defMessage
-    = SocketAddress'_constructor
-        {_SocketAddress'val = Data.ProtoLens.fieldDefault,
-         _SocketAddress'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          SocketAddress -> Data.ProtoLens.Encoding.Bytes.Parser SocketAddress
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
-                                       "val"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SocketAddress"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"val") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8
-                         _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData SocketAddress where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_SocketAddress'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_SocketAddress'val x__) ())
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \\SUBbtc_lsp/data/newtype.proto\DC2\DC3BtcLsp.Data.Newtype\"\EM\n\
+    \\GSbtc_lsp/data/high_level.proto\DC2\NAKBtcLsp.Data.HighLevel\SUB\FSbtc_lsp/data/low_level.proto\"K\n\
+    \\DC2LspLnSocketAddress\DC25\n\
+    \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.LowLevel.SocketAddressR\ETXval\"<\n\
+    \\aFeeRate\DC21\n\
+    \\ETXval\CAN\SOH \SOH(\v2\US.BtcLsp.Data.LowLevel.UrationalR\ETXval\"6\n\
+    \\ACKFeeAmt\DC2,\n\
+    \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"7\n\
+    \\aFundAmt\DC2,\n\
+    \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"9\n\
+    \\tRefundAmt\DC2,\n\
+    \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"<\n\
+    \\fLocalBalance\DC2,\n\
+    \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"=\n\
+    \\rRemoteBalance\DC2,\n\
+    \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"B\n\
+    \\rFundLnInvoice\DC21\n\
+    \\ETXval\CAN\SOH \SOH(\v2\US.BtcLsp.Data.LowLevel.LnInvoiceR\ETXval\"J\n\
+    \\DC1FundLnHodlInvoice\DC25\n\
+    \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.LowLevel.LnHodlInvoiceR\ETXval\"L\n\
+    \\DC2FundOnChainAddress\DC26\n\
+    \\ETXval\CAN\SOH \SOH(\v2$.BtcLsp.Data.LowLevel.OnChainAddressR\ETXval\"N\n\
+    \\DC4RefundOnChainAddress\DC26\n\
+    \\ETXval\CAN\SOH \SOH(\v2$.BtcLsp.Data.LowLevel.OnChainAddressR\ETXval\"x\n\
+    \\ETXCtx\DC22\n\
+    \\ENQnonce\CAN\SOH \SOH(\v2\FS.BtcLsp.Data.HighLevel.NonceR\ENQnonce\DC2=\n\
+    \\n\
+    \ln_pub_key\CAN\STX \SOH(\v2\US.BtcLsp.Data.HighLevel.LnPubKeyR\blnPubKey\"\EM\n\
     \\ENQNonce\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\EOTR\ETXval\"\RS\n\
+    \\ETXval\CAN\SOH \SOH(\EOTR\ETXval\"\FS\n\
+    \\bLnPubKey\DC2\DLE\n\
+    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"\149\SOH\n\
+    \\fInputFailure\DC2H\n\
+    \\SOfield_location\CAN\SOH \ETX(\v2!.BtcLsp.Data.HighLevel.FieldIndexR\rfieldLocation\DC2;\n\
+    \\EOTkind\CAN\STX \SOH(\SO2'.BtcLsp.Data.HighLevel.InputFailureKindR\EOTkind\"\RS\n\
     \\n\
     \FieldIndex\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\rR\ETXval\"!\n\
-    \\rSocketAddress\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"\CAN\n\
-    \\EOTMsat\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\EOTR\ETXval\"5\n\
-    \\ACKFeeAmt\DC2+\n\
-    \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval\"6\n\
-    \\aFundAmt\DC2+\n\
-    \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval\"8\n\
-    \\tRefundAmt\DC2+\n\
-    \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval\";\n\
-    \\fLocalBalance\DC2+\n\
-    \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval\"<\n\
-    \\rRemoteBalance\DC2+\n\
-    \\ETXval\CAN\SOH \SOH(\v2\EM.BtcLsp.Data.Newtype.MsatR\ETXval\"\FS\n\
-    \\bLnPubKey\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"\GS\n\
-    \\tLnInvoice\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"!\n\
-    \\rLnHodlInvoice\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"A\n\
-    \\rFundLnInvoice\DC20\n\
-    \\ETXval\CAN\SOH \SOH(\v2\RS.BtcLsp.Data.Newtype.LnInvoiceR\ETXval\"I\n\
-    \\DC1FundLnHodlInvoice\DC24\n\
-    \\ETXval\CAN\SOH \SOH(\v2\".BtcLsp.Data.Newtype.LnHodlInvoiceR\ETXval\"\"\n\
-    \\SOOnChainAddress\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"K\n\
-    \\DC2FundOnChainAddress\DC25\n\
-    \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.Newtype.OnChainAddressR\ETXval\"M\n\
-    \\DC4RefundOnChainAddress\DC25\n\
-    \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.Newtype.OnChainAddressR\ETXvalJ\219\n\
-    \\n\
-    \\ACK\DC2\EOT\NUL\NULF\SOH\n\
+    \\ETXval\CAN\SOH \SOH(\rR\ETXval*\\\n\
+    \\DLEInputFailureKind\DC2\f\n\
+    \\bREQUIRED\DLE\NUL\DC2\r\n\
+    \\tNOT_FOUND\DLE\SOH\DC2\DC2\n\
+    \\SOPARSING_FAILED\DLE\STX\DC2\ETB\n\
+    \\DC3VERIFICATION_FAILED\DLE\ETXJ\246\DC1\n\
+    \\ACK\DC2\EOT\NUL\NUL^\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
-    \\b\n\
-    \\SOH\STX\DC2\ETX\STX\NUL\FS\n\
+    \P\n\
+    \\SOH\STX\DC2\ETX\a\NUL\RS2F\n\
+    \ HighLevel types are the only types\n\
+    \ used directly in Grpc Methods.\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT\EOT\NUL\ACK\SOH\n\
+    \\t\n\
+    \\STX\ETX\NUL\DC2\ETX\t\NUL&\n\
     \\n\
     \\n\
-    \\ETX\EOT\NUL\SOH\DC2\ETX\EOT\b\r\n\
+    \\STX\EOT\NUL\DC2\EOT\v\NUL\r\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\NUL\SOH\DC2\ETX\v\b\SUB\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\ENQ\STX\DC1\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\f\STX.\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\ENQ\STX\b\n\
+    \\ENQ\EOT\NUL\STX\NUL\ACK\DC2\ETX\f\STX%\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\ENQ\t\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\f&)\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\ENQ\SI\DLE\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\f,-\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\b\NUL\n\
-    \\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\SI\NUL\DC1\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\b\b\DC2\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\SI\b\SI\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\t\STX\DC1\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\DLE\STX*\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\t\STX\b\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\DLE\STX!\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\t\t\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\DLE\"%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\t\SI\DLE\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\DLE()\n\
     \\n\
     \\n\
-    \\STX\EOT\STX\DC2\EOT\f\NUL\SO\SOH\n\
+    \\STX\EOT\STX\DC2\EOT\DC3\NUL\NAK\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\f\b\NAK\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\DC3\b\SO\n\
     \\v\n\
-    \\EOT\EOT\STX\STX\NUL\DC2\ETX\r\STX\DC1\n\
+    \\EOT\EOT\STX\STX\NUL\DC2\ETX\DC4\STX%\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ENQ\DC2\ETX\r\STX\b\n\
+    \\ENQ\EOT\STX\STX\NUL\ACK\DC2\ETX\DC4\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\r\t\f\n\
+    \\ENQ\EOT\STX\STX\NUL\SOH\DC2\ETX\DC4\GS \n\
     \\f\n\
-    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\r\SI\DLE\n\
+    \\ENQ\EOT\STX\STX\NUL\ETX\DC2\ETX\DC4#$\n\
     \\n\
     \\n\
-    \\STX\EOT\ETX\DC2\EOT\DLE\NUL\DC2\SOH\n\
+    \\STX\EOT\ETX\DC2\EOT\ETB\NUL\EM\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX\DLE\b\f\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX\ETB\b\SI\n\
     \\v\n\
-    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\DC1\STX\DC1\n\
+    \\EOT\EOT\ETX\STX\NUL\DC2\ETX\CAN\STX%\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ENQ\DC2\ETX\DC1\STX\b\n\
+    \\ENQ\EOT\ETX\STX\NUL\ACK\DC2\ETX\CAN\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\DC1\t\f\n\
+    \\ENQ\EOT\ETX\STX\NUL\SOH\DC2\ETX\CAN\GS \n\
     \\f\n\
-    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\DC1\SI\DLE\n\
+    \\ENQ\EOT\ETX\STX\NUL\ETX\DC2\ETX\CAN#$\n\
     \\n\
     \\n\
-    \\STX\EOT\EOT\DC2\EOT\DC4\NUL\SYN\SOH\n\
+    \\STX\EOT\EOT\DC2\EOT\ESC\NUL\GS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX\DC4\b\SO\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX\ESC\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\EOT\STX\NUL\DC2\ETX\NAK\STX\SI\n\
+    \\EOT\EOT\EOT\STX\NUL\DC2\ETX\FS\STX%\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX\NAK\STX\ACK\n\
+    \\ENQ\EOT\EOT\STX\NUL\ACK\DC2\ETX\FS\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX\NAK\a\n\
-    \\n\
+    \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX\FS\GS \n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX\NAK\r\SO\n\
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX\FS#$\n\
     \\n\
     \\n\
-    \\STX\EOT\ENQ\DC2\EOT\CAN\NUL\SUB\SOH\n\
+    \\STX\EOT\ENQ\DC2\EOT\US\NUL!\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX\CAN\b\SI\n\
+    \\ETX\EOT\ENQ\SOH\DC2\ETX\US\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX\EM\STX\SI\n\
+    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX \STX%\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX\EM\STX\ACK\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ACK\DC2\ETX \STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX\EM\a\n\
-    \\n\
+    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX \GS \n\
     \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX\EM\r\SO\n\
+    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX #$\n\
     \\n\
     \\n\
-    \\STX\EOT\ACK\DC2\EOT\FS\NUL\RS\SOH\n\
+    \\STX\EOT\ACK\DC2\EOT#\NUL%\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ACK\SOH\DC2\ETX\FS\b\DC1\n\
+    \\ETX\EOT\ACK\SOH\DC2\ETX#\b\NAK\n\
     \\v\n\
-    \\EOT\EOT\ACK\STX\NUL\DC2\ETX\GS\STX\SI\n\
+    \\EOT\EOT\ACK\STX\NUL\DC2\ETX$\STX%\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETX\GS\STX\ACK\n\
+    \\ENQ\EOT\ACK\STX\NUL\ACK\DC2\ETX$\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX\GS\a\n\
-    \\n\
+    \\ENQ\EOT\ACK\STX\NUL\SOH\DC2\ETX$\GS \n\
     \\f\n\
-    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX\GS\r\SO\n\
+    \\ENQ\EOT\ACK\STX\NUL\ETX\DC2\ETX$#$\n\
     \\n\
     \\n\
-    \\STX\EOT\a\DC2\EOT \NUL\"\SOH\n\
+    \\STX\EOT\a\DC2\EOT'\NUL)\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\a\SOH\DC2\ETX \b\DC4\n\
+    \\ETX\EOT\a\SOH\DC2\ETX'\b\NAK\n\
     \\v\n\
-    \\EOT\EOT\a\STX\NUL\DC2\ETX!\STX\SI\n\
+    \\EOT\EOT\a\STX\NUL\DC2\ETX(\STX*\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ACK\DC2\ETX!\STX\ACK\n\
+    \\ENQ\EOT\a\STX\NUL\ACK\DC2\ETX(\STX!\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX!\a\n\
-    \\n\
+    \\ENQ\EOT\a\STX\NUL\SOH\DC2\ETX(\"%\n\
     \\f\n\
-    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX!\r\SO\n\
+    \\ENQ\EOT\a\STX\NUL\ETX\DC2\ETX(()\n\
     \\n\
     \\n\
-    \\STX\EOT\b\DC2\EOT$\NUL&\SOH\n\
+    \\STX\EOT\b\DC2\EOT+\NUL-\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\b\SOH\DC2\ETX$\b\NAK\n\
+    \\ETX\EOT\b\SOH\DC2\ETX+\b\EM\n\
     \\v\n\
-    \\EOT\EOT\b\STX\NUL\DC2\ETX%\STX\SI\n\
+    \\EOT\EOT\b\STX\NUL\DC2\ETX,\STX.\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ACK\DC2\ETX%\STX\ACK\n\
+    \\ENQ\EOT\b\STX\NUL\ACK\DC2\ETX,\STX%\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETX%\a\n\
-    \\n\
+    \\ENQ\EOT\b\STX\NUL\SOH\DC2\ETX,&)\n\
     \\f\n\
-    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETX%\r\SO\n\
+    \\ENQ\EOT\b\STX\NUL\ETX\DC2\ETX,,-\n\
     \\n\
     \\n\
-    \\STX\EOT\t\DC2\EOT(\NUL*\SOH\n\
+    \\STX\EOT\t\DC2\EOT/\NUL1\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\t\SOH\DC2\ETX(\b\DLE\n\
+    \\ETX\EOT\t\SOH\DC2\ETX/\b\SUB\n\
     \\v\n\
-    \\EOT\EOT\t\STX\NUL\DC2\ETX)\STX\DC1\n\
+    \\EOT\EOT\t\STX\NUL\DC2\ETX0\STX/\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ENQ\DC2\ETX)\STX\b\n\
+    \\ENQ\EOT\t\STX\NUL\ACK\DC2\ETX0\STX&\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETX)\t\f\n\
+    \\ENQ\EOT\t\STX\NUL\SOH\DC2\ETX0'*\n\
     \\f\n\
-    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETX)\SI\DLE\n\
+    \\ENQ\EOT\t\STX\NUL\ETX\DC2\ETX0-.\n\
     \\n\
     \\n\
     \\STX\EOT\n\
-    \\DC2\EOT,\NUL.\SOH\n\
+    \\DC2\EOT3\NUL5\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\n\
-    \\SOH\DC2\ETX,\b\DC1\n\
+    \\SOH\DC2\ETX3\b\FS\n\
     \\v\n\
     \\EOT\EOT\n\
-    \\STX\NUL\DC2\ETX-\STX\DC1\n\
+    \\STX\NUL\DC2\ETX4\STX/\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ENQ\DC2\ETX-\STX\b\n\
+    \\STX\NUL\ACK\DC2\ETX4\STX&\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\SOH\DC2\ETX-\t\f\n\
+    \\STX\NUL\SOH\DC2\ETX4'*\n\
     \\f\n\
     \\ENQ\EOT\n\
-    \\STX\NUL\ETX\DC2\ETX-\SI\DLE\n\
+    \\STX\NUL\ETX\DC2\ETX4-.\n\
     \\n\
     \\n\
-    \\STX\EOT\v\DC2\EOT0\NUL2\SOH\n\
+    \\STX\EOT\v\DC2\EOT7\NUL:\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\v\SOH\DC2\ETX0\b\NAK\n\
+    \\ETX\EOT\v\SOH\DC2\ETX7\b\v\n\
     \\v\n\
-    \\EOT\EOT\v\STX\NUL\DC2\ETX1\STX\DC1\n\
+    \\EOT\EOT\v\STX\NUL\DC2\ETX8\STX\DC2\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ENQ\DC2\ETX1\STX\b\n\
+    \\ENQ\EOT\v\STX\NUL\ACK\DC2\ETX8\STX\a\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETX1\t\f\n\
+    \\ENQ\EOT\v\STX\NUL\SOH\DC2\ETX8\b\r\n\
     \\f\n\
-    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETX1\SI\DLE\n\
-    \\n\
-    \\n\
-    \\STX\EOT\f\DC2\EOT4\NUL6\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\f\SOH\DC2\ETX4\b\NAK\n\
+    \\ENQ\EOT\v\STX\NUL\ETX\DC2\ETX8\DLE\DC1\n\
     \\v\n\
-    \\EOT\EOT\f\STX\NUL\DC2\ETX5\STX\DC4\n\
+    \\EOT\EOT\v\STX\SOH\DC2\ETX9\STX\SUB\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ACK\DC2\ETX5\STX\v\n\
+    \\ENQ\EOT\v\STX\SOH\ACK\DC2\ETX9\STX\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETX5\f\SI\n\
+    \\ENQ\EOT\v\STX\SOH\SOH\DC2\ETX9\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETX5\DC2\DC3\n\
+    \\ENQ\EOT\v\STX\SOH\ETX\DC2\ETX9\CAN\EM\n\
     \\n\
     \\n\
-    \\STX\EOT\r\DC2\EOT8\NUL:\SOH\n\
+    \\STX\EOT\f\DC2\EOT<\NUL>\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\r\SOH\DC2\ETX8\b\EM\n\
+    \\ETX\EOT\f\SOH\DC2\ETX<\b\r\n\
     \\v\n\
-    \\EOT\EOT\r\STX\NUL\DC2\ETX9\STX\CAN\n\
+    \\EOT\EOT\f\STX\NUL\DC2\ETX=\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ACK\DC2\ETX9\STX\SI\n\
+    \\ENQ\EOT\f\STX\NUL\ENQ\DC2\ETX=\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETX9\DLE\DC3\n\
+    \\ENQ\EOT\f\STX\NUL\SOH\DC2\ETX=\t\f\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETX9\SYN\ETB\n\
+    \\ENQ\EOT\f\STX\NUL\ETX\DC2\ETX=\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\EOT\SO\DC2\EOT<\NUL>\SOH\n\
+    \\STX\EOT\r\DC2\EOT@\NULB\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SO\SOH\DC2\ETX<\b\SYN\n\
+    \\ETX\EOT\r\SOH\DC2\ETX@\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\SO\STX\NUL\DC2\ETX=\STX\DC1\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETXA\STX\DC1\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ENQ\DC2\ETX=\STX\b\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\ETXA\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETX=\t\f\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXA\t\f\n\
     \\f\n\
-    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETX=\SI\DLE\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXA\SI\DLE\n\
     \\n\
     \\n\
-    \\STX\EOT\SI\DC2\EOT@\NULB\SOH\n\
+    \\STX\EOT\SO\DC2\EOTD\NULG\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SI\SOH\DC2\ETX@\b\SUB\n\
+    \\ETX\EOT\SO\SOH\DC2\ETXD\b\DC4\n\
     \\v\n\
-    \\EOT\EOT\SI\STX\NUL\DC2\ETXA\STX\EM\n\
+    \\EOT\EOT\SO\STX\NUL\DC2\ETXE\STX)\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ACK\DC2\ETXA\STX\DLE\n\
+    \\ENQ\EOT\SO\STX\NUL\EOT\DC2\ETXE\STX\n\
+    \\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETXA\DC1\DC4\n\
+    \\ENQ\EOT\SO\STX\NUL\ACK\DC2\ETXE\v\NAK\n\
     \\f\n\
-    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETXA\ETB\CAN\n\
-    \\n\
-    \\n\
-    \\STX\EOT\DLE\DC2\EOTD\NULF\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\DLE\SOH\DC2\ETXD\b\FS\n\
+    \\ENQ\EOT\SO\STX\NUL\SOH\DC2\ETXE\SYN$\n\
+    \\f\n\
+    \\ENQ\EOT\SO\STX\NUL\ETX\DC2\ETXE'(\n\
     \\v\n\
-    \\EOT\EOT\DLE\STX\NUL\DC2\ETXE\STX\EM\n\
+    \\EOT\EOT\SO\STX\SOH\DC2\ETXF\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\DLE\STX\NUL\ACK\DC2\ETXE\STX\DLE\n\
+    \\ENQ\EOT\SO\STX\SOH\ACK\DC2\ETXF\STX\DC2\n\
     \\f\n\
-    \\ENQ\EOT\DLE\STX\NUL\SOH\DC2\ETXE\DC1\DC4\n\
+    \\ENQ\EOT\SO\STX\SOH\SOH\DC2\ETXF\DC3\ETB\n\
     \\f\n\
-    \\ENQ\EOT\DLE\STX\NUL\ETX\DC2\ETXE\ETB\CANb\ACKproto3"
+    \\ENQ\EOT\SO\STX\SOH\ETX\DC2\ETXF\SUB\ESC\n\
+    \\n\
+    \\n\
+    \\STX\EOT\SI\DC2\EOTI\NULK\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SI\SOH\DC2\ETXI\b\DC2\n\
+    \\v\n\
+    \\EOT\EOT\SI\STX\NUL\DC2\ETXJ\STX\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\SI\STX\NUL\ENQ\DC2\ETXJ\STX\b\n\
+    \\f\n\
+    \\ENQ\EOT\SI\STX\NUL\SOH\DC2\ETXJ\t\f\n\
+    \\f\n\
+    \\ENQ\EOT\SI\STX\NUL\ETX\DC2\ETXJ\SI\DLE\n\
+    \\n\
+    \\n\
+    \\STX\ENQ\NUL\DC2\EOTM\NUL^\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\ENQ\NUL\SOH\DC2\ETXM\ENQ\NAK\n\
+    \l\n\
+    \\EOT\ENQ\NUL\STX\NUL\DC2\ETXP\STX\SI\SUB_ All proto3 messages are optional, but sometimes\n\
+    \ message presence is required by source code.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\NUL\SOH\DC2\ETXP\STX\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\NUL\STX\DC2\ETXP\r\SO\n\
+    \\182\SOH\n\
+    \\EOT\ENQ\NUL\STX\SOH\DC2\ETXT\STX\DLE\SUB\168\SOH Sometimes protobuf term is not data itself, but reference\n\
+    \ to some other data, located somewhere else, for example\n\
+    \ in database, and this resource might be not found.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\SOH\SOH\DC2\ETXT\STX\v\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\SOH\STX\DC2\ETXT\SO\SI\n\
+    \\201\SOH\n\
+    \\EOT\ENQ\NUL\STX\STX\DC2\ETXY\STX\NAK\SUB\187\SOH Sometimes data is required to be in some\n\
+    \ specific format (for example DER binary encoding)\n\
+    \ which is not the part of proto3 type system.\n\
+    \ This error shows the failure of custom parser.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\STX\SOH\DC2\ETXY\STX\DLE\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\STX\STX\DC2\ETXY\DC3\DC4\n\
+    \\157\SOH\n\
+    \\EOT\ENQ\NUL\STX\ETX\DC2\ETX]\STX\SUB\SUB\143\SOH Even if custom parser succeeded, sometimes data\n\
+    \ needs to be verified somehow, for example\n\
+    \ signature needs to be cryptographically verified.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETX]\STX\NAK\n\
+    \\f\n\
+    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETX]\CAN\EMb\ACKproto3"

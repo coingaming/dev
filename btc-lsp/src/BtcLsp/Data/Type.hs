@@ -5,9 +5,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Data.Type
-  ( TableName (..),
+  ( Nonce (..),
+    TableName (..),
+    LnInvoice (..),
     LnInvoiceStatus (..),
     LnChannelStatus (..),
+    OnChainAddress (..),
     FieldIndex (..),
     ReversedFieldLocation (..),
     Seconds (..),
@@ -15,12 +18,31 @@ module BtcLsp.Data.Type
     MicroSeconds (..),
     TaskRes (..),
     Timing (..),
+    SwapStatus (..),
   )
 where
 
+import BtcLsp.Data.Kind
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Language.Haskell.TH.Syntax as TH
+import qualified LndClient as Lnd
+
+newtype Nonce
+  = Nonce Word64
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Psql.PersistField,
+      Psql.PersistFieldSql
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out Nonce
 
 newtype FieldIndex
   = FieldIndex Word32
@@ -83,6 +105,20 @@ data TableName
     ( Enum
     )
 
+newtype LnInvoice (tdir :: TxDirection)
+  = LnInvoice Lnd.PaymentRequest
+  deriving newtype
+    ( Eq,
+      Show,
+      Psql.PersistField,
+      Psql.PersistFieldSql
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out (LnInvoice tdir)
+
 data LnInvoiceStatus
   = LnInvoiceStatusNew
   | LnInvoiceStatusLocked
@@ -115,6 +151,41 @@ data LnChannelStatus
 
 instance Out LnChannelStatus
 
+newtype OnChainAddress (tdir :: TxDirection)
+  = OnChainAddress Text
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Psql.PersistField,
+      Psql.PersistFieldSql
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out (OnChainAddress tdir)
+
+data SwapStatus
+  = SwapNew
+  | SwapWaitingFund
+  | SwapProcessing
+  | SwapWaitingRefund
+  | -- | Final statuses
+    SwapRefunded
+  | SwapSucceeded
+  deriving
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic,
+      Enum,
+      Bounded
+    )
+
+instance Out SwapStatus
+
 data Timing
   = Permanent
   | Temporary
@@ -139,3 +210,5 @@ data Error a = Error
 Psql.derivePersistField "LnInvoiceStatus"
 
 Psql.derivePersistField "LnChannelStatus"
+
+Psql.derivePersistField "SwapStatus"

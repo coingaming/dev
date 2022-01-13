@@ -1,9 +1,9 @@
-{- This file was auto-generated from btc_lsp/data/type.proto by the proto-lens-protoc program. -}
+{- This file was auto-generated from btc_lsp/data/high_level.proto by the proto-lens-protoc program. -}
 {-# LANGUAGE ScopedTypeVariables, DataKinds, TypeFamilies, UndecidableInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, PatternSynonyms, MagicHash, NoImplicitPrelude, BangPatterns, TypeApplications, OverloadedStrings, DerivingStrategies, DeriveGeneric#-}
 {-# OPTIONS_GHC -Wno-unused-imports#-}
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
-module Proto.BtcLsp.Data.Type_Fields where
+module Proto.BtcLsp.Data.HighLevel_Fields where
 import qualified Data.ProtoLens.Runtime.Prelude as Prelude
 import qualified Data.ProtoLens.Runtime.Data.Int as Data.Int
 import qualified Data.ProtoLens.Runtime.Data.Monoid as Data.Monoid
@@ -27,13 +27,7 @@ import qualified Data.ProtoLens.Runtime.Data.Vector as Data.Vector
 import qualified Data.ProtoLens.Runtime.Data.Vector.Generic as Data.Vector.Generic
 import qualified Data.ProtoLens.Runtime.Data.Vector.Unboxed as Data.Vector.Unboxed
 import qualified Data.ProtoLens.Runtime.Text.Read as Text.Read
-import qualified Proto.BtcLsp.Data.Newtype
-denominator ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "denominator" a) =>
-  Lens.Family2.LensLike' f s a
-denominator = Data.ProtoLens.Field.field @"denominator"
+import qualified Proto.BtcLsp.Data.LowLevel
 fieldLocation ::
   forall f s a.
   (Prelude.Functor f,
@@ -69,23 +63,11 @@ maybe'val ::
    Data.ProtoLens.Field.HasField s "maybe'val" a) =>
   Lens.Family2.LensLike' f s a
 maybe'val = Data.ProtoLens.Field.field @"maybe'val"
-negative ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "negative" a) =>
-  Lens.Family2.LensLike' f s a
-negative = Data.ProtoLens.Field.field @"negative"
 nonce ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "nonce" a) =>
   Lens.Family2.LensLike' f s a
 nonce = Data.ProtoLens.Field.field @"nonce"
-numerator ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "numerator" a) =>
-  Lens.Family2.LensLike' f s a
-numerator = Data.ProtoLens.Field.field @"numerator"
 val ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>

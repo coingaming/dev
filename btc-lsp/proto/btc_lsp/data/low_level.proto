@@ -1,0 +1,34 @@
+syntax="proto3";
+
+//
+// LowLevel types which are used only to
+// create HighLevel types, and are not used
+// directly in Grpc Methods.
+//
+
+package BtcLsp.Data.LowLevel;
+
+message SocketAddress {
+  string val = 1;
+}
+
+message Urational {
+  uint64 numerator = 1;
+  uint64 denominator = 2;
+}
+
+message Msat {
+  uint64 val = 1;
+}
+
+message LnInvoice {
+  string val = 1;
+}
+
+message LnHodlInvoice {
+  string val = 1;
+}
+
+message OnChainAddress {
+  string val = 1;
+}

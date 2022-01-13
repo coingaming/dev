@@ -92,8 +92,18 @@ import Katip as X
     runKatipContextT,
     sl,
   )
-import LndClient as X (LndError (..), MSat (..), TxId (..), TxKind (..), Vout (..))
-import LndClient.Import.External as X (inspect, inspectStr)
+import LndClient as X
+  ( LndError (..),
+    MSat (..),
+    NodePubKey (..),
+    TxId (..),
+    TxKind (..),
+    Vout (..),
+  )
+import LndClient.Import.External as X
+  ( inspect,
+    inspectStr,
+  )
 import LndClient.Util as X
   ( MicroSecondsDelay (..),
     readTChanTimeout,
