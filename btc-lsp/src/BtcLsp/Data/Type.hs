@@ -28,6 +28,7 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
+import qualified Proto.BtcLsp.Data.HighLevel as Proto
 
 newtype Nonce
   = Nonce Word64
@@ -211,6 +212,7 @@ data Error a = Error
 
 data Failure
   = FailureNonce
+  | FailureInput Proto.InputFailure
   deriving stock
     ( Eq,
       Ord,

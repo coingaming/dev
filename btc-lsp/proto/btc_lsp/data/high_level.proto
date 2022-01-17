@@ -73,7 +73,7 @@ message Nonce {
 }
 
 message LnPubKey {
-  string val = 1;
+  bytes val = 1;
 }
 
 message InputFailure {

@@ -1299,9 +1299,9 @@ instance Control.DeepSeq.NFData InputFailureKind where
 instance Text.PrettyPrint.GenericPretty.Out InputFailureKind
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' LnPubKey Data.Text.Text@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' LnPubKey Data.ByteString.ByteString@ -}
 data LnPubKey
-  = LnPubKey'_constructor {_LnPubKey'val :: !Data.Text.Text,
+  = LnPubKey'_constructor {_LnPubKey'val :: !Data.ByteString.ByteString,
                            _LnPubKey'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show LnPubKey where
@@ -1311,7 +1311,7 @@ instance Prelude.Show LnPubKey where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out LnPubKey
-instance Data.ProtoLens.Field.HasField LnPubKey "val" Data.Text.Text where
+instance Data.ProtoLens.Field.HasField LnPubKey "val" Data.ByteString.ByteString where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -1322,15 +1322,15 @@ instance Data.ProtoLens.Message LnPubKey where
   packedMessageDescriptor _
     = "\n\
       \\bLnPubKey\DC2\DLE\n\
-      \\ETXval\CAN\SOH \SOH(\tR\ETXval"
+      \\ETXval\CAN\SOH \SOH(\fR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
         val__field_descriptor
           = Data.ProtoLens.FieldDescriptor
               "val"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.ScalarField Data.ProtoLens.BytesField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.ByteString.ByteString)
               (Data.ProtoLens.PlainField
                  Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"val")) ::
               Data.ProtoLens.FieldDescriptor LnPubKey
@@ -1367,14 +1367,9 @@ instance Data.ProtoLens.Message LnPubKey where
                       case tag of
                         10
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.getBytes
+                                             (Prelude.fromIntegral len))
                                        "val"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
                         wire
@@ -1396,13 +1391,11 @@ instance Data.ProtoLens.Message LnPubKey where
                 else
                     (Data.Monoid.<>)
                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8
+                      ((\ bs
+                          -> (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
+                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                          _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
@@ -2141,7 +2134,7 @@ packedFileDescriptor
     \\ENQNonce\DC2\DLE\n\
     \\ETXval\CAN\SOH \SOH(\EOTR\ETXval\"\FS\n\
     \\bLnPubKey\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"\149\SOH\n\
+    \\ETXval\CAN\SOH \SOH(\fR\ETXval\"\149\SOH\n\
     \\fInputFailure\DC2H\n\
     \\SOfield_location\CAN\SOH \ETX(\v2!.BtcLsp.Data.HighLevel.FieldIndexR\rfieldLocation\DC2;\n\
     \\EOTkind\CAN\STX \SOH(\SO2'.BtcLsp.Data.HighLevel.InputFailureKindR\EOTkind\"\RS\n\
@@ -2376,13 +2369,13 @@ packedFileDescriptor
     \\n\
     \\ETX\EOT\r\SOH\DC2\ETXJ\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\r\STX\NUL\DC2\ETXK\STX\DC1\n\
+    \\EOT\EOT\r\STX\NUL\DC2\ETXK\STX\DLE\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\ETXK\STX\b\n\
+    \\ENQ\EOT\r\STX\NUL\ENQ\DC2\ETXK\STX\a\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXK\t\f\n\
+    \\ENQ\EOT\r\STX\NUL\SOH\DC2\ETXK\b\v\n\
     \\f\n\
-    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXK\SI\DLE\n\
+    \\ENQ\EOT\r\STX\NUL\ETX\DC2\ETXK\SO\SI\n\
     \\n\
     \\n\
     \\STX\EOT\SO\DC2\EOTN\NULQ\SOH\n\

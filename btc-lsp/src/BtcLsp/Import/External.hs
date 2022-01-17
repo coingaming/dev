@@ -3,6 +3,7 @@ module BtcLsp.Import.External
   )
 where
 
+import BtcLsp.Import.Witch as X
 import BtcLsp.ProtoLensGrpc.Client as X
 import BtcLsp.ProtoLensGrpc.Data as X
 import BtcLsp.ProtoLensGrpc.Server as X
@@ -28,7 +29,11 @@ import Control.Concurrent.STM.TChan as X
 import Control.Concurrent.Thread.Delay as X (delay)
 import Control.Error.Util as X (failWith, failWithM)
 import Control.Monad.Extra as X (maybeM)
-import Control.Monad.Trans.Except as X (throwE, withExceptT)
+import Control.Monad.Trans.Except as X
+  ( except,
+    throwE,
+    withExceptT,
+  )
 import Crypto.Hash as X (Digest, SHA256 (..), hashWith, hashlazy)
 import Crypto.Random as X (getRandomBytes)
 import Data.Aeson as X

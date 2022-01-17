@@ -9,5 +9,6 @@ import BtcLsp.Data.Env as X (readRawConfig, withEnv)
 import BtcLsp.Data.Kind as X
 import BtcLsp.Data.Type as X
 import BtcLsp.Import.External as X
+import BtcLsp.Instance.WitchOrphan as X ()
 import BtcLsp.Storage.Model as X hiding (Key (..))
 import BtcLsp.Storage.Util as X
