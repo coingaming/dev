@@ -10,10 +10,12 @@ import qualified BtcLsp.Import.Psql as Psql
 
 --
 -- TODO : create withVerifiedNonce because
--- actions with Bitcoin/LN should be atomic
+-- actions with Bitcoin/LN should be atomic???
 --
 createVerify ::
-  ( Storage m
+  forall m sql.
+  ( Storage m,
+    sql ~ ReaderT Psql.SqlBackend m (Either Failure (Entity User))
   ) =>
   NodePubKey ->
   Nonce ->
@@ -28,6 +30,16 @@ createVerify pub nonce = runSql $ do
             userInsertedAt = ct,
             userUpdatedAt = ct
           }
+  let success :: sql =
+        Right
+          <$> Psql.upsertBy
+            (UniqueUser pub)
+            zeroRow
+              { userLatestNonce = nonce
+              }
+            [ UserLatestNonce Psql.=. Psql.val nonce,
+              UserUpdatedAt Psql.=. Psql.val ct
+            ]
   rowId <-
     entityKey
       <$> Psql.upsertBy
@@ -49,17 +61,8 @@ createVerify pub nonce = runSql $ do
     entityVal
       <$> lockByRow rowId
   if existingRow == zeroRow
-    then
-      Right
-        <$> Psql.upsertBy
-          (UniqueUser pub)
-          zeroRow
-            { userLatestNonce = nonce
-            }
-          [ UserLatestNonce Psql.=. Psql.val nonce,
-            UserUpdatedAt Psql.=. Psql.val ct
-          ]
+    then success
     else
       if userLatestNonce existingRow < nonce
-        then error "TODO"
-        else error "TODO"
+        then success
+        else pure $ Left FailureNonce

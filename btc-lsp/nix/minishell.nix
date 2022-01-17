@@ -15,7 +15,7 @@ stdenv.mkDerivation {
     #
     # TODO : replace it with minimal possible dhall setup
     #
-    (import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/2229c801ed9833e270b797678fbc5be4f49943a8") {bundle = ["dhall"];})
+    (import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/f5aaaddd0a8efcde271cd497c86e300da608c4a8") {bundle = ["dhall"];})
   ];
   LANG="en_US.UTF-8";
   TERM="xterm-256color";

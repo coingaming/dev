@@ -10,7 +10,7 @@
     in
       {
         haskell-ide = import (
-          fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/26b9292cdde4a7977309dbb98291929c7f740d2a"
+          fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/f5aaaddd0a8efcde271cd497c86e300da608c4a8"
           ) {
             inherit vimBackground vimColorScheme;
           };

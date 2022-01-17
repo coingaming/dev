@@ -28,6 +28,7 @@ dependencies:
 - transformers
 - errors
 - extra
+- witch
 # time
 - time
 - chronos
@@ -103,6 +104,8 @@ default-extensions:
 - KindSignatures
 - FlexibleContexts
 - StrictData
+- TypeFamilies
+- TypeOperators
 
 ghc-options:
 # For details on warnings: https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html

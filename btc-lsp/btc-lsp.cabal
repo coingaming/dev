@@ -34,6 +34,7 @@ library
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
+      BtcLsp.Import.Witch
       BtcLsp.ProtoLensGrpc.Client
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
@@ -75,6 +76,8 @@ library
       KindSignatures
       FlexibleContexts
       StrictData
+      TypeFamilies
+      TypeOperators
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists
   build-depends:
       GenericPretty
@@ -131,6 +134,7 @@ library
     , warp
     , warp-grpc
     , warp-tls
+    , witch
   default-language: Haskell2010
 
 executable btc-lsp-exe
@@ -145,6 +149,7 @@ executable btc-lsp-exe
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
+      BtcLsp.Import.Witch
       BtcLsp.ProtoLensGrpc.Client
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
@@ -186,6 +191,8 @@ executable btc-lsp-exe
       KindSignatures
       FlexibleContexts
       StrictData
+      TypeFamilies
+      TypeOperators
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GenericPretty
@@ -242,6 +249,7 @@ executable btc-lsp-exe
     , warp
     , warp-grpc
     , warp-tls
+    , witch
   default-language: Haskell2010
 
 test-suite btc-lsp-test
@@ -257,6 +265,7 @@ test-suite btc-lsp-test
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
+      BtcLsp.Import.Witch
       BtcLsp.ProtoLensGrpc.Client
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
@@ -303,6 +312,8 @@ test-suite btc-lsp-test
       KindSignatures
       FlexibleContexts
       StrictData
+      TypeFamilies
+      TypeOperators
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GenericPretty
@@ -366,4 +377,5 @@ test-suite btc-lsp-test
     , warp
     , warp-grpc
     , warp-tls
+    , witch
   default-language: Haskell2010
