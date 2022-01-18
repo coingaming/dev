@@ -4,14 +4,14 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module BtcLsp.ProtoLensGrpc.Client
+module BtcLsp.Grpc.Client
   ( runUnary,
     GCEnv (..),
     GCPort (..),
   )
 where
 
-import BtcLsp.ProtoLensGrpc.Data
+import BtcLsp.Grpc.Data
 import Data.Aeson
   ( FromJSON (..),
     camelTo2,

@@ -3,7 +3,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module BtcLsp.ProtoLensGrpc.Data
+module BtcLsp.Grpc.Data
   ( GRel (..),
     PrvKey (..),
     PubKey (..),

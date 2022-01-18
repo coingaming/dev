@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module BtcLsp.ProtoLensGrpc.Server
+module BtcLsp.Grpc.Server
   ( GSEnv (..),
     runServer,
     serverApp,
@@ -10,7 +10,7 @@ module BtcLsp.ProtoLensGrpc.Server
   )
 where
 
-import BtcLsp.ProtoLensGrpc.Data
+import BtcLsp.Grpc.Data
 import Control.Exception (throwIO)
 import Data.Aeson (FromJSON (..), withObject, (.:))
 import qualified Data.CaseInsensitive as CI

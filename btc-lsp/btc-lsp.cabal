@@ -31,15 +31,15 @@ library
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
       BtcLsp.Data.Type
+      BtcLsp.Grpc.Client
+      BtcLsp.Grpc.Combinator
+      BtcLsp.Grpc.Data
+      BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
       BtcLsp.Instance.WitchOrphan
-      BtcLsp.ProtoLensGrpc.Client
-      BtcLsp.ProtoLensGrpc.Combinator
-      BtcLsp.ProtoLensGrpc.Data
-      BtcLsp.ProtoLensGrpc.Server
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
@@ -148,15 +148,15 @@ executable btc-lsp-exe
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
       BtcLsp.Data.Type
+      BtcLsp.Grpc.Client
+      BtcLsp.Grpc.Combinator
+      BtcLsp.Grpc.Data
+      BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
       BtcLsp.Instance.WitchOrphan
-      BtcLsp.ProtoLensGrpc.Client
-      BtcLsp.ProtoLensGrpc.Combinator
-      BtcLsp.ProtoLensGrpc.Data
-      BtcLsp.ProtoLensGrpc.Server
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
@@ -266,15 +266,15 @@ test-suite btc-lsp-test
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
       BtcLsp.Data.Type
+      BtcLsp.Grpc.Client
+      BtcLsp.Grpc.Combinator
+      BtcLsp.Grpc.Data
+      BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
       BtcLsp.Instance.WitchOrphan
-      BtcLsp.ProtoLensGrpc.Client
-      BtcLsp.ProtoLensGrpc.Combinator
-      BtcLsp.ProtoLensGrpc.Data
-      BtcLsp.ProtoLensGrpc.Server
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan

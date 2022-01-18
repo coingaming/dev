@@ -5,8 +5,8 @@ module BtcLsp.Thread.Server
   )
 where
 
+import BtcLsp.Grpc.Data
 import BtcLsp.Import hiding (Sig (..))
-import BtcLsp.ProtoLensGrpc.Data
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message

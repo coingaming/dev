@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 
-module BtcLsp.ProtoLensGrpc.Combinator
+module BtcLsp.Grpc.Combinator
   ( fromReqT,
     fromReqE,
     failResE,
