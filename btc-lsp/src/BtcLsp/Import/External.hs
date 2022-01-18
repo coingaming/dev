@@ -70,6 +70,7 @@ import Data.Time.Clock as X
     getCurrentTime,
     secondsToDiffTime,
   )
+import Data.Type.Equality as X (type (==))
 import Data.Word as X (Word64)
 import Database.Esqueleto.Legacy as X
   ( Entity (..),

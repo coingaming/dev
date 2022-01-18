@@ -1,8 +1,8 @@
 cradle:
   cabal:
     - path: "./src"
-      component: lib:lsp
+      component: lib:btc-lsp
     - path: "./app"
-      component: exe:lsp-exe
+      component: exe:btc-lsp-exe
     - path: "./test"
-      component: test:lsp-test
+      component: test:btc-lsp-test

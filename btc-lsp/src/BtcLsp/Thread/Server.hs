@@ -10,10 +10,6 @@ import BtcLsp.ProtoLensGrpc.Data
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
---
--- TODO : add to global imports?
---
-import Data.Type.Equality (type (==))
 import Lens.Micro
 import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Network.GRPC.Server
@@ -49,87 +45,65 @@ handlers run _ _ =
 
 withMiddleware ::
   ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
-    Message req,
+    HasField res "failure" failure,
+    HasField failure "input" [Proto.InputFailure],
+    HasField failure "internal" [internal],
+    Message res,
+    Message failure,
+    Message internal,
     Env m
   ) =>
   UnliftIO m ->
-  (req -> m res) ->
+  (Entity User -> req -> m res) ->
   Wai.Request ->
   req ->
   IO res
-withMiddleware (UnliftIO run) handler waiReq protoReq =
-  --
-  -- TODO : !!!
-  --
+withMiddleware (UnliftIO run) handler _ req =
   run $ do
     res <- runExceptT $ do
       nonce <-
         fromReqT $
-          protoReq
+          req
             ^? field @"maybe'ctx"
               . _Just
               . Proto.maybe'nonce
               . _Just
       pub <-
         fromReqT $
-          protoReq
+          req
             ^? field @"maybe'ctx"
               . _Just
               . Proto.maybe'lnPubKey
               . _Just
-      lift $
+      ExceptT $
         User.createVerify pub nonce
     case res of
-      Left {} -> undefined
-      Right {} -> handler protoReq
-
-fromReqT ::
-  forall a b m.
-  ( Monad m,
-    From a b,
-    'False ~ (a == b)
-  ) =>
-  Maybe a ->
-  ExceptT Failure m b
-fromReqT =
-  except
-    . fromReqE
-
-fromReqE ::
-  forall a b.
-  ( From a b,
-    'False ~ (a == b)
-  ) =>
-  Maybe a ->
-  Either Failure b
-fromReqE =
-  (from <$>)
-    . maybeToRight
-      --
-      -- TODO : replace with real error
-      --
-      (FailureInput defMessage)
+      Left e -> pure $ failResE e
+      Right user -> handler user req
 
 getCfg ::
   ( Monad m
   ) =>
+  Entity User ->
   GetCfg.Request ->
   m GetCfg.Response
-getCfg _ =
+getCfg _ _ =
   pure defMessage
 
 swapIntoLn ::
   ( Monad m
   ) =>
+  Entity User ->
   SwapIntoLn.Request ->
   m SwapIntoLn.Response
-swapIntoLn _ =
+swapIntoLn _ _ =
   pure defMessage
 
 swapFromLn ::
   ( Monad m
   ) =>
+  Entity User ->
   SwapFromLn.Request ->
   m SwapFromLn.Response
-swapFromLn _ =
+swapFromLn _ _ =
   pure defMessage

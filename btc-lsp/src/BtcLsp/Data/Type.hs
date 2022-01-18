@@ -212,7 +212,7 @@ data Error a = Error
 
 data Failure
   = FailureNonce
-  | FailureInput Proto.InputFailure
+  | FailureInput [Proto.InputFailure]
   deriving stock
     ( Eq,
       Ord,

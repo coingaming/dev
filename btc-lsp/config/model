@@ -23,6 +23,8 @@ LnChan
 
 SwapIntoLn
   userId UserId
+  -- Nonce is client-side reference
+  nonce Nonce
   fundInvoice (LnInvoice 'Fund)
   fundAddress (OnChainAddress 'Fund)
   refundAddress (OnChainAddress 'Refund)

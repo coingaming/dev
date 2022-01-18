@@ -37,6 +37,7 @@ library
       BtcLsp.Import.Witch
       BtcLsp.Instance.WitchOrphan
       BtcLsp.ProtoLensGrpc.Client
+      BtcLsp.ProtoLensGrpc.Combinator
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
       BtcLsp.Storage.Migration
@@ -153,6 +154,7 @@ executable btc-lsp-exe
       BtcLsp.Import.Witch
       BtcLsp.Instance.WitchOrphan
       BtcLsp.ProtoLensGrpc.Client
+      BtcLsp.ProtoLensGrpc.Combinator
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
       BtcLsp.Storage.Migration
@@ -270,6 +272,7 @@ test-suite btc-lsp-test
       BtcLsp.Import.Witch
       BtcLsp.Instance.WitchOrphan
       BtcLsp.ProtoLensGrpc.Client
+      BtcLsp.ProtoLensGrpc.Combinator
       BtcLsp.ProtoLensGrpc.Data
       BtcLsp.ProtoLensGrpc.Server
       BtcLsp.Storage.Migration

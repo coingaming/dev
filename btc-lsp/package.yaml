@@ -26,8 +26,8 @@ dependencies:
 - universum
 - containers
 - transformers
-- errors
 - extra
+- errors
 - witch
 # time
 - time
