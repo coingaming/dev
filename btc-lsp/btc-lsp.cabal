@@ -34,6 +34,7 @@ library
       BtcLsp.Grpc.Client
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
+      BtcLsp.Grpc.Method.SwapIntoLn
       BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
@@ -77,6 +78,7 @@ library
       DerivingStrategies
       KindSignatures
       FlexibleContexts
+      FlexibleInstances
       StrictData
       TypeFamilies
       TypeOperators
@@ -151,6 +153,7 @@ executable btc-lsp-exe
       BtcLsp.Grpc.Client
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
+      BtcLsp.Grpc.Method.SwapIntoLn
       BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
@@ -194,6 +197,7 @@ executable btc-lsp-exe
       DerivingStrategies
       KindSignatures
       FlexibleContexts
+      FlexibleInstances
       StrictData
       TypeFamilies
       TypeOperators
@@ -269,6 +273,7 @@ test-suite btc-lsp-test
       BtcLsp.Grpc.Client
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
+      BtcLsp.Grpc.Method.SwapIntoLn
       BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
@@ -317,6 +322,7 @@ test-suite btc-lsp-test
       DerivingStrategies
       KindSignatures
       FlexibleContexts
+      FlexibleInstances
       StrictData
       TypeFamilies
       TypeOperators

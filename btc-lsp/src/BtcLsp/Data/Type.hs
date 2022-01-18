@@ -5,7 +5,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Data.Type
-  ( Nonce (..),
+  ( Nonce,
     TableName (..),
     LnInvoice (..),
     LnInvoiceStatus (..),
@@ -45,6 +45,10 @@ newtype Nonce
     )
 
 instance Out Nonce
+
+instance From Nonce Word64
+
+instance From Word64 Nonce
 
 newtype FieldIndex
   = FieldIndex Word32
@@ -122,6 +126,10 @@ newtype LnInvoice (tdir :: TxDirection)
 
 instance Out (LnInvoice tdir)
 
+instance From Lnd.PaymentRequest (LnInvoice tdir)
+
+instance From (LnInvoice tdir) Lnd.PaymentRequest
+
 data LnInvoiceStatus
   = LnInvoiceStatusNew
   | LnInvoiceStatusLocked
@@ -168,6 +176,10 @@ newtype OnChainAddress (tdir :: TxDirection)
     )
 
 instance Out (OnChainAddress tdir)
+
+instance From Text (OnChainAddress tdir)
+
+instance From (OnChainAddress tdir) Text
 
 data SwapStatus
   = SwapNew

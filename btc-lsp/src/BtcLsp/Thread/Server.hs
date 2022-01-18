@@ -6,6 +6,7 @@ module BtcLsp.Thread.Server
 where
 
 import BtcLsp.Grpc.Data
+import qualified BtcLsp.Grpc.Method.SwapIntoLn as SwapIntoLn
 import BtcLsp.Import hiding (Sig (..))
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
@@ -19,7 +20,6 @@ import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
-import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 
 apply :: (Env m) => m ()
 apply = do
@@ -38,7 +38,7 @@ handlers run _ _ =
   [ unary (RPC :: RPC Service "getCfg") $
       withMiddleware run getCfg,
     unary (RPC :: RPC Service "swapIntoLn") $
-      withMiddleware run swapIntoLn,
+      withMiddleware run SwapIntoLn.apply,
     unary (RPC :: RPC Service "swapFromLn") $
       withMiddleware run swapFromLn
   ]
@@ -88,15 +88,6 @@ getCfg ::
   GetCfg.Request ->
   m GetCfg.Response
 getCfg _ _ =
-  pure defMessage
-
-swapIntoLn ::
-  ( Monad m
-  ) =>
-  Entity User ->
-  SwapIntoLn.Request ->
-  m SwapIntoLn.Response
-swapIntoLn _ _ =
   pure defMessage
 
 swapFromLn ::

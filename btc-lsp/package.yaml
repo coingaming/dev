@@ -103,6 +103,7 @@ default-extensions:
 - DerivingStrategies
 - KindSignatures
 - FlexibleContexts
+- FlexibleInstances
 - StrictData
 - TypeFamilies
 - TypeOperators

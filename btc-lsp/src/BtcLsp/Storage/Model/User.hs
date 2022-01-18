@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module BtcLsp.Storage.Model.User
   ( createVerify,
   )
@@ -22,7 +24,7 @@ createVerify pub nonce = runSql $ do
   let zeroRow =
         User
           { userNodePubKey = pub,
-            userLatestNonce = Nonce 0,
+            userLatestNonce = from @Word64 0,
             userInsertedAt = ct,
             userUpdatedAt = ct
           }
