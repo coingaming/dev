@@ -3,6 +3,7 @@ module BtcLsp.Import
   )
 where
 
+import BtcLsp.Cfg as X
 import BtcLsp.Class.Env as X (Env (..))
 import BtcLsp.Class.Storage as X (Storage (..))
 import BtcLsp.Data.Env as X (readRawConfig, withEnv)

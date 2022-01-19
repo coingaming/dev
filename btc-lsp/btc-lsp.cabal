@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      BtcLsp.Cfg
       BtcLsp.Class.Env
       BtcLsp.Class.Storage
       BtcLsp.Data.AppM
@@ -146,6 +147,7 @@ library
 executable btc-lsp-exe
   main-is: Main.hs
   other-modules:
+      BtcLsp.Cfg
       BtcLsp.Class.Env
       BtcLsp.Class.Storage
       BtcLsp.Data.AppM
@@ -268,6 +270,7 @@ test-suite btc-lsp-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      BtcLsp.Cfg
       BtcLsp.Class.Env
       BtcLsp.Class.Storage
       BtcLsp.Data.AppM

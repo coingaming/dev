@@ -3,6 +3,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Data.Type
   ( Nonce,
@@ -11,6 +12,7 @@ module BtcLsp.Data.Type
     LnInvoiceStatus (..),
     LnChanStatus (..),
     Money (..),
+    FeeRate (..),
     OnChainAddress (..),
     FieldIndex (..),
     ReversedFieldLocation (..),
@@ -25,11 +27,13 @@ module BtcLsp.Data.Type
 where
 
 import BtcLsp.Data.Kind
+import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
+import qualified Witch
 
 newtype Nonce
   = Nonce Word64
@@ -185,6 +189,45 @@ instance Out (Money owner btcl mrel)
 instance From MSat (Money owner btcl mrel)
 
 instance From (Money owner btcl mrel) MSat
+
+instance From Word64 (Money owner btcl mrel) where
+  from =
+    via @MSat
+
+instance From (Money owner btcl mrel) Word64 where
+  from =
+    via @MSat
+
+instance TryFrom Natural (Money owner btcl mrel) where
+  tryFrom =
+    from @Word64 `composeTryRhs` tryFrom
+
+instance From (Money owner btcl mrel) Natural where
+  from =
+    via @Word64
+
+--
+-- TODO : !!!
+--
+-- instance TryFrom  (Ratio Natural)  (Money owner btcl mrel)
+instance From (Money owner btcl mrel) (Ratio Natural) where
+  from =
+    via @Natural
+
+newtype FeeRate
+  = FeeRate (Ratio Natural)
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance From (Ratio Natural) FeeRate
+
+instance From FeeRate (Ratio Natural)
 
 newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text

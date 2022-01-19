@@ -1,65 +1,50 @@
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Storage.Model.SwapIntoLn
-  ( createVerify,
+  ( create,
   )
 where
 
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 
---
--- TODO : create withVerifiedNonce because
--- actions with Bitcoin/LN should be atomic???
---
-createVerify ::
+create ::
   ( Storage m
   ) =>
-  NodePubKey ->
-  Nonce ->
-  m (Either Failure (Entity User))
-createVerify pub nonce = runSql $ do
-  ct <-
-    liftIO getCurrentTime
-  let zeroRow =
-        User
-          { userNodePubKey = pub,
-            userLatestNonce = from @Word64 0,
-            userInsertedAt = ct,
-            userUpdatedAt = ct
-          }
-  rowId <-
-    entityKey
-      <$> Psql.upsertBy
-        (UniqueUser pub)
-        zeroRow
-        --
-        -- TODO : this update is redundant, but upsertBy is
-        -- not working with mempty update argument -
-        -- probably it's a bug in Esqueleto implementation,
-        -- check it in latest version, and if not fixed -
-        -- report issue or just fix it.
-        --
-        -- UPDATE : reported in github
-        -- https://github.com/bitemyapp/esqueleto/issues/294
-        --
-        [ UserNodePubKey Psql.=. Psql.val pub
-        ]
-  existingRow <-
-    entityVal
-      <$> lockByRow rowId
-  if (existingRow == zeroRow)
-    || (userLatestNonce existingRow < nonce)
-    then
-      Right
-        <$> Psql.upsertBy
-          (UniqueUser pub)
-          zeroRow
-            { userLatestNonce = nonce
-            }
-          [ UserLatestNonce Psql.=. Psql.val nonce,
-            UserUpdatedAt Psql.=. Psql.val ct
-          ]
-    else
-      pure $
-        Left FailureNonce
+  Entity User ->
+  LnInvoice 'Fund ->
+  OnChainAddress 'Fund ->
+  OnChainAddress 'Refund ->
+  Money 'Usr 'Ln 'Fund ->
+  UTCTime ->
+  m (Entity SwapIntoLn)
+create
+  userEnt
+  fundInvoice
+  fundAddress
+  refundAddress
+  chanCapUser
+  expiresAt = runSql $ do
+    ct <-
+      liftIO getCurrentTime
+    Psql.upsertBy
+      (UniqueSwapIntoLn nonce)
+      SwapIntoLn
+        { swapIntoLnUserId = entityKey userEnt,
+          swapIntoLnNonce = nonce,
+          swapIntoLnFundInvoice = fundInvoice,
+          swapIntoLnFundAddress = fundAddress,
+          swapIntoLnRefundAddress = refundAddress,
+          swapIntoLnChanCapUser = chanCapUser,
+          swapIntoLnChanCapLsp = newChanCapLsp chanCapUser,
+          swapIntoLnFeeLsp = newSwapIntoLnFee chanCapUser,
+          swapIntoLnFeeMiner = Money 0,
+          swapIntoLnStatus = SwapNew,
+          swapIntoLnExpiresAt = expiresAt,
+          swapIntoLnInsertedAt = ct,
+          swapIntoLnUpdatedAt = ct
+        }
+      [ SwapIntoLnNonce Psql.=. Psql.val nonce
+      ]
+    where
+      nonce = userLatestNonce $ entityVal userEnt

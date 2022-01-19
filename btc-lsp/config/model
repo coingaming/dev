@@ -28,7 +28,7 @@ SwapIntoLn
   fundInvoice (LnInvoice 'Fund)
   fundAddress (OnChainAddress 'Fund)
   refundAddress (OnChainAddress 'Refund)
-  chanCapUser (Money 'Customer 'Ln 'Fund)
+  chanCapUser (Money 'Usr 'Ln 'Fund)
   chanCapLsp (Money 'Lsp 'Ln 'Fund)
   feeLsp (Money 'Lsp 'OnChain 'Gain)
   feeMiner (Money 'Lsp 'OnChain 'Loss)
@@ -36,6 +36,5 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
-  UniqueSwapIntoLnFundInvoice fundInvoice
-  UniqueSwapIntoLnFundAddress fundAddress
+  UniqueSwapIntoLn nonce
   deriving Eq Show Generic

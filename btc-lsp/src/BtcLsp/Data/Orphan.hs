@@ -13,3 +13,7 @@ import qualified LndClient as Lnd
 instance From Text Lnd.PaymentRequest
 
 instance From Lnd.PaymentRequest Text
+
+instance From Word64 MSat
+
+instance From MSat Word64

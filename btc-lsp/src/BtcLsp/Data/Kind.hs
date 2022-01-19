@@ -31,7 +31,7 @@ data BitcoinLayer
 
 data Owner
   = Lsp
-  | Customer
+  | Usr
   deriving
     ( Eq,
       Ord,
