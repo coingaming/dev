@@ -9,22 +9,8 @@ User
   UniqueUser nodePubKey
   deriving Eq Show Generic
 
-LnChan
-  userId UserId
-  fundingTxId (TxId 'Funding)
-  fundingVout (Vout 'Funding)
-  closingTxId (TxId 'Closing) Maybe
-  numUpdates Word64
-  status LnChanStatus
-  insertedAt UTCTime
-  updatedAt UTCTime
-  UniqueLnChan fundingTxId fundingVout
-  deriving Eq Show Generic
-
 SwapIntoLn
   userId UserId
-  -- Nonce is client-side reference
-  nonce Nonce
   fundInvoice (LnInvoice 'Fund)
   fundAddress (OnChainAddress 'Fund)
   refundAddress (OnChainAddress 'Refund)
@@ -36,5 +22,18 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
-  UniqueSwapIntoLn nonce
+  UniqueSwapIntoLn fundInvoice
   deriving Eq Show Generic
+
+LnChan
+  swapIntoLnId SwapIntoLnId
+  fundingTxId (TxId 'Funding)
+  fundingVout (Vout 'Funding)
+  closingTxId (TxId 'Closing) Maybe
+  numUpdates Word64
+  status LnChanStatus
+  insertedAt UTCTime
+  updatedAt UTCTime
+  UniqueLnChan fundingTxId fundingVout
+  deriving Eq Show Generic
+

@@ -12,12 +12,12 @@ import qualified BtcLsp.Import.Psql as Psql
 createIgnore ::
   ( Storage m
   ) =>
-  UserId ->
+  SwapIntoLnId ->
   TxId 'Funding ->
   Vout 'Funding ->
   LnChanStatus ->
   m (Entity LnChan)
-createIgnore uid txid vout ss = runSql $ do
+createIgnore swapId txid vout ss = runSql $ do
   ct <- liftIO getCurrentTime
   Psql.upsertBy
     (UniqueLnChan txid vout)
@@ -38,7 +38,7 @@ createIgnore uid txid vout ss = runSql $ do
   where
     this ct0 =
       LnChan
-        { lnChanUserId = uid,
+        { lnChanSwapIntoLnId = swapId,
           lnChanFundingTxId = txid,
           lnChanFundingVout = vout,
           lnChanClosingTxId = Nothing,

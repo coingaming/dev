@@ -249,10 +249,19 @@ instance From Text (OnChainAddress mrel)
 instance From (OnChainAddress mrel) Text
 
 data SwapStatus
-  = SwapNew
-  | SwapWaitingFund
-  | SwapProcessing
-  | SwapWaitingRefund
+  = -- | Waiting on-chain funding trx with
+    -- given amt from user with
+    -- some confirmations.
+    SwapWaitingFund
+  | -- | Waiting channel opening trx
+    -- to be mined with some confirmations.
+    SwapWaitingChan
+  | -- | Swap has been funded with insufficient
+    -- non-dust amt, but funding invoice has
+    -- been expired. Then lsp is doing refund
+    -- into given refund on-chain address and
+    -- waiting for some confirmations.
+    SwapWaitingRefund
   | -- | Final statuses
     SwapRefunded
   | SwapSucceeded

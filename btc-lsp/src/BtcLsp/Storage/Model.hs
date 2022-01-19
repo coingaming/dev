@@ -43,6 +43,12 @@ instance Out (Psql.Key User)
 
 instance Out User
 
+deriving stock instance Generic (Psql.Key SwapIntoLn)
+
+instance Out (Psql.Key SwapIntoLn)
+
+instance Out SwapIntoLn
+
 deriving stock instance Generic (Psql.Key LnChan)
 
 instance Out (Psql.Key LnChan)

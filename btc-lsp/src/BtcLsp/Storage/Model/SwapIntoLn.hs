@@ -18,33 +18,25 @@ create ::
   Money 'Usr 'Ln 'Fund ->
   UTCTime ->
   m (Entity SwapIntoLn)
-create
-  userEnt
-  fundInvoice
-  fundAddress
-  refundAddress
-  chanCapUser
-  expiresAt = runSql $ do
+create userEnt fundInv fundAddr refundAddr userCap expAt =
+  runSql $ do
     ct <-
       liftIO getCurrentTime
     Psql.upsertBy
-      (UniqueSwapIntoLn nonce)
+      (UniqueSwapIntoLn fundInv)
       SwapIntoLn
         { swapIntoLnUserId = entityKey userEnt,
-          swapIntoLnNonce = nonce,
-          swapIntoLnFundInvoice = fundInvoice,
-          swapIntoLnFundAddress = fundAddress,
-          swapIntoLnRefundAddress = refundAddress,
-          swapIntoLnChanCapUser = chanCapUser,
-          swapIntoLnChanCapLsp = newChanCapLsp chanCapUser,
-          swapIntoLnFeeLsp = newSwapIntoLnFee chanCapUser,
+          swapIntoLnFundInvoice = fundInv,
+          swapIntoLnFundAddress = fundAddr,
+          swapIntoLnRefundAddress = refundAddr,
+          swapIntoLnChanCapUser = userCap,
+          swapIntoLnChanCapLsp = newChanCapLsp userCap,
+          swapIntoLnFeeLsp = newSwapIntoLnFee userCap,
           swapIntoLnFeeMiner = Money 0,
-          swapIntoLnStatus = SwapNew,
-          swapIntoLnExpiresAt = expiresAt,
+          swapIntoLnStatus = SwapWaitingFund,
+          swapIntoLnExpiresAt = expAt,
           swapIntoLnInsertedAt = ct,
           swapIntoLnUpdatedAt = ct
         }
-      [ SwapIntoLnNonce Psql.=. Psql.val nonce
+      [ SwapIntoLnFundInvoice Psql.=. Psql.val fundInv
       ]
-    where
-      nonce = userLatestNonce $ entityVal userEnt
