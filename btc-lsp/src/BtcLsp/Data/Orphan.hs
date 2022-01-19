@@ -1,0 +1,15 @@
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
+
+module BtcLsp.Data.Orphan () where
+
+import BtcLsp.Import.External
+import qualified LndClient as Lnd
+
+--
+-- TODO : smart constuctors are needed!!!
+--
+
+instance From Text Lnd.PaymentRequest
+
+instance From Lnd.PaymentRequest Text

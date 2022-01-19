@@ -255,7 +255,7 @@ instance Data.ProtoLens.Message Response where
       \\bResponse\DC2,\n\
       \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2B\n\
       \\asuccess\CAN\STX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.SuccessH\NULR\asuccess\DC2B\n\
-      \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\185\EOT\n\
+      \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\187\EOT\n\
       \\aSuccess\DC2K\n\
       \\flsp_ln_nodes\CAN\SOH \ETX(\v2).BtcLsp.Data.HighLevel.LspLnSocketAddressR\n\
       \lspLnNodes\DC2S\n\
@@ -263,8 +263,8 @@ instance Data.ProtoLens.Message Response where
       \\DC4swap_into_ln_max_amt\CAN\ETX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMaxAmt\DC2S\n\
       \\DC4swap_from_ln_min_amt\CAN\EOT \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapFromLnMinAmt\DC2S\n\
       \\DC4swap_from_ln_max_amt\CAN\ENQ \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapFromLnMaxAmt\DC2G\n\
-      \\DLEswap_ln_fee_rate\CAN\ACK \SOH(\v2\RS.BtcLsp.Data.HighLevel.FeeRateR\rswapLnFeeRate\DC2D\n\
-      \\SIswap_ln_min_fee\CAN\a \SOH(\v2\GS.BtcLsp.Data.HighLevel.FeeAmtR\fswapLnMinFee\SUB\171\SOH\n\
+      \\DLEswap_ln_fee_rate\CAN\ACK \SOH(\v2\RS.BtcLsp.Data.HighLevel.FeeRateR\rswapLnFeeRate\DC2F\n\
+      \\SIswap_ln_min_fee\CAN\a \SOH(\v2\US.BtcLsp.Data.HighLevel.FeeMoneyR\fswapLnMinFee\SUB\171\SOH\n\
       \\aFailure\DC29\n\
       \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2R\n\
       \\binternal\CAN\STX \ETX(\v26.BtcLsp.Method.GetCfg.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
@@ -726,8 +726,8 @@ instance Control.DeepSeq.NFData Response'Failure'InternalFailure where
          * 'Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapFromLnMaxAmt' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance)@
          * 'Proto.BtcLsp.Method.GetCfg_Fields.swapLnFeeRate' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FeeRate@
          * 'Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapLnFeeRate' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeRate)@
-         * 'Proto.BtcLsp.Method.GetCfg_Fields.swapLnMinFee' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FeeAmt@
-         * 'Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapLnMinFee' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeAmt)@ -}
+         * 'Proto.BtcLsp.Method.GetCfg_Fields.swapLnMinFee' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FeeMoney@
+         * 'Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapLnMinFee' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeMoney)@ -}
 data Response'Success
   = Response'Success'_constructor {_Response'Success'lspLnNodes :: !(Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress),
                                    _Response'Success'swapIntoLnMinAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance),
@@ -735,7 +735,7 @@ data Response'Success
                                    _Response'Success'swapFromLnMinAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance),
                                    _Response'Success'swapFromLnMaxAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance),
                                    _Response'Success'swapLnFeeRate :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeRate),
-                                   _Response'Success'swapLnMinFee :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeAmt),
+                                   _Response'Success'swapLnMinFee :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeMoney),
                                    _Response'Success'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show Response'Success where
@@ -831,14 +831,14 @@ instance Data.ProtoLens.Field.HasField Response'Success "maybe'swapLnFeeRate" (P
            _Response'Success'swapLnFeeRate
            (\ x__ y__ -> x__ {_Response'Success'swapLnFeeRate = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField Response'Success "swapLnMinFee" Proto.BtcLsp.Data.HighLevel.FeeAmt where
+instance Data.ProtoLens.Field.HasField Response'Success "swapLnMinFee" Proto.BtcLsp.Data.HighLevel.FeeMoney where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _Response'Success'swapLnMinFee
            (\ x__ y__ -> x__ {_Response'Success'swapLnMinFee = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Response'Success "maybe'swapLnMinFee" (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeAmt) where
+instance Data.ProtoLens.Field.HasField Response'Success "maybe'swapLnMinFee" (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeMoney) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -857,8 +857,8 @@ instance Data.ProtoLens.Message Response'Success where
       \\DC4swap_into_ln_max_amt\CAN\ETX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMaxAmt\DC2S\n\
       \\DC4swap_from_ln_min_amt\CAN\EOT \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapFromLnMinAmt\DC2S\n\
       \\DC4swap_from_ln_max_amt\CAN\ENQ \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapFromLnMaxAmt\DC2G\n\
-      \\DLEswap_ln_fee_rate\CAN\ACK \SOH(\v2\RS.BtcLsp.Data.HighLevel.FeeRateR\rswapLnFeeRate\DC2D\n\
-      \\SIswap_ln_min_fee\CAN\a \SOH(\v2\GS.BtcLsp.Data.HighLevel.FeeAmtR\fswapLnMinFee"
+      \\DLEswap_ln_fee_rate\CAN\ACK \SOH(\v2\RS.BtcLsp.Data.HighLevel.FeeRateR\rswapLnFeeRate\DC2F\n\
+      \\SIswap_ln_min_fee\CAN\a \SOH(\v2\US.BtcLsp.Data.HighLevel.FeeMoneyR\fswapLnMinFee"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -915,7 +915,7 @@ instance Data.ProtoLens.Message Response'Success where
           = Data.ProtoLens.FieldDescriptor
               "swap_ln_min_fee"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.FeeAmt)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.FeeMoney)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'swapLnMinFee")) ::
               Data.ProtoLens.FieldDescriptor Response'Success
@@ -1204,11 +1204,11 @@ packedFileDescriptor
   = "\n\
     \\FSbtc_lsp/method/get_cfg.proto\DC2\DC4BtcLsp.Method.GetCfg\SUB\GSbtc_lsp/data/high_level.proto\"7\n\
     \\aRequest\DC2,\n\
-    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\"\180\a\n\
+    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\"\182\a\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2B\n\
     \\asuccess\CAN\STX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.SuccessH\NULR\asuccess\DC2B\n\
-    \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\185\EOT\n\
+    \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\187\EOT\n\
     \\aSuccess\DC2K\n\
     \\flsp_ln_nodes\CAN\SOH \ETX(\v2).BtcLsp.Data.HighLevel.LspLnSocketAddressR\n\
     \lspLnNodes\DC2S\n\
@@ -1216,8 +1216,8 @@ packedFileDescriptor
     \\DC4swap_into_ln_max_amt\CAN\ETX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMaxAmt\DC2S\n\
     \\DC4swap_from_ln_min_amt\CAN\EOT \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapFromLnMinAmt\DC2S\n\
     \\DC4swap_from_ln_max_amt\CAN\ENQ \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapFromLnMaxAmt\DC2G\n\
-    \\DLEswap_ln_fee_rate\CAN\ACK \SOH(\v2\RS.BtcLsp.Data.HighLevel.FeeRateR\rswapLnFeeRate\DC2D\n\
-    \\SIswap_ln_min_fee\CAN\a \SOH(\v2\GS.BtcLsp.Data.HighLevel.FeeAmtR\fswapLnMinFee\SUB\171\SOH\n\
+    \\DLEswap_ln_fee_rate\CAN\ACK \SOH(\v2\RS.BtcLsp.Data.HighLevel.FeeRateR\rswapLnFeeRate\DC2F\n\
+    \\SIswap_ln_min_fee\CAN\a \SOH(\v2\US.BtcLsp.Data.HighLevel.FeeMoneyR\fswapLnMinFee\SUB\171\SOH\n\
     \\aFailure\DC29\n\
     \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2R\n\
     \\binternal\CAN\STX \ETX(\v26.BtcLsp.Method.GetCfg.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
@@ -1340,16 +1340,16 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\NUL\STX\ENQ\ETX\DC2\ETX\FS67\n\
     \7\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\ACK\DC2\ETX\GS\EOT6\"(\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\ACK\DC2\ETX\GS\EOT8\"(\n\
     \ TODO : add open/close sat/vb fees???\n\
     \\n\
     \\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ACK\ACK\DC2\ETX\GS\EOT!\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ACK\ACK\DC2\ETX\GS\EOT#\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ACK\SOH\DC2\ETX\GS\"1\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ACK\SOH\DC2\ETX\GS$3\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ACK\ETX\DC2\ETX\GS45\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ACK\ETX\DC2\ETX\GS67\n\
     \\f\n\
     \\EOT\EOT\SOH\ETX\SOH\DC2\EOT#\STX*\ETX\n\
     \\f\n\

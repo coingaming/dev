@@ -17,15 +17,15 @@ message FeeRate {
   .BtcLsp.Data.LowLevel.Urational val = 1;
 }
 
-message FeeAmt {
+message FeeMoney {
   .BtcLsp.Data.LowLevel.Msat val = 1;
 }
 
-message FundAmt {
+message FundMoney {
   .BtcLsp.Data.LowLevel.Msat val = 1;
 }
 
-message RefundAmt {
+message RefundMoney {
   .BtcLsp.Data.LowLevel.Msat val = 1;
 }
 

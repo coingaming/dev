@@ -28,10 +28,10 @@ SwapIntoLn
   fundInvoice (LnInvoice 'Fund)
   fundAddress (OnChainAddress 'Fund)
   refundAddress (OnChainAddress 'Refund)
-  amtUser
-  amtLsp
-  feeOnChain
-  feeLsp
+  chanCapUser (Money 'Customer 'Ln 'Fund)
+  chanCapLsp (Money 'Lsp 'Ln 'Fund)
+  feeLsp (Money 'Lsp 'OnChain 'Gain)
+  feeMiner (Money 'Lsp 'OnChain 'Loss)
   status SwapStatus
   expiresAt UTCTime
   insertedAt UTCTime

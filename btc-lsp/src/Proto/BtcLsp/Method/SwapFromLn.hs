@@ -41,13 +41,13 @@ import qualified Proto.BtcLsp.Data.HighLevel
      
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.ctx' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.Ctx@
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'ctx' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.Ctx)@
-         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.fundAmt' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.FundAmt@
-         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundAmt' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundAmt)@
+         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.fundMoney' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.FundMoney@
+         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundMoney' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundMoney)@
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.fundOnChainAddress' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.FundOnChainAddress@
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundOnChainAddress' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundOnChainAddress)@ -}
 data Request
   = Request'_constructor {_Request'ctx :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.Ctx),
-                          _Request'fundAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundAmt),
+                          _Request'fundMoney :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundMoney),
                           _Request'fundOnChainAddress :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundOnChainAddress),
                           _Request'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
@@ -70,17 +70,17 @@ instance Data.ProtoLens.Field.HasField Request "maybe'ctx" (Prelude.Maybe Proto.
         (Lens.Family2.Unchecked.lens
            _Request'ctx (\ x__ y__ -> x__ {_Request'ctx = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField Request "fundAmt" Proto.BtcLsp.Data.HighLevel.FundAmt where
+instance Data.ProtoLens.Field.HasField Request "fundMoney" Proto.BtcLsp.Data.HighLevel.FundMoney where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Request'fundAmt (\ x__ y__ -> x__ {_Request'fundAmt = y__}))
+           _Request'fundMoney (\ x__ y__ -> x__ {_Request'fundMoney = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Request "maybe'fundAmt" (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundAmt) where
+instance Data.ProtoLens.Field.HasField Request "maybe'fundMoney" (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundMoney) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Request'fundAmt (\ x__ y__ -> x__ {_Request'fundAmt = y__}))
+           _Request'fundMoney (\ x__ y__ -> x__ {_Request'fundMoney = y__}))
         Prelude.id
 instance Data.ProtoLens.Field.HasField Request "fundOnChainAddress" Proto.BtcLsp.Data.HighLevel.FundOnChainAddress where
   fieldOf _
@@ -101,8 +101,9 @@ instance Data.ProtoLens.Message Request where
   packedMessageDescriptor _
     = "\n\
       \\aRequest\DC2,\n\
-      \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC29\n\
-      \\bfund_amt\CAN\STX \SOH(\v2\RS.BtcLsp.Data.HighLevel.FundAmtR\afundAmt\DC2\\\n\
+      \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2?\n\
+      \\n\
+      \fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\tfundMoney\DC2\\\n\
       \\NAKfund_on_chain_address\CAN\ETX \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -115,13 +116,13 @@ instance Data.ProtoLens.Message Request where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'ctx")) ::
               Data.ProtoLens.FieldDescriptor Request
-        fundAmt__field_descriptor
+        fundMoney__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "fund_amt"
+              "fund_money"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.FundAmt)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.FundMoney)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'fundAmt")) ::
+                 (Data.ProtoLens.Field.field @"maybe'fundMoney")) ::
               Data.ProtoLens.FieldDescriptor Request
         fundOnChainAddress__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -134,7 +135,7 @@ instance Data.ProtoLens.Message Request where
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, ctx__field_descriptor),
-           (Data.ProtoLens.Tag 2, fundAmt__field_descriptor),
+           (Data.ProtoLens.Tag 2, fundMoney__field_descriptor),
            (Data.ProtoLens.Tag 3, fundOnChainAddress__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
@@ -143,7 +144,7 @@ instance Data.ProtoLens.Message Request where
   defMessage
     = Request'_constructor
         {_Request'ctx = Prelude.Nothing,
-         _Request'fundAmt = Prelude.Nothing,
+         _Request'fundMoney = Prelude.Nothing,
          _Request'fundOnChainAddress = Prelude.Nothing,
          _Request'_unknownFields = []}
   parseMessage
@@ -179,8 +180,9 @@ instance Data.ProtoLens.Message Request where
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "fund_amt"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"fundAmt") y x)
+                                       "fund_money"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"fundMoney") y x)
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -219,7 +221,8 @@ instance Data.ProtoLens.Message Request where
                           _v))
              ((Data.Monoid.<>)
                 (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'fundAmt") _x
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'fundMoney") _x
                  of
                    Prelude.Nothing -> Data.Monoid.mempty
                    (Prelude.Just _v)
@@ -260,7 +263,7 @@ instance Control.DeepSeq.NFData Request where
              (Control.DeepSeq.deepseq
                 (_Request'ctx x__)
                 (Control.DeepSeq.deepseq
-                   (_Request'fundAmt x__)
+                   (_Request'fundMoney x__)
                    (Control.DeepSeq.deepseq (_Request'fundOnChainAddress x__) ())))
 {- | Fields :
      
@@ -944,10 +947,11 @@ instance Control.DeepSeq.NFData Response'Success where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \!btc_lsp/method/swap_from_ln.proto\DC2\CANBtcLsp.Method.SwapFromLn\SUB\GSbtc_lsp/data/high_level.proto\"\208\SOH\n\
+    \!btc_lsp/method/swap_from_ln.proto\DC2\CANBtcLsp.Method.SwapFromLn\SUB\GSbtc_lsp/data/high_level.proto\"\214\SOH\n\
     \\aRequest\DC2,\n\
-    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC29\n\
-    \\bfund_amt\CAN\STX \SOH(\v2\RS.BtcLsp.Data.HighLevel.FundAmtR\afundAmt\DC2\\\n\
+    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2?\n\
+    \\n\
+    \fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\tfundMoney\DC2\\\n\
     \\NAKfund_on_chain_address\CAN\ETX \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\"\234\ETX\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
@@ -983,13 +987,13 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\a#$\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\b\STX.\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\b\STX2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\b\STX \n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\b\STX\"\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\b!)\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\b#-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\b,-\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\b01\n\
     \\v\n\
     \\EOT\EOT\NUL\STX\STX\DC2\ETX\t\STXF\n\
     \\f\n\

@@ -369,10 +369,11 @@ instance Data.ProtoLens.Message Response where
       \\bResponse\DC2,\n\
       \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
       \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.SuccessH\NULR\asuccess\DC2F\n\
-      \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\162\SOH\n\
+      \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\168\SOH\n\
       \\aSuccess\DC2\\\n\
-      \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC29\n\
-      \\bfund_amt\CAN\STX \SOH(\v2\RS.BtcLsp.Data.HighLevel.FundAmtR\afundAmt\SUB\175\SOH\n\
+      \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2?\n\
+      \\n\
+      \fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\tfundMoney\SUB\175\SOH\n\
       \\aFailure\DC29\n\
       \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2V\n\
       \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
@@ -824,11 +825,11 @@ instance Control.DeepSeq.NFData Response'Failure'InternalFailure where
      
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.fundOnChainAddress' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FundOnChainAddress@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundOnChainAddress' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundOnChainAddress)@
-         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.fundAmt' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FundAmt@
-         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundAmt' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundAmt)@ -}
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.fundMoney' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FundMoney@
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundMoney' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundMoney)@ -}
 data Response'Success
   = Response'Success'_constructor {_Response'Success'fundOnChainAddress :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundOnChainAddress),
-                                   _Response'Success'fundAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundAmt),
+                                   _Response'Success'fundMoney :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundMoney),
                                    _Response'Success'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show Response'Success where
@@ -852,19 +853,19 @@ instance Data.ProtoLens.Field.HasField Response'Success "maybe'fundOnChainAddres
            _Response'Success'fundOnChainAddress
            (\ x__ y__ -> x__ {_Response'Success'fundOnChainAddress = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField Response'Success "fundAmt" Proto.BtcLsp.Data.HighLevel.FundAmt where
+instance Data.ProtoLens.Field.HasField Response'Success "fundMoney" Proto.BtcLsp.Data.HighLevel.FundMoney where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Response'Success'fundAmt
-           (\ x__ y__ -> x__ {_Response'Success'fundAmt = y__}))
+           _Response'Success'fundMoney
+           (\ x__ y__ -> x__ {_Response'Success'fundMoney = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Response'Success "maybe'fundAmt" (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundAmt) where
+instance Data.ProtoLens.Field.HasField Response'Success "maybe'fundMoney" (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundMoney) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Response'Success'fundAmt
-           (\ x__ y__ -> x__ {_Response'Success'fundAmt = y__}))
+           _Response'Success'fundMoney
+           (\ x__ y__ -> x__ {_Response'Success'fundMoney = y__}))
         Prelude.id
 instance Data.ProtoLens.Message Response'Success where
   messageName _
@@ -872,8 +873,9 @@ instance Data.ProtoLens.Message Response'Success where
   packedMessageDescriptor _
     = "\n\
       \\aSuccess\DC2\\\n\
-      \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC29\n\
-      \\bfund_amt\CAN\STX \SOH(\v2\RS.BtcLsp.Data.HighLevel.FundAmtR\afundAmt"
+      \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2?\n\
+      \\n\
+      \fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\tfundMoney"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -885,18 +887,18 @@ instance Data.ProtoLens.Message Response'Success where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'fundOnChainAddress")) ::
               Data.ProtoLens.FieldDescriptor Response'Success
-        fundAmt__field_descriptor
+        fundMoney__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "fund_amt"
+              "fund_money"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.FundAmt)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.FundMoney)
               (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'fundAmt")) ::
+                 (Data.ProtoLens.Field.field @"maybe'fundMoney")) ::
               Data.ProtoLens.FieldDescriptor Response'Success
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, fundOnChainAddress__field_descriptor),
-           (Data.ProtoLens.Tag 2, fundAmt__field_descriptor)]
+           (Data.ProtoLens.Tag 2, fundMoney__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Response'Success'_unknownFields
@@ -904,7 +906,7 @@ instance Data.ProtoLens.Message Response'Success where
   defMessage
     = Response'Success'_constructor
         {_Response'Success'fundOnChainAddress = Prelude.Nothing,
-         _Response'Success'fundAmt = Prelude.Nothing,
+         _Response'Success'fundMoney = Prelude.Nothing,
          _Response'Success'_unknownFields = []}
   parseMessage
     = let
@@ -943,8 +945,9 @@ instance Data.ProtoLens.Message Response'Success where
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                            Data.ProtoLens.Encoding.Bytes.isolate
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "fund_amt"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"fundAmt") y x)
+                                       "fund_money"
+                                loop
+                                  (Lens.Family2.set (Data.ProtoLens.Field.field @"fundMoney") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -975,7 +978,8 @@ instance Data.ProtoLens.Message Response'Success where
                           _v))
              ((Data.Monoid.<>)
                 (case
-                     Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'fundAmt") _x
+                     Lens.Family2.view
+                       (Data.ProtoLens.Field.field @"maybe'fundMoney") _x
                  of
                    Prelude.Nothing -> Data.Monoid.mempty
                    (Prelude.Just _v)
@@ -998,7 +1002,7 @@ instance Control.DeepSeq.NFData Response'Success where
              (_Response'Success'_unknownFields x__)
              (Control.DeepSeq.deepseq
                 (_Response'Success'fundOnChainAddress x__)
-                (Control.DeepSeq.deepseq (_Response'Success'fundAmt x__) ()))
+                (Control.DeepSeq.deepseq (_Response'Success'fundMoney x__) ()))
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
@@ -1006,14 +1010,15 @@ packedFileDescriptor
     \\aRequest\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2L\n\
     \\SIfund_ln_invoice\CAN\STX \SOH(\v2$.BtcLsp.Data.HighLevel.FundLnInvoiceR\rfundLnInvoice\DC2b\n\
-    \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\"\169\EOT\n\
+    \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\"\175\EOT\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
     \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.SuccessH\NULR\asuccess\DC2F\n\
-    \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\162\SOH\n\
+    \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\168\SOH\n\
     \\aSuccess\DC2\\\n\
-    \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC29\n\
-    \\bfund_amt\CAN\STX \SOH(\v2\RS.BtcLsp.Data.HighLevel.FundAmtR\afundAmt\SUB\175\SOH\n\
+    \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2?\n\
+    \\n\
+    \fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\tfundMoney\SUB\175\SOH\n\
     \\aFailure\DC29\n\
     \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2V\n\
     \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
@@ -1105,13 +1110,13 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\NAKFG\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\SYN\EOT0\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\SYN\EOT4\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\SYN\EOT\"\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\SYN\EOT$\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\SYN#+\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\SYN%/\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\SYN./\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\SYN23\n\
     \\f\n\
     \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\EM\STX \ETX\n\
     \\f\n\

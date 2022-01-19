@@ -38,17 +38,18 @@ failure ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failure" a) =>
   Lens.Family2.LensLike' f s a
 failure = Data.ProtoLens.Field.field @"failure"
-fundAmt ::
-  forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "fundAmt" a) =>
-  Lens.Family2.LensLike' f s a
-fundAmt = Data.ProtoLens.Field.field @"fundAmt"
 fundLnInvoice ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "fundLnInvoice" a) =>
   Lens.Family2.LensLike' f s a
 fundLnInvoice = Data.ProtoLens.Field.field @"fundLnInvoice"
+fundMoney ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "fundMoney" a) =>
+  Lens.Family2.LensLike' f s a
+fundMoney = Data.ProtoLens.Field.field @"fundMoney"
 fundOnChainAddress ::
   forall f s a.
   (Prelude.Functor f,
@@ -85,12 +86,6 @@ maybe'failure ::
    Data.ProtoLens.Field.HasField s "maybe'failure" a) =>
   Lens.Family2.LensLike' f s a
 maybe'failure = Data.ProtoLens.Field.field @"maybe'failure"
-maybe'fundAmt ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'fundAmt" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'fundAmt = Data.ProtoLens.Field.field @"maybe'fundAmt"
 maybe'fundLnInvoice ::
   forall f s a.
   (Prelude.Functor f,
@@ -98,6 +93,12 @@ maybe'fundLnInvoice ::
   Lens.Family2.LensLike' f s a
 maybe'fundLnInvoice
   = Data.ProtoLens.Field.field @"maybe'fundLnInvoice"
+maybe'fundMoney ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'fundMoney" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'fundMoney = Data.ProtoLens.Field.field @"maybe'fundMoney"
 maybe'fundOnChainAddress ::
   forall f s a.
   (Prelude.Functor f,

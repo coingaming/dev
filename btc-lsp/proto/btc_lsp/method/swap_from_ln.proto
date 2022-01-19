@@ -6,7 +6,7 @@ import "btc_lsp/data/high_level.proto";
 
 message Request {
   .BtcLsp.Data.HighLevel.Ctx ctx = 1;
-  .BtcLsp.Data.HighLevel.FundAmt fund_amt = 2;
+  .BtcLsp.Data.HighLevel.FundMoney fund_money = 2;
   .BtcLsp.Data.HighLevel.FundOnChainAddress fund_on_chain_address = 3;
 }
 

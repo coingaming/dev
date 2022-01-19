@@ -10,6 +10,7 @@ module BtcLsp.Data.Type
     LnInvoice (..),
     LnInvoiceStatus (..),
     LnChanStatus (..),
+    Money (..),
     OnChainAddress (..),
     FieldIndex (..),
     ReversedFieldLocation (..),
@@ -112,7 +113,7 @@ data TableName
     ( Enum
     )
 
-newtype LnInvoice (tdir :: TxDirection)
+newtype LnInvoice (mrel :: MoneyRelation)
   = LnInvoice Lnd.PaymentRequest
   deriving newtype
     ( Eq,
@@ -124,11 +125,11 @@ newtype LnInvoice (tdir :: TxDirection)
     ( Generic
     )
 
-instance Out (LnInvoice tdir)
+instance Out (LnInvoice mrel)
 
-instance From Lnd.PaymentRequest (LnInvoice tdir)
+instance From Lnd.PaymentRequest (LnInvoice mrel)
 
-instance From (LnInvoice tdir) Lnd.PaymentRequest
+instance From (LnInvoice mrel) Lnd.PaymentRequest
 
 data LnInvoiceStatus
   = LnInvoiceStatusNew
@@ -162,7 +163,30 @@ data LnChanStatus
 
 instance Out LnChanStatus
 
-newtype OnChainAddress (tdir :: TxDirection)
+newtype
+  Money
+    (owner :: Owner)
+    (btcl :: BitcoinLayer)
+    (mrel :: MoneyRelation)
+  = Money MSat
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Psql.PersistField,
+      Psql.PersistFieldSql
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out (Money owner btcl mrel)
+
+instance From MSat (Money owner btcl mrel)
+
+instance From (Money owner btcl mrel) MSat
+
+newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text
   deriving newtype
     ( Eq,
@@ -175,11 +199,11 @@ newtype OnChainAddress (tdir :: TxDirection)
     ( Generic
     )
 
-instance Out (OnChainAddress tdir)
+instance Out (OnChainAddress mrel)
 
-instance From Text (OnChainAddress tdir)
+instance From Text (OnChainAddress mrel)
 
-instance From (OnChainAddress tdir) Text
+instance From (OnChainAddress mrel) Text
 
 data SwapStatus
   = SwapNew

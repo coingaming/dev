@@ -119,7 +119,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.FeeRate where
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.FeeAmt where
+instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.FeeMoney where
   toBinary
     = Universum.mconcat
         Universum..
@@ -131,7 +131,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.FeeAmt where
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.FundAmt where
+instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.FundMoney where
   toBinary
     = Universum.mconcat
         Universum..
@@ -143,7 +143,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.FundAmt where
                    Universum.. Data.Signable.toBinary)
                 Universum.mempty]
              Universum.. (Universum.&))
-instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.RefundAmt where
+instance Data.Signable.Signable Proto.BtcLsp.Data.HighLevel.RefundMoney where
   toBinary
     = Universum.mconcat
         Universum..
@@ -470,7 +470,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Method.SwapIntoLn.Response'Success 
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundAmt)
+                   Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundMoney)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)
@@ -511,7 +511,7 @@ instance Data.Signable.Signable Proto.BtcLsp.Method.SwapFromLn.Request where
                 Universum.mempty,
               Data.Signable.applyWithDef
                 (Universum.view
-                   Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundAmt)
+                   Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundMoney)
                 Universum.isJust
                 ((Universum.<>) (Data.Signable.toBinary (2 :: Universum.Int32))
                    Universum.. Data.Signable.toBinary)

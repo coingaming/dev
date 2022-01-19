@@ -1,9 +1,10 @@
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module BtcLsp.Instance.WitchOrphan () where
+module BtcLsp.Grpc.Orphan () where
 
 import BtcLsp.Data.Kind
+import BtcLsp.Data.Orphan ()
 import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import Data.ProtoLens.Field
@@ -42,7 +43,7 @@ intoProto ::
   proto
 intoProto x =
   defMessage
-    & field @"val" .~ (from x)
+    & field @"val" .~ from x
 
 instance From Proto.Nonce Nonce where
   from = fromProto
@@ -57,20 +58,16 @@ instance From Proto.LnPubKey NodePubKey where
 instance From NodePubKey Proto.LnPubKey where
   from x =
     defMessage
-      & Proto.val .~ (coerce x)
+      & Proto.val .~ coerce x
 
-instance From Text Lnd.PaymentRequest
-
-instance From Lnd.PaymentRequest Text
-
-instance From Proto.LnInvoice (LnInvoice tdir) where
+instance From Proto.LnInvoice (LnInvoice mrel) where
   from =
     via @Lnd.PaymentRequest . (^. Proto.val)
 
-instance From (LnInvoice tdir) Proto.LnInvoice where
+instance From (LnInvoice mrel) Proto.LnInvoice where
   from x =
     defMessage
-      & Proto.val .~ (via @Lnd.PaymentRequest x)
+      & Proto.val .~ via @Lnd.PaymentRequest x
 
 instance From Proto.FundLnInvoice (LnInvoice 'Fund) where
   from = fromProto
@@ -78,10 +75,10 @@ instance From Proto.FundLnInvoice (LnInvoice 'Fund) where
 instance From (LnInvoice 'Fund) Proto.FundLnInvoice where
   from = intoProto
 
-instance From Proto.OnChainAddress (OnChainAddress tdir) where
+instance From Proto.OnChainAddress (OnChainAddress mrel) where
   from = fromProto
 
-instance From (OnChainAddress tdir) Proto.OnChainAddress where
+instance From (OnChainAddress mrel) Proto.OnChainAddress where
   from = intoProto
 
 instance From Proto.RefundOnChainAddress (OnChainAddress 'Refund) where

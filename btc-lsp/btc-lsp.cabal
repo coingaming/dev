@@ -30,20 +30,22 @@ library
       BtcLsp.Data.AppM
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
+      BtcLsp.Data.Orphan
       BtcLsp.Data.Type
       BtcLsp.Grpc.Client
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
       BtcLsp.Grpc.Method.SwapIntoLn
+      BtcLsp.Grpc.Orphan
       BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
-      BtcLsp.Instance.WitchOrphan
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
+      BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
@@ -149,20 +151,22 @@ executable btc-lsp-exe
       BtcLsp.Data.AppM
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
+      BtcLsp.Data.Orphan
       BtcLsp.Data.Type
       BtcLsp.Grpc.Client
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
       BtcLsp.Grpc.Method.SwapIntoLn
+      BtcLsp.Grpc.Orphan
       BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
-      BtcLsp.Instance.WitchOrphan
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
+      BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
@@ -269,20 +273,22 @@ test-suite btc-lsp-test
       BtcLsp.Data.AppM
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
+      BtcLsp.Data.Orphan
       BtcLsp.Data.Type
       BtcLsp.Grpc.Client
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
       BtcLsp.Grpc.Method.SwapIntoLn
+      BtcLsp.Grpc.Orphan
       BtcLsp.Grpc.Server
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
-      BtcLsp.Instance.WitchOrphan
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
+      BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main

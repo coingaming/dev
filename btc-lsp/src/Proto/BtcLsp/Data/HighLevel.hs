@@ -4,12 +4,12 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.BtcLsp.Data.HighLevel (
-        Ctx(), FeeAmt(), FeeRate(), FieldIndex(), FundAmt(),
-        FundLnHodlInvoice(), FundLnInvoice(), FundOnChainAddress(),
-        InputFailure(), InputFailureKind(..), InputFailureKind(),
+        Ctx(), FeeMoney(), FeeRate(), FieldIndex(), FundLnHodlInvoice(),
+        FundLnInvoice(), FundMoney(), FundOnChainAddress(), InputFailure(),
+        InputFailureKind(..), InputFailureKind(),
         InputFailureKind'UnrecognizedValue, LnPubKey(), LocalBalance(),
-        LspLnSocketAddress(), Nonce(), RefundAmt(), RefundOnChainAddress(),
-        RemoteBalance()
+        LspLnSocketAddress(), Nonce(), RefundMoney(),
+        RefundOnChainAddress(), RemoteBalance()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -210,36 +210,36 @@ instance Control.DeepSeq.NFData Ctx where
                 (_Ctx'nonce x__) (Control.DeepSeq.deepseq (_Ctx'lnPubKey x__) ()))
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FeeAmt Proto.BtcLsp.Data.LowLevel.Msat@
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FeeAmt (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
-data FeeAmt
-  = FeeAmt'_constructor {_FeeAmt'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
-                         _FeeAmt'_unknownFields :: !Data.ProtoLens.FieldSet}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FeeMoney Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FeeMoney (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
+data FeeMoney
+  = FeeMoney'_constructor {_FeeMoney'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
+                           _FeeMoney'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show FeeAmt where
+instance Prelude.Show FeeMoney where
   showsPrec _ __x __s
     = Prelude.showChar
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out FeeAmt
-instance Data.ProtoLens.Field.HasField FeeAmt "val" Proto.BtcLsp.Data.LowLevel.Msat where
+instance Text.PrettyPrint.GenericPretty.Out FeeMoney
+instance Data.ProtoLens.Field.HasField FeeMoney "val" Proto.BtcLsp.Data.LowLevel.Msat where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _FeeAmt'val (\ x__ y__ -> x__ {_FeeAmt'val = y__}))
+           _FeeMoney'val (\ x__ y__ -> x__ {_FeeMoney'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FeeAmt "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
+instance Data.ProtoLens.Field.HasField FeeMoney "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _FeeAmt'val (\ x__ y__ -> x__ {_FeeAmt'val = y__}))
+           _FeeMoney'val (\ x__ y__ -> x__ {_FeeMoney'val = y__}))
         Prelude.id
-instance Data.ProtoLens.Message FeeAmt where
-  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FeeAmt"
+instance Data.ProtoLens.Message FeeMoney where
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FeeMoney"
   packedMessageDescriptor _
     = "\n\
-      \\ACKFeeAmt\DC2,\n\
+      \\bFeeMoney\DC2,\n\
       \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -251,19 +251,19 @@ instance Data.ProtoLens.Message FeeAmt where
                  Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
-              Data.ProtoLens.FieldDescriptor FeeAmt
+              Data.ProtoLens.FieldDescriptor FeeMoney
       in
         Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
-        _FeeAmt'_unknownFields
-        (\ x__ y__ -> x__ {_FeeAmt'_unknownFields = y__})
+        _FeeMoney'_unknownFields
+        (\ x__ y__ -> x__ {_FeeMoney'_unknownFields = y__})
   defMessage
-    = FeeAmt'_constructor
-        {_FeeAmt'val = Prelude.Nothing, _FeeAmt'_unknownFields = []}
+    = FeeMoney'_constructor
+        {_FeeMoney'val = Prelude.Nothing, _FeeMoney'_unknownFields = []}
   parseMessage
     = let
-        loop :: FeeAmt -> Data.ProtoLens.Encoding.Bytes.Parser FeeAmt
+        loop :: FeeMoney -> Data.ProtoLens.Encoding.Bytes.Parser FeeMoney
         loop x
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
@@ -297,7 +297,7 @@ instance Data.ProtoLens.Message FeeAmt where
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "FeeAmt"
+          (do loop Data.ProtoLens.defMessage) "FeeMoney"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
@@ -318,12 +318,12 @@ instance Data.ProtoLens.Message FeeAmt where
                           _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData FeeAmt where
+instance Control.DeepSeq.NFData FeeMoney where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
-             (_FeeAmt'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_FeeAmt'val x__) ())
+             (_FeeMoney'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_FeeMoney'val x__) ())
 {- | Fields :
      
          * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FeeRate Proto.BtcLsp.Data.LowLevel.Urational@
@@ -545,122 +545,6 @@ instance Control.DeepSeq.NFData FieldIndex where
         -> Control.DeepSeq.deepseq
              (_FieldIndex'_unknownFields x__)
              (Control.DeepSeq.deepseq (_FieldIndex'val x__) ())
-{- | Fields :
-     
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundAmt Proto.BtcLsp.Data.LowLevel.Msat@
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FundAmt (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
-data FundAmt
-  = FundAmt'_constructor {_FundAmt'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
-                          _FundAmt'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show FundAmt where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out FundAmt
-instance Data.ProtoLens.Field.HasField FundAmt "val" Proto.BtcLsp.Data.LowLevel.Msat where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _FundAmt'val (\ x__ y__ -> x__ {_FundAmt'val = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField FundAmt "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _FundAmt'val (\ x__ y__ -> x__ {_FundAmt'val = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message FundAmt where
-  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FundAmt"
-  packedMessageDescriptor _
-    = "\n\
-      \\aFundAmt\DC2,\n\
-      \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        val__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "val"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'val")) ::
-              Data.ProtoLens.FieldDescriptor FundAmt
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _FundAmt'_unknownFields
-        (\ x__ y__ -> x__ {_FundAmt'_unknownFields = y__})
-  defMessage
-    = FundAmt'_constructor
-        {_FundAmt'val = Prelude.Nothing, _FundAmt'_unknownFields = []}
-  parseMessage
-    = let
-        loop :: FundAmt -> Data.ProtoLens.Encoding.Bytes.Parser FundAmt
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "val"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "FundAmt"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (case
-                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'val") _x
-              of
-                Prelude.Nothing -> Data.Monoid.mempty
-                (Prelude.Just _v)
-                  -> (Data.Monoid.<>)
-                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                       ((Prelude..)
-                          (\ bs
-                             -> (Data.Monoid.<>)
-                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData FundAmt where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_FundAmt'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_FundAmt'val x__) ())
 {- | Fields :
      
          * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundLnHodlInvoice Proto.BtcLsp.Data.LowLevel.LnHodlInvoice@
@@ -902,6 +786,122 @@ instance Control.DeepSeq.NFData FundLnInvoice where
         -> Control.DeepSeq.deepseq
              (_FundLnInvoice'_unknownFields x__)
              (Control.DeepSeq.deepseq (_FundLnInvoice'val x__) ())
+{- | Fields :
+     
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundMoney Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' FundMoney (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
+data FundMoney
+  = FundMoney'_constructor {_FundMoney'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
+                            _FundMoney'_unknownFields :: !Data.ProtoLens.FieldSet}
+  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
+instance Prelude.Show FundMoney where
+  showsPrec _ __x __s
+    = Prelude.showChar
+        '{'
+        (Prelude.showString
+           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
+instance Text.PrettyPrint.GenericPretty.Out FundMoney
+instance Data.ProtoLens.Field.HasField FundMoney "val" Proto.BtcLsp.Data.LowLevel.Msat where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _FundMoney'val (\ x__ y__ -> x__ {_FundMoney'val = y__}))
+        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
+instance Data.ProtoLens.Field.HasField FundMoney "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _FundMoney'val (\ x__ y__ -> x__ {_FundMoney'val = y__}))
+        Prelude.id
+instance Data.ProtoLens.Message FundMoney where
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.FundMoney"
+  packedMessageDescriptor _
+    = "\n\
+      \\tFundMoney\DC2,\n\
+      \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
+  packedFileDescriptor _ = packedFileDescriptor
+  fieldsByTag
+    = let
+        val__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "val"
+              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'val")) ::
+              Data.ProtoLens.FieldDescriptor FundMoney
+      in
+        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
+  unknownFields
+    = Lens.Family2.Unchecked.lens
+        _FundMoney'_unknownFields
+        (\ x__ y__ -> x__ {_FundMoney'_unknownFields = y__})
+  defMessage
+    = FundMoney'_constructor
+        {_FundMoney'val = Prelude.Nothing, _FundMoney'_unknownFields = []}
+  parseMessage
+    = let
+        loop :: FundMoney -> Data.ProtoLens.Encoding.Bytes.Parser FundMoney
+        loop x
+          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
+               if end then
+                   do (let missing = []
+                       in
+                         if Prelude.null missing then
+                             Prelude.return ()
+                         else
+                             Prelude.fail
+                               ((Prelude.++)
+                                  "Missing required fields: "
+                                  (Prelude.show (missing :: [Prelude.String]))))
+                      Prelude.return
+                        (Lens.Family2.over
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
+               else
+                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                      case tag of
+                        10
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                           Data.ProtoLens.Encoding.Bytes.isolate
+                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
+                                       "val"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
+                        wire
+                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
+                                        wire
+                                loop
+                                  (Lens.Family2.over
+                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
+      in
+        (Data.ProtoLens.Encoding.Bytes.<?>)
+          (do loop Data.ProtoLens.defMessage) "FundMoney"
+  buildMessage
+    = \ _x
+        -> (Data.Monoid.<>)
+             (case
+                  Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'val") _x
+              of
+                Prelude.Nothing -> Data.Monoid.mempty
+                (Prelude.Just _v)
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.ProtoLens.encodeMessage
+                          _v))
+             (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
+instance Control.DeepSeq.NFData FundMoney where
+  rnf
+    = \ x__
+        -> Control.DeepSeq.deepseq
+             (_FundMoney'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_FundMoney'val x__) ())
 {- | Fields :
      
          * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' FundOnChainAddress Proto.BtcLsp.Data.LowLevel.OnChainAddress@
@@ -1746,36 +1746,36 @@ instance Control.DeepSeq.NFData Nonce where
              (Control.DeepSeq.deepseq (_Nonce'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' RefundAmt Proto.BtcLsp.Data.LowLevel.Msat@
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' RefundAmt (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
-data RefundAmt
-  = RefundAmt'_constructor {_RefundAmt'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
-                            _RefundAmt'_unknownFields :: !Data.ProtoLens.FieldSet}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' RefundMoney Proto.BtcLsp.Data.LowLevel.Msat@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'val' @:: Lens' RefundMoney (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat)@ -}
+data RefundMoney
+  = RefundMoney'_constructor {_RefundMoney'val :: !(Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat),
+                              _RefundMoney'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show RefundAmt where
+instance Prelude.Show RefundMoney where
   showsPrec _ __x __s
     = Prelude.showChar
         '{'
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out RefundAmt
-instance Data.ProtoLens.Field.HasField RefundAmt "val" Proto.BtcLsp.Data.LowLevel.Msat where
+instance Text.PrettyPrint.GenericPretty.Out RefundMoney
+instance Data.ProtoLens.Field.HasField RefundMoney "val" Proto.BtcLsp.Data.LowLevel.Msat where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _RefundAmt'val (\ x__ y__ -> x__ {_RefundAmt'val = y__}))
+           _RefundMoney'val (\ x__ y__ -> x__ {_RefundMoney'val = y__}))
         (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField RefundAmt "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
+instance Data.ProtoLens.Field.HasField RefundMoney "maybe'val" (Prelude.Maybe Proto.BtcLsp.Data.LowLevel.Msat) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _RefundAmt'val (\ x__ y__ -> x__ {_RefundAmt'val = y__}))
+           _RefundMoney'val (\ x__ y__ -> x__ {_RefundMoney'val = y__}))
         Prelude.id
-instance Data.ProtoLens.Message RefundAmt where
-  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.RefundAmt"
+instance Data.ProtoLens.Message RefundMoney where
+  messageName _ = Data.Text.pack "BtcLsp.Data.HighLevel.RefundMoney"
   packedMessageDescriptor _
     = "\n\
-      \\tRefundAmt\DC2,\n\
+      \\vRefundMoney\DC2,\n\
       \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -1787,19 +1787,21 @@ instance Data.ProtoLens.Message RefundAmt where
                  Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.LowLevel.Msat)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'val")) ::
-              Data.ProtoLens.FieldDescriptor RefundAmt
+              Data.ProtoLens.FieldDescriptor RefundMoney
       in
         Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
-        _RefundAmt'_unknownFields
-        (\ x__ y__ -> x__ {_RefundAmt'_unknownFields = y__})
+        _RefundMoney'_unknownFields
+        (\ x__ y__ -> x__ {_RefundMoney'_unknownFields = y__})
   defMessage
-    = RefundAmt'_constructor
-        {_RefundAmt'val = Prelude.Nothing, _RefundAmt'_unknownFields = []}
+    = RefundMoney'_constructor
+        {_RefundMoney'val = Prelude.Nothing,
+         _RefundMoney'_unknownFields = []}
   parseMessage
     = let
-        loop :: RefundAmt -> Data.ProtoLens.Encoding.Bytes.Parser RefundAmt
+        loop ::
+          RefundMoney -> Data.ProtoLens.Encoding.Bytes.Parser RefundMoney
         loop x
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
@@ -1833,7 +1835,7 @@ instance Data.ProtoLens.Message RefundAmt where
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "RefundAmt"
+          (do loop Data.ProtoLens.defMessage) "RefundMoney"
   buildMessage
     = \ _x
         -> (Data.Monoid.<>)
@@ -1854,12 +1856,12 @@ instance Data.ProtoLens.Message RefundAmt where
                           _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData RefundAmt where
+instance Control.DeepSeq.NFData RefundMoney where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
-             (_RefundAmt'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_RefundAmt'val x__) ())
+             (_RefundMoney'_unknownFields x__)
+             (Control.DeepSeq.deepseq (_RefundMoney'val x__) ())
 {- | Fields :
      
          * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' RefundOnChainAddress Proto.BtcLsp.Data.LowLevel.OnChainAddress@
@@ -2108,12 +2110,12 @@ packedFileDescriptor
     \\DC2LspLnSocketAddress\DC25\n\
     \\ETXval\CAN\SOH \SOH(\v2#.BtcLsp.Data.LowLevel.SocketAddressR\ETXval\"<\n\
     \\aFeeRate\DC21\n\
-    \\ETXval\CAN\SOH \SOH(\v2\US.BtcLsp.Data.LowLevel.UrationalR\ETXval\"6\n\
-    \\ACKFeeAmt\DC2,\n\
-    \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"7\n\
-    \\aFundAmt\DC2,\n\
+    \\ETXval\CAN\SOH \SOH(\v2\US.BtcLsp.Data.LowLevel.UrationalR\ETXval\"8\n\
+    \\bFeeMoney\DC2,\n\
     \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"9\n\
-    \\tRefundAmt\DC2,\n\
+    \\tFundMoney\DC2,\n\
+    \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\";\n\
+    \\vRefundMoney\DC2,\n\
     \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"<\n\
     \\fLocalBalance\DC2,\n\
     \\ETXval\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.LowLevel.MsatR\ETXval\"=\n\
@@ -2190,7 +2192,7 @@ packedFileDescriptor
     \\STX\EOT\STX\DC2\EOT\DC3\NUL\NAK\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\DC3\b\SO\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\DC3\b\DLE\n\
     \\v\n\
     \\EOT\EOT\STX\STX\NUL\DC2\ETX\DC4\STX%\n\
     \\f\n\
@@ -2204,7 +2206,7 @@ packedFileDescriptor
     \\STX\EOT\ETX\DC2\EOT\ETB\NUL\EM\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX\ETB\b\SI\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX\ETB\b\DC1\n\
     \\v\n\
     \\EOT\EOT\ETX\STX\NUL\DC2\ETX\CAN\STX%\n\
     \\f\n\
@@ -2218,7 +2220,7 @@ packedFileDescriptor
     \\STX\EOT\EOT\DC2\EOT\ESC\NUL\GS\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX\ESC\b\DC1\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX\ESC\b\DC3\n\
     \\v\n\
     \\EOT\EOT\EOT\STX\NUL\DC2\ETX\FS\STX%\n\
     \\f\n\
