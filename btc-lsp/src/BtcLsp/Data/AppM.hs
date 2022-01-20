@@ -43,8 +43,8 @@ instance (MonadIO m) => KatipContext (AppM m) where
     AppM (local (\s -> s {envKatipNS = f (envKatipNS s)}) m)
 
 instance (MonadUnliftIO m) => I.Env (AppM m) where
-  getLndEnv = Env.envLnd <$> ask
-  getGsEnv = Env.envGrpcServerEnv <$> ask
+  getGsEnv =
+    Env.envGrpcServerEnv <$> ask
   withLnd method args = do
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)

@@ -23,10 +23,15 @@ echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
 )
 
 (
-  mkdir -p ./.grpc-tls
-  cd ./.grpc-tls
-  openssl genrsa -out key.pem 2048
-  openssl req -new -key key.pem -out certificate.csr -subj '/CN=localhost/O=btc-lsp'
-  openssl x509 -req -in certificate.csr -signkey key.pem -out certificate.pem
-  rm certificate.csr
+  echo "==> Generating LSP TLS cert"
+  cd "$BUILD_DIR"
+  openssl genrsa -out btc_lsp_tls_key.pem 2048
+  openssl req -new -key btc_lsp_tls_key.pem \
+    -out csr.csr -subj /CN=btc-lsp/O=btc-lsp
+  openssl x509 -req -in csr.csr \
+    -extfile "$BUILD_DIR/subjectAltName" \
+    -signkey btc_lsp_tls_key.pem -out btc_lsp_tls_cert.pem
+  rm csr.csr
 )
+
+echo "==> Generated TLS certs"

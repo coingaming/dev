@@ -1,7 +1,8 @@
 #!/bin/sh
 
+ROOT_DIR="$(pwd)"
+BUILD_DIR="$ROOT_DIR/build"
 export GODEBUG=x509ignoreCN=0
-THIS_DIR="$(pwd)"
 
 esc() {
   echo "$1" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g'
@@ -12,23 +13,23 @@ esc() {
 #
 
 export PGDATA="$PWD/postgres"
-export BTCD_DIR="$THIS_DIR/.bitcoin"
+export BTCD_DIR="$ROOT_DIR/.bitcoin"
 alias bitcoin-cli="bitcoin-cli -rpcwait -datadir=$BTCD_DIR -rpcport=18443"
 
 #
 # lnd
 #
 
-export LND_MERCHANT_DIR="$THIS_DIR/.lnd-merchant"
+export LND_MERCHANT_DIR="$ROOT_DIR/.lnd-merchant"
 alias lncli-merchant="lncli -n regtest --lnddir=$LND_MERCHANT_DIR"
-export LND_PAYMENTS_DIR="$THIS_DIR/.lnd-payments"
+export LND_PAYMENTS_DIR="$ROOT_DIR/.lnd-payments"
 alias lncli-payments="lncli -n regtest --lnddir=$LND_PAYMENTS_DIR --rpcserver=localhost:11009"
 
 #
 # app
 #
 
-export LND_TLS_CERT="$(cat "$THIS_DIR/.lnd/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export LND_TLS_CERT="$(cat "$ROOT_DIR/.lnd/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export LSP_MERCHANT_LND_ENV="
 {
     \"lnd_wallet_password\":\"developer\",
@@ -145,8 +146,8 @@ S/0jIwsLJkf61mIl2tMViaZ4nWjrLyS7cQPZO2lW47NFHbF4q7bheA==
 -----END PUBLIC KEY-----
 ")"
 
-export GRPC_TLS_CERT="$(cat "$THIS_DIR/.grpc-tls/certificate.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
-export GRPC_TLS_KEY="$(cat "$THIS_DIR/.grpc-tls/key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export GRPC_TLS_CERT="$(cat "$BUILD_DIR/btc_lsp_tls_cert.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export GRPC_TLS_KEY="$(cat "$BUILD_DIR/btc_lsp_tls_key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export LSP_GRPC_CLIENT_ENV="
 {
   \"host\":\"localhost\",

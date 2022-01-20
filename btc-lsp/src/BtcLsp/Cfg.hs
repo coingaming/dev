@@ -33,7 +33,8 @@ newSwapIntoLnFee ::
 newSwapIntoLnFee amt =
   case tryFrom @Natural
     . round
-    $ from @FeeRate @(Ratio Natural) swapLnFeeRate * from amt of
+    $ from @FeeRate @(Ratio Natural) swapLnFeeRate
+      * from amt of
     Right fee ->
       max fee swapLnMinFee
     Left err ->

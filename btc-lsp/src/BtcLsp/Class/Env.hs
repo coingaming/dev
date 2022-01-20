@@ -15,7 +15,6 @@ class
   ) =>
   Env m
   where
-  getLndEnv :: m Lnd.LndEnv
   getGsEnv :: m GSEnv
   withLnd ::
     (Lnd.LndEnv -> a) ->
