@@ -51,7 +51,8 @@ data TestEnv (owner :: TestOwner) = TestEnv
     testEnvBtc :: BTC.Client,
     testEnvKatipNS :: Namespace,
     testEnvKatipCTX :: LogContexts,
-    testEnvKatipLE :: LogEnv
+    testEnvKatipLE :: LogEnv,
+    testEnvGCEnv :: GCEnv
   }
 
 newtype TestAppM owner m a = TestAppM
@@ -139,6 +140,7 @@ withTestEnv action =
 
 withTestEnv' :: (TestEnv owner -> IO ()) -> IO ()
 withTestEnv' action = do
+  gcEnv <- readGCEnv
   paymentsRc <- readRawConfig
   merchantLndEnv <- readMerchantLndEnv
   let merchantRc =
@@ -171,7 +173,8 @@ withTestEnv' action = do
                           testEnvBtc = bc,
                           testEnvKatipNS = katipNS,
                           testEnvKatipLE = katipLE,
-                          testEnvKatipCTX = katipCTX
+                          testEnvKatipCTX = katipCTX,
+                          testEnvGCEnv = gcEnv
                         }
 
 itEnv ::

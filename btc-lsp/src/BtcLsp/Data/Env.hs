@@ -2,6 +2,7 @@ module BtcLsp.Data.Env
   ( Env (..),
     RawConfig (..),
     readRawConfig,
+    readGCEnv,
     withEnv,
     parseFromJSON,
   )
@@ -123,10 +124,15 @@ readRawConfig =
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
-  where
-    opts :: E.Mod E.Var a
-    opts =
-      E.keep <> E.help ""
+
+readGCEnv :: IO GCEnv
+readGCEnv =
+  E.parse (E.header "GCEnv") $
+    E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_CLIENT_ENV" opts
+
+opts :: E.Mod E.Var a
+opts =
+  E.keep <> E.help ""
 
 withEnv ::
   RawConfig ->

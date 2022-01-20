@@ -307,6 +307,7 @@ data Failure
   = FailureNonce
   | FailureInput [Proto.InputFailure]
   | FailureLnd Lnd.LndError
+  | FailureGrpcClient Text
   deriving stock
     ( Eq,
       Show,

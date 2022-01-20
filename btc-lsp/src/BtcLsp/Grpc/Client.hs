@@ -8,6 +8,7 @@ module BtcLsp.Grpc.Client
   ( runUnary,
     GCEnv (..),
     GCPort (..),
+    swapIntoLn,
   )
 where
 
@@ -30,8 +31,12 @@ import GHC.TypeLits (Symbol)
 import Network.GRPC.Client
 import Network.GRPC.Client.Helpers
 import Network.GRPC.HTTP2.Encoding (gzip)
+import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import qualified Network.GRPC.HTTP2.ProtoLens as ProtoLens
 import Network.HTTP2.Client
+import Proto.BtcLsp (Service)
+import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
+import Proto.SignableOrphan ()
 import Universum
 
 data GCEnv = GCEnv
@@ -70,6 +75,10 @@ instance FromJSON GCPort where
         Left (_ :: Double) -> fail "Non-integer"
         Right x -> pure x
 
+--
+-- Low Level
+--
+
 runUnary ::
   ( Show res,
     Signable res,
@@ -90,7 +99,7 @@ runUnary rpc env req = do
         close
         (\grpc -> rawUnary rpc grpc req)
   pure $ case res of
-    Right (Right (Right (h, mh, (Right x)))) ->
+    Right (Right (Right (h, mh, Right x))) ->
       case find (\header -> fst header == sigHeaderName) $ h <> fromMaybe mempty mh of
         Nothing -> Left $ "Missing header " <> show sigHeaderName
         Just (_, rawSig) ->
@@ -122,3 +131,19 @@ makeClient env req tlsEnabled doCompress =
     sigHeaderName = coerce $ gcEnvSigHeaderName env
     signature = Signable.exportSigDer . coerce $ sign (gcEnvPrvKey env) req
     compression = if doCompress then gzip else uncompressed
+
+--
+-- High Level
+--
+-- TODO : move into separate module
+--
+
+swapIntoLn ::
+  ( MonadIO m
+  ) =>
+  GCEnv ->
+  SwapIntoLn.Request ->
+  m (Either Text SwapIntoLn.Response)
+swapIntoLn env req =
+  liftIO $
+    runUnary (RPC :: RPC Service "swapIntoLn") env req
