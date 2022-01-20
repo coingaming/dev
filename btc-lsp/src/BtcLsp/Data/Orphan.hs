@@ -17,3 +17,7 @@ instance From Lnd.PaymentRequest Text
 instance From Word64 MSat
 
 instance From MSat Word64
+
+instance From Word64 Lnd.Seconds
+
+instance From Lnd.Seconds Word64

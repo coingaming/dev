@@ -20,8 +20,7 @@ create ::
   m (Entity SwapIntoLn)
 create userEnt fundInv fundAddr refundAddr userCap expAt =
   runSql $ do
-    ct <-
-      liftIO getCurrentTime
+    ct <- getCurrentTime
     Psql.upsertBy
       (UniqueSwapIntoLn fundInv)
       SwapIntoLn

@@ -9,7 +9,6 @@ import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
-import Lens.Micro
 import qualified LndClient as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
@@ -85,4 +84,22 @@ instance From Proto.RefundOnChainAddress (OnChainAddress 'Refund) where
   from = fromProto
 
 instance From (OnChainAddress 'Refund) Proto.RefundOnChainAddress where
+  from = intoProto
+
+instance From Proto.FundOnChainAddress (OnChainAddress 'Fund) where
+  from = fromProto
+
+instance From (OnChainAddress 'Fund) Proto.FundOnChainAddress where
+  from = intoProto
+
+instance From Proto.Msat MSat where
+  from = fromProto
+
+instance From MSat Proto.Msat where
+  from = intoProto
+
+instance From Proto.FundMoney MSat where
+  from = fromProto
+
+instance From MSat Proto.FundMoney where
   from = intoProto

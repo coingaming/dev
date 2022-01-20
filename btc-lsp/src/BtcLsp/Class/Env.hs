@@ -4,6 +4,7 @@ module BtcLsp.Class.Env
 where
 
 import BtcLsp.Class.Storage
+import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified LndClient as Lnd
 
@@ -16,3 +17,13 @@ class
   where
   getLndEnv :: m Lnd.LndEnv
   getGsEnv :: m GSEnv
+  withLnd ::
+    (Lnd.LndEnv -> a) ->
+    (a -> m (Either Lnd.LndError b)) ->
+    m (Either Failure b)
+  withLndT ::
+    (Lnd.LndEnv -> a) ->
+    (a -> m (Either Lnd.LndError b)) ->
+    ExceptT Failure m b
+  withLndT method =
+    ExceptT . withLnd method

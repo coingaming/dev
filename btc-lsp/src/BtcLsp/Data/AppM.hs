@@ -45,6 +45,9 @@ instance (MonadIO m) => KatipContext (AppM m) where
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getLndEnv = Env.envLnd <$> ask
   getGsEnv = Env.envGrpcServerEnv <$> ask
+  withLnd method args = do
+    lnd <- asks Env.envLnd
+    first FailureLnd <$> args (method lnd)
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool

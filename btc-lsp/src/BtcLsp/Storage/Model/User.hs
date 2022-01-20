@@ -19,8 +19,7 @@ createVerify ::
   Nonce ->
   m (Either Failure (Entity User))
 createVerify pub nonce = runSql $ do
-  ct <-
-    liftIO getCurrentTime
+  ct <- getCurrentTime
   let zeroRow =
         User
           { userNodePubKey = pub,

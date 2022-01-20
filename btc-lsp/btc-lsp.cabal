@@ -51,6 +51,7 @@ library
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
+      BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -173,6 +174,7 @@ executable btc-lsp-exe
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
+      BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -296,6 +298,7 @@ test-suite btc-lsp-test
       BtcLsp.Storage.Util
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
+      BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields

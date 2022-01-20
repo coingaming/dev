@@ -67,7 +67,6 @@ import Data.Time.Clock as X
     addUTCTime,
     diffTimeToPicoseconds,
     diffUTCTime,
-    getCurrentTime,
     secondsToDiffTime,
   )
 import Data.Type.Equality as X (type (==))
@@ -132,7 +131,7 @@ import Universum as X hiding
     set,
     show,
     state,
-    (^.),
+    swap,
   )
 import UnliftIO as X
   ( MonadUnliftIO (..),

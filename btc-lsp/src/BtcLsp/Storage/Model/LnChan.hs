@@ -18,7 +18,7 @@ createIgnore ::
   LnChanStatus ->
   m (Entity LnChan)
 createIgnore swapId txid vout ss = runSql $ do
-  ct <- liftIO getCurrentTime
+  ct <- getCurrentTime
   Psql.upsertBy
     (UniqueLnChan txid vout)
     (this ct)

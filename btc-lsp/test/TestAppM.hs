@@ -72,10 +72,16 @@ runTestApp env app = runReaderT (unTestAppM app) env
 instance (MonadUnliftIO m) => I.Env (TestAppM 'MerchantPartner m) where
   getLndEnv = envLnd . testEnvMerchantAgent <$> ask
   getGsEnv = error "getGsEnv => impossible"
+  withLnd method args = do
+    lnd <- asks $ envLnd . testEnvMerchantAgent
+    first FailureLnd <$> args (method lnd)
 
 instance (MonadUnliftIO m) => I.Env (TestAppM 'PaymentsPartner m) where
   getLndEnv = envLnd . testEnvPaymentsAgent <$> ask
   getGsEnv = error "getGsEnv => impossible"
+  withLnd method args = do
+    lnd <- asks $ envLnd . testEnvPaymentsAgent
+    first FailureLnd <$> args (method lnd)
 
 instance (MonadIO m) => Katip (TestAppM owner m) where
   getLogEnv = asks testEnvKatipLE

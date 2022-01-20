@@ -78,8 +78,13 @@ withMiddleware (UnliftIO run) handler _ req =
       ExceptT $
         User.createVerify pub nonce
     case res of
-      Left e -> pure $ failResE e
-      Right user -> handler user req
+      Left e ->
+        pure $ failResE e
+      Right user ->
+        --
+        -- TODO : set Ctx automatically!!!
+        --
+        handler user req
 
 getCfg ::
   ( Monad m

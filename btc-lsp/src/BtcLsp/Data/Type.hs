@@ -32,6 +32,7 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
+import qualified LndClient.Data.NewAddress as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Witch
 
@@ -248,6 +249,10 @@ instance From Text (OnChainAddress mrel)
 
 instance From (OnChainAddress mrel) Text
 
+instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
+
+instance From (OnChainAddress 'Fund) Lnd.NewAddressResponse
+
 data SwapStatus
   = -- | Waiting on-chain funding trx with
     -- given amt from user with
@@ -301,9 +306,9 @@ data Error a = Error
 data Failure
   = FailureNonce
   | FailureInput [Proto.InputFailure]
+  | FailureLnd Lnd.LndError
   deriving stock
     ( Eq,
-      Ord,
       Show,
       Generic
     )
