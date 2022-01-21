@@ -11,6 +11,7 @@ where
 import qualified Control.Exception as Exception
 import qualified Crypto.Secp256k1 as Secp256k1
 import Data.ByteString.Base16 as B16 (encode)
+import qualified Data.CaseInsensitive as CI
 import qualified Data.Fixed as Fixed
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Wire
 import qualified Data.Signable as Signable
@@ -91,6 +92,10 @@ instance Out Signable.Alg
 instance Out Signable.SignableError
 
 instance Out Signable.ECPointFormat
+
+instance (Out a) => Out (CI.CI a) where
+  docPrec x = docPrec x . CI.original
+  doc = doc . CI.original
 
 --
 -- Show

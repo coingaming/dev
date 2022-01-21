@@ -27,6 +27,12 @@ import Network.GRPC.HTTP2.Encoding (gzip)
 import qualified Network.GRPC.HTTP2.ProtoLens as ProtoLens
 import Network.HTTP2.Client
 import Proto.SignableOrphan ()
+import Text.PrettyPrint.GenericPretty
+  ( Out,
+  )
+import Text.PrettyPrint.GenericPretty.Import
+  ( inspectPlain,
+  )
 import Universum
 
 data GCEnv = GCEnv
@@ -66,7 +72,7 @@ instance FromJSON GCPort where
         Right x -> pure x
 
 runUnary ::
-  ( Show res,
+  ( Out res,
     Signable res,
     Signable req,
     HasMethod s m,
@@ -90,26 +96,24 @@ runUnary rpc env req = do
         Nothing ->
           Left $
             "Client ==> missing server header "
-              <> show sigHeaderName
+              <> inspectPlain sigHeaderName
         Just (_, rawSig) ->
           case Signable.importSigDer Signable.AlgSecp256k1 rawSig of
             Nothing ->
               Left $
                 "Client ==> server secp256k1 signature import failed for "
-                  <> show rawSig
+                  <> inspectPlain rawSig
             Just sig ->
               if verify (gcEnvPubKey env) (Sig sig) x
                 then Right x
                 else
                   Left $
-                    --
-                    -- TODO : replace show with inspectPlain
-                    --
                     "Client ==> server signature verification failed for "
-                      <> show rawSig
+                      <> inspectPlain rawSig
     x ->
       Left $
-        "Client ==> server grpc failure " <> show x
+        "Client ==> server grpc failure "
+          <> inspectPlain x
   where
     sigHeaderName = CI.mk . coerce $ gcEnvSigHeaderName env
 
