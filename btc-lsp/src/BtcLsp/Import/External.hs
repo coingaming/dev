@@ -3,9 +3,9 @@ module BtcLsp.Import.External
   )
 where
 
-import BtcLsp.Grpc.Client as X
+import BtcLsp.Grpc.Client.LowLevel as X
 import BtcLsp.Grpc.Data as X
-import BtcLsp.Grpc.Server as X
+import BtcLsp.Grpc.Server.LowLevel as X
 import BtcLsp.Import.Witch as X
 import Chronos as X (Timespan (..), stopwatch)
 import Control.Concurrent.Async as X

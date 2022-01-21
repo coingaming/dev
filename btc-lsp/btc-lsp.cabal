@@ -33,12 +33,13 @@ library
       BtcLsp.Data.Kind
       BtcLsp.Data.Orphan
       BtcLsp.Data.Type
-      BtcLsp.Grpc.Client
+      BtcLsp.Grpc.Client.HighLevel
+      BtcLsp.Grpc.Client.LowLevel
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
-      BtcLsp.Grpc.Method.SwapIntoLn
       BtcLsp.Grpc.Orphan
-      BtcLsp.Grpc.Server
+      BtcLsp.Grpc.Server.HighLevel
+      BtcLsp.Grpc.Server.LowLevel
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
@@ -156,12 +157,13 @@ executable btc-lsp-exe
       BtcLsp.Data.Kind
       BtcLsp.Data.Orphan
       BtcLsp.Data.Type
-      BtcLsp.Grpc.Client
+      BtcLsp.Grpc.Client.HighLevel
+      BtcLsp.Grpc.Client.LowLevel
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
-      BtcLsp.Grpc.Method.SwapIntoLn
       BtcLsp.Grpc.Orphan
-      BtcLsp.Grpc.Server
+      BtcLsp.Grpc.Server.HighLevel
+      BtcLsp.Grpc.Server.LowLevel
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
@@ -280,12 +282,13 @@ test-suite btc-lsp-test
       BtcLsp.Data.Kind
       BtcLsp.Data.Orphan
       BtcLsp.Data.Type
-      BtcLsp.Grpc.Client
+      BtcLsp.Grpc.Client.HighLevel
+      BtcLsp.Grpc.Client.LowLevel
       BtcLsp.Grpc.Combinator
       BtcLsp.Grpc.Data
-      BtcLsp.Grpc.Method.SwapIntoLn
       BtcLsp.Grpc.Orphan
-      BtcLsp.Grpc.Server
+      BtcLsp.Grpc.Server.HighLevel
+      BtcLsp.Grpc.Server.LowLevel
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql

@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeApplications #-}
 
-module BtcLsp.Grpc.Method.SwapIntoLn
-  ( apply,
+module BtcLsp.Grpc.Server.HighLevel
+  ( swapIntoLn,
   )
 where
 
@@ -13,13 +13,13 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 
-apply ::
+swapIntoLn ::
   ( Env m
   ) =>
   Entity User ->
   SwapIntoLn.Request ->
   m SwapIntoLn.Response
-apply userEnt req = do
+swapIntoLn userEnt req = do
   res <- runExceptT $ do
     fundInv <-
       fromReqT $

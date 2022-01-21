@@ -6,7 +6,7 @@ module BtcLsp.Thread.Server
 where
 
 import BtcLsp.Grpc.Data
-import qualified BtcLsp.Grpc.Method.SwapIntoLn as SwapIntoLn
+import qualified BtcLsp.Grpc.Server.HighLevel as Server
 import BtcLsp.Import hiding (Sig (..))
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
@@ -38,7 +38,7 @@ handlers run _ _ =
   [ unary (RPC :: RPC Service "getCfg") $
       withMiddleware run getCfg,
     unary (RPC :: RPC Service "swapIntoLn") $
-      withMiddleware run SwapIntoLn.apply,
+      withMiddleware run Server.swapIntoLn,
     unary (RPC :: RPC Service "swapFromLn") $
       withMiddleware run swapFromLn
   ]

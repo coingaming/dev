@@ -1,8 +1,4 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-
-module BtcLsp.Grpc.Server
+module BtcLsp.Grpc.Server.LowLevel
   ( GSEnv (..),
     runServer,
     serverApp,
