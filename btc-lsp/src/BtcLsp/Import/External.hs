@@ -116,6 +116,7 @@ import LndClient.Import.External as X
 import LndClient.Util as X
   ( MicroSecondsDelay (..),
     readTChanTimeout,
+    sleep,
     spawnLink,
     withSpawnLink,
   )

@@ -3,7 +3,7 @@ module BtcLsp.Grpc.Client.HighLevel
   )
 where
 
-import BtcLsp.Import.External
+import BtcLsp.Import
 import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Proto.BtcLsp (Service)
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
@@ -14,7 +14,8 @@ swapIntoLn ::
   ) =>
   GCEnv ->
   SwapIntoLn.Request ->
-  m (Either Text SwapIntoLn.Response)
+  m (Either Failure SwapIntoLn.Response)
 swapIntoLn env req =
   liftIO $
-    runUnary (RPC :: RPC Service "swapIntoLn") env req
+    first FailureGrpcClient
+      <$> runUnary (RPC :: RPC Service "swapIntoLn") env req

@@ -315,6 +315,7 @@ test-suite btc-lsp-test
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
       Proto.SignableOrphan
+      ServerSpec
       Spec
       TestAppM
       TestAppTH

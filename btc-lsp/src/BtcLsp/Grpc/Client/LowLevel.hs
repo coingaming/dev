@@ -87,16 +87,26 @@ runUnary rpc env req = do
   pure $ case res of
     Right (Right (Right (h, mh, Right x))) ->
       case find (\header -> fst header == sigHeaderName) $ h <> fromMaybe mempty mh of
-        Nothing -> Left $ "Missing header " <> show sigHeaderName
+        Nothing ->
+          Left $
+            "Client ==> missing server header "
+              <> show sigHeaderName
         Just (_, rawSig) ->
           case Signable.importSigDer Signable.AlgSecp256k1 rawSig of
-            Nothing -> Left $ "Secp256k1 sig import error for " <> show rawSig
+            Nothing ->
+              Left $
+                "Client ==> server secp256k1 signature import failed for "
+                  <> show rawSig
             Just sig ->
               if verify (gcEnvPubKey env) (Sig sig) x
                 then Right x
-                else Left $ "Signature verification failed " <> show rawSig
+                else
+                  Left $
+                    "Client ==> server signature verification failed for "
+                      <> show rawSig
     x ->
-      Left $ show x
+      Left $
+        "Client ==> server grpc failure " <> show x
   where
     sigHeaderName = CI.mk . coerce $ gcEnvSigHeaderName env
 

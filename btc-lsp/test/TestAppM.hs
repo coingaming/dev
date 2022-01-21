@@ -16,6 +16,7 @@ module TestAppM
     itEnv,
     xitEnv,
     withTestEnv,
+    getGCEnv,
   )
 where
 
@@ -72,14 +73,14 @@ runTestApp env app = runReaderT (unTestAppM app) env
 
 instance (MonadUnliftIO m) => I.Env (TestAppM 'MerchantPartner m) where
   getGsEnv =
-    error "getGsEnv => impossible"
+    asks $ envGrpcServerEnv . testEnvMerchantAgent
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvMerchantAgent
     first FailureLnd <$> args (method lnd)
 
 instance (MonadUnliftIO m) => I.Env (TestAppM 'PaymentsPartner m) where
   getGsEnv =
-    error "getGsEnv => impossible"
+    asks $ envGrpcServerEnv . testEnvMerchantAgent
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvPaymentsAgent
     first FailureLnd <$> args (method lnd)
@@ -121,7 +122,7 @@ instance (MonadUnliftIO m) => Storage (TestAppM owner m) where
     pool <- getSqlPool
     Psql.runSqlPool query pool
 
-withTestEnv :: I.Env (TestAppM owner IO) => TestAppM owner IO () -> IO ()
+withTestEnv :: TestAppM owner IO () -> IO ()
 withTestEnv action =
   withTestEnv' $ \env ->
     runTestApp env $
@@ -178,7 +179,6 @@ withTestEnv' action = do
                         }
 
 itEnv ::
-  I.Env (TestAppM owner IO) =>
   String ->
   TestAppM owner IO () ->
   SpecWith (Arg (IO ()))
@@ -190,7 +190,6 @@ itEnv testName expr =
         expr
 
 xitEnv ::
-  I.Env (TestAppM owner IO) =>
   String ->
   TestAppM owner IO () ->
   SpecWith (Arg (IO ()))
@@ -255,3 +254,10 @@ assertChannelState txid vout state = do
   liftIO $ case dbChannelPending of
     Right channel -> shouldBe (lnChanStatus channel) state
     Left triesExceded -> triesExceded
+
+getGCEnv ::
+  ( Monad m
+  ) =>
+  TestAppM owner m GCEnv
+getGCEnv =
+  asks testEnvGCEnv
