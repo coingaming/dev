@@ -319,6 +319,7 @@ test-suite btc-lsp-test
       Spec
       TestAppM
       TestAppTH
+      TestOrphan
       TestWithMerchantPartner
       TestWithPaymentsPartner
       Paths_btc_lsp

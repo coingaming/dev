@@ -1,13 +1,20 @@
+{-# LANGUAGE TypeApplications #-}
+
 module ServerSpec
   ( spec,
   )
 where
 
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
+import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Thread.Server as Server
+import qualified LndClient.Data.NewAddress as Lnd
+--import qualified LndClient.Data.PayReq as Lnd
+import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
+import TestOrphan ()
 import TestWithPaymentsPartner
 
 spec :: Spec
@@ -20,7 +27,28 @@ spec =
       -- TODO : implement withGCEnv!!!
       --
       gcEnv <- getGCEnv
-      res <- Client.swapIntoLn gcEnv defMessage
+      res <- runExceptT $ do
+        refundAddr <-
+          from
+            <$> withLndT
+              Lnd.newAddress
+              --
+              -- TODO : maybe pass LndEnv as the last argument
+              -- to the methods (not the first like right now)
+              -- to avoid this style of withLndT?
+              --
+              ( $
+                  Lnd.NewAddressRequest
+                    { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                      Lnd.account = Nothing
+                    }
+              )
+        Client.swapIntoLnT
+          gcEnv
+          ( defMessage
+              & SwapIntoLn.refundOnChainAddress
+                .~ from @(OnChainAddress 'Refund) refundAddr
+          )
       liftIO $
         res
           `shouldSatisfy` ( \case

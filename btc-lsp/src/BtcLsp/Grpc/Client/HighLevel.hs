@@ -1,5 +1,6 @@
 module BtcLsp.Grpc.Client.HighLevel
   ( swapIntoLn,
+    swapIntoLnT,
   )
 where
 
@@ -19,3 +20,12 @@ swapIntoLn env req =
   liftIO $
     first FailureGrpcClient
       <$> runUnary (RPC :: RPC Service "swapIntoLn") env req
+
+swapIntoLnT ::
+  ( MonadIO m
+  ) =>
+  GCEnv ->
+  SwapIntoLn.Request ->
+  ExceptT Failure m SwapIntoLn.Response
+swapIntoLnT gcEnv =
+  ExceptT . swapIntoLn gcEnv
