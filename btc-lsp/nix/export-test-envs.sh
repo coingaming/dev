@@ -154,7 +154,7 @@ export LSP_GRPC_CLIENT_ENV="
   \"port\":8443,
   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
-  \"sig_header_name\":\"signable-secp256k1-signature\"
+  \"sig_header_name\":\"compact-double-sha256-lnd-signature\"
 }
 "
 export LSP_GRPC_SERVER_ENV="
@@ -162,7 +162,7 @@ export LSP_GRPC_SERVER_ENV="
   \"port\":8443,
   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
-  \"sig_header_name\":\"signable-secp256k1-signature\",
+  \"sig_header_name\":\"compact-double-sha256-lnd-signature\",
   \"tls_cert\":\"$GRPC_TLS_CERT\",
   \"tls_key\":\"$GRPC_TLS_KEY\"
 }

@@ -28,21 +28,41 @@ apply = do
     runServer env $ handlers run
 
 handlers ::
+  forall m.
   ( Env m
   ) =>
   UnliftIO m ->
   GSEnv ->
   MVar (Sig 'Server) ->
   [ServiceHandler]
-handlers run _ _ =
+handlers run gsEnv sigVar =
   [ unary (RPC :: RPC Service "getCfg") $
-      withMiddleware run getCfg,
+      runHandler getCfg,
     unary (RPC :: RPC Service "swapIntoLn") $
-      withMiddleware run Server.swapIntoLn,
+      runHandler Server.swapIntoLn,
     unary (RPC :: RPC Service "swapFromLn") $
-      withMiddleware run swapFromLn
+      runHandler swapFromLn
   ]
+  where
+    runHandler ::
+      ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
+        HasField res "failure" failure,
+        HasField failure "input" [Proto.InputFailure],
+        HasField failure "internal" [internal],
+        Message res,
+        Message failure,
+        Message internal
+      ) =>
+      (Entity User -> req -> m res) ->
+      Wai.Request ->
+      req ->
+      IO res
+    runHandler =
+      withMiddleware run gsEnv sigVar
 
+--
+-- TODO : sign (but temporary remove verification)
+--
 withMiddleware ::
   ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
     HasField res "failure" failure,
@@ -54,11 +74,13 @@ withMiddleware ::
     Env m
   ) =>
   UnliftIO m ->
+  GSEnv ->
+  MVar (Sig 'Server) ->
   (Entity User -> req -> m res) ->
   Wai.Request ->
   req ->
   IO res
-withMiddleware (UnliftIO run) handler _ req =
+withMiddleware (UnliftIO run) _ _ handler _ req =
   run $ do
     res <- runExceptT $ do
       nonce <-

@@ -84,7 +84,7 @@ in  { networks.global.external = True
               "port":8443,
               "prv_key":"${escape ../build/esdsa.prv as Text}",
               "pub_key":"${escape ../build/esdsa.pub as Text}",
-              "sig_header_name":"signable-secp256k1-signature",
+              "sig_header_name":"compact-double-sha256-lnd-signature",
               "tls_cert":"${escape ../build/btc_lsp_tls_cert.pem as Text}",
               "tls_key":"${escape ../build/btc_lsp_tls_key.pem as Text}"
             }

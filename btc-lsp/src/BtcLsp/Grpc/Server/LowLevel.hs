@@ -119,6 +119,11 @@ withSig env sigVar handler httpReq protoReq =
               putMVar sigVar sig
               pure res
   where
-    failure = throwIO . GRPCStatus UNAUTHENTICATED
-    sigHeaderName = coerce $ gsEnvSigHeaderName env
-    sigHeaderNameCI = CI.mk sigHeaderName
+    failure =
+      throwIO
+        . GRPCStatus UNAUTHENTICATED
+        . ("Server ==> " <>)
+    sigHeaderName =
+      coerce $ gsEnvSigHeaderName env
+    sigHeaderNameCI =
+      CI.mk sigHeaderName
