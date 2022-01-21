@@ -14,6 +14,7 @@ import Data.Aeson
     genericParseJSON,
     withScientific,
   )
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
 import Data.ProtoLens.Service.Types (HasMethod, HasMethodImpl (..))
@@ -73,6 +74,7 @@ instance FromJSON GCPort where
 
 runUnary ::
   ( Out res,
+    Show res,
     Signable res,
     Signable req,
     HasMethod s m,
@@ -104,17 +106,28 @@ runUnary rpc env req = do
                 "Client ==> server secp256k1 signature import failed for "
                   <> inspectPlain rawSig
             Just sig ->
-              if verify (gcEnvPubKey env) (Sig sig) x
+              if verify pub (Sig sig) x
                 then Right x
                 else
                   Left $
-                    "Client ==> server signature verification failed for "
-                      <> inspectPlain rawSig
+                    "Client ==> server signature verification failed for raw bytes "
+                      <> (inspectPlain . BL.toStrict $ Signable.toBinary x)
+                      <> " from decoded payload "
+                      <> inspectPlain x
+                      <> " with signature "
+                      <> inspectPlain sig
+                      <> " and the key "
+                      <> inspectPlain pub
     x ->
+      --
+      -- TODO : replace show with inspectPlain
+      -- need additional instances for this.
+      --
       Left $
         "Client ==> server grpc failure "
-          <> inspectPlain x
+          <> show x
   where
+    pub = gcEnvPubKey env
     sigHeaderName = CI.mk . coerce $ gcEnvSigHeaderName env
 
 makeClient ::

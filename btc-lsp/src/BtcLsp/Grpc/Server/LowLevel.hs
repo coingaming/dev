@@ -85,7 +85,10 @@ serverApp env handlers req rep = do
             Nothing -> ts
             Just sig ->
               Trailers $
-                (CI.mk sigHeaderName, Signable.exportSigDer $ coerce sig) : ss
+                ( CI.mk sigHeaderName,
+                  Signable.exportSigDer $ coerce sig
+                ) :
+                ss
         NextTrailersMaker {} ->
           --
           -- TODO : throwIO GRPCStatus
@@ -95,8 +98,7 @@ serverApp env handlers req rep = do
       pure $ NextTrailersMaker (trailersMaker sigVar oldMaker)
 
 withSig ::
-  ( --Signable req,
-    Signable res
+  ( Signable res
   ) =>
   GSEnv ->
   MVar (Sig 'Server) ->

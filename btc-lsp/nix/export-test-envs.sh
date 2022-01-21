@@ -131,23 +131,12 @@ export LSP_AES256_INIT_VECTOR="dRgUkXp2s5v8y/B?"
 # gRPC
 #
 
-export LSP_AGENT_PRIVATE_KEY_PEM="$(esc "
------BEGIN EC PRIVATE KEY-----
-MHQCAQEEIPr2CehwrgBUDoPOqKbm43nxNIBRgJkb60hJRxu7H0bloAcGBSuBBAAK
-oUQDQgAEFVguhn0vM+U6x3HMnrMIO93YSzsuAWdnjokIOb+Ww1jTofrfg1ZuL+aZ
-7yn6nC2zikABcBgk5DtS1QizlYcJ/A==
------END EC PRIVATE KEY-----
-")"
-
-export LSP_PARTNER_PUBLIC_KEY_PEM="$(esc "
------BEGIN PUBLIC KEY-----
-MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe96ofwc8cS+MEiRzkgIYfHYnCrouJZwu
-S/0jIwsLJkf61mIl2tMViaZ4nWjrLyS7cQPZO2lW47NFHbF4q7bheA==
------END PUBLIC KEY-----
-")"
+export LSP_AGENT_PRIVATE_KEY_PEM="$(cat "$BUILD_DIR/esdsa.prv" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export LSP_PARTNER_PUBLIC_KEY_PEM="$(cat "$BUILD_DIR/esdsa.pub" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 
 export GRPC_TLS_CERT="$(cat "$BUILD_DIR/btc_lsp_tls_cert.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export GRPC_TLS_KEY="$(cat "$BUILD_DIR/btc_lsp_tls_key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+
 export LSP_GRPC_CLIENT_ENV="
 {
   \"host\":\"localhost\",

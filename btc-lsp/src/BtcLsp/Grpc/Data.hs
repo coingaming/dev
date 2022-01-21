@@ -21,6 +21,8 @@ import Data.Coerce (coerce)
 import Data.Signable (Signable)
 import qualified Data.Signable as Signable
 import qualified Data.Text.Encoding as TE
+import Text.PrettyPrint.GenericPretty (Out (..))
+import Text.PrettyPrint.GenericPretty.Instance ()
 import Universum
 import qualified Prelude
 
@@ -28,27 +30,55 @@ data GRel = Client | Server
 
 newtype PrvKey (rel :: GRel)
   = PrvKey Signable.PrvKey
-  deriving (Eq)
+  deriving
+    ( Eq
+    )
 
 newtype PubKey (rel :: GRel)
   = PubKey Signable.PubKey
-  deriving (Eq, Show)
+  deriving
+    ( Eq,
+      Show,
+      Generic
+    )
+
+instance Out (PubKey rel)
 
 newtype Sig (rel :: GRel)
   = Sig Signable.Sig
-  deriving (Eq, Show)
+  deriving
+    ( Eq,
+      Show,
+      Generic
+    )
+
+instance Out (Sig rel)
 
 newtype SigHeaderName
   = SigHeaderName ByteString
-  deriving (Eq, Ord, Show, IsString)
+  deriving
+    ( Eq,
+      Ord,
+      Show,
+      IsString
+    )
 
 newtype TlsCert (rel :: GRel)
   = TlsCert Text
-  deriving newtype (Eq, Ord, Show, FromJSON)
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      FromJSON
+    )
 
 newtype TlsKey (rel :: GRel)
   = TlsKey Text
-  deriving newtype (Eq, Ord, FromJSON)
+  deriving newtype
+    ( Eq,
+      Ord,
+      FromJSON
+    )
 
 sign ::
   ( Signable a
