@@ -2,6 +2,9 @@ module Text.PrettyPrint.GenericPretty.Util
   ( inspect,
     inspectStr,
     inspectGen,
+    inspectPlain,
+    inspectStrPlain,
+    inspectGenPlain,
     inspectStyle,
     inspectStyleStr,
     inspectStyleGen,
@@ -27,6 +30,18 @@ inspectStr =
 inspectGen :: (Out a, IsString b) => a -> b
 inspectGen =
   inspectStyleGen simpleStyle
+
+inspectPlain :: (Out a) => a -> T.Text
+inspectPlain =
+  inspectStyle plainStyle
+
+inspectStrPlain :: (Out a) => a -> String
+inspectStrPlain =
+  inspectStyleStr plainStyle
+
+inspectGenPlain :: (Out a, IsString b) => a -> b
+inspectGenPlain =
+  inspectStyleGen plainStyle
 
 inspectStyle ::
   (Out a) =>
@@ -62,3 +77,11 @@ inspectStyleGen style =
 simpleStyle :: PrettySimple.OutputOptions
 simpleStyle =
   PrettySimple.defaultOutputOptionsDarkBg
+
+plainStyle :: PrettySimple.OutputOptions
+plainStyle =
+  PrettySimple.defaultOutputOptionsNoColor
+    { PrettySimple.outputOptionsPageWidth = 100000,
+      PrettySimple.outputOptionsCompact = True,
+      PrettySimple.outputOptionsCompactParens = True
+    }

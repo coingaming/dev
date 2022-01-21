@@ -102,6 +102,9 @@ runUnary rpc env req = do
                 then Right x
                 else
                   Left $
+                    --
+                    -- TODO : replace show with inspectPlain
+                    --
                     "Client ==> server signature verification failed for "
                       <> show rawSig
     x ->

@@ -20,5 +20,4 @@ spec =
       --
       gcEnv <- getGCEnv
       res <- Client.swapIntoLn gcEnv defMessage
-      putStrLn $ inspectStr res
-      liftIO $ True `shouldBe` True
+      liftIO $ res `shouldSatisfy` isRight

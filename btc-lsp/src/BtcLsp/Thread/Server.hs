@@ -11,6 +11,7 @@ import BtcLsp.Import hiding (Sig (..))
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
+import Data.Signable (Signable)
 import Lens.Micro
 import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Network.GRPC.Server
@@ -51,7 +52,8 @@ handlers run gsEnv sigVar =
         HasField failure "internal" [internal],
         Message res,
         Message failure,
-        Message internal
+        Message internal,
+        Signable res
       ) =>
       (Entity User -> req -> m res) ->
       Wai.Request ->
@@ -71,6 +73,7 @@ withMiddleware ::
     Message res,
     Message failure,
     Message internal,
+    Signable res,
     Env m
   ) =>
   UnliftIO m ->
@@ -80,7 +83,7 @@ withMiddleware ::
   Wai.Request ->
   req ->
   IO res
-withMiddleware (UnliftIO run) _ _ handler _ req =
+withMiddleware (UnliftIO run) gsEnv sigVar handler waiReq req =
   run $ do
     res <- runExceptT $ do
       nonce <-
@@ -99,14 +102,21 @@ withMiddleware (UnliftIO run) _ _ handler _ req =
               . _Just
       ExceptT $
         User.createVerify pub nonce
-    case res of
-      Left e ->
-        pure $ failResE e
-      Right user ->
-        --
-        -- TODO : set Ctx automatically!!!
-        --
-        handler user req
+    --
+    -- TODO : set Ctx automatically!!!
+    --
+    liftIO $
+      withSig
+        gsEnv
+        sigVar
+        ( case res of
+            Left e ->
+              const . pure $ failResE e
+            Right user ->
+              run . handler user
+        )
+        waiReq
+        req
 
 getCfg ::
   ( Monad m

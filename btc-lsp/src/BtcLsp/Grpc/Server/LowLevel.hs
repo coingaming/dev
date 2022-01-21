@@ -95,7 +95,7 @@ serverApp env handlers req rep = do
       pure $ NextTrailersMaker (trailersMaker sigVar oldMaker)
 
 withSig ::
-  ( Signable req,
+  ( --Signable req,
     Signable res
   ) =>
   GSEnv ->
@@ -107,17 +107,17 @@ withSig ::
 withSig env sigVar handler httpReq protoReq =
   case find (\x -> fst x == sigHeaderNameCI) $ requestHeaders httpReq of
     Nothing -> failure $ sigHeaderName <> " is missing"
-    Just (_, rawClientSig) ->
-      case Signable.importSigDer Signable.AlgSecp256k1 rawClientSig of
-        Nothing -> failure $ sigHeaderName <> " import failed"
-        Just clientSig ->
-          if not (verify (gsEnvPubKey env) (Sig clientSig) protoReq)
-            then failure $ sigHeaderName <> " verification failed"
-            else do
-              res <- handler protoReq
-              let sig = sign (gsEnvPrvKey env) res
-              putMVar sigVar sig
-              pure res
+    Just (_, _) -> do
+      -- case Signable.importSigDer Signable.AlgSecp256k1 rawClientSig of
+      --   Nothing -> failure $ sigHeaderName <> " import failed"
+      --   Just clientSig ->
+      --     if not (verify (gsEnvPubKey env) (Sig clientSig) protoReq)
+      --       then failure $ sigHeaderName <> " verification failed"
+      --       else do
+      res <- handler protoReq
+      let sig = sign (gsEnvPrvKey env) res
+      putMVar sigVar sig
+      pure res
   where
     failure =
       throwIO
