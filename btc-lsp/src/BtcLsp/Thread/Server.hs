@@ -47,6 +47,7 @@ handlers run gsEnv sigVar =
   where
     runHandler ::
       ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
+        HasField res "ctx" Proto.Ctx,
         HasField res "failure" failure,
         HasField failure "input" [Proto.InputFailure],
         HasField failure "internal" [internal],
@@ -67,6 +68,7 @@ handlers run gsEnv sigVar =
 --
 withMiddleware ::
   ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
+    HasField res "ctx" Proto.Ctx,
     HasField res "failure" failure,
     HasField failure "input" [Proto.InputFailure],
     HasField failure "internal" [internal],
@@ -102,9 +104,6 @@ withMiddleware (UnliftIO run) gsEnv sigVar handler waiReq req =
               . _Just
       ExceptT $
         User.createVerify pub nonce
-    --
-    -- TODO : set Ctx automatically!!!
-    --
     liftIO $
       withSig
         gsEnv
@@ -113,7 +112,7 @@ withMiddleware (UnliftIO run) gsEnv sigVar handler waiReq req =
             Left e ->
               const . pure $ failResE e
             Right user ->
-              run . handler user
+              run . (setGrpcCtx <=< handler user)
         )
         waiReq
         req

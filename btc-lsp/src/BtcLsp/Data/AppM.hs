@@ -44,7 +44,9 @@ instance (MonadIO m) => KatipContext (AppM m) where
 
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
-    Env.envGrpcServerEnv <$> ask
+    asks Env.envGrpcServerEnv
+  getLspPubKeyVar =
+    asks Env.envLndPubKey
   withLnd method args = do
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)

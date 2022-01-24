@@ -48,6 +48,7 @@ data Env = Env
     envCryptoInitVector :: IV AES256,
     -- | Lnd
     envLnd :: Lnd.LndEnv,
+    envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServerEnv :: GSEnv
   }
@@ -139,6 +140,7 @@ withEnv ::
   (Env -> KatipContextT IO a) ->
   IO a
 withEnv rc this = do
+  pubKeyVar <- newEmptyMVar
   handleScribe <-
     mkHandleScribeWithFormatter
       ( case rawConfigLogFormat rc of
@@ -177,6 +179,7 @@ withEnv rc this = do
               envCryptoInitVector = rawConfigInitVector rc,
               -- Lnd
               envLnd = rawConfigLndEnv rc,
+              envLndPubKey = pubKeyVar,
               -- Grpc
               envGrpcServerEnv = rawConfigGrpcServerEnv rc
             }

@@ -9,8 +9,10 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Thread.Server as Server
-import qualified LndClient.Data.NewAddress as Lnd
 --import qualified LndClient.Data.PayReq as Lnd
+
+import qualified LndClient.Data.AddInvoice as Lnd
+import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
@@ -28,6 +30,17 @@ spec =
       --
       gcEnv <- getGCEnv
       res <- runExceptT $ do
+        fundInv <-
+          from . Lnd.paymentRequest
+            <$> withLndT
+              Lnd.addInvoice
+              ( $
+                  Lnd.AddInvoiceRequest
+                    { Lnd.valueMsat = MSat 1000000,
+                      Lnd.memo = Nothing,
+                      Lnd.expiry = Nothing
+                    }
+              )
         refundAddr <-
           from
             <$> withLndT
@@ -45,10 +58,13 @@ spec =
               )
         Client.swapIntoLnT
           gcEnv
-          ( defMessage
-              & SwapIntoLn.refundOnChainAddress
-                .~ from @(OnChainAddress 'Refund) refundAddr
-          )
+          =<< setGrpcCtxT
+            ( defMessage
+                & SwapIntoLn.fundLnInvoice
+                  .~ from @(LnInvoice 'Fund) fundInv
+                & SwapIntoLn.refundOnChainAddress
+                  .~ from @(OnChainAddress 'Refund) refundAddr
+            )
       liftIO $
         res
           `shouldSatisfy` ( \case

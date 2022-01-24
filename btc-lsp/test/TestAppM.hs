@@ -74,6 +74,8 @@ runTestApp env app = runReaderT (unTestAppM app) env
 instance (MonadUnliftIO m) => I.Env (TestAppM 'MerchantPartner m) where
   getGsEnv =
     asks $ envGrpcServerEnv . testEnvMerchantAgent
+  getLspPubKeyVar =
+    asks $ envLndPubKey . testEnvMerchantAgent
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvMerchantAgent
     first FailureLnd <$> args (method lnd)
@@ -81,6 +83,8 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'MerchantPartner m) where
 instance (MonadUnliftIO m) => I.Env (TestAppM 'PaymentsPartner m) where
   getGsEnv =
     asks $ envGrpcServerEnv . testEnvMerchantAgent
+  getLspPubKeyVar =
+    asks $ envLndPubKey . testEnvPaymentsAgent
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvPaymentsAgent
     first FailureLnd <$> args (method lnd)

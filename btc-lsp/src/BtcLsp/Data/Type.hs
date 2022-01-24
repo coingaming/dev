@@ -7,6 +7,7 @@
 
 module BtcLsp.Data.Type
   ( Nonce,
+    newNonce,
     TableName (..),
     LnInvoice (..),
     LnInvoiceStatus (..),
@@ -30,6 +31,8 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified Data.Time.Clock as Clock
+import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
@@ -55,6 +58,27 @@ instance Out Nonce
 instance From Nonce Word64
 
 instance From Word64 Nonce
+
+newNonce :: (MonadIO m) => m Nonce
+newNonce =
+  liftIO $
+    Nonce
+      . utcTimeToMicros
+      <$> Clock.getCurrentTime
+
+utcTimeToMicros :: UTCTime -> Word64
+utcTimeToMicros x =
+  fromInteger $
+    diffTimeToPicoseconds
+      ( fromRational
+          . toRational
+          $ diffUTCTime x epoch
+      )
+      `div` 1000000
+
+epoch :: UTCTime
+epoch =
+  posixSecondsToUTCTime 0
 
 newtype FieldIndex
   = FieldIndex Word32

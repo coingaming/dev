@@ -109,10 +109,6 @@ import LndClient as X
     TxKind (..),
     Vout (..),
   )
-import LndClient.Import.External as X
-  ( inspect,
-    inspectStr,
-  )
 import LndClient.Util as X
   ( MicroSecondsDelay (..),
     readTChanTimeout,
@@ -123,6 +119,11 @@ import LndClient.Util as X
 import Proto.SignableOrphan as X ()
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
+import Text.PrettyPrint.GenericPretty.Import as X
+  ( inspect,
+    inspectPlain,
+    inspectStr,
+  )
 import Text.PrettyPrint.GenericPretty.Instance as X ()
 import Universum as X hiding
   ( atomically,
