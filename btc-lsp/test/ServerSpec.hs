@@ -65,6 +65,9 @@ spec =
                 & SwapIntoLn.refundOnChainAddress
                   .~ from @(OnChainAddress 'Refund) refundAddr
             )
+      --
+      -- TODO : do exact match!!!
+      --
       liftIO $
         res
           `shouldSatisfy` ( \case

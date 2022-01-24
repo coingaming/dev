@@ -33,7 +33,14 @@ newSwapIntoLnFee ::
 newSwapIntoLnFee amt =
   case tryFrom @Natural
     . round
-    $ from @FeeRate @(Ratio Natural) swapLnFeeRate
+    --
+    -- TODO : open issue in GHC tracker.
+    -- Here we are forced to use Rational
+    -- instead or Ratio Natural because of this
+    --
+    -- https://gist.github.com/tim2CF/e63c7ff792e26362f356e71c47319494
+    --
+    $ from @FeeRate @Rational swapLnFeeRate
       * from amt of
     Right fee ->
       max fee swapLnMinFee

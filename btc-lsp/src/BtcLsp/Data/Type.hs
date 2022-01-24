@@ -160,6 +160,14 @@ instance From Lnd.PaymentRequest (LnInvoice mrel)
 
 instance From (LnInvoice mrel) Lnd.PaymentRequest
 
+instance From Text (LnInvoice mrel) where
+  from =
+    via @Lnd.PaymentRequest
+
+instance From (LnInvoice mrel) Text where
+  from =
+    via @Lnd.PaymentRequest
+
 data LnInvoiceStatus
   = LnInvoiceStatusNew
   | LnInvoiceStatusLocked
@@ -231,13 +239,23 @@ instance From (Money owner btcl mrel) Natural where
   from =
     via @Word64
 
---
--- TODO : !!!
---
--- instance TryFrom  (Ratio Natural)  (Money owner btcl mrel)
+instance TryFrom (Ratio Natural) (Money owner btcl mrel) where
+  tryFrom =
+    tryFrom @Natural
+      `composeTry` tryFrom
+
 instance From (Money owner btcl mrel) (Ratio Natural) where
   from =
     via @Natural
+
+instance TryFrom Rational (Money owner btcl mrel) where
+  tryFrom =
+    tryFrom @(Ratio Natural)
+      `composeTry` tryFrom
+
+instance From (Money owner btcl mrel) Rational where
+  from =
+    via @(Ratio Natural)
 
 newtype FeeRate
   = FeeRate (Ratio Natural)
@@ -253,6 +271,15 @@ newtype FeeRate
 instance From (Ratio Natural) FeeRate
 
 instance From FeeRate (Ratio Natural)
+
+instance TryFrom Rational FeeRate where
+  tryFrom =
+    from @(Ratio Natural)
+      `composeTryRhs` tryFrom
+
+instance From FeeRate Rational where
+  from =
+    via @(Ratio Natural)
 
 newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text
