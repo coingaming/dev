@@ -19,7 +19,7 @@ down() {
 
 if [ -z "$STACK" ]
 then
-  for STACK in btc-lsp; do
+  for STACK in yolo; do
     down $STACK
   done
 else
