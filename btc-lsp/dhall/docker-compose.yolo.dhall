@@ -12,7 +12,7 @@ let mempty = [] : P.Map.Type Text Text
 
 in  { networks.global.external = True
     , version = "3"
-    , volumes = { postgres = mempty, bitcoind = mempty }
+    , volumes = { postgres = mempty, bitcoind = mempty, lnd-lsp = mempty }
     , services =
       { postgres =
         { image = "heathmont/postgres:11-alpine-a2e8bbe"
@@ -68,7 +68,7 @@ in  { networks.global.external = True
           , LND_REST_PORT = "8080"
           , TLS_EXTRADOMAIN = "lnd-lsp"
           }
-        , volumes = [ "../build/volume/lnd-lsp:/root/.lnd" ]
+        , volumes = [ "lnd-lsp:/root/.lnd" ]
         , networks.global = mempty
         }
       , btc-lsp =

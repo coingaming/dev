@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./nix/generate-tls-cert.sh;
+./nix/nt-gen-keys.sh;
 . ./nix/export-test-envs.sh;
 ./nix/reset-test-data.sh;
 ./nix/spawn-test-deps.sh;

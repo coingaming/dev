@@ -16,7 +16,7 @@ docker network create -d overlay --attachable global || true
 
 echo "==> keys generation"
 sh "$THIS_DIR/shell-docker.sh" --mini \
-   "--run './nix/generate-tls-cert.sh'"
+   "--run './nix/nt-gen-keys.sh'"
 
 echo "==> docker image build"
 sh "$THIS_DIR/release-docker.sh"

@@ -19,7 +19,7 @@ in
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;
         packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''
-          ./nix/generate-tls-cert.sh
+          ./nix/nt-gen-keys.sh
           source ./nix/export-test-envs.sh;
           ./nix/reset-test-data.sh;
           ./nix/spawn-test-deps.sh;
