@@ -47,6 +47,30 @@ in  { networks.global.external = True
         , volumes = [ "bitcoind:/bitcoin/.bitcoin" ]
         , networks.global = mempty
         }
+      , lnd-lsp =
+        { image = "lightninglabs/lnd:v0.13.1-beta.rc2"
+        , hostname = "lnd-lsp"
+        , command =
+          [ "-c"
+          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
+          ]
+        , entrypoint = [ "sh" ]
+        , environment =
+          { BITCOIN_DEFAULTCHANCONFS = "1"
+          , BITCOIN_NETWORK = "regtest"
+          , BITCOIN_RPCHOST = "bitcoind"
+          , BITCOIN_RPCPASS = "developer"
+          , BITCOIN_RPCUSER = "bitcoinrpc"
+          , BITCOIN_ZMQPUBRAWBLOCK = "tcp://bitcoind:39703"
+          , BITCOIN_ZMQPUBRAWTX = "tcp://bitcoind:39704"
+          , LND_GRPC_PORT = "10009"
+          , LND_P2P_PORT = "9735"
+          , LND_REST_PORT = "8080"
+          , TLS_EXTRADOMAIN = "lnd-lsp"
+          }
+        , volumes = [ "../build/volume/lnd-lsp:/root/.lnd" ]
+        , networks.global = mempty
+        }
       , btc-lsp =
         { image = ../build/docker-image-btc-lsp.txt as Text
         , hostname = "btc-lsp"

@@ -18,7 +18,7 @@ echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
   cd "$LND_DIR"
   openssl ecparam -genkey -name prime256v1 -out tls.key
   openssl req -new -sha256 -key tls.key \
-    -out csr.csr -subj /CN=lnd/O=lnd
+    -out csr.csr -subj /CN=lnd-lsp/O=lnd-lsp
   openssl x509 -req -in csr.csr \
     -sha256 -days 36500 \
     -extfile "$BUILD_DIR/subjectAltName" \
