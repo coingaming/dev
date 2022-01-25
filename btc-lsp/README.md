@@ -1,10 +1,10 @@
 # btc-lsp
 
-Bitcoin Lightning Service Provider. Nix or Docker/Swarm is the only program required to get started. Development environment is packed into nix-shell.
+Bitcoin Lightning Service Provider. Development environment is packed into nix-shell.
 
 ## Docker/Swarm
 
-To spawn `btc-lsp` running [Docker/Swarm](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/) is required. On Mac you also need `brew install coreutils`. Also make sure Docker have access to reasonable amount of resources (at least 8GB of memory, reasonable storage and CPU capacity). Initial compilation will take a lot of time, CPU, memory, bandwidth and storage, but it's needed to be done only once.
+To spawn `btc-lsp` running [Docker/Swarm](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/) is required. On Mac you also need `brew install coreutils` and `brew install expect`. Also make sure Docker have access to reasonable amount of resources (at least 8GB of memory, reasonable storage and CPU capacity). Initial compilation will take a lot of time, CPU, memory, bandwidth and storage, but it's needed to be done only once.
 
 ```sh
 ./nix/ds-setup.sh

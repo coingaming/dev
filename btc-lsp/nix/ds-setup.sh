@@ -8,25 +8,38 @@ BUILD_DIR="$THIS_DIR/../build"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
-echo "==> docker swarm network setup"
+echo "==> Docker swarm network setup"
 sh "$THIS_DIR/ds-down.sh" || true
 docker swarm leave --force || true
 docker swarm init || true
 docker network create -d overlay --attachable global || true
 
-echo "==> keys generation"
+echo "==> Gen keys"
 sh "$THIS_DIR/shell-docker.sh" --mini \
    "--run './nix/nt-gen-keys.sh'"
 
-echo "==> docker image build"
+echo "==> Docker image build"
 sh "$THIS_DIR/release-docker.sh"
 docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | awk '{print $NF}' \
   | tr -d '\n' \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
-echo "==> dhall compilation"
+echo "==> Partial dhall"
 sh "$THIS_DIR/shell-docker.sh" --mini \
    "--run './nix/dhall-compile.sh'"
 
+echo "==> Partial spin"
 sh "$THIS_DIR/ds-up.sh"
+sleep 10
+
+echo "==> Gen creds"
+sh "$THIS_DIR/ds-gen-creds.sh"
+
+echo "==> Full dhall"
+sh "$THIS_DIR/shell-docker.sh" --mini \
+   "--run './nix/dhall-compile.sh'"
+
+echo "==> Full spin"
+sh "$THIS_DIR/ds-up.sh"
+sleep 10
