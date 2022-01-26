@@ -15,7 +15,10 @@ import Data.Signable (Signable)
 import qualified Data.Signable as Signable
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
-import Network.GRPC.HTTP2.Types (GRPCStatus (..), GRPCStatusCode (UNAUTHENTICATED))
+import Network.GRPC.HTTP2.Types
+  ( GRPCStatus (..),
+    GRPCStatusCode (UNAUTHENTICATED),
+  )
 import Network.GRPC.Server
 import Network.GRPC.Server.Wai (grpcApp)
 import Network.HTTP2.Server hiding (Request (..))
@@ -23,6 +26,7 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
 import Network.Wai.Internal (Request (..))
+import Text.PrettyPrint.GenericPretty.Import
 import Universum
 
 data GSEnv = GSEnv
@@ -73,10 +77,22 @@ serverApp env handlers req rep = do
         let http2data = fromMaybe defaultHTTP2Data http2data0
          in Just $
               http2data
-                { http2dataTrailers = trailersMaker sigVar (http2dataTrailers http2data)
+                { http2dataTrailers =
+                    trailersMaker
+                      mempty
+                      sigVar
+                      (http2dataTrailers http2data)
                 }
-      rep $ mapResponseHeaders (\hs -> ("trailer", sigHeaderName) : hs) res
-    trailersMaker sigVar oldMaker Nothing = do
+      rep $
+        mapResponseHeaders
+          (\hs -> ("trailer", sigHeaderName) : hs)
+          res
+    trailersMaker acc sigVar oldMaker Nothing = do
+      --
+      -- TODO : implement signing!!!
+      --
+      putStrLn ("world" :: Text)
+      putStrLn $ inspect acc
       ts <- oldMaker Nothing
       case ts of
         Trailers ss -> do
@@ -94,8 +110,15 @@ serverApp env handlers req rep = do
           -- TODO : throwIO GRPCStatus
           --
           error "UNEXPECTED_NEW_TRAILERS_MAKER"
-    trailersMaker sigVar oldMaker _ =
-      pure $ NextTrailersMaker (trailersMaker sigVar oldMaker)
+    trailersMaker acc sigVar oldMaker (Just bs) = do
+      --
+      -- TODO : implement signing!!!
+      --
+      putStrLn ("hello" :: Text)
+      putStrLn $ inspect acc
+      pure
+        . NextTrailersMaker
+        $ trailersMaker (acc <> bs) sigVar oldMaker
 
 withSig ::
   ( Signable res
