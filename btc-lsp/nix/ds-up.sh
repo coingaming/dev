@@ -12,6 +12,9 @@ docker stack deploy \
   --with-registry-auth \
   -c "$THIS_DIR/../build/docker-compose.yolo.yml" yolo
 
+echo "==> Waiting for the spawn"
+sleep 10
+
 echo "==> Lazy init/unlock"
 
 BITCOIN_NETWORK="regtest"

@@ -14,6 +14,23 @@ docker service ls
 curl -d '' -v --cacert ./build/btc_lsp_tls_cert.pem https://127.0.0.1:8443/BtcLsp.Service/SwapIntoLn
 ```
 
+In case where you don't have initialized docker swarm (for example you never used it), you need to run:
+
+```sh
+./nix/ds-setup.sh --reset-swarm
+```
+
+Please keep in mind, flag `--reset-swarm` will probably kill all already existing swarm services.
+
+## Auth
+
+Every `btc-lsp` gRPC request/response does have `ctx` (context) field in payload which contains credentials:
+
+- First is `nonce`.  The nonce is used for security reasons and is used to guard against replay attacks. The server will reject any request that comes with an incorrect nonce. The only requirement for the nonce is that it needs to be strictly increasing. Nonce generation is often achieved by using the current UNIX timestamp.
+- Second is `ln_pub_key`. This is lightning node network identity public key in DER format. This key is used to verify request/response signature from headers/trailers.
+
+Request/response signature is compact, DER-encoded and uses double-sha256 hash. It's located in `compact-2xsha256-sig` header/trailer.
+
 ## Haskell/Nix
 
 Spawn shell:

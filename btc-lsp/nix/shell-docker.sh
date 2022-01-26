@@ -43,7 +43,6 @@ if [ "$SHELL_KIND" = "maxishell" ]; then
     sleep 5 &&
     su $USER -c \"NIX_REMOTE=daemon nix-shell ./shell.nix \
         --pure \
-        --show-trace -v \
         --arg withHaskellIde true \
         --arg withShellHook true \
         $NIX_EXTRA_ARGS\"
@@ -61,7 +60,6 @@ else
     sleep 5 &&
     su $USER -c \"NIX_REMOTE=daemon nix-shell ./nix/minishell.nix \
         --pure \
-        --show-trace -v \
         $NIX_EXTRA_ARGS\"
     "
 fi

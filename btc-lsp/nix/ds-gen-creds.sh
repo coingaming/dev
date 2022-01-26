@@ -7,10 +7,33 @@ SWARM_DIR="$THIS_DIR/../build/swarm"
 
 for NET in regtest testnet mainnet; do
   for OWNER in lsp; do
+
     SERVICE="yolo_lnd-$OWNER"
     CONTAINER=`docker ps -f name="$SERVICE" --quiet`
     SERVICE_DIR="$SWARM_DIR/lnd-$OWNER"
     mkdir -p "$SERVICE_DIR"
+
+    #
+    # TODO : NET is redundant there, move it level ubove it
+    #
+
+    echo "$SERVICE ==> LN tls cert"
+    CERT_FILE="$SERVICE_DIR/tls.cert"
+    if [ -n "${CONTAINER}" ]; then
+      CERT="$( \
+        docker exec -it "$CONTAINER" \
+          cat /root/.lnd/tls.cert \
+          || true
+        )"
+      if [ -n "${CERT}" ]; then
+        echo "creating cert ==> $CERT_FILE"
+        echo -n "$CERT" > "$CERT_FILE"
+      else
+        echo "ignoring cert ==> $CERT_FILE"
+      fi
+    fi
+
+    echo "$SERVICE ==> LN macaroons"
     HEX_MACAROON_FILE="$SERVICE_DIR/macaroon-$NET.hex"
     HEX_MACAROON="$( \
       docker exec -it "$CONTAINER" \
@@ -25,9 +48,11 @@ for NET in regtest testnet mainnet; do
         ;;
       *)
         echo "creating macaroon => $HEX_MACAROON_FILE"
-        echo -n "$HEX_MACAROON" | sed 's/^M$//' > "$HEX_MACAROON_FILE"
+        echo -n "$HEX_MACAROON" > "$HEX_MACAROON_FILE"
         ;;
     esac
+
+    echo "$SERVICE ==> LN identity pubkey"
     KEY_FILE="$SERVICE_DIR/pubkey-$NET.hex"
     if [ -n "${CONTAINER}" ]; then
       PUB_KEY="$( \
@@ -41,5 +66,6 @@ for NET in regtest testnet mainnet; do
         echo "ignoring pubkey ==> $KEY_FILE"
       fi
     fi
+
   done
 done
