@@ -17,7 +17,7 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
 import TestOrphan ()
-import TestWithPaymentsPartner
+import TestWithMerchantPartner
 
 spec :: Spec
 spec =

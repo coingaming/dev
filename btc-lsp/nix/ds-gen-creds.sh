@@ -27,7 +27,7 @@ for NET in regtest testnet mainnet; do
         )"
       if [ -n "${CERT}" ]; then
         echo "creating cert ==> $CERT_FILE"
-        echo -n "$CERT" > "$CERT_FILE"
+        echo "$CERT" > "$CERT_FILE"
       else
         echo "ignoring cert ==> $CERT_FILE"
       fi
@@ -48,7 +48,10 @@ for NET in regtest testnet mainnet; do
         ;;
       *)
         echo "creating macaroon => $HEX_MACAROON_FILE"
-        echo -n "$HEX_MACAROON" > "$HEX_MACAROON_FILE"
+        echo "$HEX_MACAROON" \
+          | tr -d '\r' \
+          | tr -d '\n' \
+          > "$HEX_MACAROON_FILE"
         ;;
     esac
 
@@ -61,7 +64,7 @@ for NET in regtest testnet mainnet; do
         || true )"
       if [ -n "${PUB_KEY}" ]; then
         echo "creating pubkey ==> $KEY_FILE"
-        echo -n "$PUB_KEY" > "$KEY_FILE"
+        echo "$PUB_KEY" > "$KEY_FILE"
       else
         echo "ignoring pubkey ==> $KEY_FILE"
       fi

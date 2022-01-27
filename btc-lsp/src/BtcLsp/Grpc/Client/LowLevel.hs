@@ -83,47 +83,44 @@ runUnary ::
   ) =>
   ProtoLens.RPC s (m :: Symbol) ->
   GCEnv ->
+  (res -> ByteString -> IO Bool) ->
   req ->
   IO (Either Text res)
-runUnary rpc env req = do
+runUnary rpc env verifySig req = do
   res <-
     runClientIO $
       bracket
         (makeClient env req True True)
         close
         (\grpc -> rawUnary rpc grpc req)
-  pure $ case res of
+  case res of
     Right (Right (Right (h, mh, Right x))) ->
       case find (\header -> fst header == sigHeaderName) $ h <> fromMaybe mempty mh of
         Nothing ->
-          Left $
+          pure . Left $
             "Client ==> missing server header "
               <> inspectPlain sigHeaderName
-        Just (_, rawSig) ->
-          case Signable.importSigDer Signable.AlgSecp256k1 rawSig of
-            Nothing ->
-              Left $
-                "Client ==> server secp256k1 signature import failed for "
-                  <> inspectPlain rawSig
-            Just sig ->
-              if verify pub (Sig sig) x
-                then Right x
-                else
-                  Left $
-                    "Client ==> server signature verification failed for raw bytes "
-                      <> (inspectPlain . BL.toStrict $ Signable.toBinary x)
-                      <> " from decoded payload "
-                      <> inspectPlain x
-                      <> " with signature "
-                      <> inspectPlain sig
-                      <> " and the key "
-                      <> inspectPlain pub
+        Just (_, rawSig) -> do
+          isVerified <- verifySig x rawSig
+          pure $
+            if isVerified
+              then Right x
+              else
+                Left $
+                  "Client ==> server signature verification failed for raw bytes "
+                    <> (inspectPlain . BL.toStrict $ Signable.toBinary x)
+                    <> " from decoded payload "
+                    <> inspectPlain x
+                    <> " with signature "
+                    <> inspectPlain rawSig
+                    <> " and the key "
+                    <> inspectPlain pub
     x ->
       --
       -- TODO : replace show with inspectPlain
       -- need additional instances for this.
       --
-      Left $
+      pure . Left $
         "Client ==> server grpc failure "
           <> show x
   where
