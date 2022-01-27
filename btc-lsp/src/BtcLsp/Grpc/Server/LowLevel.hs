@@ -1,3 +1,8 @@
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 module BtcLsp.Grpc.Server.LowLevel
   ( GSEnv (..),
     runServer,
@@ -23,12 +28,23 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
 import Network.Wai.Internal (Request (..))
+import qualified Data.ByteString.Lazy as BSL
+import qualified Crypto.Secp256k1 as C
+import qualified Data.PEM as P
 import Universum
+import qualified Data.ASN1.Encoding as ASN1
+import qualified Data.ASN1.BinaryEncoding as ASN1
+import qualified Data.ASN1.Prim as ASN1
+import qualified Data.ASN1.BitArray as ASN1
+
+newtype PubKeyPem = PubKeyPem Text
+  deriving newtype (Eq, Show, FromJSON)
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
     gsEnvPrvKey :: PrvKey 'Server,
     gsEnvPubKey :: PubKey 'Client,
+    gsEnvPubKeyPem :: PubKeyPem,
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
@@ -45,6 +61,7 @@ instance FromJSON GSEnv where
             <$> x .: "port"
             <*> x .: "prv_key"
             <*> x .: "pub_key"
+            <*> x .: "pub_key"
             <*> x .: "sig_header_name"
             <*> x .: "tls_cert"
             <*> x .: "tls_key"
@@ -59,7 +76,7 @@ runServer env handlers =
         (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
     )
     (setPort (gsEnvPort env) defaultSettings)
-    (serverApp env $ handlers env)
+    (sigCheckMiddleware env $ serverApp env $ handlers env)
 
 serverApp :: GSEnv -> (MVar (Sig 'Server) -> [ServiceHandler]) -> Application
 serverApp env handlers req rep = do
@@ -96,6 +113,46 @@ serverApp env handlers req rep = do
           error "UNEXPECTED_NEW_TRAILERS_MAKER"
     trailersMaker sigVar oldMaker _ =
       pure $ NextTrailersMaker (trailersMaker sigVar oldMaker)
+
+sigFromReq :: ByteString -> Request -> Maybe C.Sig
+sigFromReq sigHeaderName req = do
+  let sigHeaderNameCI = CI.mk sigHeaderName
+  (_, sig) <- find (\x -> fst x == sigHeaderNameCI) $ requestHeaders req
+  C.importSig sig
+
+safeHeadEither :: [a] -> Either String a
+safeHeadEither [x] = Right x
+safeHeadEither _ = Left "Not one chunk"
+
+parsePubKeyPem :: ByteString -> Either String C.PubKey
+parsePubKeyPem pbs = do
+  pem <- P.pemParseBS pbs >>= safeHeadEither
+  asns <- first show $ ASN1.decodeASN1 ASN1.DER (BSL.fromStrict $ P.pemContent pem)
+  der <- safeHeadEither asns >>= bitStr
+  maybeToRight "Failed to import der" $ C.importPubKey der
+    where
+      bitStr (ASN1.BitString (ASN1.BitArray _ x)) = Right x
+      bitStr _ = Left "Incorrect asn1 object type"
+--
+-- TODO: FromJSON instance
+pubKeyFromEnv :: GSEnv -> Either String C.PubKey
+pubKeyFromEnv env = parsePubKeyPem $ TE.encodeUtf8 $ coerce $ gsEnvPubKeyPem env
+
+verifySig :: GSEnv -> Request -> ByteString -> Either String Bool
+verifySig env req payload = do
+  pubKey <- pubKeyFromEnv env
+  sig <- maybeToRight "Incorrect signature" $ sigFromReq sigHeaderName req
+  msg <- maybeToRight "Incorrect message" $ C.msg payload
+  if C.verifySig pubKey sig msg then Right True else Left "Signature verification fail"
+    where
+      sigHeaderName = coerce $ gsEnvSigHeaderName env
+
+sigCheckMiddleware :: GSEnv -> Middleware
+sigCheckMiddleware env app req resp = do
+  body <- BSL.toStrict <$> strictRequestBody req
+  case verifySig env req body of
+    Right True -> app req { requestBody = pure body } resp
+    _ -> app req resp
 
 withSig ::
   ( Signable res

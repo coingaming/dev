@@ -71,6 +71,10 @@ dependencies:
 - network-bitcoin
 - lnd-client
 - cryptonite
+- secp256k1-haskell
+- pem
+- asn1-encoding
+- asn1-types
 - signable
 # web
 - wai
