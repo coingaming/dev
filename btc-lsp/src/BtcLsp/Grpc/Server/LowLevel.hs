@@ -3,6 +3,8 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module BtcLsp.Grpc.Server.LowLevel
   ( GSEnv (..),
     runServer,
@@ -31,6 +33,7 @@ import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
 import Network.Wai.Internal (Request (..))
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString as BS
 import qualified Crypto.Secp256k1 as C
 import qualified Data.PEM as P
 import Universum
@@ -38,6 +41,12 @@ import qualified Data.ASN1.Encoding as ASN1
 import qualified Data.ASN1.BinaryEncoding as ASN1
 import qualified Data.ASN1.Prim as ASN1
 import qualified Data.ASN1.BitArray as ASN1
+import Control.Concurrent (modifyMVar)
+import Numeric (showHex)
+import qualified Data.List as L
+import qualified Crypto.Hash as CH
+import qualified Data.ByteArray as BA
+import qualified Data.Binary as B
 
 newtype PubKeyPem = PubKeyPem Text
   deriving newtype (Eq, Show, FromJSON)
@@ -135,29 +144,44 @@ sigFromReq sigHeaderName req = do
   (_, sig) <- find (\x -> fst x == sigHeaderNameCI) $ requestHeaders req
   C.importSig sig
 
-safeHeadEither :: [a] -> Either String a
-safeHeadEither [x] = Right x
-safeHeadEither _ = Left "Not one chunk"
+safeHeadEither :: String -> [a] -> Either String a
+safeHeadEither _ [x] = Right x
+safeHeadEither msg _ = Left $ msg <> " Not one chunk"
+
+findBitString :: [ASN1.ASN1] -> Either String ByteString
+findBitString arr =
+  let masn = L.find (\case (ASN1.BitString (ASN1.BitArray _ x)) -> True; _ -> False) arr
+  in case masn of
+       Just (ASN1.BitString (ASN1.BitArray _ x)) -> Right x
+       _ -> Left "Cannot find asn1 bitstring"
+
+prettyPrint :: ByteString -> String
+prettyPrint = foldr showHex ""
 
 parsePubKeyPem :: ByteString -> Either String C.PubKey
 parsePubKeyPem pbs = do
-  pem <- P.pemParseBS pbs >>= safeHeadEither
+  pem <- P.pemParseBS pbs >>= safeHeadEither "pubkey"
   asns <- first show $ ASN1.decodeASN1 ASN1.DER (BSL.fromStrict $ P.pemContent pem)
-  der <- safeHeadEither asns >>= bitStr
+  der <- findBitString asns
   maybeToRight "Failed to import der" $ C.importPubKey der
-    where
-      bitStr (ASN1.BitString (ASN1.BitArray _ x)) = Right x
-      bitStr _ = Left "Incorrect asn1 object type"
---
--- TODO: FromJSON instance
+
 pubKeyFromEnv :: GSEnv -> Either String C.PubKey
 pubKeyFromEnv env = parsePubKeyPem $ TE.encodeUtf8 $ coerce $ gsEnvPubKeyPem env
+
+prepareMsg :: ByteString -> Maybe C.Msg
+prepareMsg m = C.msg $ BS.pack $ BA.unpack $ hash256 $ (BSL.drop 8 . B.encode) m
+  where
+    hash256 :: BSL.ByteString -> CH.Digest CH.SHA256
+    hash256 = CH.hashlazy
 
 verifySig :: GSEnv -> Request -> ByteString -> Either String Bool
 verifySig env req payload = do
   pubKey <- pubKeyFromEnv env
   sig <- maybeToRight "Incorrect signature" $ sigFromReq sigHeaderName req
-  msg <- maybeToRight "Incorrect message" $ C.msg payload
+  traceShowM sig
+  traceShowM $ prettyPrint payload
+  traceShowM $ length payload
+  msg <- maybeToRight "Incorrect message" $ prepareMsg payload
   if C.verifySig pubKey sig msg then Right True else Left "Signature verification fail"
     where
       sigHeaderName = coerce $ gsEnvSigHeaderName env
@@ -165,9 +189,19 @@ verifySig env req payload = do
 sigCheckMiddleware :: GSEnv -> Middleware
 sigCheckMiddleware env app req resp = do
   body <- BSL.toStrict <$> strictRequestBody req
+  body' <- newMVar body
+  print req
+  print body
+  let req' = req { requestBody = requestBody' body' }
   case verifySig env req body of
-    Right True -> app req { requestBody = pure body } resp
-    _ -> app req resp
+    Right True -> app req' resp
+    Left str -> do
+      print str
+      app req' resp
+    _ -> app req' resp
+  where
+    requestBody' mvar = modifyMVar mvar
+      (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
 
 withSig ::
   ( Signable res
