@@ -92,10 +92,10 @@ runServer env handlers =
         (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
     )
     (setPort (gsEnvPort env) defaultSettings)
-    (sigCheckMiddleware env $ serverApp env $ handlers env)
+    (sigCheckMiddleware env $ serverApp (handlers env))
 
-serverApp :: GSEnv -> (MVar (Sig 'Server) -> [ServiceHandler]) -> Application
-serverApp env handlers req rep = do
+serverApp :: (MVar (Sig 'Server) -> [ServiceHandler]) -> GSEnv -> ByteString -> Application
+serverApp handlers env body req rep = do
   --
   -- TODO : remove sig var!!!!!!
   --
@@ -186,7 +186,7 @@ verifySig env req payload = do
     where
       sigHeaderName = coerce $ gsEnvSigHeaderName env
 
-sigCheckMiddleware :: GSEnv -> Middleware
+sigCheckMiddleware :: GSEnv -> (GSEnv -> ByteString -> Application) -> Application
 sigCheckMiddleware env app req resp = do
   body <- BSL.toStrict <$> strictRequestBody req
   body' <- newMVar body
@@ -194,11 +194,11 @@ sigCheckMiddleware env app req resp = do
   print body
   let req' = req { requestBody = requestBody' body' }
   case verifySig env req body of
-    Right True -> app req' resp
+    Right True -> app env body req' resp
     Left str -> do
       print str
-      app req' resp
-    _ -> app req' resp
+      app env body req' resp
+    _ -> app env body req' resp
   where
     requestBody' mvar = modifyMVar mvar
       (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
