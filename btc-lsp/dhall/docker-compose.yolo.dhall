@@ -93,11 +93,13 @@ in  { networks.global.external = True
               ''
               {
                 "lnd_wallet_password":"developer",
-                "lnd_tls_cert":"${escape ../build/lnd_tls.cert as Text}",
+                "lnd_tls_cert":"${  escape
+                                      ../build/swarm/lnd-lsp/tls.cert as Text
+                                  ? "TODO"}",
                 "lnd_hex_macaroon":"${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
                                       ? "TODO"}",
-                "lnd_host":"localhost",
-                "lnd_port":11009,
+                "lnd_host":"lnd-lsp",
+                "lnd_port":10009,
                 "lnd_cipher_seed_mnemonic":[
                    "absent",
                    "betray",
@@ -133,7 +135,7 @@ in  { networks.global.external = True
                 "port":8443,
                 "prv_key":"${escape ../build/esdsa.prv as Text}",
                 "pub_key":"${escape ../build/esdsa.pub as Text}",
-                "sig_header_name":"compact-double-sha256-lnd-signature",
+                "sig_header_name":"compact-2xsha256-sig",
                 "tls_cert":"${escape ../build/btc_lsp_tls_cert.pem as Text}",
                 "tls_key":"${escape ../build/btc_lsp_tls_key.pem as Text}"
               }

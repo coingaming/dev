@@ -17,10 +17,12 @@ import Data.Aeson (FromJSON (..), withObject, (.:))
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
 import Data.Signable (Signable)
-import qualified Data.Signable as Signable
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
-import Network.GRPC.HTTP2.Types (GRPCStatus (..), GRPCStatusCode (UNAUTHENTICATED))
+import Network.GRPC.HTTP2.Types
+  ( GRPCStatus (..),
+    GRPCStatusCode (UNAUTHENTICATED),
+  )
 import Network.GRPC.Server
 import Network.GRPC.Server.Wai (grpcApp)
 import Network.HTTP2.Server hiding (Request (..))
@@ -48,7 +50,11 @@ data GSEnv = GSEnv
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
-    gsEnvLogger :: Text -> IO ()
+    gsEnvLogger :: Text -> IO (),
+    --
+    -- TODO : more typed data
+    --
+    gsEnvSigner :: ByteString -> IO (Maybe ByteString)
   }
   deriving (Generic)
 
@@ -66,6 +72,7 @@ instance FromJSON GSEnv where
             <*> x .: "tls_cert"
             <*> x .: "tls_key"
             <*> pure (const $ pure ())
+            <*> pure (const $ pure Nothing)
       )
 
 runServer :: GSEnv -> (GSEnv -> MVar (Sig 'Server) -> [ServiceHandler]) -> IO ()
@@ -80,39 +87,47 @@ runServer env handlers =
 
 serverApp :: GSEnv -> (MVar (Sig 'Server) -> [ServiceHandler]) -> Application
 serverApp env handlers req rep = do
+  --
+  -- TODO : remove sig var!!!!!!
+  --
   sigVar <- newEmptyMVar
   let app = grpcApp [gzip] $ handlers sigVar
-  app req (middleware sigVar)
+  app req middleware
   where
     sigHeaderName = coerce $ gsEnvSigHeaderName env
-    middleware sigVar res = do
+    middleware res = do
       modifyHTTP2Data req $ \http2data0 ->
         let http2data = fromMaybe defaultHTTP2Data http2data0
          in Just $
               http2data
-                { http2dataTrailers = trailersMaker sigVar (http2dataTrailers http2data)
+                { http2dataTrailers =
+                    trailersMaker
+                      mempty
+                      (http2dataTrailers http2data)
                 }
-      rep $ mapResponseHeaders (\hs -> ("trailer", sigHeaderName) : hs) res
-    trailersMaker sigVar oldMaker Nothing = do
+      rep $
+        mapResponseHeaders
+          (\hs -> ("trailer", sigHeaderName) : hs)
+          res
+    trailersMaker acc oldMaker Nothing = do
       ts <- oldMaker Nothing
       case ts of
         Trailers ss -> do
-          mSig <- tryTakeMVar sigVar
+          mSig <- gsEnvSigner env acc
           pure $ case mSig of
-            Nothing -> ts
+            Nothing ->
+              ts
             Just sig ->
-              Trailers $
-                ( CI.mk sigHeaderName,
-                  Signable.exportSigDer $ coerce sig
-                ) :
-                ss
+              Trailers $ (CI.mk sigHeaderName, sig) : ss
         NextTrailersMaker {} ->
           --
           -- TODO : throwIO GRPCStatus
           --
           error "UNEXPECTED_NEW_TRAILERS_MAKER"
-    trailersMaker sigVar oldMaker _ =
-      pure $ NextTrailersMaker (trailersMaker sigVar oldMaker)
+    trailersMaker acc oldMaker (Just bs) = do
+      pure
+        . NextTrailersMaker
+        $ trailersMaker (acc <> bs) oldMaker
 
 sigFromReq :: ByteString -> Request -> Maybe C.Sig
 sigFromReq sigHeaderName req = do

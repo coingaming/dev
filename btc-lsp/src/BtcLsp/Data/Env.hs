@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module BtcLsp.Data.Env
   ( Env (..),
     RawConfig (..),
@@ -16,6 +18,7 @@ import Crypto.Cipher.AES (AES256)
 import Crypto.Cipher.Types (IV, cipherInit, makeIV)
 import Crypto.Error (CryptoFailable (..))
 import qualified Data.Aeson as A (Result (..), Value (..), decode)
+import qualified Data.ByteString as BS
 import Data.ByteString.Char8 as C8S (pack)
 import Data.ByteString.Lazy.Char8 as C8L (pack)
 import qualified Data.Text.Lazy.Encoding as LTE
@@ -33,6 +36,8 @@ import qualified Env as E
     var,
   )
 import qualified LndClient as Lnd
+import qualified LndClient.Data.SignMessage as Lnd
+import qualified LndClient.RPC.Katip as Lnd
 
 data Env = Env
   { -- | General
@@ -162,29 +167,70 @@ withEnv rc this = do
           Psql.createPostgresqlPool (rawConfigLibpqConnStr rc) 10
   let katipCtx = mempty :: LogContexts
   let katipNs = mempty :: Namespace
+  let lnd = rawConfigLndEnv rc
   bracket newLogEnv rmLogEnv $ \le ->
     bracket newSqlPool rmSqlPool $ \pool ->
-      runKatipContextT le katipCtx katipNs $
-        this $
-          Env
-            { -- General
-              envSQLPool = pool,
-              envEndpointPort = rawConfigEndpointPort rc,
-              -- Logging
-              envKatipLE = le,
-              envKatipCTX = katipCtx,
-              envKatipNS = katipNs,
-              -- Encryption
-              envCryptoCipher = rawConfigCipher rc,
-              envCryptoInitVector = rawConfigInitVector rc,
-              -- Lnd
-              envLnd = rawConfigLndEnv rc,
-              envLndPubKey = pubKeyVar,
-              -- Grpc
-              envGrpcServerEnv = rawConfigGrpcServerEnv rc
-            }
+      runKatipContextT le katipCtx katipNs
+        . withUnliftIO
+        $ \(UnliftIO run) ->
+          run . this $
+            Env
+              { -- General
+                envSQLPool = pool,
+                envEndpointPort = rawConfigEndpointPort rc,
+                -- Logging
+                envKatipLE = le,
+                envKatipCTX = katipCtx,
+                envKatipNS = katipNs,
+                -- Encryption
+                envCryptoCipher = rawConfigCipher rc,
+                envCryptoInitVector = rawConfigInitVector rc,
+                -- Lnd
+                envLnd = lnd,
+                envLndPubKey = pubKeyVar,
+                -- Grpc
+                envGrpcServerEnv =
+                  (rawConfigGrpcServerEnv rc)
+                    { gsEnvSigner = run . signT lnd
+                    }
+              }
   where
     rmLogEnv :: LogEnv -> IO ()
     rmLogEnv = void . liftIO . closeScribes
     rmSqlPool :: Pool a -> IO ()
     rmSqlPool = liftIO . destroyAllResources
+    signT ::
+      Lnd.LndEnv ->
+      ByteString ->
+      KatipContextT IO (Maybe ByteString)
+    signT lnd msg = do
+      eSig <-
+        Lnd.signMessage lnd $
+          Lnd.SignMessageRequest
+            { Lnd.message = msg,
+              Lnd.keyLoc =
+                Lnd.KeyLocator
+                  { Lnd.keyFamily = 6,
+                    Lnd.keyIndex = 0
+                  },
+              Lnd.doubleHash = True,
+              Lnd.compactSig = True
+            }
+      case eSig of
+        Left e -> do
+          $(logTM) ErrorS . logStr $
+            "Server ==> signing procedure failed "
+              <> inspect e
+          pure Nothing
+        Right sig0 -> do
+          let sig = coerce sig0
+          $(logTM) DebugS . logStr $
+            "Server ==> signing procedure succeeded for msg of "
+              <> inspect (BS.length msg)
+              <> " bytes "
+              <> inspect msg
+              <> " got signature of "
+              <> inspect (BS.length sig)
+              <> " bytes "
+              <> inspect sig
+          pure $ Just sig
