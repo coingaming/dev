@@ -320,8 +320,8 @@ test-suite btc-lsp-test
       TestAppM
       TestAppTH
       TestOrphan
-      TestWithMerchantPartner
-      TestWithPaymentsPartner
+      TestWithLndAlice
+      TestWithLndLsp
       Paths_btc_lsp
   hs-source-dirs:
       src

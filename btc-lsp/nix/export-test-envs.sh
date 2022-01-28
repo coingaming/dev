@@ -20,17 +20,17 @@ alias bitcoin-cli="bitcoin-cli -rpcwait -datadir=$BTCD_DIR -rpcport=18443"
 # lnd
 #
 
-export LND_MERCHANT_DIR="$ROOT_DIR/.lnd-merchant"
-alias lncli-merchant="lncli -n regtest --lnddir=$LND_MERCHANT_DIR"
-export LND_PAYMENTS_DIR="$ROOT_DIR/.lnd-payments"
-alias lncli-payments="lncli -n regtest --lnddir=$LND_PAYMENTS_DIR --rpcserver=localhost:11009"
+export LND_LSP_DIR="$ROOT_DIR/.lnd-lsp"
+alias lncli-lsp="lncli -n regtest --lnddir=$LND_LSP_DIR"
+export LND_ALICE_DIR="$ROOT_DIR/.lnd-alice"
+alias lncli-alice="lncli -n regtest --lnddir=$LND_ALICE_DIR --rpcserver=localhost:11009"
 
 #
 # app
 #
 
 export LND_TLS_CERT="$(cat "$ROOT_DIR/.lnd/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
-export LSP_MERCHANT_LND_ENV="
+export LND_LSP_ENV="
 {
     \"lnd_wallet_password\":\"developer\",
     \"lnd_tls_cert\":\"$LND_TLS_CERT\",

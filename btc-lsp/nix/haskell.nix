@@ -2,7 +2,6 @@ let
   header = (import ./header.nix);
   pkgs = header.pkgs;
   lnd = import ./lnd.nix { inherit pkgs; };
-  boltz-lnd = pkgs.callPackage (import ./boltz-lnd.nix) {};
 in
   {
     pkgs = pkgs;
