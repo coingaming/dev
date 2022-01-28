@@ -9,15 +9,13 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Thread.Server as Server
---import qualified LndClient.Data.PayReq as Lnd
-
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
 import TestOrphan ()
-import TestWithMerchantPartner
+import TestWithLndLsp
 
 spec :: Spec
 spec =
