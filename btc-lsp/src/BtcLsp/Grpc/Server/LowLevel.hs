@@ -11,7 +11,6 @@ import Control.Exception (throwIO)
 import Data.Aeson (FromJSON (..), withObject, (.:))
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
-import Data.Signable (Signable)
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
 import Network.GRPC.HTTP2.Types
@@ -29,8 +28,6 @@ import Universum
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
-    gsEnvPrvKey :: PrvKey 'Server,
-    gsEnvPubKey :: PubKey 'Client,
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
@@ -49,8 +46,6 @@ instance FromJSON GSEnv where
       ( \x ->
           GSEnv
             <$> x .: "port"
-            <*> x .: "prv_key"
-            <*> x .: "pub_key"
             <*> x .: "sig_header_name"
             <*> x .: "tls_cert"
             <*> x .: "tls_key"
@@ -58,7 +53,7 @@ instance FromJSON GSEnv where
             <*> pure (const $ pure Nothing)
       )
 
-runServer :: GSEnv -> (GSEnv -> MVar (Sig 'Server) -> [ServiceHandler]) -> IO ()
+runServer :: GSEnv -> (GSEnv -> [ServiceHandler]) -> IO ()
 runServer env handlers =
   runTLS
     ( tlsSettingsMemory
@@ -68,13 +63,9 @@ runServer env handlers =
     (setPort (gsEnvPort env) defaultSettings)
     (serverApp env $ handlers env)
 
-serverApp :: GSEnv -> (MVar (Sig 'Server) -> [ServiceHandler]) -> Application
+serverApp :: GSEnv -> [ServiceHandler] -> Application
 serverApp env handlers req rep = do
-  --
-  -- TODO : remove sig var!!!!!!
-  --
-  sigVar <- newEmptyMVar
-  let app = grpcApp [gzip] $ handlers sigVar
+  let app = grpcApp [gzip] handlers
   app req middleware
   where
     sigHeaderName = coerce $ gsEnvSigHeaderName env
@@ -113,15 +104,12 @@ serverApp env handlers req rep = do
         $ trailersMaker (acc <> bs) oldMaker
 
 withSig ::
-  ( Signable res
-  ) =>
   GSEnv ->
-  MVar (Sig 'Server) ->
   (req -> IO res) ->
   Request ->
   req ->
   IO res
-withSig env sigVar handler httpReq protoReq =
+withSig env handler httpReq protoReq =
   case find (\x -> fst x == sigHeaderNameCI) $ requestHeaders httpReq of
     Nothing -> failure $ sigHeaderName <> " is missing"
     Just (_, _) -> do
@@ -131,10 +119,7 @@ withSig env sigVar handler httpReq protoReq =
       --     if not (verify (gsEnvPubKey env) (Sig clientSig) protoReq)
       --       then failure $ sigHeaderName <> " verification failed"
       --       else do
-      res <- handler protoReq
-      let sig = sign (gsEnvPrvKey env) res
-      putMVar sigVar sig
-      pure res
+      handler protoReq
   where
     failure =
       throwIO

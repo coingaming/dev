@@ -5,13 +5,11 @@ module BtcLsp.Thread.Server
   )
 where
 
-import BtcLsp.Grpc.Data
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
 import BtcLsp.Import hiding (Sig (..))
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
-import Data.Signable (Signable)
 import Lens.Micro
 import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Network.GRPC.Server
@@ -34,9 +32,8 @@ handlers ::
   ) =>
   UnliftIO m ->
   GSEnv ->
-  MVar (Sig 'Server) ->
   [ServiceHandler]
-handlers run gsEnv sigVar =
+handlers run gsEnv =
   [ unary (RPC :: RPC Service "getCfg") $
       runHandler getCfg,
     unary (RPC :: RPC Service "swapIntoLn") $
@@ -53,19 +50,15 @@ handlers run gsEnv sigVar =
         HasField failure "internal" [internal],
         Message res,
         Message failure,
-        Message internal,
-        Signable res
+        Message internal
       ) =>
       (Entity User -> req -> m res) ->
       Wai.Request ->
       req ->
       IO res
     runHandler =
-      withMiddleware run gsEnv sigVar
+      withMiddleware run gsEnv
 
---
--- TODO : sign (but temporary remove verification)
---
 withMiddleware ::
   ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
     HasField res "ctx" Proto.Ctx,
@@ -75,17 +68,15 @@ withMiddleware ::
     Message res,
     Message failure,
     Message internal,
-    Signable res,
     Env m
   ) =>
   UnliftIO m ->
   GSEnv ->
-  MVar (Sig 'Server) ->
   (Entity User -> req -> m res) ->
   Wai.Request ->
   req ->
   IO res
-withMiddleware (UnliftIO run) gsEnv sigVar handler waiReq req =
+withMiddleware (UnliftIO run) gsEnv handler waiReq req =
   run $ do
     res <- runExceptT $ do
       nonce <-
@@ -107,7 +98,6 @@ withMiddleware (UnliftIO run) gsEnv sigVar handler waiReq req =
     liftIO $
       withSig
         gsEnv
-        sigVar
         ( case res of
             Left e ->
               const . pure $ failResE e

@@ -113,8 +113,6 @@ runUnary rpc env verifySig req = do
                     <> inspectPlain x
                     <> " with signature "
                     <> inspectPlain rawSig
-                    <> " and the key "
-                    <> inspectPlain pub
     x ->
       --
       -- TODO : replace show with inspectPlain
@@ -124,7 +122,6 @@ runUnary rpc env verifySig req = do
         "Client ==> server grpc failure "
           <> show x
   where
-    pub = gcEnvPubKey env
     sigHeaderName = CI.mk . coerce $ gcEnvSigHeaderName env
 
 makeClient ::

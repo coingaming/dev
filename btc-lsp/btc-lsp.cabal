@@ -318,7 +318,6 @@ test-suite btc-lsp-test
       ServerSpec
       Spec
       TestAppM
-      TestAppTH
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp

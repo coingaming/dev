@@ -169,11 +169,11 @@ withTestEnv' action = do
         runKatipContextT katipLE katipCTX katipNS $
           LndTest.withTestEnv
             (envLnd lspAppEnv)
-            (Lnd.NodeLocation "localhost:9735")
+            (Lnd.NodeLocation "localhost:9736")
             $ \lspTestEnv ->
               LndTest.withTestEnv
                 (envLnd aliceAppEnv)
-                (Lnd.NodeLocation "localhost:9734")
+                (Lnd.NodeLocation "localhost:9737")
                 $ \aliceTestEnv ->
                   liftIO $
                     action
