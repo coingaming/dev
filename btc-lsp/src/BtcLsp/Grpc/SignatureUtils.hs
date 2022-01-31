@@ -68,23 +68,3 @@ verifySig pubK sigHeaderName req payload = do
   sig <- maybeToRight "Incorrect signature" $ sigFromReq sigHeaderName req
   msg <- maybeToRight "Incorrect message" $ prepareMsg payload
   if C.verifySig pubKey sig msg then Right True else Left "Signature verification fail"
-
-
--- sigCheckMiddleware :: GSEnv -> (GSEnv -> ByteString -> Application) -> Application
--- sigCheckMiddleware env app req resp = do
---   body <- BSL.toStrict <$> strictRequestBody req
---   body' <- newMVar body
---   print req
---   print body
---   let req' = req { requestBody = requestBody' body' }
---   case verifySig env req body of
---     Right True -> app env body req' resp
---     Left str -> do
---       print str
---       app env body req' resp
---     _ -> app env body req' resp
---   where
---     requestBody' mvar = modifyMVar mvar
---       (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
-
-
