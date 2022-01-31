@@ -3,28 +3,19 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
-{-# OPTIONS_GHC -Wno-unused-matches #-}
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 module BtcLsp.Grpc.Server.LowLevel
   ( GSEnv (..),
     runServer,
-    serverApp,
-    withSig,
+    serverApp
   )
 where
 
 import BtcLsp.Grpc.Data
-import Control.Exception (throwIO)
 import Data.Aeson (FromJSON (..), withObject, (.:))
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
-import Data.Signable (Signable)
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
-import Network.GRPC.HTTP2.Types
-  ( GRPCStatus (..),
-    GRPCStatusCode (UNAUTHENTICATED),
-  )
 import Network.GRPC.Server
 import Network.GRPC.Server.Wai (grpcApp)
 import Network.HTTP2.Server hiding (Request (..))
@@ -33,20 +24,8 @@ import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
 import Network.Wai.Internal (Request (..))
 import qualified Data.ByteString.Lazy as BSL
-import qualified Data.ByteString as BS
-import qualified Crypto.Secp256k1 as C
-import qualified Data.PEM as P
 import Universum
-import qualified Data.ASN1.Encoding as ASN1
-import qualified Data.ASN1.BinaryEncoding as ASN1
-import qualified Data.ASN1.Prim as ASN1
-import qualified Data.ASN1.BitArray as ASN1
 import Control.Concurrent (modifyMVar)
-import Numeric (showHex)
-import qualified Data.List as L
-import qualified Crypto.Hash as CH
-import qualified Data.ByteArray as BA
-import qualified Data.Binary as B
 
 newtype PubKeyPem = PubKeyPem Text
   deriving newtype (Eq, Show, FromJSON)
@@ -84,7 +63,7 @@ instance FromJSON GSEnv where
             <*> pure (const $ pure Nothing)
       )
 
-runServer :: GSEnv -> (GSEnv -> MVar (Sig 'Server) -> [ServiceHandler]) -> IO ()
+runServer :: GSEnv -> (GSEnv -> ByteString -> [ServiceHandler]) -> IO ()
 runServer env handlers =
   runTLS
     ( tlsSettingsMemory
@@ -92,15 +71,14 @@ runServer env handlers =
         (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
     )
     (setPort (gsEnvPort env) defaultSettings)
-    (sigCheckMiddleware env $ serverApp (handlers env))
+    (extractBodyBytesMiddleware env $ serverApp handlers)
 
-serverApp :: (MVar (Sig 'Server) -> [ServiceHandler]) -> GSEnv -> ByteString -> Application
+serverApp :: (GSEnv -> ByteString -> [ServiceHandler]) -> GSEnv -> ByteString -> Application
 serverApp handlers env body req rep = do
   --
   -- TODO : remove sig var!!!!!!
   --
-  sigVar <- newEmptyMVar
-  let app = grpcApp [gzip] $ handlers sigVar
+  let app = grpcApp [gzip] $ handlers env body
   app req middleware
   where
     sigHeaderName = coerce $ gsEnvSigHeaderName env
@@ -138,100 +116,12 @@ serverApp handlers env body req rep = do
         . NextTrailersMaker
         $ trailersMaker (acc <> bs) oldMaker
 
-sigFromReq :: ByteString -> Request -> Maybe C.Sig
-sigFromReq sigHeaderName req = do
-  let sigHeaderNameCI = CI.mk sigHeaderName
-  (_, sig) <- find (\x -> fst x == sigHeaderNameCI) $ requestHeaders req
-  C.importSig sig
-
-safeHeadEither :: String -> [a] -> Either String a
-safeHeadEither _ [x] = Right x
-safeHeadEither msg _ = Left $ msg <> " Not one chunk"
-
-findBitString :: [ASN1.ASN1] -> Either String ByteString
-findBitString arr =
-  let masn = L.find (\case (ASN1.BitString (ASN1.BitArray _ x)) -> True; _ -> False) arr
-  in case masn of
-       Just (ASN1.BitString (ASN1.BitArray _ x)) -> Right x
-       _ -> Left "Cannot find asn1 bitstring"
-
-prettyPrint :: ByteString -> String
-prettyPrint = foldr showHex ""
-
-parsePubKeyPem :: ByteString -> Either String C.PubKey
-parsePubKeyPem pbs = do
-  pem <- P.pemParseBS pbs >>= safeHeadEither "pubkey"
-  asns <- first show $ ASN1.decodeASN1 ASN1.DER (BSL.fromStrict $ P.pemContent pem)
-  der <- findBitString asns
-  maybeToRight "Failed to import der" $ C.importPubKey der
-
-pubKeyFromEnv :: GSEnv -> Either String C.PubKey
-pubKeyFromEnv env = parsePubKeyPem $ TE.encodeUtf8 $ coerce $ gsEnvPubKeyPem env
-
-prepareMsg :: ByteString -> Maybe C.Msg
-prepareMsg m = C.msg $ BS.pack $ BA.unpack $ hash256 $ (BSL.drop 8 . B.encode) m
-  where
-    hash256 :: BSL.ByteString -> CH.Digest CH.SHA256
-    hash256 = CH.hashlazy
-
-verifySig :: GSEnv -> Request -> ByteString -> Either String Bool
-verifySig env req payload = do
-  pubKey <- pubKeyFromEnv env
-  sig <- maybeToRight "Incorrect signature" $ sigFromReq sigHeaderName req
-  traceShowM sig
-  traceShowM $ prettyPrint payload
-  traceShowM $ length payload
-  msg <- maybeToRight "Incorrect message" $ prepareMsg payload
-  if C.verifySig pubKey sig msg then Right True else Left "Signature verification fail"
-    where
-      sigHeaderName = coerce $ gsEnvSigHeaderName env
-
-sigCheckMiddleware :: GSEnv -> (GSEnv -> ByteString -> Application) -> Application
-sigCheckMiddleware env app req resp = do
+extractBodyBytesMiddleware :: GSEnv -> (GSEnv -> ByteString -> Application) -> Application
+extractBodyBytesMiddleware env app req resp = do
   body <- BSL.toStrict <$> strictRequestBody req
-  body' <- newMVar body
-  print req
-  print body
-  let req' = req { requestBody = requestBody' body' }
-  case verifySig env req body of
-    Right True -> app env body req' resp
-    Left str -> do
-      print str
-      app env body req' resp
-    _ -> app env body req' resp
+  body'<- newMVar body
+  app env body (req' body') resp
   where
     requestBody' mvar = modifyMVar mvar
       (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
-
-withSig ::
-  ( Signable res
-  ) =>
-  GSEnv ->
-  MVar (Sig 'Server) ->
-  (req -> IO res) ->
-  Request ->
-  req ->
-  IO res
-withSig env sigVar handler httpReq protoReq =
-  case find (\x -> fst x == sigHeaderNameCI) $ requestHeaders httpReq of
-    Nothing -> failure $ sigHeaderName <> " is missing"
-    Just (_, _) -> do
-      -- case Signable.importSigDer Signable.AlgSecp256k1 rawClientSig of
-      --   Nothing -> failure $ sigHeaderName <> " import failed"
-      --   Just clientSig ->
-      --     if not (verify (gsEnvPubKey env) (Sig clientSig) protoReq)
-      --       then failure $ sigHeaderName <> " verification failed"
-      --       else do
-      res <- handler protoReq
-      let sig = sign (gsEnvPrvKey env) res
-      putMVar sigVar sig
-      pure res
-  where
-    failure =
-      throwIO
-        . GRPCStatus UNAUTHENTICATED
-        . ("Server ==> " <>)
-    sigHeaderName =
-      coerce $ gsEnvSigHeaderName env
-    sigHeaderNameCI =
-      CI.mk sigHeaderName
+    req' b = req { requestBody = requestBody' b }

@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ConstraintKinds #-}
 
 module BtcLsp.Thread.Server
   ( apply,
@@ -11,7 +12,6 @@ import BtcLsp.Import hiding (Sig (..))
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
-import Data.Signable (Signable)
 import Lens.Micro
 import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Network.GRPC.Server
@@ -21,6 +21,8 @@ import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
+import qualified Crypto.Secp256k1 as C
+import qualified BtcLsp.Grpc.SignatureUtils as SU
 
 apply :: (Env m) => m ()
 apply = do
@@ -28,15 +30,30 @@ apply = do
   withUnliftIO $ \run ->
     runServer env $ handlers run
 
+
+
+type HasContext req = ( HasField req "maybe'ctx" (Maybe Proto.Ctx))
+
+type ContextMsg req res failure internal =
+  ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
+    HasField res "ctx" Proto.Ctx,
+    HasField res "failure" failure,
+    HasField failure "input" [Proto.InputFailure],
+    HasField failure "internal" [internal],
+    Message res,
+    Message failure,
+    Message internal
+  )
+
 handlers ::
   forall m.
   ( Env m
   ) =>
   UnliftIO m ->
   GSEnv ->
-  MVar (Sig 'Server) ->
+  ByteString ->
   [ServiceHandler]
-handlers run gsEnv sigVar =
+handlers run gsEnv body =
   [ unary (RPC :: RPC Service "getCfg") $
       runHandler getCfg,
     unary (RPC :: RPC Service "swapIntoLn") $
@@ -46,48 +63,50 @@ handlers run gsEnv sigVar =
   ]
   where
     runHandler ::
-      ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
-        HasField res "ctx" Proto.Ctx,
-        HasField res "failure" failure,
-        HasField failure "input" [Proto.InputFailure],
-        HasField failure "internal" [internal],
-        Message res,
-        Message failure,
-        Message internal,
-        Signable res
-      ) =>
+      ( ContextMsg req res failure internal) =>
       (Entity User -> req -> m res) ->
       Wai.Request ->
       req ->
       IO res
     runHandler =
-      withMiddleware run gsEnv sigVar
+      withMiddleware run gsEnv body
+
+
+extractPubKeyDer ::(HasField req "maybe'ctx" (Maybe Proto.Ctx)) => req -> Maybe C.PubKey
+extractPubKeyDer req = do
+  ctx <- req ^? field @"maybe'ctx" . _Just
+  C.importPubKey =<< (ctx ^? Proto.maybe'lnPubKey . _Just . Proto.val)
+
+verifySig :: (HasContext req) => GSEnv -> Wai.Request -> req -> ByteString -> Either String Bool
+verifySig env waiReq req payload = do
+  pubKey <- maybeToRight "No pub key in ctx" $ extractPubKeyDer req
+  sig <- maybeToRight "Incorrect signature" $ SU.sigFromReq sigHeaderName waiReq
+  msg <- maybeToRight "Incorrect message" $ SU.prepareMsg payload
+  if C.verifySig pubKey sig msg then Right True else Left "Signature verification fail"
+    where
+      sigHeaderName = coerce $ gsEnvSigHeaderName env
+
+
+
+
 
 --
 -- TODO : sign (but temporary remove verification)
 --
 withMiddleware ::
-  ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
-    HasField res "ctx" Proto.Ctx,
-    HasField res "failure" failure,
-    HasField failure "input" [Proto.InputFailure],
-    HasField failure "internal" [internal],
-    Message res,
-    Message failure,
-    Message internal,
-    Signable res,
+  ( ContextMsg req res failure internal,
     Env m
   ) =>
   UnliftIO m ->
   GSEnv ->
-  MVar (Sig 'Server) ->
+  ByteString ->
   (Entity User -> req -> m res) ->
   Wai.Request ->
   req ->
   IO res
-withMiddleware (UnliftIO run) gsEnv sigVar handler waiReq req =
+withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
   run $ do
-    res <- runExceptT $ do
+    userE <- runExceptT $ do
       nonce <-
         fromReqT $
           req
@@ -102,20 +121,14 @@ withMiddleware (UnliftIO run) gsEnv sigVar handler waiReq req =
               . _Just
               . Proto.maybe'lnPubKey
               . _Just
-      ExceptT $
-        User.createVerify pub nonce
-    liftIO $
-      withSig
-        gsEnv
-        sigVar
-        ( case res of
-            Left e ->
-              const . pure $ failResE e
-            Right user ->
-              run . (setGrpcCtx <=< handler user)
-        )
-        waiReq
-        req
+      ExceptT $ User.createVerify pub nonce
+    let isValidSigE = verifySig gsEnv waiReq req body
+    let act =
+          case (isValidSigE, userE) of
+            (Right True, Right user) -> run . (setGrpcCtx <=< handler user)
+            (_, Left e) -> const . pure $ failResE e
+            (_, _) -> const . pure $ failResE $ FailureGrpcClient "Unknown error"
+    liftIO $ act req
 
 getCfg ::
   ( Monad m
