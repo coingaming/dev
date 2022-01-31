@@ -2,7 +2,6 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
-LND_DIR="$ROOT_DIR/.lnd"
 BUILD_DIR="$ROOT_DIR/build"
 SHELL_DIR="$BUILD_DIR/shell"
 

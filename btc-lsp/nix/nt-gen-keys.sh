@@ -5,7 +5,6 @@ ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
 SHELL_DIR="$BUILD_DIR/shell"
 SWARM_DIR="$BUILD_DIR/swarm"
-LND_DIR="$ROOT_DIR/.lnd"
 
 mkdir -p "$BUILD_DIR"
 
@@ -13,26 +12,24 @@ echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
    > "$BUILD_DIR/subjectAltName"
 
 (
+  cd "$BUILD_DIR"
   for OWNER in lsp alice bob; do
+
     echo "==> Generating LND TLS cert ($OWNER)"
     SERVICE_DIR="$SHELL_DIR/lnd-$OWNER"
+    TLS_KEY="$SERVICE_DIR/tls.key"
+    TLS_CERT="$SERVICE_DIR/tls.cert"
     mkdir -p "$SERVICE_DIR"
 
-    #
-    # TODO : remove root dirs
-    #
-    cd "$LND_DIR"
-    openssl ecparam -genkey -name prime256v1 -out tls.key
-    openssl req -new -sha256 -key tls.key \
+    openssl ecparam -genkey -name prime256v1 -out "$TLS_KEY"
+    openssl req -new -sha256 -key "$TLS_KEY" \
       -out csr.csr -subj "/CN=lnd-$OWNER/O=lnd-$OWNER"
     openssl x509 -req -in csr.csr \
       -sha256 -days 36500 \
       -extfile "$BUILD_DIR/subjectAltName" \
-      -signkey tls.key -out tls.cert
+      -signkey "$TLS_KEY" -out "$TLS_CERT"
     rm csr.csr
 
-    cp "$LND_DIR/tls.key" "$SERVICE_DIR/tls.key"
-    cp "$LND_DIR/tls.cert" "$SERVICE_DIR/tls.cert"
   done
 )
 
