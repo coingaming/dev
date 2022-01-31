@@ -14,7 +14,7 @@ echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
 
 (
   for OWNER in lsp alice bob; do
-    echo "$OWNER ==> Generating LND TLS cert"
+    echo "==> Generating LND TLS cert ($OWNER)"
     SERVICE_DIR="$SHELL_DIR/lnd-$OWNER"
     mkdir -p "$SERVICE_DIR"
 
