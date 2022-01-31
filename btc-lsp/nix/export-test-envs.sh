@@ -2,6 +2,7 @@
 
 ROOT_DIR="$(pwd)"
 BUILD_DIR="$ROOT_DIR/build"
+BTC_LSP_DIR="$ROOT_DIR/build/shell/btc-lsp"
 export GODEBUG=x509ignoreCN=0
 
 #
@@ -130,8 +131,8 @@ export LSP_AES256_INIT_VECTOR="dRgUkXp2s5v8y/B?"
 export LSP_AGENT_PRIVATE_KEY_PEM="$(cat "$BUILD_DIR/esdsa.prv" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export LSP_PARTNER_PUBLIC_KEY_PEM="$(cat "$BUILD_DIR/esdsa.pub" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 
-export GRPC_TLS_CERT="$(cat "$BUILD_DIR/btc_lsp_tls_cert.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
-export GRPC_TLS_KEY="$(cat "$BUILD_DIR/btc_lsp_tls_key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export GRPC_TLS_KEY="$(cat "$BTC_LSP_DIR/key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export GRPC_TLS_CERT="$(cat "$BTC_LSP_DIR/cert.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 
 export LSP_GRPC_CLIENT_ENV="
 {

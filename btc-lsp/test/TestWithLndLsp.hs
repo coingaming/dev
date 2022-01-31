@@ -1,11 +1,14 @@
 module TestWithLndLsp
   ( itEnv,
     xitEnv,
+    mainTestSetup,
     module ReExport,
   )
 where
 
 import BtcLsp.Import
+import BtcLsp.Storage.Migration (migrateAll)
+import BtcLsp.Storage.Util (cleanDb)
 import Test.Hspec
 import TestAppM as ReExport hiding (itEnv, xitEnv)
 import qualified TestAppM
@@ -23,3 +26,13 @@ xitEnv ::
   SpecWith (Arg (IO ()))
 xitEnv =
   TestAppM.xitEnv
+
+mainTestSetup :: IO ()
+mainTestSetup =
+  TestAppM.withTestEnv action
+  where
+    action :: TestAppM 'LndLsp IO ()
+    action = do
+      --unScheduleAll
+      runSql cleanDb
+      migrateAll
