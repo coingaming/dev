@@ -8,8 +8,9 @@ LND_LSP_DIR="$SHELL_DIR/lnd-lsp"
 LND_ALICE_DIR="$SHELL_DIR/lnd-alice"
 LND_BOB_DIR="$SHELL_DIR/lnd-bob"
 BTCD_DIR="$SHELL_DIR/bitcoind"
+PGDATA="$SHELL_DIR/postgres"
+
 export GODEBUG=x509ignoreCN=0
-export PGDATA="$PWD/postgres"
 
 #
 # bitcoind
