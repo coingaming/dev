@@ -7,14 +7,14 @@ BTC_LSP_DIR="$SHELL_DIR/btc-lsp"
 LND_LSP_DIR="$SHELL_DIR/lnd-lsp"
 LND_ALICE_DIR="$SHELL_DIR/lnd-alice"
 LND_BOB_DIR="$SHELL_DIR/lnd-bob"
+BTCD_DIR="$SHELL_DIR/bitcoind"
 export GODEBUG=x509ignoreCN=0
+export PGDATA="$PWD/postgres"
 
 #
 # bitcoind
 #
 
-export PGDATA="$PWD/postgres"
-export BTCD_DIR="$ROOT_DIR/.bitcoin"
 alias bitcoin-cli="bitcoin-cli -rpcwait -datadir=$BTCD_DIR -rpcport=18443"
 
 #

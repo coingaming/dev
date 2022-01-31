@@ -44,4 +44,23 @@ debuglevel=warn,PEER=warn" > "$SERVICE_DIR/lnd.conf"
   done
 )
 
+(
+  SERVICE_DIR="$SHELL_DIR/bitcoind"
+  echo "==> Generating $SERVICE_DIR"
+  mkdir -p "$SERVICE_DIR"
+  echo "
+regtest=1
+daemon=1
+txindex=1
+
+rpcuser=developer
+rpcpassword=developer
+
+zmqpubrawblock=tcp://127.0.0.1:28332
+zmqpubrawtx=tcp://127.0.0.1:28333
+
+server=1
+rest=1" > "$SERVICE_DIR/bitcoin.conf"
+)
+
 echo "==> Generated cfgs"

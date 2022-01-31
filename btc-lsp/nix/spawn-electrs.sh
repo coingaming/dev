@@ -3,7 +3,7 @@
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
 ELECTRS_DIR="$THIS_DIR/../build/shell/electrs"
-BITCOIN_DIR="$THIS_DIR/../.bitcoin"
+BITCOIN_DIR="$THIS_DIR/../build/shell/bitcoind"
 
 echo "==> starting electrs..."
 
