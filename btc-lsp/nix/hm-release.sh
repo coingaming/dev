@@ -8,6 +8,6 @@ rm -rf "$THIS_DIR/../build/docker-image-btc-lsp.tar.gz"
 mkdir -p "$THIS_DIR/../build"
 
 sh "$THIS_DIR/shell-docker.sh" --mini \
-   "--run './nix/release-native.sh && \
+   "--run './nix/ns-release.sh && \
    cp -Lr ./result ./build/docker-image-btc-lsp.tar.gz'
    "

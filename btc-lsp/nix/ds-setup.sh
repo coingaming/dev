@@ -26,7 +26,7 @@ sh "$THIS_DIR/shell-docker.sh" --mini \
    "--run './nix/ns-gen-keys.sh'"
 
 echo "==> Docker image build"
-sh "$THIS_DIR/release-docker.sh"
+sh "$THIS_DIR/hm-release.sh"
 docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | awk '{print $NF}' \
   | tr -d '\n' \
@@ -34,7 +34,7 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/shell-docker.sh" --mini \
-   "--run './nix/dhall-compile.sh'"
+   "--run './nix/ns-dhall-compile.sh'"
 
 echo "==> Partial spin"
 sh "$THIS_DIR/ds-up.sh"
@@ -45,7 +45,7 @@ sh "$THIS_DIR/ds-gen-creds.sh"
 
 echo "==> Full dhall"
 sh "$THIS_DIR/shell-docker.sh" --mini \
-   "--run './nix/dhall-compile.sh'"
+   "--run './nix/ns-dhall-compile.sh'"
 
 echo "==> Full spin"
 sh "$THIS_DIR/ds-up.sh"
