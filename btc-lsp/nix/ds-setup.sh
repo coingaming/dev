@@ -22,7 +22,7 @@ echo "==> Docker volume cleanup"
 docker volume rm $(docker volume ls -q | grep yolo_) || true
 
 echo "==> Gen keys"
-sh "$THIS_DIR/shell-docker.sh" --mini \
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-gen-keys.sh'"
 
 echo "==> Docker image build"
@@ -33,7 +33,7 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
 echo "==> Partial dhall"
-sh "$THIS_DIR/shell-docker.sh" --mini \
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
 
 echo "==> Partial spin"
@@ -44,7 +44,7 @@ echo "==> Gen creds"
 sh "$THIS_DIR/ds-gen-creds.sh"
 
 echo "==> Full dhall"
-sh "$THIS_DIR/shell-docker.sh" --mini \
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
 
 echo "==> Full spin"

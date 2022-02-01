@@ -39,10 +39,10 @@ Spawn shell:
 
 ```sh
 # If you have Nix installed (a bit faster)
-./nix/shell-native.sh
+./nix/hm-shell-native.sh
 
 # If you have Docker installed (works on Mac)
-./nix/shell-docker.sh
+./nix/hm-shell-docker.sh
 ```
 
 Work with Haskell sources in shell:

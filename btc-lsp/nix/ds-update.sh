@@ -5,7 +5,7 @@ set -e
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
 echo "==> Compiling dhall"
-sh "$THIS_DIR/shell-docker.sh" --mini \
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
 
 sh -c "$THIS_DIR/ds-down.sh $1"
