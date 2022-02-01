@@ -91,8 +91,6 @@ library
   build-depends:
       GenericPretty
     , aeson
-    , asn1-encoding
-    , asn1-types
     , async
     , base >=4.7 && <5
     , base16-bytestring
@@ -120,7 +118,6 @@ library
     , microlens
     , monad-logger
     , network-bitcoin
-    , pem
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
@@ -218,8 +215,6 @@ executable btc-lsp-exe
   build-depends:
       GenericPretty
     , aeson
-    , asn1-encoding
-    , asn1-types
     , async
     , base >=4.7 && <5
     , base16-bytestring
@@ -247,7 +242,6 @@ executable btc-lsp-exe
     , microlens
     , monad-logger
     , network-bitcoin
-    , pem
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
@@ -353,8 +347,6 @@ test-suite btc-lsp-test
       GenericPretty
     , QuickCheck
     , aeson
-    , asn1-encoding
-    , asn1-types
     , async
     , base >=4.7 && <5
     , base16-bytestring
@@ -386,7 +378,6 @@ test-suite btc-lsp-test
     , microlens
     , monad-logger
     , network-bitcoin
-    , pem
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
