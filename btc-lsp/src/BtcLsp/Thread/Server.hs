@@ -51,7 +51,7 @@ handlers ::
   ) =>
   UnliftIO m ->
   GSEnv ->
-  ByteString ->
+  RawRequestBytes ->
   [ServiceHandler]
 handlers run gsEnv body =
   [ unary (RPC :: RPC Service "getCfg") $
@@ -76,8 +76,8 @@ extractPubKeyDer req = do
   ctx <- req ^? field @"maybe'ctx" . _Just
   C.importPubKey =<< (ctx ^? Proto.maybe'lnPubKey . _Just . Proto.val)
 
-verifySig :: (HasContext req) => GSEnv -> Wai.Request -> req -> ByteString -> Either String Bool
-verifySig env waiReq req payload = do
+verifySig :: (HasContext req) => GSEnv -> Wai.Request -> req -> RawRequestBytes -> Either String Bool
+verifySig env waiReq req (RawRequestBytes payload) = do
   pubKey <- maybeToRight "No pub key in ctx" $ extractPubKeyDer req
   sig <- maybeToRight "Incorrect signature" $ SU.sigFromReq sigHeaderName waiReq
   msg <- maybeToRight "Incorrect message" $ SU.prepareMsg payload
@@ -94,7 +94,7 @@ withMiddleware ::
   ) =>
   UnliftIO m ->
   GSEnv ->
-  ByteString ->
+  RawRequestBytes ->
   (Entity User -> req -> m res) ->
   Wai.Request ->
   req ->

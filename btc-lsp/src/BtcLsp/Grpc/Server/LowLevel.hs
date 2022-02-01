@@ -57,7 +57,7 @@ instance FromJSON GSEnv where
             <*> pure (const $ pure Nothing)
       )
 
-runServer :: GSEnv -> (GSEnv -> ByteString -> [ServiceHandler]) -> IO ()
+runServer :: GSEnv -> (GSEnv -> RawRequestBytes -> [ServiceHandler]) -> IO ()
 runServer env handlers =
   runTLS
     ( tlsSettingsMemory
@@ -67,7 +67,7 @@ runServer env handlers =
     (setPort (gsEnvPort env) defaultSettings)
     (extractBodyBytesMiddleware env $ serverApp handlers)
 
-serverApp :: (GSEnv -> ByteString -> [ServiceHandler]) -> GSEnv -> ByteString -> Application
+serverApp :: (GSEnv -> RawRequestBytes -> [ServiceHandler]) -> GSEnv -> RawRequestBytes -> Application
 serverApp handlers env body req rep = do
   --
   -- TODO : remove sig var!!!!!!
@@ -110,11 +110,11 @@ serverApp handlers env body req rep = do
         . NextTrailersMaker
         $ trailersMaker (acc <> bs) oldMaker
 
-extractBodyBytesMiddleware :: GSEnv -> (GSEnv -> ByteString -> Application) -> Application
+extractBodyBytesMiddleware :: GSEnv -> (GSEnv -> RawRequestBytes -> Application) -> Application
 extractBodyBytesMiddleware env app req resp = do
   body <- BSL.toStrict <$> strictRequestBody req
   body'<- newMVar body
-  app env body (req' body') resp
+  app env (RawRequestBytes body) (req' body') resp
   where
     requestBody' mvar = modifyMVar mvar
       (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))

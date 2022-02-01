@@ -8,6 +8,7 @@ module BtcLsp.Grpc.Data
     SigHeaderName (..),
     TlsCert (..),
     TlsKey (..),
+    RawRequestBytes (..)
   )
 where
 
@@ -17,6 +18,8 @@ import Text.PrettyPrint.GenericPretty.Instance ()
 import Universum
 
 data GRel = Client | Server
+
+newtype RawRequestBytes = RawRequestBytes ByteString
 
 newtype SigHeaderName
   = SigHeaderName ByteString
