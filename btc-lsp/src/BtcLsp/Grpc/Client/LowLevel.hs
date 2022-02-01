@@ -19,14 +19,12 @@ import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
 import Data.ProtoLens.Service.Types (HasMethod, HasMethodImpl (..))
 import Data.Scientific (floatingOrInteger)
--- import qualified Data.Signable as Signable
 import GHC.TypeLits (Symbol)
 import Network.GRPC.Client
 import Network.GRPC.Client.Helpers
 import Network.GRPC.HTTP2.Encoding (gzip)
 import qualified Network.GRPC.HTTP2.ProtoLens as ProtoLens
 import Network.HTTP2.Client
-import Proto.SignableOrphan ()
 import Text.PrettyPrint.GenericPretty
   ( Out,
   )
@@ -44,8 +42,6 @@ import BtcLsp.Grpc.Server.LowLevel (GSEnv (gsEnvSigner))
 data GCEnv = GCEnv
   { gcEnvHost :: String,
     gcEnvPort :: GCPort,
-    gcEnvPrvKey :: PrvKey 'Client,
-    gcEnvPubKey :: PubKey 'Server,
     gcEnvSigHeaderName :: SigHeaderName
   }
   deriving (Eq, Generic)
@@ -112,7 +108,6 @@ runUnary rpc gsEnv env verifySig req = do
               else
                 Left $
                   "Client ==> server signature verification failed for raw bytes "
-                    -- <> (inspectPlain . BL.toStrict $ Signable.toBinary x)
                     <> " from decoded payload "
                     <> inspectPlain x
                     <> " with signature "

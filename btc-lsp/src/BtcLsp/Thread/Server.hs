@@ -8,7 +8,7 @@ module BtcLsp.Thread.Server
 where
 
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
-import BtcLsp.Import hiding (Sig (..))
+import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.User as User
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
@@ -118,7 +118,6 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
               . _Just
       ExceptT $ User.createVerify pub nonce
     let isValidSigE = verifySig gsEnv waiReq req body
-    traceShowM (isValidSigE, userE)
     let act =
           case (isValidSigE, userE) of
             (Right True, Right user) -> run . (setGrpcCtx <=< handler user)

@@ -21,7 +21,6 @@ import Proto.BtcLsp (Service)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
-import Proto.SignableOrphan ()
 
 swapIntoLn ::
   ( Env m

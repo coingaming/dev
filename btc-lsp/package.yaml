@@ -75,7 +75,6 @@ dependencies:
 - pem
 - asn1-encoding
 - asn1-types
-- signable
 # web
 - wai
 - warp

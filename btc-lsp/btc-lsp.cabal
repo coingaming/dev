@@ -66,7 +66,6 @@ library
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
-      Proto.SignableOrphan
   other-modules:
       Paths_btc_lsp
   hs-source-dirs:
@@ -133,7 +132,6 @@ library
     , resource-pool
     , scientific
     , secp256k1-haskell
-    , signable
     , stm
     , template-haskell
     , text
@@ -195,7 +193,6 @@ executable btc-lsp-exe
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
-      Proto.SignableOrphan
       Paths_btc_lsp
   hs-source-dirs:
       src
@@ -262,7 +259,6 @@ executable btc-lsp-exe
     , resource-pool
     , scientific
     , secp256k1-haskell
-    , signable
     , stm
     , template-haskell
     , text
@@ -325,7 +321,6 @@ test-suite btc-lsp-test
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
-      Proto.SignableOrphan
       ServerSpec
       Spec
       TestAppM
@@ -405,7 +400,6 @@ test-suite btc-lsp-test
     , resource-pool
     , scientific
     , secp256k1-haskell
-    , signable
     , stm
     , template-haskell
     , text
