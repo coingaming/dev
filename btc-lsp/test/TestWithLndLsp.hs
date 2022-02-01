@@ -1,7 +1,7 @@
-module TestWithPaymentsPartner
-  ( mainTestSetup,
-    itEnv,
+module TestWithLndLsp
+  ( itEnv,
     xitEnv,
+    mainTestSetup,
     module ReExport,
   )
 where
@@ -15,14 +15,14 @@ import qualified TestAppM
 
 itEnv ::
   String ->
-  TestAppM 'PaymentsPartner IO () ->
+  TestAppM 'LndLsp IO () ->
   SpecWith (Arg (IO ()))
 itEnv =
   TestAppM.itEnv
 
 xitEnv ::
   String ->
-  TestAppM 'PaymentsPartner IO () ->
+  TestAppM 'LndLsp IO () ->
   SpecWith (Arg (IO ()))
 xitEnv =
   TestAppM.xitEnv
@@ -31,7 +31,7 @@ mainTestSetup :: IO ()
 mainTestSetup =
   TestAppM.withTestEnv action
   where
-    action :: TestAppM 'PaymentsPartner IO ()
+    action :: TestAppM 'LndLsp IO ()
     action = do
       --unScheduleAll
       runSql cleanDb

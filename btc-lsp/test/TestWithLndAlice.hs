@@ -1,4 +1,4 @@
-module TestWithMerchantPartner
+module TestWithLndAlice
   ( itEnv,
     xitEnv,
     module ReExport,
@@ -12,14 +12,14 @@ import qualified TestAppM
 
 itEnv ::
   String ->
-  TestAppM 'MerchantPartner IO () ->
+  TestAppM 'LndAlice IO () ->
   SpecWith (Arg (IO ()))
 itEnv =
   TestAppM.itEnv
 
 xitEnv ::
   String ->
-  TestAppM 'MerchantPartner IO () ->
+  TestAppM 'LndAlice IO () ->
   SpecWith (Arg (IO ()))
 xitEnv =
   TestAppM.xitEnv

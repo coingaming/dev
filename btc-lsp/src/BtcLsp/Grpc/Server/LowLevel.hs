@@ -32,9 +32,6 @@ newtype PubKeyPem = PubKeyPem Text
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
-    gsEnvPrvKey :: PrvKey 'Server,
-    gsEnvPubKey :: PubKey 'Client,
-    gsEnvPubKeyPem :: PubKeyPem,
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
@@ -53,9 +50,6 @@ instance FromJSON GSEnv where
       ( \x ->
           GSEnv
             <$> x .: "port"
-            <*> x .: "prv_key"
-            <*> x .: "pub_key"
-            <*> x .: "pub_key"
             <*> x .: "sig_header_name"
             <*> x .: "tls_cert"
             <*> x .: "tls_key"

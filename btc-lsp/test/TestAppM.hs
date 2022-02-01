@@ -31,13 +31,20 @@ import LndClient (LndEnv (..))
 import qualified LndClient as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
-import Network.Bitcoin as BTC (Client, getClient)
+import Network.Bitcoin as Btc (Client, getClient)
 import Test.Hspec
 
 data TestOwner
-  = MerchantPartner
-  | PaymentsPartner
-  deriving (Eq, Ord, Bounded, Enum, Show, Generic)
+  = LndLsp
+  | LndAlice
+  deriving
+    ( Eq,
+      Ord,
+      Bounded,
+      Enum,
+      Show,
+      Generic
+    )
 
 instance Out TestOwner
 
@@ -45,11 +52,10 @@ proxyOwner :: Proxy TestOwner
 proxyOwner = Proxy
 
 data TestEnv (owner :: TestOwner) = TestEnv
-  { testEnvMerchantAgent :: Env.Env,
-    testEnvPaymentsAgent :: Env.Env,
-    testEnvMerchantPartner :: LndTest.TestEnv,
-    testEnvPaymentsPartner :: LndTest.TestEnv,
-    testEnvBtc :: BTC.Client,
+  { testEnvLsp :: Env.Env,
+    testEnvLndLsp :: LndTest.TestEnv,
+    testEnvLndAlice :: LndTest.TestEnv,
+    testEnvBtc :: Btc.Client,
     testEnvKatipNS :: Namespace,
     testEnvKatipCTX :: LogContexts,
     testEnvKatipLE :: LogEnv,
@@ -69,28 +75,21 @@ newtype TestAppM owner m a = TestAppM
     )
 
 runTestApp :: TestEnv owner -> TestAppM owner m a -> m a
-runTestApp env app = runReaderT (unTestAppM app) env
+runTestApp env app =
+  runReaderT (unTestAppM app) env
 
-instance (MonadUnliftIO m) => I.Env (TestAppM 'MerchantPartner m) where
+instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
-    asks $ envGrpcServerEnv . testEnvMerchantAgent
+    asks $ envGrpcServerEnv . testEnvLsp
   getLspPubKeyVar =
-    asks $ envLndPubKey . testEnvMerchantAgent
+    asks $ envLndPubKey . testEnvLsp
   withLnd method args = do
-    lnd <- asks $ envLnd . testEnvMerchantAgent
-    first FailureLnd <$> args (method lnd)
-
-instance (MonadUnliftIO m) => I.Env (TestAppM 'PaymentsPartner m) where
-  getGsEnv =
-    asks $ envGrpcServerEnv . testEnvMerchantAgent
-  getLspPubKeyVar =
-    asks $ envLndPubKey . testEnvPaymentsAgent
-  withLnd method args = do
-    lnd <- asks $ envLnd . testEnvPaymentsAgent
+    lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
 
 instance (MonadIO m) => Katip (TestAppM owner m) where
-  getLogEnv = asks testEnvKatipLE
+  getLogEnv =
+    asks testEnvKatipLE
   localLogEnv f (TestAppM m) =
     TestAppM
       ( local
@@ -99,14 +98,16 @@ instance (MonadIO m) => Katip (TestAppM owner m) where
       )
 
 instance (MonadIO m) => KatipContext (TestAppM owner m) where
-  getKatipContext = asks testEnvKatipCTX
+  getKatipContext =
+    asks testEnvKatipCTX
   localKatipContext f (TestAppM m) =
     TestAppM
       ( local
           (\s -> s {testEnvKatipCTX = f (testEnvKatipCTX s)})
           m
       )
-  getKatipNamespace = asks testEnvKatipNS
+  getKatipNamespace =
+    asks testEnvKatipNS
   localKatipNamespace f (TestAppM m) =
     TestAppM
       ( local
@@ -115,13 +116,15 @@ instance (MonadIO m) => KatipContext (TestAppM owner m) where
       )
 
 instance (MonadUnliftIO m) => LndTest (TestAppM owner m) TestOwner where
-  getBtcClient = const $ asks testEnvBtc
+  getBtcClient =
+    const $ asks testEnvBtc
   getTestEnv = \case
-    MerchantPartner -> asks testEnvMerchantPartner
-    PaymentsPartner -> asks testEnvPaymentsPartner
+    LndLsp -> asks testEnvLndLsp
+    LndAlice -> asks testEnvLndAlice
 
 instance (MonadUnliftIO m) => Storage (TestAppM owner m) where
-  getSqlPool = envSQLPool <$> asks testEnvPaymentsAgent
+  getSqlPool =
+    envSQLPool <$> asks testEnvLsp
   runSql query = do
     pool <- getSqlPool
     Psql.runSqlPool query pool
@@ -146,35 +149,34 @@ withTestEnv action =
 withTestEnv' :: (TestEnv owner -> IO ()) -> IO ()
 withTestEnv' action = do
   gcEnv <- readGCEnv
-  paymentsRc <- readRawConfig
-  merchantLndEnv <- readMerchantLndEnv
-  let merchantRc =
-        paymentsRc
-          { rawConfigLndEnv = merchantLndEnv
+  aliceRc <- readRawConfig
+  lndLspEnv <- readLndLspEnv
+  let lspRc =
+        aliceRc
+          { rawConfigLndEnv = lndLspEnv
           }
-  withEnv merchantRc $ \merchantAppEnv ->
+  withEnv lspRc $ \lspAppEnv ->
     liftIO $
-      withEnv paymentsRc $ \paymentsAppEnv -> do
+      withEnv aliceRc $ \aliceAppEnv -> do
         bc <- liftIO newBtcClient
-        let katipNS = envKatipNS merchantAppEnv
-        let katipLE = envKatipLE merchantAppEnv
-        let katipCTX = envKatipCTX merchantAppEnv
+        let katipNS = envKatipNS lspAppEnv
+        let katipLE = envKatipLE lspAppEnv
+        let katipCTX = envKatipCTX lspAppEnv
         runKatipContextT katipLE katipCTX katipNS $
           LndTest.withTestEnv
-            (envLnd merchantAppEnv)
-            (Lnd.NodeLocation "localhost:9735")
-            $ \merchantTestEnv ->
+            (envLnd lspAppEnv)
+            (Lnd.NodeLocation "localhost:9736")
+            $ \lspTestEnv ->
               LndTest.withTestEnv
-                (envLnd paymentsAppEnv)
-                (Lnd.NodeLocation "localhost:9734")
-                $ \paymentsTestEnv ->
+                (envLnd aliceAppEnv)
+                (Lnd.NodeLocation "localhost:9737")
+                $ \aliceTestEnv ->
                   liftIO $
                     action
                       TestEnv
-                        { testEnvMerchantAgent = merchantAppEnv,
-                          testEnvPaymentsAgent = paymentsAppEnv,
-                          testEnvMerchantPartner = merchantTestEnv,
-                          testEnvPaymentsPartner = paymentsTestEnv,
+                        { testEnvLsp = lspAppEnv,
+                          testEnvLndLsp = lspTestEnv,
+                          testEnvLndAlice = aliceTestEnv,
                           testEnvBtc = bc,
                           testEnvKatipNS = katipNS,
                           testEnvKatipLE = katipLE,
@@ -204,20 +206,20 @@ xitEnv testName expr =
         (sl "TestName" testName)
         expr
 
-readMerchantLndEnv :: IO LndEnv
-readMerchantLndEnv =
+readLndLspEnv :: IO LndEnv
+readLndLspEnv =
   E.parse
     (E.header "LndEnv")
     $ E.var
       (parser <=< E.nonempty)
-      "LSP_MERCHANT_LND_ENV"
+      "LND_LSP_ENV"
       (E.keep <> E.help "")
   where
     parser :: String -> Either E.Error LndEnv
     parser x =
       first E.UnreadError $ eitherDecodeStrict $ C8.pack x
 
-newBtcClient :: IO BTC.Client
+newBtcClient :: IO Btc.Client
 newBtcClient =
   getClient
     "http://localhost:18443"

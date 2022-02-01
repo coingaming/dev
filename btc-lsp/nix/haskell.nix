@@ -2,7 +2,6 @@ let
   header = (import ./header.nix);
   pkgs = header.pkgs;
   lnd = import ./lnd.nix { inherit pkgs; };
-  boltz-lnd = pkgs.callPackage (import ./boltz-lnd.nix) {};
 in
   {
     pkgs = pkgs;
@@ -19,6 +18,7 @@ in
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;
         packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''
+          ./nix/nt-gen-cfgs.sh
           ./nix/nt-gen-keys.sh
           source ./nix/export-test-envs.sh;
           ./nix/reset-test-data.sh;

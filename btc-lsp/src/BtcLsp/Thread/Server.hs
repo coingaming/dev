@@ -6,7 +6,6 @@ module BtcLsp.Thread.Server
   )
 where
 
-import BtcLsp.Grpc.Data
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
 import BtcLsp.Import hiding (Sig (..))
 import qualified BtcLsp.Storage.Model.User as User
@@ -68,8 +67,7 @@ handlers run gsEnv body =
       Wai.Request ->
       req ->
       IO res
-    runHandler =
-      withMiddleware run gsEnv body
+    runHandler = withMiddleware run gsEnv body
 
 
 extractPubKeyDer ::(HasField req "maybe'ctx" (Maybe Proto.Ctx)) => req -> Maybe C.PubKey
@@ -89,10 +87,6 @@ verifySig env waiReq req payload = do
 
 
 
-
---
--- TODO : sign (but temporary remove verification)
---
 withMiddleware ::
   ( ContextMsg req res failure internal,
     Env m
