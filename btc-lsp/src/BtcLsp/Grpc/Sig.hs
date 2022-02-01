@@ -1,4 +1,4 @@
-module BtcLsp.Grpc.SignatureUtils
+module BtcLsp.Grpc.Sig
   (
     sigFromReq,
     findBitString,

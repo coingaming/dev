@@ -22,7 +22,7 @@ import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
 import qualified Crypto.Secp256k1 as C
-import qualified BtcLsp.Grpc.SignatureUtils as SU
+import qualified BtcLsp.Grpc.Sig as SU
 
 apply :: (Env m) => m ()
 apply = do
