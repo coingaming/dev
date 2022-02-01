@@ -35,7 +35,7 @@ in
       echo "Spawning nix-shell with shellHook"
       sh ./nix/ns-gen-cfgs.sh
       sh ./nix/ns-gen-keys.sh
-      . ./nix/export-test-envs.sh
+      . ./nix/ns-export-test-envs.sh
       trap "./nix/ns-shutdown-test-deps.sh 2> /dev/null" EXIT
     ''
     else ''

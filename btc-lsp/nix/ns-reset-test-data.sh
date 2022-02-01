@@ -2,7 +2,7 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-. "$THIS_DIR/export-test-envs.sh"
+. "$THIS_DIR/ns-export-test-envs.sh"
 
 echo "==> resetting test data..."
 rm -rf $LND_LSP_DIR/data

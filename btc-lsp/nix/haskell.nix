@@ -20,9 +20,9 @@ in
         packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''
           ./nix/ns-gen-cfgs.sh
           ./nix/ns-gen-keys.sh
-          source ./nix/export-test-envs.sh;
+          source ./nix/ns-export-test-envs.sh;
           ./nix/ns-reset-test-data.sh;
-          ./nix/spawn-test-deps.sh;
+          ./nix/ns-spawn-test-deps.sh;
         '';
         packages.btc-lsp.components.tests.btc-lsp-test.build-tools = [
           pkgs.haskellPackages.hspec-discover

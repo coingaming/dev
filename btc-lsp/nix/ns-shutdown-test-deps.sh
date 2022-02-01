@@ -3,7 +3,7 @@
 THIS_DIR="$(dirname "$(realpath "$0")")"
 SHELL_DIR="$THIS_DIR/../build/shell"
 
-. "$THIS_DIR/export-test-envs.sh"
+. "$THIS_DIR/ns-export-test-envs.sh"
 
 bitcoin_pid=`cat $BTCD_DIR/regtest/bitcoind.pid`
 lnd_lsp_pid=`cat $LND_LSP_DIR/lnd.pid`
