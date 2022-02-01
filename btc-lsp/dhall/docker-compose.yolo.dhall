@@ -10,6 +10,8 @@ let escape
 
 let mempty = [] : P.Map.Type Text Text
 
+let todo = "TODO" : Text
+
 in  { networks.global.external = True
     , version = "3"
     , volumes = { postgres = mempty, bitcoind = mempty, lnd-lsp = mempty }
@@ -71,10 +73,41 @@ in  { networks.global.external = True
         , volumes = [ "lnd-lsp:/root/.lnd" ]
         , networks.global = mempty
         }
+      , rtl =
+        { environment =
+          { RTL_CONFIG_JSON =
+              ''
+              {
+                "SSO":{
+                  "logoutRedirectLink": "",
+                  "rtlCookiePath": "",
+                  "rtlSSO": 0
+                },
+                "defaultNodeIndex": 1,
+                "multiPass": "developer",
+                "nodes": [],
+                "port": "80"
+              }
+              ''
+          , RTL_CONFIG_NODES_JSON =
+              ''
+              [
+                {
+                  "hexMacaroon": "${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
+                                    ? todo}",
+                  "index": 1,
+                  "lnServerUrl": "https://lnd-lsp:8080"
+                }
+              ]
+              ''
+          }
+        , hostname = "rtl"
+        , image = "heathmont/rtl:9c8d7d6"
+        , networks.global = mempty
+        }
       , btc-lsp =
         { image = ../build/docker-image-btc-lsp.txt as Text
         , hostname = "btc-lsp"
-        , ports = [ "8443:8443/tcp" ]
         , environment =
           { -- General
             LSP_LIBPQ_CONN_STR =
@@ -95,9 +128,9 @@ in  { networks.global.external = True
                 "lnd_wallet_password":"developer",
                 "lnd_tls_cert":"${  escape
                                       ../build/swarm/lnd-lsp/tls.cert as Text
-                                  ? "TODO"}",
+                                  ? todo}",
                 "lnd_hex_macaroon":"${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
-                                      ? "TODO"}",
+                                      ? todo}",
                 "lnd_host":"lnd-lsp",
                 "lnd_port":10009,
                 "lnd_cipher_seed_mnemonic":[
@@ -139,6 +172,12 @@ in  { networks.global.external = True
               }
               ''
           }
+        , networks.global = mempty
+        }
+      , docker-proxy =
+        { hostname = "docker-proxy"
+        , image = "heathmont/docker-proxy:v0.1.0-530984d"
+        , ports = [ "80:8080/tcp" ]
         , networks.global = mempty
         }
       }
