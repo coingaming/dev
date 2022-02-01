@@ -26,6 +26,7 @@ spec =
       --
       -- TODO : implement withGCEnv!!!
       --
+      gsEnv <- getGsEnv
       gcEnv <- getGCEnv
       res <- runExceptT $ do
         fundInv <-
@@ -55,6 +56,7 @@ spec =
                     }
               )
         Client.swapIntoLnT
+          gsEnv
           gcEnv
           =<< setGrpcCtxT
             ( defMessage

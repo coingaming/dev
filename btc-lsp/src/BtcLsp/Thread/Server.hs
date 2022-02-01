@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Thread.Server
   ( apply,
@@ -117,6 +118,7 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
               . _Just
       ExceptT $ User.createVerify pub nonce
     let isValidSigE = verifySig gsEnv waiReq req body
+    traceShowM (isValidSigE, userE)
     let act =
           case (isValidSigE, userE) of
             (Right True, Right user) -> run . (setGrpcCtx <=< handler user)
