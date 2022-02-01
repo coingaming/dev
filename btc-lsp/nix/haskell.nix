@@ -18,10 +18,10 @@ in
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;
         packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''
-          ./nix/nt-gen-cfgs.sh
-          ./nix/nt-gen-keys.sh
+          ./nix/ns-gen-cfgs.sh
+          ./nix/ns-gen-keys.sh
           source ./nix/export-test-envs.sh;
-          ./nix/reset-test-data.sh;
+          ./nix/ns-reset-test-data.sh;
           ./nix/spawn-test-deps.sh;
         '';
         packages.btc-lsp.components.tests.btc-lsp-test.build-tools = [
@@ -33,7 +33,7 @@ in
           lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''
-          ./nix/shutdown-test-deps.sh
+          ./nix/ns-shutdown-test-deps.sh
         '';
       }];
     };

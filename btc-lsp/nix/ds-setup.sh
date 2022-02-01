@@ -23,7 +23,7 @@ docker volume rm $(docker volume ls -q | grep yolo_) || true
 
 echo "==> Gen keys"
 sh "$THIS_DIR/shell-docker.sh" --mini \
-   "--run './nix/nt-gen-keys.sh'"
+   "--run './nix/ns-gen-keys.sh'"
 
 echo "==> Docker image build"
 sh "$THIS_DIR/release-docker.sh"
