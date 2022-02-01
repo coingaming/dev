@@ -123,10 +123,13 @@ runUnary rpc gsEnv env verifySig req = do
   where
     sigHeaderName = CI.mk . coerce $ gcEnvSigHeaderName env
 
-msgToSignBytes :: (Message msg) => msg -> ByteString
-msgToSignBytes msg = header <> body
+msgToSignBytes :: (Message msg) => Bool -> msg -> ByteString
+msgToSignBytes doCompress msg = header <> body
   where
-    body = G._compressionFunction G.gzip $ encodeMessage msg
+    rawBody = encodeMessage msg
+    body = if doCompress
+              then G._compressionFunction G.gzip rawBody
+              else rawBody
     header =  BS.pack [1]
           <> ( BL.toStrict
                . BS.toLazyByteString
@@ -157,5 +160,5 @@ makeClient gsEnv env req tlsEnabled doCompress = do
   where
     signer = gsEnvSigner gsEnv
     sigHeaderName = coerce $ gcEnvSigHeaderName env
-    doSignature = signer $ msgToSignBytes req
+    doSignature = signer $ msgToSignBytes doCompress req
     compression = if doCompress then gzip else uncompressed
