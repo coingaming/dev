@@ -31,7 +31,7 @@ import LndClient (LndEnv (..))
 import qualified LndClient as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
-import Network.Bitcoin as BTC (Client, getClient)
+import Network.Bitcoin as Btc (Client, getClient)
 import Test.Hspec
 
 data TestOwner
@@ -53,10 +53,9 @@ proxyOwner = Proxy
 
 data TestEnv (owner :: TestOwner) = TestEnv
   { testEnvLsp :: Env.Env,
-    testEnvAlice :: Env.Env,
     testEnvLndLsp :: LndTest.TestEnv,
     testEnvLndAlice :: LndTest.TestEnv,
-    testEnvBtc :: BTC.Client,
+    testEnvBtc :: Btc.Client,
     testEnvKatipNS :: Namespace,
     testEnvKatipCTX :: LogContexts,
     testEnvKatipLE :: LogEnv,
@@ -76,7 +75,8 @@ newtype TestAppM owner m a = TestAppM
     )
 
 runTestApp :: TestEnv owner -> TestAppM owner m a -> m a
-runTestApp env app = runReaderT (unTestAppM app) env
+runTestApp env app =
+  runReaderT (unTestAppM app) env
 
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
@@ -87,17 +87,9 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
 
-instance (MonadUnliftIO m) => I.Env (TestAppM 'LndAlice m) where
-  getGsEnv =
-    asks $ envGrpcServerEnv . testEnvLsp
-  getLspPubKeyVar =
-    asks $ envLndPubKey . testEnvAlice
-  withLnd method args = do
-    lnd <- asks $ envLnd . testEnvAlice
-    first FailureLnd <$> args (method lnd)
-
 instance (MonadIO m) => Katip (TestAppM owner m) where
-  getLogEnv = asks testEnvKatipLE
+  getLogEnv =
+    asks testEnvKatipLE
   localLogEnv f (TestAppM m) =
     TestAppM
       ( local
@@ -106,14 +98,16 @@ instance (MonadIO m) => Katip (TestAppM owner m) where
       )
 
 instance (MonadIO m) => KatipContext (TestAppM owner m) where
-  getKatipContext = asks testEnvKatipCTX
+  getKatipContext =
+    asks testEnvKatipCTX
   localKatipContext f (TestAppM m) =
     TestAppM
       ( local
           (\s -> s {testEnvKatipCTX = f (testEnvKatipCTX s)})
           m
       )
-  getKatipNamespace = asks testEnvKatipNS
+  getKatipNamespace =
+    asks testEnvKatipNS
   localKatipNamespace f (TestAppM m) =
     TestAppM
       ( local
@@ -122,13 +116,15 @@ instance (MonadIO m) => KatipContext (TestAppM owner m) where
       )
 
 instance (MonadUnliftIO m) => LndTest (TestAppM owner m) TestOwner where
-  getBtcClient = const $ asks testEnvBtc
+  getBtcClient =
+    const $ asks testEnvBtc
   getTestEnv = \case
     LndLsp -> asks testEnvLndLsp
     LndAlice -> asks testEnvLndAlice
 
 instance (MonadUnliftIO m) => Storage (TestAppM owner m) where
-  getSqlPool = envSQLPool <$> asks testEnvAlice
+  getSqlPool =
+    envSQLPool <$> asks testEnvLsp
   runSql query = do
     pool <- getSqlPool
     Psql.runSqlPool query pool
@@ -179,7 +175,6 @@ withTestEnv' action = do
                     action
                       TestEnv
                         { testEnvLsp = lspAppEnv,
-                          testEnvAlice = aliceAppEnv,
                           testEnvLndLsp = lspTestEnv,
                           testEnvLndAlice = aliceTestEnv,
                           testEnvBtc = bc,
@@ -224,7 +219,7 @@ readLndLspEnv =
     parser x =
       first E.UnreadError $ eitherDecodeStrict $ C8.pack x
 
-newBtcClient :: IO BTC.Client
+newBtcClient :: IO Btc.Client
 newBtcClient =
   getClient
     "http://localhost:18443"

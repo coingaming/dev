@@ -3,7 +3,8 @@
 THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
-LND_DIR="$ROOT_DIR/.lnd"
+SHELL_DIR="$BUILD_DIR/shell"
+SWARM_DIR="$BUILD_DIR/swarm"
 
 mkdir -p "$BUILD_DIR"
 
@@ -11,21 +12,25 @@ echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
    > "$BUILD_DIR/subjectAltName"
 
 (
-  #
-  # TODO : generate individually for every lnd instance
-  #
-  echo "==> Generating LND TLS cert"
-  cd "$LND_DIR"
-  openssl ecparam -genkey -name prime256v1 -out tls.key
-  openssl req -new -sha256 -key tls.key \
-    -out csr.csr -subj /CN=lnd-lsp/O=lnd-lsp
-  openssl x509 -req -in csr.csr \
-    -sha256 -days 36500 \
-    -extfile "$BUILD_DIR/subjectAltName" \
-    -signkey tls.key -out tls.cert
-  rm csr.csr
-  cp "$LND_DIR/tls.key" "$BUILD_DIR/lnd_tls.key"
-  cp "$LND_DIR/tls.cert" "$BUILD_DIR/lnd_tls.cert"
+  cd "$BUILD_DIR"
+  for OWNER in lsp alice bob; do
+
+    echo "==> Generating LND TLS cert ($OWNER)"
+    SERVICE_DIR="$SHELL_DIR/lnd-$OWNER"
+    TLS_KEY="$SERVICE_DIR/tls.key"
+    TLS_CERT="$SERVICE_DIR/tls.cert"
+    mkdir -p "$SERVICE_DIR"
+
+    openssl ecparam -genkey -name prime256v1 -out "$TLS_KEY"
+    openssl req -new -sha256 -key "$TLS_KEY" \
+      -out csr.csr -subj "/CN=lnd-$OWNER/O=lnd-$OWNER"
+    openssl x509 -req -in csr.csr \
+      -sha256 -days 36500 \
+      -extfile "$BUILD_DIR/subjectAltName" \
+      -signkey "$TLS_KEY" -out "$TLS_CERT"
+    rm csr.csr
+
+  done
 )
 
 (
@@ -47,6 +52,16 @@ echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
     -extfile "$BUILD_DIR/subjectAltName" \
     -signkey btc_lsp_tls_key.pem -out btc_lsp_tls_cert.pem
   rm csr.csr
+  for RUNTIME_DIR in "$SWARM_DIR" "$SHELL_DIR"; do
+    SERVICE_DIR="$RUNTIME_DIR/btc-lsp"
+    mkdir -p "$SERVICE_DIR"
+    cp ./btc_lsp_tls_key.pem "$SERVICE_DIR/key.pem"
+    cp ./btc_lsp_tls_cert.pem "$SERVICE_DIR/cert.pem"
+  done
+  rm -rf ./btc_lsp_tls_key.pem
+  rm -rf ./btc_lsp_tls_cert.pem
 )
 
-echo "==> Generated certs"
+rm -rf "$BUILD_DIR/subjectAltName"
+
+echo "==> Generated keys"

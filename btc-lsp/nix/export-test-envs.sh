@@ -2,34 +2,38 @@
 
 ROOT_DIR="$(pwd)"
 BUILD_DIR="$ROOT_DIR/build"
+SHELL_DIR="$BUILD_DIR/shell"
+BTC_LSP_DIR="$SHELL_DIR/btc-lsp"
+LND_LSP_DIR="$SHELL_DIR/lnd-lsp"
+LND_ALICE_DIR="$SHELL_DIR/lnd-alice"
+LND_BOB_DIR="$SHELL_DIR/lnd-bob"
+BTCD_DIR="$SHELL_DIR/bitcoind"
+PGDATA="$SHELL_DIR/postgres"
+
 export GODEBUG=x509ignoreCN=0
 
 #
 # bitcoind
 #
 
-export PGDATA="$PWD/postgres"
-export BTCD_DIR="$ROOT_DIR/.bitcoin"
 alias bitcoin-cli="bitcoin-cli -rpcwait -datadir=$BTCD_DIR -rpcport=18443"
 
 #
 # lnd
 #
 
-export LND_LSP_DIR="$ROOT_DIR/.lnd-lsp"
-alias lncli-lsp="lncli -n regtest --lnddir=$LND_LSP_DIR --rpcserver=localhost:10010"
-export LND_ALICE_DIR="$ROOT_DIR/.lnd-alice"
-alias lncli-alice="lncli -n regtest --lnddir=$LND_ALICE_DIR --rpcserver=localhost:10011"
+alias lncli-lsp="lncli -n regtest --lnddir=$LND_LSP_DIR"
+alias lncli-alice="lncli -n regtest --lnddir=$LND_ALICE_DIR"
+alias lncli-bob="lncli -n regtest --lnddir=$LND_BOB_DIR"
 
 #
 # app
 #
 
-export LND_TLS_CERT="$(cat "$ROOT_DIR/.lnd/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export LND_LSP_ENV="
 {
     \"lnd_wallet_password\":\"developer\",
-    \"lnd_tls_cert\":\"$LND_TLS_CERT\",
+    \"lnd_tls_cert\":\"$(cat "$LND_LSP_DIR/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')\",
     \"lnd_hex_macaroon\":\"0201036c6e6402f801030a10f65286e21207df41cc77be0175cbb2871201301a160a0761646472657373120472656164120577726974651a130a04696e666f120472656164120577726974651a170a08696e766f69636573120472656164120577726974651a210a086d616361726f6f6e120867656e6572617465120472656164120577726974651a160a076d657373616765120472656164120577726974651a170a086f6666636861696e120472656164120577726974651a160a076f6e636861696e120472656164120577726974651a140a057065657273120472656164120577726974651a180a067369676e6572120867656e6572617465120472656164000006202eba3f3acaa7a7b974fdccc7a10060ede5b4801a85661c58166b062412e92e8a\",
     \"lnd_host\":\"localhost\",
     \"lnd_port\":10010,
@@ -66,7 +70,7 @@ export LND_LSP_ENV="
 export LSP_LND_ENV="
 {
   \"lnd_wallet_password\":\"developer\",
-  \"lnd_tls_cert\":\"$LND_TLS_CERT\",
+  \"lnd_tls_cert\":\"$(cat "$LND_ALICE_DIR/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')\",
   \"lnd_hex_macaroon\":\"0201036c6e6402f801030a10f65286e21207df41cc77be0175cbb2871201301a160a0761646472657373120472656164120577726974651a130a04696e666f120472656164120577726974651a170a08696e766f69636573120472656164120577726974651a210a086d616361726f6f6e120867656e6572617465120472656164120577726974651a160a076d657373616765120472656164120577726974651a170a086f6666636861696e120472656164120577726974651a160a076f6e636861696e120472656164120577726974651a140a057065657273120472656164120577726974651a180a067369676e6572120867656e6572617465120472656164000006202eba3f3acaa7a7b974fdccc7a10060ede5b4801a85661c58166b062412e92e8a\",
   \"lnd_host\":\"localhost\",
   \"lnd_port\":10011,
@@ -130,8 +134,8 @@ export LSP_AES256_INIT_VECTOR="dRgUkXp2s5v8y/B?"
 export LSP_AGENT_PRIVATE_KEY_PEM="$(cat "$BUILD_DIR/esdsa.prv" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export LSP_PARTNER_PUBLIC_KEY_PEM="$(cat "$BUILD_DIR/esdsa.pub" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 
-export GRPC_TLS_CERT="$(cat "$BUILD_DIR/btc_lsp_tls_cert.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
-export GRPC_TLS_KEY="$(cat "$BUILD_DIR/btc_lsp_tls_key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export GRPC_TLS_KEY="$(cat "$BTC_LSP_DIR/key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
+export GRPC_TLS_CERT="$(cat "$BTC_LSP_DIR/cert.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 
 export LSP_GRPC_CLIENT_ENV="
 {

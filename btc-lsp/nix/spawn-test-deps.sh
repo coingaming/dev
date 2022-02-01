@@ -6,8 +6,11 @@ set -m
 
 ./nix/spawn-postgres.sh
 ./nix/spawn-bitcoind.sh
-./nix/spawn-lnd.sh "$LND_LSP_DIR" "lsp"
-./nix/spawn-lnd.sh "$LND_ALICE_DIR" "alice"
+
+for OWNER in lsp alice bob; do
+  ./nix/spawn-lnd.sh "$OWNER"
+done
+
 ./nix/spawn-electrs.sh
 
-echo "spawn-test-deps executed"
+echo "==> spawn-test-deps executed"

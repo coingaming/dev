@@ -33,6 +33,7 @@ in
     if withShellHook
     then ''
       echo "Spawning nix-shell with shellHook"
+      sh ./nix/nt-gen-cfgs.sh
       sh ./nix/nt-gen-keys.sh
       . ./nix/export-test-envs.sh
       trap "./nix/shutdown-test-deps.sh 2> /dev/null" EXIT

@@ -2,10 +2,10 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-ELECTRS_DIR="$THIS_DIR/../.electrs"
-BITCOIN_DIR="$THIS_DIR/../.bitcoin"
+ELECTRS_DIR="$THIS_DIR/../build/shell/electrs"
+BITCOIN_DIR="$THIS_DIR/../build/shell/bitcoind"
 
-echo "starting electrs..."
+echo "==> starting electrs..."
 
 mkdir -p "$ELECTRS_DIR/db"
 
@@ -34,4 +34,4 @@ electrs \
   #--cookie-file
   #--monitoring-addr
 
-echo "electrs has been started!"
+echo "==> electrs has been started!"
