@@ -7,8 +7,11 @@ BUILD_DIR="$THIS_DIR/../build"
 
 mkdir -p "$BUILD_DIR"
 
-echo "==> Docker swarm network setup"
+echo "==> Docker build cleanup"
 sh "$THIS_DIR/ds-down.sh" || true
+rm -rf "$BUILD_DIR"
+
+echo "==> Docker swarm network setup"
 if [ "$1" = "--reset-swarm" ]; then
   echo "==> DOING SWARM RESET"
   docker swarm leave --force || true

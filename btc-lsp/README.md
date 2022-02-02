@@ -13,7 +13,7 @@ sudo ./nix/ds-setup-hosts.sh
 
 docker service ls
 
-curl -d '' -v --cacert ./build/swarm/btc-lsp/cert.pem https://yolo_btc-lsp:80/BtcLsp.Service/SwapIntoLn
+curl -d '' -v --cacert ./build/swarm/btc-lsp/cert.pem https://yolo_btc-lsp:443/BtcLsp.Service/SwapIntoLn
 ```
 
 In case where you don't have initialized docker swarm (for example you never used it), you need to run:
