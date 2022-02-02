@@ -10,7 +10,9 @@ let escape
 
 let mempty = [] : P.Map.Type Text Text
 
-let todo = "TODO" : Text
+let todo
+    : Text
+    = "TODO"
 
 in  { networks.global.external = True
     , version = "3"
@@ -112,7 +114,7 @@ in  { networks.global.external = True
           { -- General
             LSP_LIBPQ_CONN_STR =
               "postgresql://btc-lsp:developer@postgres/btc-lsp"
-          , LSP_ENDPOINT_PORT = "8443"
+          , LSP_ENDPOINT_PORT = "443"
           , -- Logging
             LSP_LOG_ENV = "test"
           , LSP_LOG_FORMAT = "Bracket"
@@ -165,7 +167,7 @@ in  { networks.global.external = True
             LSP_GRPC_SERVER_ENV =
               ''
               {
-                "port":8443,
+                "port":443,
                 "sig_header_name":"compact-2xsha256-sig",
                 "tls_cert":"${escape ../build/swarm/btc-lsp/cert.pem as Text}",
                 "tls_key":"${escape ../build/swarm/btc-lsp/key.pem as Text}"
@@ -176,8 +178,8 @@ in  { networks.global.external = True
         }
       , docker-proxy =
         { hostname = "docker-proxy"
-        , image = "heathmont/docker-proxy:v0.1.0-530984d"
-        , ports = [ "80:8080/tcp" ]
+        , image = "heathmont/docker-proxy:v0.1.0-d5f0f38"
+        , ports = [ "80:8080/tcp", "443:8081/tcp" ]
         , networks.global = mempty
         }
       }
