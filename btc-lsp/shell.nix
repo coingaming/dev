@@ -21,7 +21,6 @@ in
     pkgs.zlib
     pkgs.protobuf
     proto.protoc-haskell-bin
-    proto.protoc-signable-bin
   ];
   tools = {
     cabal = "3.2.0.0";
