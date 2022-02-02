@@ -71,7 +71,7 @@ dependencies:
 - network-bitcoin
 - lnd-client
 - cryptonite
-- signable
+- secp256k1-haskell
 # web
 - wai
 - warp

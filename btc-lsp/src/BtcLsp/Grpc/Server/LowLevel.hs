@@ -1,22 +1,21 @@
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 module BtcLsp.Grpc.Server.LowLevel
   ( GSEnv (..),
     runServer,
-    serverApp,
-    withSig,
+    serverApp
   )
 where
 
 import BtcLsp.Grpc.Data
-import Control.Exception (throwIO)
 import Data.Aeson (FromJSON (..), withObject, (.:))
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
-import Network.GRPC.HTTP2.Types
-  ( GRPCStatus (..),
-    GRPCStatusCode (UNAUTHENTICATED),
-  )
 import Network.GRPC.Server
 import Network.GRPC.Server.Wai (grpcApp)
 import Network.HTTP2.Server hiding (Request (..))
@@ -24,7 +23,9 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
 import Network.Wai.Internal (Request (..))
+import qualified Data.ByteString.Lazy as BSL
 import Universum
+import Control.Concurrent (modifyMVar)
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
@@ -53,7 +54,7 @@ instance FromJSON GSEnv where
             <*> pure (const $ pure Nothing)
       )
 
-runServer :: GSEnv -> (GSEnv -> [ServiceHandler]) -> IO ()
+runServer :: GSEnv -> (GSEnv -> RawRequestBytes -> [ServiceHandler]) -> IO ()
 runServer env handlers =
   runTLS
     ( tlsSettingsMemory
@@ -61,11 +62,14 @@ runServer env handlers =
         (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
     )
     (setPort (gsEnvPort env) defaultSettings)
-    (serverApp env $ handlers env)
+    (extractBodyBytesMiddleware env $ serverApp handlers)
 
-serverApp :: GSEnv -> [ServiceHandler] -> Application
-serverApp env handlers req rep = do
-  let app = grpcApp [gzip] handlers
+serverApp :: (GSEnv -> RawRequestBytes -> [ServiceHandler]) -> GSEnv -> RawRequestBytes -> Application
+serverApp handlers env body req rep = do
+  --
+  -- TODO : remove sig var!!!!!!
+  --
+  let app = grpcApp [gzip] $ handlers env body
   app req middleware
   where
     sigHeaderName = coerce $ gsEnvSigHeaderName env
@@ -103,29 +107,12 @@ serverApp env handlers req rep = do
         . NextTrailersMaker
         $ trailersMaker (acc <> bs) oldMaker
 
-withSig ::
-  GSEnv ->
-  (req -> IO res) ->
-  Request ->
-  req ->
-  IO res
-withSig env handler httpReq protoReq =
-  case find (\x -> fst x == sigHeaderNameCI) $ requestHeaders httpReq of
-    Nothing -> failure $ sigHeaderName <> " is missing"
-    Just (_, _) -> do
-      -- case Signable.importSigDer Signable.AlgSecp256k1 rawClientSig of
-      --   Nothing -> failure $ sigHeaderName <> " import failed"
-      --   Just clientSig ->
-      --     if not (verify (gsEnvPubKey env) (Sig clientSig) protoReq)
-      --       then failure $ sigHeaderName <> " verification failed"
-      --       else do
-      handler protoReq
+extractBodyBytesMiddleware :: GSEnv -> (GSEnv -> RawRequestBytes -> Application) -> Application
+extractBodyBytesMiddleware env app req resp = do
+  body <- BSL.toStrict <$> strictRequestBody req
+  body'<- newMVar body
+  app env (RawRequestBytes body) (req' body') resp
   where
-    failure =
-      throwIO
-        . GRPCStatus UNAUTHENTICATED
-        . ("Server ==> " <>)
-    sigHeaderName =
-      coerce $ gsEnvSigHeaderName env
-    sigHeaderNameCI =
-      CI.mk sigHeaderName
+    requestBody' mvar = modifyMVar mvar
+      (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
+    req' b = req { requestBody = requestBody' b }

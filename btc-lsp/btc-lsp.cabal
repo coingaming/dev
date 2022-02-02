@@ -40,6 +40,7 @@ library
       BtcLsp.Grpc.Orphan
       BtcLsp.Grpc.Server.HighLevel
       BtcLsp.Grpc.Server.LowLevel
+      BtcLsp.Grpc.Sig
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
@@ -65,7 +66,6 @@ library
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
-      Proto.SignableOrphan
   other-modules:
       Paths_btc_lsp
   hs-source-dirs:
@@ -128,7 +128,7 @@ library
     , proto-lens-runtime
     , resource-pool
     , scientific
-    , signable
+    , secp256k1-haskell
     , stm
     , template-haskell
     , text
@@ -164,6 +164,7 @@ executable btc-lsp-exe
       BtcLsp.Grpc.Orphan
       BtcLsp.Grpc.Server.HighLevel
       BtcLsp.Grpc.Server.LowLevel
+      BtcLsp.Grpc.Sig
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
@@ -189,7 +190,6 @@ executable btc-lsp-exe
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
-      Proto.SignableOrphan
       Paths_btc_lsp
   hs-source-dirs:
       src
@@ -252,7 +252,7 @@ executable btc-lsp-exe
     , proto-lens-runtime
     , resource-pool
     , scientific
-    , signable
+    , secp256k1-haskell
     , stm
     , template-haskell
     , text
@@ -289,6 +289,7 @@ test-suite btc-lsp-test
       BtcLsp.Grpc.Orphan
       BtcLsp.Grpc.Server.HighLevel
       BtcLsp.Grpc.Server.LowLevel
+      BtcLsp.Grpc.Sig
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
@@ -314,7 +315,6 @@ test-suite btc-lsp-test
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
-      Proto.SignableOrphan
       ServerSpec
       Spec
       TestAppM
@@ -390,7 +390,7 @@ test-suite btc-lsp-test
     , quickcheck-instances
     , resource-pool
     , scientific
-    , signable
+    , secp256k1-haskell
     , stm
     , template-haskell
     , text

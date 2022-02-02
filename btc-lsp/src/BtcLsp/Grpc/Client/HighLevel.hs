@@ -21,18 +21,19 @@ import Proto.BtcLsp (Service)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
-import Proto.SignableOrphan ()
 
 swapIntoLn ::
   ( Env m
   ) =>
+  GSEnv ->
   GCEnv ->
   SwapIntoLn.Request ->
   m (Either Failure SwapIntoLn.Response)
-swapIntoLn env req = withRunInIO $ \run ->
+swapIntoLn gsEnv env req = withRunInIO $ \run ->
   first FailureGrpcClient
     <$> runUnary
       (RPC :: RPC Service "swapIntoLn")
+      gsEnv
       env
       (\res sig -> run $ verifySig res sig)
       req
@@ -40,11 +41,12 @@ swapIntoLn env req = withRunInIO $ \run ->
 swapIntoLnT ::
   ( Env m
   ) =>
+  GSEnv ->
   GCEnv ->
   SwapIntoLn.Request ->
   ExceptT Failure m SwapIntoLn.Response
-swapIntoLnT env =
-  ExceptT . swapIntoLn env
+swapIntoLnT gsEnv env =
+  ExceptT . swapIntoLn gsEnv env
 
 -- | WARNING : this function is unsafe and inefficient
 -- but it is used for testing purposes only!

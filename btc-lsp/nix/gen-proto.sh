@@ -11,9 +11,7 @@ gen_haskell() {
   # Haskell
   #
   # To install Haskell protoc plugin without nix,
-  # run `stack install proto-lens-protoc` and the
-  # same for `signable-haskell-protoc`.
-  #
+  # run `stack install proto-lens-protoc`
   # Haskell stack is needed for this as well
   # https://docs.haskellstack.org/
   #
@@ -34,12 +32,6 @@ gen_haskell() {
     --haskell_out=$HASKELL_SRC_DIR \
     --haskell_opt='Opt{ imports = ["Text.PrettyPrint.GenericPretty.Instance"], pragmas = ["DeriveGeneric"], stockInstances = ["GHC.Generics.Generic"], defaultInstances = ["Text.PrettyPrint.GenericPretty.Out"] }')
   echo "==> Haskell (proto-lens) - generated proto types in $HASKELL_SRC_PROTO_LENS_DIR"
-  (cd $PROTO_DIR && protoc \
-    ./*.proto \
-    ./**/**/*.proto \
-    --plugin=protoc-gen-signable=`which signable-haskell-protoc` \
-    --signable_out=$HASKELL_SRC_DIR)
-  echo "==> Haskell (proto-lens) - generated orphan Signable instances in $HASKELL_SRC_PROTO_LENS_DIR"
 }
 
 gen_all() {
