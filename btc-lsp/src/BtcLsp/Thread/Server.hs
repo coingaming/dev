@@ -1,6 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ConstraintKinds #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Thread.Server
   ( apply,

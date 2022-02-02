@@ -27,9 +27,6 @@ import qualified Data.ByteString.Lazy as BSL
 import Universum
 import Control.Concurrent (modifyMVar)
 
-newtype PubKeyPem = PubKeyPem Text
-  deriving newtype (Eq, Show, FromJSON)
-
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
     gsEnvSigHeaderName :: SigHeaderName,
