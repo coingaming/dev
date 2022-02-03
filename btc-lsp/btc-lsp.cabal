@@ -44,6 +44,8 @@ library
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Rpc.Client
+      BtcLsp.Rpc.Env
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
@@ -117,7 +119,9 @@ library
     , memory
     , microlens
     , monad-logger
+    , network
     , network-bitcoin
+    , network-simple
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
@@ -168,6 +172,8 @@ executable btc-lsp-exe
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Rpc.Client
+      BtcLsp.Rpc.Env
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
@@ -241,7 +247,9 @@ executable btc-lsp-exe
     , memory
     , microlens
     , monad-logger
+    , network
     , network-bitcoin
+    , network-simple
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
@@ -293,6 +301,8 @@ test-suite btc-lsp-test
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Rpc.Client
+      BtcLsp.Rpc.Env
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.LnChan
@@ -315,6 +325,7 @@ test-suite btc-lsp-test
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
       Proto.SignableOrphan
+      RpcSpec
       ServerSpec
       Spec
       TestAppM
@@ -377,7 +388,9 @@ test-suite btc-lsp-test
     , memory
     , microlens
     , monad-logger
+    , network
     , network-bitcoin
+    , network-simple
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1

@@ -9,6 +9,7 @@ import BtcLsp.Class.Storage
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import.External
+import BtcLsp.Rpc.Env
 import Data.ProtoLens.Field
 import qualified LndClient as Lnd
 import qualified LndClient.Data.GetInfo as Lnd
@@ -24,6 +25,7 @@ class
   Env m
   where
   getGsEnv :: m GSEnv
+  getRpcEnv :: m RpcEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLspPubKey :: m Lnd.NodePubKey
   getLspPubKey = do

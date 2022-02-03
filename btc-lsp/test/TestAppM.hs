@@ -81,6 +81,8 @@ runTestApp env app = runReaderT (unTestAppM app) env
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
     asks $ envGrpcServerEnv . testEnvLsp
+  getRpcEnv =
+    asks $ envElectrsRpcEnc . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvLsp
   withLnd method args = do
@@ -90,6 +92,8 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndAlice m) where
   getGsEnv =
     asks $ envGrpcServerEnv . testEnvLsp
+  getRpcEnv =
+    asks $ envElectrsRpcEnc . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvAlice
   withLnd method args = do

@@ -11,6 +11,7 @@ module BtcLsp.Data.Env
 where
 
 import BtcLsp.Data.Type
+import BtcLsp.Rpc.Env
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import Control.Monad.Logger (runNoLoggingT)
@@ -55,7 +56,9 @@ data Env = Env
     envLnd :: Lnd.LndEnv,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
-    envGrpcServerEnv :: GSEnv
+    envGrpcServerEnv :: GSEnv,
+    -- | Elecrts Rpc
+    envElectrsRpcEnc :: RpcEnv
   }
 
 data RawConfig = RawConfig
@@ -73,7 +76,9 @@ data RawConfig = RawConfig
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     -- | Grpc
-    rawConfigGrpcServerEnv :: GSEnv
+    rawConfigGrpcServerEnv :: GSEnv,
+    -- | Electrs Rpc
+    rawConfigElectrsRpcEnv :: RpcEnv
   }
 
 -- | Here we enable normal JSON parsing
@@ -130,6 +135,8 @@ readRawConfig =
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
+      -- Electrs Rpc
+      <*> E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts
 
 readGCEnv :: IO GCEnv
 readGCEnv =
@@ -192,7 +199,8 @@ withEnv rc this = do
                 envGrpcServerEnv =
                   (rawConfigGrpcServerEnv rc)
                     { gsEnvSigner = run . signT lnd
-                    }
+                    },
+                envElectrsRpcEnc = rawConfigElectrsRpcEnv rc
               }
   where
     rmLogEnv :: LogEnv -> IO ()

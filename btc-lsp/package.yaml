@@ -82,6 +82,8 @@ dependencies:
 - http2-grpc-proto-lens
 - http2-client
 - http2-client-grpc
+- network
+- network-simple
 # other
 - envparse
 - scientific

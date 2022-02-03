@@ -7,7 +7,7 @@ LND_DIR="$ROOT_DIR/.lnd"
 
 mkdir -p "$BUILD_DIR"
 
-echo "subjectAltName=IP:127.0.0.1,DNS:localhost" \
+echo "subjectAltName=IP:127.0.0.1,DNS:127.0.0.1" \
    > "$BUILD_DIR/subjectAltName"
 
 (
