@@ -21,7 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 # foundation
-- base >= 4.7 && < 5
+- base #>= 4.7 && < 5
 - unliftio
 - universum
 - containers
@@ -69,6 +69,7 @@ dependencies:
 # crypto
 - uuid
 - network-bitcoin
+- SHA
 - lnd-client
 - cryptonite
 - signable
