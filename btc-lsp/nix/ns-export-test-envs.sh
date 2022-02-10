@@ -22,8 +22,8 @@ alias bitcoin-cli="bitcoin-cli -rpcwait -datadir=$BTCD_DIR -rpcport=18443"
 # lnd
 #
 
-alias lncli-lsp="lncli -n regtest --lnddir=$LND_LSP_DIR"
-alias lncli-alice="lncli -n regtest --lnddir=$LND_ALICE_DIR"
+alias lncli-lsp="lncli -n regtest --rpcserver 127.0.0.1:10010 --lnddir=$LND_LSP_DIR"
+alias lncli-alice="lncli -n regtest --rpcserver 127.0.0.1:10011 --lnddir=$LND_ALICE_DIR"
 alias lncli-bob="lncli -n regtest --lnddir=$LND_BOB_DIR"
 
 #

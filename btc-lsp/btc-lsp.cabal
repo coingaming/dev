@@ -1,20 +1,20 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
-name:           btc-lsp
-version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
-homepage:       https://github.com/githubuser/btc-lsp#readme
-bug-reports:    https://github.com/githubuser/btc-lsp/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2020 Author name here
-license:        BSD3
-license-file:   LICENSE
-build-type:     Simple
+name:                btc-lsp
+version:             0.1.0.0
+description:         Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
+homepage:            https://github.com/githubuser/btc-lsp#readme
+bug-reports:         https://github.com/githubuser/btc-lsp/issues
+license-file:        LICENSE
+author:              Author name here
+maintainer:          example@example.com
+copyright:           2020 Author name here
+license:             BSD3
+build-type:          Simple
 extra-source-files:
     README.md
     ChangeLog.md
@@ -54,6 +54,7 @@ library
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Util
+      BtcLsp.Watcher.ChannelWatcher
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -178,6 +179,7 @@ executable btc-lsp-exe
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Util
+      BtcLsp.Watcher.ChannelWatcher
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -303,6 +305,7 @@ test-suite btc-lsp-test
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Util
+      BtcLsp.Watcher.ChannelWatcher
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -321,6 +324,7 @@ test-suite btc-lsp-test
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp
+      WatcherSpec
       Paths_btc_lsp
   hs-source-dirs:
       src

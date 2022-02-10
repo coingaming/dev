@@ -26,7 +26,7 @@ SwapIntoLn
   deriving Eq Show Generic
 
 LnChan
-  swapIntoLnId SwapIntoLnId
+  swapIntoLnId SwapIntoLnId Maybe
   fundingTxId (TxId 'Funding)
   fundingVout (Vout 'Funding)
   closingTxId (TxId 'Closing) Maybe
