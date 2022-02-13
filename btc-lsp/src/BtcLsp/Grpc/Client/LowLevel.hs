@@ -6,6 +6,8 @@ module BtcLsp.Grpc.Client.LowLevel
 where
 
 import BtcLsp.Grpc.Data
+import BtcLsp.Grpc.Server.LowLevel (GSEnv (gsEnvSigner))
+import BtcLsp.Import.Witch
 import Data.Aeson
   ( FromJSON (..),
     camelTo2,
@@ -14,15 +16,22 @@ import Data.Aeson
     genericParseJSON,
     withScientific,
   )
+import qualified Data.Binary.Builder as BS
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Base64.URL as B64
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
+import Data.ProtoLens (Message)
+import Data.ProtoLens.Encoding (encodeMessage)
 import Data.ProtoLens.Service.Types (HasMethod, HasMethodImpl (..))
 import Data.Scientific (floatingOrInteger)
+import qualified Data.Text as T
 import GHC.TypeLits (Symbol)
 import Network.GRPC.Client
 import Network.GRPC.Client.Helpers
 import Network.GRPC.HTTP2.Encoding (gzip)
+import qualified Network.GRPC.HTTP2.Encoding as G
 import qualified Network.GRPC.HTTP2.ProtoLens as ProtoLens
 import Network.HTTP2.Client
 import Text.PrettyPrint.GenericPretty
@@ -32,12 +41,6 @@ import Text.PrettyPrint.GenericPretty.Import
   ( inspectPlain,
   )
 import Universum
-import Data.ProtoLens (Message)
-import qualified Network.GRPC.HTTP2.Encoding as G
-import qualified Data.ByteString as BS
-import qualified Data.Binary.Builder as BS
-import Data.ProtoLens.Encoding (encodeMessage)
-import BtcLsp.Grpc.Server.LowLevel (GSEnv (gsEnvSigner))
 
 data GCEnv = GCEnv
   { gcEnvHost :: String,
@@ -93,6 +96,9 @@ runUnary rpc gsEnv env verifySig req = do
         (makeClient gsEnv env req True True)
         close
         (\grpc -> rawUnary rpc grpc req)
+  --
+  -- TODO : better composition with ExceptT
+  --
   case res of
     Right (Right (Right (h, mh, Right x))) ->
       case find (\header -> fst header == sigHeaderName) $ h <> fromMaybe mempty mh of
@@ -100,18 +106,27 @@ runUnary rpc gsEnv env verifySig req = do
           pure . Left $
             "Client ==> missing server header "
               <> inspectPlain sigHeaderName
-        Just (_, rawSig) -> do
-          isVerified <- verifySig x rawSig
-          pure $
-            if isVerified
-              then Right x
-              else
-                Left $
-                  "Client ==> server signature verification failed for raw bytes "
-                    <> " from decoded payload "
-                    <> inspectPlain x
-                    <> " with signature "
-                    <> inspectPlain rawSig
+        Just (_, b64sig) ->
+          case B64.decode b64sig of
+            Left e ->
+              pure . Left $
+                "signature import from base64 payload "
+                  <> inspectPlain b64sig
+                  <> " failed with error "
+                  <> T.pack e
+            Right sigDer -> do
+              isVerified <-
+                verifySig x sigDer
+              pure $
+                if isVerified
+                  then Right x
+                  else
+                    Left $
+                      "Client ==> server signature verification failed for raw bytes "
+                        <> " from decoded payload "
+                        <> inspectPlain x
+                        <> " with signature "
+                        <> inspectPlain sigDer
     x ->
       --
       -- TODO : replace show with inspectPlain
@@ -121,23 +136,24 @@ runUnary rpc gsEnv env verifySig req = do
         "Client ==> server grpc failure "
           <> show x
   where
-    sigHeaderName = CI.mk . coerce $ gcEnvSigHeaderName env
+    sigHeaderName = CI.mk . from $ gcEnvSigHeaderName env
 
 msgToSignBytes :: (Message msg) => Bool -> msg -> ByteString
 msgToSignBytes doCompress msg = header <> body
   where
     rawBody = encodeMessage msg
-    body = if doCompress
-              then G._compressionFunction G.gzip rawBody
-              else rawBody
-    header =  BS.pack [1]
-          <> ( BL.toStrict
+    body =
+      if doCompress
+        then G._compressionFunction G.gzip rawBody
+        else rawBody
+    header =
+      BS.pack [1]
+        <> ( BL.toStrict
                . BS.toLazyByteString
                . BS.putWord32be
                . fromIntegral
                $ BS.length body
-             )
-
+           )
 
 makeClient ::
   Message req =>
@@ -154,11 +170,15 @@ makeClient gsEnv env req tlsEnabled doCompress = do
       setupGrpcClient $
         (grpcClientConfigSimple (gcEnvHost env) (coerce $ gcEnvPort env) tlsEnabled)
           { _grpcClientConfigCompression = compression,
-            _grpcClientConfigHeaders = [(sigHeaderName, signature)]
+            _grpcClientConfigHeaders =
+              [ ( sigHeaderName,
+                  B64.encodeUnpadded signature
+                )
+              ]
           }
     Nothing -> throwError EarlyEndOfStream
   where
     signer = gsEnvSigner gsEnv
-    sigHeaderName = coerce $ gcEnvSigHeaderName env
+    sigHeaderName = from $ gcEnvSigHeaderName env
     doSignature = signer $ msgToSignBytes doCompress req
     compression = if doCompress then gzip else uncompressed

@@ -119,8 +119,10 @@ import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X
   ( inspect,
+    inspectGenPlain,
     inspectPlain,
     inspectStr,
+    inspectStrPlain,
   )
 import Text.PrettyPrint.GenericPretty.Instance as X ()
 import Universum as X hiding

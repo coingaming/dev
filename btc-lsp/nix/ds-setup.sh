@@ -9,7 +9,7 @@ mkdir -p "$BUILD_DIR"
 
 echo "==> Docker build cleanup"
 sh "$THIS_DIR/ds-down.sh" || true
-rm -rf "$BUILD_DIR"
+rm -rf "$BUILD_DIR/swarm"
 
 echo "==> Docker swarm network setup"
 if [ "$1" = "--reset-swarm" ]; then

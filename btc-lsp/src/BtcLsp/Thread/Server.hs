@@ -1,5 +1,5 @@
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Thread.Server
   ( apply,
@@ -7,8 +7,10 @@ module BtcLsp.Thread.Server
 where
 
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
+import qualified BtcLsp.Grpc.Sig as SU
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.User as User
+import qualified Crypto.Secp256k1 as C
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
 import Lens.Micro
@@ -20,8 +22,6 @@ import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
-import qualified Crypto.Secp256k1 as C
-import qualified BtcLsp.Grpc.Sig as SU
 
 apply :: (Env m) => m ()
 apply = do
@@ -29,9 +29,7 @@ apply = do
   withUnliftIO $ \run ->
     runServer env $ handlers run
 
-
-
-type HasContext req = ( HasField req "maybe'ctx" (Maybe Proto.Ctx))
+type HasContext req = (HasField req "maybe'ctx" (Maybe Proto.Ctx))
 
 type ContextMsg req res failure internal =
   ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
@@ -62,30 +60,39 @@ handlers run gsEnv body =
   ]
   where
     runHandler ::
-      ( ContextMsg req res failure internal) =>
+      (ContextMsg req res failure internal) =>
       (Entity User -> req -> m res) ->
       Wai.Request ->
       req ->
       IO res
     runHandler = withMiddleware run gsEnv body
 
-
-extractPubKeyDer ::(HasField req "maybe'ctx" (Maybe Proto.Ctx)) => req -> Maybe C.PubKey
+extractPubKeyDer ::
+  ( HasField req "maybe'ctx" (Maybe Proto.Ctx)
+  ) =>
+  req ->
+  Maybe C.PubKey
 extractPubKeyDer req = do
   ctx <- req ^? field @"maybe'ctx" . _Just
-  C.importPubKey =<< (ctx ^? Proto.maybe'lnPubKey . _Just . Proto.val)
+  C.importPubKey
+    =<< ( ctx ^? Proto.maybe'lnPubKey . _Just . Proto.val
+        )
 
-verifySig :: (HasContext req) => GSEnv -> Wai.Request -> req -> RawRequestBytes -> Either String Bool
+verifySig ::
+  ( HasContext req
+  ) =>
+  GSEnv ->
+  Wai.Request ->
+  req ->
+  RawRequestBytes ->
+  Either Text Bool
 verifySig env waiReq req (RawRequestBytes payload) = do
   pubKey <- maybeToRight "No pub key in ctx" $ extractPubKeyDer req
-  sig <- maybeToRight "Incorrect signature" $ SU.sigFromReq sigHeaderName waiReq
+  sig <- SU.sigFromReq (gsEnvSigHeaderName env) waiReq
   msg <- maybeToRight "Incorrect message" $ SU.prepareMsg payload
-  if C.verifySig pubKey sig msg then Right True else Left "Signature verification fail"
-    where
-      sigHeaderName = coerce $ gsEnvSigHeaderName env
-
-
-
+  if C.verifySig pubKey sig msg
+    then Right True
+    else Left "Signature verification fail"
 
 withMiddleware ::
   ( ContextMsg req res failure internal,
