@@ -126,10 +126,15 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
     let isValidSigE = verifySig gsEnv waiReq req body
     let act =
           case (isValidSigE, userE) of
-            (Right True, Right user) -> run . (setGrpcCtx <=< handler user)
-            (_, Left e) -> const . pure $ failResE e
-            (_, _) -> const . pure $ failResE $ FailureGrpcClient "Unknown error"
-    liftIO $ act req
+            (Right True, Right user) ->
+              run . (setGrpcCtx <=< handler user)
+            (_, Left e) ->
+              const . pure $ failResE e
+            (_, _) ->
+              const . pure . failResE $
+                FailureGrpcClient "Unknown error"
+    liftIO $
+      act req
 
 getCfg ::
   ( Monad m
