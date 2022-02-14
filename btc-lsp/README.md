@@ -33,11 +33,12 @@ Every `btc-lsp` gRPC request/response does have `ctx` (context) field in payload
 
 Also every request/response does have a signature which is:
 
-- Compact.
-- Using DER format.
-- Using double-sha256 hash.
-- Located in `sig-bin` header/trailer.
+- Signed with LN identity key (key locator family is 6 and index is 0).
+- Single hashed (double_hash parameter is False).
+- Not compact (compact_sig parameter is False).
+- Using DER binary format.
 - Base64-encoded according official http2 [spec](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md).
+- Located in `sig-bin` gRPC header/trailer.
 
 ## Haskell/Nix
 

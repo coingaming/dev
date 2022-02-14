@@ -213,8 +213,8 @@ withEnv rc this = do
                   { Lnd.keyFamily = 6,
                     Lnd.keyIndex = 0
                   },
-              Lnd.doubleHash = True,
-              Lnd.compactSig = True
+              Lnd.doubleHash = False,
+              Lnd.compactSig = False
             }
       case eSig of
         Left e -> do
