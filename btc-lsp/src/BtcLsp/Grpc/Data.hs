@@ -1,34 +1,51 @@
-{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module BtcLsp.Grpc.Data
   ( GRel (..),
-    SigHeaderName (..),
+    SigHeaderName,
     TlsCert (..),
     TlsKey (..),
-    RawRequestBytes (..)
+    RawRequestBytes (..),
   )
 where
 
+import BtcLsp.Import.Witch
 import Data.Aeson (FromJSON (..), withText)
-import qualified Data.Text.Encoding as TE
 import Text.PrettyPrint.GenericPretty.Instance ()
 import Universum
+import qualified Witch
 
-data GRel = Client | Server
+data GRel
+  = Client
+  | Server
 
-newtype RawRequestBytes = RawRequestBytes ByteString
+newtype RawRequestBytes
+  = RawRequestBytes ByteString
 
 newtype SigHeaderName
-  = SigHeaderName ByteString
+  = SigHeaderName Text
   deriving
     ( Eq,
       Ord,
       Show,
       IsString
     )
+
+instance From SigHeaderName Text
+
+instance From Text SigHeaderName
+
+instance From SigHeaderName ByteString where
+  from =
+    via @Text
+
+instance TryFrom ByteString SigHeaderName where
+  tryFrom =
+    from @Text
+      `composeTryRhs` tryFrom
 
 newtype TlsCert (rel :: GRel)
   = TlsCert Text
@@ -49,4 +66,5 @@ newtype TlsKey (rel :: GRel)
 
 instance FromJSON SigHeaderName where
   parseJSON =
-    withText "SigHeaderName" $ pure . SigHeaderName . TE.encodeUtf8
+    withText "SigHeaderName" $
+      pure . SigHeaderName

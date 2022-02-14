@@ -1,17 +1,21 @@
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
+
 module BtcLsp.Grpc.Server.LowLevel
   ( GSEnv (..),
     runServer,
-    serverApp
+    serverApp,
   )
 where
 
 import BtcLsp.Grpc.Data
+import BtcLsp.Import.Witch
+import Control.Concurrent (modifyMVar)
 import Data.Aeson (FromJSON (..), withObject, (.:))
+import qualified Data.ByteString.Base64.URL as B64
+import qualified Data.ByteString.Lazy as BSL
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
 import qualified Data.Text.Encoding as TE
@@ -23,9 +27,7 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
 import Network.Wai.Internal (Request (..))
-import qualified Data.ByteString.Lazy as BSL
 import Universum
-import Control.Concurrent (modifyMVar)
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
@@ -72,7 +74,8 @@ serverApp handlers env body req rep = do
   let app = grpcApp [gzip] $ handlers env body
   app req middleware
   where
-    sigHeaderName = coerce $ gsEnvSigHeaderName env
+    sigHeaderName =
+      from $ gsEnvSigHeaderName env
     middleware res = do
       modifyHTTP2Data req $ \http2data0 ->
         let http2data = fromMaybe defaultHTTP2Data http2data0
@@ -96,7 +99,11 @@ serverApp handlers env body req rep = do
             Nothing ->
               ts
             Just sig ->
-              Trailers $ (CI.mk sigHeaderName, sig) : ss
+              Trailers $
+                ( CI.mk sigHeaderName,
+                  B64.encodeUnpadded sig
+                ) :
+                ss
         NextTrailersMaker {} ->
           --
           -- TODO : throwIO GRPCStatus
@@ -110,9 +117,11 @@ serverApp handlers env body req rep = do
 extractBodyBytesMiddleware :: GSEnv -> (GSEnv -> RawRequestBytes -> Application) -> Application
 extractBodyBytesMiddleware env app req resp = do
   body <- BSL.toStrict <$> strictRequestBody req
-  body'<- newMVar body
+  body' <- newMVar body
   app env (RawRequestBytes body) (req' body') resp
   where
-    requestBody' mvar = modifyMVar mvar
-      (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
-    req' b = req { requestBody = requestBody' b }
+    requestBody' mvar =
+      modifyMVar
+        mvar
+        (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
+    req' b = req {requestBody = requestBody' b}
