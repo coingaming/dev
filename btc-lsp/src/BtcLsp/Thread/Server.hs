@@ -7,7 +7,7 @@ module BtcLsp.Thread.Server
 where
 
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
-import qualified BtcLsp.Grpc.Sig as SU
+import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.User as User
 import qualified Crypto.Secp256k1 as C
@@ -29,8 +29,6 @@ apply = do
   withUnliftIO $ \run ->
     runServer env $ handlers run
 
-type HasContext req = (HasField req "maybe'ctx" (Maybe Proto.Ctx))
-
 type ContextMsg req res failure internal =
   ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
     HasField res "ctx" Proto.Ctx,
@@ -51,12 +49,12 @@ handlers ::
   RawRequestBytes ->
   [ServiceHandler]
 handlers run gsEnv body =
-  [ unary (RPC :: RPC Service "getCfg") $
-      runHandler getCfg,
-    unary (RPC :: RPC Service "swapIntoLn") $
+  [ unary (RPC :: RPC Service "swapIntoLn") $
       runHandler Server.swapIntoLn,
     unary (RPC :: RPC Service "swapFromLn") $
-      runHandler swapFromLn
+      runHandler swapFromLn,
+    unary (RPC :: RPC Service "getCfg") $
+      runHandler getCfg
   ]
   where
     runHandler ::
@@ -67,32 +65,29 @@ handlers run gsEnv body =
       IO res
     runHandler = withMiddleware run gsEnv body
 
-extractPubKeyDer ::
-  ( HasField req "maybe'ctx" (Maybe Proto.Ctx)
-  ) =>
-  req ->
-  Maybe C.PubKey
-extractPubKeyDer req = do
-  ctx <- req ^? field @"maybe'ctx" . _Just
-  C.importPubKey
-    =<< ( ctx ^? Proto.maybe'lnPubKey . _Just . Proto.val
-        )
-
-verifySig ::
-  ( HasContext req
-  ) =>
+verifySigE ::
   GSEnv ->
   Wai.Request ->
-  req ->
+  NodePubKey ->
   RawRequestBytes ->
-  Either Text Bool
-verifySig env waiReq req (RawRequestBytes payload) = do
-  pubKey <- maybeToRight "No pub key in ctx" $ extractPubKeyDer req
-  sig <- SU.sigFromReq (gsEnvSigHeaderName env) waiReq
-  msg <- maybeToRight "Incorrect message" $ SU.prepareMsg payload
-  if C.verifySig pubKey sig msg
-    then Right True
-    else Left "Signature verification fail"
+  Either Failure ()
+verifySigE env waiReq pubNode (RawRequestBytes payload) = do
+  pubDer <-
+    maybeToRight
+      (FailureGrpc "NodePubKey DER import failed")
+      . C.importPubKey
+      $ coerce pubNode
+  sig <-
+    Sig.sigFromReq (gsEnvSigHeaderName env) waiReq
+  msg <-
+    maybeToRight
+      (FailureGrpc "Incorrect message")
+      $ Sig.prepareMsg payload
+  if C.verifySig pubDer sig msg
+    then pure ()
+    else
+      Left $
+        FailureGrpc "Signature verification failed"
 
 withMiddleware ::
   ( ContextMsg req res failure internal,
@@ -122,28 +117,15 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
               . _Just
               . Proto.maybe'lnPubKey
               . _Just
-      ExceptT $ User.createVerify pub nonce
-    let isValidSigE = verifySig gsEnv waiReq req body
-    let act =
-          case (isValidSigE, userE) of
-            (Right True, Right user) ->
-              run . (setGrpcCtx <=< handler user)
-            (_, Left e) ->
-              const . pure $ failResE e
-            (_, _) ->
-              const . pure . failResE $
-                FailureGrpcClient "Unknown error"
-    liftIO $
-      act req
-
-getCfg ::
-  ( Monad m
-  ) =>
-  Entity User ->
-  GetCfg.Request ->
-  m GetCfg.Response
-getCfg _ _ =
-  pure defMessage
+      except $
+        verifySigE gsEnv waiReq pub body
+      ExceptT $
+        User.createVerify pub nonce
+    case userE of
+      Right user ->
+        setGrpcCtx =<< handler user req
+      Left e ->
+        pure $ failResE e
 
 swapFromLn ::
   ( Monad m
@@ -152,4 +134,20 @@ swapFromLn ::
   SwapFromLn.Request ->
   m SwapFromLn.Response
 swapFromLn _ _ =
+  --
+  -- TODO : implement!!!
+  --
+  pure defMessage
+
+getCfg ::
+  ( Monad m
+  ) =>
+  Entity User ->
+  GetCfg.Request ->
+  m GetCfg.Response
+getCfg _ _ =
+  --
+  -- TODO : rename into EstimateSwap/EstimateSwapIntoLn
+  -- and implement!!!
+  --
   pure defMessage

@@ -358,7 +358,11 @@ data Failure
   = FailureNonce
   | FailureInput [Proto.InputFailure]
   | FailureLnd Lnd.LndError
-  | FailureGrpcClient Text
+  | --
+    -- TODO : do proper input/internal
+    -- failure proto messages instead.
+    --
+    FailureGrpc Text
   deriving stock
     ( Eq,
       Show,
