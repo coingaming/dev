@@ -21,7 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 # foundation
-- base #>= 4.7 && < 5
+- base >= 4.7 && < 5
 - unliftio
 - universum
 - containers
@@ -60,6 +60,9 @@ dependencies:
 - memory
 - aeson
 - base16-bytestring
+- hex-text
+# haskoin-core >= 0.13.5
+# bitcoind-rpc
 # threads
 - async
 - stm
@@ -72,7 +75,7 @@ dependencies:
 - SHA
 - lnd-client
 - cryptonite
-- signable
+- secp256k1-haskell
 # web
 - wai
 - warp
@@ -85,6 +88,8 @@ dependencies:
 - http2-client-grpc
 - network
 - network-simple
+- http-client
+- http-types
 # other
 - envparse
 - scientific

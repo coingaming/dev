@@ -26,4 +26,4 @@ for x in $ROOT_DIR/dhall/docker-compose.*.dhall; do
 
 done
 
-sh -c "$THIS_DIR/dhall-lint.sh"
+sh -c "$THIS_DIR/ns-dhall-lint.sh"

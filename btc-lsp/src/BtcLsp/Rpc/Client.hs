@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module BtcLsp.Rpc.Client
-  ( send,
+  ( RpcError (..),
+    send,
   )
 where
 
@@ -14,7 +15,11 @@ import qualified UnliftIO.Exception as E
 
 data RpcError
   = RpcNoAddress
+  | RpcJsonDecodeError
+  | OtherError Text
   deriving (Eq, Generic, Show)
+
+instance Out RpcError
 
 send :: Env m => ByteString -> m (Either RpcError ByteString)
 send req = do

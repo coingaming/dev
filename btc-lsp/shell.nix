@@ -23,7 +23,6 @@ in
     pkgs.netcat-gnu
     pkgs.socat
     proto.protoc-haskell-bin
-    proto.protoc-signable-bin
   ];
   tools = {
     cabal = "3.2.0.0";
@@ -35,9 +34,10 @@ in
     if withShellHook
     then ''
       echo "Spawning nix-shell with shellHook"
-      sh ./nix/nt-gen-keys.sh
-      . ./nix/export-test-envs.sh
-      trap "./nix/shutdown-test-deps.sh 2> /dev/null" EXIT
+      sh ./nix/ns-gen-cfgs.sh
+      sh ./nix/ns-gen-keys.sh
+      . ./nix/ns-export-test-envs.sh
+      trap "./nix/ns-shutdown-test-deps.sh 2> /dev/null" EXIT
     ''
     else ''
       echo "Spawning nix-shell without shellHook"

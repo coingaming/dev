@@ -4,7 +4,7 @@
 # Bitcoind
 #
 
-. nix/export-test-envs.sh
+. nix/ns-export-test-envs.sh
 
 echo "starting bitcoind..."
 bitcoind -datadir=$BTCD_DIR &

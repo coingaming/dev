@@ -59,7 +59,6 @@ import Data.Pool as X (Pool, destroyAllResources)
 import Data.ProtoLens as X (defMessage)
 import Data.ProtoLens.Encoding as X (decodeMessage, encodeMessage)
 import Data.Ratio as X (denominator, numerator, (%))
-import Data.Signable as X (safeFromIntegral)
 import Data.Text as X (pack)
 import Data.Time.Clock as X
   ( DiffTime,
@@ -116,7 +115,6 @@ import LndClient.Util as X
     spawnLink,
     withSpawnLink,
   )
-import Proto.SignableOrphan as X ()
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X
@@ -131,7 +129,7 @@ import Universum as X hiding
     finally,
     on,
     set,
---    show,
+    show,
     state,
     swap,
   )

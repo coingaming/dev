@@ -7,11 +7,13 @@ Bitcoin Lightning Service Provider. Development environment is packed into nix-s
 To spawn `btc-lsp` running [Docker/Swarm](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/) is required. On Mac you also need `brew install coreutils` and `brew install expect`. Also make sure Docker have access to reasonable amount of resources (at least 8GB of memory, reasonable storage and CPU capacity). Initial compilation will take a lot of time, CPU, memory, bandwidth and storage, but it's needed to be done only once.
 
 ```sh
+sudo ./nix/ds-setup-hosts.sh
+
 ./nix/ds-setup.sh
 
 docker service ls
 
-curl -d '' -v --cacert ./build/btc_lsp_tls_cert.pem https://127.0.0.1:8443/BtcLsp.Service/SwapIntoLn
+curl -d '' -v --cacert ./build/swarm/btc-lsp/cert.pem https://yolo_btc-lsp:443/BtcLsp.Service/SwapIntoLn
 ```
 
 In case where you don't have initialized docker swarm (for example you never used it), you need to run:
@@ -39,10 +41,10 @@ Spawn shell:
 
 ```sh
 # If you have Nix installed (a bit faster)
-./nix/shell-native.sh
+./nix/hm-shell-native.sh
 
 # If you have Docker installed (works on Mac)
-./nix/shell-docker.sh
+./nix/hm-shell-docker.sh
 ```
 
 Work with Haskell sources in shell:

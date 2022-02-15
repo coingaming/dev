@@ -4,51 +4,44 @@ module RpcSpec
 where
 
 import BtcLsp.Import
-import qualified BtcLsp.Rpc.Client as Client
-import Data.Aeson (encode, object, (.=))
-import qualified Data.ByteString.Lazy as BS
-import Data.Digest.Pure.SHA
-import Network.Bitcoin
+import BtcLsp.Rpc.ScriptHashRpc as Rpc
+import qualified LndClient.Data.NewAddress as Lnd
+import LndClient.LndTest (getBtcClient)
+import qualified LndClient.RPC.Katip as Lnd
+import Network.Bitcoin.Mining (generateToAddress)
 import Test.Hspec
 import TestOrphan ()
 import TestWithLndLsp
---import qualified Data.ByteString as BSS
-
---import Haskoin.Address
---import Network.Bitcoin.Mining (generateToAddress)
+import LndClient.Data.NewAddress (NewAddressResponse(NewAddressResponse))
 
 spec :: Spec
 spec = do
-  itEnv "Rpc Version" $ do
-    let jsonMsg =
-          BS.toStrict $
-            encode $
-              object
-                [ "jsonrpc" .= ("2.0" :: Text),
-                  "method" .= ("server.version" :: Text),
-                  "params" .= ["" :: Text, "1.4" :: Text],
-                  "id" .= (0 :: Int)
-                ]
-    msgReply <- Client.send jsonMsg
-    liftIO $ msgReply `shouldSatisfy` isRight
-  focus $
-    itEnv "Rpc Get Balance" $ do
-      client <- liftIO $ getClient "http://127.0.0.1:18443" "developer" "developer"
-      address <- liftIO $ getNewAddress client Nothing
-      let scriptHash = showDigest $ sha256 $ BS.reverse $ encodeUtf8 address
-      bal <- liftIO $ getBalance client
-      print bal
-      print scriptHash
+  itEnv "Version" $ do
+    ver <- Rpc.version
+    liftIO $ ver `shouldSatisfy` isRight
+  itEnv "Get Balance" $ do
+    client <- getBtcClient LndLsp
+    addrResponse <-
+      runExceptT $
+        withLndT
+          Lnd.newAddress
+          ( $
+              Lnd.NewAddressRequest
+                { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                  Lnd.account = Nothing
+                }
+          )
+    case addrResponse of
+      Left _ -> error "Error getting address from lnd"
+      Right response -> do
+        let addr = coerce response
+        _ <- liftIO $ generateToAddress client 3 addr Nothing
 
-      let jsonMsg =
-            BS.toStrict $
-              encode $
-                object
-                  [ "jsonrpc" .= ("2.0" :: Text),
-                    "method" .= ("blockchain.scripthash.get_balance" :: Text),
-                    "params" .= [scriptHash],
-                    "id" .= (0 :: Int)
-                  ]
-      msgReply <- Client.send jsonMsg
-      print msgReply
-      liftIO $ msgReply `shouldSatisfy` isRight
+        --Sleep ten seconds to electrs synchronize with blockchain
+        sleep $ MicroSecondsDelay 10000000
+        elecBal <- Rpc.getBalance (Left $ Rpc.Address addr)
+        liftIO $ elecBal `shouldSatisfy` isRight
+        case elecBal of
+          Right bal -> liftIO $ confirmed bal `shouldBe` 7500000000
+          Left _ -> error "Error getting balance"
+
