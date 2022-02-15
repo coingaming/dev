@@ -146,6 +146,20 @@ export LSP_GRPC_CLIENT_ENV="
   \"sig_header_name\":\"sig-bin\"
 }
 "
+
+#
+# NOTE : for local swarm tests
+#
+# export LSP_GRPC_CLIENT_ENV="
+# {
+#   \"host\":\"yolo_btc-lsp\",
+#   \"port\":443,
+#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
+#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
+#   \"sig_header_name\":\"sig-bin\"
+# }
+# "
+
 export LSP_GRPC_SERVER_ENV="
 {
   \"port\":8444,
