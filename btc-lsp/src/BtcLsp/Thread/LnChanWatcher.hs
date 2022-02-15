@@ -1,6 +1,5 @@
-{-# OPTIONS_GHC -Wno-deprecations #-}
-module BtcLsp.Watcher.ChannelWatcher
-  (watchChannelEvents)
+module BtcLsp.Thread.LnChanWatcher
+  (watchChannelEvents, forkThread)
 where
 
 import BtcLsp.Import hiding (takeMVar, putMVar, newEmptyMVar)
@@ -10,12 +9,10 @@ import qualified LndClient.RPC.Silent as Lnd
 import BtcLsp.Storage.Model.LnChan (persistChannelUpdates)
 import LndClient
 
-forkThread :: (Storage m) => m () -> m (ThreadId, MVar ())
+forkThread :: MonadUnliftIO m => m () -> m (ThreadId, MVar ())
 forkThread proc = do
     handle <- newEmptyMVar
-    tid <- forkFinally proc (\e -> do
-      traceShowM e
-      putMVar handle ())
+    tid <- forkFinally proc (\_ -> putMVar handle ())
     return (tid, handle)
 
 watchChannelEvents :: (Storage m, KatipContext m) => LndEnv -> m (ThreadId, MVar ())

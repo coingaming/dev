@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.5.
 --
 -- see: https://github.com/sol/hpack
 
@@ -51,10 +51,10 @@ library
       BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Util
-      BtcLsp.Watcher.ChannelWatcher
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -176,10 +176,10 @@ executable btc-lsp-exe
       BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Util
-      BtcLsp.Watcher.ChannelWatcher
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -302,10 +302,10 @@ test-suite btc-lsp-test
       BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Util
-      BtcLsp.Watcher.ChannelWatcher
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -318,13 +318,13 @@ test-suite btc-lsp-test
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
+      LnChanWatcherSpec
       ServerSpec
       Spec
       TestAppM
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp
-      WatcherSpec
       Paths_btc_lsp
   hs-source-dirs:
       src
