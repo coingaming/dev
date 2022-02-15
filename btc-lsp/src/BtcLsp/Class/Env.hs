@@ -26,6 +26,7 @@ class
   getGsEnv :: m GSEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLspPubKey :: m Lnd.NodePubKey
+  getLspLndEnv :: m Lnd.LndEnv
   getLspPubKey = do
     var <- getLspPubKeyVar
     mPubKey <- tryReadMVar var

@@ -83,6 +83,8 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     asks $ envGrpcServerEnv . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvLsp
+  getLspLndEnv =
+    asks $ envLnd . testEnvLsp
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
