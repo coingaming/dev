@@ -100,6 +100,7 @@ library
     , async
     , base >=4.7 && <5
     , base16-bytestring
+    , base64-bytestring >=1.2.1
     , binary
     , bytestring
     , case-insensitive
@@ -235,6 +236,7 @@ executable btc-lsp-exe
     , async
     , base >=4.7 && <5
     , base16-bytestring
+    , base64-bytestring >=1.2.1
     , binary
     , bytestring
     , case-insensitive
@@ -379,6 +381,7 @@ test-suite btc-lsp-test
     , async
     , base >=4.7 && <5
     , base16-bytestring
+    , base64-bytestring >=1.2.1
     , binary
     , bytestring
     , case-insensitive

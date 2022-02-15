@@ -168,7 +168,7 @@ in  { networks.global.external = True
               ''
               {
                 "port":443,
-                "sig_header_name":"compact-2xsha256-sig",
+                "sig_header_name":"sig-bin",
                 "tls_cert":"${escape ../build/swarm/btc-lsp/cert.pem as Text}",
                 "tls_key":"${escape ../build/swarm/btc-lsp/key.pem as Text}"
               }

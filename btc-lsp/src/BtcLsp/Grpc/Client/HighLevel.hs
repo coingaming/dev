@@ -30,7 +30,7 @@ swapIntoLn ::
   SwapIntoLn.Request ->
   m (Either Failure SwapIntoLn.Response)
 swapIntoLn gsEnv env req = withRunInIO $ \run ->
-  first FailureGrpcClient
+  first FailureGrpc
     <$> runUnary
       (RPC :: RPC Service "swapIntoLn")
       gsEnv

@@ -31,9 +31,14 @@ Every `btc-lsp` gRPC request/response does have `ctx` (context) field in payload
 - First is `nonce`.  The nonce is used for security reasons and is used to guard against replay attacks. The server will reject any request that comes with an incorrect nonce. The only requirement for the nonce is that it needs to be strictly increasing. Nonce generation is often achieved by using the current UNIX timestamp.
 - Second is `ln_pub_key`. This is lightning node network identity public key in DER format. This key is used to verify request/response signature from headers/trailers.
 
-Also every request/response does have a signature:
+Also every request/response does have a signature which is:
 
-- Request/response signature is compact, DER-encoded and uses double-sha256 hash. It's located in `compact-2xsha256-sig` header/trailer.
+- Signed with LN identity key (key locator family is 6 and index is 0).
+- Single hashed (double_hash parameter is False).
+- Not compact (compact_sig parameter is False).
+- Using DER binary format.
+- Base64-encoded according official http2 [spec](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md).
+- Located in `sig-bin` gRPC header/trailer.
 
 ## Haskell/Nix
 

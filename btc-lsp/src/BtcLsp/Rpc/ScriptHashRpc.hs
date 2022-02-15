@@ -32,7 +32,14 @@ data Balance = Balance
   }
   deriving (Generic, Show)
 
-instance FromJSON Balance
+getBalanceFromSat :: MSat -> MSat -> Balance
+getBalanceFromSat c u = Balance (c * 1000) (u * 1000)
+
+instance FromJSON Balance where
+  parseJSON = withObject "Balance" $ \v ->
+    getBalanceFromSat
+      <$> v .: "confirmed"
+      <*> v .: "unconfirmed"
 
 instance ToJSON Address
 
@@ -67,7 +74,7 @@ getBalance (Left address) = do
     Left _ -> pure $ Left (OtherError "GettingScript Hash error")
 
 ------------
--- TODO Below is implementation of getaddrinfo rpc for bitcoind that needs to be moved to network.bitcoin package
+-- TODO Below is the implementation of getaddrinfo rpc for bitcoind that needs to be moved to network.bitcoin package
 ------------
 --
 getScriptHash :: (Env m) => Address -> m (Either Text ScriptHash)
