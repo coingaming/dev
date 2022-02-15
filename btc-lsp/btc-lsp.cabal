@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.5.
 --
 -- see: https://github.com/sol/hpack
 
@@ -129,7 +129,6 @@ library
     , monad-logger
     , network
     , network-bitcoin
-    , network-simple
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
@@ -265,7 +264,6 @@ executable btc-lsp-exe
     , monad-logger
     , network
     , network-bitcoin
-    , network-simple
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
@@ -414,7 +412,6 @@ test-suite btc-lsp-test
     , monad-logger
     , network
     , network-bitcoin
-    , network-simple
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1

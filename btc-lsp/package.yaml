@@ -86,7 +86,6 @@ dependencies:
 - http2-client
 - http2-client-grpc
 - network
-- network-simple
 - http-client
 - http-types
 # other
