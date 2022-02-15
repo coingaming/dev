@@ -18,7 +18,7 @@ import Data.Aeson
   )
 import qualified Data.Binary.Builder as BS
 import qualified Data.ByteString as BS
-import qualified Data.ByteString.Base64.URL as B64
+import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
@@ -26,7 +26,6 @@ import Data.ProtoLens (Message)
 import Data.ProtoLens.Encoding (encodeMessage)
 import Data.ProtoLens.Service.Types (HasMethod, HasMethodImpl (..))
 import Data.Scientific (floatingOrInteger)
-import qualified Data.Text as T
 import GHC.TypeLits (Symbol)
 import Network.GRPC.Client
 import Network.GRPC.Client.Helpers
@@ -106,27 +105,19 @@ runUnary rpc gsEnv env verifySig req = do
           pure . Left $
             "Client ==> missing server header "
               <> inspectPlain sigHeaderName
-        Just (_, b64sig) ->
-          case B64.decode b64sig of
-            Left e ->
-              pure . Left $
-                "signature import from base64 payload "
-                  <> inspectPlain b64sig
-                  <> " failed with error "
-                  <> T.pack e
-            Right sigDer -> do
-              isVerified <-
-                verifySig x sigDer
-              pure $
-                if isVerified
-                  then Right x
-                  else
-                    Left $
-                      "Client ==> server signature verification failed for raw bytes "
-                        <> " from decoded payload "
-                        <> inspectPlain x
-                        <> " with signature "
-                        <> inspectPlain sigDer
+        Just (_, b64sig) -> do
+          let sigDer = B64.decodeLenient b64sig
+          isVerified <- verifySig x sigDer
+          pure $
+            if isVerified
+              then Right x
+              else
+                Left $
+                  "Client ==> server signature verification failed for raw bytes "
+                    <> " from decoded payload "
+                    <> inspectPlain x
+                    <> " with signature "
+                    <> inspectPlain sigDer
     x ->
       --
       -- TODO : replace show with inspectPlain
@@ -172,7 +163,7 @@ makeClient gsEnv env req tlsEnabled doCompress = do
           { _grpcClientConfigCompression = compression,
             _grpcClientConfigHeaders =
               [ ( sigHeaderName,
-                  B64.encodeUnpadded signature
+                  B64.encode signature
                 )
               ]
           }

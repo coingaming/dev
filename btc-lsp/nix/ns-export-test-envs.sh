@@ -118,7 +118,7 @@ export LSP_LOG_VERBOSITY="V3" # V0-V3
 # AlertS
 # EmergencyS
 #
-export LSP_LOG_SEVERITY="InfoS"
+export LSP_LOG_SEVERITY="DebugS"
 export LSP_LIBPQ_CONN_STR="postgresql://postgres@localhost/lsp-test"
 export LSP_ENDPOINT_PORT="3000"
 
@@ -154,6 +154,21 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"yolo_btc-lsp\",
 #   \"port\":443,
+#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
+#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
+#   \"sig_header_name\":\"sig-bin\"
+# }
+# "
+#
+# TODO : remove this temporary mapping, which
+# is workaround to avoid strange data: end of file
+# error,  probably caused by docker-proxy, but only
+# with Swift client (Haskell client works)
+#
+# export LSP_GRPC_CLIENT_ENV="
+# {
+#   \"host\":\"127.0.0.1\",
+#   \"port\":8081,
 #   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
 #   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\"

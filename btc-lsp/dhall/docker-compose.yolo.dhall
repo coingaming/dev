@@ -110,6 +110,7 @@ in  { networks.global.external = True
       , btc-lsp =
         { image = ../build/docker-image-btc-lsp.txt as Text
         , hostname = "btc-lsp"
+        , ports = [ "8081:443/tcp" ]
         , environment =
           { -- General
             LSP_LIBPQ_CONN_STR =
@@ -168,7 +169,7 @@ in  { networks.global.external = True
               ''
               {
                 "port":443,
-                "sig_verify":false,
+                "sig_verify":true,
                 "sig_header_name":"sig-bin",
                 "tls_cert":"${escape ../build/swarm/btc-lsp/cert.pem as Text}",
                 "tls_key":"${escape ../build/swarm/btc-lsp/key.pem as Text}"

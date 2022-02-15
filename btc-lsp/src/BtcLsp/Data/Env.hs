@@ -191,7 +191,8 @@ withEnv rc this = do
                 -- Grpc
                 envGrpcServerEnv =
                   (rawConfigGrpcServerEnv rc)
-                    { gsEnvSigner = run . signT lnd
+                    { gsEnvSigner = run . signT lnd,
+                      gsEnvLogger = run . $(logTM) DebugS . logStr
                     }
               }
   where

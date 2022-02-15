@@ -14,6 +14,7 @@ where
 
 import BtcLsp.Import.Witch
 import Data.Aeson (FromJSON (..), withText)
+import Text.PrettyPrint.GenericPretty (Out)
 import Text.PrettyPrint.GenericPretty.Instance ()
 import Universum
 import qualified Witch
@@ -24,6 +25,13 @@ data GRel
 
 newtype RawRequestBytes
   = RawRequestBytes ByteString
+  deriving stock
+    ( Eq,
+      Ord,
+      Generic
+    )
+
+instance Out RawRequestBytes
 
 newtype SigHeaderName
   = SigHeaderName Text

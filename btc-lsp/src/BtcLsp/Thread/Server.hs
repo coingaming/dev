@@ -23,6 +23,7 @@ import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
+import qualified Universum
 
 apply :: (Env m) => m ()
 apply = do
@@ -59,12 +60,16 @@ handlers run gsEnv body =
   ]
   where
     runHandler ::
-      (ContextMsg req res failure internal) =>
+      ( ContextMsg req res failure internal,
+        Out req,
+        Out res
+      ) =>
       (Entity User -> req -> m res) ->
       Wai.Request ->
       req ->
       IO res
-    runHandler = withMiddleware run gsEnv body
+    runHandler =
+      withMiddleware run gsEnv body
 
 verifySigE ::
   GSEnv ->
@@ -92,7 +97,9 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
 
 withMiddleware ::
   ( ContextMsg req res failure internal,
-    Env m
+    Env m,
+    Out req,
+    Out res
   ) =>
   UnliftIO m ->
   GSEnv ->
@@ -129,10 +136,24 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
       ExceptT $
         User.createVerify pub nonce
     case userE of
-      Right user ->
-        setGrpcCtx =<< handler user req
-      Left e ->
+      Right user -> do
+        res <- setGrpcCtx =<< handler user req
+        $(logTM) DebugS . logStr $ debugMsg res
+        pure res
+      Left e -> do
+        $(logTM) DebugS . logStr $ debugMsg e
         pure $ failResE e
+  where
+    debugMsg :: (Out a) => a -> Text
+    debugMsg x =
+      "Got input "
+        <> inspect body
+        <> " with Wai request "
+        <> Universum.show waiReq
+        <> " and decoded "
+        <> inspect req
+        <> " producing result "
+        <> inspect x
 
 swapFromLn ::
   ( Monad m
