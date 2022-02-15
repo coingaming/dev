@@ -12,6 +12,7 @@ import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.User as User
 import qualified Crypto.Secp256k1 as C
+import qualified Data.ByteString as BS
 import Data.ProtoLens.Field
 import Data.ProtoLens.Message
 import Lens.Micro
@@ -104,7 +105,11 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
           <> inspectPlain pubDer
           <> " signature "
           <> inspectPlain sig
-          <> " and message "
+          <> " message "
+          <> inspectPlain payload
+          <> " of "
+          <> inspectPlain (BS.length payload)
+          <> " bytes and message hash "
           <> inspectPlain (C.getMsg msg)
 
 withMiddleware ::

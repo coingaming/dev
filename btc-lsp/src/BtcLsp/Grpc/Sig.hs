@@ -19,7 +19,7 @@ sigFromReq sigHeaderName waiReq = do
   (_, b64sig) <-
     maybeToRight
       ( FailureGrpc $
-          "missing "
+          "Missing "
             <> sigHeaderNameText
             <> " header"
       )
@@ -29,7 +29,7 @@ sigFromReq sigHeaderName waiReq = do
         B64.decodeLenient b64sig
   maybeToRight
     ( FailureGrpc $
-        "signature "
+        "Signature "
           <> sigHeaderNameText
           <> " import from der payload "
           <> inspectPlain sigDer
