@@ -31,6 +31,7 @@ import Universum
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
+    gsEnvSigVerify :: Bool,
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
@@ -49,6 +50,7 @@ instance FromJSON GSEnv where
       ( \x ->
           GSEnv
             <$> x .: "port"
+            <*> x .: "sig_verify"
             <*> x .: "sig_header_name"
             <*> x .: "tls_cert"
             <*> x .: "tls_key"
@@ -64,7 +66,9 @@ runServer env handlers =
         (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
     )
     (setPort (gsEnvPort env) defaultSettings)
-    (extractBodyBytesMiddleware env $ serverApp handlers)
+    $ if gsEnvSigVerify env
+      then extractBodyBytesMiddleware env $ serverApp handlers
+      else serverApp handlers env (RawRequestBytes mempty)
 
 serverApp :: (GSEnv -> RawRequestBytes -> [ServiceHandler]) -> GSEnv -> RawRequestBytes -> Application
 serverApp handlers env body req rep = do
@@ -123,5 +127,13 @@ extractBodyBytesMiddleware env app req resp = do
     requestBody' mvar =
       modifyMVar
         mvar
-        (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
-    req' b = req {requestBody = requestBody' b}
+        ( \b ->
+            pure $
+              if b == mempty
+                then (mempty, mempty)
+                else (mempty, b)
+        )
+    req' b =
+      req
+        { requestBody = requestBody' b
+        }

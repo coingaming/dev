@@ -1,4 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Thread.Server
@@ -117,8 +118,14 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
               . _Just
               . Proto.maybe'lnPubKey
               . _Just
-      except $
-        verifySigE gsEnv waiReq pub body
+      if gsEnvSigVerify gsEnv
+        then
+          except $
+            verifySigE gsEnv waiReq pub body
+        else
+          $(logTM)
+            ErrorS
+            "WARNING!!! SIGNATURE VERIFICATION DISABLED!!!"
       ExceptT $
         User.createVerify pub nonce
     case userE of

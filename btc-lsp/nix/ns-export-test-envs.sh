@@ -163,6 +163,7 @@ export LSP_GRPC_CLIENT_ENV="
 export LSP_GRPC_SERVER_ENV="
 {
   \"port\":8444,
+  \"sig_verify\":true,
   \"sig_header_name\":\"sig-bin\",
   \"tls_cert\":\"$GRPC_TLS_CERT\",
   \"tls_key\":\"$GRPC_TLS_KEY\"
