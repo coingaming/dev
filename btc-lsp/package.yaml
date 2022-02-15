@@ -60,6 +60,7 @@ dependencies:
 - memory
 - aeson
 - base16-bytestring
+- base64-bytestring >= 1.2.1
 # threads
 - async
 - stm

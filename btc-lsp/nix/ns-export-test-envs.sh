@@ -143,13 +143,13 @@ export LSP_GRPC_CLIENT_ENV="
   \"port\":8444,
   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
-  \"sig_header_name\":\"compact-2xsha256-sig\"
+  \"sig_header_name\":\"sig-bin\"
 }
 "
 export LSP_GRPC_SERVER_ENV="
 {
   \"port\":8444,
-  \"sig_header_name\":\"compact-2xsha256-sig\",
+  \"sig_header_name\":\"sig-bin\",
   \"tls_cert\":\"$GRPC_TLS_CERT\",
   \"tls_key\":\"$GRPC_TLS_KEY\"
 }
