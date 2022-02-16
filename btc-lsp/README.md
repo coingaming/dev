@@ -34,6 +34,7 @@ Every `btc-lsp` gRPC request/response does have `ctx` (context) field in payload
 Also every request/response does have a signature which is:
 
 - Signed with LN identity key (key locator family is 6 and index is 0).
+- Signed over binary request payload in exact gRPC/http2 wire [format](https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md) (1 byte of compression flag + 4 bytes of payload length in big endian format + payload bytes).
 - Single hashed (double_hash parameter is False).
 - Not compact (compact_sig parameter is False).
 - Using DER binary format.
