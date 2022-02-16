@@ -6,6 +6,7 @@ module ServerSpec
 where
 
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
+import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Thread.Server as Server
@@ -28,52 +29,53 @@ spec =
       --
       gsEnv <- getGsEnv
       gcEnv <- getGCEnv
-      res <- runExceptT $ do
-        fundInv <-
-          from . Lnd.paymentRequest
-            <$> withLndT
-              Lnd.addInvoice
-              ( $
-                  Lnd.AddInvoiceRequest
-                    { Lnd.valueMsat = MSat 1000000,
-                      Lnd.memo = Nothing,
-                      Lnd.expiry = Nothing
-                    }
+      forM_ [Compressed, Uncompressed] $ \compressMode -> do
+        res <- runExceptT $ do
+          fundInv <-
+            from . Lnd.paymentRequest
+              <$> withLndT
+                Lnd.addInvoice
+                ( $
+                    Lnd.AddInvoiceRequest
+                      { Lnd.valueMsat = MSat 1000000,
+                        Lnd.memo = Nothing,
+                        Lnd.expiry = Nothing
+                      }
+                )
+          refundAddr <-
+            from
+              <$> withLndT
+                Lnd.newAddress
+                --
+                -- TODO : maybe pass LndEnv as the last argument
+                -- to the methods (not the first like right now)
+                -- to avoid this style of withLndT?
+                --
+                ( $
+                    Lnd.NewAddressRequest
+                      { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                        Lnd.account = Nothing
+                      }
+                )
+          Client.swapIntoLnT
+            gsEnv
+            (gcEnv {gcEnvCompressMode = compressMode})
+            =<< setGrpcCtxT
+              ( defMessage
+                  & SwapIntoLn.fundLnInvoice
+                    .~ from @(LnInvoice 'Fund) fundInv
+                  & SwapIntoLn.refundOnChainAddress
+                    .~ from @(OnChainAddress 'Refund) refundAddr
               )
-        refundAddr <-
-          from
-            <$> withLndT
-              Lnd.newAddress
-              --
-              -- TODO : maybe pass LndEnv as the last argument
-              -- to the methods (not the first like right now)
-              -- to avoid this style of withLndT?
-              --
-              ( $
-                  Lnd.NewAddressRequest
-                    { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-                      Lnd.account = Nothing
-                    }
-              )
-        Client.swapIntoLnT
-          gsEnv
-          gcEnv
-          =<< setGrpcCtxT
-            ( defMessage
-                & SwapIntoLn.fundLnInvoice
-                  .~ from @(LnInvoice 'Fund) fundInv
-                & SwapIntoLn.refundOnChainAddress
-                  .~ from @(OnChainAddress 'Refund) refundAddr
-            )
-      --
-      -- TODO : do exact match!!!
-      --
-      liftIO $
-        res
-          `shouldSatisfy` ( \case
-                              Left {} ->
-                                False
-                              Right msg ->
-                                isJust $
-                                  msg ^. SwapIntoLn.maybe'success
-                          )
+        --
+        -- TODO : do exact match!!!
+        --
+        liftIO $
+          res
+            `shouldSatisfy` ( \case
+                                Left {} ->
+                                  False
+                                Right msg ->
+                                  isJust $
+                                    msg ^. SwapIntoLn.maybe'success
+                            )

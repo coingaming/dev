@@ -6,7 +6,8 @@ module BtcLsp.Grpc.Client.LowLevel
 where
 
 import BtcLsp.Grpc.Data
-import BtcLsp.Grpc.Server.LowLevel (GSEnv (gsEnvSigner))
+import BtcLsp.Grpc.Orphan ()
+import BtcLsp.Grpc.Server.LowLevel (GSEnv (..))
 import BtcLsp.Import.Witch
 import Data.Aeson
   ( FromJSON (..),
@@ -44,9 +45,13 @@ import Universum
 data GCEnv = GCEnv
   { gcEnvHost :: String,
     gcEnvPort :: GCPort,
-    gcEnvSigHeaderName :: SigHeaderName
+    gcEnvSigHeaderName :: SigHeaderName,
+    gcEnvCompressMode :: CompressMode
   }
-  deriving (Eq, Generic)
+  deriving stock
+    ( Eq,
+      Generic
+    )
 
 instance FromJSON GCEnv where
   parseJSON =
@@ -85,14 +90,14 @@ runUnary ::
   ProtoLens.RPC s (m :: Symbol) ->
   GSEnv ->
   GCEnv ->
-  (res -> ByteString -> IO Bool) ->
+  (res -> ByteString -> CompressMode -> IO Bool) ->
   req ->
   IO (Either Text res)
 runUnary rpc gsEnv env verifySig req = do
   res <-
     runClientIO $
       bracket
-        (makeClient gsEnv env req True True)
+        (makeClient gsEnv env req True)
         close
         (\grpc -> rawUnary rpc grpc req)
   --
@@ -107,7 +112,9 @@ runUnary rpc gsEnv env verifySig req = do
               <> inspectPlain sigHeaderName
         Just (_, b64sig) -> do
           let sigDer = B64.decodeLenient b64sig
-          isVerified <- verifySig x sigDer
+          isVerified <-
+            verifySig x sigDer $
+              gcEnvCompressMode env
           pure $
             if isVerified
               then Right x
@@ -129,16 +136,25 @@ runUnary rpc gsEnv env verifySig req = do
   where
     sigHeaderName = CI.mk . from $ gcEnvSigHeaderName env
 
-msgToSignBytes :: (Message msg) => Bool -> msg -> ByteString
-msgToSignBytes doCompress msg = header <> body
+msgToSignBytes ::
+  ( Message msg
+  ) =>
+  CompressMode ->
+  msg ->
+  ByteString
+msgToSignBytes compressMode msg = header <> body
   where
     rawBody = encodeMessage msg
     body =
-      if doCompress
-        then G._compressionFunction G.gzip rawBody
-        else rawBody
+      case compressMode of
+        Compressed -> G._compressionFunction G.gzip rawBody
+        Uncompressed -> rawBody
     header =
-      BS.pack [1]
+      BS.pack
+        [ case compressMode of
+            Compressed -> 1
+            Uncompressed -> 0
+        ]
         <> ( BL.toStrict
                . BS.toLazyByteString
                . BS.putWord32be
@@ -152,9 +168,8 @@ makeClient ::
   GCEnv ->
   req ->
   UseTlsOrNot ->
-  Bool ->
   ClientIO GrpcClient
-makeClient gsEnv env req tlsEnabled doCompress = do
+makeClient gsEnv env req tlsEnabled = do
   mSignature <- liftIO doSignature
   case mSignature of
     Just signature ->
@@ -171,5 +186,9 @@ makeClient gsEnv env req tlsEnabled doCompress = do
   where
     signer = gsEnvSigner gsEnv
     sigHeaderName = from $ gcEnvSigHeaderName env
-    doSignature = signer $ msgToSignBytes doCompress req
-    compression = if doCompress then gzip else uncompressed
+    compressMode = gcEnvCompressMode env
+    doSignature = signer $ msgToSignBytes compressMode req
+    compression =
+      case compressMode of
+        Compressed -> gzip
+        Uncompressed -> uncompressed

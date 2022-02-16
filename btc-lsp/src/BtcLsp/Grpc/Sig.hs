@@ -5,6 +5,7 @@ module BtcLsp.Grpc.Sig
 where
 
 import BtcLsp.Data.Type
+import BtcLsp.Grpc.Data
 import BtcLsp.Import.External
 import qualified Crypto.Hash as CH
 import qualified Crypto.Secp256k1 as C

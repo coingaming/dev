@@ -7,7 +7,9 @@ module BtcLsp.Thread.Server
   )
 where
 
+import BtcLsp.Grpc.Data
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
+import BtcLsp.Grpc.Server.LowLevel
 import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.User as User

@@ -7,6 +7,8 @@ module BtcLsp.Grpc.Client.HighLevel
   )
 where
 
+import BtcLsp.Grpc.Client.LowLevel
+import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import
 import qualified Data.Binary.Builder as BS
 import qualified Data.ByteString as BS
@@ -35,7 +37,10 @@ swapIntoLn gsEnv env req = withRunInIO $ \run ->
       (RPC :: RPC Service "swapIntoLn")
       gsEnv
       env
-      (\res sig -> run $ verifySig res sig)
+      ( \res sig compressMode ->
+          run $
+            verifySig res sig compressMode
+      )
       req
 
 swapIntoLnT ::
@@ -57,20 +62,28 @@ verifySig ::
   ) =>
   msg ->
   ByteString ->
+  CompressMode ->
   m Bool
-verifySig msg sig = do
-  let msgCompressed =
-        G._compressionFunction G.gzip $
-          encodeMessage msg
+verifySig msg sig compressMode = do
+  let msgEncoded =
+        encodeMessage msg
+  let msgChunk =
+        case compressMode of
+          Compressed -> G._compressionFunction G.gzip msgEncoded
+          Uncompressed -> msgEncoded
   let msgWire =
-        BS.pack [1]
+        BS.pack
+          [ case compressMode of
+              Compressed -> 1
+              Uncompressed -> 0
+          ]
           <> ( BL.toStrict
                  . BS.toLazyByteString
                  . BS.putWord32be
                  . fromIntegral
-                 $ BS.length msgCompressed
+                 $ BS.length msgChunk
              )
-          <> msgCompressed
+          <> msgChunk
   let pub =
         msg
           ^. field @"ctx"

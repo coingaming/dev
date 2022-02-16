@@ -11,6 +11,8 @@ module BtcLsp.Data.Env
 where
 
 import BtcLsp.Data.Type
+import BtcLsp.Grpc.Client.LowLevel
+import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import Control.Monad.Logger (runNoLoggingT)
