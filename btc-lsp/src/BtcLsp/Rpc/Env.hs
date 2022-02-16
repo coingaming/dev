@@ -1,26 +1,44 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module BtcLsp.Rpc.Env
-  ( RpcEnv(..)
+  ( ElectrsEnv (..),
+    BitcoindEnv (..),
   )
 where
 
 import BtcLsp.Import.External
 import Data.Aeson (FromJSON (..), withObject, (.:))
 
-data RpcEnv = RpcEnv
-  { rpcEnvPort :: Text,
-    rpcEnvHost :: Text
+data ElectrsEnv = ElectrsEnv
+  { electrsEnvPort :: Text,
+    electrsEnvHost :: Text
   }
   deriving (Generic)
 
-instance FromJSON RpcEnv where
+instance FromJSON ElectrsEnv where
   parseJSON =
     withObject
-      "RpcEnv"
+      "ElectrsEnv"
       ( \x ->
-          RpcEnv
+          ElectrsEnv
             <$> x .: "port"
             <*> x .: "host"
       )
 
+data BitcoindEnv = BitcoindEnv
+  { bitcoindEnvHost :: Text,
+    bitcoindEnvUsername :: Text,
+    bitcoindEnvPassword :: Text
+  }
+  deriving (Generic)
+
+instance FromJSON BitcoindEnv where
+  parseJSON =
+    withObject
+      "BitcoindEnv"
+      ( \x ->
+          BitcoindEnv
+            <$> x .: "host"
+            <*> x .: "username"
+            <*> x .: "password"
+      )

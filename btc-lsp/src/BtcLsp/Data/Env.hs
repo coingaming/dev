@@ -58,7 +58,9 @@ data Env = Env
     -- | Grpc
     envGrpcServerEnv :: GSEnv,
     -- | Elecrts Rpc
-    envElectrsRpcEnc :: RpcEnv
+    envElectrsRpcEnv :: ElectrsEnv,
+    -- | Bitcoind Rpc
+    envBitcoindRpcEnv :: BitcoindEnv
   }
 
 data RawConfig = RawConfig
@@ -78,7 +80,10 @@ data RawConfig = RawConfig
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
-    rawConfigElectrsRpcEnv :: RpcEnv
+    rawConfigElectrsRpcEnv :: ElectrsEnv,
+    -- | Bitcoind Rpc
+    rawConfigBitcoindRpcEnv :: BitcoindEnv
+
   }
 
 -- | Here we enable normal JSON parsing
@@ -137,6 +142,8 @@ readRawConfig =
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
       -- Electrs Rpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts
+      -- Bitcoind Rpc
+      <*> E.var (parseFromJSON <=< E.nonempty) "LSP_BITCOIND_ENV" opts
 
 readGCEnv :: IO GCEnv
 readGCEnv =
@@ -200,7 +207,8 @@ withEnv rc this = do
                   (rawConfigGrpcServerEnv rc)
                     { gsEnvSigner = run . signT lnd
                     },
-                envElectrsRpcEnc = rawConfigElectrsRpcEnv rc
+                envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
+                envBitcoindRpcEnv = rawConfigBitcoindRpcEnv rc
               }
   where
     rmLogEnv :: LogEnv -> IO ()

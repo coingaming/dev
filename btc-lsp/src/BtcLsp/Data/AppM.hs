@@ -45,8 +45,10 @@ instance (MonadIO m) => KatipContext (AppM m) where
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
     asks Env.envGrpcServerEnv
-  getRpcEnv =
-    asks Env.envElectrsRpcEnc
+  getElectrsEnv =
+    asks Env.envElectrsRpcEnv
+  getBtcEnv =
+    asks Env.envBitcoindRpcEnv
   getLspPubKeyVar =
     asks Env.envLndPubKey
   withLnd method args = do

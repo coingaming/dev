@@ -8,7 +8,6 @@ where
 
 import BtcLsp.Import
 import BtcLsp.Rpc.Env
-import Data.Text
 import Network.Socket
 import Network.Socket.ByteString (recv, sendAll)
 import qualified UnliftIO.Exception as E
@@ -23,9 +22,9 @@ instance Out RpcError
 
 send :: Env m => ByteString -> m (Either RpcError ByteString)
 send req = do
-  env <- getRpcEnv
+  env <- getElectrsEnv
   liftIO $
-    runTCPClient (unpack $ rpcEnvHost env) (unpack $ rpcEnvPort env) $ \s -> do
+    runTCPClient (unpack $ electrsEnvHost env) (unpack $ electrsEnvPort env) $ \s -> do
       sendAll s $ req <> "\n"
       Right <$> recv s 1024
 

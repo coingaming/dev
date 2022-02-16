@@ -59,7 +59,7 @@ import Data.Pool as X (Pool, destroyAllResources)
 import Data.ProtoLens as X (defMessage)
 import Data.ProtoLens.Encoding as X (decodeMessage, encodeMessage)
 import Data.Ratio as X (denominator, numerator, (%))
-import Data.Text as X (pack)
+import Data.Text as X (pack, unpack)
 import Data.Time.Clock as X
   ( DiffTime,
     UTCTime,

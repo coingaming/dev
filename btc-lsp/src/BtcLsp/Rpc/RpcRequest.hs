@@ -27,6 +27,3 @@ data Method
 instance ToJSON Method where
   toJSON GetBalance = String "blockchain.scripthash.get_balance"
   toJSON Version = String "server.version"
-
-instance IsString Method where
-  fromString _ = GetBalance

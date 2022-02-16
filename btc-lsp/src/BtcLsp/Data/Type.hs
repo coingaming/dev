@@ -304,6 +304,9 @@ instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
 
 instance From (OnChainAddress 'Fund) Lnd.NewAddressResponse
 
+instance FromJSON (OnChainAddress mrel)
+instance ToJSON (OnChainAddress mrel)
+
 data SwapStatus
   = -- | Waiting on-chain funding trx with
     -- given amt from user with

@@ -81,8 +81,10 @@ runTestApp env app =
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
     asks $ envGrpcServerEnv . testEnvLsp
-  getRpcEnv =
-    asks $ envElectrsRpcEnc . testEnvLsp
+  getElectrsEnv =
+    asks $ envElectrsRpcEnv . testEnvLsp
+  getBtcEnv =
+    asks $ envBitcoindRpcEnv . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvLsp
   withLnd method args = do

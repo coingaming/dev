@@ -25,7 +25,8 @@ class
   Env m
   where
   getGsEnv :: m GSEnv
-  getRpcEnv :: m RpcEnv
+  getElectrsEnv :: m ElectrsEnv
+  getBtcEnv :: m BitcoindEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLspPubKey :: m Lnd.NodePubKey
   getLspPubKey = do

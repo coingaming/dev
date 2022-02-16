@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module RpcSpec
   ( spec,
   )
@@ -39,7 +41,7 @@ spec = do
 
         --Sleep ten seconds to electrs synchronize with blockchain
         sleep $ MicroSecondsDelay 10000000
-        elecBal <- Rpc.getBalance (Left $ Rpc.Address addr)
+        elecBal <- Rpc.getBalance (Left $ OnChainAddress addr)
         liftIO $ elecBal `shouldSatisfy` isRight
         case elecBal of
           Right bal -> liftIO $ confirmed bal `shouldSatisfy` (> 0)

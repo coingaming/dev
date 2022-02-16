@@ -161,3 +161,11 @@ export LSP_ELECTRS_ENV="
   \"port\":\"60401\"
 }
 "
+
+export LSP_BITCOIND_ENV="
+{
+  \"host\":\"http://localhost:18443\",
+  \"username\":\"developer\",
+  \"password\":\"developer\"
+}
+"
