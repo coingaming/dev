@@ -774,3 +774,22 @@ estimateSmartFee client target mode =
     where
     parse = either (throw . BitcoinResultTypeError . BSL8.pack) pure . parseEither parseResp
     parseResp = withObject "estimatesmartfee response" (.: "feerate")
+
+-- | Return information about the given bitcoin address.
+getAddrInfo :: Client -> Address -> IO AddrInfo
+getAddrInfo client addr = callApi client "getaddrinfo" [ tj addr ]
+
+-- | Information on a given address.
+data AddrInfo = AddrInfo { -- | The address in question.
+                                 address :: Address
+                               -- | The address' balance.
+                               , scriptPubKey  :: ScriptPubKey
+                               }
+    deriving ( Show, Read, Eq, Ord )
+
+instance FromJSON AddrInfo where
+    parseJSON (Object o) =
+      AddrInfo
+        <$> o .:  "address"
+        <*> o .:  "scriptPubKey"
+    parseJSON _ = mzero
