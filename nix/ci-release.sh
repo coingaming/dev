@@ -7,7 +7,7 @@ BTC_LSP_NIX_DIR="$THIS_DIR/../btc-lsp/nix"
 BTC_LSP_BUILD_DIR="$THIS_DIR/../btc-lsp/build"
 
 echo "btc-lsp ==> Binaries build"
-sh "$BTC_LSP_NIX_DIR/hm-release.sh"
+sh "$BTC_LSP_NIX_DIR/hm-release.sh" --github
 
 echo "btc-lsp ==> Chown"
 sudo chown -R $USER:$USER "$BTC_LSP_BUILD_DIR"
@@ -20,7 +20,7 @@ docker load -q -i \
   > "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.txt"
 
 echo "btc-lsp ==> Dhall compilation"
-sh "$BTC_LSP_NIX_DIR/hm-shell-docker.sh" --mini \
+sh "$BTC_LSP_NIX_DIR/hm-shell-docker.sh" --mini --github \
    "--run './nix/ns-dhall-compile.sh'"
 
 echo "btc-lsp ==> Chown"

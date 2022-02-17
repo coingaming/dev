@@ -11,6 +11,7 @@ trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDS
 "
 
 SHELL_KIND=maxishell
+CHOWN_CMD="true"
 if [ -z "$*" ]; then
   true
 else
@@ -18,12 +19,16 @@ else
   do
     case $arg in
       -m|--mini|--minishell)
-      SHELL_KIND=minishell
-      shift
-      ;;
+        SHELL_KIND=minishell
+        shift
+        ;;
+      -g|--github|--github-actions)
+        CHOWN_CMD="chown -R $USER:$USER ."
+        shift
+        ;;
       *)
-      break
-      ;;
+        break
+        ;;
     esac
   done
 fi
@@ -39,6 +44,7 @@ if [ "$SHELL_KIND" = "maxishell" ]; then
     -w "/app" nixos/nix:2.3.12 \
     sh -c "
     adduser $USER -D &&
+    $CHOWN_CMD &&
     echo \"$NIX_CONF\" >> /etc/nix/nix.conf &&
     (nix-daemon &) &&
     sleep 1 &&
@@ -56,6 +62,7 @@ else
     -w "/app" nixos/nix:2.3.12 \
     sh -c "
     adduser $USER -D &&
+    $CHOWN_CMD &&
     echo \"$NIX_CONF\" >> /etc/nix/nix.conf &&
     (nix-daemon &) &&
     sleep 1 &&

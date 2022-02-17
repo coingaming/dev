@@ -47,10 +47,17 @@ case $SETUP_MODE in
     ;;
   --prebuilt)
     echo "==> Using prebuilt"
-    exit 1
-    # cd "$BUILD_DIR"
-    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
-    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-compose.yolo.yml"
+    (
+      cd "$BUILD_DIR"
+      wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
+      wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-compose.yolo.yml"
+    )
+    docker load -q -i \
+      "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
+      | awk '{print $NF}' \
+      | tr -d '\n' \
+      > "$BUILD_DIR/docker-image-btc-lsp.txt"
+    sh -c "$THIS_DIR/ds-up.sh"
     ;;
   --keep)
     echo "==> Keeping version"
