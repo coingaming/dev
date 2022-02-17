@@ -48,7 +48,7 @@ jobs:
         asset_path: ./btc-lsp/build/docker-image-btc-lsp.tar.gz
         asset_name: docker-image-btc-lsp.tar.gz
         asset_content_type: application/gzip
-    - name: Upload swarm file
+    - name: Upload docker image version
       if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
