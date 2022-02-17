@@ -40,7 +40,7 @@ if [ "$SHELL_KIND" = "maxishell" ]; then
     adduser $USER -D &&
     echo \"$NIX_CONF\" >> /etc/nix/nix.conf &&
     (nix-daemon &) &&
-    sleep 5 &&
+    sleep 1 &&
     su $USER -c \"NIX_REMOTE=daemon nix-shell ./shell.nix \
         --pure \
         --arg withHaskellIde true \
@@ -57,7 +57,7 @@ else
     adduser $USER -D &&
     echo \"$NIX_CONF\" >> /etc/nix/nix.conf &&
     (nix-daemon &) &&
-    sleep 5 &&
+    sleep 1 &&
     su $USER -c \"NIX_REMOTE=daemon nix-shell ./nix/minishell.nix \
         --pure \
         $NIX_EXTRA_ARGS\"

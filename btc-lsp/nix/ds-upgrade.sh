@@ -49,8 +49,8 @@ case $SETUP_MODE in
     echo "==> Using prebuilt"
     exit 1
     # cd "$BUILD_DIR"
-    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-image-reckless-trading-bot.tar.gz"
-    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-compose.21it.yml"
+    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
+    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-compose.yolo.yml"
     ;;
   --keep)
     echo "==> Keeping version"
