@@ -55,6 +55,7 @@ in  { networks.global.external = True
       , lnd-lsp =
         { image = "lightninglabs/lnd:v0.13.1-beta.rc2"
         , hostname = "lnd-lsp"
+        , ports = [ "9735:9735/tcp" ]
         , command =
           [ "-c"
           , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
@@ -181,8 +182,8 @@ in  { networks.global.external = True
         }
       , docker-proxy =
         { hostname = "docker-proxy"
-        , image = "heathmont/docker-proxy:v0.1.0-d5f0f38"
-        , ports = [ "80:8080/tcp", "443:8081/tcp" ]
+        , image = "heathmont/docker-proxy:v0.1.0-fdb6beb"
+        , ports = [ "80:80/tcp", "443:443/tcp" ]
         , networks.global = mempty
         }
       }
