@@ -29,9 +29,10 @@ else
 fi
 NIX_EXTRA_ARGS="$@"
 
-
+USE_TTY=""
+test -t 1 && USE_TTY="-t"
 if [ "$SHELL_KIND" = "maxishell" ]; then
-  docker run -it --rm \
+  docker run -i $USE_TTY --rm \
     -v "$THIS_DIR/..:/app" \
     -v "nix-$USER:/nix" \
     -v "nix-home-$USER:/home/$USER" \
@@ -48,7 +49,7 @@ if [ "$SHELL_KIND" = "maxishell" ]; then
         $NIX_EXTRA_ARGS\"
     "
 else
-  docker run -it --rm \
+  docker run -i $USE_TTY --rm \
     -v "$THIS_DIR/..:/app" \
     -v "nix-$USER:/nix" \
     -v "nix-home-$USER:/home/$USER" \
