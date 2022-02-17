@@ -12,6 +12,8 @@ where
 
 import BtcLsp.Data.Type
 import BtcLsp.Rpc.Env
+import BtcLsp.Grpc.Client.LowLevel
+import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import Control.Monad.Logger (runNoLoggingT)
@@ -205,7 +207,8 @@ withEnv rc this = do
                 -- Grpc
                 envGrpcServerEnv =
                   (rawConfigGrpcServerEnv rc)
-                    { gsEnvSigner = run . signT lnd
+                    { gsEnvSigner = run . signT lnd,
+                      gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
                 envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
                 envBitcoindRpcEnv = rawConfigBitcoindRpcEnv rc

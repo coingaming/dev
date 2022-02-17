@@ -21,6 +21,7 @@ module TestAppM
 where
 
 import BtcLsp.Data.Env as Env
+import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.LnChan as LnChan (getByChannelPoint)

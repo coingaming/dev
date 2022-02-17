@@ -8,6 +8,7 @@ where
 import BtcLsp.Class.Storage
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Orphan ()
+import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import BtcLsp.Rpc.Env
 import Data.ProtoLens.Field
