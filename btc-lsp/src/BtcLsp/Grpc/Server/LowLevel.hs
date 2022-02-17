@@ -14,7 +14,7 @@ import BtcLsp.Grpc.Data
 import BtcLsp.Import.Witch
 import Control.Concurrent (modifyMVar)
 import Data.Aeson (FromJSON (..), withObject, (.:))
-import qualified Data.ByteString.Base64.URL as B64
+import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.CaseInsensitive as CI
 import Data.Coerce (coerce)
@@ -27,10 +27,12 @@ import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
 import Network.Wai.Internal (Request (..))
+import Text.PrettyPrint.GenericPretty.Import (inspect)
 import Universum
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
+    gsEnvSigVerify :: Bool,
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
@@ -49,6 +51,7 @@ instance FromJSON GSEnv where
       ( \x ->
           GSEnv
             <$> x .: "port"
+            <*> x .: "sig_verify"
             <*> x .: "sig_header_name"
             <*> x .: "tls_cert"
             <*> x .: "tls_key"
@@ -56,7 +59,10 @@ instance FromJSON GSEnv where
             <*> pure (const $ pure Nothing)
       )
 
-runServer :: GSEnv -> (GSEnv -> RawRequestBytes -> [ServiceHandler]) -> IO ()
+runServer ::
+  GSEnv ->
+  (GSEnv -> RawRequestBytes -> [ServiceHandler]) ->
+  IO ()
 runServer env handlers =
   runTLS
     ( tlsSettingsMemory
@@ -64,13 +70,16 @@ runServer env handlers =
         (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
     )
     (setPort (gsEnvPort env) defaultSettings)
-    (extractBodyBytesMiddleware env $ serverApp handlers)
+    $ if gsEnvSigVerify env
+      then extractBodyBytesMiddleware env $ serverApp handlers
+      else serverApp handlers env (RawRequestBytes mempty)
 
-serverApp :: (GSEnv -> RawRequestBytes -> [ServiceHandler]) -> GSEnv -> RawRequestBytes -> Application
+serverApp ::
+  (GSEnv -> RawRequestBytes -> [ServiceHandler]) ->
+  GSEnv ->
+  RawRequestBytes ->
+  Application
 serverApp handlers env body req rep = do
-  --
-  -- TODO : remove sig var!!!!!!
-  --
   let app = grpcApp [gzip] $ handlers env body
   app req middleware
   where
@@ -101,7 +110,7 @@ serverApp handlers env body req rep = do
             Just sig ->
               Trailers $
                 ( CI.mk sigHeaderName,
-                  B64.encodeUnpadded sig
+                  B64.encode sig
                 ) :
                 ss
         NextTrailersMaker {} ->
@@ -114,14 +123,28 @@ serverApp handlers env body req rep = do
         . NextTrailersMaker
         $ trailersMaker (acc <> bs) oldMaker
 
-extractBodyBytesMiddleware :: GSEnv -> (GSEnv -> RawRequestBytes -> Application) -> Application
+extractBodyBytesMiddleware ::
+  GSEnv ->
+  (GSEnv -> RawRequestBytes -> Application) ->
+  Application
 extractBodyBytesMiddleware env app req resp = do
   body <- BSL.toStrict <$> strictRequestBody req
+  gsEnvLogger env $
+    "Server ==> extracted raw request body"
+      <> inspect body
   body' <- newMVar body
   app env (RawRequestBytes body) (req' body') resp
   where
     requestBody' mvar =
       modifyMVar
         mvar
-        (\b -> pure $ if b == mempty then (mempty, mempty) else (mempty, b))
-    req' b = req {requestBody = requestBody' b}
+        ( \b ->
+            pure $
+              if b == mempty
+                then (mempty, mempty)
+                else (mempty, b)
+        )
+    req' b =
+      req
+        { requestBody = requestBody' b
+        }

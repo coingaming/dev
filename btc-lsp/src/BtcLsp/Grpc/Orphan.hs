@@ -103,3 +103,9 @@ instance From Proto.FundMoney MSat where
 
 instance From MSat Proto.FundMoney where
   from = intoProto
+
+deriving stock instance Eq CompressMode
+
+deriving stock instance Generic CompressMode
+
+instance FromJSON CompressMode

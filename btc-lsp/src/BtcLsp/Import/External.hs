@@ -3,9 +3,6 @@ module BtcLsp.Import.External
   )
 where
 
-import BtcLsp.Grpc.Client.LowLevel as X
-import BtcLsp.Grpc.Data as X
-import BtcLsp.Grpc.Server.LowLevel as X
 import BtcLsp.Import.Witch as X
 import Chronos as X (Timespan (..), stopwatch)
 import Control.Concurrent.Async as X
@@ -115,6 +112,7 @@ import LndClient.Util as X
     spawnLink,
     withSpawnLink,
   )
+import Network.GRPC.Client as X (CompressMode (..))
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X
