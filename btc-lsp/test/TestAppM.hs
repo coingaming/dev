@@ -90,6 +90,9 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
+  withElectrs method args = do
+    env <- asks $ envElectrsRpcEnv . testEnvLsp
+    first FailureElectrs <$> args (method env)
 
 instance (MonadIO m) => Katip (TestAppM owner m) where
   getLogEnv =

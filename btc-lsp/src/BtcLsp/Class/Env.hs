@@ -86,3 +86,13 @@ class
     ExceptT Failure m b
   withLndT method =
     ExceptT . withLnd method
+  withElectrs ::
+    (ElectrsEnv -> a) ->
+    (a -> m (Either RpcError b)) ->
+    m (Either Failure b)
+  withElectrsT ::
+    (ElectrsEnv -> a) ->
+    (a -> m (Either RpcError b)) ->
+    ExceptT Failure m b
+  withElectrsT method =
+    ExceptT . withElectrs method

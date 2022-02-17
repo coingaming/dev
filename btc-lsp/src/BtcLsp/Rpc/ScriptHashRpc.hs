@@ -40,8 +40,8 @@ instance FromJSON Balance where
 
 instance ToJSON ScriptHash
 
-callRpc :: (Env m, ToJSON req, FromJSON resp) => Method -> req -> m (Either RpcError resp)
-callRpc m r = do
+callRpc :: (Env m, ToJSON req, FromJSON resp) => Method -> req -> ElectrsEnv -> m (Either RpcError resp)
+callRpc m r env = do
   let request =
         RpcRequest
           { Req.id = 0,
@@ -49,7 +49,7 @@ callRpc m r = do
             Req.method = m,
             Req.params = r
           }
-  msgReply <- Client.send $ lazyEncode request
+  msgReply <- Client.send (lazyEncode request) env
   pure $ join $ second (second result . lazyDecode) msgReply
   where
     lazyDecode :: FromJSON resp => ByteString -> Either RpcError resp
@@ -57,15 +57,15 @@ callRpc m r = do
     lazyEncode :: ToJSON req => RpcRequest req -> ByteString
     lazyEncode = BS.toStrict . encode
 
-version :: Env m => m (Either RpcError [Text])
-version = callRpc Version ["" :: Text, "1.4" :: Text]
+version :: Env m => ElectrsEnv -> () -> m (Either RpcError [Text])
+version env () = callRpc Version ["" :: Text, "1.4" :: Text] env
 
-getBalance :: Env m => Either (OnChainAddress a) ScriptHash -> m (Either RpcError Balance)
-getBalance (Right scriptHash) = callRpc GetBalance [scriptHash]
-getBalance (Left address) = do
+getBalance :: Env m => ElectrsEnv -> Either (OnChainAddress a) ScriptHash -> m (Either RpcError Balance)
+getBalance env (Right scriptHash) = callRpc GetBalance [scriptHash] env
+getBalance env (Left address) = do
   scrHash <- getScriptHash address
   case scrHash of
-    Right sh -> getBalance $ Right sh
+    Right sh -> getBalance env (Right sh)
     Left _ -> pure $ Left (OtherError "GettingScript Hash error")
 
 ------------

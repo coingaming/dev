@@ -7,6 +7,7 @@ where
 
 import BtcLsp.Import
 import BtcLsp.Rpc.ScriptHashRpc as Rpc
+import LndClient.Data.NewAddress (NewAddressResponse (NewAddressResponse))
 import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (getBtcClient)
 import qualified LndClient.RPC.Katip as Lnd
@@ -14,12 +15,11 @@ import Network.Bitcoin.Mining (generateToAddress)
 import Test.Hspec
 import TestOrphan ()
 import TestWithLndLsp
-import LndClient.Data.NewAddress (NewAddressResponse(NewAddressResponse))
 
 spec :: Spec
 spec = do
   itEnv "Version" $ do
-    ver <- Rpc.version
+    ver <- withElectrs Rpc.version ($ ())
     liftIO $ ver `shouldSatisfy` isRight
   itEnv "Get Balance" $ do
     client <- getBtcClient LndLsp
@@ -41,9 +41,8 @@ spec = do
 
         --Sleep ten seconds to electrs synchronize with blockchain
         sleep $ MicroSecondsDelay 10000000
-        elecBal <- Rpc.getBalance (Left $ OnChainAddress addr)
+        elecBal <- withElectrs Rpc.getBalance ($ Left $ OnChainAddress addr)
         liftIO $ elecBal `shouldSatisfy` isRight
         case elecBal of
           Right bal -> liftIO $ confirmed bal `shouldSatisfy` (> 0)
           Left _ -> error "Error getting balance"
-

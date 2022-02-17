@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module BtcLsp.Rpc.Client
-  ( RpcError (..),
-    send,
+  ( send,
   )
 where
 
@@ -12,17 +11,8 @@ import Network.Socket
 import Network.Socket.ByteString (recv, sendAll)
 import qualified UnliftIO.Exception as E
 
-data RpcError
-  = RpcNoAddress
-  | RpcJsonDecodeError
-  | OtherError Text
-  deriving (Eq, Generic, Show)
-
-instance Out RpcError
-
-send :: Env m => ByteString -> m (Either RpcError ByteString)
-send req = do
-  env <- getElectrsEnv
+send :: Env m => ByteString -> ElectrsEnv -> m (Either RpcError ByteString)
+send req env = do
   liftIO $
     runTCPClient (unpack $ electrsEnvHost env) (unpack $ electrsEnvPort env) $ \s -> do
       sendAll s $ req <> "\n"
