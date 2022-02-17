@@ -19,7 +19,7 @@ jobs:
           sh -c "tar -xvzf ./nix.tar.gz -C /" \
         || true
     - name: Release all
-      run: ./nix/ci-release.sh || true
+      run: ./nix/ci-release.sh
     - name: Save cache
       run: |
         docker run --rm \
@@ -55,6 +55,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./btc-lsp/build/docker-compose.yolo.yml
-        asset_name: docker-compose.yolo.yml
-        asset_content_type: application/yaml
+        asset_path: ./btc-lsp/build/docker-image-btc-lsp.txt
+        asset_name: docker-image-btc-lsp.txt
+        asset_content_type: text/plain

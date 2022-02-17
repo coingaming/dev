@@ -19,16 +19,11 @@ docker load -q -i \
   | tr -d '\n' \
   > "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.txt"
 
-echo "btc-lsp ==> Dhall compilation"
-sh "$BTC_LSP_NIX_DIR/hm-shell-docker.sh" --mini --github \
-   "--run './nix/ns-dhall-compile.sh'"
-
 echo "btc-lsp ==> Chown"
 sudo chown -R $USER:$USER "$BTC_LSP_BUILD_DIR"
 
 echo "btc-lsp ==> DEBUG ls "
 ls -la "$BTC_LSP_BUILD_DIR"
+
 echo "btc-lsp ==> DEBUG image name"
 cat "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.txt"
-echo "btc-lsp ==> DEBUG swarm file"
-cat "$BTC_LSP_BUILD_DIR/docker-compose.yolo.yml"
