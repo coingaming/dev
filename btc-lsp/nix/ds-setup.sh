@@ -65,6 +65,8 @@ case $SETUP_MODE in
     (
       echo "==> Using prebuilt"
       cd "$BUILD_DIR"
+      rm -rf docker-image-btc-lsp.tar.gz
+      rm -rf docker-image-btc-lsp.txt
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
     )
     ;;
