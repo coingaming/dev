@@ -4,6 +4,34 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
+SETUP_MODE="--source"
+RESET_SWARM="false"
+GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
+
+if [ -z "$*" ]; then
+  echo "==> using defaults"
+else
+  for arg in "$@"; do
+    case $arg in
+      --source)
+        SETUP_MODE="$arg"
+        shift
+        ;;
+      --prebuilt)
+        SETUP_MODE="$arg"
+        shift
+        ;;
+      --reset-swarm)
+        RESET_SWARM="true"
+        shift
+        ;;
+      *)
+        echo "==> unrecognized arg $arg"
+        exit 1
+        ;;
+    esac
+  done
+fi
 
 mkdir -p "$BUILD_DIR"
 
@@ -12,7 +40,7 @@ sh "$THIS_DIR/ds-down.sh" || true
 rm -rf "$BUILD_DIR/swarm"
 
 echo "==> Docker swarm network setup"
-if [ "$1" = "--reset-swarm" ]; then
+if [ "$RESET_SWARM" = "true" ]; then
   echo "==> DOING SWARM RESET"
   docker swarm leave --force || true
   docker swarm init || true
@@ -28,8 +56,27 @@ echo "==> Gen keys"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-gen-keys.sh'"
 
-echo "==> Docker image build"
-sh "$THIS_DIR/hm-release.sh"
+case $SETUP_MODE in
+  --source)
+    echo "==> Building from source"
+    sh "$THIS_DIR/hm-release.sh"
+    ;;
+  --prebuilt)
+    (
+      echo "==> Using prebuilt"
+      cd "$BUILD_DIR"
+      rm -rf docker-image-btc-lsp.tar.gz
+      rm -rf docker-image-btc-lsp.txt
+      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
+    )
+    ;;
+  *)
+    echo "==> Unrecognized SETUP_MODE $SETUP_MODE"
+    exit 1
+    ;;
+esac
+
+echo "==> Loading docker image"
 docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | awk '{print $NF}' \
   | tr -d '\n' \

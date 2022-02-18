@@ -1,0 +1,60 @@
+name: release
+on: [push]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v2
+      with:
+        key: ${{ runner.os }}-nix-v0
+        path: ./nix.tar.gz
+    - name: Restore cache
+      run: |
+        docker run --rm \
+          -v nix-$USER:/nix \
+          -v $(pwd):/app \
+          -w /app nixos/nix:2.3.12 \
+          sh -c "tar -xvzf ./nix.tar.gz -C /" \
+        || true
+    - name: Release all
+      run: ./nix/ci-release.sh
+    - name: Save cache
+      run: |
+        docker run --rm \
+          -v nix-$USER:/nix \
+          -v $(pwd):/app \
+          -w /app nixos/nix:2.3.12 \
+          sh -c "tar -czvf ./nix.tar.gz /nix/*"
+    - name: Create github release
+      if: github.ref_type == 'tag'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+    - name: Upload docker image
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./btc-lsp/build/docker-image-btc-lsp.tar.gz
+        asset_name: docker-image-btc-lsp.tar.gz
+        asset_content_type: application/gzip
+    - name: Upload docker image version
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./btc-lsp/build/docker-image-btc-lsp.txt
+        asset_name: docker-image-btc-lsp.txt
+        asset_content_type: text/plain
