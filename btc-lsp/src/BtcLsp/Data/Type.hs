@@ -24,6 +24,7 @@ module BtcLsp.Data.Type
     Timing (..),
     SwapStatus (..),
     Failure (..),
+    RpcError (..),
   )
 where
 
@@ -304,6 +305,10 @@ instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
 
 instance From (OnChainAddress 'Fund) Lnd.NewAddressResponse
 
+instance FromJSON (OnChainAddress mrel)
+
+instance ToJSON (OnChainAddress mrel)
+
 data SwapStatus
   = -- | Waiting on-chain funding trx with
     -- given amt from user with
@@ -363,6 +368,7 @@ data Failure
     -- failure proto messages instead.
     --
     FailureGrpc Text
+  | FailureElectrs RpcError
   deriving stock
     ( Eq,
       Show,
@@ -370,6 +376,14 @@ data Failure
     )
 
 instance Out Failure
+
+data RpcError
+  = RpcNoAddress
+  | RpcJsonDecodeError
+  | OtherError Text
+  deriving (Eq, Generic, Show)
+
+instance Out RpcError
 
 Psql.derivePersistField "LnInvoiceStatus"
 

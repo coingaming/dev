@@ -60,6 +60,7 @@ dependencies:
 - memory
 - aeson
 - base16-bytestring
+- hex-text
 - base64-bytestring >= 1.2.1
 # threads
 - async
@@ -70,6 +71,7 @@ dependencies:
 # crypto
 - uuid
 - network-bitcoin
+- SHA
 - lnd-client
 - cryptonite
 - secp256k1-haskell
@@ -83,6 +85,9 @@ dependencies:
 - http2-grpc-proto-lens
 - http2-client
 - http2-client-grpc
+- network
+- http-client
+- http-types
 # other
 - envparse
 - scientific

@@ -10,6 +10,7 @@ import BtcLsp.Data.Type
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
+import BtcLsp.Rpc.Env
 import Data.ProtoLens.Field
 import qualified LndClient as Lnd
 import qualified LndClient.Data.GetInfo as Lnd
@@ -25,6 +26,7 @@ class
   Env m
   where
   getGsEnv :: m GSEnv
+  getBtcEnv :: m BitcoindEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLspPubKey :: m Lnd.NodePubKey
   getLspPubKey = do
@@ -84,3 +86,13 @@ class
     ExceptT Failure m b
   withLndT method =
     ExceptT . withLnd method
+  withElectrs ::
+    (ElectrsEnv -> a) ->
+    (a -> m (Either RpcError b)) ->
+    m (Either Failure b)
+  withElectrsT ::
+    (ElectrsEnv -> a) ->
+    (a -> m (Either RpcError b)) ->
+    ExceptT Failure m b
+  withElectrsT method =
+    ExceptT . withElectrs method

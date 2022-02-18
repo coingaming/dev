@@ -10,7 +10,7 @@ mkdir -p "$BUILD_DIR"
 
 newSubjectAltName () {
   SERVICE_NAME="$1"
-  echo "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:$SERVICE_NAME,DNS:yolo_$SERVICE_NAME" \
+  echo "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:127.0.0.1,DNS:$SERVICE_NAME,DNS:yolo_$SERVICE_NAME" \
      > "$BUILD_DIR/subjectAltName"
 }
 

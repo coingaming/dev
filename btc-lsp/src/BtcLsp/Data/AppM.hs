@@ -45,11 +45,16 @@ instance (MonadIO m) => KatipContext (AppM m) where
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
     asks Env.envGrpcServerEnv
+  getBtcEnv =
+    asks Env.envBitcoindRpcEnv
   getLspPubKeyVar =
     asks Env.envLndPubKey
   withLnd method args = do
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)
+  withElectrs method args = do
+    env <- asks Env.envElectrsRpcEnv
+    first FailureElectrs <$> args (method env)
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool
