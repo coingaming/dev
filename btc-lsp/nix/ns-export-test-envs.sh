@@ -157,7 +157,8 @@ export LSP_GRPC_CLIENT_ENV="
 #   \"port\":443,
 #   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
 #   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
-#   \"sig_header_name\":\"sig-bin\"
+#   \"sig_header_name\":\"sig-bin\",
+#   \"compress_mode\":\"Compressed\"
 # }
 # "
 #

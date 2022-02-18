@@ -4,9 +4,8 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
-
 SETUP_MODE="--keep"
-GITHUB_RELEASE="v0.1.0"
+GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
 
 if [ -z "$*" ]; then
   echo "==> Using defaults"
@@ -39,25 +38,29 @@ case $SETUP_MODE in
   --source)
     echo "==> Building from source"
     sh "$THIS_DIR/hm-release.sh"
-    docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
-      | awk '{print $NF}' \
-      | tr -d '\n' \
-      > "$BUILD_DIR/docker-image-btc-lsp.txt"
-    sh -c "$THIS_DIR/ds-update.sh"
     ;;
   --prebuilt)
-    echo "==> Using prebuilt"
-    exit 1
-    # cd "$BUILD_DIR"
-    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-image-reckless-trading-bot.tar.gz"
-    # wget "https://github.com/21it/src/releases/download/$GITHUB_RELEASE/docker-compose.21it.yml"
+    (
+      echo "==> Using prebuilt"
+      cd "$BUILD_DIR"
+      rm -rf docker-image-btc-lsp.tar.gz
+      rm -rf docker-image-btc-lsp.txt
+      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
+    )
     ;;
   --keep)
     echo "==> Keeping version"
-    sh -c "$THIS_DIR/ds-update.sh"
     ;;
   *)
     echo "==> Unrecognized SETUP_MODE $SETUP_MODE"
     exit 1
     ;;
 esac
+
+echo "==> Loading docker image"
+docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
+  | awk '{print $NF}' \
+  | tr -d '\n' \
+  > "$BUILD_DIR/docker-image-btc-lsp.txt"
+
+sh -c "$THIS_DIR/ds-update.sh"

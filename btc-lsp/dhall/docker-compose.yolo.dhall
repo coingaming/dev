@@ -32,15 +32,16 @@ in  { networks.global.external = True
       , bitcoind =
         { image = "heathmont/bitcoind:v1.0.9"
         , hostname = "bitcoind"
+        , ports = [ "39703:39703/tcp", "39704:39704/tcp" ]
         , environment =
           { CONFIG_FROM_ENV = "true"
           , DISABLEWALLET = "0"
           , PRUNE = "0"
           , REGTEST = "1"
           , RPCALLOWIP = "0.0.0.0/0"
-          , RPCBIND = ":18332"
+          , RPCBIND = ":80"
           , RPCPASSWORD = "developer"
-          , RPCPORT = "18332"
+          , RPCPORT = "80"
           , RPCUSER = "bitcoinrpc"
           , SERVER = "1"
           , TESTNET = "0"
@@ -54,6 +55,7 @@ in  { networks.global.external = True
       , lnd-lsp =
         { image = "lightninglabs/lnd:v0.13.1-beta.rc2"
         , hostname = "lnd-lsp"
+        , ports = [ "9735:9735/tcp" ]
         , command =
           [ "-c"
           , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
@@ -62,7 +64,7 @@ in  { networks.global.external = True
         , environment =
           { BITCOIN_DEFAULTCHANCONFS = "1"
           , BITCOIN_NETWORK = "regtest"
-          , BITCOIN_RPCHOST = "bitcoind"
+          , BITCOIN_RPCHOST = "bitcoind:80"
           , BITCOIN_RPCPASS = "developer"
           , BITCOIN_RPCUSER = "bitcoinrpc"
           , BITCOIN_ZMQPUBRAWBLOCK = "tcp://bitcoind:39703"
@@ -110,7 +112,7 @@ in  { networks.global.external = True
       , btc-lsp =
         { image = ../build/docker-image-btc-lsp.txt as Text
         , hostname = "btc-lsp"
-        , ports = [ "8081:443/tcp" ]
+        , ports = [ "8443:443/tcp" ]
         , environment =
           { -- General
             LSP_LIBPQ_CONN_STR =
@@ -180,8 +182,8 @@ in  { networks.global.external = True
         }
       , docker-proxy =
         { hostname = "docker-proxy"
-        , image = "heathmont/docker-proxy:v0.1.0-d5f0f38"
-        , ports = [ "80:8080/tcp", "443:8081/tcp" ]
+        , image = "heathmont/docker-proxy:v0.1.0-fdb6beb"
+        , ports = [ "80:80/tcp", "443:443/tcp" ]
         , networks.global = mempty
         }
       }
