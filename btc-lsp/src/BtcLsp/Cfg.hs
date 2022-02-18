@@ -1,7 +1,9 @@
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Cfg
-  ( swapLnFeeRate,
+  ( swapLnMinAmt,
+    swapLnMaxAmt,
+    swapLnFeeRate,
     swapLnMinFee,
     newChanCapLsp,
     newSwapIntoLnFee,
@@ -12,6 +14,14 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified Universum
+
+swapLnMinAmt :: Money 'Usr btcl 'Fund
+swapLnMinAmt =
+  Money $ MSat 10000000
+
+swapLnMaxAmt :: Money 'Usr btcl 'Fund
+swapLnMaxAmt =
+  Money $ MSat 10000000000
 
 swapLnFeeRate :: FeeRate
 swapLnFeeRate =

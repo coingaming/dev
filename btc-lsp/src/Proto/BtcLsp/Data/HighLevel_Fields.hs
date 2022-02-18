@@ -34,6 +34,11 @@ fieldLocation ::
    Data.ProtoLens.Field.HasField s "fieldLocation" a) =>
   Lens.Family2.LensLike' f s a
 fieldLocation = Data.ProtoLens.Field.field @"fieldLocation"
+host ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "host" a) =>
+  Lens.Family2.LensLike' f s a
+host = Data.ProtoLens.Field.field @"host"
 kind ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "kind" a) =>
@@ -45,6 +50,12 @@ lnPubKey ::
    Data.ProtoLens.Field.HasField s "lnPubKey" a) =>
   Lens.Family2.LensLike' f s a
 lnPubKey = Data.ProtoLens.Field.field @"lnPubKey"
+maybe'host ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'host" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'host = Data.ProtoLens.Field.field @"maybe'host"
 maybe'lnPubKey ::
   forall f s a.
   (Prelude.Functor f,
@@ -57,6 +68,18 @@ maybe'nonce ::
    Data.ProtoLens.Field.HasField s "maybe'nonce" a) =>
   Lens.Family2.LensLike' f s a
 maybe'nonce = Data.ProtoLens.Field.field @"maybe'nonce"
+maybe'port ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'port" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'port = Data.ProtoLens.Field.field @"maybe'port"
+maybe'pubKey ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'pubKey" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'pubKey = Data.ProtoLens.Field.field @"maybe'pubKey"
 maybe'val ::
   forall f s a.
   (Prelude.Functor f,
@@ -68,6 +91,16 @@ nonce ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "nonce" a) =>
   Lens.Family2.LensLike' f s a
 nonce = Data.ProtoLens.Field.field @"nonce"
+port ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "port" a) =>
+  Lens.Family2.LensLike' f s a
+port = Data.ProtoLens.Field.field @"port"
+pubKey ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "pubKey" a) =>
+  Lens.Family2.LensLike' f s a
+pubKey = Data.ProtoLens.Field.field @"pubKey"
 val ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>

@@ -28,6 +28,7 @@ class
   getGsEnv :: m GSEnv
   getBtcEnv :: m BitcoindEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
+  getLspLndSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey
   getLspPubKey = do
     var <- getLspPubKeyVar

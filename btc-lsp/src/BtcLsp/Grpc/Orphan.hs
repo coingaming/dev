@@ -13,6 +13,7 @@ import qualified LndClient as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Data.LowLevel as Proto
+import qualified Proto.BtcLsp.Data.LowLevel_Fields as LowLevel
 import qualified Witch
 
 --
@@ -109,3 +110,30 @@ deriving stock instance Eq CompressMode
 deriving stock instance Generic CompressMode
 
 instance FromJSON CompressMode
+
+instance From PortNumber Word32 where
+  from = fromIntegral
+
+instance From PortNumber Proto.LnPort where
+  from = intoProto
+
+instance From HostName Proto.LnHost where
+  from = intoProto
+
+instance From (Money owner btcl mrel) Proto.Msat where
+  from = intoProto
+
+instance From (Money 'Usr btcl 'Fund) Proto.LocalBalance where
+  from = intoProto
+
+instance From (Money 'Lsp btcl 'Gain) Proto.FeeMoney where
+  from = intoProto
+
+instance From FeeRate Proto.Urational where
+  from (FeeRate x) =
+    defMessage
+      & LowLevel.numerator .~ numerator x
+      & LowLevel.denominator .~ denominator x
+
+instance From FeeRate Proto.FeeRate where
+  from = intoProto
