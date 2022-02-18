@@ -34,7 +34,7 @@ let mkLnd =
           , BITCOIN_ZMQPUBRAWTX = "tcp://bitcoind:39704"
           , LND_GRPC_PORT = "10009"
           , LND_P2P_PORT = "9735"
-          , LND_REST_PORT = "8080"
+          , LND_REST_PORT = "80"
           , TLS_EXTRADOMAIN = "lnd-${owner}"
           }
         , volumes = [ "lnd-${owner}:/root/.lnd" ]
@@ -103,7 +103,7 @@ in  { networks.global.external = True
                   "hexMacaroon": "${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
                                     ? todo}",
                   "index": 1,
-                  "lnServerUrl": "https://lnd-lsp:8080"
+                  "lnServerUrl": "https://lnd-lsp:80"
                 }
               ]
               ''
@@ -129,7 +129,7 @@ in  { networks.global.external = True
           , -- Encryption
             LSP_AES256_SECRET_KEY = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
           , LSP_AES256_INIT_VECTOR = "dRgUkXp2s5v8y/B?"
-          , -- Lnd
+          , -- Rpc
             LSP_LND_ENV =
               ''
               {
@@ -169,8 +169,7 @@ in  { networks.global.external = True
                 ]
               }
               ''
-          , -- Grpc
-            LSP_GRPC_SERVER_ENV =
+          , LSP_GRPC_SERVER_ENV =
               ''
               {
                 "port":443,
@@ -178,6 +177,21 @@ in  { networks.global.external = True
                 "sig_header_name":"sig-bin",
                 "tls_cert":"${escape ../build/swarm/btc-lsp/cert.pem as Text}",
                 "tls_key":"${escape ../build/swarm/btc-lsp/key.pem as Text}"
+              }
+              ''
+          , LSP_ELECTRS_ENV =
+              ''
+              {
+                "host":"electrs",
+                "port":"80"
+              }
+              ''
+          , LSP_BITCOIND_ENV =
+              ''
+              {
+                "host":"http://bitcoind:80",
+                "username":"bitcoinrpc",
+                "password":"developer"
               }
               ''
           }
