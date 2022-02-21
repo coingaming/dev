@@ -4,6 +4,8 @@
 module BtcLsp.Grpc.Client.HighLevel
   ( swapIntoLn,
     swapIntoLnT,
+    getCfg,
+    getCfgT,
   )
 where
 
@@ -22,6 +24,7 @@ import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Proto.BtcLsp (Service)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
+import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 
 swapIntoLn ::
@@ -52,6 +55,35 @@ swapIntoLnT ::
   ExceptT Failure m SwapIntoLn.Response
 swapIntoLnT gsEnv env =
   ExceptT . swapIntoLn gsEnv env
+
+getCfg ::
+  ( Env m
+  ) =>
+  GSEnv ->
+  GCEnv ->
+  GetCfg.Request ->
+  m (Either Failure GetCfg.Response)
+getCfg gsEnv env req = withRunInIO $ \run ->
+  first FailureGrpc
+    <$> runUnary
+      (RPC :: RPC Service "getCfg")
+      gsEnv
+      env
+      ( \res sig compressMode ->
+          run $
+            verifySig res sig compressMode
+      )
+      req
+
+getCfgT ::
+  ( Env m
+  ) =>
+  GSEnv ->
+  GCEnv ->
+  GetCfg.Request ->
+  ExceptT Failure m GetCfg.Response
+getCfgT gsEnv env =
+  ExceptT . getCfg gsEnv env
 
 -- | WARNING : this function is unsafe and inefficient
 -- but it is used for testing purposes only!

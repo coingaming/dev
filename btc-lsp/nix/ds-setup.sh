@@ -100,3 +100,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
 echo "==> Full spin"
 sh "$THIS_DIR/ds-up.sh"
 sleep 10
+
+echo "==> Mine initial coins"
+sh "$THIS_DIR/ds-mine.sh" 105
+sleep 10

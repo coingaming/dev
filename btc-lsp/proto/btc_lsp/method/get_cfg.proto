@@ -21,7 +21,7 @@ message Response {
     // TODO : replace this rpc with better version estimate_swap
     // where client will provide amounts as inputs!!!
     //
-    repeated .BtcLsp.Data.HighLevel.LspLnSocketAddress lsp_ln_nodes = 1;
+    repeated .BtcLsp.Data.HighLevel.LnPeer lsp_ln_nodes = 1;
     .BtcLsp.Data.HighLevel.LocalBalance swap_into_ln_min_amt = 2;
     .BtcLsp.Data.HighLevel.LocalBalance swap_into_ln_max_amt = 3;
     .BtcLsp.Data.HighLevel.LocalBalance swap_from_ln_min_amt = 4;

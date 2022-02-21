@@ -113,6 +113,7 @@ import LndClient.Util as X
     withSpawnLink,
   )
 import Network.GRPC.Client as X (CompressMode (..))
+import Network.HTTP2.Client as X (HostName, PortNumber)
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X

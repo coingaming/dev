@@ -33,6 +33,7 @@ import qualified LndClient as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
 import Network.Bitcoin as Btc (Client, getClient)
+import qualified Network.GRPC.Client.Helpers as Grpc
 import Test.Hspec
 
 data TestOwner
@@ -86,6 +87,13 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     asks $ envBitcoindRpcEnv . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvLsp
+  getLspLndSocketAddress = do
+    env <- Lnd.envLndConfig <$> asks (envLnd . testEnvLsp)
+    pure
+      SocketAddress
+        { socketAddressHost = Grpc._grpcClientConfigHost env,
+          socketAddressPort = Grpc._grpcClientConfigPort env
+        }
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)

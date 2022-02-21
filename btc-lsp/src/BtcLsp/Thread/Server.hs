@@ -24,7 +24,6 @@ import qualified Network.Wai.Internal as Wai
 import Proto.BtcLsp (Service)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
-import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
 import qualified Universum
 
@@ -59,7 +58,7 @@ handlers run gsEnv body =
     unary (RPC :: RPC Service "swapFromLn") $
       runHandler swapFromLn,
     unary (RPC :: RPC Service "getCfg") $
-      runHandler getCfg
+      runHandler Server.getCfg
   ]
   where
     runHandler ::
@@ -183,18 +182,5 @@ swapFromLn ::
 swapFromLn _ _ =
   --
   -- TODO : implement!!!
-  --
-  pure defMessage
-
-getCfg ::
-  ( Monad m
-  ) =>
-  Entity User ->
-  GetCfg.Request ->
-  m GetCfg.Response
-getCfg _ _ =
-  --
-  -- TODO : rename into EstimateSwap/EstimateSwapIntoLn
-  -- and implement!!!
   --
   pure defMessage

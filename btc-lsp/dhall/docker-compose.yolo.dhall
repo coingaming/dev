@@ -14,6 +14,33 @@ let todo
     : Text
     = "TODO"
 
+let mkLnd =
+      λ(owner : Text) →
+        { image = "lightninglabs/lnd:v0.13.1-beta.rc2"
+        , hostname = "lnd-${owner}"
+        , ports = [ "9735:9735/tcp" ]
+        , command =
+          [ "-c"
+          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
+          ]
+        , entrypoint = [ "sh" ]
+        , environment =
+          { BITCOIN_DEFAULTCHANCONFS = "1"
+          , BITCOIN_NETWORK = "regtest"
+          , BITCOIN_RPCHOST = "bitcoind:80"
+          , BITCOIN_RPCPASS = "developer"
+          , BITCOIN_RPCUSER = "bitcoinrpc"
+          , BITCOIN_ZMQPUBRAWBLOCK = "tcp://bitcoind:39703"
+          , BITCOIN_ZMQPUBRAWTX = "tcp://bitcoind:39704"
+          , LND_GRPC_PORT = "10009"
+          , LND_P2P_PORT = "9735"
+          , LND_REST_PORT = "80"
+          , TLS_EXTRADOMAIN = "lnd-${owner}"
+          }
+        , volumes = [ "lnd-${owner}:/root/.lnd" ]
+        , networks.global = mempty
+        }
+
 in  { networks.global.external = True
     , version = "3"
     , volumes = { postgres = mempty, bitcoind = mempty, lnd-lsp = mempty }
@@ -52,31 +79,7 @@ in  { networks.global.external = True
         , volumes = [ "bitcoind:/bitcoin/.bitcoin" ]
         , networks.global = mempty
         }
-      , lnd-lsp =
-        { image = "lightninglabs/lnd:v0.13.1-beta.rc2"
-        , hostname = "lnd-lsp"
-        , ports = [ "9735:9735/tcp" ]
-        , command =
-          [ "-c"
-          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
-          ]
-        , entrypoint = [ "sh" ]
-        , environment =
-          { BITCOIN_DEFAULTCHANCONFS = "1"
-          , BITCOIN_NETWORK = "regtest"
-          , BITCOIN_RPCHOST = "bitcoind:80"
-          , BITCOIN_RPCPASS = "developer"
-          , BITCOIN_RPCUSER = "bitcoinrpc"
-          , BITCOIN_ZMQPUBRAWBLOCK = "tcp://bitcoind:39703"
-          , BITCOIN_ZMQPUBRAWTX = "tcp://bitcoind:39704"
-          , LND_GRPC_PORT = "10009"
-          , LND_P2P_PORT = "9735"
-          , LND_REST_PORT = "8080"
-          , TLS_EXTRADOMAIN = "lnd-lsp"
-          }
-        , volumes = [ "lnd-lsp:/root/.lnd" ]
-        , networks.global = mempty
-        }
+      , lnd-lsp = mkLnd "lsp"
       , rtl =
         { environment =
           { RTL_CONFIG_JSON =
@@ -100,7 +103,7 @@ in  { networks.global.external = True
                   "hexMacaroon": "${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
                                     ? todo}",
                   "index": 1,
-                  "lnServerUrl": "https://lnd-lsp:8080"
+                  "lnServerUrl": "https://lnd-lsp:80"
                 }
               ]
               ''
@@ -126,7 +129,7 @@ in  { networks.global.external = True
           , -- Encryption
             LSP_AES256_SECRET_KEY = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
           , LSP_AES256_INIT_VECTOR = "dRgUkXp2s5v8y/B?"
-          , -- Lnd
+          , -- Rpc
             LSP_LND_ENV =
               ''
               {
@@ -166,8 +169,7 @@ in  { networks.global.external = True
                 ]
               }
               ''
-          , -- Grpc
-            LSP_GRPC_SERVER_ENV =
+          , LSP_GRPC_SERVER_ENV =
               ''
               {
                 "port":443,
@@ -175,6 +177,21 @@ in  { networks.global.external = True
                 "sig_header_name":"sig-bin",
                 "tls_cert":"${escape ../build/swarm/btc-lsp/cert.pem as Text}",
                 "tls_key":"${escape ../build/swarm/btc-lsp/key.pem as Text}"
+              }
+              ''
+          , LSP_ELECTRS_ENV =
+              ''
+              {
+                "host":"electrs",
+                "port":"80"
+              }
+              ''
+          , LSP_BITCOIND_ENV =
+              ''
+              {
+                "host":"http://bitcoind:80",
+                "username":"bitcoinrpc",
+                "password":"developer"
               }
               ''
           }
