@@ -4,7 +4,8 @@ allow-newer: http2-grpc-proto-lens:proto-lens,
   signable:proto-lens, signable:proto-lens-runtime,
   http2-grpc-proto-lens:proto-lens, http2-client:http2,
   lnd-client:aeson, chronos:aeson, lnd-client:base64-bytestring,
-  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client
+  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client,
+  lnd-client:network-bitcoin
   --
   -- TODO : remove base64-bytestring jailbreak,
   -- probably need to upgrade qrcode-juicypixels in
