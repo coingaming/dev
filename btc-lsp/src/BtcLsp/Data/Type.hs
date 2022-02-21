@@ -25,6 +25,7 @@ module BtcLsp.Data.Type
     SwapStatus (..),
     Failure (..),
     RpcError (..),
+    SocketAddress (..),
   )
 where
 
@@ -259,7 +260,7 @@ instance From (Money owner btcl mrel) Rational where
     via @(Ratio Natural)
 
 newtype FeeRate
-  = FeeRate (Ratio Natural)
+  = FeeRate (Ratio Word64)
   deriving newtype
     ( Eq,
       Ord,
@@ -269,18 +270,18 @@ newtype FeeRate
     ( Generic
     )
 
-instance From (Ratio Natural) FeeRate
+instance From (Ratio Word64) FeeRate
 
-instance From FeeRate (Ratio Natural)
+instance From FeeRate (Ratio Word64)
 
 instance TryFrom Rational FeeRate where
   tryFrom =
-    from @(Ratio Natural)
+    from @(Ratio Word64)
       `composeTryRhs` tryFrom
 
 instance From FeeRate Rational where
   from =
-    via @(Ratio Natural)
+    via @(Ratio Word64)
 
 newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text
@@ -384,6 +385,17 @@ data RpcError
   deriving (Eq, Generic, Show)
 
 instance Out RpcError
+
+data SocketAddress = SocketAddress
+  { socketAddressHost :: HostName,
+    socketAddressPort :: PortNumber
+  }
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
 
 Psql.derivePersistField "LnInvoiceStatus"
 

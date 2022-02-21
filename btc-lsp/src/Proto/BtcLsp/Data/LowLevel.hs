@@ -4,8 +4,7 @@
 {-# OPTIONS_GHC -Wno-duplicate-exports#-}
 {-# OPTIONS_GHC -Wno-dodgy-exports#-}
 module Proto.BtcLsp.Data.LowLevel (
-        LnHodlInvoice(), LnInvoice(), Msat(), OnChainAddress(),
-        SocketAddress(), Urational()
+        LnHodlInvoice(), LnInvoice(), Msat(), OnChainAddress(), Urational()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -485,122 +484,6 @@ instance Control.DeepSeq.NFData OnChainAddress where
              (Control.DeepSeq.deepseq (_OnChainAddress'val x__) ())
 {- | Fields :
      
-         * 'Proto.BtcLsp.Data.LowLevel_Fields.val' @:: Lens' SocketAddress Data.Text.Text@ -}
-data SocketAddress
-  = SocketAddress'_constructor {_SocketAddress'val :: !Data.Text.Text,
-                                _SocketAddress'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show SocketAddress where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out SocketAddress
-instance Data.ProtoLens.Field.HasField SocketAddress "val" Data.Text.Text where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _SocketAddress'val (\ x__ y__ -> x__ {_SocketAddress'val = y__}))
-        Prelude.id
-instance Data.ProtoLens.Message SocketAddress where
-  messageName _ = Data.Text.pack "BtcLsp.Data.LowLevel.SocketAddress"
-  packedMessageDescriptor _
-    = "\n\
-      \\rSocketAddress\DC2\DLE\n\
-      \\ETXval\CAN\SOH \SOH(\tR\ETXval"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag
-    = let
-        val__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "val"
-              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
-                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
-              (Data.ProtoLens.PlainField
-                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"val")) ::
-              Data.ProtoLens.FieldDescriptor SocketAddress
-      in
-        Data.Map.fromList [(Data.ProtoLens.Tag 1, val__field_descriptor)]
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _SocketAddress'_unknownFields
-        (\ x__ y__ -> x__ {_SocketAddress'_unknownFields = y__})
-  defMessage
-    = SocketAddress'_constructor
-        {_SocketAddress'val = Data.ProtoLens.fieldDefault,
-         _SocketAddress'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          SocketAddress -> Data.ProtoLens.Encoding.Bytes.Parser SocketAddress
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of
-                        10
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                                       Data.ProtoLens.Encoding.Bytes.getBytes
-                                                         (Prelude.fromIntegral len)
-                                           Data.ProtoLens.Encoding.Bytes.runEither
-                                             (case Data.Text.Encoding.decodeUtf8' value of
-                                                (Prelude.Left err)
-                                                  -> Prelude.Left (Prelude.show err)
-                                                (Prelude.Right r) -> Prelude.Right r))
-                                       "val"
-                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"val") y x)
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "SocketAddress"
-  buildMessage
-    = \ _x
-        -> (Data.Monoid.<>)
-             (let _v = Lens.Family2.view (Data.ProtoLens.Field.field @"val") _x
-              in
-                if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                    Data.Monoid.mempty
-                else
-                    (Data.Monoid.<>)
-                      (Data.ProtoLens.Encoding.Bytes.putVarInt 10)
-                      ((Prelude..)
-                         (\ bs
-                            -> (Data.Monoid.<>)
-                                 (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                    (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                 (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8
-                         _v))
-             (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                (Lens.Family2.view Data.ProtoLens.unknownFields _x))
-instance Control.DeepSeq.NFData SocketAddress where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_SocketAddress'_unknownFields x__)
-             (Control.DeepSeq.deepseq (_SocketAddress'val x__) ())
-{- | Fields :
-     
          * 'Proto.BtcLsp.Data.LowLevel_Fields.numerator' @:: Lens' Urational Data.Word.Word64@
          * 'Proto.BtcLsp.Data.LowLevel_Fields.denominator' @:: Lens' Urational Data.Word.Word64@ -}
 data Urational
@@ -745,9 +628,7 @@ instance Control.DeepSeq.NFData Urational where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \\FSbtc_lsp/data/low_level.proto\DC2\DC4BtcLsp.Data.LowLevel\"!\n\
-    \\rSocketAddress\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXval\"K\n\
+    \\FSbtc_lsp/data/low_level.proto\DC2\DC4BtcLsp.Data.LowLevel\"K\n\
     \\tUrational\DC2\FS\n\
     \\tnumerator\CAN\SOH \SOH(\EOTR\tnumerator\DC2 \n\
     \\vdenominator\CAN\STX \SOH(\EOTR\vdenominator\"\CAN\n\
@@ -758,8 +639,8 @@ packedFileDescriptor
     \\rLnHodlInvoice\DC2\DLE\n\
     \\ETXval\CAN\SOH \SOH(\tR\ETXval\"\"\n\
     \\SOOnChainAddress\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\tR\ETXvalJ\194\ACK\n\
-    \\ACK\DC2\EOT\NUL\NUL0\SOH\n\
+    \\ETXval\CAN\SOH \SOH(\tR\ETXvalJ\243\ENQ\n\
+    \\ACK\DC2\EOT\NUL\NUL,\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \x\n\
@@ -772,43 +653,29 @@ packedFileDescriptor
     \\n\
     \\n\
     \\STX\EOT\NUL\DC2\EOT\n\
-    \\NUL\f\SOH\n\
+    \\NUL\r\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\NUL\SOH\DC2\ETX\n\
-    \\b\NAK\n\
+    \\b\DC1\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\v\STX\DC1\n\
+    \\EOT\EOT\NUL\STX\NUL\DC2\ETX\v\STX\ETB\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\NUL\ENQ\DC2\ETX\v\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\v\t\f\n\
+    \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\v\t\DC2\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\v\SI\DLE\n\
-    \\n\
-    \\n\
-    \\STX\EOT\SOH\DC2\EOT\SO\NUL\DC1\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\SO\b\DC1\n\
+    \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\v\NAK\SYN\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\SI\STX\ETB\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\f\STX\EM\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\SI\STX\b\n\
+    \\ENQ\EOT\NUL\STX\SOH\ENQ\DC2\ETX\f\STX\b\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\SI\t\DC2\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\f\t\DC4\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\SI\NAK\SYN\n\
-    \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\DLE\STX\EM\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ENQ\DC2\ETX\DLE\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\DLE\t\DC4\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\DLE\ETB\CAN\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\f\ETB\CAN\n\
     \\174\SOH\n\
-    \\STX\EOT\STX\DC2\EOT\"\NUL$\SOH2\161\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\RS\NUL \SOH2\161\SOH\n\
     \ TODO : maybe have a sum-type like this:\n\
     \\n\
     \ message Btc {\n\
@@ -825,7 +692,21 @@ packedFileDescriptor
     \\n\
     \\n\
     \\n\
-    \\ETX\EOT\STX\SOH\DC2\ETX\"\b\f\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\RS\b\f\n\
+    \\v\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\US\STX\DC1\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ENQ\DC2\ETX\US\STX\b\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\US\t\f\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\US\SI\DLE\n\
+    \\n\
+    \\n\
+    \\STX\EOT\STX\DC2\EOT\"\NUL$\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\STX\SOH\DC2\ETX\"\b\DC1\n\
     \\v\n\
     \\EOT\EOT\STX\STX\NUL\DC2\ETX#\STX\DC1\n\
     \\f\n\
@@ -839,7 +720,7 @@ packedFileDescriptor
     \\STX\EOT\ETX\DC2\EOT&\NUL(\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\ETX\SOH\DC2\ETX&\b\DC1\n\
+    \\ETX\EOT\ETX\SOH\DC2\ETX&\b\NAK\n\
     \\v\n\
     \\EOT\EOT\ETX\STX\NUL\DC2\ETX'\STX\DC1\n\
     \\f\n\
@@ -853,7 +734,7 @@ packedFileDescriptor
     \\STX\EOT\EOT\DC2\EOT*\NUL,\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\EOT\SOH\DC2\ETX*\b\NAK\n\
+    \\ETX\EOT\EOT\SOH\DC2\ETX*\b\SYN\n\
     \\v\n\
     \\EOT\EOT\EOT\STX\NUL\DC2\ETX+\STX\DC1\n\
     \\f\n\
@@ -861,18 +742,4 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\EOT\STX\NUL\SOH\DC2\ETX+\t\f\n\
     \\f\n\
-    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX+\SI\DLE\n\
-    \\n\
-    \\n\
-    \\STX\EOT\ENQ\DC2\EOT.\NUL0\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\ENQ\SOH\DC2\ETX.\b\SYN\n\
-    \\v\n\
-    \\EOT\EOT\ENQ\STX\NUL\DC2\ETX/\STX\DC1\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ENQ\DC2\ETX/\STX\b\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\SOH\DC2\ETX/\t\f\n\
-    \\f\n\
-    \\ENQ\EOT\ENQ\STX\NUL\ETX\DC2\ETX/\SI\DLEb\ACKproto3"
+    \\ENQ\EOT\EOT\STX\NUL\ETX\DC2\ETX+\SI\DLEb\ACKproto3"

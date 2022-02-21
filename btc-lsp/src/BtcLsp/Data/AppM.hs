@@ -13,6 +13,8 @@ where
 import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
+import qualified LndClient as Lnd
+import qualified Network.GRPC.Client.Helpers as Grpc
 
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
@@ -49,6 +51,13 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     asks Env.envBitcoindRpcEnv
   getLspPubKeyVar =
     asks Env.envLndPubKey
+  getLspLndSocketAddress = do
+    env <- Lnd.envLndConfig <$> asks Env.envLnd
+    pure
+      SocketAddress
+        { socketAddressHost = Grpc._grpcClientConfigHost env,
+          socketAddressPort = Grpc._grpcClientConfigPort env
+        }
   withLnd method args = do
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)

@@ -9,10 +9,6 @@ package BtcLsp.Data.HighLevel;
 
 import "btc_lsp/data/low_level.proto";
 
-message LspLnSocketAddress {
-  .BtcLsp.Data.LowLevel.SocketAddress val = 1;
-}
-
 message FeeRate {
   .BtcLsp.Data.LowLevel.Urational val = 1;
 }
@@ -74,6 +70,20 @@ message Nonce {
 
 message LnPubKey {
   bytes val = 1;
+}
+
+message LnHost {
+  string val = 1;
+}
+
+message LnPort {
+  uint32 val = 1;
+}
+
+message LnPeer {
+  LnPubKey pub_key = 1;
+  LnHost host = 2;
+  LnPort port = 3;
 }
 
 message InputFailure {

@@ -255,9 +255,9 @@ instance Data.ProtoLens.Message Response where
       \\bResponse\DC2,\n\
       \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2B\n\
       \\asuccess\CAN\STX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.SuccessH\NULR\asuccess\DC2B\n\
-      \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\187\EOT\n\
-      \\aSuccess\DC2K\n\
-      \\flsp_ln_nodes\CAN\SOH \ETX(\v2).BtcLsp.Data.HighLevel.LspLnSocketAddressR\n\
+      \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\175\EOT\n\
+      \\aSuccess\DC2?\n\
+      \\flsp_ln_nodes\CAN\SOH \ETX(\v2\GS.BtcLsp.Data.HighLevel.LnPeerR\n\
       \lspLnNodes\DC2S\n\
       \\DC4swap_into_ln_min_amt\CAN\STX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMinAmt\DC2S\n\
       \\DC4swap_into_ln_max_amt\CAN\ETX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMaxAmt\DC2S\n\
@@ -714,8 +714,8 @@ instance Control.DeepSeq.NFData Response'Failure'InternalFailure where
              (_Response'Failure'InternalFailure'_unknownFields x__) ()
 {- | Fields :
      
-         * 'Proto.BtcLsp.Method.GetCfg_Fields.lspLnNodes' @:: Lens' Response'Success [Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress]@
-         * 'Proto.BtcLsp.Method.GetCfg_Fields.vec'lspLnNodes' @:: Lens' Response'Success (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress)@
+         * 'Proto.BtcLsp.Method.GetCfg_Fields.lspLnNodes' @:: Lens' Response'Success [Proto.BtcLsp.Data.HighLevel.LnPeer]@
+         * 'Proto.BtcLsp.Method.GetCfg_Fields.vec'lspLnNodes' @:: Lens' Response'Success (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.LnPeer)@
          * 'Proto.BtcLsp.Method.GetCfg_Fields.swapIntoLnMinAmt' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.LocalBalance@
          * 'Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapIntoLnMinAmt' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance)@
          * 'Proto.BtcLsp.Method.GetCfg_Fields.swapIntoLnMaxAmt' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.LocalBalance@
@@ -729,7 +729,7 @@ instance Control.DeepSeq.NFData Response'Failure'InternalFailure where
          * 'Proto.BtcLsp.Method.GetCfg_Fields.swapLnMinFee' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FeeMoney@
          * 'Proto.BtcLsp.Method.GetCfg_Fields.maybe'swapLnMinFee' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FeeMoney)@ -}
 data Response'Success
-  = Response'Success'_constructor {_Response'Success'lspLnNodes :: !(Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress),
+  = Response'Success'_constructor {_Response'Success'lspLnNodes :: !(Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.LnPeer),
                                    _Response'Success'swapIntoLnMinAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance),
                                    _Response'Success'swapIntoLnMaxAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance),
                                    _Response'Success'swapFromLnMinAmt :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.LocalBalance),
@@ -745,7 +745,7 @@ instance Prelude.Show Response'Success where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out Response'Success
-instance Data.ProtoLens.Field.HasField Response'Success "lspLnNodes" [Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress] where
+instance Data.ProtoLens.Field.HasField Response'Success "lspLnNodes" [Proto.BtcLsp.Data.HighLevel.LnPeer] where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -754,7 +754,7 @@ instance Data.ProtoLens.Field.HasField Response'Success "lspLnNodes" [Proto.BtcL
         (Lens.Family2.Unchecked.lens
            Data.Vector.Generic.toList
            (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField Response'Success "vec'lspLnNodes" (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress) where
+instance Data.ProtoLens.Field.HasField Response'Success "vec'lspLnNodes" (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.LnPeer) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -850,8 +850,8 @@ instance Data.ProtoLens.Message Response'Success where
     = Data.Text.pack "BtcLsp.Method.GetCfg.Response.Success"
   packedMessageDescriptor _
     = "\n\
-      \\aSuccess\DC2K\n\
-      \\flsp_ln_nodes\CAN\SOH \ETX(\v2).BtcLsp.Data.HighLevel.LspLnSocketAddressR\n\
+      \\aSuccess\DC2?\n\
+      \\flsp_ln_nodes\CAN\SOH \ETX(\v2\GS.BtcLsp.Data.HighLevel.LnPeerR\n\
       \lspLnNodes\DC2S\n\
       \\DC4swap_into_ln_min_amt\CAN\STX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMinAmt\DC2S\n\
       \\DC4swap_into_ln_max_amt\CAN\ETX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMaxAmt\DC2S\n\
@@ -866,7 +866,7 @@ instance Data.ProtoLens.Message Response'Success where
           = Data.ProtoLens.FieldDescriptor
               "lsp_ln_nodes"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.LnPeer)
               (Data.ProtoLens.RepeatedField
                  Data.ProtoLens.Unpacked
                  (Data.ProtoLens.Field.field @"lspLnNodes")) ::
@@ -946,7 +946,7 @@ instance Data.ProtoLens.Message Response'Success where
     = let
         loop ::
           Response'Success
-          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.BtcLsp.Data.HighLevel.LspLnSocketAddress
+          -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.BtcLsp.Data.HighLevel.LnPeer
              -> Data.ProtoLens.Encoding.Bytes.Parser Response'Success
         loop x mutable'lspLnNodes
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
@@ -1204,13 +1204,13 @@ packedFileDescriptor
   = "\n\
     \\FSbtc_lsp/method/get_cfg.proto\DC2\DC4BtcLsp.Method.GetCfg\SUB\GSbtc_lsp/data/high_level.proto\"7\n\
     \\aRequest\DC2,\n\
-    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\"\182\a\n\
+    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\"\170\a\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2B\n\
     \\asuccess\CAN\STX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.SuccessH\NULR\asuccess\DC2B\n\
-    \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\187\EOT\n\
-    \\aSuccess\DC2K\n\
-    \\flsp_ln_nodes\CAN\SOH \ETX(\v2).BtcLsp.Data.HighLevel.LspLnSocketAddressR\n\
+    \\afailure\CAN\ETX \SOH(\v2&.BtcLsp.Method.GetCfg.Response.FailureH\NULR\afailure\SUB\175\EOT\n\
+    \\aSuccess\DC2?\n\
+    \\flsp_ln_nodes\CAN\SOH \ETX(\v2\GS.BtcLsp.Data.HighLevel.LnPeerR\n\
     \lspLnNodes\DC2S\n\
     \\DC4swap_into_ln_min_amt\CAN\STX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMinAmt\DC2S\n\
     \\DC4swap_into_ln_max_amt\CAN\ETX \SOH(\v2#.BtcLsp.Data.HighLevel.LocalBalanceR\DLEswapIntoLnMaxAmt\DC2S\n\
@@ -1286,7 +1286,7 @@ packedFileDescriptor
     \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\DC2\n\
     \\DC1\n\
     \|\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\ETB\EOTH\SUBm\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\ETB\EOT<\SUBm\n\
     \ TODO : replace this rpc with better version estimate_swap\n\
     \ where client will provide amounts as inputs!!!\n\
     \\n\
@@ -1294,11 +1294,11 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\NUL\STX\NUL\EOT\DC2\ETX\ETB\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\ETB\r6\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\ETB\r*\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\ETB7C\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\ETB+7\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\ETBFG\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\ETB:;\n\
     \\r\n\
     \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\CAN\EOTA\n\
     \\SO\n\

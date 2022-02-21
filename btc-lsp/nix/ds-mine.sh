@@ -6,7 +6,7 @@ BITCOIN_NETWORK="regtest"
 echo "$0 ==> starting"
 
 if [ -z "$1" ]; then
-  BLOCKS="1"
+  BLOCKS="6"
 else
   BLOCKS="$1"
 fi
