@@ -42,6 +42,9 @@ swapIntoLn userEnt req = do
                   Lnd.account = Nothing
                 }
           )
+    --
+    -- TODO : accept only zero amt invoices!!!
+    --
     fundInvLnd <-
       withLndT
         Lnd.decodePayReq
@@ -67,7 +70,7 @@ swapIntoLn userEnt req = do
           .~ ( defMessage
                  & SwapIntoLn.fundOnChainAddress
                    .~ from (swapIntoLnFundAddress swap)
-                 & SwapIntoLn.fundMoney
+                 & SwapIntoLn.minFundMoney
                    .~ from @MSat
                      ( from (swapIntoLnChanCapUser swap)
                          + from (swapIntoLnFeeLsp swap)

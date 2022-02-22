@@ -320,6 +320,9 @@ data SwapStatus
     -- given amt from user with
     -- some confirmations.
     SwapWaitingFund
+  | -- | Swap has been funded on-chain,
+    -- need to open LN channel now.
+    SwapFunded
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan
