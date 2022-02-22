@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# OPTIONS_GHC -Wall #-}
 
 -- | An interface to bitcoind's available wallet-related RPC calls.
@@ -11,79 +13,79 @@
 --   Certain APIs were too complicated for me to write an interface for. If
 --   you figure them out, then patches are always welcome! They're left in
 --   the source as comments.
-module Network.Bitcoin.Wallet
-  ( Client,
-    getClient,
-    BitcoindInfo (..),
-    getBitcoindInfo,
-    getNewAddress,
-    getAccountAddress,
-    getAccount,
-    setAccount,
-    getAddressesByAccount,
-    sendToAddress,
-    AddressInfo (..),
-    listAddressGroupings,
-    Signature,
-    signMessage,
-    verifyMessage,
-    getReceivedByAddress,
-    getReceivedByAddress',
-    getReceivedByAccount,
-    getReceivedByAccount',
-    getBalance,
-    getAddrInfo,
-    getBalance',
-    getBalance'',
-    moveBitcoins,
-    sendFromAccount,
-    sendMany,
-    EstimationMode (..),
-    estimateSmartFee,
-    -- , createMultiSig
-    ReceivedByAddress (..),
-    listReceivedByAddress,
-    listReceivedByAddress',
-    ReceivedByAccount (..),
-    listReceivedByAccount,
-    listReceivedByAccount',
-    listTransactions,
-    listTransactions',
-    listAccounts,
-    importAddress,
-    SinceBlock (..),
-    SimpleTransaction (..),
-    TransactionCategory (..),
-    listSinceBlock,
-    listSinceBlock',
-    DetailedTransaction (..),
-    DetailedTransactionDetails (..),
-    getTransaction,
-    backupWallet,
-    keyPoolRefill,
-    unlockWallet,
-    lockWallet,
-    changePassword,
-    encryptWallet,
-    isAddressValid,
-  )
-where
+module Network.Bitcoin.Wallet ( Client
+                              , getClient
+                              , BitcoindInfo(..)
+                              , getBitcoindInfo
+                              , getNewAddress
+                              , getAccountAddress
+                              , getAccount
+                              , setAccount
+                              , getAddressesByAccount
+                              , sendToAddress
+                              , AddressInfo(..)
+                              , listAddressGroupings
+                              , Signature
+                              , signMessage
+                              , verifyMessage
+                              , getReceivedByAddress
+                              , getReceivedByAddress'
+                              , getReceivedByAccount
+                              , getReceivedByAccount'
+                              , getBalance
+                              , getBalance'
+                              , getBalance''
+                              , moveBitcoins
+                              , sendFromAccount
+                              , sendMany
+                              , EstimationMode (..)
+                              , estimateSmartFee
+                              -- , createMultiSig
+                              , ReceivedByAddress(..)
+                              , listReceivedByAddress
+                              , listReceivedByAddress'
+                              , ReceivedByAccount(..)
+                              , listReceivedByAccount
+                              , listReceivedByAccount'
+                              , listTransactions
+                              , listTransactions'
+                              , listAccounts
+                              , importAddress
+                              , SinceBlock(..)
+                              , SimpleTransaction(..)
+                              , TransactionCategory(..)
+                              , listSinceBlock
+                              , listSinceBlock'
+                              , DetailedTransaction(..)
+                              , DetailedTransactionDetails(..)
+                              , getTransaction
+                              , backupWallet
+                              , keyPoolRefill
+                              , unlockWallet
+                              , lockWallet
+                              , changePassword
+                              , encryptWallet
+                              , isAddressValid
+                              , getAddrInfo
+                              , AddrInfo(..)
+                              , ScrPubKey(..)
+                              ) where
 
-import Control.Exception (throw)
-import Control.Monad
-import Data.Aeson as A
-import Data.Aeson.Types (parseEither)
-import qualified Data.ByteString.Lazy.Char8 as BSL8
-import qualified Data.HashMap.Lazy as HM
-import Data.Maybe
-import qualified Data.Maybe
-import Data.Text
-import Data.Time.Clock.POSIX
-import Data.Vector as V hiding ((++))
-import Data.Word
-import Network.Bitcoin.BlockChain (BlockHash)
-import Network.Bitcoin.Internal
-import Network.Bitcoin.RawTransaction (RawTransaction, ScriptPubKey)
+import           Control.Exception              (throw)
+import           Control.Monad
+import           Data.Aeson                     as A
+import           Data.Aeson.Types               (parseEither)
+import qualified Data.ByteString.Lazy.Char8     as BSL8
+import qualified Data.HashMap.Lazy              as HM
+import           Data.Maybe
+import           Data.Text
+import           Data.Time.Clock.POSIX
+import           Data.Vector                    as V hiding ((++))
+import           Data.Word
+import           Network.Bitcoin.BlockChain     (BlockHash)
+import           Network.Bitcoin.Internal
+import           Network.Bitcoin.RawTransaction (RawTransaction)
+
 
 -- | A plethora of information about a bitcoind instance.
 data BitcoindInfo = BitcoindInfo
@@ -808,27 +810,30 @@ instance ToJSON EstimationMode where
 -- | Estimate the fee per kb to send a transaction
 estimateSmartFee :: Client -> Word32 -> Maybe EstimationMode -> IO Double
 estimateSmartFee client target mode =
-  parse =<< callApi client "estimatesmartfee" (Data.Maybe.catMaybes [Just $ tj target, tj <$> mode])
-  where
+    parse =<< callApi client "estimatesmartfee" (Data.Maybe.catMaybes [ Just $ tj target, tj <$> mode ])
+    where
     parse = either (throw . BitcoinResultTypeError . BSL8.pack) pure . parseEither parseResp
     parseResp = withObject "estimatesmartfee response" (.: "feerate")
 
 -- | Return information about the given bitcoin address.
 getAddrInfo :: Client -> Address -> IO AddrInfo
-getAddrInfo client addr = callApi client "getaddrinfo" [tj addr]
+getAddrInfo client addr = callApi client "getaddressinfo" [ tj addr ]
 
 -- | Information on a given address.
-data AddrInfo = AddrInfo
-  { -- | The address in question.
-    address :: Address,
-    -- | The address' balance.
-    scriptPubKey :: ScriptPubKey
-  }
-  deriving (Show, Read, Eq, Ord)
+data AddrInfo = AddrInfo { -- | The address in question.
+                                 address :: Address
+                               -- | The address' balance.
+                               , scriptPubKey  :: ScrPubKey
+                               }
+    deriving ( Show, Read, Eq, Ord )
 
 instance FromJSON AddrInfo where
-  parseJSON (Object o) =
-    AddrInfo
-      <$> o .: "address"
-      <*> o .: "scriptPubKey"
-  parseJSON _ = mzero
+    parseJSON (Object o) =
+      AddrInfo
+        <$> o .:  "address"
+        <*> o .:  "scriptPubKey"
+    parseJSON _ = mzero
+
+newtype ScrPubKey = ScrPubKey Text
+  deriving stock (Show, Read, Eq, Ord)
+  deriving newtype (FromJSON)

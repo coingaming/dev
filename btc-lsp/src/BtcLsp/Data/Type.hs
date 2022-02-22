@@ -375,6 +375,7 @@ data Failure
     --
     FailureGrpc Text
   | FailureElectrs RpcError
+  | FailureBitcoind RpcError
   deriving stock
     ( Eq,
       Show,
@@ -386,6 +387,7 @@ instance Out Failure
 data RpcError
   = RpcNoAddress
   | RpcJsonDecodeError
+  | RpcHexDecodeError
   | OtherError Text
   deriving (Eq, Generic, Show)
 
