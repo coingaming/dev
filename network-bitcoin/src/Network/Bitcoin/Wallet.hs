@@ -782,7 +782,7 @@ estimateSmartFee client target mode =
 
 -- | Return information about the given bitcoin address.
 getAddrInfo :: Client -> Address -> IO AddrInfo
-getAddrInfo client addr = callApi client "getaddrinfo" [ tj addr ]
+getAddrInfo client addr = callApi client "getaddressinfo" [ tj addr ]
 
 -- | Information on a given address.
 data AddrInfo = AddrInfo { -- | The address in question.
