@@ -24,4 +24,8 @@ instance From Word64 Lnd.Seconds
 
 instance From Lnd.Seconds Word64
 
+deriving stock instance Generic Btc.Block
+
+instance Out Btc.Block
+
 Psql.derivePersistField "Btc.BlockHeight"

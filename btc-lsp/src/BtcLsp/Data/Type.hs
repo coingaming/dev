@@ -27,6 +27,7 @@ module BtcLsp.Data.Type
     RpcError (..),
     SocketAddress (..),
     BlkHash (..),
+    BlkPrevHash (..),
     BlkHeight (..),
     BlkStatus (..),
   )
@@ -412,6 +413,17 @@ instance From Btc.BlockHash BlkHash
 
 instance From BlkHash Btc.BlockHash
 
+newtype BlkPrevHash
+  = BlkPrevHash Btc.BlockHash
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
+
+instance Out BlkPrevHash
+
+instance From Btc.BlockHash BlkPrevHash
+
+instance From BlkPrevHash Btc.BlockHash
+
 newtype BlkHeight
   = BlkHeight Btc.BlockHeight
   deriving stock (Eq, Ord, Show, Generic)
@@ -425,7 +437,8 @@ instance From BlkHeight Btc.BlockHeight
 
 data BlkStatus
   = BlkConfirmed
-  | BlkOrphan
+  | BlkOrphanNew
+  | BlkOrphanTrxReverted
   deriving (Eq, Ord, Show, Read, Generic)
 
 instance Out BlkStatus
