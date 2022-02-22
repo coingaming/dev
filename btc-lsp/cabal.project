@@ -4,7 +4,8 @@ allow-newer: http2-grpc-proto-lens:proto-lens,
   signable:proto-lens, signable:proto-lens-runtime,
   http2-grpc-proto-lens:proto-lens, http2-client:http2,
   lnd-client:aeson, chronos:aeson, lnd-client:base64-bytestring,
-  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client
+  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client,
+  lnd-client:network-bitcoin
   --
   -- TODO : remove base64-bytestring jailbreak,
   -- probably need to upgrade qrcode-juicypixels in
@@ -49,6 +50,13 @@ source-repository-package
   tag: ef684cf26184b57051155532e680926d459caa11
   --sha256: 1nfxzb01013rihjffwg8kiyqc09mcz0iaqca7fd3xp8sya7vc5ym
   subdir: generic-pretty-instances
+
+source-repository-package
+  type: git
+  location: https://github.com/coingaming/src.git
+  tag: 020d57847e040a0b9f608545a476f9a155a96c9c
+  --sha256: 152r2q7fc8a4w5qh9nkl1l8xp7l3vj37m9rhdkv5hfvfldf7fm8r
+  subdir: network-bitcoin
 
 source-repository-package
   type: git

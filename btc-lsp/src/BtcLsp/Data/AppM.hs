@@ -48,7 +48,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
     asks Env.envGrpcServerEnv
   getBtcEnv =
-    asks Env.envBitcoindRpcEnv
+    asks Env.envBtc'
   getLspPubKeyVar =
     asks Env.envLndPubKey
   getLspLndSocketAddress = do
@@ -64,6 +64,12 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
   withElectrs method args = do
     env <- asks Env.envElectrsRpcEnv
     first FailureElectrs <$> args (method env)
+  withBtc method args = do
+    env <- asks Env.envBtc
+    --
+    -- TODO : catch exceptions!!!
+    --
+    liftIO $ Right <$> args (method env)
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool

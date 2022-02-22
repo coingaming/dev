@@ -1023,8 +1023,8 @@ packedFileDescriptor
     \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2V\n\
     \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
     \\SIInternalFailureB\b\n\
-    \\ACKeitherJ\177\ACK\n\
-    \\ACK\DC2\EOT\NUL\NUL!\SOH\n\
+    \\ACKeitherJ\219\a\n\
+    \\ACK\DC2\EOT\NUL\NUL%\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1033,8 +1033,7 @@ packedFileDescriptor
     \\STX\ETX\NUL\DC2\ETX\EOT\NUL'\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT\ACK\NUL\n\
-    \\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\ACK\NUL\f\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\NUL\SOH\DC2\ETX\ACK\b\SI\n\
@@ -1046,103 +1045,111 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\a\GS \n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\a#$\n\
+    \b\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\n\
+    \\STX;\SUBU FundLnInvoice is optional to enable channel rebalance\n\
+    \ without new channel opening.\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\n\
+    \\STX&\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\n\
+    \'6\n\
+    \\f\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\n\
+    \9:\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\b\STX;\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\v\STXJ\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\b\STX&\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\v\STX-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\b'6\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\v.E\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\b9:\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\t\STXJ\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\t\STX-\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\t.E\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\tHI\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\vHI\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\f\NUL!\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\SO\NUL%\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\f\b\DLE\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\SO\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\r\STX%\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\SI\STX%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\r\STX\FS\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\SI\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\r\GS \n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\SI\GS \n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\r#$\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\SI#$\n\
     \\f\n\
-    \\EOT\EOT\SOH\b\NUL\DC2\EOT\SI\STX\DC2\ETX\n\
+    \\EOT\EOT\SOH\b\NUL\DC2\EOT\DC1\STX\DC4\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX\SI\b\SO\n\
+    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX\DC1\b\SO\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\DLE\EOT\CAN\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\DC2\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\DLE\EOT\v\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\DC2\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\DLE\f\DC3\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\DC2\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\DLE\SYN\ETB\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\DC2\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX\DC1\EOT\CAN\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\DC3\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\DC1\EOT\v\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\DC3\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\DC1\f\DC3\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\DC3\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\DC1\SYN\ETB\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\DC3\SYN\ETB\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\DC4\STX\ETB\ETX\n\
+    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\SYN\STX\ESC\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\DC4\n\
+    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\SYN\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\NAK\EOTH\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\ETB\EOTH\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\NAK\EOT-\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\ETB\EOT-\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\NAK.C\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\ETB.C\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\NAKFG\n\
-    \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\SYN\EOT4\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\ETBFG\n\
+    \`\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\SUB\EOT4\SUBQ FundMoney will be provided only in case\n\
+    \ where FundLnInvoice has been provided.\n\
+    \\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\SYN\EOT$\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\SUB\EOT$\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\SYN%/\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\SUB%/\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\SYN23\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\SUB23\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\EM\STX \ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\GS\STX$\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\EM\n\
+    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\GS\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX\SUB\EOT;\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX\RS\EOT;\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX\SUB\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX\RS\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX\SUB\r0\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX\RS\r0\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX\SUB16\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX\RS16\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX\SUB9:\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX\RS9:\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX\ESC\EOT*\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX\US\EOT*\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX\ESC\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX\US\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX\ESC\r\FS\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX\US\r\FS\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX\ESC\GS%\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX\US\GS%\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\ESC()\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\US()\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT\GS\EOT\US\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT!\EOT#\ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX\GS\f\ESCb\ACKproto3"
+    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX!\f\ESCb\ACKproto3"

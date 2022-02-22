@@ -84,7 +84,7 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
     asks $ envGrpcServerEnv . testEnvLsp
   getBtcEnv =
-    asks $ envBitcoindRpcEnv . testEnvLsp
+    asks $ envBtc' . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvLsp
   getLspLndSocketAddress = do
@@ -100,6 +100,12 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   withElectrs method args = do
     env <- asks $ envElectrsRpcEnv . testEnvLsp
     first FailureElectrs <$> args (method env)
+  withBtc method args = do
+    env <- asks $ Env.envBtc . testEnvLsp
+    --
+    -- TODO : catch exceptions!!!
+    --
+    liftIO $ Right <$> args (method env)
 
 instance (MonadIO m) => Katip (TestAppM owner m) where
   getLogEnv =
