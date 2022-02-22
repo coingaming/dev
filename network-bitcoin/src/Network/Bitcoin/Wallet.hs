@@ -66,8 +66,8 @@ module Network.Bitcoin.Wallet ( Client
                               , encryptWallet
                               , isAddressValid
                               , getAddrInfo
-                              , AddrInfo
-                              , ScrPubKey
+                              , AddrInfo(..)
+                              , ScrPubKey(..)
                               ) where
 
 import           Control.Exception              (throw)
