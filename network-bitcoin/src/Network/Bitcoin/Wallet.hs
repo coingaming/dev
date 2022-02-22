@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# OPTIONS_GHC -Wall #-}
 -- | An interface to bitcoind's available wallet-related RPC calls.
 --   The implementation of these functions can be found at
@@ -795,7 +797,8 @@ instance FromJSON AddrInfo where
     parseJSON _ = mzero
 
 newtype ScriptPubKey = ScriptPubKey Text
-  deriving (Show, Read, Eq, Ord)
+  deriving stock (Show, Read, Eq, Ord)
+  deriving newtype (FromJSON)
 
-instance FromJSON ScriptPubKey
+--instance FromJSON ScriptPubKey
 
