@@ -65,6 +65,9 @@ module Network.Bitcoin.Wallet ( Client
                               , changePassword
                               , encryptWallet
                               , isAddressValid
+                              , getAddrInfo
+                              , AddrInfo
+                              , ScrPubKey
                               ) where
 
 import           Control.Exception              (throw)
@@ -785,7 +788,7 @@ getAddrInfo client addr = callApi client "getaddrinfo" [ tj addr ]
 data AddrInfo = AddrInfo { -- | The address in question.
                                  address :: Address
                                -- | The address' balance.
-                               , scriptPubKey  :: ScriptPubKey
+                               , scriptPubKey  :: ScrPubKey
                                }
     deriving ( Show, Read, Eq, Ord )
 
@@ -796,9 +799,6 @@ instance FromJSON AddrInfo where
         <*> o .:  "scriptPubKey"
     parseJSON _ = mzero
 
-newtype ScriptPubKey = ScriptPubKey Text
+newtype ScrPubKey = ScrPubKey Text
   deriving stock (Show, Read, Eq, Ord)
   deriving newtype (FromJSON)
-
---instance FromJSON ScriptPubKey
-
