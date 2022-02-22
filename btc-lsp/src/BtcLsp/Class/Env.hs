@@ -17,6 +17,7 @@ import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
+import qualified Network.Bitcoin as Btc
 
 class
   ( MonadUnliftIO m,
@@ -26,7 +27,6 @@ class
   Env m
   where
   getGsEnv :: m GSEnv
-  getBtcEnv :: m BitcoindEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLspLndSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey
@@ -97,3 +97,13 @@ class
     ExceptT Failure m b
   withElectrsT method =
     ExceptT . withElectrs method
+  withBitcoin ::
+    (Btc.Client -> a) ->
+    (a -> m (Either RpcError b)) ->
+    m (Either Failure b)
+  withBitcoinT ::
+    (Btc.Client -> a) ->
+    (a -> m (Either RpcError b)) ->
+    ExceptT Failure m b
+  withBitcoinT method =
+    ExceptT . withBitcoin method

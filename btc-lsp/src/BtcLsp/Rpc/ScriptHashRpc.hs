@@ -14,11 +14,11 @@ import BtcLsp.Rpc.Client as Client
 import BtcLsp.Rpc.Env
 import BtcLsp.Rpc.RpcRequest as Req
 import BtcLsp.Rpc.RpcResponse as Resp
-import Data.Aeson (decode, encode, object, withObject, (.:), (.=))
+import Data.Aeson (decode, encode, withObject, (.:))
 import qualified Data.ByteString.Lazy as BS
 import Data.Digest.Pure.SHA
-import Network.HTTP.Client as HTTPClient hiding (Proxy)
 import qualified Text.Hex as TH
+import qualified Network.Bitcoin.Wallet as W
 
 newtype ScriptHash = ScriptHash Text
   deriving (Generic)
@@ -68,14 +68,14 @@ getBalance env (Left address) = do
     Right sh -> getBalance env (Right sh)
     Left _ -> pure $ Left (OtherError "GettingScript Hash error")
 
-------------
--- TODO Below is the implementation of getaddrinfo rpc for bitcoind that needs to be moved to network.bitcoin package
-------------
---
 getScriptHash :: (Env m) => OnChainAddress a -> m (Either Text ScriptHash)
 getScriptHash addr = do
-  scrPubKey <- getAddrScriptPubKey addr
-  case scrPubKey of
+  client <- liftIO $ W.getClient
+    "http://localhost:18443"
+    "developer"
+    "developer"
+  W.AddrInfo _ scrPubKey <- liftIO $ W.getAddrInfo client (coerce addr)
+  case Right (coerce scrPubKey) of
     Left e -> pure $ Left e
     Right sp -> do
       case TH.decodeHex sp of
@@ -84,42 +84,4 @@ getScriptHash addr = do
           let sha256pubKey = bytestringDigest $ sha256 $ BS.fromStrict pubKey
           let sha256reversedPubKey = BS.reverse sha256pubKey
           pure $ Right $ ScriptHash $ TH.encodeHex $ BS.toStrict sha256reversedPubKey
-
-getAddrScriptPubKey :: (Env m) => OnChainAddress a -> m (Either Text Text)
-getAddrScriptPubKey addr = do
-  manager <- liftIO $ newManager defaultManagerSettings
-  let requestObject =
-        object
-          [ "jsonrpc" .= ("1.0" :: Text),
-            "id" .= ("getaddrinfo" :: Text),
-            "method" .= ("getaddressinfo" :: Text),
-            "params" .= [addr]
-          ]
-  env <- getBtcEnv
-  baseRequest <-
-    liftIO $
-      applyBasicAuth
-        (encodeUtf8 $ bitcoindEnvUsername env)
-        (encodeUtf8 $ bitcoindEnvPassword env)
-        <$> parseRequest (unpack (bitcoindEnvHost env))
-  let request = baseRequest {HTTPClient.method = "POST", requestBody = RequestBodyLBS $ encode requestObject}
-  response <- liftIO $ httpLbs request manager
-  let responseJson :: Maybe AddrInfoResponse = decode $ responseBody response
-  pure $ case responseJson of
-    Nothing -> Left "No scriptPubKey"
-    Just s -> Right $ coerce s
-
-newtype AddrInfoResponse = AddrInfoResponse AddrInfo
-
-newtype AddrInfo = AddrInfo Text
-
-instance FromJSON AddrInfoResponse where
-  parseJSON = withObject "AddrInfoResponse" $ \v ->
-    AddrInfoResponse
-      <$> v .: "result"
-
-instance FromJSON AddrInfo where
-  parseJSON = withObject "AddrInfo" $ \v ->
-    AddrInfo
-      <$> v .: "scriptPubKey"
 

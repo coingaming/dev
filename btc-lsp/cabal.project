@@ -4,7 +4,9 @@ allow-newer: http2-grpc-proto-lens:proto-lens,
   signable:proto-lens, signable:proto-lens-runtime,
   http2-grpc-proto-lens:proto-lens, http2-client:http2,
   lnd-client:aeson, chronos:aeson, lnd-client:base64-bytestring,
-  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client
+  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client,
+  lnd-client:network-bitcoin
+
   --
   -- TODO : remove base64-bytestring jailbreak,
   -- probably need to upgrade qrcode-juicypixels in
@@ -55,3 +57,10 @@ source-repository-package
   location: https://github.com/21it/witch.git
   --sha256: 17dvcqj29883sysx5qcgjbi3smn1c9kjaj807a9a2vj24fg2jwja
   tag: ee0259bc5eb46d9c47d1c15473ff3e7d8212dc43
+
+source-repository-package
+  type: git
+  location: https://github.com/coingaming/src.git
+  --sha256: 1ql15mgbady0axdgslvk7av3i7ihxxmw7dq021yn4a7h3y5gh8i4
+  tag: e82db6b897a5a73a90675e49f9c5faf9fac286e1
+  subdir: network-bitcoin

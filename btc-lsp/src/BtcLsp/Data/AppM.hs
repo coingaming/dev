@@ -47,8 +47,6 @@ instance (MonadIO m) => KatipContext (AppM m) where
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
     asks Env.envGrpcServerEnv
-  getBtcEnv =
-    asks Env.envBitcoindRpcEnv
   getLspPubKeyVar =
     asks Env.envLndPubKey
   getLspLndSocketAddress = do
@@ -64,6 +62,9 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
   withElectrs method args = do
     env <- asks Env.envElectrsRpcEnv
     first FailureElectrs <$> args (method env)
+  withBitcoin method args = do
+    client <- asks Env.envBitcoindRpcEnv
+    first FailureBitcoind <$> args (method client)
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool

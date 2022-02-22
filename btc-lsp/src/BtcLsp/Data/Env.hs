@@ -11,11 +11,11 @@ module BtcLsp.Data.Env
 where
 
 import BtcLsp.Data.Type
-import BtcLsp.Rpc.Env
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
 import Crypto.Cipher.AES (AES256)
 import Crypto.Cipher.Types (IV, cipherInit, makeIV)
@@ -41,6 +41,7 @@ import qualified Env as E
 import qualified LndClient as Lnd
 import qualified LndClient.Data.SignMessage as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Network.Bitcoin as Btc
 
 data Env = Env
   { -- | General
@@ -62,7 +63,7 @@ data Env = Env
     -- | Elecrts Rpc
     envElectrsRpcEnv :: ElectrsEnv,
     -- | Bitcoind Rpc
-    envBitcoindRpcEnv :: BitcoindEnv
+    envBitcoindRpcEnv :: Btc.Client
   }
 
 data RawConfig = RawConfig
@@ -85,7 +86,6 @@ data RawConfig = RawConfig
     rawConfigElectrsRpcEnv :: ElectrsEnv,
     -- | Bitcoind Rpc
     rawConfigBitcoindRpcEnv :: BitcoindEnv
-
   }
 
 -- | Here we enable normal JSON parsing
@@ -184,6 +184,11 @@ withEnv rc this = do
   let katipCtx = mempty :: LogContexts
   let katipNs = mempty :: Namespace
   let lnd = rawConfigLndEnv rc
+  btcClient <-
+    Btc.getClient
+      (unpack $ bitcoindEnvHost $ rawConfigBitcoindRpcEnv rc)
+      (encodeUtf8 $ bitcoindEnvUsername $ rawConfigBitcoindRpcEnv rc)
+      (encodeUtf8 $ bitcoindEnvPassword $ rawConfigBitcoindRpcEnv rc)
   bracket newLogEnv rmLogEnv $ \le ->
     bracket newSqlPool rmSqlPool $ \pool ->
       runKatipContextT le katipCtx katipNs
@@ -211,7 +216,7 @@ withEnv rc this = do
                       gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
                 envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
-                envBitcoindRpcEnv = rawConfigBitcoindRpcEnv rc
+                envBitcoindRpcEnv = btcClient
               }
   where
     rmLogEnv :: LogEnv -> IO ()

@@ -370,6 +370,7 @@ data Failure
     --
     FailureGrpc Text
   | FailureElectrs RpcError
+  | FailureBitcoind RpcError
   deriving stock
     ( Eq,
       Show,
