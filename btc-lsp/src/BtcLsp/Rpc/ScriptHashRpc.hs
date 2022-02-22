@@ -66,7 +66,7 @@ getBalance env (Left address) = do
   scrHash <- getScriptHash address
   case scrHash of
     Right sh -> getBalance env (Right sh)
-    Left _ -> pure $ Left (OtherError "GettingScript Hash error")
+    Left _ -> pure $ Left (OtherError "Getting ScriptHash error")
 
 getScriptHash :: (Env m) => OnChainAddress a -> m (Either Text ScriptHash)
 getScriptHash addr = do
