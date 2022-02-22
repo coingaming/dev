@@ -15,9 +15,9 @@ import Data.ProtoLens.Field
 import qualified LndClient as Lnd
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Network.Bitcoin as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
-import qualified Network.Bitcoin as Btc
 
 class
   ( MonadUnliftIO m,
@@ -97,13 +97,13 @@ class
     ExceptT Failure m b
   withElectrsT method =
     ExceptT . withElectrs method
-  withBitcoin ::
+  withBtc ::
     (Btc.Client -> a) ->
-    (a -> m (Either RpcError b)) ->
+    (a -> IO b) ->
     m (Either Failure b)
-  withBitcoinT ::
+  withBtcT ::
     (Btc.Client -> a) ->
-    (a -> m (Either RpcError b)) ->
+    (a -> IO b) ->
     ExceptT Failure m b
-  withBitcoinT method =
-    ExceptT . withBitcoin method
+  withBtcT method =
+    ExceptT . withBtc method

@@ -17,8 +17,8 @@ import BtcLsp.Rpc.RpcResponse as Resp
 import Data.Aeson (decode, encode, withObject, (.:))
 import qualified Data.ByteString.Lazy as BS
 import Data.Digest.Pure.SHA
+import qualified Network.Bitcoin.Wallet as BtcW
 import qualified Text.Hex as TH
-import qualified Network.Bitcoin.Wallet as W
 
 newtype ScriptHash = ScriptHash Text
   deriving (Generic)
@@ -68,20 +68,24 @@ getBalance env (Left address) = do
     Right sh -> getBalance env (Right sh)
     Left _ -> pure $ Left (OtherError "Getting ScriptHash error")
 
-getScriptHash :: (Env m) => OnChainAddress a -> m (Either Text ScriptHash)
-getScriptHash addr = do
-  client <- liftIO $ W.getClient
-    "http://localhost:18443"
-    "developer"
-    "developer"
-  W.AddrInfo _ scrPubKey <- liftIO $ W.getAddrInfo client (coerce addr)
-  case Right (coerce scrPubKey) of
-    Left e -> pure $ Left e
-    Right sp -> do
-      case TH.decodeHex sp of
-        Nothing -> pure $ Left "Hex decode error"
-        Just pubKey -> do
-          let sha256pubKey = bytestringDigest $ sha256 $ BS.fromStrict pubKey
-          let sha256reversedPubKey = BS.reverse sha256pubKey
-          pure $ Right $ ScriptHash $ TH.encodeHex $ BS.toStrict sha256reversedPubKey
-
+getScriptHash :: (Env m) => OnChainAddress a -> m (Either Failure ScriptHash)
+getScriptHash addr = runExceptT $ do
+  BtcW.AddrInfo _ sp <- withBtcT BtcW.getAddrInfo ($ coerce addr)
+  decodeSp sp
+  where
+    decodeSp :: (Env m) => BtcW.ScrPubKey -> ExceptT Failure m ScriptHash
+    decodeSp =
+      ExceptT
+        . pure
+        . second sha256AndReverse
+        . maybeToRight (FailureBitcoind RpcHexDecodeError)
+        . TH.decodeHex
+        . coerce
+    sha256AndReverse =
+      ScriptHash
+        . TH.encodeHex
+        . BS.toStrict
+        . BS.reverse
+        . bytestringDigest
+        . sha256
+        . BS.fromStrict

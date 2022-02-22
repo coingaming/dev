@@ -62,8 +62,12 @@ data Env = Env
     envGrpcServerEnv :: GSEnv,
     -- | Elecrts Rpc
     envElectrsRpcEnv :: ElectrsEnv,
-    -- | Bitcoind Rpc
-    envBitcoindRpcEnv :: Btc.Client
+    -- | Bitcoind
+    envBtc :: Btc.Client,
+    --
+    -- TODO : it's redundant, remove it later!!!
+    --
+    envBtc' :: BitcoindEnv
   }
 
 data RawConfig = RawConfig
@@ -84,7 +88,7 @@ data RawConfig = RawConfig
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
     rawConfigElectrsRpcEnv :: ElectrsEnv,
-    -- | Bitcoind Rpc
+    -- | Bitcoind
     rawConfigBitcoindRpcEnv :: BitcoindEnv
   }
 
@@ -184,13 +188,14 @@ withEnv rc this = do
   let katipCtx = mempty :: LogContexts
   let katipNs = mempty :: Namespace
   let lnd = rawConfigLndEnv rc
-  btcClient <-
-    Btc.getClient
-      (unpack $ bitcoindEnvHost $ rawConfigBitcoindRpcEnv rc)
-      (encodeUtf8 $ bitcoindEnvUsername $ rawConfigBitcoindRpcEnv rc)
-      (encodeUtf8 $ bitcoindEnvPassword $ rawConfigBitcoindRpcEnv rc)
   bracket newLogEnv rmLogEnv $ \le ->
-    bracket newSqlPool rmSqlPool $ \pool ->
+    bracket newSqlPool rmSqlPool $ \pool -> do
+      let rBtc = rawConfigBitcoindRpcEnv rc
+      btc <-
+        Btc.getClient
+          (from $ bitcoindEnvHost rBtc)
+          (from $ bitcoindEnvUsername rBtc)
+          (from $ bitcoindEnvPassword rBtc)
       runKatipContextT le katipCtx katipNs
         . withUnliftIO
         $ \(UnliftIO run) ->
@@ -216,7 +221,8 @@ withEnv rc this = do
                       gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
                 envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
-                envBitcoindRpcEnv = btcClient
+                envBtc = btc,
+                envBtc' = rBtc
               }
   where
     rmLogEnv :: LogEnv -> IO ()

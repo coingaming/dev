@@ -99,9 +99,12 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   withElectrs method args = do
     env <- asks $ envElectrsRpcEnv . testEnvLsp
     first FailureElectrs <$> args (method env)
-  withBitcoin method args = do
-    client <- asks $ envBitcoindRpcEnv . testEnvLsp
-    first FailureBitcoind <$> args (method client)
+  withBtc method args = do
+    env <- asks $ Env.envBtc . testEnvLsp
+    --
+    -- TODO : catch exceptions!!!
+    --
+    liftIO $ Right <$> args (method env)
 
 instance (MonadIO m) => Katip (TestAppM owner m) where
   getLogEnv =
