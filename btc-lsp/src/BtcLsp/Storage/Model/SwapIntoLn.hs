@@ -1,5 +1,5 @@
 module BtcLsp.Storage.Model.SwapIntoLn
-  ( create,
+  ( createIgnore,
     getFundedSwaps,
     openChannel,
   )
@@ -8,7 +8,7 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 
-create ::
+createIgnore ::
   ( Storage m
   ) =>
   Entity User ->
@@ -18,7 +18,7 @@ create ::
   Money 'Usr 'Ln 'Fund ->
   UTCTime ->
   m (Entity SwapIntoLn)
-create userEnt fundInv fundAddr refundAddr userCap expAt =
+createIgnore userEnt fundInv fundAddr refundAddr userCap expAt =
   runSql $ do
     ct <- getCurrentTime
     Psql.upsertBy
@@ -40,18 +40,27 @@ create userEnt fundInv fundAddr refundAddr userCap expAt =
       [ SwapIntoLnFundInvoice Psql.=. Psql.val fundInv
       ]
 
-getFundedSwaps :: (Storage m) => m [Entity SwapIntoLn]
-getFundedSwaps =
-  runSql $
-    Psql.selectList
-      [ SwapIntoLnStatus `Psql.persistEq` SwapFunded
-      ]
+getFundedSwaps ::
+  ( Storage m
+  ) =>
+  m [(Entity SwapIntoLn, Entity User)]
+getFundedSwaps = runSql $
+  Psql.select $
+    Psql.from $ \(swap `Psql.InnerJoin` user) -> do
+      Psql.on
+        ( swap Psql.^. SwapIntoLnUserId
+            Psql.==. user Psql.^. UserId
+        )
+      Psql.where_
+        ( swap Psql.^. SwapIntoLnStatus
+            Psql.==. Psql.val SwapFunded
+        )
       --
       -- TODO : some sort of exp backoff in case
       -- where user node is offline for a long time.
       -- Maybe limits, some proper retries etc.
       --
-      []
+      pure (swap, user)
 
 openChannel :: (Monad m) => Entity SwapIntoLn -> m ()
 openChannel _ =

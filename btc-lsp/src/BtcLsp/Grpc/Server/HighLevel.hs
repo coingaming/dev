@@ -54,7 +54,7 @@ swapIntoLn userEnt req = do
         . getFutureTime
         $ Lnd.expiry fundInvLnd
     lift $
-      SwapIntoLn.create
+      SwapIntoLn.createIgnore
         userEnt
         fundInv
         fundAddr

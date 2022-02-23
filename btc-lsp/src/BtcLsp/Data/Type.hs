@@ -24,6 +24,10 @@ module BtcLsp.Data.Type
     Timing (..),
     SwapStatus (..),
     Failure (..),
+    tryFailureE,
+    tryFailureT,
+    tryFromE,
+    tryFromT,
     RpcError (..),
     SocketAddress (..),
     BlkHash (..),
@@ -44,6 +48,7 @@ import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
+import qualified Universum
 import qualified Witch
 
 newtype Nonce
@@ -378,6 +383,11 @@ data Failure
     --
     FailureGrpc Text
   | FailureElectrs RpcError
+  | --
+    -- NOTE : can not use SomeException there
+    -- because need Eq instance.
+    --
+    FailureTryFrom Text
   deriving stock
     ( Eq,
       Show,
@@ -385,6 +395,57 @@ data Failure
     )
 
 instance Out Failure
+
+tryFailureE ::
+  forall source target.
+  ( Show source,
+    Typeable source,
+    Typeable target
+  ) =>
+  Either (TryFromException source target) target ->
+  Either Failure target
+tryFailureE =
+  first $
+    FailureTryFrom . Universum.show
+
+tryFailureT ::
+  forall source target m.
+  ( Show source,
+    Typeable source,
+    Typeable target,
+    Monad m
+  ) =>
+  Either (TryFromException source target) target ->
+  ExceptT Failure m target
+tryFailureT =
+  except . tryFailureE
+
+tryFromE ::
+  forall source target.
+  ( Show source,
+    Typeable source,
+    Typeable target,
+    TryFrom source target,
+    'False ~ (source == target)
+  ) =>
+  source ->
+  Either Failure target
+tryFromE =
+  tryFailureE . tryFrom
+
+tryFromT ::
+  forall source target m.
+  ( Show source,
+    Typeable source,
+    Typeable target,
+    TryFrom source target,
+    Monad m,
+    'False ~ (source == target)
+  ) =>
+  source ->
+  ExceptT Failure m target
+tryFromT =
+  except . tryFromE
 
 data RpcError
   = RpcNoAddress
