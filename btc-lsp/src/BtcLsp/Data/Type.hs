@@ -434,6 +434,8 @@ newtype BlkHeight
 
 instance Out BlkHeight
 
+instance ToJSON BlkHeight
+
 instance From Btc.BlockHeight BlkHeight
 
 instance From BlkHeight Btc.BlockHeight

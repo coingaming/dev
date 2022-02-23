@@ -48,6 +48,7 @@ library
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
+      BtcLsp.Rpc.Helper
       BtcLsp.Rpc.RpcRequest
       BtcLsp.Rpc.RpcResponse
       BtcLsp.Storage.Migration
@@ -187,6 +188,7 @@ executable btc-lsp-exe
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
+      BtcLsp.Rpc.Helper
       BtcLsp.Rpc.RpcRequest
       BtcLsp.Rpc.RpcResponse
       BtcLsp.Storage.Migration
@@ -327,6 +329,7 @@ test-suite btc-lsp-test
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
+      BtcLsp.Rpc.Helper
       BtcLsp.Rpc.RpcRequest
       BtcLsp.Rpc.RpcResponse
       BtcLsp.Storage.Migration

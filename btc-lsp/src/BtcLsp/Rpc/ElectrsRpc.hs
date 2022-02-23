@@ -7,7 +7,6 @@ module BtcLsp.Rpc.ElectrsRpc
     blockHeader,
     Balance (..),
     ScriptHash (..),
-    BlockHeight (..),
     BlockHeader (..)
   )
 where
@@ -26,11 +25,8 @@ import qualified Text.Hex as TH
 newtype ScriptHash = ScriptHash Text
   deriving (Generic)
 
-newtype BlockHeight = BlockHeight Integer
-  deriving (Generic)
-
 newtype BlockHeader = BlockHeader Text
-  deriving (Generic)
+  deriving (Generic, Eq)
 
 instance Out BlockHeader
 
@@ -51,8 +47,6 @@ instance FromJSON Balance where
 
 instance ToJSON ScriptHash
 
-instance ToJSON BlockHeight
-
 instance FromJSON BlockHeader
 
 instance Out Balance
@@ -67,7 +61,6 @@ callRpc m r env = do
             Req.params = r
           }
   msgReply <- Client.send (lazyEncode request) env
-  print $ ("Reply: " :: Text) <> inspect msgReply
   pure $ join $ second (second result . lazyDecode) msgReply
   where
     lazyDecode :: FromJSON resp => ByteString -> Either RpcError resp
@@ -86,7 +79,7 @@ getBalance env (Left address) = do
     Right sh -> getBalance env (Right sh)
     Left _ -> pure $ Left (OtherError "Getting ScriptHash error")
 
-blockHeader :: Env m => ElectrsEnv -> BlockHeight -> m (Either RpcError BlockHeader)
+blockHeader :: Env m => ElectrsEnv -> BlkHeight -> m (Either RpcError BlockHeader)
 blockHeader env bh = callRpc GetBlockHeader [bh] env
 
 getScriptHash :: (Env m) => OnChainAddress a -> m (Either Failure ScriptHash)
