@@ -388,6 +388,7 @@ data RpcError
   = RpcNoAddress
   | RpcJsonDecodeError
   | RpcHexDecodeError
+  | CannotSyncBlockchain
   | OtherError Text
   deriving (Eq, Generic, Show)
 
