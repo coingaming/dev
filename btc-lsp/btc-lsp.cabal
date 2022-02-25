@@ -58,9 +58,9 @@ library
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
+      BtcLsp.Thread.ChannelOpener
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapIntoLn
       BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
@@ -198,9 +198,9 @@ executable btc-lsp-exe
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
+      BtcLsp.Thread.ChannelOpener
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapIntoLn
       BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
@@ -339,9 +339,9 @@ test-suite btc-lsp-test
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
+      BtcLsp.Thread.ChannelOpener
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapIntoLn
       BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
