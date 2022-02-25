@@ -9,9 +9,11 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import
-import qualified BtcLsp.Thread.Server as Server
+import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
+import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.NewAddress as Lnd
+import LndClient.LndTest (mine)
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
@@ -25,9 +27,9 @@ import TestWithLndLsp
 spec :: Spec
 spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
   itEnv "GetCfg" $
-    withSpawnLink Server.apply . const $ do
-      -- Let gRPC server spawn
-      sleep $ MicroSecondsDelay 100
+    withSpawnLink Main.apply . const $ do
+      -- Let app spawn
+      sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
       --
@@ -89,9 +91,9 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                      )
             )
   itEnv "SwapIntoLn" $
-    withSpawnLink Server.apply . const $ do
-      -- Let gRPC server spawn
-      sleep $ MicroSecondsDelay 100
+    withSpawnLink Main.apply . const $ do
+      -- Let app spawn
+      sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
       --
@@ -104,7 +106,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
               Lnd.addInvoice
               ( $
                   Lnd.AddInvoiceRequest
-                    { Lnd.valueMsat = MSat 1000000,
+                    { Lnd.valueMsat = MSat 0,
                       Lnd.memo = Nothing,
                       Lnd.expiry = Nothing
                     }
@@ -135,7 +137,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                   .~ from @(OnChainAddress 'Refund) refundAddr
             )
       --
-      -- TODO : do exact match!!!
+      -- TODO : do more precise match!!!
       --
       liftIO $
         res
@@ -146,3 +148,22 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                                 isJust $
                                   msg ^. SwapIntoLn.maybe'success
                           )
+      -- Let channel be opened
+      sleep $ MicroSecondsDelay 1000000
+      mine 1 LndLsp
+      cs <-
+        withLnd
+          Lnd.listChannels
+          ( $
+              ListChannels.ListChannelsRequest
+                { ListChannels.activeOnly = True,
+                  ListChannels.inactiveOnly = False,
+                  ListChannels.publicOnly = False,
+                  ListChannels.privateOnly = False,
+                  --
+                  -- TODO : add peer
+                  --
+                  ListChannels.peer = Nothing
+                }
+          )
+      print cs

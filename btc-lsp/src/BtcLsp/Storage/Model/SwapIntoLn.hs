@@ -1,7 +1,6 @@
 module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
     getFundedSwaps,
-    openChannel,
   )
 where
 
@@ -15,12 +14,17 @@ createIgnore ::
   LnInvoice 'Fund ->
   OnChainAddress 'Fund ->
   OnChainAddress 'Refund ->
-  Money 'Usr 'Ln 'Fund ->
   UTCTime ->
   m (Entity SwapIntoLn)
-createIgnore userEnt fundInv fundAddr refundAddr userCap expAt =
+createIgnore userEnt fundInv fundAddr refundAddr expAt =
   runSql $ do
     ct <- getCurrentTime
+    --
+    -- NOTE : Set initial amount to zero because
+    -- we don't know how much user will deposit
+    -- into on-chain address.
+    --
+    let userCap = Money 0
     Psql.upsertBy
       (UniqueSwapIntoLn fundInv)
       SwapIntoLn
@@ -37,7 +41,8 @@ createIgnore userEnt fundInv fundAddr refundAddr userCap expAt =
           swapIntoLnInsertedAt = ct,
           swapIntoLnUpdatedAt = ct
         }
-      [ SwapIntoLnFundInvoice Psql.=. Psql.val fundInv
+      [ SwapIntoLnFundInvoice
+          Psql.=. Psql.val fundInv
       ]
 
 getFundedSwaps ::
@@ -61,12 +66,3 @@ getFundedSwaps = runSql $
       -- Maybe limits, some proper retries etc.
       --
       pure (swap, user)
-
-openChannel :: (Monad m) => Entity SwapIntoLn -> m ()
-openChannel _ =
-  --
-  -- TODO : improve!!! This is reckless version,
-  -- we need to query Lnd for payment already being
-  -- processed or not.
-  --
-  pure ()
