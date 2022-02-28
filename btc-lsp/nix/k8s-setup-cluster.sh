@@ -7,7 +7,8 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 . "$THIS_DIR/k8s-export-env.sh"
 
 echo "==> Drop old kubernetes cluster"
-minikube stop --profile=$MINIKUBE_PROFILE && minikube delete --profile=$MINIKUBE_PROFILE
+minikube stop --profile=$MINIKUBE_PROFILE && \
+minikube delete --profile=$MINIKUBE_PROFILE
 
 echo "==> Create new kubernetes cluster"
 minikube start \
@@ -32,7 +33,10 @@ read -s DOCKERHUB_PASSWORD
 echo "Checking if entered credentials are correct..."
 docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
 
-kubectl create secret docker-registry dockerhub --docker-username=$DOCKERHUB_USERNAME --docker-password=$DOCKERHUB_PASSWORD
+kubectl create secret docker-registry dockerhub \
+--docker-username=$DOCKERHUB_USERNAME \
+--docker-password=$DOCKERHUB_PASSWORD
+
 kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "dockerhub"}]}'
 
 echo "==> Allow to use kubectl from nix-shell"

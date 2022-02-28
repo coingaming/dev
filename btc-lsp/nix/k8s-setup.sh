@@ -1,0 +1,114 @@
+#!/bin/sh
+
+set -e
+
+THIS_DIR="$(dirname "$(realpath "$0")")"
+BUILD_DIR="$THIS_DIR/../build"
+SETUP_MODE="--source"
+RESET_KUBERNETES="false"
+GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
+
+. "$THIS_DIR/k8s-export-env.sh"
+
+if [ -z "$*" ]; then
+  echo "==> using defaults"
+else
+  for arg in "$@"; do
+    case $arg in
+      --source)
+        SETUP_MODE="$arg"
+        shift
+        ;;
+      --prebuilt)
+        SETUP_MODE="$arg"
+        shift
+        ;;
+      --reset-kubernetes)
+        RESET_KUBERNETES="true"
+        shift
+        ;;
+      *)
+        echo "==> unrecognized arg $arg"
+        exit 1
+        ;;
+    esac
+  done
+fi
+
+echo "==> Build cleanup"
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+
+if [ "$RESET_KUBERNETES" = "true" ]; then
+  echo "==> DOING KUBERNETES CLUSTER RESET"
+  sh "$THIS_DIR/k8s-setup-cluster.sh"
+else
+  echo "==> using existing kubernetes cluster"
+fi
+
+echo "==> Generate keys"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/ns-gen-keys.sh'"
+
+case $SETUP_MODE in
+  --source)
+    echo "==> Building from source"
+    sh "$THIS_DIR/hm-release.sh"
+    ;;
+  --prebuilt)
+    (
+      echo "==> Using prebuilt"
+      cd "$BUILD_DIR"
+      rm -rf docker-image-btc-lsp.tar.gz
+      rm -rf docker-image-btc-lsp.txt
+      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
+    )
+    ;;
+  *)
+    echo "==> Unrecognized SETUP_MODE $SETUP_MODE"
+    exit 1
+    ;;
+esac
+
+echo "==> Loading docker image into minikube"
+minikube image load -p "$MINIKUBE_PROFILE" "$BUILD_DIR/docker-image-btc-lsp.tar.gz"
+
+echo "==> Partial dhall"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/ns-dhall-compile.sh'"
+
+echo "==> Generating k8s configs"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/k8s-generate.sh'"
+
+echo "==> Deploying k8s resources"
+sh "$THIS_DIR/k8s-deploy.sh yolo"
+
+echo "==> Waiting until containers are ready"
+sh "$THIS_DIR/k8s-wait.sh yolo"
+
+echo "==> Partial spin"
+sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
+
+echo "==> Export generated creds"
+sh "$THIS_DIR/k8s-export-creds.sh"
+
+echo "==> Generate additional creds"
+sh "$THIS_DIR/k8s-generate-creds.sh"
+
+echo "==> Full dhall"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/ns-dhall-compile.sh'"
+
+echo "==> Generating k8s configs"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/k8s-generate.sh'"
+
+echo "==> Deploying k8s resources"
+sh "$THIS_DIR/k8s-deploy.sh yolo"
+
+echo "==> Waiting until containers are ready"
+sh "$THIS_DIR/k8s-wait.sh yolo"
+
+echo "==> Mine initial coins"
+sh "$THIS_DIR/k8s-mine.sh" 105

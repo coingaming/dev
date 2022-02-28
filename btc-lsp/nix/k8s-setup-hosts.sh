@@ -1,8 +1,11 @@
 #!/bin/sh
 
 LOCALHOST=127.0.0.1
-CLUSTER_IP=`minikube ip --profile=coins-io`
 HOSTS_FILE=/etc/hosts
+
+. "$THIS_DIR/k8s-export-env.sh"
+
+CLUSTER_IP=`minikube ip --profile=$MINIKUBE_PROFILE`
 
 if [ `uname -s` = "Darwin" ]; then
   IP_ADDRESS="$LOCALHOST"
