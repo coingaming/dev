@@ -35,6 +35,10 @@ apply = do
   sleep $ MicroSecondsDelay 500000
   apply
 
+--
+-- TODO : do not open channel in case where
+-- there is enough liquidity to perform swap.
+--
 openChan :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
 openChan (swapEnt, userEnt) = do
   res <- runExceptT $ do
