@@ -1,6 +1,8 @@
 module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
+    updateFunded,
     getFundedSwaps,
+    getLatestSwapT,
   )
 where
 
@@ -26,7 +28,7 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
     --
     let userCap = Money 0
     Psql.upsertBy
-      (UniqueSwapIntoLn fundInv)
+      (UniqueSwapIntoLnFundInvoice fundInv)
       SwapIntoLn
         { swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
@@ -44,6 +46,31 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
       [ SwapIntoLnFundInvoice
           Psql.=. Psql.val fundInv
       ]
+
+updateFunded ::
+  ( Storage m
+  ) =>
+  OnChainAddress 'Fund ->
+  Money 'Usr 'Ln 'Fund ->
+  Money 'Lsp 'Ln 'Fund ->
+  Money 'Lsp 'OnChain 'Gain ->
+  m ()
+updateFunded addr usrCap lspCap lspFee = runSql $ do
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnChanCapUser
+          Psql.=. Psql.val usrCap,
+        SwapIntoLnChanCapLsp
+          Psql.=. Psql.val lspCap,
+        SwapIntoLnFeeLsp
+          Psql.=. Psql.val lspFee,
+        SwapIntoLnStatus
+          Psql.=. Psql.val SwapFunded
+      ]
+    Psql.where_ $
+      row Psql.^. SwapIntoLnFundAddress
+        Psql.==. Psql.val addr
 
 getFundedSwaps ::
   ( Storage m
@@ -66,3 +93,21 @@ getFundedSwaps = runSql $
       -- Maybe limits, some proper retries etc.
       --
       pure (swap, user)
+
+getLatestSwapT ::
+  ( Storage m
+  ) =>
+  ExceptT Failure m (Entity SwapIntoLn)
+getLatestSwapT =
+  ExceptT
+    . ( maybeToRight
+          (FailureInternal "Missing SwapIntoLn")
+          <$>
+      )
+    . runSql
+    $ listToMaybe
+      <$> Psql.selectList
+        []
+        [ Psql.Desc SwapIntoLnId,
+          Psql.LimitTo 1
+        ]

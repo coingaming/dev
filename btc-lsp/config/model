@@ -22,7 +22,8 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
-  UniqueSwapIntoLn fundInvoice
+  UniqueSwapIntoLnFundInvoice fundInvoice
+  UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic
 
 Block

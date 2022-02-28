@@ -5,10 +5,12 @@ module ServerSpec
   )
 where
 
+import qualified BtcLsp.Cfg as Cfg
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -36,7 +38,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       gsEnv <- getGsEnv
       gcEnv <- getGCEnv
       pub <- getLspPubKey
-      res <-
+      res0 <-
         Client.getCfg
           gsEnv
           (gcEnv {gcEnvCompressMode = compressMode})
@@ -54,7 +56,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                        & LowLevel.val .~ 10000000000
                    )
       liftIO $
-        (^. GetCfg.success) <$> res
+        (^. GetCfg.success) <$> res0
           `shouldBe` Right
             ( defMessage
                 & GetCfg.lspLnNodes
@@ -99,7 +101,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       --
       gsEnv <- getGsEnv
       gcEnv <- getGCEnv
-      res <- runExceptT $ do
+      res0 <- runExceptT $ do
         fundInv <-
           from . Lnd.paymentRequest
             <$> withLndT
@@ -140,7 +142,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       -- TODO : do more precise match!!!
       --
       liftIO $
-        res
+        res0
           `shouldSatisfy` ( \case
                               Left {} ->
                                 False
@@ -148,11 +150,19 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                                 isJust $
                                   msg ^. SwapIntoLn.maybe'success
                           )
-      -- Let channel be opened
-      sleep $ MicroSecondsDelay 1000000
-      mine 1 LndLsp
-      cs <-
-        withLnd
+      res1 <- runExceptT $ do
+        swapEnt <- SwapIntoLn.getLatestSwapT
+        let amt = Cfg.swapLnMaxAmt
+        lift $
+          SwapIntoLn.updateFunded
+            (swapIntoLnFundAddress $ entityVal swapEnt)
+            amt
+            (Cfg.newChanCapLsp amt)
+            (Cfg.newSwapIntoLnFee amt)
+        -- Let channel be opened
+        sleep $ MicroSecondsDelay 5000000
+        lift $ mine 6 LndLsp
+        withLndT
           Lnd.listChannels
           ( $
               ListChannels.ListChannelsRequest
@@ -166,4 +176,11 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                   ListChannels.peer = Nothing
                 }
           )
-      print cs
+      liftIO $
+        res1
+          `shouldSatisfy` ( \case
+                              Left {} ->
+                                False
+                              Right {} ->
+                                True
+                          )

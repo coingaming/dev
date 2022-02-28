@@ -388,6 +388,7 @@ data Failure
     -- because need Eq instance.
     --
     FailureTryFrom Text
+  | FailureInternal Text
   deriving stock
     ( Eq,
       Show,
