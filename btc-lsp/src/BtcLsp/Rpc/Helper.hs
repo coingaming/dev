@@ -18,9 +18,14 @@ waitTillLastBlockProcessedT 0 = throwE $ FailureElectrs CannotSyncBlockchain
 waitTillLastBlockProcessedT decr = do
   sleep $ MicroSecondsDelay 1000000
   bHeight <- withBtcT getBlockCount id
-  bHash <- withBtcT getBlockHash ($ bHeight)
+  _ <- withBtcT getBlockHash ($ bHeight)
   bHeader <- withElectrsT Rpc.blockHeader ($ BlkHeight (coerce bHeight))
-  if bHeader == Rpc.BlockHeader bHash then
-    return ()
-  else
-    waitTillLastBlockProcessedT (decr -1)
+  case bHeader of
+    Rpc.BlockHeader "" -> waitTillLastBlockProcessedT (decr -1)
+    _ -> return ()
+
+-- TODO Implement blockHash comparison, now it looks like has different formats so doesn't match
+--  if bHeader == Rpc.BlockHeader bHash then
+--    return ()
+--  else
+--    waitTillLastBlockProcessedT (decr -1)
