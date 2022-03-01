@@ -1,5 +1,5 @@
 module BtcLsp.Storage.Model.Block
-  ( create,
+  ( createUpdate,
     getLatest,
   )
 where
@@ -7,14 +7,14 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 
-create ::
+createUpdate ::
   ( Storage m
   ) =>
   BlkHeight ->
   BlkHash ->
   BlkPrevHash ->
   m (Entity Block)
-create height hash prev = do
+createUpdate height hash prev = do
   ct <- getCurrentTime
   --
   -- TODO : investigate how this will behave

@@ -5,6 +5,7 @@
 }:
 with (import ./nix/haskell.nix);
 let proto = import ./nix/proto-lens-protoc.nix;
+    kompose-src = import ./nix/kompose.nix;
     ideBuildInputs =
       if withHaskellIde
       then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/f5aaaddd0a8efcde271cd497c86e300da608c4a8") {bundle = ["dhall" "haskell"];})]
@@ -23,6 +24,7 @@ in
     pkgs.netcat-gnu
     pkgs.socat
     proto.protoc-haskell-bin
+    (pkgs.callPackage kompose-src {})
   ];
   tools = {
     cabal = "3.2.0.0";

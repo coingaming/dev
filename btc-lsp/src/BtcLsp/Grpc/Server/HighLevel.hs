@@ -32,6 +32,16 @@ swapIntoLn userEnt req = do
     refundAddr <-
       fromReqT $
         req ^. SwapIntoLn.maybe'refundOnChainAddress
+    fundInvLnd <-
+      withLndT
+        Lnd.decodePayReq
+        ($ from fundInv)
+    --
+    -- TODO : proper input failure
+    --
+    when (Lnd.numMsat fundInvLnd /= MSat 0)
+      . throwE
+      $ FailureInput [defMessage]
     fundAddr <-
       from
         <$> withLndT
@@ -42,21 +52,16 @@ swapIntoLn userEnt req = do
                   Lnd.account = Nothing
                 }
           )
-    fundInvLnd <-
-      withLndT
-        Lnd.decodePayReq
-        ($ from fundInv)
     expAt <-
       lift
         . getFutureTime
         $ Lnd.expiry fundInvLnd
     lift $
-      SwapIntoLn.create
+      SwapIntoLn.createIgnore
         userEnt
         fundInv
         fundAddr
         refundAddr
-        (from $ Lnd.numMsat fundInvLnd)
         expAt
   pure $ case res of
     Left e ->
@@ -67,7 +72,7 @@ swapIntoLn userEnt req = do
           .~ ( defMessage
                  & SwapIntoLn.fundOnChainAddress
                    .~ from (swapIntoLnFundAddress swap)
-                 & SwapIntoLn.fundMoney
+                 & SwapIntoLn.minFundMoney
                    .~ from @MSat
                      ( from (swapIntoLnChanCapUser swap)
                          + from (swapIntoLnFeeLsp swap)

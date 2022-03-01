@@ -11,6 +11,7 @@ import Control.Concurrent.Async as X
     cancel,
     linkOnly,
     race,
+    wait,
     waitAnyCancel,
     waitAnySTM,
   )

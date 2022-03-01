@@ -1,6 +1,7 @@
 let nixpkgs = import ./nixpkgs21.nix;
 in
 {
+  kompose-src ? import ./kompose.nix,
   pkgs ? import nixpkgs {
 
   }
@@ -12,6 +13,7 @@ stdenv.mkDerivation {
   buildInputs = [
     nix
     openssl
+    (pkgs.callPackage kompose-src {})
     #
     # TODO : replace it with minimal possible dhall setup
     #

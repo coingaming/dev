@@ -48,7 +48,7 @@ scanBlockT height hash prev = do
   lift $
     $(logTM) ErrorS . logStr $ inspect blk
   lift . void $
-    Block.create height hash prev
+    Block.createUpdate height hash prev
 
 scanUntilT ::
   ( Env m

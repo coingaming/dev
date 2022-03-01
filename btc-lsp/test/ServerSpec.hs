@@ -5,13 +5,18 @@ module ServerSpec
   )
 where
 
+import qualified BtcLsp.Cfg as Cfg
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import
-import qualified BtcLsp.Thread.Server as Server
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
+import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.NewAddress as Lnd
+import LndClient.LndTest (mine)
+import qualified LndClient.LndTest as LndTest
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
@@ -25,16 +30,16 @@ import TestWithLndLsp
 spec :: Spec
 spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
   itEnv "GetCfg" $
-    withSpawnLink Server.apply . const $ do
-      -- Let gRPC server spawn
-      sleep $ MicroSecondsDelay 100
+    withSpawnLink Main.apply . const $ do
+      -- Let app spawn
+      sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
       --
       gsEnv <- getGsEnv
       gcEnv <- getGCEnv
       pub <- getLspPubKey
-      res <-
+      res0 <-
         Client.getCfg
           gsEnv
           (gcEnv {gcEnvCompressMode = compressMode})
@@ -52,7 +57,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                        & LowLevel.val .~ 10000000000
                    )
       liftIO $
-        (^. GetCfg.success) <$> res
+        (^. GetCfg.success) <$> res0
           `shouldBe` Right
             ( defMessage
                 & GetCfg.lspLnNodes
@@ -89,29 +94,31 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                      )
             )
   itEnv "SwapIntoLn" $
-    withSpawnLink Server.apply . const $ do
-      -- Let gRPC server spawn
-      sleep $ MicroSecondsDelay 100
+    withSpawnLink Main.apply . const $ do
+      -- Let app spawn
+      sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
       --
       gsEnv <- getGsEnv
       gcEnv <- getGCEnv
-      res <- runExceptT $ do
+      res0 <- runExceptT $ do
         fundInv <-
           from . Lnd.paymentRequest
-            <$> withLndT
+            <$> withLndTestT
+              LndAlice
               Lnd.addInvoice
               ( $
                   Lnd.AddInvoiceRequest
-                    { Lnd.valueMsat = MSat 1000000,
+                    { Lnd.valueMsat = MSat 0,
                       Lnd.memo = Nothing,
                       Lnd.expiry = Nothing
                     }
               )
         refundAddr <-
           from
-            <$> withLndT
+            <$> withLndTestT
+              LndAlice
               Lnd.newAddress
               --
               -- TODO : maybe pass LndEnv as the last argument
@@ -124,6 +131,13 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                       Lnd.account = Nothing
                     }
               )
+        --
+        -- TODO : remove gsEnv argument, add own signer
+        -- into gcEnv. Without proper signer, this test
+        -- is meaningless, because LSP can not recognize
+        -- itself as a peer to open channel. Peer and
+        -- signer should be Alice node!!!
+        --
         Client.swapIntoLnT
           gsEnv
           (gcEnv {gcEnvCompressMode = compressMode})
@@ -135,14 +149,49 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                   .~ from @(OnChainAddress 'Refund) refundAddr
             )
       --
-      -- TODO : do exact match!!!
+      -- TODO : do more precise match!!!
       --
       liftIO $
-        res
+        res0
           `shouldSatisfy` ( \case
                               Left {} ->
                                 False
                               Right msg ->
                                 isJust $
                                   msg ^. SwapIntoLn.maybe'success
+                          )
+      res1 <- runExceptT $ do
+        lift $ LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
+        swapEnt <- SwapIntoLn.getLatestSwapT
+        let amt = Cfg.swapLnMaxAmt
+        lift $
+          SwapIntoLn.updateFunded
+            (swapIntoLnFundAddress $ entityVal swapEnt)
+            amt
+            (Cfg.newChanCapLsp amt)
+            (Cfg.newSwapIntoLnFee amt)
+        -- Let channel be opened
+        sleep $ MicroSecondsDelay 5000000
+        lift $ mine 6 LndLsp
+        withLndT
+          Lnd.listChannels
+          ( $
+              ListChannels.ListChannelsRequest
+                { ListChannels.activeOnly = True,
+                  ListChannels.inactiveOnly = False,
+                  ListChannels.publicOnly = False,
+                  ListChannels.privateOnly = False,
+                  --
+                  -- TODO : add peer
+                  --
+                  ListChannels.peer = Nothing
+                }
+          )
+      liftIO $
+        res1
+          `shouldSatisfy` ( \case
+                              Left {} ->
+                                False
+                              Right {} ->
+                                True
                           )
