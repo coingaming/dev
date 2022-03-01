@@ -27,7 +27,6 @@ class
   Env m
   where
   getGsEnv :: m GSEnv
-  getBtcEnv :: m BitcoindEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLspLndSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey

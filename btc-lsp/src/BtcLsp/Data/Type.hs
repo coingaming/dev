@@ -389,6 +389,7 @@ data Failure
     --
     FailureTryFrom Text
   | FailureInternal Text
+  | FailureBitcoind RpcError
   deriving stock
     ( Eq,
       Show,
@@ -451,6 +452,7 @@ tryFromT =
 data RpcError
   = RpcNoAddress
   | RpcJsonDecodeError
+  | RpcHexDecodeError
   | OtherError Text
   deriving (Eq, Generic, Show)
 
