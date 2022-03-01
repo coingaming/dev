@@ -1,5 +1,6 @@
 #!/bin/sh
 
+THIS_DIR="$(dirname "$(realpath "$0")")"
 LOCALHOST=127.0.0.1
 HOSTS_FILE=/etc/hosts
 

@@ -5,7 +5,6 @@ set -e
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
 SETUP_MODE="--source"
-RESET_KUBERNETES="false"
 GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
 
 . "$THIS_DIR/k8s-export-env.sh"
@@ -23,10 +22,6 @@ else
         SETUP_MODE="$arg"
         shift
         ;;
-      --reset-kubernetes)
-        RESET_KUBERNETES="true"
-        shift
-        ;;
       *)
         echo "==> unrecognized arg $arg"
         exit 1
@@ -35,16 +30,12 @@ else
   done
 fi
 
+echo "==> Setup kubernetes cluster"
+sh "$THIS_DIR/k8s-setup-cluster.sh"
+
 echo "==> Build cleanup"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
-
-if [ "$RESET_KUBERNETES" = "true" ]; then
-  echo "==> DOING KUBERNETES CLUSTER RESET"
-  sh "$THIS_DIR/k8s-setup-cluster.sh"
-else
-  echo "==> using existing kubernetes cluster"
-fi
 
 echo "==> Generate keys"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
@@ -70,8 +61,16 @@ case $SETUP_MODE in
     ;;
 esac
 
+echo "==> Loading docker image"
+docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
+  | awk '{print $NF}' \
+  | tr -d '\n' \
+  > "$BUILD_DIR/docker-image-btc-lsp.txt"
+
 echo "==> Loading docker image into minikube"
-minikube image load -p "$MINIKUBE_PROFILE" "$BUILD_DIR/docker-image-btc-lsp.tar.gz"
+minikube image load \
+  -p "$MINIKUBE_PROFILE" \
+  --daemon=true $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
