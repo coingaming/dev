@@ -10,7 +10,6 @@ module BtcLsp.Grpc.Client.HighLevel
 where
 
 import BtcLsp.Grpc.Client.LowLevel
-import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import
 import qualified Data.Binary.Builder as BS
 import qualified Data.ByteString as BS
@@ -30,15 +29,13 @@ import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 swapIntoLn ::
   ( Env m
   ) =>
-  GSEnv ->
   GCEnv ->
   SwapIntoLn.Request ->
   m (Either Failure SwapIntoLn.Response)
-swapIntoLn gsEnv env req = withRunInIO $ \run ->
+swapIntoLn env req = withRunInIO $ \run ->
   first FailureGrpc
     <$> runUnary
       (RPC :: RPC Service "swapIntoLn")
-      gsEnv
       env
       ( \res sig compressMode ->
           run $
@@ -49,25 +46,22 @@ swapIntoLn gsEnv env req = withRunInIO $ \run ->
 swapIntoLnT ::
   ( Env m
   ) =>
-  GSEnv ->
   GCEnv ->
   SwapIntoLn.Request ->
   ExceptT Failure m SwapIntoLn.Response
-swapIntoLnT gsEnv env =
-  ExceptT . swapIntoLn gsEnv env
+swapIntoLnT env =
+  ExceptT . swapIntoLn env
 
 getCfg ::
   ( Env m
   ) =>
-  GSEnv ->
   GCEnv ->
   GetCfg.Request ->
   m (Either Failure GetCfg.Response)
-getCfg gsEnv env req = withRunInIO $ \run ->
+getCfg env req = withRunInIO $ \run ->
   first FailureGrpc
     <$> runUnary
       (RPC :: RPC Service "getCfg")
-      gsEnv
       env
       ( \res sig compressMode ->
           run $
@@ -78,12 +72,11 @@ getCfg gsEnv env req = withRunInIO $ \run ->
 getCfgT ::
   ( Env m
   ) =>
-  GSEnv ->
   GCEnv ->
   GetCfg.Request ->
   ExceptT Failure m GetCfg.Response
-getCfgT gsEnv env =
-  ExceptT . getCfg gsEnv env
+getCfgT env =
+  ExceptT . getCfg env
 
 -- | WARNING : this function is unsafe and inefficient
 -- but it is used for testing purposes only!

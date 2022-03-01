@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralisedNewtypeDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module TestAppM
@@ -18,24 +19,32 @@ module TestAppM
     withTestEnv,
     getGCEnv,
     withLndTestT,
+    setGrpcCtxT,
   )
 where
 
 import BtcLsp.Data.Env as Env
-import BtcLsp.Rpc.Env
 import BtcLsp.Grpc.Client.LowLevel
-import BtcLsp.Import as I
+import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
+import BtcLsp.Rpc.Env
 import qualified BtcLsp.Storage.Model.LnChan as LnChan (getByChannelPoint)
 import Data.Aeson (eitherDecodeStrict)
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8 hiding (filter, length)
+import Data.ProtoLens.Field
 import qualified Env as E
 import LndClient (LndEnv (..))
 import qualified LndClient as Lnd
+import qualified LndClient.Data.GetInfo as GetInfo
+import qualified LndClient.Data.SignMessage as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
+import qualified LndClient.RPC.Katip as Lnd
 import Network.Bitcoin as Btc (Client, getClient)
 import qualified Network.GRPC.Client.Helpers as Grpc
+import qualified Proto.BtcLsp.Data.HighLevel as Proto
+import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
 
 data TestOwner
@@ -206,18 +215,64 @@ withTestEnv' action = do
                 (envLnd aliceAppEnv)
                 (Lnd.NodeLocation "localhost:9737")
                 $ \aliceTestEnv ->
-                  liftIO $
-                    action
-                      TestEnv
-                        { testEnvLsp = lspAppEnv,
-                          testEnvBtc = btcClient,
-                          testEnvLndLsp = lspTestEnv,
-                          testEnvLndAlice = aliceTestEnv,
-                          testEnvKatipNS = katipNS,
-                          testEnvKatipLE = katipLE,
-                          testEnvKatipCTX = katipCTX,
-                          testEnvGCEnv = gcEnv
-                        }
+                  liftIO . action $
+                    TestEnv
+                      { testEnvLsp = lspAppEnv,
+                        testEnvBtc = btcClient,
+                        testEnvLndLsp = lspTestEnv,
+                        testEnvLndAlice = aliceTestEnv,
+                        testEnvKatipNS = katipNS,
+                        testEnvKatipLE = katipLE,
+                        testEnvKatipCTX = katipCTX,
+                        testEnvGCEnv =
+                          gcEnv
+                            { gcEnvSigner =
+                                runKatipContextT
+                                  katipLE
+                                  katipCTX
+                                  katipNS
+                                  . signT
+                                    ( LndTest.testLndEnv
+                                        aliceTestEnv
+                                    )
+                            }
+                      }
+
+signT ::
+  Lnd.LndEnv ->
+  ByteString ->
+  KatipContextT IO (Maybe ByteString)
+signT env msg = do
+  eSig <-
+    Lnd.signMessage env $
+      Lnd.SignMessageRequest
+        { Lnd.message = msg,
+          Lnd.keyLoc =
+            Lnd.KeyLocator
+              { Lnd.keyFamily = 6,
+                Lnd.keyIndex = 0
+              },
+          Lnd.doubleHash = False,
+          Lnd.compactSig = False
+        }
+  case eSig of
+    Left e -> do
+      $(logTM) ErrorS . logStr $
+        "Client ==> signing procedure failed "
+          <> inspect e
+      pure Nothing
+    Right sig0 -> do
+      let sig = coerce sig0
+      $(logTM) DebugS . logStr $
+        "Client ==> signing procedure succeeded for msg of "
+          <> inspect (BS.length msg)
+          <> " bytes "
+          <> inspect msg
+          <> " got signature of "
+          <> inspect (BS.length sig)
+          <> " bytes "
+          <> inspect sig
+      pure $ Just sig
 
 itEnv ::
   String ->
@@ -295,3 +350,26 @@ getGCEnv ::
   TestAppM owner m GCEnv
 getGCEnv =
   asks testEnvGCEnv
+
+setGrpcCtxT ::
+  ( HasField msg "ctx" Proto.Ctx,
+    MonadUnliftIO m,
+    LndTest m owner
+  ) =>
+  owner ->
+  msg ->
+  ExceptT Failure m msg
+setGrpcCtxT owner message = do
+  nonce <- newNonce
+  pubKey <-
+    GetInfo.identityPubkey
+      <$> withLndTestT owner Lnd.getInfo id
+  pure $
+    message
+      & field @"ctx"
+        .~ ( defMessage
+               & Proto.nonce
+                 .~ from @Nonce @Proto.Nonce nonce
+               & Proto.lnPubKey
+                 .~ from @Lnd.NodePubKey @Proto.LnPubKey pubKey
+           )
