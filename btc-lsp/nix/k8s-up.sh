@@ -26,7 +26,7 @@ EOF
 
 for OWNER in lsp; do
 
-  LND_SERVICE=yolo_lnd-$OWNER
+  LND_SERVICE="lnd-$OWNER"
   LND_CONTAINER=`docker ps -f name=$LND_SERVICE --quiet`
   ( echo "$LND_SERVICE ==> Checking wallet of $LND_CONTAINER" \
     && docker exec \

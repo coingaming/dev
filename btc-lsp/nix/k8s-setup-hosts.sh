@@ -15,7 +15,7 @@ else
 fi
 
 setup () {
-  ENTRY="$IP_ADDRESS yolo-$1"
+  ENTRY="$IP_ADDRESS $1"
   echo "Adding $ENTRY to $HOSTS_FILE"
   grep -q "$ENTRY" /etc/hosts || echo "$ENTRY" >> $HOSTS_FILE
 }

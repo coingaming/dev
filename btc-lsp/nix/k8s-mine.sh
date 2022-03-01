@@ -13,7 +13,7 @@ fi
 
 for OWNER in lsp; do
 
-  LND_SERVICE="yolo-lnd-$OWNER"
+  LND_SERVICE="lnd-$OWNER"
   echo "$0 ==> getting LND_POD of $LND_SERVICE"
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   echo "$0 ==> getting $BITCOIN_NETWORK LND_ADDRESS of $LND_SERVICE $LND_POD"
@@ -22,7 +22,7 @@ for OWNER in lsp; do
     | tr -d '\r\n'`
   echo "$0 ==> got LND_ADDRESS $LND_ADDRESS of $LND_SERVICE"
 
-  BITCOIND_SERVICE="yolo-bitcoind"
+  BITCOIND_SERVICE="bitcoind"
   BITCOIND_POD=`sh $THIS_DIR/k8s-get-pod.sh $BITCOIND_SERVICE`
   echo "$BITCOIND_SERVICE ==> mining $BITCOIND_POD to $LND_ADDRESS"
 

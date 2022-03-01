@@ -24,7 +24,7 @@ EOF
 
 for OWNER in lsp; do
 
-  LND_SERVICE="yolo-lnd-$OWNER"
+  LND_SERVICE="lnd-$OWNER"
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   ( echo "$LND_SERVICE ==> Checking wallet of $LND_POD" \
     && kubectl exec \

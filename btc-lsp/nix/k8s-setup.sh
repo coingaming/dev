@@ -84,7 +84,7 @@ echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh yolo"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh yolo"
+sh "$THIS_DIR/k8s-wait.sh"
 
 echo "==> Partial spin"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
@@ -104,7 +104,7 @@ echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh yolo"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh yolo"
+sh "$THIS_DIR/k8s-wait.sh"
 
 echo "==> Mine initial coins"
 sh "$THIS_DIR/k8s-mine.sh" 105

@@ -8,10 +8,6 @@ check_state () {
   echo "Success! $1 is up and running!"
 }
 
-if [ "$1" = "yolo" ]; then
-  for MEMBER in bitcoind btc-lsp lnd-lsp postgres rtl; do
-    check_state "$1-$MEMBER"
-  done
-else
-  echo "Unknown stack: $1"
-fi
+for MEMBER in bitcoind btc-lsp lnd-lsp postgres rtl; do
+  check_state "$MEMBER"
+done
