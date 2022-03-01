@@ -6,6 +6,8 @@ import "btc_lsp/data/high_level.proto";
 
 message Request {
   .BtcLsp.Data.HighLevel.Ctx ctx = 1;
+  // FundLnInvoice is optional to enable channel rebalance
+  // without new channel opening.
   .BtcLsp.Data.HighLevel.FundLnInvoice fund_ln_invoice = 2;
   .BtcLsp.Data.HighLevel.RefundOnChainAddress refund_on_chain_address = 3;
 }
@@ -20,6 +22,8 @@ message Response {
 
   message Success {
     .BtcLsp.Data.HighLevel.FundOnChainAddress fund_on_chain_address = 1;
+    // FundMoney will be provided only in case
+    // where FundLnInvoice has been provided.
     .BtcLsp.Data.HighLevel.FundMoney fund_money = 2;
   }
 

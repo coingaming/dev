@@ -24,6 +24,12 @@ module BtcLsp.Data.Type
     Timing (..),
     SwapStatus (..),
     Failure (..),
+    RpcError (..),
+    SocketAddress (..),
+    BlkHash (..),
+    BlkPrevHash (..),
+    BlkHeight (..),
+    BlkStatus (..),
   )
 where
 
@@ -36,6 +42,7 @@ import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
+import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Witch
 
@@ -258,7 +265,7 @@ instance From (Money owner btcl mrel) Rational where
     via @(Ratio Natural)
 
 newtype FeeRate
-  = FeeRate (Ratio Natural)
+  = FeeRate (Ratio Word64)
   deriving newtype
     ( Eq,
       Ord,
@@ -268,18 +275,18 @@ newtype FeeRate
     ( Generic
     )
 
-instance From (Ratio Natural) FeeRate
+instance From (Ratio Word64) FeeRate
 
-instance From FeeRate (Ratio Natural)
+instance From FeeRate (Ratio Word64)
 
 instance TryFrom Rational FeeRate where
   tryFrom =
-    from @(Ratio Natural)
+    from @(Ratio Word64)
       `composeTryRhs` tryFrom
 
 instance From FeeRate Rational where
   from =
-    via @(Ratio Natural)
+    via @(Ratio Word64)
 
 newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text
@@ -303,6 +310,10 @@ instance From (OnChainAddress mrel) Text
 instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
 
 instance From (OnChainAddress 'Fund) Lnd.NewAddressResponse
+
+instance FromJSON (OnChainAddress mrel)
+
+instance ToJSON (OnChainAddress mrel)
 
 data SwapStatus
   = -- | Waiting on-chain funding trx with
@@ -363,6 +374,8 @@ data Failure
     -- failure proto messages instead.
     --
     FailureGrpc Text
+  | FailureElectrs RpcError
+  | FailureBitcoind RpcError
   deriving stock
     ( Eq,
       Show,
@@ -371,8 +384,68 @@ data Failure
 
 instance Out Failure
 
+data RpcError
+  = RpcNoAddress
+  | RpcJsonDecodeError
+  | RpcHexDecodeError
+  | OtherError Text
+  deriving (Eq, Generic, Show)
+
+instance Out RpcError
+
+data SocketAddress = SocketAddress
+  { socketAddressHost :: HostName,
+    socketAddressPort :: PortNumber
+  }
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
+
+newtype BlkHash
+  = BlkHash Btc.BlockHash
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
+
+instance Out BlkHash
+
+instance From Btc.BlockHash BlkHash
+
+instance From BlkHash Btc.BlockHash
+
+newtype BlkPrevHash
+  = BlkPrevHash Btc.BlockHash
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
+
+instance Out BlkPrevHash
+
+instance From Btc.BlockHash BlkPrevHash
+
+instance From BlkPrevHash Btc.BlockHash
+
+newtype BlkHeight
+  = BlkHeight Btc.BlockHeight
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
+
+instance Out BlkHeight
+
+instance From Btc.BlockHeight BlkHeight
+
+instance From BlkHeight Btc.BlockHeight
+
+data BlkStatus
+  = BlkConfirmed
+  | BlkOrphanNew
+  | BlkOrphanTrxReverted
+  deriving (Eq, Ord, Show, Read, Generic)
+
+instance Out BlkStatus
+
 Psql.derivePersistField "LnInvoiceStatus"
-
 Psql.derivePersistField "LnChanStatus"
-
 Psql.derivePersistField "SwapStatus"
+Psql.derivePersistField "BlkStatus"

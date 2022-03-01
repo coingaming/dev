@@ -1,20 +1,20 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
-name:                btc-lsp
-version:             0.1.0.0
-description:         Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
-homepage:            https://github.com/githubuser/btc-lsp#readme
-bug-reports:         https://github.com/githubuser/btc-lsp/issues
-license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2020 Author name here
-license:             BSD3
-build-type:          Simple
+name:           btc-lsp
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
+homepage:       https://github.com/githubuser/btc-lsp#readme
+bug-reports:    https://github.com/githubuser/btc-lsp/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
 extra-source-files:
     README.md
     ChangeLog.md
@@ -45,12 +45,19 @@ library
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Rpc.Client
+      BtcLsp.Rpc.Env
+      BtcLsp.Rpc.RpcRequest
+      BtcLsp.Rpc.RpcResponse
+      BtcLsp.Rpc.ScriptHashRpc
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
+      BtcLsp.Storage.Model.Block
       BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Thread.BlockScanner
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
@@ -88,9 +95,12 @@ library
       StrictData
       TypeFamilies
       TypeOperators
+      StandaloneDeriving
+      DerivingVia
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists
   build-depends:
       GenericPretty
+    , SHA
     , aeson
     , async
     , base >=4.7 && <5
@@ -108,6 +118,9 @@ library
     , esqueleto >=3.5.3
     , extra
     , generic-pretty-instances
+    , hex-text
+    , http-client
+    , http-types
     , http2
     , http2-client
     , http2-client-grpc
@@ -119,6 +132,7 @@ library
     , memory
     , microlens
     , monad-logger
+    , network
     , network-bitcoin
     , persistent >=2.13.2.1
     , persistent-migration
@@ -171,12 +185,19 @@ executable btc-lsp-exe
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Rpc.Client
+      BtcLsp.Rpc.Env
+      BtcLsp.Rpc.RpcRequest
+      BtcLsp.Rpc.RpcResponse
+      BtcLsp.Rpc.ScriptHashRpc
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
+      BtcLsp.Storage.Model.Block
       BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Thread.BlockScanner
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
@@ -214,9 +235,12 @@ executable btc-lsp-exe
       StrictData
       TypeFamilies
       TypeOperators
+      StandaloneDeriving
+      DerivingVia
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GenericPretty
+    , SHA
     , aeson
     , async
     , base >=4.7 && <5
@@ -234,6 +258,9 @@ executable btc-lsp-exe
     , esqueleto >=3.5.3
     , extra
     , generic-pretty-instances
+    , hex-text
+    , http-client
+    , http-types
     , http2
     , http2-client
     , http2-client-grpc
@@ -245,6 +272,7 @@ executable btc-lsp-exe
     , memory
     , microlens
     , monad-logger
+    , network
     , network-bitcoin
     , persistent >=2.13.2.1
     , persistent-migration
@@ -298,12 +326,19 @@ test-suite btc-lsp-test
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Rpc.Client
+      BtcLsp.Rpc.Env
+      BtcLsp.Rpc.RpcRequest
+      BtcLsp.Rpc.RpcResponse
+      BtcLsp.Rpc.ScriptHashRpc
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
+      BtcLsp.Storage.Model.Block
       BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Model.SwapIntoLn
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Thread.BlockScanner
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
@@ -321,6 +356,7 @@ test-suite btc-lsp-test
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
       LnChanWatcherSpec
+      RpcSpec
       ServerSpec
       Spec
       TestAppM
@@ -348,10 +384,13 @@ test-suite btc-lsp-test
       StrictData
       TypeFamilies
       TypeOperators
+      StandaloneDeriving
+      DerivingVia
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       GenericPretty
     , QuickCheck
+    , SHA
     , aeson
     , async
     , base >=4.7 && <5
@@ -370,9 +409,12 @@ test-suite btc-lsp-test
     , extra
     , generic-arbitrary
     , generic-pretty-instances
+    , hex-text
     , hspec
     , hspec-expectations
     , hspec-wai
+    , http-client
+    , http-types
     , http2
     , http2-client
     , http2-client-grpc
@@ -384,6 +426,7 @@ test-suite btc-lsp-test
     , memory
     , microlens
     , monad-logger
+    , network
     , network-bitcoin
     , persistent >=2.13.2.1
     , persistent-migration

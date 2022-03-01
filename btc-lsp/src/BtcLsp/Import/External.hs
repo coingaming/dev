@@ -3,9 +3,6 @@ module BtcLsp.Import.External
   )
 where
 
-import BtcLsp.Grpc.Client.LowLevel as X
-import BtcLsp.Grpc.Data as X
-import BtcLsp.Grpc.Server.LowLevel as X
 import BtcLsp.Import.Witch as X
 import Chronos as X (Timespan (..), stopwatch)
 import Control.Concurrent.Async as X
@@ -59,7 +56,7 @@ import Data.Pool as X (Pool, destroyAllResources)
 import Data.ProtoLens as X (defMessage)
 import Data.ProtoLens.Encoding as X (decodeMessage, encodeMessage)
 import Data.Ratio as X (denominator, numerator, (%))
-import Data.Text as X (pack)
+import Data.Text as X (pack, unpack)
 import Data.Time.Clock as X
   ( DiffTime,
     UTCTime,
@@ -115,6 +112,8 @@ import LndClient.Util as X
     spawnLink,
     withSpawnLink,
   )
+import Network.GRPC.Client as X (CompressMode (..))
+import Network.HTTP2.Client as X (HostName, PortNumber)
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X

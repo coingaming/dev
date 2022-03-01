@@ -11,8 +11,11 @@ module BtcLsp.Data.Env
 where
 
 import BtcLsp.Data.Type
+import BtcLsp.Grpc.Client.LowLevel
+import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
 import Crypto.Cipher.AES (AES256)
 import Crypto.Cipher.Types (IV, cipherInit, makeIV)
@@ -38,6 +41,7 @@ import qualified Env as E
 import qualified LndClient as Lnd
 import qualified LndClient.Data.SignMessage as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Network.Bitcoin as Btc
 
 data Env = Env
   { -- | General
@@ -55,7 +59,15 @@ data Env = Env
     envLnd :: Lnd.LndEnv,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
-    envGrpcServerEnv :: GSEnv
+    envGrpcServerEnv :: GSEnv,
+    -- | Elecrts Rpc
+    envElectrsRpcEnv :: ElectrsEnv,
+    -- | Bitcoind
+    envBtc :: Btc.Client,
+    --
+    -- TODO : it's redundant, remove it later!!!
+    --
+    envBtc' :: BitcoindEnv
   }
 
 data RawConfig = RawConfig
@@ -73,7 +85,11 @@ data RawConfig = RawConfig
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     -- | Grpc
-    rawConfigGrpcServerEnv :: GSEnv
+    rawConfigGrpcServerEnv :: GSEnv,
+    -- | Electrs Rpc
+    rawConfigElectrsRpcEnv :: ElectrsEnv,
+    -- | Bitcoind
+    rawConfigBitcoindRpcEnv :: BitcoindEnv
   }
 
 -- | Here we enable normal JSON parsing
@@ -130,6 +146,10 @@ readRawConfig =
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
+      -- Electrs Rpc
+      <*> E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts
+      -- Bitcoind Rpc
+      <*> E.var (parseFromJSON <=< E.nonempty) "LSP_BITCOIND_ENV" opts
 
 readGCEnv :: IO GCEnv
 readGCEnv =
@@ -169,7 +189,13 @@ withEnv rc this = do
   let katipNs = mempty :: Namespace
   let lnd = rawConfigLndEnv rc
   bracket newLogEnv rmLogEnv $ \le ->
-    bracket newSqlPool rmSqlPool $ \pool ->
+    bracket newSqlPool rmSqlPool $ \pool -> do
+      let rBtc = rawConfigBitcoindRpcEnv rc
+      btc <-
+        Btc.getClient
+          (from $ bitcoindEnvHost rBtc)
+          (from $ bitcoindEnvUsername rBtc)
+          (from $ bitcoindEnvPassword rBtc)
       runKatipContextT le katipCtx katipNs
         . withUnliftIO
         $ \(UnliftIO run) ->
@@ -191,8 +217,12 @@ withEnv rc this = do
                 -- Grpc
                 envGrpcServerEnv =
                   (rawConfigGrpcServerEnv rc)
-                    { gsEnvSigner = run . signT lnd
-                    }
+                    { gsEnvSigner = run . signT lnd,
+                      gsEnvLogger = run . $(logTM) DebugS . logStr
+                    },
+                envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
+                envBtc = btc,
+                envBtc' = rBtc
               }
   where
     rmLogEnv :: LogEnv -> IO ()

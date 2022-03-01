@@ -5,14 +5,14 @@ module BtcLsp.Grpc.Sig
 where
 
 import BtcLsp.Data.Type
+import BtcLsp.Grpc.Data
 import BtcLsp.Import.External
 import qualified Crypto.Hash as CH
 import qualified Crypto.Secp256k1 as C
 import qualified Data.ByteArray as BA
 import qualified Data.ByteString as BS
-import qualified Data.ByteString.Base64.URL as B64
+import qualified Data.ByteString.Base64 as B64
 import qualified Data.CaseInsensitive as CI
-import qualified Data.Text as T
 import Network.Wai.Internal (Request (..))
 
 sigFromReq :: SigHeaderName -> Request -> Either Failure C.Sig
@@ -20,27 +20,17 @@ sigFromReq sigHeaderName waiReq = do
   (_, b64sig) <-
     maybeToRight
       ( FailureGrpc $
-          "missing "
+          "Missing "
             <> sigHeaderNameText
             <> " header"
       )
       . find (\x -> fst x == sigHeaderNameCI)
       $ requestHeaders waiReq
-  sigDer <-
-    first
-      ( \e ->
-          FailureGrpc $
-            "signature "
-              <> sigHeaderNameText
-              <> " import from base64 payload "
-              <> inspectPlain b64sig
-              <> " failed with error "
-              <> T.pack e
-      )
-      $ B64.decode b64sig
+  let sigDer =
+        B64.decodeLenient b64sig
   maybeToRight
     ( FailureGrpc $
-        "signature "
+        "Signature "
           <> sigHeaderNameText
           <> " import from der payload "
           <> inspectPlain sigDer

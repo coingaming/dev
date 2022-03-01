@@ -4,7 +4,8 @@ allow-newer: http2-grpc-proto-lens:proto-lens,
   signable:proto-lens, signable:proto-lens-runtime,
   http2-grpc-proto-lens:proto-lens, http2-client:http2,
   lnd-client:aeson, chronos:aeson, lnd-client:base64-bytestring,
-  qrcode-juicypixels:base64-bytestring
+  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client,
+  lnd-client:network-bitcoin
   --
   -- TODO : remove base64-bytestring jailbreak,
   -- probably need to upgrade qrcode-juicypixels in
@@ -26,8 +27,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 1a78qp11g8bi8yvvmga8k95axs6j4p6mhr4ss3mxwy0qsf234r0m
-  tag: aed652309b1e1bfc48e24680014d5b030f050447
+  --sha256: 14x7khg2hdxjk642cjkhbxsiimn433lnr2qnkyqvac2b2w02wfs6
+  tag: 921798603f4de6396e4b0063999c59e5b69a9d75
 
 source-repository-package
   type: git
@@ -52,6 +53,20 @@ source-repository-package
 
 source-repository-package
   type: git
+  location: https://github.com/coingaming/src.git
+  tag: 020d57847e040a0b9f608545a476f9a155a96c9c
+  --sha256: 152r2q7fc8a4w5qh9nkl1l8xp7l3vj37m9rhdkv5hfvfldf7fm8r
+  subdir: network-bitcoin
+
+source-repository-package
+  type: git
   location: https://github.com/21it/witch.git
   --sha256: 17dvcqj29883sysx5qcgjbi3smn1c9kjaj807a9a2vj24fg2jwja
   tag: ee0259bc5eb46d9c47d1c15473ff3e7d8212dc43
+
+source-repository-package
+  type: git
+  location: https://github.com/coingaming/src.git
+  --sha256: 1h8nqnwlgkhyvcl985pnf3mf4qhyvka5sp6nssnwkyngd3y5gvzf
+  tag: d7146045f282bf7782abd1cd675d949d107c3b1d
+  subdir: network-bitcoin

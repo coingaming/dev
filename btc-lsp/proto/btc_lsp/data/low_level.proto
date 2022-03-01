@@ -8,10 +8,6 @@ syntax="proto3";
 
 package BtcLsp.Data.LowLevel;
 
-message SocketAddress {
-  string val = 1;
-}
-
 message Urational {
   uint64 numerator = 1;
   uint64 denominator = 2;

@@ -9,7 +9,8 @@ SHELL_DIR="$BUILD_DIR/shell"
   SERVICE_DIR="$SHELL_DIR/electrs"
   echo "==> Generating $SERVICE_DIR"
   mkdir -p "$SERVICE_DIR/db"
-  echo 'auth="developer:developer"' > "$SERVICE_DIR/electrs.toml"
+  echo 'auth="developer:developer"
+verbose=4' > "$SERVICE_DIR/electrs.toml"
 )
 
 (

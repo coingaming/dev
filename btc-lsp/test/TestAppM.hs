@@ -21,6 +21,8 @@ module TestAppM
 where
 
 import BtcLsp.Data.Env as Env
+import BtcLsp.Rpc.Env
+import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.LnChan as LnChan (getByChannelPoint)
@@ -32,6 +34,7 @@ import qualified LndClient as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
 import Network.Bitcoin as Btc (Client, getClient)
+import qualified Network.GRPC.Client.Helpers as Grpc
 import Test.Hspec
 
 data TestOwner
@@ -53,9 +56,9 @@ proxyOwner = Proxy
 
 data TestEnv (owner :: TestOwner) = TestEnv
   { testEnvLsp :: Env.Env,
+    testEnvBtc :: Btc.Client,
     testEnvLndLsp :: LndTest.TestEnv,
     testEnvLndAlice :: LndTest.TestEnv,
-    testEnvBtc :: Btc.Client,
     testEnvKatipNS :: Namespace,
     testEnvKatipCTX :: LogContexts,
     testEnvKatipLE :: LogEnv,
@@ -85,9 +88,25 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     asks $ envLndPubKey . testEnvLsp
   getLspLndEnv =
     asks $ envLnd . testEnvLsp
+  getLspLndSocketAddress = do
+    env <- Lnd.envLndConfig <$> asks (envLnd . testEnvLsp)
+    pure
+      SocketAddress
+        { socketAddressHost = Grpc._grpcClientConfigHost env,
+          socketAddressPort = Grpc._grpcClientConfigPort env
+        }
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
+  withElectrs method args = do
+    env <- asks $ envElectrsRpcEnv . testEnvLsp
+    first FailureElectrs <$> args (method env)
+  withBtc method args = do
+    env <- asks $ Env.envBtc . testEnvLsp
+    --
+    -- TODO : catch exceptions!!!
+    --
+    liftIO $ Right <$> args (method env)
 
 instance (MonadIO m) => Katip (TestAppM owner m) where
   getLogEnv =
@@ -153,6 +172,11 @@ withTestEnv' action = do
   gcEnv <- readGCEnv
   aliceRc <- readRawConfig
   lndLspEnv <- readLndLspEnv
+  btcClient <-
+    Btc.getClient
+      (unpack $ bitcoindEnvHost $ rawConfigBitcoindRpcEnv aliceRc)
+      (encodeUtf8 $ bitcoindEnvUsername $ rawConfigBitcoindRpcEnv aliceRc)
+      (encodeUtf8 $ bitcoindEnvPassword $ rawConfigBitcoindRpcEnv aliceRc)
   let lspRc =
         aliceRc
           { rawConfigLndEnv = lndLspEnv
@@ -160,7 +184,6 @@ withTestEnv' action = do
   withEnv lspRc $ \lspAppEnv ->
     liftIO $
       withEnv aliceRc $ \aliceAppEnv -> do
-        bc <- liftIO newBtcClient
         let katipNS = envKatipNS lspAppEnv
         let katipLE = envKatipLE lspAppEnv
         let katipCTX = envKatipCTX lspAppEnv
@@ -177,9 +200,9 @@ withTestEnv' action = do
                     action
                       TestEnv
                         { testEnvLsp = lspAppEnv,
+                          testEnvBtc = btcClient,
                           testEnvLndLsp = lspTestEnv,
                           testEnvLndAlice = aliceTestEnv,
-                          testEnvBtc = bc,
                           testEnvKatipNS = katipNS,
                           testEnvKatipLE = katipLE,
                           testEnvKatipCTX = katipCTX,
@@ -220,13 +243,6 @@ readLndLspEnv =
     parser :: String -> Either E.Error LndEnv
     parser x =
       first E.UnreadError $ eitherDecodeStrict $ C8.pack x
-
-newBtcClient :: IO Btc.Client
-newBtcClient =
-  getClient
-    "http://localhost:18443"
-    "developer"
-    "developer"
 
 waitForChannelStatus ::
   (I.Env m) =>

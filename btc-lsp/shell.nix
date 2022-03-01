@@ -20,6 +20,8 @@ in
     pkgs.haskellPackages.cabal-plan
     pkgs.zlib
     pkgs.protobuf
+    pkgs.netcat-gnu
+    pkgs.socat
     proto.protoc-haskell-bin
   ];
   tools = {
