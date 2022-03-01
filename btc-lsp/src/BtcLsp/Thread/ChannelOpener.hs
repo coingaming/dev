@@ -41,6 +41,7 @@ apply = do
 --
 openChan :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
 openChan (swapEnt, userEnt) = do
+  let swap = entityVal swapEnt
   res <- runExceptT $ do
     cp <-
       withLndT
@@ -51,11 +52,8 @@ openChan (swapEnt, userEnt) = do
                   userNodePubKey $
                     entityVal userEnt,
                 Chan.localFundingAmount =
-                  --
-                  -- TODO : correct cap
-                  --
-                  from . swapIntoLnChanCapLsp $
-                    entityVal swapEnt,
+                  from (swapIntoLnChanCapLsp swap)
+                    + from (swapIntoLnChanCapUser swap),
                 Chan.pushMSat = Nothing,
                 Chan.targetConf = Nothing,
                 Chan.mSatPerByte = Nothing,

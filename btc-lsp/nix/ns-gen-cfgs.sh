@@ -35,6 +35,10 @@ bitcoind.rpcpass=developer
 bitcoind.zmqpubrawblock=tcp://127.0.0.1:28332
 bitcoind.zmqpubrawtx=tcp://127.0.0.1:28333
 
+[protocol]
+
+protocol.wumbo-channels=true
+
 [Application Options]
 
 listen=0.0.0.0:$((9735 + i))
