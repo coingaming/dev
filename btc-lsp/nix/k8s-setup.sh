@@ -81,7 +81,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/k8s-generate.sh'"
 
 echo "==> Deploying k8s resources"
-sh "$THIS_DIR/k8s-deploy.sh yolo"
+sh "$THIS_DIR/k8s-deploy.sh"
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh"
@@ -101,7 +101,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/k8s-generate.sh'"
 
 echo "==> Deploying k8s resources"
-sh "$THIS_DIR/k8s-deploy.sh yolo"
+sh "$THIS_DIR/k8s-deploy.sh"
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh"
