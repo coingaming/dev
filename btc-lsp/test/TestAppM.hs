@@ -17,6 +17,7 @@ module TestAppM
     xitEnv,
     withTestEnv,
     getGCEnv,
+    withLndTestT,
   )
 where
 
@@ -165,6 +166,17 @@ withTestEnv action =
 
 -- where
 --   sub = SubscribeInvoicesRequest (Just $ Lnd.AddIndex 1) Nothing
+
+withLndTestT ::
+  ( LndTest m owner
+  ) =>
+  owner ->
+  (Lnd.LndEnv -> a) ->
+  (a -> m (Either Lnd.LndError b)) ->
+  ExceptT Failure m b
+withLndTestT owner method args = do
+  env <- lift $ LndTest.getLndEnv owner
+  ExceptT $ first FailureLnd <$> args (method env)
 
 withTestEnv' :: (TestEnv owner -> IO ()) -> IO ()
 withTestEnv' action = do

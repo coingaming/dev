@@ -16,6 +16,7 @@ import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
+import qualified LndClient.LndTest as LndTest
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
@@ -104,7 +105,8 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       res0 <- runExceptT $ do
         fundInv <-
           from . Lnd.paymentRequest
-            <$> withLndT
+            <$> withLndTestT
+              LndAlice
               Lnd.addInvoice
               ( $
                   Lnd.AddInvoiceRequest
@@ -115,7 +117,8 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
               )
         refundAddr <-
           from
-            <$> withLndT
+            <$> withLndTestT
+              LndAlice
               Lnd.newAddress
               --
               -- TODO : maybe pass LndEnv as the last argument
@@ -128,6 +131,13 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                       Lnd.account = Nothing
                     }
               )
+        --
+        -- TODO : remove gsEnv argument, add own signer
+        -- into gcEnv. Without proper signer, this test
+        -- is meaningless, because LSP can not recognize
+        -- itself as a peer to open channel. Peer and
+        -- signer should be Alice node!!!
+        --
         Client.swapIntoLnT
           gsEnv
           (gcEnv {gcEnvCompressMode = compressMode})
@@ -151,6 +161,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                                   msg ^. SwapIntoLn.maybe'success
                           )
       res1 <- runExceptT $ do
+        lift $ LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
         swapEnt <- SwapIntoLn.getLatestSwapT
         let amt = Cfg.swapLnMaxAmt
         lift $
