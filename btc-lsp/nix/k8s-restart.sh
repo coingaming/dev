@@ -2,6 +2,4 @@
 
 set -e
 
-DEPLOYMENT="$1"
-
-kubectl rollout restart deploy $DEPLOYMENT
+kubectl rollout restart deploy $1

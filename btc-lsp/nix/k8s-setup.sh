@@ -90,9 +90,6 @@ sh "$THIS_DIR/k8s-wait.sh yolo"
 echo "==> Partial spin"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 
-echo "==> Export generated creds"
-sh "$THIS_DIR/k8s-export-creds.sh"
-
 echo "==> Generate additional creds"
 sh "$THIS_DIR/k8s-generate-creds.sh"
 
