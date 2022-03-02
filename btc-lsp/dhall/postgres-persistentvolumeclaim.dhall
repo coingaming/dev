@@ -2,7 +2,7 @@ let P = ./Prelude/Import.dhall
 
 let K = ./Kubernetes/Import.dhall
 
-let name = "bitcoind"
+let name = "postgres"
 
 let persistentVolumeClaim =
     K.PersistentVolumeClaim::{

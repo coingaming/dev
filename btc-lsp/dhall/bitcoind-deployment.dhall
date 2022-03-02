@@ -12,7 +12,6 @@ let deployment =
         , matchLabels = Some (toMap { name = name })
         }
       , replicas = Some 1
-      , strategy = Some K.DeploymentStrategy::{ type = Some "Recreate" }
       , template = K.PodTemplateSpec::{
         , metadata = Some K.ObjectMeta::{ labels = Some [{mapKey = "name", mapValue = name}] }
         , spec = Some K.PodSpec::{
