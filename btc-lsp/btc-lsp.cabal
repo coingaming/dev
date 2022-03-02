@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -46,10 +46,11 @@ library
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
       BtcLsp.Rpc.Client
+      BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
+      BtcLsp.Rpc.Helper
       BtcLsp.Rpc.RpcRequest
       BtcLsp.Rpc.RpcResponse
-      BtcLsp.Rpc.ScriptHashRpc
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.Block
@@ -186,10 +187,11 @@ executable btc-lsp-exe
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
       BtcLsp.Rpc.Client
+      BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
+      BtcLsp.Rpc.Helper
       BtcLsp.Rpc.RpcRequest
       BtcLsp.Rpc.RpcResponse
-      BtcLsp.Rpc.ScriptHashRpc
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.Block
@@ -327,10 +329,11 @@ test-suite btc-lsp-test
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
       BtcLsp.Rpc.Client
+      BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
+      BtcLsp.Rpc.Helper
       BtcLsp.Rpc.RpcRequest
       BtcLsp.Rpc.RpcResponse
-      BtcLsp.Rpc.ScriptHashRpc
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.Block
