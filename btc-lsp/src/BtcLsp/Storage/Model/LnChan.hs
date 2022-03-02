@@ -2,7 +2,8 @@
 module BtcLsp.Storage.Model.LnChan
   ( createIgnore,
     getByChannelPoint,
-    persistChannelUpdates
+    persistChannelUpdates,
+    persistChannelList
   )
 where
 
@@ -50,7 +51,9 @@ createIgnore swapId txid vout ss = runSql $ do
           lnChanNumUpdates = 0,
           lnChanStatus = ss,
           lnChanInsertedAt = ct0,
-          lnChanUpdatedAt = ct0
+          lnChanUpdatedAt = ct0,
+          lnChanTotalSatoshisReceived = MSat 0,
+          lnChanTotalSatoshisSent = MSat 0
         }
 
 getByChannelPoint ::
@@ -64,15 +67,45 @@ getByChannelPoint txid vout =
     $ UniqueLnChan txid vout
 
 
+persistChannelList :: (Storage m, Traversable t) => t Lnd.Channel -> m (t (Entity LnChan))
+persistChannelList chs = do
+  now <- getCurrentTime
+  runSql $ sequence $ upsertChannel now . mapChannel now <$> chs
+  where
+    upsertChannel now ch@(LnChan _ txid vout _ numUpdates tsent trecv _ _ _) =
+      Psql.upsertBy
+        (UniqueLnChan txid vout)
+        ch
+        [ LnChanFundingTxId Psql.=. Psql.val txid,
+          LnChanFundingVout Psql.=. Psql.val vout,
+          LnChanTotalSatoshisSent Psql.=. Psql.val tsent,
+          LnChanTotalSatoshisReceived Psql.=. Psql.val trecv,
+          LnChanNumUpdates Psql.=. Psql.val numUpdates,
+          LnChanUpdatedAt Psql.=. Psql.val now
+        ]
+    mapChannel now (Lnd.Channel _ (Lnd.ChannelPoint txid vout) _ _ _ _ active _ tsent trec numUpdates) =
+      LnChan
+        { lnChanSwapIntoLnId = Nothing,
+          lnChanFundingTxId = txid,
+          lnChanFundingVout = vout,
+          lnChanClosingTxId = Nothing,
+          lnChanNumUpdates = numUpdates,
+          lnChanStatus = if active then LnChanStatusActive else LnChanStatusInactive,
+          lnChanInsertedAt = now,
+          lnChanUpdatedAt = now,
+          lnChanTotalSatoshisReceived = tsent,
+          lnChanTotalSatoshisSent = trec
+        }
+
 pendingOpenChannelInsert :: (
   PersistStoreWrite backend,
   BaseBackend backend ~ Psql.SqlBackend, MonadIO m) => UTCTime -> Lnd.PendingUpdate 'Funding -> ReaderT backend m (Psql.Key LnChan)
 pendingOpenChannelInsert now (Lnd.PendingUpdate txid out)
-    = insert $ LnChan Nothing txid out Nothing 0 LnChanStatusPendingOpen now now
+    = insert $ LnChan Nothing txid out Nothing 0 (MSat 0) (MSat 0) LnChanStatusPendingOpen now now
 
 openChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
  BaseBackend backend ~ Psql.SqlBackend) => Lnd.Channel -> ReaderT backend m ()
-openChannelUpdate (Lnd.Channel _ (Lnd.ChannelPoint txid out) _ _ _ _ _ _)
+openChannelUpdate (Lnd.Channel _ (Lnd.ChannelPoint txid out) _ _ _ _ _ _ _ _ _)
     = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
           [LnChanStatus =. LnChanStatusOpened, LnChanNumUpdates +=. 1]
 

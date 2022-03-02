@@ -47,6 +47,8 @@ LnChan
   fundingVout (Vout 'Funding)
   closingTxId (TxId 'Closing) Maybe
   numUpdates Word64
+  totalSatoshisSent MSat
+  totalSatoshisReceived MSat
   status LnChanStatus
   insertedAt UTCTime
   updatedAt UTCTime

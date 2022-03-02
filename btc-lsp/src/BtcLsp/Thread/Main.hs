@@ -11,7 +11,7 @@ import BtcLsp.Import
 import qualified BtcLsp.Storage.Migration as StorageMigration
 import qualified BtcLsp.Thread.Server as ThreadServer
 import qualified LndClient.RPC.Katip as Lnd
-import BtcLsp.Thread.LnChanWatcher (watchChannelEvents)
+import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 
 main :: IO ()
 main = do
@@ -25,12 +25,12 @@ apply = do
   if isRight unlocked
     then do
       StorageMigration.migrateAll
-      lnd <- getLspLndEnv
-      void $ watchChannelEvents lnd
       xs <-
         mapM
           spawnLink
-          [ ThreadServer.apply
+          [ ThreadServer.apply,
+            LnChanWatcher.apply,
+            LnChanWatcher.applyListChannelWatcher
           ]
       liftIO
         . void

@@ -27,8 +27,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 14x7khg2hdxjk642cjkhbxsiimn433lnr2qnkyqvac2b2w02wfs6
-  tag: 921798603f4de6396e4b0063999c59e5b69a9d75
+  --sha256: 18s0xygydf91pq11zrf017sfygpivs6d58cmpvh9ml4v4jm1803c
+  tag: 32f0ea17e372b3cc277ae71caedd837e0ea24364
 
 source-repository-package
   type: git
