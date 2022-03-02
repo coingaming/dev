@@ -104,7 +104,7 @@ data BlockVerbose = BlockVerbose {
     --   which this block belongs to.
     , vBerkleRoot       :: BlockHash
     -- | Should this be a transaction, or transaction id?
-    , vSubTransactions  :: Vector RawTransaction
+    , vSubTransactions  :: Vector DecodedRawTransaction
     -- | The time it was mined.
     , vBlkTime          :: Integer
     -- | The block's nonce.

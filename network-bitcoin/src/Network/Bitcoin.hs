@@ -22,6 +22,7 @@ module Network.Bitcoin
     , getBlockHash
     , Block(..)
     , getBlock
+    , getBlockVerbose
     , OutputSetInfo(..)
     , getOutputSetInfo
     , OutputInfo(..)
