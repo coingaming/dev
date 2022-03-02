@@ -29,7 +29,7 @@ watchChannelEvents lnd = forkThread $ withRunInIO act
     where
       act run = do
         _ <- Lnd.subscribeChannelEvents (run . persistChannelUpdates) lnd
-        pure ()
+        act run
 
 applyListChannelWatcher :: (Env m) => m ()
 applyListChannelWatcher = do
