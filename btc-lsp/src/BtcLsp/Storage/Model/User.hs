@@ -5,6 +5,7 @@ module BtcLsp.Storage.Model.User
   )
 where
 
+import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 

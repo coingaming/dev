@@ -25,11 +25,37 @@ createIgnore ::
   m (Entity LnChan)
 createIgnore swapId txid vout ss = runSql $ do
   ct <- getCurrentTime
+  Psql.update $ \swap -> do
+    Psql.set
+      swap
+      --
+      -- TODO : better status mapping
+      --
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapWaitingChan,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( swap Psql.^. SwapIntoLnId
+          Psql.==. Psql.val swapId
+      )
   Psql.upsertBy
     (UniqueLnChan txid vout)
-    (this ct)
+    LnChan
+      { lnChanSwapIntoLnId = Just swapId,
+        lnChanFundingTxId = txid,
+        lnChanFundingVout = vout,
+        lnChanClosingTxId = Nothing,
+        lnChanNumUpdates = 0,
+        lnChanStatus = ss,
+        lnChanInsertedAt = ct,
+        lnChanUpdatedAt = ct,
+        lnChanTotalSatoshisReceived = MSat 0,
+        lnChanTotalSatoshisSent = MSat 0
+      }
     --
-    -- TODO : this update is redundant, but upsertBy is
+    -- TODO : txid + vout update is redundant, but upsertBy is
     -- not working with mempty update argument -
     -- probably it's a bug in Esqueleto implementation,
     -- check it in latest version, and if not fixed -
@@ -39,22 +65,9 @@ createIgnore swapId txid vout ss = runSql $ do
     -- https://github.com/bitemyapp/esqueleto/issues/294
     --
     [ LnChanFundingTxId Psql.=. Psql.val txid,
-      LnChanFundingVout Psql.=. Psql.val vout
+      LnChanFundingVout Psql.=. Psql.val vout,
+      LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId)
     ]
-  where
-    this ct0 =
-      LnChan
-        { lnChanSwapIntoLnId = Just swapId,
-          lnChanFundingTxId = txid,
-          lnChanFundingVout = vout,
-          lnChanClosingTxId = Nothing,
-          lnChanNumUpdates = 0,
-          lnChanStatus = ss,
-          lnChanInsertedAt = ct0,
-          lnChanUpdatedAt = ct0,
-          lnChanTotalSatoshisReceived = MSat 0,
-          lnChanTotalSatoshisSent = MSat 0
-        }
 
 getByChannelPoint ::
   (Env m) =>

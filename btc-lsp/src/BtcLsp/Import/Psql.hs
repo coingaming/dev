@@ -6,6 +6,7 @@ where
 
 import Database.Esqueleto.Legacy as X
   ( Entity (..),
+    InnerJoin (..),
     Key (..),
     PersistField (..),
     PersistFieldSql (..),
@@ -24,6 +25,7 @@ import Database.Esqueleto.Legacy as X
     limit,
     max_,
     min_,
+    on,
     orderBy,
     putMany,
     rawExecute,
@@ -67,6 +69,7 @@ import Database.Persist.Postgresql as X
   )
 import Database.Persist.Sql as X
   ( fromSqlKey,
+    toSqlKey,
   )
 import Database.Persist.TH as X
   ( derivePersistField,

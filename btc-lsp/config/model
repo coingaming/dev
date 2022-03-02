@@ -22,7 +22,8 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
-  UniqueSwapIntoLn fundInvoice
+  UniqueSwapIntoLnFundInvoice fundInvoice
+  UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic
 
 Block
@@ -46,6 +47,11 @@ LnChan
   fundingTxId (TxId 'Funding)
   fundingVout (Vout 'Funding)
   closingTxId (TxId 'Closing) Maybe
+  -- We need to track is channel used or not.
+  -- If channel is not used for a long time, then
+  -- it should be closed because it's not efficient
+  -- allocation of liquidity. We can track channel usage
+  -- with combination of numUpdates and updatedAt.
   numUpdates Word64
   totalSatoshisSent MSat
   totalSatoshisReceived MSat

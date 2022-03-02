@@ -8,8 +8,9 @@ where
 
 import BtcLsp.Data.AppM (runApp)
 import BtcLsp.Import
-import qualified BtcLsp.Storage.Migration as StorageMigration
-import qualified BtcLsp.Thread.Server as ThreadServer
+import qualified BtcLsp.Storage.Migration as Storage
+import qualified BtcLsp.Thread.ChannelOpener as ChannelOpener
+import qualified BtcLsp.Thread.Server as Server
 import qualified LndClient.RPC.Katip as Lnd
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 
@@ -24,13 +25,15 @@ apply = do
   unlocked <- withLnd Lnd.lazyUnlockWallet id
   if isRight unlocked
     then do
-      StorageMigration.migrateAll
+      Storage.migrateAll
       xs <-
         mapM
           spawnLink
-          [ ThreadServer.apply,
+          [
+            Server.apply,
             LnChanWatcher.apply,
-            LnChanWatcher.applyListChannelWatcher
+            LnChanWatcher.applyListChannelWatcher,
+            ChannelOpener.apply
           ]
       liftIO
         . void
