@@ -1,7 +1,9 @@
 module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
     updateFunded,
+    updateWaitingChan,
     getFundedSwaps,
+    getOpenedChanSwaps,
     getLatestSwapT,
   )
 where
@@ -69,8 +71,32 @@ updateFunded addr usrCap lspCap lspFee = runSql $ do
           Psql.=. Psql.val SwapFunded
       ]
     Psql.where_ $
-      row Psql.^. SwapIntoLnFundAddress
-        Psql.==. Psql.val addr
+      ( row Psql.^. SwapIntoLnFundAddress
+          Psql.==. Psql.val addr
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     Psql.==. Psql.val SwapWaitingFund
+                 )
+
+updateWaitingChan ::
+  ( Storage m
+  ) =>
+  OnChainAddress 'Fund ->
+  m ()
+updateWaitingChan addr = runSql $ do
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapWaitingChan
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnFundAddress
+          Psql.==. Psql.val addr
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     Psql.==. Psql.val SwapWaitingFund
+                 )
 
 getFundedSwaps ::
   ( Storage m
@@ -93,6 +119,42 @@ getFundedSwaps = runSql $
       -- Maybe limits, some proper retries etc.
       --
       pure (swap, user)
+
+getOpenedChanSwaps ::
+  ( Storage m
+  ) =>
+  m
+    [ ( Entity SwapIntoLn,
+        Entity LnChan,
+        Entity User
+      )
+    ]
+getOpenedChanSwaps =
+  runSql $
+    Psql.select $
+      Psql.from $
+        \( swap
+             `Psql.InnerJoin` chan
+             `Psql.InnerJoin` user
+           ) -> do
+            Psql.on
+              ( swap Psql.^. SwapIntoLnUserId
+                  Psql.==. user Psql.^. UserId
+              )
+            Psql.on
+              ( swap Psql.^. SwapIntoLnId
+                  Psql.==. chan Psql.^. LnChanSwapIntoLnId
+              )
+            Psql.where_
+              ( swap Psql.^. SwapIntoLnStatus
+                  Psql.==. Psql.val SwapWaitingChan
+              )
+            --
+            -- TODO : some sort of exp backoff in case
+            -- where user node is offline for a long time.
+            -- Maybe limits, some proper retries etc.
+            --
+            pure (swap, chan, user)
 
 getLatestSwapT ::
   ( Storage m
