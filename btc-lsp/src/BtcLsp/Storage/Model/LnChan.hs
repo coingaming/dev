@@ -117,36 +117,36 @@ pendingOpenChannelInsert now (Lnd.PendingUpdate txid out)
     = insert $ LnChan Nothing txid out Nothing 0 (MSat 0) (MSat 0) LnChanStatusPendingOpen now now
 
 openChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => Lnd.Channel -> ReaderT backend m ()
-openChannelUpdate (Lnd.Channel _ (Lnd.ChannelPoint txid out) _ _ _ _ _ _ _ _ _)
+ BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.Channel -> ReaderT backend m ()
+openChannelUpdate now (Lnd.Channel _ (Lnd.ChannelPoint txid out) _ _ _ _ _ _ _ _ _)
     = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusOpened, LnChanNumUpdates +=. 1]
+          [LnChanStatus =. LnChanStatusOpened, LnChanUpdatedAt =. now]
 
 activeChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => Lnd.ChannelPoint -> ReaderT backend m ()
-activeChannelUpdate (Lnd.ChannelPoint txid out)
+ BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelPoint -> ReaderT backend m ()
+activeChannelUpdate now (Lnd.ChannelPoint txid out)
     = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusActive, LnChanNumUpdates +=. 1]
+          [LnChanStatus =. LnChanStatusActive, LnChanUpdatedAt =. now]
 
 inactiveChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => Lnd.ChannelPoint -> ReaderT backend m ()
-inactiveChannelUpdate (Lnd.ChannelPoint txid out)
+ BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelPoint -> ReaderT backend m ()
+inactiveChannelUpdate now (Lnd.ChannelPoint txid out)
     = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusInactive, LnChanNumUpdates +=. 1]
+          [LnChanStatus =. LnChanStatusInactive, LnChanUpdatedAt =. now]
 
 closedChannelUpdate :: (PersistQueryWrite backend, MonadUnliftIO m,
- BaseBackend backend ~ Psql.SqlBackend) => Lnd.ChannelCloseSummary -> ReaderT backend m ()
-closedChannelUpdate (Lnd.ChannelCloseSummary _remotePubkey (Lnd.ChannelPoint txid out) _settledBalance closeTxId)
+ BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelCloseSummary -> ReaderT backend m ()
+closedChannelUpdate now (Lnd.ChannelCloseSummary _remotePubkey (Lnd.ChannelPoint txid out) _settledBalance closeTxId)
     = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
           [LnChanStatus =. LnChanStatusClosed,
           LnChanClosingTxId =. Just closeTxId,
-          LnChanNumUpdates +=. 1]
+          LnChanUpdatedAt =. now ]
 
 fullyResolvedChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => Lnd.ChannelPoint -> ReaderT backend m ()
-fullyResolvedChannelUpdate (Lnd.ChannelPoint txid out)
+ BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelPoint -> ReaderT backend m ()
+fullyResolvedChannelUpdate now (Lnd.ChannelPoint txid out)
     = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusInactive, LnChanNumUpdates +=. 1]
+          [LnChanStatus =. LnChanStatusInactive, LnChanUpdatedAt =. now]
 
 
 persistChannelUpdates :: (KatipContext m, Storage m) => Lnd.ChannelEventUpdate -> m ()
@@ -154,9 +154,9 @@ persistChannelUpdates (Lnd.ChannelEventUpdate channelEvent _) = do
   $(logTM) DebugS $ logStr $ inspect channelEvent
   now <- getCurrentTime
   case channelEvent of
-    Lnd.ChannelEventUpdateChannelOpenChannel x -> runSql $ openChannelUpdate x
-    Lnd.ChannelEventUpdateChannelActiveChannel x -> runSql $ activeChannelUpdate x
-    Lnd.ChannelEventUpdateChannelInactiveChannel x -> runSql $ inactiveChannelUpdate x
-    Lnd.ChannelEventUpdateChannelClosedChannel x -> runSql $ closedChannelUpdate x
-    Lnd.ChannelEventUpdateChannelFullyResolved x -> runSql $ fullyResolvedChannelUpdate x
+    Lnd.ChannelEventUpdateChannelOpenChannel x -> runSql $ openChannelUpdate now x
+    Lnd.ChannelEventUpdateChannelActiveChannel x -> runSql $ activeChannelUpdate now x
+    Lnd.ChannelEventUpdateChannelInactiveChannel x -> runSql $ inactiveChannelUpdate now x
+    Lnd.ChannelEventUpdateChannelClosedChannel x -> runSql $ closedChannelUpdate now x
+    Lnd.ChannelEventUpdateChannelFullyResolved x -> runSql $ fullyResolvedChannelUpdate now x
     Lnd.ChannelEventUpdateChannelPendingOpenChannel x -> void $ runSql $ pendingOpenChannelInsert now x

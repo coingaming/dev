@@ -76,26 +76,20 @@ testThread result = do
   isOpenedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r = and <$> sequence
-          [(== LnChanStatusActive) . lnChanStatus <$> ch,
-           (== 2) . lnChanNumUpdates <$> ch
-          ]
+          [(== LnChanStatusActive) . lnChanStatus <$> ch]
     pure $ justTrue r
   (ctid, _) <- forkThread $ do
     void $ liftLndResult =<< Lnd.closeChannel (const $ pure ()) lndFrom (closeChannelRequest cp)
   isInactivedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r = and <$> sequence
-          [(== LnChanStatusInactive) . lnChanStatus <$> ch,
-           (== 3) . lnChanNumUpdates <$> ch
-          ]
+          [(== LnChanStatusInactive) . lnChanStatus <$> ch]
     pure $ justTrue r
   mine 10 LndLsp
   isClosedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r = and <$> sequence
-          [(== LnChanStatusClosed) . lnChanStatus <$> ch,
-           (== 4) . lnChanNumUpdates <$> ch
-          ]
+          [(== LnChanStatusClosed) . lnChanStatus <$> ch ]
     pure $ justTrue r
   void $ killThread ctid
   putMVar result [isPendingOpenOk, isOpenedOk, isInactivedOk, isClosedOk]
