@@ -41,7 +41,7 @@ let deployment =
                   ]
                 , ports = Some
                   [ K.ContainerPort::{ containerPort = 18332 }
-                  [ K.ContainerPort::{ containerPort = 39703 }
+                  , K.ContainerPort::{ containerPort = 39703 }
                   , K.ContainerPort::{ containerPort = 39704 }
                   ]
                 , volumeMounts = Some

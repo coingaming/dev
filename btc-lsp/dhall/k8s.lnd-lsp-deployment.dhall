@@ -33,7 +33,7 @@ let deployment =
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_RPCHOST"
-                    , value = Some "bitcoind:80"
+                    , value = Some "bitcoind:18332"
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_RPCPASS"

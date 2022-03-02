@@ -18,6 +18,7 @@ let ingress =
                       , port = Some K.ServiceBackendPort::{ number = Some 80 }
                       }
                     }
+                  , path = Some "/"
                   , pathType = "Prefix"
                   }
                 ]
