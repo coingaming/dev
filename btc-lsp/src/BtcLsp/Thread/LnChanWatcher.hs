@@ -12,9 +12,9 @@ import LndClient.Data.ListChannels
 
 forkThread :: MonadUnliftIO m => m () -> m (ThreadId, MVar ())
 forkThread proc = do
-    handle <- newEmptyMVar
-    tid <- forkFinally proc (\_ -> putMVar handle ())
-    return (tid, handle)
+  handle <- newEmptyMVar
+  tid <- forkFinally proc (\_ -> putMVar handle ())
+  return (tid, handle)
 
 
 syncChannelList :: (Storage m) => LndEnv -> m ()
