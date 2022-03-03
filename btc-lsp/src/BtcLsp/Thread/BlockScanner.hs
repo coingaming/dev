@@ -34,6 +34,9 @@ apply = do
   apply
 
 
+-- getBlockAddresses :: Btc.BlockVerbose -> ()
+-- getBlockAddresses blk = do
+
 
 scanBlockT ::
   ( Env m
