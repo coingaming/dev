@@ -21,23 +21,8 @@ echo "==> Enable ingress addon"
 minikube addons enable ingress --profile=$MINIKUBE_PROFILE
 
 echo "==> Setup hosts to resolve ingress routes"
-sudo sh "$THIS_DIR/k8s-setup-hosts.sh"
-
-echo "==> Allow k8s to download images from private repos"
-echo "DockerHub username:"
-read DOCKERHUB_USERNAME
-
-echo "DockerHub password:"
-read -s DOCKERHUB_PASSWORD
-
-echo "Checking if entered credentials are correct..."
-docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
-
-kubectl create secret docker-registry dockerhub \
---docker-username=$DOCKERHUB_USERNAME \
---docker-password=$DOCKERHUB_PASSWORD
-
-kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "dockerhub"}]}'
+CLUSTER_IP=`minikube ip --profile=$MINIKUBE_PROFILE`
+sudo sh "$THIS_DIR/k8s-setup-hosts.sh" "$CLUSTER_IP"
 
 echo "==> Allow to use kubectl from nix-shell"
 sh "$THIS_DIR/k8s-edit-conf.sh"

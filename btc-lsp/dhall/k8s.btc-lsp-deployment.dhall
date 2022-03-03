@@ -35,7 +35,10 @@ let deployment =
                     , value = Some
                         "postgresql://btc-lsp:developer@postgres/btc-lsp"
                     }
-                  , K.EnvVar::{ name = "LSP_ENDPOINT_PORT", value = Some "8443" }
+                  , K.EnvVar::{
+                    , name = "LSP_ENDPOINT_PORT"
+                    , value = Some "8443"
+                    }
                   , K.EnvVar::{ name = "LSP_LOG_ENV", value = Some "test" }
                   , K.EnvVar::{
                     , name = "LSP_LOG_FORMAT"
