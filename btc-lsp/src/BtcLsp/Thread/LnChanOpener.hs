@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Thread.ChannelOpener
+module BtcLsp.Thread.LnChanOpener
   ( apply,
   )
 where
