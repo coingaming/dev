@@ -13,6 +13,7 @@ import qualified BtcLsp.Thread.ChannelOpener as ChannelOpener
 import qualified BtcLsp.Thread.Server as Server
 import qualified LndClient.RPC.Katip as Lnd
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
+import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 
 main :: IO ()
 main = do
@@ -33,7 +34,8 @@ apply = do
             Server.apply,
             LnChanWatcher.apply,
             LnChanWatcher.applyListChannelWatcher,
-            ChannelOpener.apply
+            ChannelOpener.apply,
+            BlockScanner.apply
           ]
       liftIO
         . void

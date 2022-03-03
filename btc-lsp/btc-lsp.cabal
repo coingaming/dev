@@ -361,6 +361,7 @@ test-suite btc-lsp-test
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
+      BlockScannerSpec
       LnChanWatcherSpec
       RpcSpec
       ServerSpec

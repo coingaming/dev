@@ -1,6 +1,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Thread.BlockScanner
   ( apply,
@@ -14,37 +15,16 @@ import qualified Data.Set as S
 import qualified Data.Vector as V
 
 
--- apply :: (Env m) => m ()
--- apply = do
---   res <- runExceptT $ do
---     height <-
---       into @BlkHeight <$> withBtcT Btc.getBlockCount id
---     hash <-
---       from <$> withBtcT Btc.getBlockHash ($ from height)
---     prev <-
---       from <$> withBtcT Btc.getBlockHash ($ from height - 1)
---     mBlock <-
---       lift Block.getLatest
---     case mBlock of
---       Nothing ->
---         scanBlockT height hash prev
---       Just blockEnt ->
---         when (blockHash (entityVal blockEnt) /= hash) $
---           scanUntilT blockEnt height hash prev
---   whenLeft res $
---     $(logTM) ErrorS . logStr . inspect
---   sleep $ MicroSecondsDelay 1000000
---   apply
-
-apply :: (Env m, Storage (ExceptT Failure m), From (Maybe Btc.BlockHash) BlkPrevHash) => m ()
+apply :: (Env m) => m ()
 apply = do
-  _r <- runExceptT scan
+  r <- runExceptT scan
+  traceShowM r
   sleep $ MicroSecondsDelay 1000000
   apply
 
 
 getBlockAddresses :: Btc.BlockVerbose -> Set Btc.Address
-getBlockAddresses blk =
+getBlockAddresses blk = do
     S.unions $ V.map extractAddr $
       V.map Btc.scriptPubKey $ V.foldMap Btc.decVout $ Btc.vSubTransactions blk
   where
@@ -55,7 +35,7 @@ getBlockAddresses blk =
 heighToInt :: BlkHeight -> Integer
 heighToInt (BlkHeight c) = c
 
-scan :: (Env m, Storage (ExceptT Failure m), From (Maybe Btc.BlockHash) BlkPrevHash)
+scan :: (Env m)
      => ExceptT Failure m (Set Btc.Address)
 scan = do
   mBlk <- lift Block.getLatest
@@ -64,49 +44,26 @@ scan = do
     Nothing -> scanOneBlock cHeight
     Just lBlk -> do
       let s = heighToInt $ blockHeight $ entityVal lBlk
-      step S.empty s (heighToInt cHeight)
+      step S.empty (1 + s) (heighToInt cHeight)
     where
       step acc cur end = do
-        addrs <- scanOneBlock $ BlkHeight cur
         if cur == end
-           then pure (acc <> addrs)
+           then do
+             addrs <- scanOneBlock $ BlkHeight cur
+             pure (acc <> addrs)
            else do
              r <- step acc (cur + 1) end
              pure (acc <> r)
 
 
-scanOneBlock :: (Env m, From (Maybe Btc.BlockHash) BlkPrevHash, Storage (ExceptT Failure m)) =>
+scanOneBlock :: (Env m) =>
   BlkHeight -> ExceptT Failure m (Set Btc.Address)
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  void $ Block.createUpdate height (from hash) (from $ Btc.vPrevBlock blk)
-  pure $ getBlockAddresses blk
-
--- scanBlockT ::
---   ( Env m
---   ) =>
---   BlkHeight ->
---   BlkHash ->
---   BlkPrevHash ->
---   ExceptT Failure m ()
--- scanBlockT height hash prev = do
---   blk <- withBtcT Btc.getBlock ($ from hash)
---   --
---   -- TODO : !!!
---   --
---   lift $
---     $(logTM) ErrorS . logStr $ inspect blk
---   lift . void $
---     Block.createUpdate height hash prev
---
--- scanUntilT ::
---   ( Env m
---   ) =>
---   Entity Block ->
---   BlkHeight ->
---   BlkHash ->
---   BlkPrevHash ->
---   ExceptT Failure m ()
--- scanUntilT _ _ _ _ =
---   $(logTM) ErrorS "TODO!!!"
+  traceShowM blk
+  prevHash <- ExceptT $ pure $ maybeToRight (FailureInternal "gen block") (Btc.vPrevBlock blk)
+  lift . void $ Block.createUpdate height (from hash) (from prevHash)
+  let r = getBlockAddresses blk
+  traceShowM r
+  pure r
