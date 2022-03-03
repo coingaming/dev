@@ -134,16 +134,16 @@ getOpenedChanSwaps =
     Psql.select $
       Psql.from $
         \( swap
-             `Psql.InnerJoin` chan
              `Psql.InnerJoin` user
+             `Psql.InnerJoin` chan
            ) -> do
+            Psql.on
+              ( Psql.just (swap Psql.^. SwapIntoLnId)
+                  Psql.==. chan Psql.^. LnChanSwapIntoLnId
+              )
             Psql.on
               ( swap Psql.^. SwapIntoLnUserId
                   Psql.==. user Psql.^. UserId
-              )
-            Psql.on
-              ( swap Psql.^. SwapIntoLnId
-                  Psql.==. chan Psql.^. LnChanSwapIntoLnId
               )
             Psql.where_
               ( swap Psql.^. SwapIntoLnStatus

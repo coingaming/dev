@@ -12,9 +12,6 @@ jobs:
         key: ${{ runner.os }}-nix-v3
         restore-keys: |
           ${{ runner.os }}-nix-v3
-          ${{ runner.os }}-nix-v2
-          ${{ runner.os }}-nix-v1
-          ${{ runner.os }}-nix-v0
     - name: Restore cache
       run: |
         docker run --rm \
