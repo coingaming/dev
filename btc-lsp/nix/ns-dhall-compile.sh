@@ -4,26 +4,36 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
+BUILD_DIR="$ROOT_DIR/build"
+KUBERNETES_BUILD_DIR="$ROOT_DIR/build/kubernetes"
 
-mkdir -p $ROOT_DIR/build
+mkdir -p "$BUILD_DIR" "$KUBERNETES_BUILD_DIR"
 
-for x in $ROOT_DIR/dhall/docker-compose.*.dhall; do
+dhall_to_yaml() {
+  FILE_PATH="$1"
+  BUILD_PATH="$2"
+  [ -f "$FILE_PATH" ] || (echo "FILE_DOES_NOT_EXIST $FILE_PATH" && exit 1)
 
-  [ -f "$x" ] || (echo "FILE_DOES_NOT_EXIST $x" && exit 1)
-
-  FILE_NAME_DHALL=$(basename -- "$x")
+  FILE_NAME_DHALL=$(basename -- "$FILE_PATH")
   FILE_NAME="${FILE_NAME_DHALL%.dhall}"
   FILE_NAME_YAML="$FILE_NAME.yml"
   SRC_DHALL="$ROOT_DIR/dhall/$FILE_NAME_DHALL"
 
   if [ -f "$SRC_DHALL" ]; then
-    RESULT_YAML="$ROOT_DIR/build/$FILE_NAME_YAML"
+    RESULT_YAML="$BUILD_PATH/$FILE_NAME_YAML"
     dhall-to-yaml \
       --file "$SRC_DHALL" \
       --output "$RESULT_YAML" \
       --generated-comment
   fi
+}
 
+for x in $ROOT_DIR/dhall/docker-compose.*.dhall; do
+  dhall_to_yaml "$x" "$BUILD_DIR"
+done
+
+for x in $ROOT_DIR/dhall/k8s.*.dhall; do
+  dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
 done
 
 sh -c "$THIS_DIR/ns-dhall-lint.sh"

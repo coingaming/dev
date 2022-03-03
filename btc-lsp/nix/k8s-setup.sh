@@ -76,10 +76,6 @@ echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
 
-echo "==> Generating k8s configs"
-sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/k8s-generate.sh'"
-
 echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh"
 
@@ -95,10 +91,6 @@ sh "$THIS_DIR/k8s-generate-creds.sh"
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
-
-echo "==> Generating k8s configs"
-sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/k8s-generate.sh'"
 
 echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh"
