@@ -35,7 +35,7 @@ let deployment =
                     , value = Some
                         "postgresql://btc-lsp:developer@postgres/btc-lsp"
                     }
-                  , K.EnvVar::{ name = "LSP_ENDPOINT_PORT", value = Some "443" }
+                  , K.EnvVar::{ name = "LSP_ENDPOINT_PORT", value = Some "8443" }
                   , K.EnvVar::{ name = "LSP_LOG_ENV", value = Some "test" }
                   , K.EnvVar::{
                     , name = "LSP_LOG_FORMAT"
@@ -66,33 +66,7 @@ let deployment =
                           "lnd_hex_macaroon":"${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
                                                 ? todo}",
                           "lnd_host":"lnd-lsp",
-                          "lnd_port":10009,
-                          "lnd_cipher_seed_mnemonic":[
-                            "absent",
-                            "betray",
-                            "direct",
-                            "scheme",
-                            "sunset",
-                            "mechanic",
-                            "exhaust",
-                            "suggest",
-                            "boy",
-                            "arena",
-                            "sketch",
-                            "bone",
-                            "news",
-                            "south",
-                            "way",
-                            "survey",
-                            "clip",
-                            "dutch",
-                            "depart",
-                            "green",
-                            "furnace",
-                            "wire",
-                            "wave",
-                            "fall"
-                          ]
+                          "lnd_port":10009
                         }
                         ''
                     }
@@ -101,7 +75,7 @@ let deployment =
                     , value = Some
                         ''
                         {
-                          "port":443,
+                          "port":8443,
                           "sig_verify":true,
                           "sig_header_name":"sig-bin",
                           "tls_cert":"${escape
