@@ -59,7 +59,7 @@ for NET in regtest testnet mainnet; do
     KEY_FILE="$SERVICE_DIR/pubkey-$NET.hex"
     if [ -n "${POD}" ]; then
       PUB_KEY="$( \
-        kubectl exec -it "$POD" -- lncli --network="$NET" getinfo \
+        kubectl exec -i "$POD" -- lncli --network="$NET" getinfo \
         | jq -r '.identity_pubkey' 2>/dev/null \
         || true )"
       if [ -n "${PUB_KEY}" ]; then

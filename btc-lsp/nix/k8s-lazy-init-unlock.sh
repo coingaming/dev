@@ -28,11 +28,11 @@ for OWNER in lsp; do
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   ( echo "$LND_SERVICE ==> Checking wallet of $LND_POD" \
     && kubectl exec \
-        -it "$LND_POD" \ 
+        -i "$LND_POD" \
         -- lncli \
         --network="$BITCOIN_NETWORK" getinfo ) \
   || ( echo "$LND_SERVICE ==> Unlocking wallet $LND_POD" \
-       && echo "$LND_WALLET_PASSWORD" | kubectl exec \
+        && echo "$LND_WALLET_PASSWORD" | kubectl exec \
         -i "$LND_POD" \
         -- lncli \
         --network="$BITCOIN_NETWORK" unlock \
@@ -41,5 +41,4 @@ for OWNER in lsp; do
        && create_wallet \
         "kubectl exec -it $LND_POD -- lncli --network=$BITCOIN_NETWORK create" ) \
   || true
-
 done
