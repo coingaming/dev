@@ -3,7 +3,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateFunded,
     updateWaitingChan,
     getFundedSwaps,
-    getOpenedChanSwaps,
+    getSwapsToSettle,
     getLatestSwapT,
   )
 where
@@ -101,7 +101,11 @@ updateWaitingChan addr = runSql $ do
 getFundedSwaps ::
   ( Storage m
   ) =>
-  m [(Entity SwapIntoLn, Entity User)]
+  m
+    [ ( Entity SwapIntoLn,
+        Entity User
+      )
+    ]
 getFundedSwaps = runSql $
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` user) -> do
@@ -120,7 +124,7 @@ getFundedSwaps = runSql $
       --
       pure (swap, user)
 
-getOpenedChanSwaps ::
+getSwapsToSettle ::
   ( Storage m
   ) =>
   m
@@ -129,7 +133,7 @@ getOpenedChanSwaps ::
         Entity User
       )
     ]
-getOpenedChanSwaps =
+getSwapsToSettle =
   runSql $
     Psql.select $
       Psql.from $
@@ -146,8 +150,12 @@ getOpenedChanSwaps =
                   Psql.==. user Psql.^. UserId
               )
             Psql.where_
-              ( swap Psql.^. SwapIntoLnStatus
-                  Psql.==. Psql.val SwapWaitingChan
+              ( ( chan Psql.^. LnChanStatus
+                    Psql.==. Psql.val LnChanStatusActive
+                )
+                  Psql.&&. ( swap Psql.^. SwapIntoLnStatus
+                               Psql.==. Psql.val SwapWaitingChan
+                           )
               )
             --
             -- TODO : some sort of exp backoff in case

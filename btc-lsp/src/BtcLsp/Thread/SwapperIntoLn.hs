@@ -70,7 +70,6 @@ openChan (swapEnt, userEnt) = do
         (entityKey swapEnt)
         (ChannelPoint.fundingTxId cp)
         (ChannelPoint.outputIndex cp)
-        LnChanStatusPendingOpen
   whenLeft res $
     $(logTM) ErrorS . logStr
       . ("OpenChan procedure failed: " <>)

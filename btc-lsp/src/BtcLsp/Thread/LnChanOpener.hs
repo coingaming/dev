@@ -12,12 +12,20 @@ import qualified Data.Set as Set
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.OpenChannel as Chan
 import qualified LndClient.Data.Peer as Peer
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Katip as LndKatip
+import qualified LndClient.RPC.Silent as LndSilent
 
 apply :: (Env m) => m ()
 apply = do
-  peerList <- fromRight [] <$> withLnd Lnd.listPeers id
-  let peerSet = Set.fromList $ Peer.pubKey <$> peerList
+  ePeerList <- withLnd LndSilent.listPeers id
+  whenLeft ePeerList $
+    $(logTM) ErrorS
+      . logStr
+      . ("ListPeers procedure failed: " <>)
+      . inspect
+  let peerSet =
+        Set.fromList $
+          Peer.pubKey <$> fromRight [] ePeerList
   swaps <- SwapIntoLn.getFundedSwaps
   tasks <-
     mapM
@@ -45,7 +53,7 @@ openChan (swapEnt, userEnt) = do
   res <- runExceptT $ do
     cp <-
       withLndT
-        Lnd.openChannelSync
+        LndKatip.openChannelSync
         ( $
             Chan.OpenChannelRequest
               { Chan.nodePubkey =
@@ -70,7 +78,6 @@ openChan (swapEnt, userEnt) = do
         (entityKey swapEnt)
         (ChannelPoint.fundingTxId cp)
         (ChannelPoint.outputIndex cp)
-        LnChanStatusPendingOpen
   whenLeft res $
     $(logTM) ErrorS . logStr
       . ("OpenChan procedure failed: " <>)

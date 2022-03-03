@@ -1,17 +1,20 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 module BtcLsp.Storage.Model.LnChan
   ( createIgnore,
     getByChannelPoint,
     persistChannelUpdates,
-    persistChannelList
+    persistChannelList,
   )
 where
 
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
+import qualified LndClient.Data.Channel as Channel
 import qualified LndClient.Data.Channel as Lnd
+import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.ChannelPoint as Lnd
-import Database.Persist
+import qualified LndClient.Data.CloseChannel as CloseChannel
 import qualified LndClient.Data.CloseChannel as Lnd
 import qualified LndClient.Data.SubscribeChannelEvents as Lnd
 
@@ -21,25 +24,20 @@ createIgnore ::
   SwapIntoLnId ->
   TxId 'Funding ->
   Vout 'Funding ->
-  LnChanStatus ->
   m (Entity LnChan)
-createIgnore swapId txid vout ss = runSql $ do
+createIgnore swapId txid vout = runSql $ do
   ct <- getCurrentTime
   Psql.update $ \swap -> do
     Psql.set
       swap
-      --
-      -- TODO : better status mapping
-      --
       [ SwapIntoLnStatus
           Psql.=. Psql.val SwapWaitingChan,
         SwapIntoLnUpdatedAt
           Psql.=. Psql.val ct
       ]
     Psql.where_ $
-      ( swap Psql.^. SwapIntoLnId
-          Psql.==. Psql.val swapId
-      )
+      swap Psql.^. SwapIntoLnId
+        Psql.==. Psql.val swapId
   Psql.upsertBy
     (UniqueLnChan txid vout)
     LnChan
@@ -48,14 +46,14 @@ createIgnore swapId txid vout ss = runSql $ do
         lnChanFundingVout = vout,
         lnChanClosingTxId = Nothing,
         lnChanNumUpdates = 0,
-        lnChanStatus = ss,
+        lnChanStatus = LnChanStatusPendingOpen,
         lnChanInsertedAt = ct,
         lnChanUpdatedAt = ct,
         lnChanTotalSatoshisReceived = MSat 0,
         lnChanTotalSatoshisSent = MSat 0
       }
     --
-    -- TODO : txid + vout update is redundant, but upsertBy is
+    -- TODO : txid + vout update was redundant, but upsertBy is
     -- not working with mempty update argument -
     -- probably it's a bug in Esqueleto implementation,
     -- check it in latest version, and if not fixed -
@@ -64,9 +62,7 @@ createIgnore swapId txid vout ss = runSql $ do
     -- UPDATE : reported in github
     -- https://github.com/bitemyapp/esqueleto/issues/294
     --
-    [ LnChanFundingTxId Psql.=. Psql.val txid,
-      LnChanFundingVout Psql.=. Psql.val vout,
-      LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId)
+    [ LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId)
     ]
 
 getByChannelPoint ::
@@ -79,8 +75,12 @@ getByChannelPoint txid vout =
     . Psql.getBy
     $ UniqueLnChan txid vout
 
-
-persistChannelList :: (Storage m, Traversable t) => t Lnd.Channel -> m (t (Entity LnChan))
+persistChannelList ::
+  ( Storage m,
+    Traversable t
+  ) =>
+  t Lnd.Channel ->
+  m (t (Entity LnChan))
 persistChannelList chs = do
   now <- getCurrentTime
   runSql $ sequence $ upsertChannel now . mapChannel now <$> chs
@@ -103,60 +103,167 @@ persistChannelList chs = do
           lnChanFundingVout = vout,
           lnChanClosingTxId = Nothing,
           lnChanNumUpdates = numUpdates,
-          lnChanStatus = if active then LnChanStatusActive else LnChanStatusInactive,
+          lnChanStatus =
+            if active
+              then LnChanStatusActive
+              else LnChanStatusInactive,
           lnChanInsertedAt = now,
           lnChanUpdatedAt = now,
           lnChanTotalSatoshisReceived = tsent,
           lnChanTotalSatoshisSent = trec
         }
 
-pendingOpenChannelInsert :: (
-  PersistStoreWrite backend,
-  BaseBackend backend ~ Psql.SqlBackend, MonadIO m) => UTCTime -> Lnd.PendingUpdate 'Funding -> ReaderT backend m (Psql.Key LnChan)
-pendingOpenChannelInsert now (Lnd.PendingUpdate txid out)
-    = insert $ LnChan Nothing txid out Nothing 0 (MSat 0) (MSat 0) LnChanStatusPendingOpen now now
+pendingOpenChanUpsert ::
+  ( MonadIO m
+  ) =>
+  UTCTime ->
+  Lnd.PendingUpdate 'Funding ->
+  ReaderT Psql.SqlBackend m (Entity LnChan)
+pendingOpenChanUpsert ct (Lnd.PendingUpdate txid vout) =
+  Psql.upsertBy
+    (UniqueLnChan txid vout)
+    LnChan
+      { lnChanSwapIntoLnId = Nothing,
+        lnChanFundingTxId = txid,
+        lnChanFundingVout = vout,
+        lnChanClosingTxId = Nothing,
+        lnChanNumUpdates = 0,
+        lnChanStatus = ss,
+        lnChanInsertedAt = ct,
+        lnChanUpdatedAt = ct,
+        lnChanTotalSatoshisReceived = MSat 0,
+        lnChanTotalSatoshisSent = MSat 0
+      }
+    [ LnChanStatus
+        Psql.=. Psql.val ss,
+      LnChanUpdatedAt
+        Psql.=. Psql.val ct
+    ]
+  where
+    ss = LnChanStatusPendingOpen
 
-openChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.Channel -> ReaderT backend m ()
-openChannelUpdate now (Lnd.Channel _ (Lnd.ChannelPoint txid out) _ _ _ _ _ _ _ _ _)
-    = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusOpened, LnChanUpdatedAt =. now]
+channelUpsert ::
+  ( MonadIO m
+  ) =>
+  UTCTime ->
+  Lnd.Channel ->
+  ReaderT Psql.SqlBackend m (Entity LnChan)
+channelUpsert ct chan =
+  Psql.upsertBy
+    (UniqueLnChan txid vout)
+    LnChan
+      { lnChanSwapIntoLnId = Nothing,
+        lnChanFundingTxId = txid,
+        lnChanFundingVout = vout,
+        lnChanClosingTxId = Nothing,
+        lnChanNumUpdates = upd,
+        lnChanStatus = LnChanStatusPendingOpen,
+        lnChanInsertedAt = ct,
+        lnChanUpdatedAt = ct,
+        lnChanTotalSatoshisReceived = rcv,
+        lnChanTotalSatoshisSent = sent
+      }
+    [ LnChanStatus
+        Psql.=. Psql.val LnChanStatusOpened,
+      LnChanNumUpdates
+        Psql.=. Psql.val upd,
+      LnChanTotalSatoshisSent
+        Psql.=. Psql.val sent,
+      LnChanTotalSatoshisReceived
+        Psql.=. Psql.val rcv,
+      LnChanUpdatedAt
+        Psql.=. Psql.val ct
+    ]
+  where
+    cp = Channel.channelPoint chan
+    txid = ChannelPoint.fundingTxId cp
+    vout = ChannelPoint.outputIndex cp
+    upd = Channel.numUpdates chan
+    sent = Channel.totalSatoshisSent chan
+    rcv = Channel.totalSatoshisReceived chan
 
-activeChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelPoint -> ReaderT backend m ()
-activeChannelUpdate now (Lnd.ChannelPoint txid out)
-    = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusActive, LnChanUpdatedAt =. now]
+channelPointUpsert ::
+  ( MonadIO m
+  ) =>
+  Lnd.ChannelPoint ->
+  LnChanStatus ->
+  UTCTime ->
+  ReaderT Psql.SqlBackend m (Entity LnChan)
+channelPointUpsert (Lnd.ChannelPoint txid vout) ss ct =
+  Psql.upsertBy
+    (UniqueLnChan txid vout)
+    LnChan
+      { lnChanSwapIntoLnId = Nothing,
+        lnChanFundingTxId = txid,
+        lnChanFundingVout = vout,
+        lnChanClosingTxId = Nothing,
+        lnChanNumUpdates = 0,
+        lnChanStatus = ss,
+        lnChanInsertedAt = ct,
+        lnChanUpdatedAt = ct,
+        lnChanTotalSatoshisReceived = MSat 0,
+        lnChanTotalSatoshisSent = MSat 0
+      }
+    [ LnChanStatus
+        Psql.=. Psql.val ss,
+      LnChanUpdatedAt
+        Psql.=. Psql.val ct
+    ]
 
-inactiveChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelPoint -> ReaderT backend m ()
-inactiveChannelUpdate now (Lnd.ChannelPoint txid out)
-    = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusInactive, LnChanUpdatedAt =. now]
+closedChannelUpsert ::
+  ( MonadIO m
+  ) =>
+  UTCTime ->
+  Lnd.ChannelCloseSummary ->
+  ReaderT Psql.SqlBackend m (Entity LnChan)
+closedChannelUpsert ct close =
+  Psql.upsertBy
+    (UniqueLnChan fundTxId fundVout)
+    LnChan
+      { lnChanSwapIntoLnId = Nothing,
+        lnChanFundingTxId = fundTxId,
+        lnChanFundingVout = fundVout,
+        lnChanClosingTxId = closeTxId,
+        lnChanNumUpdates = 0,
+        lnChanStatus = ss,
+        lnChanInsertedAt = ct,
+        lnChanUpdatedAt = ct,
+        lnChanTotalSatoshisReceived = MSat 0,
+        lnChanTotalSatoshisSent = MSat 0
+      }
+    [ LnChanClosingTxId
+        Psql.=. Psql.val closeTxId,
+      LnChanStatus
+        Psql.=. Psql.val ss,
+      LnChanUpdatedAt
+        Psql.=. Psql.val ct
+    ]
+  where
+    ss = LnChanStatusClosed
+    cp = CloseChannel.chPoint close
+    fundTxId = ChannelPoint.fundingTxId cp
+    fundVout = ChannelPoint.outputIndex cp
+    closeTxId = Just $ CloseChannel.closingTxId close
 
-closedChannelUpdate :: (PersistQueryWrite backend, MonadUnliftIO m,
- BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelCloseSummary -> ReaderT backend m ()
-closedChannelUpdate now (Lnd.ChannelCloseSummary _remotePubkey (Lnd.ChannelPoint txid out) _settledBalance closeTxId)
-    = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusClosed,
-          LnChanClosingTxId =. Just closeTxId,
-          LnChanUpdatedAt =. now ]
-
-fullyResolvedChannelUpdate :: (PersistQueryWrite backend, MonadIO m,
- BaseBackend backend ~ Psql.SqlBackend) => UTCTime -> Lnd.ChannelPoint -> ReaderT backend m ()
-fullyResolvedChannelUpdate now (Lnd.ChannelPoint txid out)
-    = updateWhere [LnChanFundingTxId ==. txid, LnChanFundingVout ==. out]
-          [LnChanStatus =. LnChanStatusInactive, LnChanUpdatedAt =. now]
-
-
-persistChannelUpdates :: (KatipContext m, Storage m) => Lnd.ChannelEventUpdate -> m ()
+persistChannelUpdates ::
+  ( KatipContext m,
+    Storage m
+  ) =>
+  Lnd.ChannelEventUpdate ->
+  m (Entity LnChan)
 persistChannelUpdates (Lnd.ChannelEventUpdate channelEvent _) = do
   $(logTM) DebugS $ logStr $ inspect channelEvent
-  now <- getCurrentTime
-  case channelEvent of
-    Lnd.ChannelEventUpdateChannelOpenChannel x -> runSql $ openChannelUpdate now x
-    Lnd.ChannelEventUpdateChannelActiveChannel x -> runSql $ activeChannelUpdate now x
-    Lnd.ChannelEventUpdateChannelInactiveChannel x -> runSql $ inactiveChannelUpdate now x
-    Lnd.ChannelEventUpdateChannelClosedChannel x -> runSql $ closedChannelUpdate now x
-    Lnd.ChannelEventUpdateChannelFullyResolved x -> runSql $ fullyResolvedChannelUpdate now x
-    Lnd.ChannelEventUpdateChannelPendingOpenChannel x -> void $ runSql $ pendingOpenChannelInsert now x
+  ct <- getCurrentTime
+  runSql $ case channelEvent of
+    Lnd.ChannelEventUpdateChannelOpenChannel x ->
+      channelUpsert ct x
+    Lnd.ChannelEventUpdateChannelActiveChannel x ->
+      channelPointUpsert x LnChanStatusActive ct
+    Lnd.ChannelEventUpdateChannelInactiveChannel x ->
+      channelPointUpsert x LnChanStatusInactive ct
+    Lnd.ChannelEventUpdateChannelClosedChannel x ->
+      closedChannelUpsert ct x
+    Lnd.ChannelEventUpdateChannelFullyResolved x ->
+      channelPointUpsert x LnChanStatusInactive ct
+    Lnd.ChannelEventUpdateChannelPendingOpenChannel x ->
+      pendingOpenChanUpsert ct x
