@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module BtcLsp.Rpc.ScriptHashRpc
+module BtcLsp.Rpc.ElectrsRpc
   ( getBalance,
     version,
+    blockHeader,
     Balance (..),
     ScriptHash (..),
+    BlockHeader (..)
   )
 where
 
@@ -23,6 +25,11 @@ import qualified Text.Hex as TH
 newtype ScriptHash = ScriptHash Text
   deriving (Generic)
 
+newtype BlockHeader = BlockHeader Text
+  deriving (Generic, Eq)
+
+instance Out BlockHeader
+
 data Balance = Balance
   { confirmed :: MSat,
     unconfirmed :: MSat
@@ -39,6 +46,10 @@ instance FromJSON Balance where
       <*> v .: "unconfirmed"
 
 instance ToJSON ScriptHash
+
+instance FromJSON BlockHeader
+
+instance Out Balance
 
 callRpc :: (Env m, ToJSON req, FromJSON resp) => Method -> req -> ElectrsEnv -> m (Either RpcError resp)
 callRpc m r env = do
@@ -67,6 +78,9 @@ getBalance env (Left address) = do
   case scrHash of
     Right sh -> getBalance env (Right sh)
     Left _ -> pure $ Left (OtherError "Getting ScriptHash error")
+
+blockHeader :: Env m => ElectrsEnv -> BlkHeight -> m (Either RpcError BlockHeader)
+blockHeader env bh = callRpc GetBlockHeader [bh] env
 
 getScriptHash :: (Env m) => OnChainAddress a -> m (Either Failure ScriptHash)
 getScriptHash addr = runExceptT $ do

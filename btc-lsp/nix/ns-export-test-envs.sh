@@ -176,6 +176,19 @@ export LSP_GRPC_CLIENT_ENV="
 #   \"sig_header_name\":\"sig-bin\"
 # }
 # "
+#
+# NOTE : for local k8s tests
+#
+# export LSP_GRPC_CLIENT_ENV="
+# {
+#   \"host\":\"btc-lsp\",
+#   \"port\":30443,
+#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
+#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
+#   \"sig_header_name\":\"sig-bin\",
+#   \"compress_mode\":\"Compressed\"
+# }
+# "
 
 export LSP_GRPC_SERVER_ENV="
 {

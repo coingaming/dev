@@ -453,6 +453,7 @@ data RpcError
   = RpcNoAddress
   | RpcJsonDecodeError
   | RpcHexDecodeError
+  | CannotSyncBlockchain
   | OtherError Text
   deriving (Eq, Generic, Show)
 
@@ -497,6 +498,8 @@ newtype BlkHeight
   deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
 
 instance Out BlkHeight
+
+instance ToJSON BlkHeight
 
 instance From Btc.BlockHeight BlkHeight
 
