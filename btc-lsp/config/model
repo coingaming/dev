@@ -43,7 +43,7 @@ Block
   deriving Eq Show Generic
 
 LnChan
-  swapIntoLnId SwapIntoLnId
+  swapIntoLnId SwapIntoLnId Maybe
   fundingTxId (TxId 'Funding)
   fundingVout (Vout 'Funding)
   closingTxId (TxId 'Closing) Maybe
@@ -53,6 +53,8 @@ LnChan
   -- allocation of liquidity. We can track channel usage
   -- with combination of numUpdates and updatedAt.
   numUpdates Word64
+  totalSatoshisSent MSat
+  totalSatoshisReceived MSat
   status LnChanStatus
   insertedAt UTCTime
   updatedAt UTCTime

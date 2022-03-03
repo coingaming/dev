@@ -30,6 +30,7 @@ class
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLspLndSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey
+  getLspLndEnv :: m Lnd.LndEnv
   getLspPubKey = do
     var <- getLspPubKeyVar
     mPubKey <- tryReadMVar var
