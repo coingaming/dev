@@ -17,6 +17,7 @@ module Network.Bitcoin.BlockChain ( Client
                                   , BlockHeight
                                   , getBlockHash
                                   , Block(..)
+                                  , BlockVerbose(..)
                                   , getBlock
                                   , getBlockVerbose
                                   , OutputSetInfo(..)
