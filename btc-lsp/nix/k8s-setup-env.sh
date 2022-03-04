@@ -10,10 +10,10 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 DEFAULT_PASSWORD=developer
 BITCOIN_RPCUSER=bitcoinrpc
 BITCOIN_NETWORK=regtest
-LND_TLS_CERT=$(inline <$THIS_DIR/../build/swarm/lnd-lsp/tls.cert) || printf "TODO"
-LND_HEX_MACAROON=$(<$THIS_DIR/../build/swarm/lnd-lsp/macaroon-$BITCOIN_NETWORK.hex) || printf "TODO"
-BTC_LSP_TLS_CERT=$(inline <$THIS_DIR/../build/swarm/btc-lsp/cert.pem)
-BTC_LSP_TLS_KEY=$(inline <$THIS_DIR/../build/swarm/btc-lsp/key.pem)
+LND_TLS_CERT=$(cat $THIS_DIR/../build/swarm/lnd-lsp/tls.cert | inline || printf "TODO")
+LND_HEX_MACAROON=$(cat $THIS_DIR/../build/swarm/lnd-lsp/macaroon-$BITCOIN_NETWORK.hex || printf "TODO")
+BTC_LSP_TLS_CERT=$(cat $THIS_DIR/../build/swarm/btc-lsp/cert.pem | inline)
+BTC_LSP_TLS_KEY=$(cat $THIS_DIR/../build/swarm/btc-lsp/key.pem | inline)
 
 echo "==> Setting up ENV for bitcoind"
 (kubectl create secret generic bitcoind \
