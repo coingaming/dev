@@ -10,12 +10,20 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified Data.Set as Set
 import qualified LndClient.Data.Peer as Peer
 import qualified LndClient.Data.SendPayment as Lnd
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Katip as LndKatip
+import qualified LndClient.RPC.Silent as LndSilent
 
 apply :: (Env m) => m ()
 apply = do
-  peerList <- fromRight [] <$> withLnd Lnd.listPeers id
-  let peerSet = Set.fromList $ Peer.pubKey <$> peerList
+  ePeerList <- withLnd LndSilent.listPeers id
+  whenLeft ePeerList $
+    $(logTM) ErrorS
+      . logStr
+      . ("ListPeers procedure failed: " <>)
+      . inspect
+  let peerSet =
+        Set.fromList $
+          Peer.pubKey <$> fromRight [] ePeerList
   swaps <- SwapIntoLn.getSwapsToSettle
   tasks <-
     mapM
@@ -42,7 +50,7 @@ settleSwap (swapEnt, _) = do
     --
     void $
       withLndT
-        Lnd.sendPayment
+        LndKatip.sendPayment
         ( $
             Lnd.SendPaymentRequest
               { Lnd.paymentRequest =

@@ -1,8 +1,8 @@
 module BtcLsp.Thread.LnChanWatcher
   ( watchChannelEvents,
     forkThread,
-    applySub,
     applyPoll,
+    applySub,
   )
 where
 
