@@ -72,6 +72,9 @@ minikube image load \
   -p "$MINIKUBE_PROFILE" \
   --daemon=true $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
 
+echo "==> Configuring environment for containers"
+sh "$THIS_DIR/k8s-setup-env.sh"
+
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
@@ -88,12 +91,13 @@ sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 echo "==> Generate additional creds"
 sh "$THIS_DIR/k8s-generate-creds.sh"
 
-echo "==> Full dhall"
-sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-dhall-compile.sh'"
+echo "==> Reconfiguring environment for containers"
+kubectl delete secret btc-lsp rtl
+sh "$THIS_DIR/k8s-setup-env.sh"
 
-echo "==> Deploying k8s resources"
-sh "$THIS_DIR/k8s-deploy.sh"
+echo "==> Restarting k8s resources"
+sh "$THIS_DIR/k8s-restart.sh" btc-lsp
+sh "$THIS_DIR/k8s-restart.sh" rtl
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh"

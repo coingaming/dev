@@ -18,25 +18,131 @@ let deployment =
                 , name
                 , image = Some "heathmont/bitcoind:v1.0.9"
                 , env = Some
-                  [ K.EnvVar::{ name = "CONFIG_FROM_ENV", value = Some "true" }
-                  , K.EnvVar::{ name = "DISABLEWALLET", value = Some "0" }
-                  , K.EnvVar::{ name = "PRUNE", value = Some "0" }
-                  , K.EnvVar::{ name = "REGTEST", value = Some "1" }
-                  , K.EnvVar::{ name = "RPCALLOWIP", value = Some "0.0.0.0/0" }
-                  , K.EnvVar::{ name = "RPCBIND", value = Some ":18332" }
-                  , K.EnvVar::{ name = "RPCPASSWORD", value = Some "developer" }
-                  , K.EnvVar::{ name = "RPCPORT", value = Some "18332" }
-                  , K.EnvVar::{ name = "RPCUSER", value = Some "bitcoinrpc" }
-                  , K.EnvVar::{ name = "SERVER", value = Some "1" }
-                  , K.EnvVar::{ name = "TESTNET", value = Some "0" }
-                  , K.EnvVar::{ name = "TXINDEX", value = Some "1" }
+                  [ K.EnvVar::{
+                    , name = "CONFIG_FROM_ENV"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "config_from_env"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "DISABLEWALLET"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "disablewallet"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "PRUNE"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "prune"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "REGTEST"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "regtest"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "RPCALLOWIP"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "rpcallowip"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "RPCBIND"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "rpcbind"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "RPCUSER"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "rpcuser"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "RPCPASSWORD"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "rpcpassword"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "RPCPORT"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "rpcport"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "SERVER"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "server"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "TESTNET"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "testnet"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "TXINDEX"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "txindex"
+                        , name = Some name
+                        }
+                      }
+                    }
                   , K.EnvVar::{
                     , name = "ZMQPUBRAWBLOCK"
-                    , value = Some "tcp://0.0.0.0:39703"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "zmqpubrawblock"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "ZMQPUBRAWTX"
-                    , value = Some "tcp://0.0.0.0:39704"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "zmqpubrawtx"
+                        , name = Some name
+                        }
+                      }
                     }
                   ]
                 , ports = Some
