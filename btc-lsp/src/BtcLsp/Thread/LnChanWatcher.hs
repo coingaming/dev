@@ -1,16 +1,16 @@
 module BtcLsp.Thread.LnChanWatcher
   ( watchChannelEvents,
     forkThread,
-    apply,
-    applyListChannelWatcher,
+    applySub,
+    applyPoll,
   )
 where
 
 import BtcLsp.Import (newEmptyMVar)
 import BtcLsp.Import hiding (newEmptyMVar, putMVar, takeMVar)
 import BtcLsp.Storage.Model.LnChan
-  ( persistChannelList,
-    persistChannelUpdates,
+  ( persistChannelUpdates,
+    persistOpenedChannels,
   )
 import LndClient
 import LndClient.Data.ListChannels
@@ -43,7 +43,7 @@ syncChannelList lnd = do
       lnd
       (ListChannelsRequest False False False False Nothing)
   case res of
-    Right chs -> void $ persistChannelList chs
+    Right chs -> void $ persistOpenedChannels chs
     Left {} -> pure ()
 
 watchChannelEvents ::
@@ -63,15 +63,15 @@ watchChannelEvents lnd =
           lnd
       act run
 
-applyListChannelWatcher :: (Env m) => m ()
-applyListChannelWatcher = do
+applyPoll :: (Env m) => m ()
+applyPoll = do
   lnd <- getLspLndEnv
   void $ syncChannelList lnd
   void $ threadDelay $ 60 * 1000000
-  applyListChannelWatcher
+  applyPoll
 
-apply :: (Env m) => m ()
-apply = do
+applySub :: (Env m) => m ()
+applySub = do
   lnd <- getLspLndEnv
   withRunInIO $ \run -> do
     void $

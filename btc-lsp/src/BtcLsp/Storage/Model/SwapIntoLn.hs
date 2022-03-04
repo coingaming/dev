@@ -2,6 +2,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
     updateFunded,
     updateWaitingChan,
+    updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
     getLatestSwapT,
@@ -98,6 +99,29 @@ updateWaitingChan addr = runSql $ do
                      Psql.==. Psql.val SwapWaitingFund
                  )
 
+--
+-- TODO : store preimage???
+--
+updateSettled ::
+  ( Storage m
+  ) =>
+  SwapIntoLnId ->
+  m ()
+updateSettled sid = runSql $ do
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapSucceeded
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val sid
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     Psql.==. Psql.val SwapWaitingChan
+                 )
+
 getFundedSwaps ::
   ( Storage m
   ) =>
@@ -129,7 +153,6 @@ getSwapsToSettle ::
   ) =>
   m
     [ ( Entity SwapIntoLn,
-        Entity LnChan,
         Entity User
       )
     ]
@@ -162,7 +185,7 @@ getSwapsToSettle =
             -- where user node is offline for a long time.
             -- Maybe limits, some proper retries etc.
             --
-            pure (swap, chan, user)
+            pure (swap, user)
 
 getLatestSwapT ::
   ( Storage m

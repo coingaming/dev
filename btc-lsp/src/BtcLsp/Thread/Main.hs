@@ -12,6 +12,7 @@ import qualified BtcLsp.Storage.Migration as Storage
 import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 import qualified BtcLsp.Thread.Server as Server
+import qualified BtcLsp.Thread.SwapperIntoLn as SwapperIntoLn
 import qualified LndClient.RPC.Katip as Lnd
 
 main :: IO ()
@@ -30,9 +31,10 @@ apply = do
         mapM
           spawnLink
           [ Server.apply,
-            LnChanWatcher.apply,
-            LnChanWatcher.applyListChannelWatcher,
-            LnChanOpener.apply
+            LnChanWatcher.applySub,
+            LnChanWatcher.applyPoll,
+            LnChanOpener.apply,
+            SwapperIntoLn.apply
           ]
       liftIO
         . void

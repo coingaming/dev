@@ -73,11 +73,20 @@ openChan (swapEnt, userEnt) = do
                 Chan.closeAddress = Nothing
               }
         )
-    lift $
-      LnChan.createIgnore
+    --
+    -- TODO : make it single psql trx
+    --
+    void
+      . lift
+      $ LnChan.createIgnore
         (entityKey swapEnt)
         (ChannelPoint.fundingTxId cp)
         (ChannelPoint.outputIndex cp)
+    void
+      . lift
+      . SwapIntoLn.updateWaitingChan
+      . swapIntoLnFundAddress
+      $ entityVal swapEnt
   whenLeft res $
     $(logTM) ErrorS . logStr
       . ("OpenChan procedure failed: " <>)
