@@ -79,6 +79,28 @@ in  { networks.global.external = True
         , volumes = [ "bitcoind:/bitcoin/.bitcoin" ]
         , networks.global = mempty
         }
+      , electrs =
+        { image = ../build/docker-image-electrs.txt as Text
+        , hostname = "electrs"
+        , environment =
+          { CONFIG_FROM_ENV = "true"
+          , DISABLEWALLET = "0"
+          , PRUNE = "0"
+          , REGTEST = "1"
+          , RPCALLOWIP = "0.0.0.0/0"
+          , RPCBIND = ":80"
+          , RPCPASSWORD = "developer"
+          , RPCPORT = "80"
+          , RPCUSER = "bitcoinrpc"
+          , SERVER = "1"
+          , TESTNET = "0"
+          , TXINDEX = "1"
+          , ZMQPUBRAWBLOCK = "tcp://0.0.0.0:39703"
+          , ZMQPUBRAWTX = "tcp://0.0.0.0:39704"
+          }
+        , volumes = [ "bitcoind:/bitcoin/.bitcoin" ]
+        , networks.global = mempty
+        }
       , lnd-lsp = mkLnd "lsp"
       , rtl =
         { environment =
