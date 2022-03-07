@@ -50,9 +50,9 @@ data Env = Env
     envLnd :: Lnd.LndEnv,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
-    envGrpcServerEnv :: GSEnv,
-    -- | Elecrts Rpc
-    envElectrsRpcEnv :: ElectrsEnv,
+    envGrpcServer :: GSEnv,
+    -- | Elecrts
+    envElectrs :: ElectrsEnv,
     -- | Bitcoind
     envBtc :: Btc.Client
   }
@@ -70,10 +70,15 @@ data RawConfig = RawConfig
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
-    rawConfigElectrsRpcEnv :: ElectrsEnv,
+    rawConfigElectrsEnv :: ElectrsEnv,
     -- | Bitcoind
-    rawConfigBitcoindRpcEnv :: BitcoindEnv
+    rawConfigBtcEnv :: BitcoindEnv
   }
+
+--
+-- TODO : do we really need support of
+-- double-quoted JSONs now???
+--
 
 -- | Here we enable normal JSON parsing
 -- as well as double-quoted JSON parsing
@@ -114,9 +119,9 @@ readRawConfig =
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
-      -- Electrs Rpc
+      -- Electrs
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts
-      -- Bitcoind Rpc
+      -- Bitcoind
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_BITCOIND_ENV" opts
 
 readGCEnv :: IO GCEnv
@@ -158,7 +163,7 @@ withEnv rc this = do
   let lnd = rawConfigLndEnv rc
   bracket newLogEnv rmLogEnv $ \le ->
     bracket newSqlPool rmSqlPool $ \pool -> do
-      let rBtc = rawConfigBitcoindRpcEnv rc
+      let rBtc = rawConfigBtcEnv rc
       btc <-
         Btc.getClient
           (from $ bitcoindEnvHost rBtc)
@@ -179,12 +184,12 @@ withEnv rc this = do
                 envLnd = lnd,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
-                envGrpcServerEnv =
+                envGrpcServer =
                   (rawConfigGrpcServerEnv rc)
                     { gsEnvSigner = run . signT lnd,
                       gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
-                envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
+                envElectrs = rawConfigElectrsEnv rc,
                 envBtc = btc
               }
   where

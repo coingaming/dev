@@ -46,7 +46,7 @@ instance (MonadIO m) => KatipContext (AppM m) where
 
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
-    asks Env.envGrpcServerEnv
+    asks Env.envGrpcServer
   getLspPubKeyVar =
     asks Env.envLndPubKey
   getLspLndEnv =
@@ -62,7 +62,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)
   withElectrs method args = do
-    env <- asks Env.envElectrsRpcEnv
+    env <- asks Env.envElectrs
     first FailureElectrs <$> args (method env)
   withBtc method args = do
     env <- asks Env.envBtc
