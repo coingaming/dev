@@ -37,6 +37,7 @@ mkdir -p "$BUILD_DIR"
 
 echo "==> Docker build cleanup"
 sh "$THIS_DIR/ds-down.sh" || true
+sleep 5
 rm -rf "$BUILD_DIR/swarm"
 
 echo "==> Docker swarm network setup"

@@ -18,13 +18,31 @@ let deployment =
                 , env = Some
                   [ K.EnvVar::{
                     , name = "POSTGRES_MULTIPLE_DATABASES"
-                    , value = Some "\"btc-lsp\""
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "postgres_multiple_databases"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "POSTGRES_USER"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "postgres_user"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "POSTGRES_PASSWORD"
-                    , value = Some "developer"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "postgres_password"
+                        , name = Some name
+                        }
+                      }
                     }
-                  , K.EnvVar::{ name = "POSTGRES_USER", value = Some "btc-lsp" }
                   ]
                 , name
                 , image = Some "heathmont/postgres:11-alpine-a2e8bbe"

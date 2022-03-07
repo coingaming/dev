@@ -18,37 +18,32 @@ let deployment =
                 , name
                 , image = Some "heathmont/rtl:9c8d7d6"
                 , env = Some
-                  [ K.EnvVar::{ name = "CONFIG_FROM_ENV", value = Some "true" }
+                  [ K.EnvVar::{
+                    , name = "CONFIG_FROM_ENV"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "config_from_env"
+                        , name = Some name
+                        }
+                      }
+                    }
                   , K.EnvVar::{
                     , name = "RTL_CONFIG_JSON"
-                    , value = Some
-                        ''
-                        {
-                          "SSO":{
-                            "logoutRedirectLink": "",
-                            "rtlCookiePath": "",
-                            "rtlSSO": 0
-                          },
-                          "defaultNodeIndex": 1,
-                          "multiPass": "developer",
-                          "nodes": [],
-                          "port": "80"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "rtl_config_json"
+                        , name = Some name
                         }
-                        ''
+                      }
                     }
                   , K.EnvVar::{
                     , name = "RTL_CONFIG_NODES_JSON"
-                    , value = Some
-                        ''
-                        [
-                          {
-                            "hexMacaroon": "${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
-                                              ? "TODO"}",
-                            "index": 1,
-                            "lnServerUrl": "https://lnd-lsp:8080"
-                          }
-                        ]
-                        ''
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "rtl_config_nodes_json"
+                        , name = Some name
+                        }
+                      }
                     }
                   ]
                 , ports = Some [ K.ContainerPort::{ containerPort = 80 } ]

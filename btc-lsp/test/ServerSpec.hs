@@ -9,7 +9,7 @@ import qualified BtcLsp.Cfg as Cfg
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
-import BtcLsp.Import
+import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
@@ -31,19 +31,6 @@ spec :: Spec
 spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
   itEnv "GetCfg" $
     withSpawnLink Main.apply . const $ do
-      -- Let app spawn
-      sleep $ MicroSecondsDelay 500000
-      --
-      -- TODO : implement withGCEnv!!!
-      --
-      gsEnv <- getGsEnv
-      gcEnv <- getGCEnv
-      pub <- getLspPubKey
-      res0 <-
-        Client.getCfg
-          gsEnv
-          (gcEnv {gcEnvCompressMode = compressMode})
-          =<< setGrpcCtx defMessage
       let minAmt :: Proto.LocalBalance =
             defMessage
               & Proto.val
@@ -56,6 +43,20 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                 .~ ( defMessage
                        & LowLevel.val .~ 10000000000
                    )
+      -- Let app spawn
+      sleep $ MicroSecondsDelay 500000
+      --
+      -- TODO : implement withGCEnv!!!
+      --
+      gcEnv <- getGCEnv
+      pub <- getLspPubKey
+      res0 <-
+        runExceptT $
+          Client.getCfgT
+            gcEnv
+              { gcEnvCompressMode = compressMode
+              }
+            =<< setGrpcCtxT LndAlice defMessage
       liftIO $
         (^. GetCfg.success) <$> res0
           `shouldBe` Right
@@ -70,7 +71,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                               )
                          & Proto.port
                            .~ ( defMessage
-                                  & Proto.val .~ 10010
+                                  & Proto.val .~ 9735
                               )
                      ]
                 & GetCfg.swapIntoLnMinAmt .~ minAmt
@@ -100,7 +101,6 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       --
       -- TODO : implement withGCEnv!!!
       --
-      gsEnv <- getGsEnv
       gcEnv <- getGCEnv
       res0 <- runExceptT $ do
         fundInv <-
@@ -131,17 +131,12 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                       Lnd.account = Nothing
                     }
               )
-        --
-        -- TODO : remove gsEnv argument, add own signer
-        -- into gcEnv. Without proper signer, this test
-        -- is meaningless, because LSP can not recognize
-        -- itself as a peer to open channel. Peer and
-        -- signer should be Alice node!!!
-        --
         Client.swapIntoLnT
-          gsEnv
-          (gcEnv {gcEnvCompressMode = compressMode})
+          gcEnv
+            { gcEnvCompressMode = compressMode
+            }
           =<< setGrpcCtxT
+            LndAlice
             ( defMessage
                 & SwapIntoLn.fundLnInvoice
                   .~ from @(LnInvoice 'Fund) fundInv
@@ -190,8 +185,8 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       liftIO $
         res1
           `shouldSatisfy` ( \case
-                              Left {} ->
-                                False
-                              Right {} ->
+                              Right [_] ->
                                 True
+                              _ ->
+                                False
                           )

@@ -25,38 +25,102 @@ let deployment =
                 , env = Some
                   [ K.EnvVar::{
                     , name = "BITCOIN_DEFAULTCHANCONFS"
-                    , value = Some "1"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "bitcoin_defaultchanconfs"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_NETWORK"
-                    , value = Some "regtest"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "bitcoin_network"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_RPCHOST"
-                    , value = Some "bitcoind:18332"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "bitcoin_rpchost"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_RPCPASS"
-                    , value = Some "developer"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "bitcoin_rpcpass"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_RPCUSER"
-                    , value = Some "bitcoinrpc"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
+                        , key = "bitcoin_rpcuser"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_ZMQPUBRAWBLOCK"
-                    , value = Some "tcp://bitcoind:39703"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "bitcoin_zmqpubrawblock"
+                        , name = Some name
+                        }
+                      }
                     }
                   , K.EnvVar::{
                     , name = "BITCOIN_ZMQPUBRAWTX"
-                    , value = Some "tcp://bitcoind:39704"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "bitcoin_zmqpubrawtx"
+                        , name = Some name
+                        }
+                      }
                     }
-                  , K.EnvVar::{ name = "LND_GRPC_PORT", value = Some "10009" }
-                  , K.EnvVar::{ name = "LND_P2P_PORT", value = Some "9735" }
-                  , K.EnvVar::{ name = "LND_REST_PORT", value = Some "8080" }
+                  , K.EnvVar::{
+                    , name = "LND_GRPC_PORT"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "lnd_grpc_port"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "LND_P2P_PORT"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "lnd_p2p_port"
+                        , name = Some name
+                        }
+                      }
+                    }
+                  , K.EnvVar::{
+                    , name = "LND_REST_PORT"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "lnd_rest_port"
+                        , name = Some name
+                        }
+                      }
+                    }
                   , K.EnvVar::{
                     , name = "TLS_EXTRADOMAIN"
-                    , value = Some "lnd-lsp"
+                    , valueFrom = Some K.EnvVarSource::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                        , key = "tls_extradomain"
+                        , name = Some name
+                        }
+                      }
                     }
                   ]
                 , ports = Some
