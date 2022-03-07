@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BlockScannerSpec
   ( spec,
@@ -9,44 +8,63 @@ where
 import BtcLsp.Import
 import TestOrphan ()
 import TestWithLndLsp
-import qualified BtcLsp.Thread.Main as Main
 import LndClient.LndTest (mine)
 import qualified Network.Bitcoin.Wallet as Btc
 import Test.Hspec
-import qualified BtcLsp.Rpc.ElectrsRpc as Rpc
-import BtcLsp.Rpc.Helper (waitTillLastBlockProcessedT)
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified BtcLsp.Thread.BlockScanner as BS
+import qualified Data.Map as M
+import qualified Network.Bitcoin as Btc
+
+genLspAddress :: ExceptT
+  Failure (TestAppM 'LndLsp IO) Lnd.NewAddressResponse
+genLspAddress =
+  withLndT
+    Lnd.newAddress
+    ( $
+        Lnd.NewAddressRequest
+          { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+            Lnd.account = Nothing
+          }
+    )
+
+btcToMSat :: Btc.BTC -> MSat
+btcToMSat x = MSat $ fromIntegral (i * 1000)
+  where (i :: Integer) = from x
+
 
 spec :: Spec
 spec = do
-  itEnv "Block scanner" $ do
-    withSpawnLink Main.apply . const $ do
-      sleep $ MicroSecondsDelay 500000
-      addrResponse <-
-        runExceptT $
-          withLndT
-            Lnd.newAddress
-            ( $
-                Lnd.NewAddressRequest
-                  { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-                    Lnd.account = Nothing
-                  }
-            )
+  itEnv "Block scanner works with 1 block" $ do
+    sleep $ MicroSecondsDelay 500000
+    mine 100 LndLsp
+    wb <- runExceptT $ withBtcT Btc.getBalance id
+    res <- runExceptT $ do
+      wbal <- except wb
+      let amt = wbal / 10
+      (Lnd.NewAddressResponse trAddr) <- genLspAddress
+      void $ withBtcT Btc.sendToAddress (\h -> h trAddr amt Nothing Nothing)
+      void $ withBtcT Btc.sendToAddress (\h -> h trAddr amt Nothing Nothing)
+      lift $ mine 1 LndLsp
+      let expectedAmt = btcToMSat amt * 2
+      foundAmt <- M.lookup trAddr <$> BS.scan
+      pure $ (==) <$> Just expectedAmt <*> foundAmt
+    liftIO $ shouldBe res (Right (Just True))
 
-      mine 10 LndLsp
-      case addrResponse of
-        Left _ -> error "Error getting address from lnd"
-        Right response -> do
-            let trAddr = coerce response
-            _r <- runExceptT $ do
-              withBtcT Btc.sendToAddress (\h -> h trAddr 1 Nothing Nothing)
-            mine 10 LndLsp
-            sleep $ MicroSecondsDelay $ 10 * 1000000
-            b <- runExceptT $ do
-              _ <- waitTillLastBlockProcessedT 100
-              withElectrsT Rpc.getBalance ($ Left $ OnChainAddress trAddr)
-            traceShowM b
-      sleep $ MicroSecondsDelay $ 2 * 1000000
-      liftIO $ shouldBe True True
-
+  itEnv "Block scanner works with 2 blocks" $ do
+    sleep $ MicroSecondsDelay 500000
+    mine 100 LndLsp
+    wb <- runExceptT $ withBtcT Btc.getBalance id
+    res <- runExceptT $ do
+      wbal <- except wb
+      let amt = wbal / 10
+      (Lnd.NewAddressResponse trAddr) <- genLspAddress
+      void $ withBtcT Btc.sendToAddress (\h -> h trAddr amt Nothing Nothing)
+      lift $ mine 1 LndLsp
+      void $ withBtcT Btc.sendToAddress (\h -> h trAddr amt Nothing Nothing)
+      lift $ mine 1 LndLsp
+      let expectedAmt = btcToMSat amt * 2
+      foundAmt <- M.lookup trAddr <$> BS.scan
+      pure $ (==) <$> Just expectedAmt <*> foundAmt
+    liftIO $ shouldBe res (Right (Just True))
