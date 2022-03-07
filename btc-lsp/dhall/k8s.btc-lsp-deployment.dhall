@@ -44,15 +44,6 @@ let deployment =
                       }
                     }
                   , K.EnvVar::{
-                    , name = "LSP_ENDPOINT_PORT"
-                    , valueFrom = Some K.EnvVarSource::{
-                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
-                        , key = "lsp_endpoint_port"
-                        , name = Some name
-                        }
-                      }
-                    }
-                  , K.EnvVar::{
                     , name = "LSP_LOG_ENV"
                     , valueFrom = Some K.EnvVarSource::{
                       , configMapKeyRef = Some K.ConfigMapKeySelector::{

@@ -120,7 +120,6 @@ in  { networks.global.external = True
           { -- General
             LSP_LIBPQ_CONN_STR =
               "postgresql://btc-lsp:developer@postgres/btc-lsp"
-          , LSP_ENDPOINT_PORT = "443"
           , -- Logging
             LSP_LOG_ENV = "test"
           , LSP_LOG_FORMAT = "Bracket"
@@ -140,33 +139,7 @@ in  { networks.global.external = True
                 "lnd_hex_macaroon":"${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
                                       ? todo}",
                 "lnd_host":"lnd-lsp",
-                "lnd_port":10009,
-                "lnd_cipher_seed_mnemonic":[
-                   "absent",
-                   "betray",
-                   "direct",
-                   "scheme",
-                   "sunset",
-                   "mechanic",
-                   "exhaust",
-                   "suggest",
-                   "boy",
-                   "arena",
-                   "sketch",
-                   "bone",
-                   "news",
-                   "south",
-                   "way",
-                   "survey",
-                   "clip",
-                   "dutch",
-                   "depart",
-                   "green",
-                   "furnace",
-                   "wire",
-                   "wave",
-                   "fall"
-                ]
+                "lnd_port":10009
               }
               ''
           , LSP_GRPC_SERVER_ENV =

@@ -46,7 +46,6 @@ import qualified Network.Bitcoin as Btc
 data Env = Env
   { -- | General
     envSQLPool :: Pool Psql.SqlBackend,
-    envEndpointPort :: Int,
     -- | Logging
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
@@ -63,17 +62,12 @@ data Env = Env
     -- | Elecrts Rpc
     envElectrsRpcEnv :: ElectrsEnv,
     -- | Bitcoind
-    envBtc :: Btc.Client,
-    --
-    -- TODO : it's redundant, remove it later!!!
-    --
-    envBtc' :: BitcoindEnv
+    envBtc :: Btc.Client
   }
 
 data RawConfig = RawConfig
   { -- | General
     rawConfigLibpqConnStr :: Psql.ConnectionString,
-    rawConfigEndpointPort :: Int,
     -- | Logging
     rawConfigLogEnv :: Text,
     rawConfigLogFormat :: LogFormat,
@@ -133,7 +127,6 @@ readRawConfig =
     RawConfig
       -- General
       <$> E.var (E.str <=< E.nonempty) "LSP_LIBPQ_CONN_STR" opts
-      <*> E.var (E.auto <=< E.nonempty) "LSP_ENDPOINT_PORT" opts
       -- Logging
       <*> E.var (E.str <=< E.nonempty) "LSP_LOG_ENV" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts
@@ -203,7 +196,6 @@ withEnv rc this = do
             Env
               { -- General
                 envSQLPool = pool,
-                envEndpointPort = rawConfigEndpointPort rc,
                 -- Logging
                 envKatipLE = le,
                 envKatipCTX = katipCtx,
@@ -221,8 +213,7 @@ withEnv rc this = do
                       gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
                 envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
-                envBtc = btc,
-                envBtc' = rBtc
+                envBtc = btc
               }
   where
     rmLogEnv :: LogEnv -> IO ()
