@@ -12,10 +12,6 @@ import qualified Text.PrettyPrint as PP
 import qualified Universum
 import qualified Witch
 
---
--- TODO : smart constuctors are needed!!!
---
-
 instance From Text Lnd.PaymentRequest
 
 instance From Lnd.PaymentRequest Text

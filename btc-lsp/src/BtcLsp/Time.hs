@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 
-module BtcLsp.Util
+module BtcLsp.Time
   ( getCurrentTime,
     getFutureTime,
     getPastTime,
@@ -25,23 +25,18 @@ getPastTime ss =
   subSeconds ss <$> liftIO getCurrentTime
 
 addSeconds :: Lnd.Seconds -> UTCTime -> UTCTime
-addSeconds s =
+addSeconds =
   addUTCTime
     . fromRational
     . toRational
     . secondsToDiffTime
-    --
-    -- TODO : replace *integral utils with witch!!!
-    --
-    . fromIntegral
-    $ from @Lnd.Seconds @Word64 s
+    . via @Word64
 
 subSeconds :: Lnd.Seconds -> UTCTime -> UTCTime
-subSeconds s =
+subSeconds =
   addUTCTime
     . fromRational
     . toRational
     . secondsToDiffTime
     . (* (-1))
-    . fromIntegral
-    $ from @Lnd.Seconds @Word64 s
+    . via @Word64

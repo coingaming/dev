@@ -42,7 +42,9 @@ class
         case eRes of
           Left e ->
             --
-            -- TODO : do we want fatal fail there?
+            -- NOTE : there is fatal failure here,
+            -- because lnd-lsp is meaningless without
+            -- operational lnd.
             --
             error $
               "Fatal Lnd failure, can not get NodePubKey: "

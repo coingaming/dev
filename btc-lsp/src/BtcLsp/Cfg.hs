@@ -44,11 +44,12 @@ newSwapIntoLnFee amt =
   case tryFrom @Natural
     . round
     --
-    -- TODO : open issue in GHC tracker.
-    -- Here we are forced to use Rational
-    -- instead or Ratio Natural because of this
-    --
+    -- NOTE : we are using Rational instead of
+    -- Ratio Natural because of GHC-related issue
     -- https://gist.github.com/tim2CF/e63c7ff792e26362f356e71c47319494
+    -- After report to GHC bug tracker seems like
+    -- we need to upgrade to latest GHC where issue is fixed:
+    -- https://gitlab.haskell.org/ghc/ghc/-/issues/21004
     --
     $ from @FeeRate @Rational swapLnFeeRate
       * from amt of
