@@ -56,13 +56,30 @@ swapIntoLn userEnt req = do
       lift
         . getFutureTime
         $ Lnd.expiry fundInvLnd
+    swapEnt <-
+      lift $
+        SwapIntoLn.createIgnore
+          userEnt
+          fundInv
+          fundAddr
+          refundAddr
+          expAt
+    --
+    -- TODO : !!!this is for test purposes only!!!
+    -- !!!remove in prod!!!
+    --
+    let amt = Cfg.swapLnMaxAmt
     lift $
-      SwapIntoLn.createIgnore
-        userEnt
-        fundInv
-        fundAddr
-        refundAddr
-        expAt
+      SwapIntoLn.updateFunded
+        (swapIntoLnFundAddress $ entityVal swapEnt)
+        amt
+        (Cfg.newChanCapLsp amt)
+        (Cfg.newSwapIntoLnFee amt)
+    --
+    -- TODO : !!!this is for test purposes only!!!
+    -- !!!remove in prod!!!
+    --
+    pure swapEnt
   pure $ case res of
     Left e ->
       failResE e
@@ -87,7 +104,11 @@ getCfg ::
   m GetCfg.Response
 getCfg _ _ = do
   pub <- getLspPubKey
-  sa <- getLspLndSocketAddress
+  --
+  -- TODO : is it really needed?
+  -- Maybe remove it from Env completely.
+  --
+  --sa <- getLspLndSocketAddress
   pure $
     defMessage
       & GetCfg.success
@@ -96,10 +117,20 @@ getCfg _ _ = do
                  .~ [ defMessage
                         & Grpc.pubKey
                           .~ from pub
+                        --
+                        -- TODO : HARDCODE IS BAD. Propagate from
+                        -- Env or somehow get it dynamically.
+                        --
                         & Grpc.host
-                          .~ from (socketAddressHost sa)
+                          .~ ( defMessage
+                                 & Grpc.val .~ "127.0.0.1"
+                             )
+                        -- from (socketAddressHost sa)
                         & Grpc.port
-                          .~ from (socketAddressPort sa)
+                          .~ ( defMessage
+                                 & Grpc.val .~ 9735
+                             )
+                             -- from (socketAddressPort sa)
                     ]
                & GetCfg.swapIntoLnMinAmt
                  .~ from Cfg.swapLnMinAmt

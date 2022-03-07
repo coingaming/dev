@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.5.
 --
 -- see: https://github.com/sol/hpack
 
@@ -59,10 +59,11 @@ library
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
-      BtcLsp.Thread.ChannelOpener
+      BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
+      BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
@@ -201,10 +202,11 @@ executable btc-lsp-exe
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
-      BtcLsp.Thread.ChannelOpener
+      BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
+      BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
@@ -344,10 +346,11 @@ test-suite btc-lsp-test
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
-      BtcLsp.Thread.ChannelOpener
+      BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
+      BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Util
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel

@@ -7,15 +7,12 @@ where
 
 import BtcLsp.Grpc.Data
 import BtcLsp.Grpc.Orphan ()
-import BtcLsp.Grpc.Server.LowLevel (GSEnv (..))
 import BtcLsp.Import.Witch
 import Data.Aeson
   ( FromJSON (..),
-    camelTo2,
-    defaultOptions,
-    fieldLabelModifier,
-    genericParseJSON,
+    withObject,
     withScientific,
+    (.:),
   )
 import qualified Data.Binary.Builder as BS
 import qualified Data.ByteString as BS
@@ -46,19 +43,28 @@ data GCEnv = GCEnv
   { gcEnvHost :: String,
     gcEnvPort :: GCPort,
     gcEnvSigHeaderName :: SigHeaderName,
-    gcEnvCompressMode :: CompressMode
+    gcEnvCompressMode :: CompressMode,
+    --
+    -- TODO : more typed data
+    --
+    gcEnvSigner :: ByteString -> IO (Maybe ByteString)
   }
   deriving stock
-    ( Eq,
-      Generic
+    ( Generic
     )
 
 instance FromJSON GCEnv where
   parseJSON =
-    genericParseJSON
-      defaultOptions
-        { fieldLabelModifier = camelTo2 '_' . drop 5
-        }
+    withObject
+      "GCEnv"
+      ( \x ->
+          GCEnv
+            <$> x .: "host"
+            <*> x .: "port"
+            <*> x .: "sig_header_name"
+            <*> x .: "compress_mode"
+            <*> pure (const $ pure Nothing)
+      )
 
 newtype GCPort
   = GCPort PortNumber
@@ -88,16 +94,15 @@ runUnary ::
     res ~ MethodOutput s m
   ) =>
   ProtoLens.RPC s (m :: Symbol) ->
-  GSEnv ->
   GCEnv ->
   (res -> ByteString -> CompressMode -> IO Bool) ->
   req ->
   IO (Either Text res)
-runUnary rpc gsEnv env verifySig req = do
+runUnary rpc env verifySig req = do
   res <-
     runClientIO $
       bracket
-        (makeClient gsEnv env req True)
+        (makeClient env req True)
         close
         (\grpc -> rawUnary rpc grpc req)
   --
@@ -164,12 +169,11 @@ msgToSignBytes compressMode msg = header <> body
 
 makeClient ::
   Message req =>
-  GSEnv ->
   GCEnv ->
   req ->
   UseTlsOrNot ->
   ClientIO GrpcClient
-makeClient gsEnv env req tlsEnabled = do
+makeClient env req tlsEnabled = do
   mSignature <- liftIO doSignature
   case mSignature of
     Just signature ->
@@ -184,7 +188,7 @@ makeClient gsEnv env req tlsEnabled = do
           }
     Nothing -> throwError EarlyEndOfStream
   where
-    signer = gsEnvSigner gsEnv
+    signer = gcEnvSigner env
     sigHeaderName = from $ gcEnvSigHeaderName env
     compressMode = gcEnvCompressMode env
     doSignature = signer $ msgToSignBytes compressMode req

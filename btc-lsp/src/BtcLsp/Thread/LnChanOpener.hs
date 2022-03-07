@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Thread.ChannelOpener
+module BtcLsp.Thread.LnChanOpener
   ( apply,
   )
 where
@@ -12,12 +12,20 @@ import qualified Data.Set as Set
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.OpenChannel as Chan
 import qualified LndClient.Data.Peer as Peer
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Katip as LndKatip
+import qualified LndClient.RPC.Silent as LndSilent
 
 apply :: (Env m) => m ()
 apply = do
-  peerList <- fromRight [] <$> withLnd Lnd.listPeers id
-  let peerSet = Set.fromList $ Peer.pubKey <$> peerList
+  ePeerList <- withLnd LndSilent.listPeers id
+  whenLeft ePeerList $
+    $(logTM) ErrorS
+      . logStr
+      . ("ListPeers procedure failed: " <>)
+      . inspect
+  let peerSet =
+        Set.fromList $
+          Peer.pubKey <$> fromRight [] ePeerList
   swaps <- SwapIntoLn.getFundedSwaps
   tasks <-
     mapM
@@ -41,21 +49,19 @@ apply = do
 --
 openChan :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
 openChan (swapEnt, userEnt) = do
+  let swap = entityVal swapEnt
   res <- runExceptT $ do
     cp <-
       withLndT
-        Lnd.openChannelSync
+        LndKatip.openChannelSync
         ( $
             Chan.OpenChannelRequest
               { Chan.nodePubkey =
                   userNodePubKey $
                     entityVal userEnt,
                 Chan.localFundingAmount =
-                  --
-                  -- TODO : correct cap
-                  --
-                  from . swapIntoLnChanCapLsp $
-                    entityVal swapEnt,
+                  from (swapIntoLnChanCapLsp swap)
+                    + from (swapIntoLnChanCapUser swap),
                 Chan.pushMSat = Nothing,
                 Chan.targetConf = Nothing,
                 Chan.mSatPerByte = Nothing,
@@ -67,12 +73,20 @@ openChan (swapEnt, userEnt) = do
                 Chan.closeAddress = Nothing
               }
         )
-    lift $
-      LnChan.createIgnore
+    --
+    -- TODO : make it single psql trx
+    --
+    void
+      . lift
+      $ LnChan.createIgnore
         (entityKey swapEnt)
         (ChannelPoint.fundingTxId cp)
         (ChannelPoint.outputIndex cp)
-        LnChanStatusPendingOpen
+    void
+      . lift
+      . SwapIntoLn.updateWaitingChan
+      . swapIntoLnFundAddress
+      $ entityVal swapEnt
   whenLeft res $
     $(logTM) ErrorS . logStr
       . ("OpenChan procedure failed: " <>)

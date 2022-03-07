@@ -5,13 +5,18 @@ module BtcLsp.Import.Psql
 where
 
 import Database.Esqueleto.Legacy as X
-  ( Entity (..),
+  ( BaseBackend (..),
+    Entity (..),
     InnerJoin (..),
     Key (..),
+    LeftOuterJoin (..),
     PersistField (..),
     PersistFieldSql (..),
+    PersistQueryWrite (..),
+    PersistStoreWrite (..),
     PersistValue (..),
     RawSql (..),
+    RightOuterJoin (..),
     SqlBackend,
     SqlPersistT,
     SqlType (..),
@@ -22,9 +27,11 @@ import Database.Esqueleto.Legacy as X
     get,
     getBy,
     in_,
+    just,
     limit,
     max_,
     min_,
+    nothing,
     on,
     orderBy,
     putMany,
@@ -49,6 +56,7 @@ import Database.Esqueleto.Legacy as X
     (=.),
     (==.),
     (>=.),
+    (?.),
     (^.),
   )
 import Database.Esqueleto.PostgreSQL as X
