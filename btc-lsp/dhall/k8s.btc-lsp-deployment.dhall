@@ -26,24 +26,6 @@ let deployment =
                       }
                     }
                   , K.EnvVar::{
-                    , name = "LSP_AES256_INIT_VECTOR"
-                    , valueFrom = Some K.EnvVarSource::{
-                      , secretKeyRef = Some K.SecretKeySelector::{
-                        , key = "lsp_aes256_init_vector"
-                        , name = Some name
-                        }
-                      }
-                    }
-                  , K.EnvVar::{
-                    , name = "LSP_AES256_SECRET_KEY"
-                    , valueFrom = Some K.EnvVarSource::{
-                      , secretKeyRef = Some K.SecretKeySelector::{
-                        , key = "lsp_aes256_secret_key"
-                        , name = Some name
-                        }
-                      }
-                    }
-                  , K.EnvVar::{
                     , name = "LSP_LOG_ENV"
                     , valueFrom = Some K.EnvVarSource::{
                       , configMapKeyRef = Some K.ConfigMapKeySelector::{

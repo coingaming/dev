@@ -17,12 +17,8 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
-import Crypto.Cipher.AES (AES256)
-import Crypto.Cipher.Types (IV, cipherInit, makeIV)
-import Crypto.Error (CryptoFailable (..))
 import qualified Data.Aeson as A (Result (..), Value (..), decode)
 import qualified Data.ByteString as BS
-import Data.ByteString.Char8 as C8S (pack)
 import Data.ByteString.Lazy.Char8 as C8L (pack)
 import qualified Data.Text.Lazy.Encoding as LTE
 import qualified Env as E
@@ -50,10 +46,6 @@ data Env = Env
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
     envKatipLE :: LogEnv,
-    -- | 32 bytes for AES256
-    envCryptoCipher :: AES256,
-    -- | 16 bytes for AES256
-    envCryptoInitVector :: IV AES256,
     -- | Lnd
     envLnd :: Lnd.LndEnv,
     envLndPubKey :: MVar Lnd.NodePubKey,
@@ -73,9 +65,6 @@ data RawConfig = RawConfig
     rawConfigLogFormat :: LogFormat,
     rawConfigLogVerbosity :: Verbosity,
     rawConfigLogSeverity :: Severity,
-    -- | Encryption
-    rawConfigCipher :: AES256,
-    rawConfigInitVector :: IV AES256,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     -- | Grpc
@@ -110,17 +99,6 @@ parseFromJSON x =
   where
     failure = Left . E.UnreadError
 
-parseCipher :: String -> Either E.Error AES256
-parseCipher secretKey =
-  case cipherInit $ C8S.pack secretKey of
-    CryptoFailed {} -> Left $ E.UnreadError "parseCipher => cipherInit failure"
-    CryptoPassed a -> Right a
-
-parseInitVector :: String -> Either E.Error (IV AES256)
-parseInitVector initVectorString = case makeIV $ C8S.pack initVectorString of
-  Just v -> Right v
-  Nothing -> Left $ E.UnreadError "parseInitVector => makeIV failure"
-
 readRawConfig :: IO RawConfig
 readRawConfig =
   E.parse (E.header "BtcLsp") $
@@ -132,9 +110,6 @@ readRawConfig =
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_VERBOSITY" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SEVERITY" opts
-      -- Encryption
-      <*> E.var (parseCipher <=< E.nonempty) "LSP_AES256_SECRET_KEY" opts
-      <*> E.var (parseInitVector <=< E.nonempty) "LSP_AES256_INIT_VECTOR" opts
       -- Lnd
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       -- Grpc
@@ -200,9 +175,6 @@ withEnv rc this = do
                 envKatipLE = le,
                 envKatipCTX = katipCtx,
                 envKatipNS = katipNs,
-                -- Encryption
-                envCryptoCipher = rawConfigCipher rc,
-                envCryptoInitVector = rawConfigInitVector rc,
                 -- Lnd
                 envLnd = lnd,
                 envLndPubKey = pubKeyVar,

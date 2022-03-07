@@ -77,8 +77,6 @@ echo "==> Setting up ENV for rtl"
 echo "==> Setting up ENV for btc-lsp"
 (kubectl create secret generic btc-lsp \
   --from-literal=lsp_libpq_conn_str="postgresql://btc-lsp:$DEFAULT_PASSWORD@postgres/btc-lsp" \
-  --from-literal=lsp_aes256_init_vector="dRgUkXp2s5v8y/B?" \
-  --from-literal=lsp_aes256_secret_key="y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN" \
   --from-literal=lsp_lnd_env='{
     "lnd_wallet_password":"'$DEFAULT_PASSWORD'",
     "lnd_tls_cert":"'"$LND_TLS_CERT"'",

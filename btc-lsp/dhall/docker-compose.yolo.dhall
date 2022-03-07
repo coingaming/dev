@@ -125,9 +125,6 @@ in  { networks.global.external = True
           , LSP_LOG_FORMAT = "Bracket"
           , LSP_LOG_VERBOSITY = "V3"
           , LSP_LOG_SEVERITY = "DebugS"
-          , -- Encryption
-            LSP_AES256_SECRET_KEY = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
-          , LSP_AES256_INIT_VECTOR = "dRgUkXp2s5v8y/B?"
           , -- Rpc
             LSP_LND_ENV =
               ''
