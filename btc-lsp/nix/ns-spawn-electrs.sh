@@ -9,7 +9,7 @@ echo "==> starting electrs..."
 
 mkdir -p "$ELECTRS_DIR/db"
 
-electrs \
+RUST_LOG=debug electrs \
   --conf="$ELECTRS_DIR/electrs.toml" \
   --db-dir="$ELECTRS_DIR/db" \
   --daemon-dir="$BITCOIN_DIR" \

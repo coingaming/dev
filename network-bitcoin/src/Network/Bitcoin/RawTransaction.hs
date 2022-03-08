@@ -84,6 +84,7 @@ data TxnOutputType = TxnPubKey     -- ^ JSON of "pubkey" received.
                    | TxnPubKeyHash -- ^ JSON of "pubkeyhash" received.
                    | TxnScriptHash -- ^ JSON of "scripthash" received.
                    | TxnMultisig   -- ^ JSON of "multisig" received.
+                   | TxnUnknown
     deriving ( Show, Read, Ord, Eq )
 
 instance FromJSON TxnOutputType where
@@ -91,7 +92,7 @@ instance FromJSON TxnOutputType where
                            | s == "pubkeyhash" = return TxnPubKeyHash
                            | s == "scripthash" = return TxnScriptHash
                            | s == "multisig"   = return TxnMultisig
-                           | otherwise         = mzero
+                           | otherwise         = return TxnUnknown
     parseJSON _ = mzero
 
 
@@ -288,7 +289,7 @@ data DecodedRawTransaction =
                           , decVin         :: Vector TxIn
                           -- | The vector of transactions out.
                           , decVout        :: Vector TxOut
-                          }
+                          } deriving (Show, Read, Ord, Eq)
 
 instance FromJSON DecodedRawTransaction where
     parseJSON (Object o) = DecodedRawTransaction <$> o .: "hex"
