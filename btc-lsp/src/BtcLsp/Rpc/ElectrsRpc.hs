@@ -21,13 +21,12 @@ import qualified Data.ByteString.Lazy as BS
 import Data.Digest.Pure.SHA
 import qualified Network.Bitcoin.Wallet as BtcW
 import qualified Text.Hex as TH
---import qualified Network.Bitcoin.BlockChain as Btc
 
 newtype ScriptHash = ScriptHash Text
   deriving (Generic)
 
 newtype BlockHeader = BlockHeader Text
-  deriving (Generic, Eq, Show)
+  deriving (Generic, Eq)
 
 instance Out BlockHeader
 
