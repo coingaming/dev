@@ -51,8 +51,8 @@ release_electrs () {
 }
 
 release_all () {
-  release_btc_lsp
   release_electrs
+  release_btc_lsp
 }
 
 case $RELEASE_TARGET in
