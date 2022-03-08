@@ -1,12 +1,8 @@
 #!/bin/sh
 
 set -e
-set -x
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-
-echo "$THIS_DIR/$1"
-ls -la "$THIS_DIR"
 
 nix-build \
   "$THIS_DIR/$1" \
