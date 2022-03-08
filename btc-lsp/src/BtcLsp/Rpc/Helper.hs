@@ -13,10 +13,10 @@ import Data.Digest.Pure.SHA (bytestringDigest, sha256)
 import Network.Bitcoin (getBlockCount, getBlockHash)
 import qualified Text.Hex as TH
 
-waitTillLastBlockProcessed :: Env m => Integer -> m (Either Failure ())
+waitTillLastBlockProcessed :: Env m => Natural -> m (Either Failure ())
 waitTillLastBlockProcessed = runExceptT . waitTillLastBlockProcessedT
 
-waitTillLastBlockProcessedT :: Env m => Integer -> ExceptT Failure m ()
+waitTillLastBlockProcessedT :: Env m => Natural -> ExceptT Failure m ()
 waitTillLastBlockProcessedT 0 = throwE $ FailureElectrs CannotSyncBlockchain
 waitTillLastBlockProcessedT decr = do
   sleep $ MicroSecondsDelay 1000000
