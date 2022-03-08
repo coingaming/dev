@@ -5,12 +5,10 @@ module ServerSpec
   )
 where
 
-import qualified BtcLsp.Cfg as Cfg
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
-import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -26,6 +24,10 @@ import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
 import TestOrphan ()
 import TestWithLndLsp
+import qualified Network.Bitcoin.Wallet as Btc
+import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
+import qualified Network.Bitcoin as Btc
+import qualified BtcLsp.Rpc.Helper as Rpc
 
 spec :: Spec
 spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
@@ -94,7 +96,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                               )
                      )
             )
-  itEnv "SwapIntoLn" $
+  itEnv "Server SwapIntoLn" $
     withSpawnLink Main.apply . const $ do
       -- Let app spawn
       sleep $ MicroSecondsDelay 500000
@@ -155,17 +157,16 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                                 isJust $
                                   msg ^. SwapIntoLn.maybe'success
                           )
+
       res1 <- runExceptT $ do
+        resp <- except res0
+        let fundAddr = resp ^. (SwapIntoLn.success . SwapIntoLn.fundOnChainAddress . SwapIntoLn.val . SwapIntoLn.val)
+        void $ withBtcT Btc.sendToAddress (\h -> h fundAddr 0.01 Nothing Nothing)
         lift $ LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
-        swapEnt <- SwapIntoLn.getLatestSwapT
-        let amt = Cfg.swapLnMaxAmt
-        lift $
-          SwapIntoLn.updateFunded
-            (swapIntoLnFundAddress $ entityVal swapEnt)
-            amt
-            (Cfg.newChanCapLsp amt)
-            (Cfg.newSwapIntoLnFee amt)
-        -- Let channel be opened
+        sleep $ MicroSecondsDelay 5000000
+        lift $ mine 6 LndLsp
+        lb <- withBtcT Btc.getBlockCount id
+        void $ Rpc.waitTillLastBlockProcessedT lb
         sleep $ MicroSecondsDelay 5000000
         lift $ mine 6 LndLsp
         withLndT
