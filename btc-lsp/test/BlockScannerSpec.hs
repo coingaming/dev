@@ -39,9 +39,8 @@ spec = do
   itEnv "Block scanner works with 1 block" $ do
     sleep $ MicroSecondsDelay 500000
     mine 100 LndLsp
-    wb <- runExceptT $ withBtcT Btc.getBalance id
     res <- runExceptT $ do
-      wbal <- except wb
+      wbal <- withBtcT Btc.getBalance id
       let amt = wbal / 10
       (Lnd.NewAddressResponse trAddr) <- genLspAddress
       void $ withBtcT Btc.sendToAddress (\h -> h trAddr amt Nothing Nothing)
@@ -55,9 +54,8 @@ spec = do
   itEnv "Block scanner works with 2 blocks" $ do
     sleep $ MicroSecondsDelay 500000
     mine 100 LndLsp
-    wb <- runExceptT $ withBtcT Btc.getBalance id
     res <- runExceptT $ do
-      wbal <- except wb
+      wbal <- withBtcT Btc.getBalance id
       let amt = wbal / 10
       (Lnd.NewAddressResponse trAddr) <- genLspAddress
       void $ withBtcT Btc.sendToAddress (\h -> h trAddr amt Nothing Nothing)

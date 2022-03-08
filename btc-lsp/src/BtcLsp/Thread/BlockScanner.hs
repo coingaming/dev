@@ -18,7 +18,9 @@ import qualified Network.Bitcoin as Btc
 
 apply :: (Env m) => m ()
 apply = do
-  _r <- runExceptT scan
+  res <- runExceptT scan
+  whenLeft res $
+    $(logTM) ErrorS . logStr . inspect
   sleep $ MicroSecondsDelay 1000000
   apply
 
@@ -39,10 +41,7 @@ getBlockAddresses blk = do
   where
     extractAddr :: Btc.ScriptPubKey -> Set Btc.Address
     extractAddr (Btc.StandardScriptPubKey _ _ _ _ addrs) = V.foldr S.insert S.empty addrs
-    extractAddr _ = S.empty
-
-heighToInt :: BlkHeight -> Integer
-heighToInt (BlkHeight c) = c
+    extractAddr Btc.NonStandardScriptPubKey {} = S.empty
 
 scan ::
   (Env m) =>
@@ -50,12 +49,12 @@ scan ::
 scan = do
   mBlk <- lift Block.getLatest
   cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
-  void $ Rpc.waitTillLastBlockProcessedT $ heighToInt cHeight
+  void $ Rpc.waitTillLastBlockProcessedT $ from cHeight
   case mBlk of
     Nothing -> scanOneBlock cHeight
     Just lBlk -> do
-      let s = heighToInt $ blockHeight $ entityVal lBlk
-      let e = heighToInt cHeight
+      let s = from $ blockHeight $ entityVal lBlk
+      let e = from cHeight
       step M.empty (1 + s) e
   where
     step acc cur end = do
