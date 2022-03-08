@@ -166,7 +166,8 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
         sleep $ MicroSecondsDelay 5000000
         lift $ mine 6 LndLsp
         lb <- withBtcT Btc.getBlockCount id
-        void $ Rpc.waitTillLastBlockProcessedT lb
+        natLB <- tryFromT lb
+        void $ Rpc.waitTillLastBlockProcessedT natLB
         sleep $ MicroSecondsDelay 5000000
         lift $ mine 6 LndLsp
         withLndT

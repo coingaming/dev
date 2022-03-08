@@ -64,7 +64,8 @@ scan ::
 scan = do
   mBlk <- lift Block.getLatest
   cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
-  void $ Rpc.waitTillLastBlockProcessedT $ from cHeight
+  natH <- tryFromT cHeight
+  void $ Rpc.waitTillLastBlockProcessedT natH
   case mBlk of
     Nothing -> scanOneBlock cHeight
     Just lBlk -> do

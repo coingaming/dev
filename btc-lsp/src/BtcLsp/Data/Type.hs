@@ -505,6 +505,9 @@ instance From Btc.BlockHeight BlkHeight
 
 instance From BlkHeight Btc.BlockHeight
 
+instance TryFrom BlkHeight Natural where
+  tryFrom = tryFrom @Integer `composeTryLhs` from
+
 data BlkStatus
   = BlkConfirmed
   | BlkOrphanNew
