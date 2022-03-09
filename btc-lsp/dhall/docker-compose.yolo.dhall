@@ -43,7 +43,12 @@ let mkLnd =
 
 in  { networks.global.external = True
     , version = "3"
-    , volumes = { postgres = mempty, bitcoind = mempty, lnd-lsp = mempty }
+    , volumes =
+      { postgres = mempty
+      , bitcoind = mempty
+      , electrs = mempty
+      , lnd-lsp = mempty
+      }
     , services =
       { postgres =
         { image = "heathmont/postgres:11-alpine-a2e8bbe"
@@ -86,10 +91,11 @@ in  { networks.global.external = True
           { BITCOIND_USER = "bitcoinrpc"
           , BITCOIND_PASSWORD = "developer"
           , NETWORK = "regtest"
-          , ELECTRUM_RPC_ADDR = ""
-          , DAEMON_RPC_ADDR = ""
+          , ELECTRUM_RPC_ADDR = "127.0.0.1:80"
+          , DAEMON_RPC_ADDR = "bitcoind:80"
+          , WAIT_DURATION_SECS = "5"
           }
-        , volumes = [ "bitcoind:/bitcoin/.bitcoin" ]
+        , volumes = [ "electrs:/.electrs/db" ]
         , networks.global = mempty
         }
       , lnd-lsp = mkLnd "lsp"
