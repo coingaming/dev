@@ -56,30 +56,8 @@ swapIntoLn userEnt req = do
       lift
         . getFutureTime
         $ Lnd.expiry fundInvLnd
-    swapEnt <-
-      lift $
-        SwapIntoLn.createIgnore
-          userEnt
-          fundInv
-          fundAddr
-          refundAddr
-          expAt
-    --
-    -- TODO : !!!this is for test purposes only!!!
-    -- !!!remove in prod!!!
-    --
-    let amt = Cfg.swapLnMaxAmt
     lift $
-      SwapIntoLn.updateFunded
-        (swapIntoLnFundAddress $ entityVal swapEnt)
-        amt
-        (Cfg.newChanCapLsp amt)
-        (Cfg.newSwapIntoLnFee amt)
-    --
-    -- TODO : !!!this is for test purposes only!!!
-    -- !!!remove in prod!!!
-    --
-    pure swapEnt
+      SwapIntoLn.createIgnore userEnt fundInv fundAddr refundAddr expAt
   pure $ case res of
     Left e ->
       failResE e

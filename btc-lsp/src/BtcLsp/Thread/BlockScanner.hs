@@ -15,14 +15,29 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Vector as V
 import qualified Network.Bitcoin as Btc
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SL
 
 apply :: (Env m) => m ()
 apply = do
   res <- runExceptT scan
   whenLeft res $
     $(logTM) ErrorS . logStr . inspect
+  whenRight res (mapM_ markInDb . M.toList)
   sleep $ MicroSecondsDelay 1000000
   apply
+
+
+markInDb :: (Env m) => (Btc.Address, MSat) -> m ()
+markInDb (addr, amt) = do
+  $(logTM) DebugS . logStr $ debugMsg
+  when isEnought (void $ SL.updateFunded (from addr) (from amt) lspCap lspFee)
+  where
+    isEnought = amt >= from swapLnMinAmt
+    lspCap = newChanCapLsp $ from amt
+    lspFee = newSwapIntoLnFee $ from amt
+    debugMsg = "Marking funded ()" <>
+      inspect isEnought <> " at addr: " <> inspect addr <> " with amt: " <> inspect amt
+
 
 askElectrs :: (Env m) => Set Btc.Address -> ExceptT Failure m (Map Btc.Address MSat)
 askElectrs addrs = do
@@ -49,7 +64,8 @@ scan ::
 scan = do
   mBlk <- lift Block.getLatest
   cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
-  void $ Rpc.waitTillLastBlockProcessedT $ from cHeight
+  natH <- tryFromT cHeight
+  void $ Rpc.waitTillLastBlockProcessedT natH
   case mBlk of
     Nothing -> scanOneBlock cHeight
     Just lBlk -> do
@@ -73,5 +89,10 @@ scanOneBlock height = do
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
   prevHash <- ExceptT $ pure $ maybeToRight (FailureInternal "gen block") (Btc.vPrevBlock blk)
   r <- askElectrs $ getBlockAddresses blk
+  lift $ $(logTM) DebugS . logStr $ debugMsg height r
   lift . void $ Block.createUpdate height (from hash) (from prevHash)
   pure r
+  where
+    debugMsg :: BlkHeight -> Map Btc.Address MSat -> Text
+    debugMsg h ma = "Scanning block at h: " <> inspect h <> " found: " <> inspect (M.toList ma)
+
