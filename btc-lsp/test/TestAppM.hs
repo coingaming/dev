@@ -93,7 +93,7 @@ runTestApp env app =
 
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
-    asks $ envGrpcServerEnv . testEnvLsp
+    asks $ envGrpcServer . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvLsp
   getLspLndEnv =
@@ -109,7 +109,7 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
   withElectrs method args = do
-    env <- asks $ envElectrsRpcEnv . testEnvLsp
+    env <- asks $ envElectrs . testEnvLsp
     first FailureElectrs <$> args (method env)
   withBtc method args = do
     env <- asks $ Env.envBtc . testEnvLsp
@@ -195,9 +195,9 @@ withTestEnv' action = do
   lndLspEnv <- readLndLspEnv
   btcClient <-
     Btc.getClient
-      (unpack $ bitcoindEnvHost $ rawConfigBitcoindRpcEnv aliceRc)
-      (encodeUtf8 $ bitcoindEnvUsername $ rawConfigBitcoindRpcEnv aliceRc)
-      (encodeUtf8 $ bitcoindEnvPassword $ rawConfigBitcoindRpcEnv aliceRc)
+      (unpack . bitcoindEnvHost $ rawConfigBtcEnv aliceRc)
+      (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv aliceRc)
+      (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv aliceRc)
   let lspRc =
         aliceRc
           { rawConfigLndEnv = lndLspEnv

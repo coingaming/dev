@@ -17,12 +17,8 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
-import Crypto.Cipher.AES (AES256)
-import Crypto.Cipher.Types (IV, cipherInit, makeIV)
-import Crypto.Error (CryptoFailable (..))
 import qualified Data.Aeson as A (Result (..), Value (..), decode)
 import qualified Data.ByteString as BS
-import Data.ByteString.Char8 as C8S (pack)
 import Data.ByteString.Lazy.Char8 as C8L (pack)
 import qualified Data.Text.Lazy.Encoding as LTE
 import qualified Env as E
@@ -46,51 +42,43 @@ import qualified Network.Bitcoin as Btc
 data Env = Env
   { -- | General
     envSQLPool :: Pool Psql.SqlBackend,
-    envEndpointPort :: Int,
     -- | Logging
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
     envKatipLE :: LogEnv,
-    -- | 32 bytes for AES256
-    envCryptoCipher :: AES256,
-    -- | 16 bytes for AES256
-    envCryptoInitVector :: IV AES256,
     -- | Lnd
     envLnd :: Lnd.LndEnv,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
-    envGrpcServerEnv :: GSEnv,
-    -- | Elecrts Rpc
-    envElectrsRpcEnv :: ElectrsEnv,
+    envGrpcServer :: GSEnv,
+    -- | Elecrts
+    envElectrs :: ElectrsEnv,
     -- | Bitcoind
-    envBtc :: Btc.Client,
-    --
-    -- TODO : it's redundant, remove it later!!!
-    --
-    envBtc' :: BitcoindEnv
+    envBtc :: Btc.Client
   }
 
 data RawConfig = RawConfig
   { -- | General
     rawConfigLibpqConnStr :: Psql.ConnectionString,
-    rawConfigEndpointPort :: Int,
     -- | Logging
     rawConfigLogEnv :: Text,
     rawConfigLogFormat :: LogFormat,
     rawConfigLogVerbosity :: Verbosity,
     rawConfigLogSeverity :: Severity,
-    -- | Encryption
-    rawConfigCipher :: AES256,
-    rawConfigInitVector :: IV AES256,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
-    rawConfigElectrsRpcEnv :: ElectrsEnv,
+    rawConfigElectrsEnv :: ElectrsEnv,
     -- | Bitcoind
-    rawConfigBitcoindRpcEnv :: BitcoindEnv
+    rawConfigBtcEnv :: BitcoindEnv
   }
+
+--
+-- TODO : do we really need support of
+-- double-quoted JSONs now???
+--
 
 -- | Here we enable normal JSON parsing
 -- as well as double-quoted JSON parsing
@@ -116,39 +104,24 @@ parseFromJSON x =
   where
     failure = Left . E.UnreadError
 
-parseCipher :: String -> Either E.Error AES256
-parseCipher secretKey =
-  case cipherInit $ C8S.pack secretKey of
-    CryptoFailed {} -> Left $ E.UnreadError "parseCipher => cipherInit failure"
-    CryptoPassed a -> Right a
-
-parseInitVector :: String -> Either E.Error (IV AES256)
-parseInitVector initVectorString = case makeIV $ C8S.pack initVectorString of
-  Just v -> Right v
-  Nothing -> Left $ E.UnreadError "parseInitVector => makeIV failure"
-
 readRawConfig :: IO RawConfig
 readRawConfig =
   E.parse (E.header "BtcLsp") $
     RawConfig
       -- General
       <$> E.var (E.str <=< E.nonempty) "LSP_LIBPQ_CONN_STR" opts
-      <*> E.var (E.auto <=< E.nonempty) "LSP_ENDPOINT_PORT" opts
       -- Logging
       <*> E.var (E.str <=< E.nonempty) "LSP_LOG_ENV" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_VERBOSITY" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SEVERITY" opts
-      -- Encryption
-      <*> E.var (parseCipher <=< E.nonempty) "LSP_AES256_SECRET_KEY" opts
-      <*> E.var (parseInitVector <=< E.nonempty) "LSP_AES256_INIT_VECTOR" opts
       -- Lnd
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
-      -- Electrs Rpc
+      -- Electrs
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts
-      -- Bitcoind Rpc
+      -- Bitcoind
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_BITCOIND_ENV" opts
 
 readGCEnv :: IO GCEnv
@@ -190,7 +163,7 @@ withEnv rc this = do
   let lnd = rawConfigLndEnv rc
   bracket newLogEnv rmLogEnv $ \le ->
     bracket newSqlPool rmSqlPool $ \pool -> do
-      let rBtc = rawConfigBitcoindRpcEnv rc
+      let rBtc = rawConfigBtcEnv rc
       btc <-
         Btc.getClient
           (from $ bitcoindEnvHost rBtc)
@@ -203,26 +176,21 @@ withEnv rc this = do
             Env
               { -- General
                 envSQLPool = pool,
-                envEndpointPort = rawConfigEndpointPort rc,
                 -- Logging
                 envKatipLE = le,
                 envKatipCTX = katipCtx,
                 envKatipNS = katipNs,
-                -- Encryption
-                envCryptoCipher = rawConfigCipher rc,
-                envCryptoInitVector = rawConfigInitVector rc,
                 -- Lnd
                 envLnd = lnd,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
-                envGrpcServerEnv =
+                envGrpcServer =
                   (rawConfigGrpcServerEnv rc)
                     { gsEnvSigner = run . signT lnd,
                       gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
-                envElectrsRpcEnv = rawConfigElectrsRpcEnv rc,
-                envBtc = btc,
-                envBtc' = rBtc
+                envElectrs = rawConfigElectrsEnv rc,
+                envBtc = btc
               }
   where
     rmLogEnv :: LogEnv -> IO ()

@@ -43,7 +43,12 @@ let mkLnd =
 
 in  { networks.global.external = True
     , version = "3"
-    , volumes = { postgres = mempty, bitcoind = mempty, lnd-lsp = mempty }
+    , volumes =
+      { postgres = mempty
+      , bitcoind = mempty
+      , electrs = mempty
+      , lnd-lsp = mempty
+      }
     , services =
       { postgres =
         { image = "heathmont/postgres:11-alpine-a2e8bbe"
@@ -77,6 +82,20 @@ in  { networks.global.external = True
           , ZMQPUBRAWTX = "tcp://0.0.0.0:39704"
           }
         , volumes = [ "bitcoind:/bitcoin/.bitcoin" ]
+        , networks.global = mempty
+        }
+      , electrs =
+        { image = ../build/docker-image-electrs.txt as Text
+        , hostname = "electrs"
+        , environment =
+          { BITCOIND_USER = "bitcoinrpc"
+          , BITCOIND_PASSWORD = "developer"
+          , NETWORK = "regtest"
+          , ELECTRUM_RPC_ADDR = "0.0.0.0:80"
+          , DAEMON_RPC_ADDR = "bitcoind:80"
+          , WAIT_DURATION_SECS = "5"
+          }
+        , volumes = [ "electrs:/.electrs/db" ]
         , networks.global = mempty
         }
       , lnd-lsp = mkLnd "lsp"
@@ -120,15 +139,11 @@ in  { networks.global.external = True
           { -- General
             LSP_LIBPQ_CONN_STR =
               "postgresql://btc-lsp:developer@postgres/btc-lsp"
-          , LSP_ENDPOINT_PORT = "443"
           , -- Logging
             LSP_LOG_ENV = "test"
           , LSP_LOG_FORMAT = "Bracket"
           , LSP_LOG_VERBOSITY = "V3"
           , LSP_LOG_SEVERITY = "DebugS"
-          , -- Encryption
-            LSP_AES256_SECRET_KEY = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
-          , LSP_AES256_INIT_VECTOR = "dRgUkXp2s5v8y/B?"
           , -- Rpc
             LSP_LND_ENV =
               ''
@@ -140,33 +155,7 @@ in  { networks.global.external = True
                 "lnd_hex_macaroon":"${  ../build/swarm/lnd-lsp/macaroon-regtest.hex as Text
                                       ? todo}",
                 "lnd_host":"lnd-lsp",
-                "lnd_port":10009,
-                "lnd_cipher_seed_mnemonic":[
-                   "absent",
-                   "betray",
-                   "direct",
-                   "scheme",
-                   "sunset",
-                   "mechanic",
-                   "exhaust",
-                   "suggest",
-                   "boy",
-                   "arena",
-                   "sketch",
-                   "bone",
-                   "news",
-                   "south",
-                   "way",
-                   "survey",
-                   "clip",
-                   "dutch",
-                   "depart",
-                   "green",
-                   "furnace",
-                   "wire",
-                   "wave",
-                   "fall"
-                ]
+                "lnd_port":10009
               }
               ''
           , LSP_GRPC_SERVER_ENV =

@@ -40,7 +40,7 @@ jobs:
         release_name: ${{ github.ref_name }}
         draft: false
         prerelease: false
-    - name: Upload docker image
+    - name: Upload btc-lsp docker image
       if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
@@ -50,7 +50,7 @@ jobs:
         asset_path: ./btc-lsp/build/docker-image-btc-lsp.tar.gz
         asset_name: docker-image-btc-lsp.tar.gz
         asset_content_type: application/gzip
-    - name: Upload docker image version
+    - name: Upload btc-lsp docker image version
       if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
       env:
@@ -59,4 +59,24 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./btc-lsp/build/docker-image-btc-lsp.txt
         asset_name: docker-image-btc-lsp.txt
+        asset_content_type: text/plain
+    - name: Upload electrs docker image
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./btc-lsp/build/docker-image-electrs.tar.gz
+        asset_name: docker-image-electrs.tar.gz
+        asset_content_type: application/gzip
+    - name: Upload electrs docker image version
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./btc-lsp/build/docker-image-electrs.txt
+        asset_name: docker-image-electrs.txt
         asset_content_type: text/plain

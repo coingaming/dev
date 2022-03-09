@@ -64,7 +64,7 @@ library
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Util
+      BtcLsp.Time
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -207,7 +207,7 @@ executable btc-lsp-exe
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Util
+      BtcLsp.Time
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -351,7 +351,7 @@ test-suite btc-lsp-test
       BtcLsp.Thread.Main
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Util
+      BtcLsp.Time
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields

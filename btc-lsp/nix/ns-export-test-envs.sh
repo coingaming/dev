@@ -120,12 +120,6 @@ export LSP_LOG_VERBOSITY="V3" # V0-V3
 #
 export LSP_LOG_SEVERITY="DebugS"
 export LSP_LIBPQ_CONN_STR="postgresql://postgres@localhost/lsp-test"
-export LSP_ENDPOINT_PORT="3000"
-
-# 32 symbols for AES256
-export LSP_AES256_SECRET_KEY="y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
-# 16 symbols for AES256
-export LSP_AES256_INIT_VECTOR="dRgUkXp2s5v8y/B?"
 
 #
 # gRPC
