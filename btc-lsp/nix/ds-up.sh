@@ -15,12 +15,20 @@ docker stack deploy \
 echo "==> Waiting for the spawn"
 sleep 10
 
+echo "==> Create default bitcoind wallet"
+BITCOIND_SERVICE=yolo_bitcoind
+BITCOIND_CONTAINER=`docker ps -f name=$BITCOIND_SERVICE --quiet`
+echo "$BITCOIND_SERVICE ==> Creating $BITCOIND_CONTAINER wallet"
+docker exec \
+  -it $BITCOIND_CONTAINER \
+  bitcoin-cli createwallet "default"
+
 echo "==> Lazy init/unlock"
 
 BITCOIN_NETWORK="regtest"
 LND_WALLET_PASSWORD="developer"
 
-create_wallet() {
+create_lnd_wallet() {
 expect <<- EOF
   spawn $1 create;
   expect "Input wallet password: ";
@@ -51,7 +59,7 @@ for OWNER in lsp; do
         --network=$BITCOIN_NETWORK unlock \
         --stdin ) \
   || ( echo "$LND_SERVICE ==> Creating wallet $LND_CONTAINER" \
-       && create_wallet \
+       && create_lnd_wallet \
         "docker exec -it $LND_CONTAINER lncli --network=$BITCOIN_NETWORK create" ) \
   || true
 

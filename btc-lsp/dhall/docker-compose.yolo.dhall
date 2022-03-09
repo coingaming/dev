@@ -91,7 +91,7 @@ in  { networks.global.external = True
           { BITCOIND_USER = "bitcoinrpc"
           , BITCOIND_PASSWORD = "developer"
           , NETWORK = "regtest"
-          , ELECTRUM_RPC_ADDR = "127.0.0.1:80"
+          , ELECTRUM_RPC_ADDR = "0.0.0.0:80"
           , DAEMON_RPC_ADDR = "bitcoind:80"
           , WAIT_DURATION_SECS = "5"
           }
