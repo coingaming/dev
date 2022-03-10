@@ -114,9 +114,9 @@ echo "==> Setting up ENV for electrs"
   --from-literal=bitcoind_password=$DEFAULT_PASSWORD) || true
 
 (kubectl create configmap electrs \
-  --from-literal=network=$BITCOIN_NETWORK
-  --from-literal=electrum_rpc_addr="0.0.0.0:8080"
-  --from-literal=daemon_rpc_addr="bitcoind:80"
+  --from-literal=network=$BITCOIN_NETWORK \
+  --from-literal=electrum_rpc_addr="0.0.0.0:8080" \
+  --from-literal=daemon_rpc_addr="bitcoind:18332" \
   --from-literal=wait_duration_secs=5) || true
 
 echo "==> Setting up ENV for postgres"

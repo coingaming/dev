@@ -28,7 +28,7 @@ let deployment =
                   , K.EnvVar::{
                     , name = "BITCOIND_PASSWORD"
                     , valueFrom = Some K.EnvVarSource::{
-                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
+                      , secretKeyRef = Some K.SecretKeySelector::{
                         , key = "bitcoind_password"
                         , name = Some name
                         }
@@ -64,7 +64,7 @@ let deployment =
                   , K.EnvVar::{
                     , name = "WAIT_DURATION_SECS"
                     , valueFrom = Some K.EnvVarSource::{
-                      , secretKeyRef = Some K.SecretKeySelector::{
+                      , configMapKeyRef = Some K.ConfigMapKeySelector::{
                         , key = "wait_duration_secs"
                         , name = Some name
                         }
