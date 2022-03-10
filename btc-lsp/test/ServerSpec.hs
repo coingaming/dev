@@ -9,6 +9,7 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
+import qualified BtcLsp.Rpc.Helper as Rpc
 import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -16,18 +17,16 @@ import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
 import qualified LndClient.LndTest as LndTest
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Network.Bitcoin as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as LowLevel
+import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
 import qualified Proto.BtcLsp.Method.GetCfg_Fields as GetCfg
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
 import TestOrphan ()
 import TestWithLndLsp
-import qualified Network.Bitcoin.Wallet as Btc
-import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
-import qualified Network.Bitcoin as Btc
-import qualified BtcLsp.Rpc.Helper as Rpc
 
 spec :: Spec
 spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
