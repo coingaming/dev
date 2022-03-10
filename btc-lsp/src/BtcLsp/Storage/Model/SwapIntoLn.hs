@@ -5,6 +5,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
+    getByFundAddress,
     getLatestSwapT,
   )
 where
@@ -186,6 +187,16 @@ getSwapsToSettle =
             -- Maybe limits, some proper retries etc.
             --
             pure (swap, user)
+
+getByFundAddress ::
+  ( Storage m
+  ) =>
+  OnChainAddress 'Fund ->
+  m (Maybe (Entity SwapIntoLn))
+getByFundAddress =
+  runSql
+    . Psql.getBy
+    . UniqueSwapIntoLnFundAddress
 
 getLatestSwapT ::
   ( Storage m

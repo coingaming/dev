@@ -11,7 +11,7 @@ import BtcLsp.Import
 import qualified BtcLsp.Rpc.ElectrsRpc as Rpc
 import qualified BtcLsp.Rpc.Helper as Rpc
 import qualified BtcLsp.Storage.Model.Block as Block
-import qualified BtcLsp.Storage.Model.SwapIntoLn as SL
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Vector as V
@@ -19,7 +19,7 @@ import qualified Network.Bitcoin as Btc
 
 apply :: (Env m) => m ()
 apply = do
-  res <- runExceptT scan
+  res <- runExceptT $ scan swapsOnly
   whenLeft res $
     $(logTM) ErrorS . logStr . inspect
   whenRight res (mapM_ markInDb . M.toList)
@@ -31,7 +31,11 @@ markInDb (addr, amt) = do
   $(logTM) DebugS . logStr $ debugMsg
   when isEnough
     . void
-    $ SL.updateFunded (from addr) (from amt) lspCap lspFee
+    $ SwapIntoLn.updateFunded
+      (from addr)
+      (from amt)
+      lspCap
+      lspFee
   where
     isEnough = amt >= from swapLnMinAmt
     lspCap = newChanCapLsp $ from amt
@@ -47,11 +51,16 @@ markInDb (addr, amt) = do
 askElectrs ::
   ( Env m
   ) =>
+  (Btc.Address -> ExceptT Failure m Bool) ->
   Set Btc.Address ->
   ExceptT Failure m (Map Btc.Address MSat)
-askElectrs addrs = do
-  ab <- mapM askConfBalance (S.toList addrs)
-  pure $ M.fromList ab
+askElectrs cond addrs = do
+  --
+  -- TODO : maybe optimize with bulk select
+  --
+  swapAddrs <- filterM cond $ S.toList addrs
+  balances <- mapM askConfBalance swapAddrs
+  pure $ M.fromList balances
   where
     askConfBalance addr = do
       cb <-
@@ -78,15 +87,16 @@ getBlockAddresses blk = do
 scan ::
   ( Env m
   ) =>
+  (Btc.Address -> ExceptT Failure m Bool) ->
   ExceptT Failure m (Map Btc.Address MSat)
-scan = do
+scan cond = do
   mBlk <- lift Block.getLatest
   cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
   natH <- tryFromT cHeight
   void $ Rpc.waitTillLastBlockProcessedT natH
   case mBlk of
     Nothing ->
-      scanOneBlock cHeight
+      scanOneBlock cond cHeight
     Just lBlk -> do
       let s = from . blockHeight $ entityVal lBlk
       let e = from cHeight
@@ -96,15 +106,16 @@ scan = do
       if cur > end
         then pure acc
         else do
-          addrs <- scanOneBlock $ BlkHeight cur
+          addrs <- scanOneBlock cond $ BlkHeight cur
           step (acc <> addrs) (cur + 1) end
 
 scanOneBlock ::
   ( Env m
   ) =>
+  (Btc.Address -> ExceptT Failure m Bool) ->
   BlkHeight ->
   ExceptT Failure m (Map Btc.Address MSat)
-scanOneBlock height = do
+scanOneBlock cond height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
   prevHash <-
@@ -112,7 +123,7 @@ scanOneBlock height = do
       maybeToRight
         (FailureInternal "gen block")
         (Btc.vPrevBlock blk)
-  balances <- askElectrs $ getBlockAddresses blk
+  balances <- askElectrs cond $ getBlockAddresses blk
   $(logTM) DebugS . logStr $ debugMsg height balances
   lift . void $
     Block.createUpdate height (from hash) (from prevHash)
@@ -124,3 +135,10 @@ scanOneBlock height = do
         <> inspect h
         <> " found: "
         <> inspect (M.toList ma)
+
+swapsOnly :: (Env m) => Btc.Address -> ExceptT Failure m Bool
+swapsOnly =
+  (isJust <$>)
+    . lift
+    . SwapIntoLn.getByFundAddress
+    . from
