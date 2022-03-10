@@ -105,8 +105,19 @@ echo "==> Setting up ENV for btc-lsp"
   --from-literal=lsp_log_severity=DebugS \
   --from-literal=lsp_electrs_env='{
     "host":"electrs",
-    "port":"80"
+    "port":"8080"
   }') || true
+
+echo "==> Setting up ENV for electrs"
+(kubectl create secret generic electrs \
+  --from-literal=bitcoind_user=$BITCOIN_RPCUSER \
+  --from-literal=bitcoind_password=$DEFAULT_PASSWORD) || true
+
+(kubectl create configmap electrs \
+  --from-literal=network=$BITCOIN_NETWORK
+  --from-literal=electrum_rpc_addr="0.0.0.0:8080"
+  --from-literal=daemon_rpc_addr="bitcoind:80"
+  --from-literal=wait_duration_secs=5) || true
 
 echo "==> Setting up ENV for postgres"
 (kubectl create secret generic postgres \

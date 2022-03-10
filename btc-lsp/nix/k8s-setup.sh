@@ -50,9 +50,9 @@ case $SETUP_MODE in
     (
       echo "==> Using prebuilt"
       cd "$BUILD_DIR"
-      rm -rf docker-image-btc-lsp.tar.gz
-      rm -rf docker-image-btc-lsp.txt
+      rm -rf docker-image-*
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
+      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-electrs.tar.gz"
     )
     ;;
   *)
@@ -61,16 +61,27 @@ case $SETUP_MODE in
     ;;
 esac
 
-echo "==> Loading docker image"
+echo "==> Loading btc-lsp docker image"
 docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | awk '{print $NF}' \
   | tr -d '\n' \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
-echo "==> Loading docker image into minikube"
+echo "==> Loading electrs docker image"
+docker load -q -i "$BUILD_DIR/docker-image-electrs.tar.gz" \
+  | awk '{print $NF}' \
+  | tr -d '\n' \
+  > "$BUILD_DIR/docker-image-electrs.txt"
+
+echo "==> Loading btc-lsp docker image into minikube"
 minikube image load \
   -p "$MINIKUBE_PROFILE" \
   --daemon=true $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
+
+echo "==> Loading electrs docker image into minikube"
+minikube image load \
+  -p "$MINIKUBE_PROFILE" \
+  --daemon=true $(cat "$BUILD_DIR/docker-image-electrs.txt")
 
 echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"
