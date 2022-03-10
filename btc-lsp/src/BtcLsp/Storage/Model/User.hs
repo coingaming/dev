@@ -10,8 +10,10 @@ import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 
 --
--- TODO : create withVerifiedNonce because
--- actions with Bitcoin/LN should be atomic???
+-- NOTE : We will not create withVerifiedNonce
+-- for now to reduce complexity overall.
+-- Plus this combinator enables all kinds of
+-- possibilities for deadlocks.
 --
 createVerify ::
   ( Storage m
