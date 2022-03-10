@@ -4,7 +4,7 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
-SETUP_MODE="--source"
+SETUP_MODE="--prebuilt"
 GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
 
 . "$THIS_DIR/k8s-export-env.sh"
@@ -98,6 +98,7 @@ sh "$THIS_DIR/k8s-wait.sh"
 
 echo "==> Partial spin"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
+sleep 20
 
 echo "==> Generate additional creds"
 sh "$THIS_DIR/k8s-generate-creds.sh"
