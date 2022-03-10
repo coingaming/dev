@@ -56,7 +56,7 @@ spec = do
       foundAmt <-
         M.lookup
           trAddr
-          <$> BlockScanner.scan (const $ pure True)
+          <$> BlockScanner.scanT (const $ pure True)
       pure $ (==) <$> Just expectedAmt <*> foundAmt
     liftIO $ shouldBe res (Right (Just True))
   itEnv "Block scanner works with 2 blocks" $ do
@@ -80,6 +80,6 @@ spec = do
       foundAmt <-
         M.lookup
           trAddr
-          <$> BlockScanner.scan (const $ pure True)
+          <$> BlockScanner.scanT (const $ pure True)
       pure $ (==) <$> Just expectedAmt <*> foundAmt
     liftIO $ shouldBe res (Right (Just True))

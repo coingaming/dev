@@ -3,7 +3,7 @@
 
 module BtcLsp.Thread.BlockScanner
   ( apply,
-    scan,
+    scanT,
   )
 where
 
@@ -19,42 +19,19 @@ import qualified Network.Bitcoin as Btc
 
 apply :: (Env m) => m ()
 apply = do
-  res <- runExceptT $ scan swapsOnly
+  res <- runExceptT $ scanT swapsOnlyT
   whenLeft res $
     $(logTM) ErrorS . logStr . inspect
-  whenRight res (mapM_ markInDb . M.toList)
   sleep $ MicroSecondsDelay 1000000
   apply
 
-markInDb :: (Env m) => (Btc.Address, MSat) -> m ()
-markInDb (addr, amt) = do
-  $(logTM) DebugS . logStr $ debugMsg
-  when isEnough
-    . void
-    $ SwapIntoLn.updateFunded
-      (from addr)
-      (from amt)
-      lspCap
-      lspFee
-  where
-    isEnough = amt >= from swapLnMinAmt
-    lspCap = newChanCapLsp $ from amt
-    lspFee = newSwapIntoLnFee $ from amt
-    debugMsg =
-      "Marking funded "
-        <> inspect isEnough
-        <> " at addr: "
-        <> inspect addr
-        <> " with amt: "
-        <> inspect amt
-
-askElectrs ::
+askElectrsT ::
   ( Env m
   ) =>
   (Btc.Address -> ExceptT Failure m Bool) ->
   Set Btc.Address ->
   ExceptT Failure m (Map Btc.Address MSat)
-askElectrs cond addrs = do
+askElectrsT cond addrs = do
   --
   -- TODO : maybe optimize with bulk select
   --
@@ -84,47 +61,54 @@ getBlockAddresses blk = do
     extractAddr Btc.NonStandardScriptPubKey {} =
       S.empty
 
-scan ::
+scanT ::
   ( Env m
   ) =>
   (Btc.Address -> ExceptT Failure m Bool) ->
   ExceptT Failure m (Map Btc.Address MSat)
-scan cond = do
+scanT cond = do
   mBlk <- lift Block.getLatest
-  cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
-  natH <- tryFromT cHeight
-  void $ Rpc.waitTillLastBlockProcessedT natH
-  case mBlk of
-    Nothing ->
-      scanOneBlock cond cHeight
-    Just lBlk -> do
-      let s = from . blockHeight $ entityVal lBlk
-      let e = from cHeight
-      step M.empty (1 + s) e
-  where
-    step acc cur end = do
-      if cur > end
-        then pure acc
-        else do
-          addrs <- scanOneBlock cond $ BlkHeight cur
-          step (acc <> addrs) (cur + 1) end
+  end <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
+  natH <- tryFromT end
+  Rpc.waitTillLastBlockProcessedT natH
+  scanUntilT
+    end
+    cond
+    mempty
+    $ maybe end (blockHeight . entityVal) mBlk
 
-scanOneBlock ::
+scanUntilT ::
+  ( Env m
+  ) =>
+  BlkHeight ->
+  (Btc.Address -> ExceptT Failure m Bool) ->
+  Map Btc.Address MSat ->
+  BlkHeight ->
+  ExceptT Failure m (Map Btc.Address MSat)
+scanUntilT end cond acc curr =
+  if curr > end
+    then pure acc
+    else do
+      addrs <- scanBlockT cond curr
+      scanUntilT end cond (acc <> addrs) $ curr + 1
+
+scanBlockT ::
   ( Env m
   ) =>
   (Btc.Address -> ExceptT Failure m Bool) ->
   BlkHeight ->
   ExceptT Failure m (Map Btc.Address MSat)
-scanOneBlock cond height = do
+scanBlockT cond height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
   prevHash <-
     ExceptT . pure $
       maybeToRight
-        (FailureInternal "gen block")
+        (FailureInternal "Genesis block")
         (Btc.vPrevBlock blk)
-  balances <- askElectrs cond $ getBlockAddresses blk
+  balances <- askElectrsT cond $ getBlockAddresses blk
   $(logTM) DebugS . logStr $ debugMsg height balances
+  lift . mapM_ updateFundedSwap $ M.toList balances
   lift . void $
     Block.createUpdate height (from hash) (from prevHash)
   pure balances
@@ -136,8 +120,30 @@ scanOneBlock cond height = do
         <> " found: "
         <> inspect (M.toList ma)
 
-swapsOnly :: (Env m) => Btc.Address -> ExceptT Failure m Bool
-swapsOnly =
+updateFundedSwap :: (Env m) => (Btc.Address, MSat) -> m ()
+updateFundedSwap (addr, amt) = do
+  $(logTM) DebugS . logStr $ debugMsg
+  when isEnough
+    . void
+    $ SwapIntoLn.updateFunded
+      (from addr)
+      (from amt)
+      lspCap
+      lspFee
+  where
+    isEnough = amt >= from swapLnMinAmt
+    lspCap = newChanCapLsp $ from amt
+    lspFee = newSwapIntoLnFee $ from amt
+    debugMsg =
+      "Marking funded "
+        <> inspect isEnough
+        <> " at addr: "
+        <> inspect addr
+        <> " with amt: "
+        <> inspect amt
+
+swapsOnlyT :: (Env m) => Btc.Address -> ExceptT Failure m Bool
+swapsOnlyT =
   (isJust <$>)
     . lift
     . SwapIntoLn.getByFundAddress

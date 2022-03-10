@@ -494,8 +494,17 @@ instance From BlkPrevHash Btc.BlockHash
 
 newtype BlkHeight
   = BlkHeight Btc.BlockHeight
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
+  deriving newtype
+    ( Num,
+      Psql.PersistField,
+      Psql.PersistFieldSql
+    )
 
 instance Out BlkHeight
 
