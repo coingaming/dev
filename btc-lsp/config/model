@@ -26,6 +26,18 @@ SwapIntoLn
   UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic
 
+SwapUtxo
+  swapIntoLnId SwapIntoLnId
+  blockId BlockId
+  txid (TxId 'Funding)
+  vout (Vout 'Funding)
+  amount MSat
+  status SwapUtxoStatus
+  refundedToAddress (OnChainAddress 'Refund)
+  refundAmount MSat
+  refundTxId (TxId 'Funding)
+  deriving Eq Show Generic
+
 Block
   height BlkHeight
   hash BlkHash

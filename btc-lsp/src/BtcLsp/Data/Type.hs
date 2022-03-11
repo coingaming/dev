@@ -34,6 +34,7 @@ module BtcLsp.Data.Type
     BlkPrevHash (..),
     BlkHeight (..),
     BlkStatus (..),
+    SwapUtxoStatus (..),
   )
 where
 
@@ -516,7 +517,15 @@ data BlkStatus
 
 instance Out BlkStatus
 
+data SwapUtxoStatus =
+  SwapUtxoUsedForChanFunding | SwapUtxoRefunded
+  deriving (Eq, Ord, Show, Read, Generic)
+
+instance Out SwapUtxoStatus
+
+
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"
 Psql.derivePersistField "SwapStatus"
 Psql.derivePersistField "BlkStatus"
+Psql.derivePersistField "SwapUtxoStatus"
