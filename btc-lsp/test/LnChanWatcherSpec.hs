@@ -3,22 +3,21 @@ module LnChanWatcherSpec
   )
 where
 
-import BtcLsp.Import hiding (takeMVar, putMVar, newEmptyMVar)
-import Test.Hspec
+import BtcLsp.Import hiding (newEmptyMVar, putMVar, takeMVar)
+import qualified BtcLsp.Storage.Model.LnChan as LnChan
+import BtcLsp.Thread.LnChanWatcher (forkThread, watchChannelEvents)
 import qualified BtcLsp.Thread.Server as Server
-import TestWithLndLsp
-import LndClient.LndTest
-import BtcLsp.Thread.LnChanWatcher (watchChannelEvents, forkThread)
-import qualified LndClient.Data.OpenChannel as OpenChannel
-import qualified LndClient.RPC.Silent as Lnd
-import LndClient.Data.GetInfo
 import LndClient
-import qualified Database.Persist as Psql
 import qualified LndClient.Data.ChannelPoint as Lnd
-import UnliftIO.Concurrent (threadDelay, killThread)
-import UnliftIO.MVar
 import qualified LndClient.Data.CloseChannel as Lnd
-
+import LndClient.Data.GetInfo
+import qualified LndClient.Data.OpenChannel as OpenChannel
+import LndClient.LndTest
+import qualified LndClient.RPC.Silent as Lnd
+import Test.Hspec
+import TestWithLndLsp
+import UnliftIO.Concurrent (killThread, threadDelay)
+import UnliftIO.MVar
 
 openChannelRequest :: NodePubKey -> OpenChannel.OpenChannelRequest
 openChannelRequest nodePubkey =
@@ -45,11 +44,15 @@ getNodePubKey lndEnv = do
     liftLndResult =<< Lnd.getInfo lndEnv
   pure merchantPubKey
 
-queryChannel :: Storage m => Lnd.ChannelPoint -> m (Maybe (Entity LnChan))
-queryChannel (Lnd.ChannelPoint txid out) =
-  runSql $ Psql.getBy (UniqueLnChan txid out)
+queryChannel ::
+  ( Storage m
+  ) =>
+  Lnd.ChannelPoint ->
+  m (Maybe (Entity LnChan))
+queryChannel (Lnd.ChannelPoint txid vout) =
+  LnChan.getByChannelPoint txid vout
 
-tryTimes :: MonadUnliftIO m => Int -> Int -> m (Maybe a) ->  m (Maybe a)
+tryTimes :: MonadUnliftIO m => Int -> Int -> m (Maybe a) -> m (Maybe a)
 tryTimes times delaySec tryFn = go times
   where
     go 0 = pure Nothing
@@ -57,7 +60,7 @@ tryTimes times delaySec tryFn = go times
       res <- tryFn
       case res of
         Just r -> pure $ Just r
-        Nothing -> threadDelay (delaySec * 1000000) >> go (n-1)
+        Nothing -> threadDelay (delaySec * 1000000) >> go (n -1)
 
 justTrue :: Maybe Bool -> Maybe Bool
 justTrue (Just True) = Just True
@@ -68,33 +71,40 @@ testThread result = do
   lndFrom <- getLndEnv LndLsp
   lndTo <- getLndEnv LndAlice
   toPubKey <- getNodePubKey lndTo
-  cp <- liftLndResult
-    =<< Lnd.openChannelSync lndFrom (openChannelRequest toPubKey)
-  isPendingOpenOk <- tryTimes 3 1 $
-    justTrue . fmap ((== LnChanStatusPendingOpen) . lnChanStatus . entityVal) <$> queryChannel cp
+  cp <-
+    liftLndResult
+      =<< Lnd.openChannelSync lndFrom (openChannelRequest toPubKey)
+  isPendingOpenOk <-
+    tryTimes 3 1 $
+      justTrue . fmap ((== LnChanStatusPendingOpen) . lnChanStatus . entityVal) <$> queryChannel cp
   mine 10 LndLsp
   isOpenedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
-    let r = and <$> sequence
-          [(== LnChanStatusActive) . lnChanStatus <$> ch]
+    let r =
+          and
+            <$> sequence
+              [(== LnChanStatusActive) . lnChanStatus <$> ch]
     pure $ justTrue r
   (ctid, _) <- forkThread $ do
     void $ liftLndResult =<< Lnd.closeChannel (const $ pure ()) lndFrom (closeChannelRequest cp)
   isInactivedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
-    let r = and <$> sequence
-          [(== LnChanStatusInactive) . lnChanStatus <$> ch]
+    let r =
+          and
+            <$> sequence
+              [(== LnChanStatusInactive) . lnChanStatus <$> ch]
     pure $ justTrue r
   mine 10 LndLsp
   isClosedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
-    let r = and <$> sequence
-          [(== LnChanStatusClosed) . lnChanStatus <$> ch ]
+    let r =
+          and
+            <$> sequence
+              [(== LnChanStatusClosed) . lnChanStatus <$> ch]
     pure $ justTrue r
   void $ killThread ctid
   putMVar result [isPendingOpenOk, isOpenedOk, isInactivedOk, isClosedOk]
   pure ()
-
 
 spec :: Spec
 spec =
@@ -108,4 +118,3 @@ spec =
       r <- sequence <$> takeMVar res
       let k = and <$> r
       liftIO $ shouldBe (Just True) k
-

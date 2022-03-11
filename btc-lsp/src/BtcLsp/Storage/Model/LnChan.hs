@@ -52,21 +52,13 @@ createIgnore swapId txid vout = runSql $ do
         lnChanTotalSatoshisReceived = MSat 0,
         lnChanTotalSatoshisSent = MSat 0
       }
-    --
-    -- TODO : txid + vout update was redundant, but upsertBy is
-    -- not working with mempty update argument -
-    -- probably it's a bug in Esqueleto implementation,
-    -- check it in latest version, and if not fixed -
-    -- report issue or just fix it.
-    --
-    -- UPDATE : reported in github
-    -- https://github.com/bitemyapp/esqueleto/issues/294
-    --
-    [ LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId)
+    [ LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId),
+      LnChanUpdatedAt Psql.=. Psql.val ct
     ]
 
 getByChannelPoint ::
-  (Env m) =>
+  ( Storage m
+  ) =>
   TxId 'Funding ->
   Vout 'Funding ->
   m (Maybe (Entity LnChan))

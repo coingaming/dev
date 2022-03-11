@@ -114,10 +114,10 @@ serverApp handlers env body req rep = do
                 ) :
                 ss
         NextTrailersMaker {} ->
-          --
-          -- TODO : throwIO GRPCStatus
-          --
-          error "UNEXPECTED_NEW_TRAILERS_MAKER"
+          throwIO $
+            GRPCStatus
+              INTERNAL
+              "UNEXPECTED_NEW_TRAILERS_MAKER"
     trailersMaker acc oldMaker (Just bs) = do
       pure
         . NextTrailersMaker

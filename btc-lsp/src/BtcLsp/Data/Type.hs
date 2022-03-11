@@ -494,8 +494,17 @@ instance From BlkPrevHash Btc.BlockHash
 
 newtype BlkHeight
   = BlkHeight Btc.BlockHeight
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
+  deriving newtype
+    ( Num,
+      Psql.PersistField,
+      Psql.PersistFieldSql
+    )
 
 instance Out BlkHeight
 
@@ -506,12 +515,12 @@ instance From Btc.BlockHeight BlkHeight
 instance From BlkHeight Btc.BlockHeight
 
 instance TryFrom BlkHeight Natural where
-  tryFrom = tryFrom @Integer `composeTryLhs` from
+  tryFrom =
+    tryFrom @Integer `composeTryLhs` from
 
 data BlkStatus
   = BlkConfirmed
-  | BlkOrphanNew
-  | BlkOrphanTrxReverted
+  | BlkOrphan
   deriving (Eq, Ord, Show, Read, Generic)
 
 instance Out BlkStatus

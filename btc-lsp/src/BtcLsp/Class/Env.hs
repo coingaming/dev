@@ -28,7 +28,7 @@ class
   where
   getGsEnv :: m GSEnv
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
-  getLspLndSocketAddress :: m SocketAddress
+  getLndP2PSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey
   getLspLndEnv :: m Lnd.LndEnv
   getLspPubKey = do
