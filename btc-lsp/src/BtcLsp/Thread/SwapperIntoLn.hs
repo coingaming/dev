@@ -10,6 +10,7 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified Data.Set as Set
 import qualified LndClient.Data.Peer as Peer
 import qualified LndClient.Data.SendPayment as Lnd
+import qualified LndClient.Data.SendPayment as SendPayment
 import qualified LndClient.RPC.Katip as LndKatip
 import qualified LndClient.RPC.Silent as LndSilent
 
@@ -46,9 +47,10 @@ settleSwap (swapEnt, _) = do
   let swap = entityVal swapEnt
   res <- runExceptT $ do
     --
-    -- TODO : use preimage as a proof??
+    -- TODO : detect the case where payment has been already
+    -- settled, use trackPaymentSync for that.
     --
-    void $
+    res <-
       withLndT
         LndKatip.sendPayment
         ( $
@@ -60,8 +62,8 @@ settleSwap (swapEnt, _) = do
               }
         )
     lift
-      . SwapIntoLn.updateSettled
-      $ entityKey swapEnt
+      . SwapIntoLn.updateSettled (entityKey swapEnt)
+      $ SendPayment.paymentPreimage res
   whenLeft res $
     $(logTM) ErrorS . logStr
       . ("SettleSwap procedure failed: " <>)

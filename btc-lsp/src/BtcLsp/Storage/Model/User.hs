@@ -35,17 +35,7 @@ createVerify pub nonce = runSql $ do
       <$> Psql.upsertBy
         (UniqueUser pub)
         zeroRow
-        --
-        -- TODO : this update is redundant, but upsertBy is
-        -- not working with mempty update argument -
-        -- probably it's a bug in Esqueleto implementation,
-        -- check it in latest version, and if not fixed -
-        -- report issue or just fix it.
-        --
-        -- UPDATE : reported in github
-        -- https://github.com/bitemyapp/esqueleto/issues/294
-        --
-        [ UserNodePubKey Psql.=. Psql.val pub
+        [ UserUpdatedAt Psql.=. Psql.val ct
         ]
   existingRow <-
     entityVal

@@ -26,7 +26,7 @@ createUpdate height hash prev = do
     Psql.update $ \row -> do
       Psql.set
         row
-        [ BlockStatus Psql.=. Psql.val BlkOrphanNew,
+        [ BlockStatus Psql.=. Psql.val BlkOrphan,
           BlockUpdatedAt Psql.=. Psql.val ct
         ]
       Psql.where_ $
