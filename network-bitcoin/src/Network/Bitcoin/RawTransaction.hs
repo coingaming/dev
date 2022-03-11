@@ -100,6 +100,7 @@ instance FromJSON TxnOutputType where
 data TxOut =
     TxOut { -- | The amount of bitcoin transferred out.
             txoutVal     :: BTC
+            txoutNum     :: Integer
           -- | The public key of the account we sent the money to.
           , scriptPubKey :: ScriptPubKey
           }
@@ -107,6 +108,7 @@ data TxOut =
 
 instance FromJSON TxOut where
     parseJSON (Object o) = TxOut <$> o .: "value"
+                                 <*> o .: "n"
                                  <*> o .: "scriptPubKey"
     parseJSON _ = mzero
 

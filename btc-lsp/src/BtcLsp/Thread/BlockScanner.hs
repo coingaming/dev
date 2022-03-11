@@ -17,6 +17,10 @@ import qualified Data.Set as S
 import qualified Data.Vector as V
 import qualified Network.Bitcoin as Btc
 
+
+{-
+-}
+
 apply :: (Env m) => m ()
 apply = do
   res <- runExceptT $ scan swapsOnly
@@ -69,6 +73,29 @@ askElectrs cond addrs = do
             Rpc.getBalance
             ($ Left $ OnChainAddress addr)
       pure (addr, cb)
+
+
+
+data UtxoVout = UtxoVout { value :: Btc.BTC, n :: Integer, address :: Btc.Address}
+
+extractFromBlock :: Btc.BlockVerbose -> Set Btc.Address -> Map Btc.Address Integer
+extractFromBlock blk addrs = do
+  M.empty
+  where
+    trxs = Btc.vSubTransactions blk
+    foldTrx :: Btc.DecodedRawTransaction -> Map Btc.TransactionID [UtxoVout]
+    foldTrx trx acc = do
+      let txid = decTxId trx
+          vouts = mapVout <$> Btc.decVout trx
+          rVouts = rights vouts
+      if isEmpty rVouts
+         then acc
+         else M.insert txid rVouts acc
+    mapVout (Btc.TxOut val n (Btc.StandardScriptPubKey _ _ _ _ [addr])) =
+      if S.member addr addrs
+         then Right $ UtxoVout val n addr else Left "Unknown address"
+    mapVout _ = Left "TODO: unsupported vout"
+
 
 getBlockAddresses :: Btc.BlockVerbose -> Set Btc.Address
 getBlockAddresses blk = do
