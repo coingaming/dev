@@ -284,6 +284,7 @@ data DecodedRawTransaction =
                             decRaw         :: RawTransaction
                           -- | The transaction version number.
                           , decTxnVersion  :: Integer
+                          , decTxId        :: TransactionID
                           , decTxnLockTime :: Integer
                           -- | The vector of transactions in.
                           , decVin         :: Vector TxIn
@@ -294,6 +295,7 @@ data DecodedRawTransaction =
 instance FromJSON DecodedRawTransaction where
     parseJSON (Object o) = DecodedRawTransaction <$> o .: "hex"
                                                  <*> o .: "version"
+                                                 <*> o .: "txid"
                                                  <*> o .: "locktime"
                                                  <*> o .: "vin"
                                                  <*> o .: "vout"
