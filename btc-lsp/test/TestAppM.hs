@@ -42,7 +42,6 @@ import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
 import qualified LndClient.RPC.Katip as Lnd
 import Network.Bitcoin as Btc (Client, getClient)
-import qualified Network.GRPC.Client.Helpers as Grpc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
@@ -98,12 +97,13 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     asks $ envLndPubKey . testEnvLsp
   getLspLndEnv =
     asks $ envLnd . testEnvLsp
-  getLspLndSocketAddress = do
-    env <- Lnd.envLndConfig <$> asks (envLnd . testEnvLsp)
+  getLndP2PSocketAddress = do
+    host <- asks $ envLndP2PHost . testEnvLsp
+    port <- asks $ envLndP2PPort . testEnvLsp
     pure
       SocketAddress
-        { socketAddressHost = Grpc._grpcClientConfigHost env,
-          socketAddressPort = Grpc._grpcClientConfigPort env
+        { socketAddressHost = host,
+          socketAddressPort = port
         }
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp

@@ -119,6 +119,8 @@ export LSP_LOG_VERBOSITY="V3" # V0-V3
 # EmergencyS
 #
 export LSP_LOG_SEVERITY="DebugS"
+export LSP_LND_P2P_HOST="127.0.0.1"
+export LSP_LND_P2P_PORT="9735"
 export LSP_LIBPQ_CONN_STR="postgresql://postgres@localhost/lsp-test"
 
 #
