@@ -14,6 +14,7 @@ nohup.out
 .lnd/tls*
 .grpc-tls/
 .bash_history
+.electrs
 test_run.txt
 core
 build/
