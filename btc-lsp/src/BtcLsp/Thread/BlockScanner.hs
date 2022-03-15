@@ -14,7 +14,6 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified Data.Vector as V
 import qualified Data.Set as S
 import qualified Network.Bitcoin as Btc
-import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.SwapUtxo as SU
 
 
@@ -90,16 +89,19 @@ persistBlock blk utxos = runSql $ do
     (from $ Btc.vBlkHeight blk)
     (from $ Btc.vBlockHash blk)
     (from <$> Btc.vPrevBlock blk)
-  Psql.insertMany $ toSwapUtxo b <$> utxos
+  ct <- getCurrentTime
+  SU.createManySql $ toSwapUtxo ct b <$> utxos
   where
-    toSwapUtxo blkId (UtxoVout value' n' txid' swpId') =
+    toSwapUtxo now blkId (UtxoVout value' n' txid' swpId') =
      SwapUtxo {
         swapUtxoSwapIntoLnId = swpId',
         swapUtxoBlockId = entityKey blkId,
         swapUtxoTxid = from txid',
         swapUtxoVout = from n',
         swapUtxoAmount = from value',
-        swapUtxoStatus = SwapUtxoFirstSeen
+        swapUtxoStatus = SwapUtxoFirstSeen,
+        swapUtxoInsertedAt = now,
+        swapUtxoUpdatedAt = now
       }
 
 scan ::

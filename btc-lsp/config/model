@@ -33,6 +33,8 @@ SwapUtxo
   vout (Vout 'Funding)
   amount MSat
   status SwapUtxoStatus
+  insertedAt UTCTime
+  updatedAt UTCTime
   UniqSwapUtxo txid vout
   deriving Eq Show Generic
 

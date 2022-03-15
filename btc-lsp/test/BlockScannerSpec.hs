@@ -1,5 +1,4 @@
 {-# LANGUAGE TypeApplications #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BlockScannerSpec
   ( spec,
