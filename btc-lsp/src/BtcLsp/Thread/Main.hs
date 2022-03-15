@@ -8,7 +8,7 @@ where
 
 import BtcLsp.Data.AppM (runApp)
 import BtcLsp.Import
--- import qualified BtcLsp.Thread.BlockScanner as BlockScanner
+import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified BtcLsp.Storage.Migration as Storage
 import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
@@ -35,8 +35,8 @@ apply = do
             LnChanWatcher.applySub,
             LnChanWatcher.applyPoll,
             LnChanOpener.apply,
-            SwapperIntoLn.apply --,
-            -- BlockScanner.apply
+            SwapperIntoLn.apply,
+            BlockScanner.apply
           ]
       liftIO
         . void

@@ -1,12 +1,13 @@
 module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
-    updateFunded,
+    updateFundedSql,
     updateWaitingChan,
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
     getByFundAddress,
     getLatestSwapT,
+    getWaitingFundSql
   )
 where
 
@@ -51,15 +52,15 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
           Psql.=. Psql.val fundInv
       ]
 
-updateFunded ::
+updateFundedSql ::
   ( Storage m
   ) =>
-  OnChainAddress 'Fund ->
+  SwapIntoLnId ->
   Money 'Usr 'Ln 'Fund ->
   Money 'Lsp 'Ln 'Fund ->
   Money 'Lsp 'OnChain 'Gain ->
-  m ()
-updateFunded addr usrCap lspCap lspFee = runSql $ do
+  ReaderT Psql.SqlBackend m ()
+updateFundedSql sid usrCap lspCap lspFee = do
   Psql.update $ \row -> do
     Psql.set
       row
@@ -73,8 +74,8 @@ updateFunded addr usrCap lspCap lspFee = runSql $ do
           Psql.=. Psql.val SwapFunded
       ]
     Psql.where_ $
-      ( row Psql.^. SwapIntoLnFundAddress
-          Psql.==. Psql.val addr
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val sid
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
                      Psql.==. Psql.val SwapWaitingFund

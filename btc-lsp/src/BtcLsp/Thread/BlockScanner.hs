@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Thread.BlockScanner
   ( apply,
@@ -13,44 +12,51 @@ import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified Data.Vector as V
+import qualified Data.Set as S
 import qualified Network.Bitcoin as Btc
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Model.SwapUtxo as SU
 
 
 apply :: (Env m) => m ()
 apply = do
   res <- runExceptT scan
   whenLeft res $ $(logTM) ErrorS . logStr . inspect
+  whenRight res markFunded
   sleep $ MicroSecondsDelay 1000000
   apply
 
-_markInDb :: (Env m) => (Btc.Address, MSat) -> m ()
-_markInDb (addr, amt) = do
-  $(logTM) DebugS . logStr $ debugMsg
-  when isEnough
-    . void
-    $ SwapIntoLn.updateFunded
-      (from addr)
-      (from amt)
-      lspCap
-      lspFee
-  where
-    isEnough = amt >= from swapLnMinAmt
-    lspCap = newChanCapLsp $ from amt
-    lspFee = newSwapIntoLnFee $ from amt
-    debugMsg =
-      "Marking funded "
-        <> inspect isEnough
-        <> " at addr: "
-        <> inspect addr
-        <> " with amt: "
-        <> inspect amt
+
+markFunded :: (Env m) => [UtxoVout] -> m ()
+markFunded utxos = do
+  let swapIds = S.toList $ S.fromList $ utxoSwapId <$> utxos
+  sequence_ $ maybeFundSwap <$> swapIds
+    where
+      lspCap amt = newChanCapLsp $ from amt
+      lspFee amt = newSwapIntoLnFee $ from amt
+      debugMsg isFunded sid amt = $(logTM) DebugS . logStr $
+        if isFunded then "Marking funded "
+          <> inspect sid
+          <> " with amt: "
+          <> inspect amt
+          else "Not enought funds for "
+          <> inspect sid
+          <> " with amt: "
+          <> inspect amt
+      maybeFundSwap swapId = do
+        us <- runSql $ SU.getFundsBySwapIdSql swapId
+        let amt = sum $ swapUtxoAmount . entityVal <$> us
+        let isEnought = amt >= from swapLnMinAmt
+        debugMsg isEnought swapId amt
+        when isEnought $ runSql $ do
+          void $ SU.markAsUsedForChanFundingSql (entityKey <$> us)
+          void $ SwapIntoLn.updateFundedSql
+            swapId (from amt) (lspCap amt) (lspFee amt)
 
 
 data UtxoVout = UtxoVout {
   utxoValue :: Btc.BTC,
   utxoN :: Integer,
-  utxoAddress :: Btc.Address,
   utxoId :: Btc.TransactionID,
   utxoSwapId :: SwapIntoLnId
 } deriving Show
@@ -73,20 +79,20 @@ extractRelatedUtxoFromBlock blk = foldrM foldTrx [] $ Btc.vSubTransactions blk
            let addr = V.head addrsV
            mswp <- maybeSwap addr
            case mswp of
-              Just swp -> pure $ Right $ UtxoVout val num addr txid (entityKey swp)
+              Just swp -> pure $ Right $ UtxoVout val num txid (entityKey swp)
               Nothing -> pure $ Left "Unknown address"
     mapVout _ _ = pure $ Left "TODO: unsupported vout"
 
 
-persistBlock :: (Storage m) => Btc.BlockVerbose -> [UtxoVout] -> m ()
+persistBlock :: (Storage m) => Btc.BlockVerbose -> [UtxoVout] -> m [SwapUtxoId]
 persistBlock blk utxos = runSql $ do
   b <- Block.createUpdateSql
     (from $ Btc.vBlkHeight blk)
     (from $ Btc.vBlockHash blk)
     (from <$> Btc.vPrevBlock blk)
-  void $ Psql.insertMany $ toSwapUtxo b <$> utxos
+  Psql.insertMany $ toSwapUtxo b <$> utxos
   where
-    toSwapUtxo blkId (UtxoVout value' n' _ txid' swpId') =
+    toSwapUtxo blkId (UtxoVout value' n' txid' swpId') =
      SwapUtxo {
         swapUtxoSwapIntoLnId = swpId',
         swapUtxoBlockId = entityKey blkId,
@@ -126,9 +132,7 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  traceShowM blk
   utxos <- lift $ extractRelatedUtxoFromBlock blk
-  traceShowM utxos
   void . lift $ persistBlock blk utxos
   pure utxos
 
