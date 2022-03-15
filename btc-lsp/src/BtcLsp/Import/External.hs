@@ -102,6 +102,7 @@ import LndClient as X
   ( LndError (..),
     MSat (..),
     NodePubKey (..),
+    RPreimage (..),
     TxId (..),
     TxKind (..),
     Vout (..),

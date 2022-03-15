@@ -6,8 +6,6 @@ module BlockScannerSpec
 where
 
 import BtcLsp.Import
---import qualified Data.Map as M
-
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SWP
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner

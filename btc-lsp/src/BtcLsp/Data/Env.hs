@@ -48,6 +48,8 @@ data Env = Env
     envKatipLE :: LogEnv,
     -- | Lnd
     envLnd :: Lnd.LndEnv,
+    envLndP2PHost :: HostName,
+    envLndP2PPort :: PortNumber,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
@@ -67,6 +69,8 @@ data RawConfig = RawConfig
     rawConfigLogSeverity :: Severity,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
+    rawConfigLndP2PHost :: HostName,
+    rawConfigLndP2PPort :: PortNumber,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
@@ -117,6 +121,8 @@ readRawConfig =
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SEVERITY" opts
       -- Lnd
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
+      <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
+      <*> E.var (E.auto <=< E.nonempty) "LSP_LND_P2P_PORT" opts
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
       -- Electrs
@@ -182,6 +188,8 @@ withEnv rc this = do
                 envKatipNS = katipNs,
                 -- Lnd
                 envLnd = lnd,
+                envLndP2PHost = rawConfigLndP2PHost rc,
+                envLndP2PPort = rawConfigLndP2PPort rc,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
                 envGrpcServer =

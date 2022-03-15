@@ -38,6 +38,7 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
         { swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
           swapIntoLnFundAddress = fundAddr,
+          swapIntoLnFundProof = Nothing,
           swapIntoLnRefundAddress = refundAddr,
           swapIntoLnChanCapUser = userCap,
           swapIntoLnChanCapLsp = newChanCapLsp userCap,
@@ -48,8 +49,8 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
           swapIntoLnInsertedAt = ct,
           swapIntoLnUpdatedAt = ct
         }
-      [ SwapIntoLnFundInvoice
-          Psql.=. Psql.val fundInv
+      [ SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
       ]
 
 updateFundedSql ::
@@ -61,6 +62,7 @@ updateFundedSql ::
   Money 'Lsp 'OnChain 'Gain ->
   ReaderT Psql.SqlBackend m ()
 updateFundedSql sid usrCap lspCap lspFee = do
+  ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
       row
@@ -71,7 +73,9 @@ updateFundedSql sid usrCap lspCap lspFee = do
         SwapIntoLnFeeLsp
           Psql.=. Psql.val lspFee,
         SwapIntoLnStatus
-          Psql.=. Psql.val SwapFunded
+          Psql.=. Psql.val SwapFunded,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
       ]
     Psql.where_ $
       ( row Psql.^. SwapIntoLnId
@@ -95,34 +99,40 @@ updateWaitingChan ::
   OnChainAddress 'Fund ->
   m ()
 updateWaitingChan addr = runSql $ do
+  ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
       row
       [ SwapIntoLnStatus
-          Psql.=. Psql.val SwapWaitingChan
+          Psql.=. Psql.val SwapWaitingChan,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
       ]
     Psql.where_ $
       ( row Psql.^. SwapIntoLnFundAddress
           Psql.==. Psql.val addr
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapWaitingFund
+                     Psql.==. Psql.val SwapFunded
                  )
 
---
--- TODO : store preimage???
---
 updateSettled ::
   ( Storage m
   ) =>
   SwapIntoLnId ->
+  RPreimage ->
   m ()
-updateSettled sid = runSql $ do
+updateSettled sid rp = runSql $ do
+  ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
       row
-      [ SwapIntoLnStatus
-          Psql.=. Psql.val SwapSucceeded
+      [ SwapIntoLnFundProof
+          Psql.=. Psql.val (Just rp),
+        SwapIntoLnStatus
+          Psql.=. Psql.val SwapSucceeded,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
       ]
     Psql.where_ $
       ( row Psql.^. SwapIntoLnId

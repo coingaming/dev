@@ -13,6 +13,7 @@ SwapIntoLn
   userId UserId
   fundInvoice (LnInvoice 'Fund)
   fundAddress (OnChainAddress 'Fund)
+  fundProof RPreimage Maybe
   refundAddress (OnChainAddress 'Refund)
   chanCapUser (Money 'Usr 'Ln 'Fund)
   chanCapLsp (Money 'Lsp 'Ln 'Fund)

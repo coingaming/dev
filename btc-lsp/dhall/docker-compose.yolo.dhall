@@ -144,6 +144,8 @@ in  { networks.global.external = True
           , LSP_LOG_FORMAT = "Bracket"
           , LSP_LOG_VERBOSITY = "V3"
           , LSP_LOG_SEVERITY = "DebugS"
+          , LSP_LND_P2P_HOST = "127.0.0.1"
+          , LSP_LND_P2P_PORT = "9735"
           , -- Rpc
             LSP_LND_ENV =
               ''

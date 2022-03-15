@@ -82,11 +82,7 @@ getCfg ::
   m GetCfg.Response
 getCfg _ _ = do
   pub <- getLspPubKey
-  --
-  -- TODO : is it really needed?
-  -- Maybe remove it from Env completely.
-  --
-  --sa <- getLspLndSocketAddress
+  sa <- getLndP2PSocketAddress
   pure $
     defMessage
       & GetCfg.success
@@ -95,20 +91,10 @@ getCfg _ _ = do
                  .~ [ defMessage
                         & Grpc.pubKey
                           .~ from pub
-                        --
-                        -- TODO : HARDCODE IS BAD. Propagate from
-                        -- Env or somehow get it dynamically.
-                        --
                         & Grpc.host
-                          .~ ( defMessage
-                                 & Grpc.val .~ "127.0.0.1"
-                             )
-                        -- from (socketAddressHost sa)
+                          .~ from (socketAddressHost sa)
                         & Grpc.port
-                          .~ ( defMessage
-                                 & Grpc.val .~ 9735
-                             )
-                             -- from (socketAddressPort sa)
+                          .~ from (socketAddressPort sa)
                     ]
                & GetCfg.swapIntoLnMinAmt
                  .~ from Cfg.swapLnMinAmt
