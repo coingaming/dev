@@ -61,11 +61,12 @@ import Database.Esqueleto.Legacy as X
   )
 import Database.Esqueleto.PostgreSQL as X
   ( now_,
-    upsertBy,
+    upsertBy
   )
 import Database.Persist as X
   ( SelectOpt (..),
     selectList,
+    insertEntity
   )
 import qualified Database.Persist as P
 import Database.Persist.Class as X

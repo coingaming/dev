@@ -80,6 +80,14 @@ updateFunded addr usrCap lspCap lspFee = runSql $ do
                      Psql.==. Psql.val SwapWaitingFund
                  )
 
+getWaitingFundSql :: (Storage m) => ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
+getWaitingFundSql = do
+  Psql.select $ Psql.from $ \row -> do
+    Psql.where_ ((row Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapWaitingFund) Psql.&&.
+      (row Psql.^. SwapIntoLnExpiresAt Psql.<. Psql.now_))
+    pure row
+
+
 updateWaitingChan ::
   ( Storage m
   ) =>

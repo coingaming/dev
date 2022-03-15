@@ -518,7 +518,7 @@ data BlkStatus
 instance Out BlkStatus
 
 data SwapUtxoStatus =
-  SwapUtxoUsedForChanFunding | SwapUtxoRefunded
+  SwapUtxoUsedForChanFunding | SwapUtxoRefunded | SwapUtxoFirstSeen
   deriving (Eq, Ord, Show, Read, Generic)
 
 instance Out SwapUtxoStatus

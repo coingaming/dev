@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -56,6 +56,7 @@ library
       BtcLsp.Storage.Model.Block
       BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Model.SwapIntoLn
+      BtcLsp.Storage.Model.SwapUtxo
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
@@ -199,6 +200,7 @@ executable btc-lsp-exe
       BtcLsp.Storage.Model.Block
       BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Model.SwapIntoLn
+      BtcLsp.Storage.Model.SwapUtxo
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
@@ -343,6 +345,7 @@ test-suite btc-lsp-test
       BtcLsp.Storage.Model.Block
       BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Model.SwapIntoLn
+      BtcLsp.Storage.Model.SwapUtxo
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner
