@@ -3,148 +3,142 @@
 
 module BtcLsp.Thread.BlockScanner
   ( apply,
-    scanT,
+    scan,
+    Utxo(..)
   )
 where
 
 import BtcLsp.Import
-import qualified BtcLsp.Rpc.ElectrsRpc as Rpc
-import qualified BtcLsp.Rpc.Helper as Rpc
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
-import qualified Data.Map as M
-import qualified Data.Set as S
 import qualified Data.Vector as V
+import qualified Data.Set as S
 import qualified Network.Bitcoin as Btc
+import qualified BtcLsp.Storage.Model.SwapUtxo as SU
+
 
 apply :: (Env m) => m ()
 apply = do
-  res <- runExceptT $ scanT swapsOnlyT
-  whenLeft res $
-    $(logTM) ErrorS . logStr . inspect
+  res <- runExceptT scan
+  whenLeft res $ $(logTM) ErrorS . logStr . inspect
+  whenRight res markFunded
   sleep $ MicroSecondsDelay 1000000
   apply
 
-askElectrsT ::
+
+markFunded :: (Env m) => [Utxo] -> m ()
+markFunded utxos = do
+  let swapIds = S.toList $ S.fromList $ utxoSwapId <$> utxos
+  sequence_ $ maybeFundSwap <$> swapIds
+    where
+      lspCap amt = newChanCapLsp $ from amt
+      lspFee amt = newSwapIntoLnFee $ from amt
+      debugMsg isFunded sid amt = $(logTM) DebugS . logStr $
+        if isFunded then "Marking funded "
+          <> inspect sid
+          <> " with amt: "
+          <> inspect amt
+          else "Not enought funds for "
+          <> inspect sid
+          <> " with amt: "
+          <> inspect amt
+      maybeFundSwap swapId = do
+        us <- runSql $ SU.getFundsBySwapIdSql swapId
+        let amt = sum $ swapUtxoAmount . entityVal <$> us
+        let isEnought = amt >= from swapLnMinAmt
+        debugMsg isEnought swapId amt
+        when isEnought $ runSql $ do
+          void $ SU.markAsUsedForChanFundingSql (entityKey <$> us)
+          void $ SwapIntoLn.updateFundedSql
+            swapId (from amt) (lspCap amt) (lspFee amt)
+
+
+data Utxo = Utxo {
+  utxoValue :: MSat,
+  utxoN :: Vout 'Funding,
+  utxoId :: Btc.TransactionID,
+  utxoSwapId :: SwapIntoLnId
+} deriving Show
+
+-- TODO: presist log of unsupported transactions
+extractRelatedUtxoFromBlock :: (Env m) => Btc.BlockVerbose -> m [Utxo]
+extractRelatedUtxoFromBlock blk = foldrM foldTrx [] $ Btc.vSubTransactions blk
+  where
+    foldTrx trx acc = do
+      vouts <- mapM (mapVout $ Btc.decTxId trx) $ V.toList $ Btc.decVout trx
+      let rVouts = rights vouts
+      pure $ if null rVouts
+         then acc
+         else rVouts <> acc
+    mapVout :: (Env m) => Btc.TransactionID -> Btc.TxOut -> m (Either Text Utxo)
+    mapVout txid (Btc.TxOut val num (Btc.StandardScriptPubKey _ _ _ _ addrsV)) = do
+      if V.length addrsV /= 1
+         then pure $ Left "TODO: unsupported vout"
+         else do
+           let addr = V.head addrsV
+           mswp <- maybeSwap addr
+           case mswp of
+              Just swp -> pure $ utxo (tryFrom val) (tryFrom num) txid swp
+              Nothing -> pure $ Left "Unknown address"
+    mapVout _ _ = pure $ Left "TODO: unsupported vout"
+    utxo (Right val) (Right n) txid swp = Right $ Utxo val n txid (entityKey swp)
+    utxo _ _ _ _ = Left "vout number overflow"
+
+
+persistBlock :: (Storage m) => Btc.BlockVerbose -> [Utxo] -> m [SwapUtxoId]
+persistBlock blk utxos = runSql $ do
+  b <- Block.createUpdateSql
+    (from $ Btc.vBlkHeight blk)
+    (from $ Btc.vBlockHash blk)
+    (from <$> Btc.vPrevBlock blk)
+  ct <- getCurrentTime
+  SU.createManySql $ toSwapUtxo ct b <$> utxos
+  where
+    toSwapUtxo now blkId (Utxo value' n' txid' swpId') =
+      SwapUtxo {
+        swapUtxoSwapIntoLnId = swpId',
+        swapUtxoBlockId = entityKey blkId,
+        swapUtxoTxid = from txid',
+        swapUtxoVout = n',
+        swapUtxoAmount = value',
+        swapUtxoStatus = SwapUtxoFirstSeen,
+        swapUtxoInsertedAt = now,
+        swapUtxoUpdatedAt = now
+      }
+
+scan ::
   ( Env m
   ) =>
-  (Btc.Address -> ExceptT Failure m Bool) ->
-  Set Btc.Address ->
-  ExceptT Failure m (Map Btc.Address MSat)
-askElectrsT cond addrs = do
-  --
-  -- TODO : maybe optimize with bulk select
-  --
-  swapAddrs <- filterM cond $ S.toList addrs
-  balances <- mapM askConfBalance swapAddrs
-  pure $ M.fromList balances
-  where
-    askConfBalance addr = do
-      cb <-
-        Rpc.confirmed
-          <$> withElectrsT
-            Rpc.getBalance
-            ($ Left $ OnChainAddress addr)
-      pure (addr, cb)
-
-getBlockAddresses :: Btc.BlockVerbose -> Set Btc.Address
-getBlockAddresses blk = do
-  S.unions
-    . V.map extractAddr
-    . V.map Btc.scriptPubKey
-    . V.foldMap Btc.decVout
-    $ Btc.vSubTransactions blk
-  where
-    extractAddr :: Btc.ScriptPubKey -> Set Btc.Address
-    extractAddr (Btc.StandardScriptPubKey _ _ _ _ addrs) =
-      V.foldr S.insert S.empty addrs
-    extractAddr Btc.NonStandardScriptPubKey {} =
-      S.empty
-
-scanT ::
-  ( Env m
-  ) =>
-  (Btc.Address -> ExceptT Failure m Bool) ->
-  ExceptT Failure m (Map Btc.Address MSat)
-scanT cond = do
+  ExceptT Failure m [Utxo]
+scan = do
   mBlk <- lift Block.getLatest
-  end <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
-  natH <- tryFromT end
-  Rpc.waitTillLastBlockProcessedT natH
-  scanUntilT
-    end
-    cond
-    mempty
-    $ maybe end (blockHeight . entityVal) mBlk
+  cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
+  case mBlk of
+    Nothing ->
+      scanOneBlock cHeight
+    Just lBlk -> do
+      let s = from . blockHeight $ entityVal lBlk
+      let e = from cHeight
+      step [] (1 + s) e
+  where
+    step acc cur end = do
+      if cur > end
+        then pure acc
+        else do
+          utxos <- scanOneBlock (BlkHeight cur)
+          step (acc <> utxos) (cur + 1) end
 
-scanUntilT ::
+scanOneBlock ::
   ( Env m
   ) =>
   BlkHeight ->
-  (Btc.Address -> ExceptT Failure m Bool) ->
-  Map Btc.Address MSat ->
-  BlkHeight ->
-  ExceptT Failure m (Map Btc.Address MSat)
-scanUntilT end cond acc curr =
-  if curr > end
-    then pure acc
-    else do
-      addrs <- scanBlockT cond curr
-      scanUntilT end cond (acc <> addrs) $ curr + 1
-
-scanBlockT ::
-  ( Env m
-  ) =>
-  (Btc.Address -> ExceptT Failure m Bool) ->
-  BlkHeight ->
-  ExceptT Failure m (Map Btc.Address MSat)
-scanBlockT cond height = do
+  ExceptT Failure m [Utxo]
+scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  prevHash <-
-    ExceptT . pure $
-      maybeToRight
-        (FailureInternal "Genesis block")
-        (Btc.vPrevBlock blk)
-  balances <- askElectrsT cond $ getBlockAddresses blk
-  $(logTM) DebugS . logStr $ debugMsg height balances
-  lift . mapM_ updateFundedSwap $ M.toList balances
-  lift . void $
-    Block.createUpdate height (from hash) (from prevHash)
-  pure balances
-  where
-    debugMsg :: BlkHeight -> Map Btc.Address MSat -> Text
-    debugMsg h ma =
-      "Scanning block at height: "
-        <> inspect h
-        <> " found: "
-        <> inspect (M.toList ma)
+  utxos <- lift $ extractRelatedUtxoFromBlock blk
+  void . lift $ persistBlock blk utxos
+  pure utxos
 
-updateFundedSwap :: (Env m) => (Btc.Address, MSat) -> m ()
-updateFundedSwap (addr, amt) = do
-  $(logTM) DebugS . logStr $ debugMsg
-  when isEnough
-    . void
-    $ SwapIntoLn.updateFunded
-      (from addr)
-      (from amt)
-      lspCap
-      lspFee
-  where
-    isEnough = amt >= from swapLnMinAmt
-    lspCap = newChanCapLsp $ from amt
-    lspFee = newSwapIntoLnFee $ from amt
-    debugMsg =
-      "Marking funded "
-        <> inspect isEnough
-        <> " at addr: "
-        <> inspect addr
-        <> " with amt: "
-        <> inspect amt
-
-swapsOnlyT :: (Env m) => Btc.Address -> ExceptT Failure m Bool
-swapsOnlyT =
-  (isJust <$>)
-    . lift
-    . SwapIntoLn.getByFundAddress
-    . from
+maybeSwap :: (Env m) => Btc.Address -> m (Maybe (Entity SwapIntoLn))
+maybeSwap addr = SwapIntoLn.getByFundAddress $ from addr

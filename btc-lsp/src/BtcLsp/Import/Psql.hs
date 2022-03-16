@@ -37,6 +37,7 @@ import Database.Esqueleto.Legacy as X
     putMany,
     rawExecute,
     rawSql,
+    deleteKey,
     runMigration,
     runSqlPool,
     select,
@@ -47,6 +48,7 @@ import Database.Esqueleto.Legacy as X
     update,
     updateCount,
     val,
+    sum_,
     valList,
     where_,
     (!=.),
@@ -61,11 +63,12 @@ import Database.Esqueleto.Legacy as X
   )
 import Database.Esqueleto.PostgreSQL as X
   ( now_,
-    upsertBy,
+    upsertBy
   )
 import Database.Persist as X
   ( SelectOpt (..),
     selectList,
+    insertEntity
   )
 import qualified Database.Persist as P
 import Database.Persist.Class as X
