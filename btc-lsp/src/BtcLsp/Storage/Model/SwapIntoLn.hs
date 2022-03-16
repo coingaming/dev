@@ -1,12 +1,13 @@
 module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
-    updateFunded,
+    updateFundedSql,
     updateWaitingChan,
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
     getByFundAddress,
     getLatestSwapT,
+    getWaitingFundSql
   )
 where
 
@@ -52,15 +53,15 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
           Psql.=. Psql.val ct
       ]
 
-updateFunded ::
+updateFundedSql ::
   ( Storage m
   ) =>
-  OnChainAddress 'Fund ->
+  SwapIntoLnId ->
   Money 'Usr 'Ln 'Fund ->
   Money 'Lsp 'Ln 'Fund ->
   Money 'Lsp 'OnChain 'Gain ->
-  m ()
-updateFunded addr usrCap lspCap lspFee = runSql $ do
+  ReaderT Psql.SqlBackend m ()
+updateFundedSql sid usrCap lspCap lspFee = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
@@ -77,12 +78,20 @@ updateFunded addr usrCap lspCap lspFee = runSql $ do
           Psql.=. Psql.val ct
       ]
     Psql.where_ $
-      ( row Psql.^. SwapIntoLnFundAddress
-          Psql.==. Psql.val addr
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val sid
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
                      Psql.==. Psql.val SwapWaitingFund
                  )
+
+getWaitingFundSql :: (Storage m) => ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
+getWaitingFundSql = do
+  Psql.select $ Psql.from $ \row -> do
+    Psql.where_ ((row Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapWaitingFund) Psql.&&.
+      (row Psql.^. SwapIntoLnExpiresAt Psql.<. Psql.now_))
+    pure row
+
 
 updateWaitingChan ::
   ( Storage m
