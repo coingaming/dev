@@ -1,18 +1,15 @@
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Cfg
-  ( SwapCap
-      ( swapCapUsr,
-        swapCapLsp,
-        swapCapFee
-      ),
+  ( SwapCap,
+    swapCapUsr,
+    swapCapLsp,
+    swapCapFee,
     swapLnMinAmt,
     swapLnMaxAmt,
     swapLnFeeRate,
     swapLnMinFee,
-    newChanCapLsp,
     newSwapCap,
-    newSwapIntoLnFee,
   )
 where
 
@@ -51,32 +48,30 @@ swapLnMinFee :: Money 'Lsp btcl 'Gain
 swapLnMinFee =
   Money $ MSat 2000000
 
-newChanCapLsp ::
-  Money 'Usr 'Ln 'Fund ->
-  Money 'Lsp 'Ln 'Fund
-newChanCapLsp =
-  coerce
-
 newSwapCap ::
   Money 'Usr 'OnChain 'Fund ->
-  SwapCap
+  Maybe SwapCap
 newSwapCap usrCh =
-  SwapCap
-    { swapCapUsr = usrLn,
-      swapCapLsp = coerce usrLn,
-      swapCapFee = fee
-    }
+  if usrCh < swapLnMinAmt
+    then Nothing
+    else
+      Just
+        SwapCap
+          { swapCapUsr = usrLn,
+            swapCapLsp = coerce usrLn,
+            swapCapFee = fee
+          }
   where
     fee =
-      newSwapIntoLnFee usrCh
+      newSwapFee usrCh
     usrLn =
       coerce $
         usrCh - coerce fee
 
-newSwapIntoLnFee ::
+newSwapFee ::
   Money 'Usr 'OnChain 'Fund ->
   Money 'Lsp 'OnChain 'Gain
-newSwapIntoLnFee amt =
+newSwapFee amt =
   case tryFrom @Natural
     . round
     --

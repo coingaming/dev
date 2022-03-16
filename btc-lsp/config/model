@@ -32,7 +32,7 @@ SwapUtxo
   blockId BlockId
   txid (TxId 'Funding)
   vout (Vout 'Funding)
-  amount MSat
+  amount (Money 'Usr 'OnChain 'Fund)
   status SwapUtxoStatus
   insertedAt UTCTime
   updatedAt UTCTime
