@@ -1,11 +1,17 @@
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Cfg
-  ( swapLnMinAmt,
+  ( SwapCap
+      ( swapCapUsr,
+        swapCapLsp,
+        swapCapFee
+      ),
+    swapLnMinAmt,
     swapLnMaxAmt,
     swapLnFeeRate,
     swapLnMinFee,
     newChanCapLsp,
+    newSwapCap,
     newSwapIntoLnFee,
   )
 where
@@ -14,6 +20,20 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified Universum
+
+data SwapCap = SwapCap
+  { swapCapUsr :: Money 'Usr 'Ln 'Fund,
+    swapCapLsp :: Money 'Lsp 'Ln 'Fund,
+    swapCapFee :: Money 'Lsp 'OnChain 'Gain
+  }
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
+
+instance Out SwapCap
 
 swapLnMinAmt :: Money 'Usr btcl 'Fund
 swapLnMinAmt =
@@ -37,8 +57,24 @@ newChanCapLsp ::
 newChanCapLsp =
   coerce
 
+newSwapCap ::
+  Money 'Usr 'OnChain 'Fund ->
+  SwapCap
+newSwapCap usrCh =
+  SwapCap
+    { swapCapUsr = usrLn,
+      swapCapLsp = coerce usrLn,
+      swapCapFee = fee
+    }
+  where
+    fee =
+      newSwapIntoLnFee usrCh
+    usrLn =
+      coerce $
+        usrCh - coerce fee
+
 newSwapIntoLnFee ::
-  Money 'Usr 'Ln 'Fund ->
+  Money 'Usr 'OnChain 'Fund ->
   Money 'Lsp 'OnChain 'Gain
 newSwapIntoLnFee amt =
   case tryFrom @Natural
@@ -57,5 +93,5 @@ newSwapIntoLnFee amt =
       max fee swapLnMinFee
     Left err ->
       error $
-        "Impossible newSwapIntoLnFee "
+        "Impossible newSwapFee "
           <> Universum.show err
