@@ -36,7 +36,7 @@ SwapUtxo
   status SwapUtxoStatus
   insertedAt UTCTime
   updatedAt UTCTime
-  UniqSwapUtxo txid vout
+  UniqueSwapUtxo txid vout
   deriving Eq Show Generic
 
 Block

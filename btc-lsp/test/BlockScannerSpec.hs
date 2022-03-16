@@ -89,9 +89,9 @@ spec = do
           Btc.sendToAddress
           (\h -> h trAddr amt Nothing Nothing)
       lift $ mine 1 LndLsp
-      let expectedAmt = from amt * 2
+      expectedAmt <- except $ first (const (FailureInternal "expectedAmt overflow")) $ tryFrom (amt * 2)
       utxos <- BlockScanner.scan
-      let (gotAmt :: MSat) = sum $ from . BlockScanner.utxoValue <$> utxos
+      let (gotAmt :: MSat) = sum $ BlockScanner.utxoValue <$> utxos
       pure (expectedAmt == gotAmt)
     liftIO $ shouldBe res (Right True)
   itEnv "Block scanner works with 2 blocks" $ do
@@ -111,8 +111,8 @@ spec = do
           Btc.sendToAddress
           (\h -> h trAddr amt Nothing Nothing)
       lift $ mine 1 LndLsp
-      let expectedAmt = from amt * 2
+      expectedAmt <- except $ first (const (FailureInternal "expectedAmt overflow")) $ tryFrom (amt * 2)
       utxos <- BlockScanner.scan
-      let (gotAmt :: MSat) = sum $ from . BlockScanner.utxoValue <$> utxos
+      let gotAmt = sum $ BlockScanner.utxoValue <$> utxos
       pure (expectedAmt == gotAmt)
     liftIO $ shouldBe res (Right True)

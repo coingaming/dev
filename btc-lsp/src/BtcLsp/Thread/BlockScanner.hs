@@ -4,7 +4,7 @@
 module BtcLsp.Thread.BlockScanner
   ( apply,
     scan,
-    UtxoVout(..)
+    Utxo(..)
   )
 where
 
@@ -26,7 +26,7 @@ apply = do
   apply
 
 
-markFunded :: (Env m) => [UtxoVout] -> m ()
+markFunded :: (Env m) => [Utxo] -> m ()
 markFunded utxos = do
   let swapIds = S.toList $ S.fromList $ utxoSwapId <$> utxos
   sequence_ $ maybeFundSwap <$> swapIds
@@ -53,15 +53,15 @@ markFunded utxos = do
             swapId (from amt) (lspCap amt) (lspFee amt)
 
 
-data UtxoVout = UtxoVout {
-  utxoValue :: Btc.BTC,
-  utxoN :: Integer,
+data Utxo = Utxo {
+  utxoValue :: MSat,
+  utxoN :: Vout 'Funding,
   utxoId :: Btc.TransactionID,
   utxoSwapId :: SwapIntoLnId
 } deriving Show
 
 -- TODO: presist log of unsupported transactions
-extractRelatedUtxoFromBlock :: (Env m) => Btc.BlockVerbose -> m [UtxoVout]
+extractRelatedUtxoFromBlock :: (Env m) => Btc.BlockVerbose -> m [Utxo]
 extractRelatedUtxoFromBlock blk = foldrM foldTrx [] $ Btc.vSubTransactions blk
   where
     foldTrx trx acc = do
@@ -70,7 +70,7 @@ extractRelatedUtxoFromBlock blk = foldrM foldTrx [] $ Btc.vSubTransactions blk
       pure $ if null rVouts
          then acc
          else rVouts <> acc
-    mapVout :: (Env m) => Btc.TransactionID -> Btc.TxOut -> m (Either Text UtxoVout)
+    mapVout :: (Env m) => Btc.TransactionID -> Btc.TxOut -> m (Either Text Utxo)
     mapVout txid (Btc.TxOut val num (Btc.StandardScriptPubKey _ _ _ _ addrsV)) = do
       if V.length addrsV /= 1
          then pure $ Left "TODO: unsupported vout"
@@ -78,12 +78,14 @@ extractRelatedUtxoFromBlock blk = foldrM foldTrx [] $ Btc.vSubTransactions blk
            let addr = V.head addrsV
            mswp <- maybeSwap addr
            case mswp of
-              Just swp -> pure $ Right $ UtxoVout val num txid (entityKey swp)
+              Just swp -> pure $ utxo (tryFrom val) (tryFrom num) txid swp
               Nothing -> pure $ Left "Unknown address"
     mapVout _ _ = pure $ Left "TODO: unsupported vout"
+    utxo (Right val) (Right n) txid swp = Right $ Utxo val n txid (entityKey swp)
+    utxo _ _ _ _ = Left "vout number overflow"
 
 
-persistBlock :: (Storage m) => Btc.BlockVerbose -> [UtxoVout] -> m [SwapUtxoId]
+persistBlock :: (Storage m) => Btc.BlockVerbose -> [Utxo] -> m [SwapUtxoId]
 persistBlock blk utxos = runSql $ do
   b <- Block.createUpdateSql
     (from $ Btc.vBlkHeight blk)
@@ -92,13 +94,13 @@ persistBlock blk utxos = runSql $ do
   ct <- getCurrentTime
   SU.createManySql $ toSwapUtxo ct b <$> utxos
   where
-    toSwapUtxo now blkId (UtxoVout value' n' txid' swpId') =
-     SwapUtxo {
+    toSwapUtxo now blkId (Utxo value' n' txid' swpId') =
+      SwapUtxo {
         swapUtxoSwapIntoLnId = swpId',
         swapUtxoBlockId = entityKey blkId,
         swapUtxoTxid = from txid',
-        swapUtxoVout = from n',
-        swapUtxoAmount = from value',
+        swapUtxoVout = n',
+        swapUtxoAmount = value',
         swapUtxoStatus = SwapUtxoFirstSeen,
         swapUtxoInsertedAt = now,
         swapUtxoUpdatedAt = now
@@ -107,7 +109,7 @@ persistBlock blk utxos = runSql $ do
 scan ::
   ( Env m
   ) =>
-  ExceptT Failure m [UtxoVout]
+  ExceptT Failure m [Utxo]
 scan = do
   mBlk <- lift Block.getLatest
   cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
@@ -130,7 +132,7 @@ scanOneBlock ::
   ( Env m
   ) =>
   BlkHeight ->
-  ExceptT Failure m [UtxoVout]
+  ExceptT Failure m [Utxo]
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
