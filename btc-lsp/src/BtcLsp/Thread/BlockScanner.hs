@@ -130,15 +130,26 @@ extractRelatedUtxoFromBlock blk =
           <> inspect swp
       pure Nothing
 
-persistBlock :: (Storage m) => Btc.BlockVerbose -> [Utxo] -> m ()
-persistBlock blk utxos = runSql $ do
-  b <-
-    Block.createUpdateSql
-      (from $ Btc.vBlkHeight blk)
-      (from $ Btc.vBlockHash blk)
-      (from <$> Btc.vPrevBlock blk)
-  ct <- getCurrentTime
-  SwapUtxo.createManySql $ toSwapUtxo ct b <$> utxos
+persistBlockT ::
+  ( Storage m
+  ) =>
+  Btc.BlockVerbose ->
+  [Utxo] ->
+  ExceptT Failure m ()
+persistBlockT blk utxos = do
+  height <-
+    tryFromT $
+      Btc.vBlkHeight blk
+  lift . runSql $ do
+    b <-
+      Block.createUpdateSql
+        height
+        (from $ Btc.vBlockHash blk)
+        (from <$> Btc.vPrevBlock blk)
+    ct <-
+      getCurrentTime
+    SwapUtxo.createManySql $
+      toSwapUtxo ct b <$> utxos
   where
     toSwapUtxo now blkId (Utxo value' n' txid' swpId') =
       SwapUtxo
@@ -158,7 +169,7 @@ scan ::
   ExceptT Failure m [Utxo]
 scan = do
   mBlk <- lift Block.getLatest
-  cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
+  cHeight <- tryFromT =<< withBtcT Btc.getBlockCount id
   case mBlk of
     Nothing -> do
       $(logTM) DebugS . logStr $
@@ -199,7 +210,7 @@ scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
   utxos <- lift $ extractRelatedUtxoFromBlock blk
-  lift $ persistBlock blk utxos
+  persistBlockT blk utxos
   pure utxos
 
 maybeSwap ::

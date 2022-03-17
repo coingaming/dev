@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module BtcLsp.Rpc.Helper
   ( waitTillLastBlockProcessedT,
     waitTillLastBlockProcessed,
@@ -13,17 +11,29 @@ import Data.Digest.Pure.SHA (bytestringDigest, sha256)
 import Network.Bitcoin (getBlockCount, getBlockHash)
 import qualified Text.Hex as TH
 
-waitTillLastBlockProcessed :: Env m => Natural -> m (Either Failure ())
-waitTillLastBlockProcessed = runExceptT . waitTillLastBlockProcessedT
+waitTillLastBlockProcessed ::
+  ( Env m
+  ) =>
+  Natural ->
+  m (Either Failure ())
+waitTillLastBlockProcessed =
+  runExceptT . waitTillLastBlockProcessedT
 
-waitTillLastBlockProcessedT :: Env m => Natural -> ExceptT Failure m ()
-waitTillLastBlockProcessedT 0 = throwE $ FailureElectrs CannotSyncBlockchain
+waitTillLastBlockProcessedT ::
+  ( Env m
+  ) =>
+  Natural ->
+  ExceptT Failure m ()
+waitTillLastBlockProcessedT 0 =
+  throwE $ FailureElectrs CannotSyncBlockchain
 waitTillLastBlockProcessedT decr = do
   sleep $ MicroSecondsDelay 1000000
   bHeight <- withBtcT getBlockCount id
   bHash <- withBtcT getBlockHash ($ bHeight)
-  bHeader <- withElectrsT Rpc.blockHeader ($ BlkHeight (coerce bHeight))
-  if (doubleSha256AndReverse <$> TH.decodeHex (coerce bHeader)) == TH.decodeHex (coerce $ Rpc.BlockHeader bHash)
+  blkHeight <- tryFromT bHeight
+  bHeader <- withElectrsT Rpc.blockHeader ($ blkHeight)
+  if (doubleSha256AndReverse <$> TH.decodeHex (coerce bHeader))
+    == TH.decodeHex (coerce $ Rpc.BlockHeader bHash)
     then return ()
     else waitTillLastBlockProcessedT (decr -1)
   where
