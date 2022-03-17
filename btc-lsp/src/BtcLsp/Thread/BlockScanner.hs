@@ -177,27 +177,23 @@ scan = do
           <> inspect cHeight
       scanOneBlock cHeight
     Just lBlk -> do
-      $(logTM) DebugS . logStr $
-        "Found latest known block: "
-          <> inspect lBlk
-          <> " scanning to height: "
-          <> inspect cHeight
       --
       -- TODO : verify block hash
       --
-      let s = from . blockHeight $ entityVal lBlk
-      let e = from cHeight
-      step [] (1 + s) e
+      let known = from . blockHeight $ entityVal lBlk
+      step [] (1 + known) $ from cHeight
   where
-    step acc cur end = do
-      $(logTM) DebugS . logStr $
-        "Scanner step cur:"
-          <> inspect cur
-          <> " end: "
-          <> inspect end
+    step acc cur end =
       if cur > end
         then pure acc
         else do
+          $(logTM) DebugS . logStr $
+            "Scanner step cur:"
+              <> inspect cur
+              <> " end: "
+              <> inspect end
+              <> " got utxos: "
+              <> inspect (length acc)
           utxos <- scanOneBlock (BlkHeight cur)
           step (acc <> utxos) (cur + 1) end
 
