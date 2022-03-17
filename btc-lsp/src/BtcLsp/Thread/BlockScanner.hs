@@ -8,13 +8,14 @@ module BtcLsp.Thread.BlockScanner
   )
 where
 
+import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
-import qualified Data.Set as S
 import qualified Data.Vector as V
 import qualified Network.Bitcoin as Btc
+import qualified Universum
 
 apply :: (Env m) => m ()
 apply = do
@@ -25,12 +26,12 @@ apply = do
   apply
 
 markFunded :: (Env m) => [Utxo] -> m ()
-markFunded utxos = do
-  sequence_ $
-    maybeFundSwap <$> swapIds
+markFunded utxos =
+  mapM_ maybeFundSwap swapIds
   where
     swapIds =
-      S.toList . S.fromList $ utxoSwapId <$> utxos
+      nubOrd $
+        utxoSwapId <$> utxos
     debugMsg mCap sid amt =
       $(logTM) DebugS . logStr $
         maybe
@@ -70,39 +71,64 @@ data Utxo = Utxo
 --
 extractRelatedUtxoFromBlock :: (Env m) => Btc.BlockVerbose -> m [Utxo]
 extractRelatedUtxoFromBlock blk =
-  foldrM foldTrx [] $ Btc.vSubTransactions blk
+  foldrM foldTrx [] $
+    Btc.vSubTransactions blk
   where
     foldTrx trx acc = do
-      vouts <-
+      utxos <-
         mapM (mapVout $ Btc.decTxId trx)
           . V.toList
           $ Btc.decVout trx
-      let rVouts = rights vouts
       pure $
-        if null rVouts
-          then acc
-          else rVouts <> acc
+        catMaybes utxos <> acc
     mapVout ::
       ( Env m
       ) =>
       Btc.TransactionID ->
       Btc.TxOut ->
-      m (Either Text Utxo)
-    mapVout txid (Btc.TxOut val num (Btc.StandardScriptPubKey _ _ _ _ addrsV)) = do
-      if V.length addrsV /= 1
-        then pure $ Left "TODO: unsupported vout"
-        else do
-          let addr = V.head addrsV
+      m (Maybe Utxo)
+    mapVout txid txout@(Btc.TxOut val num (Btc.StandardScriptPubKey _ _ _ _ addrsV)) =
+      case V.toList addrsV of
+        [addr] -> do
           mswp <- maybeSwap addr
           case mswp of
-            Just swp -> pure $ utxo (tryFrom val) (tryFrom num) txid swp
-            Nothing -> pure $ Left "Unknown address"
-    mapVout _ _ =
-      pure $ Left "TODO: unsupported vout"
-    utxo (Right val) (Right n) txid swp =
-      Right $ Utxo val n txid (entityKey swp)
-    utxo _ _ _ _ =
-      Left "vout number overflow"
+            Just swp ->
+              newUtxo (tryFrom val) (tryFrom num) txid swp
+            Nothing -> do
+              $(logTM) DebugS . logStr $
+                "Unknown swap in txid: "
+                  <> inspect txid
+                  <> " and txout: "
+                  <> Universum.show txout
+              pure Nothing
+        _ -> do
+          $(logTM) ErrorS . logStr $
+            "Unsupported address vector in txid: "
+              <> inspect txid
+              <> " and txout: "
+              <> Universum.show txout
+          pure Nothing
+    mapVout txid txout = do
+      $(logTM) DebugS . logStr $
+        "Unsupported txid: "
+          <> inspect txid
+          <> " and txout: "
+          <> Universum.show txout
+      pure Nothing
+    newUtxo (Right val) (Right n) txid swp =
+      pure . Just $
+        Utxo val n txid (entityKey swp)
+    newUtxo val num txid swp = do
+      $(logTM) ErrorS . logStr $
+        "TryFrom overflow error val: "
+          <> Universum.show val
+          <> " num: "
+          <> Universum.show num
+          <> " txid: "
+          <> inspect txid
+          <> " and swap: "
+          <> inspect swp
+      pure Nothing
 
 persistBlock :: (Storage m) => Btc.BlockVerbose -> [Utxo] -> m ()
 persistBlock blk utxos = runSql $ do
@@ -134,14 +160,30 @@ scan = do
   mBlk <- lift Block.getLatest
   cHeight <- into @BlkHeight <$> withBtcT Btc.getBlockCount id
   case mBlk of
-    Nothing ->
+    Nothing -> do
+      $(logTM) DebugS . logStr $
+        "Found no blocks, scanning height: "
+          <> inspect cHeight
       scanOneBlock cHeight
     Just lBlk -> do
+      $(logTM) DebugS . logStr $
+        "Found latest known block: "
+          <> inspect lBlk
+          <> " scanning to height: "
+          <> inspect cHeight
+      --
+      -- TODO : verify block hash
+      --
       let s = from . blockHeight $ entityVal lBlk
       let e = from cHeight
       step [] (1 + s) e
   where
     step acc cur end = do
+      $(logTM) DebugS . logStr $
+        "Scanner step cur:"
+          <> inspect cur
+          <> " end: "
+          <> inspect end
       if cur > end
         then pure acc
         else do
