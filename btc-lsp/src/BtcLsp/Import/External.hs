@@ -28,7 +28,8 @@ import Control.Concurrent.Thread.Delay as X (delay)
 import Control.Error.Util as X (failWith, failWithM)
 import Control.Monad.Extra as X (maybeM)
 import Control.Monad.Trans.Except as X
-  ( except,
+  ( catchE,
+    except,
     throwE,
     withExceptT,
   )

@@ -12,8 +12,6 @@ import Database.Esqueleto.Legacy as X
     LeftOuterJoin (..),
     PersistField (..),
     PersistFieldSql (..),
-    PersistQueryWrite (..),
-    PersistStoreWrite (..),
     PersistValue (..),
     RawSql (..),
     RightOuterJoin (..),
@@ -22,6 +20,7 @@ import Database.Esqueleto.Legacy as X
     SqlType (..),
     ToBackendKey,
     asc,
+    deleteKey,
     desc,
     from,
     get,
@@ -89,4 +88,5 @@ persistEq ::
   P.EntityField v typ ->
   typ ->
   P.Filter v
-persistEq = (P.==.)
+persistEq =
+  (P.==.)

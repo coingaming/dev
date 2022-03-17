@@ -54,3 +54,9 @@ deriving stock instance Generic (Psql.Key LnChan)
 instance Out (Psql.Key LnChan)
 
 instance Out LnChan
+
+deriving stock instance Generic (Psql.Key Block)
+
+instance Out (Psql.Key Block)
+
+instance Out Block

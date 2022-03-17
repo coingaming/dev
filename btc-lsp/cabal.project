@@ -27,8 +27,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 18s0xygydf91pq11zrf017sfygpivs6d58cmpvh9ml4v4jm1803c
-  tag: ccaf24dd1a51fdd026bdca35682be32b3bf68b04
+  --sha256: 0yzk5l5gdiy06w1c4bgza4ygk01v2anc6knf85wc3n01hpxrra6m
+  tag: 2b53cc78aa7419549dcc9e1427cef621521ce5e9
 
 source-repository-package
   type: git
@@ -46,13 +46,6 @@ source-repository-package
 
 source-repository-package
   type: git
-  location: https://github.com/coingaming/src.git
-  tag: aa77961c718ce63d42100f6935c0a959b681cfe0
-  --sha256: 0nw1zdw6yr8wx7fa2d65x1szbsv604l18x7qgd51y57chbyijk3g
-  subdir: generic-pretty-instances
-
-source-repository-package
-  type: git
   location: https://github.com/21it/witch.git
   --sha256: 17dvcqj29883sysx5qcgjbi3smn1c9kjaj807a9a2vj24fg2jwja
   tag: ee0259bc5eb46d9c47d1c15473ff3e7d8212dc43
@@ -60,6 +53,13 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/src.git
-  tag: aa77961c718ce63d42100f6935c0a959b681cfe0
-  --sha256: 0nw1zdw6yr8wx7fa2d65x1szbsv604l18x7qgd51y57chbyijk3g
+  tag: 324fdc0ba4292e4229ccfe96c61cd8a4fc603fed
+  --sha256: 08bxxwvaingxjhnsmbmz62jh6h2giggzwif2ixp897xh49sx86bc
+  subdir: generic-pretty-instances
+
+source-repository-package
+  type: git
+  location: https://github.com/coingaming/src.git
+  tag: 324fdc0ba4292e4229ccfe96c61cd8a4fc603fed
+  --sha256: 08bxxwvaingxjhnsmbmz62jh6h2giggzwif2ixp897xh49sx86bc
   subdir: network-bitcoin

@@ -34,6 +34,7 @@ module BtcLsp.Data.Type
     BlkPrevHash (..),
     BlkHeight (..),
     BlkStatus (..),
+    SwapUtxoStatus (..),
   )
 where
 
@@ -222,6 +223,7 @@ newtype
     ( Eq,
       Ord,
       Show,
+      Num,
       Psql.PersistField,
       Psql.PersistFieldSql
     )
@@ -493,7 +495,7 @@ instance From Btc.BlockHash BlkPrevHash
 instance From BlkPrevHash Btc.BlockHash
 
 newtype BlkHeight
-  = BlkHeight Btc.BlockHeight
+  = BlkHeight Word64
   deriving stock
     ( Eq,
       Ord,
@@ -510,13 +512,22 @@ instance Out BlkHeight
 
 instance ToJSON BlkHeight
 
-instance From Btc.BlockHeight BlkHeight
+instance From Word64 BlkHeight
 
-instance From BlkHeight Btc.BlockHeight
+instance From BlkHeight Word64
 
-instance TryFrom BlkHeight Natural where
+instance From BlkHeight Natural where
+  from =
+    via @Word64
+
+instance TryFrom Btc.BlockHeight BlkHeight where
   tryFrom =
-    tryFrom @Integer `composeTryLhs` from
+    from @Word64
+      `composeTryRhs` tryFrom
+
+instance From BlkHeight Btc.BlockHeight where
+  from =
+    via @Word64
 
 data BlkStatus
   = BlkConfirmed
@@ -525,7 +536,16 @@ data BlkStatus
 
 instance Out BlkStatus
 
+data SwapUtxoStatus
+  = SwapUtxoUsedForChanFunding
+  | SwapUtxoRefunded
+  | SwapUtxoFirstSeen
+  deriving (Eq, Ord, Show, Read, Generic)
+
+instance Out SwapUtxoStatus
+
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"
 Psql.derivePersistField "SwapStatus"
 Psql.derivePersistField "BlkStatus"
+Psql.derivePersistField "SwapUtxoStatus"

@@ -100,6 +100,7 @@ instance FromJSON TxnOutputType where
 data TxOut =
     TxOut { -- | The amount of bitcoin transferred out.
             txoutVal     :: BTC
+          , txoutNum     :: Integer
           -- | The public key of the account we sent the money to.
           , scriptPubKey :: ScriptPubKey
           }
@@ -107,6 +108,7 @@ data TxOut =
 
 instance FromJSON TxOut where
     parseJSON (Object o) = TxOut <$> o .: "value"
+                                 <*> o .: "n"
                                  <*> o .: "scriptPubKey"
     parseJSON _ = mzero
 
@@ -284,6 +286,7 @@ data DecodedRawTransaction =
                             decRaw         :: RawTransaction
                           -- | The transaction version number.
                           , decTxnVersion  :: Integer
+                          , decTxId        :: TransactionID
                           , decTxnLockTime :: Integer
                           -- | The vector of transactions in.
                           , decVin         :: Vector TxIn
@@ -294,6 +297,7 @@ data DecodedRawTransaction =
 instance FromJSON DecodedRawTransaction where
     parseJSON (Object o) = DecodedRawTransaction <$> o .: "hex"
                                                  <*> o .: "version"
+                                                 <*> o .: "txid"
                                                  <*> o .: "locktime"
                                                  <*> o .: "vin"
                                                  <*> o .: "vout"

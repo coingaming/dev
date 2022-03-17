@@ -9,6 +9,7 @@ SOCKET_DIRECTORIES=`mktemp -d`
 
 initdb -D $PGDATA --auth=trust --no-locale --encoding=UTF8
 echo "unix_socket_directories = '$SOCKET_DIRECTORIES'" >> $PGDATA/postgresql.conf
+echo "log_statement = 'all'" >> $PGDATA/postgresql.conf
 pg_ctl -D $PGDATA -l $PGDATA/postgres.log start
 
 createuser -s postgres -h "$SOCKET_DIRECTORIES"
