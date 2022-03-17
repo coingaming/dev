@@ -141,6 +141,26 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+  btc-lsp-integration:
+    main: Integration.hs
+    source-dirs:
+    - integration
+    - test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is
+    - Integration
+    dependencies:
+    - QuickCheck
+    - quickcheck-instances
+    - generic-arbitrary
+    - proto-lens-arbitrary
+    - hspec
+    - hspec-expectations
+    - hspec-wai
+    - hspec-discover
 
 tests:
   btc-lsp-test:
@@ -160,19 +180,3 @@ tests:
     - hspec-expectations
     - hspec-wai
 
-  btc-lsp-integration:
-    main: Main.hs
-    source-dirs:
-    - integration
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - QuickCheck
-    - quickcheck-instances
-    - generic-arbitrary
-    - proto-lens-arbitrary
-    - hspec
-    - hspec-expectations
-    - hspec-wai

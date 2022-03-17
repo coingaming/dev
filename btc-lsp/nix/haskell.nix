@@ -32,6 +32,14 @@ in
           pkgs.electrs
           lnd
         ];
+        packages.btc-lsp.components.exes.btc-lsp-integration.build-tools = [
+          pkgs.haskellPackages.hspec-discover
+          pkgs.postgresql
+          pkgs.openssl
+          pkgs.bitcoin
+          pkgs.electrs
+          lnd
+        ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''
           ./nix/ns-shutdown-test-deps.sh
         '';

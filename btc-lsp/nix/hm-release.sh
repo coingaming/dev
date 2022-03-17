@@ -24,6 +24,10 @@ else
         RELEASE_TARGET="electrs"
         shift
         ;;
+      integration|--integration)
+        RELEASE_TARGET="integration"
+        shift
+        ;;
       *)
         break
         ;;
@@ -50,9 +54,19 @@ release_electrs () {
      "
 }
 
+release_integration () {
+  rm -rf "$THIS_DIR/../build/docker-image-electrs.tar.gz"
+  rm -rf "$THIS_DIR/../build/docker-image-electrs.txt"
+  sh "$THIS_DIR/hm-shell-docker.sh" --mini "$NIX_EXTRA_ARGS" \
+     "--run './nix/ns-release.sh docker-integration.nix && \
+     cp -Lr ./result ./build/docker-image-electrs.tar.gz'
+     "
+}
+
 release_all () {
   release_electrs
   release_btc_lsp
+  release_integration
 }
 
 case $RELEASE_TARGET in
@@ -67,6 +81,10 @@ case $RELEASE_TARGET in
   electrs)
     echo "==> Release electrs"
     release_electrs
+    ;;
+  integration)
+    echo "==> Release integration"
+    release_integration
     ;;
   *)
     echo "==> Unrecognized RELEASE_TARGET $RELEASE_TARGET"
