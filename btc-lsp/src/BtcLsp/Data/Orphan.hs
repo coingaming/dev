@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
@@ -27,8 +26,6 @@ instance From Lnd.Seconds Word64
 deriving stock instance Generic Btc.Block
 
 instance Out Btc.Block
-
-Psql.derivePersistField "Btc.BlockHeight"
 
 instance Out Natural where
   docPrec x =
@@ -60,6 +57,7 @@ instance From Btc.TransactionID (TxId 'Funding) where
   from = via @ByteString
 
 instance From Word32 (Vout 'Funding)
+
 instance From ByteString (TxId 'Funding)
 
 instance TryFrom Integer (Vout 'Funding) where
@@ -67,5 +65,3 @@ instance TryFrom Integer (Vout 'Funding) where
 
 instance TryFrom Btc.BTC MSat where
   tryFrom = from `composeTryRhs` tryFrom @Integer @Word64 `composeTryLhs` fmap (* 1000) from
-
-
