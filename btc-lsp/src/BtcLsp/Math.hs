@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 
-module BtcLsp.Cfg
+module BtcLsp.Math
   ( SwapCap,
     swapCapUsr,
     swapCapLsp,

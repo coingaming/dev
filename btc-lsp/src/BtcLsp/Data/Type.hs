@@ -223,6 +223,7 @@ newtype
     ( Eq,
       Ord,
       Show,
+      Read,
       Num,
       Psql.PersistField,
       Psql.PersistFieldSql

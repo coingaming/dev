@@ -10,6 +10,7 @@ module BtcLsp.Data.Env
   )
 where
 
+import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Server.LowLevel
@@ -50,6 +51,7 @@ data Env = Env
     envLnd :: Lnd.LndEnv,
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
+    envMinChanCap :: Money 'Lsp 'Ln 'Fund,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
@@ -71,6 +73,7 @@ data RawConfig = RawConfig
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
+    rawConfigMinChanCap :: Money 'Lsp 'Ln 'Fund,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
@@ -123,6 +126,7 @@ readRawConfig =
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LND_P2P_PORT" opts
+      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_CHAN_CAP_MSAT" opts
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
       -- Electrs
@@ -190,6 +194,7 @@ withEnv rc this = do
                 envLnd = lnd,
                 envLndP2PHost = rawConfigLndP2PHost rc,
                 envLndP2PPort = rawConfigLndP2PPort rc,
+                envMinChanCap = rawConfigMinChanCap rc,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
                 envGrpcServer =
