@@ -94,12 +94,7 @@ extractRelatedUtxoFromBlock blk =
           case mswp of
             Just swp ->
               newUtxo (tryFrom val) (tryFrom num) txid swp
-            Nothing -> do
-              $(logTM) DebugS . logStr $
-                "Unknown swap in txid: "
-                  <> inspect txid
-                  <> " and txout: "
-                  <> Universum.show txout
+            Nothing ->
               pure Nothing
         _ -> do
           $(logTM) ErrorS . logStr $
@@ -108,12 +103,7 @@ extractRelatedUtxoFromBlock blk =
               <> " and txout: "
               <> Universum.show txout
           pure Nothing
-    mapVout txid txout = do
-      $(logTM) DebugS . logStr $
-        "Unsupported txid: "
-          <> inspect txid
-          <> " and txout: "
-          <> Universum.show txout
+    mapVout _ _ =
       pure Nothing
     newUtxo (Right val) (Right n) txid swp =
       pure . Just $
