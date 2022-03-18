@@ -16,6 +16,7 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Math as Math
 import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
 import qualified Data.Aeson as A (Result (..), Value (..), decode)
@@ -51,7 +52,7 @@ data Env = Env
     envLnd :: Lnd.LndEnv,
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
-    envMinChanCap :: Money 'Lsp 'Ln 'Fund,
+    envSwapIntoLnMinAmt :: Money 'Usr 'OnChain 'Fund,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
@@ -194,7 +195,9 @@ withEnv rc this = do
                 envLnd = lnd,
                 envLndP2PHost = rawConfigLndP2PHost rc,
                 envLndP2PPort = rawConfigLndP2PPort rc,
-                envMinChanCap = rawConfigMinChanCap rc,
+                envSwapIntoLnMinAmt =
+                  Math.newSwapIntoLnMinAmt $
+                    rawConfigMinChanCap rc,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
                 envGrpcServer =

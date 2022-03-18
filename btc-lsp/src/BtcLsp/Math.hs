@@ -5,11 +5,11 @@ module BtcLsp.Math
     swapCapUsr,
     swapCapLsp,
     swapCapFee,
-    swapLnMinAmt,
     swapLnMaxAmt,
     swapLnFeeRate,
     swapLnMinFee,
     newSwapCap,
+    newSwapIntoLnMinAmt,
   )
 where
 
@@ -72,6 +72,9 @@ newSwapFee ::
   Money 'Usr 'OnChain 'Fund ->
   Money 'Lsp 'OnChain 'Gain
 newSwapFee amt =
+  --
+  -- TODO : make it more aligned with newSwapIntoLnMinAmt
+  --
   case tryFrom @Natural
     . round
     --
@@ -90,3 +93,33 @@ newSwapFee amt =
       error $
         "Impossible newSwapFee "
           <> Universum.show err
+
+newSwapIntoLnMinAmt ::
+  Money 'Lsp 'Ln 'Fund ->
+  Money 'Usr 'OnChain 'Fund
+newSwapIntoLnMinAmt cap =
+  from . (* 1000) $
+    if usrInitSat == usrInitSatRound % 1
+      then usrInitSatRound
+      else usrInitSatRound + 1
+  where
+    minFee :: Ratio Word64
+    minFee =
+      from swapLnMinFee % 1
+    usrFin :: Ratio Word64
+    usrFin =
+      from cap % 2
+    usrPerc :: Ratio Word64
+    usrPerc =
+      usrFin / (1 - from swapLnFeeRate)
+    usrInitMsat :: Ratio Word64
+    usrInitMsat =
+      if usrPerc - usrFin >= minFee
+        then usrPerc
+        else usrFin + minFee
+    usrInitSat :: Ratio Word64
+    usrInitSat =
+      usrInitMsat / 1000
+    usrInitSatRound :: Word64
+    usrInitSatRound =
+      round usrInitSat

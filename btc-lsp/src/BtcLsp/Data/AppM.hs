@@ -45,6 +45,8 @@ instance (MonadIO m) => KatipContext (AppM m) where
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
     asks Env.envGrpcServer
+  getSwapIntoLnMinAmt =
+    asks Env.envSwapIntoLnMinAmt
   getLspPubKeyVar =
     asks Env.envLndPubKey
   getLspLndEnv =

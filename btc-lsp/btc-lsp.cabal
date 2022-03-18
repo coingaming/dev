@@ -369,6 +369,7 @@ test-suite btc-lsp-test
       Proto.BtcLsp_Fields
       BlockScannerSpec
       LnChanWatcherSpec
+      MathSpec
       RpcSpec
       ServerSpec
       Spec

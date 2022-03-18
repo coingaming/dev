@@ -83,6 +83,7 @@ getCfg ::
 getCfg _ _ = do
   pub <- getLspPubKey
   sa <- getLndP2PSocketAddress
+  swapMinAmt <- getSwapIntoLnMinAmt
   pure $
     defMessage
       & GetCfg.success
@@ -97,11 +98,11 @@ getCfg _ _ = do
                           .~ from (socketAddressPort sa)
                     ]
                & GetCfg.swapIntoLnMinAmt
-                 .~ from Math.swapLnMinAmt
+                 .~ from swapMinAmt
                & GetCfg.swapIntoLnMaxAmt
                  .~ from Math.swapLnMaxAmt
                & GetCfg.swapFromLnMinAmt
-                 .~ from Math.swapLnMinAmt
+                 .~ from swapMinAmt
                & GetCfg.swapFromLnMaxAmt
                  .~ from Math.swapLnMaxAmt
                & GetCfg.swapLnFeeRate

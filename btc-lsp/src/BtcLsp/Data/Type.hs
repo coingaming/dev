@@ -287,6 +287,10 @@ instance From (Ratio Word64) FeeRate
 
 instance From FeeRate (Ratio Word64)
 
+instance From FeeRate (Ratio Natural) where
+  from =
+    via @(Ratio Word64)
+
 instance TryFrom Rational FeeRate where
   tryFrom =
     from @(Ratio Word64)
