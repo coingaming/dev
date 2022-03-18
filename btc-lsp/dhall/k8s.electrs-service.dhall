@@ -11,7 +11,7 @@ let service =
           [ K.ServicePort::{
             , name = Some "8080"
             , port = 8080
-            , targetPort = Some (K.IntOrString.Int (Natural/toInteger 8080))
+            , targetPort = Some (K.NatOrString.Nat 8080)
             }
           ]
         }

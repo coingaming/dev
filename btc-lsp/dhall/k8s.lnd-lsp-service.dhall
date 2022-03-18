@@ -12,19 +12,19 @@ let service =
           [ K.ServicePort::{
             , name = Some "9735"
             , port = 9735
-            , targetPort = Some (K.IntOrString.Int (Natural/toInteger 9735))
+            , targetPort = Some (K.NatOrString.Nat 9735)
             , nodePort = Some 30735
             }
           , K.ServicePort::{
             , name = Some "10009"
             , port = 10009
-            , targetPort = Some (K.IntOrString.Int (Natural/toInteger 10009))
+            , targetPort = Some (K.NatOrString.Nat 10009)
             , nodePort = Some 30009
             }
           , K.ServicePort::{
             , name = Some "8080"
             , port = 8080
-            , targetPort = Some (K.IntOrString.Int (Natural/toInteger 8080))
+            , targetPort = Some (K.NatOrString.Nat 8080)
             , nodePort = Some 30080
             }
           ]
