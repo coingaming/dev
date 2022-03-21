@@ -36,7 +36,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
             defMessage
               & Proto.val
                 .~ ( defMessage
-                       & LowLevel.val .~ 12002000
+                       & LowLevel.val .~ 12000000
                    )
       let maxAmt :: Proto.LocalBalance =
             defMessage

@@ -5,6 +5,7 @@ module BtcLsp.Thread.BlockScanner
   ( apply,
     scan,
     Utxo (..),
+    trySat2MSat,
   )
 where
 
@@ -52,7 +53,7 @@ markFunded utxos =
     maybeFundSwap swapId = do
       us <- runSql $ SwapUtxo.getFundsBySwapIdSql swapId
       let amt = sum $ swapUtxoAmount . entityVal <$> us
-      let mCap = newSwapCap amt
+      mCap <- newSwapCapM amt
       debugMsg mCap swapId amt
       whenJust mCap $ \swapCap -> runSql $ do
         SwapUtxo.markAsUsedForChanFundingSql $ entityKey <$> us
@@ -93,7 +94,7 @@ extractRelatedUtxoFromBlock blk =
           mswp <- maybeSwap addr
           case mswp of
             Just swp ->
-              newUtxo (tryFrom val) (tryFrom num) txid swp
+              newUtxo (trySat2MSat val) (tryFrom num) txid swp
             Nothing ->
               pure Nothing
         _ -> do
@@ -119,6 +120,14 @@ extractRelatedUtxoFromBlock blk =
           <> " and swap: "
           <> inspect swp
       pure Nothing
+
+trySat2MSat ::
+  Btc.BTC ->
+  Either (TryFromException Btc.BTC MSat) MSat
+trySat2MSat =
+  from @Word64
+    `composeTryRhs` tryFrom @Integer
+      `composeTryLhs` fmap (* 1000) from
 
 persistBlockT ::
   ( Storage m

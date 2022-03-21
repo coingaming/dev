@@ -74,7 +74,7 @@ data RawConfig = RawConfig
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
-    rawConfigMinChanCap :: Money 'Lsp 'Ln 'Fund,
+    rawConfigMinChanCap :: Money 'Chan 'Ln 'Fund,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
