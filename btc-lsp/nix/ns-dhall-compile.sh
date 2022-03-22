@@ -7,6 +7,8 @@ ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
 KUBERNETES_BUILD_DIR="$ROOT_DIR/build/kubernetes"
 
+. "$ROOT_DIR/nix/k8s-export-env.sh"
+
 mkdir -p "$BUILD_DIR" "$KUBERNETES_BUILD_DIR"
 
 dhall_to_yaml() {
@@ -32,7 +34,7 @@ for x in $ROOT_DIR/dhall/docker-compose.*.dhall; do
   dhall_to_yaml "$x" "$BUILD_DIR"
 done
 
-for x in $ROOT_DIR/dhall/k8s.*.dhall; do
+for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/*.dhall; do
   dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
 done
 

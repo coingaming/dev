@@ -3,3 +3,5 @@
 set -e
 
 export MINIKUBE_PROFILE=btc-lsp
+
+export BITCOIN_NETWORK=regtest
