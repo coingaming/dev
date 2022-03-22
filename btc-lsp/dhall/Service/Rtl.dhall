@@ -1,8 +1,8 @@
 let P = ../Prelude/Import.dhall
 
-let K = ../Kubernetes/Import.dhall
-
 let G = ../Global.dhall
+
+let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
 
@@ -26,8 +26,8 @@ let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = Service.ServiceType.LoadBalancer
-          , TestNet = Service.ServiceType.LoadBalancer
+          { MainNet = Service.ServiceType.ClusterIP
+          , TestNet = Service.ServiceType.ClusterIP
           , RegTest = Service.ServiceType.ClusterIP
           }
           net

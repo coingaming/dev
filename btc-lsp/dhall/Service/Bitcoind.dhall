@@ -1,10 +1,10 @@
-let K = ../Kubernetes/Import.dhall
-
 let G = ../Global.dhall
 
-let Volume = ../Kubernetes/Volume.dhall
+let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
+
+let Volume = ../Kubernetes/Volume.dhall
 
 let Deployment = ../Kubernetes/Deployment.dhall
 

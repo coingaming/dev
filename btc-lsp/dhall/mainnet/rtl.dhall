@@ -1,6 +1,6 @@
-let K = ../Kubernetes/Import.dhall
-
 let G = ../Global.dhall
+
+let K = ../Kubernetes/Import.dhall
 
 let Rtl = ../Service/Rtl.dhall
 
