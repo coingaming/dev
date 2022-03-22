@@ -70,3 +70,60 @@ Run specific tests with hot code reloading:
 ```sh
 ghcid --setup ":set args -m importPubKey"
 ```
+
+## Kubernetres/Digitalocean
+
+K8S setup is scripted in a way similar to Docker/Swarm setup. Some tools are required to be installed directly on host machine. They can be installed using nix-env:
+
+```sh
+./nix/nix-install-tools.sh
+```
+
+If nix is not available, install tools in any other way you like:
+
+```
+doctl-1.71.1
+kubectl-1.23.5
+minikube-1.25.2
+```
+
+For local setup run in sequence:
+
+1. Setup cluster and services:
+
+```sh
+./nix/k8s-setup-cluster.sh
+./nix/k8s-setup.sh --prebuilt
+```
+
+2. Forward services to localhost (MacOS):
+
+```sh
+minikube tunnel
+```
+
+## Troubleshoot
+
+1. Get list of running pods:
+
+```sh
+kubectl get po
+```
+
+2. Get info about pod:
+
+```sh
+kubectl describe pod <pod-name>
+```
+
+3. Get detailed info about current cluster state:
+
+```sh
+minikube dashboard
+```
+
+4. To access postgres dbs from local machine (pgAdmin or Postico):
+
+```sh
+kubectl port-forward <pod-name> 5432:<desired-port>
+```
