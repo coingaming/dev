@@ -89,7 +89,11 @@ spec = do
           Btc.sendToAddress
           (\h -> h trAddr amt Nothing Nothing)
       lift $ mine 1 LndLsp
-      expectedAmt <- except $ first (const (FailureInternal "expectedAmt overflow")) $ tryFrom (amt * 2)
+      expectedAmt <-
+        except
+          . first (const (FailureInternal "expectedAmt overflow"))
+          . BlockScanner.trySat2MSat
+          $ amt * 2
       utxos <- BlockScanner.scan
       let (gotAmt :: MSat) = sum $ BlockScanner.utxoValue <$> utxos
       pure (expectedAmt == gotAmt)
@@ -111,7 +115,10 @@ spec = do
           Btc.sendToAddress
           (\h -> h trAddr amt Nothing Nothing)
       lift $ mine 1 LndLsp
-      expectedAmt <- except $ first (const (FailureInternal "expectedAmt overflow")) $ tryFrom (amt * 2)
+      expectedAmt <-
+        except . first (const (FailureInternal "expectedAmt overflow"))
+          . BlockScanner.trySat2MSat
+          $ amt * 2
       utxos <- BlockScanner.scan
       let gotAmt = sum $ BlockScanner.utxoValue <$> utxos
       pure (expectedAmt == gotAmt)

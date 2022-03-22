@@ -121,6 +121,7 @@ export LSP_LOG_VERBOSITY="V3" # V0-V3
 export LSP_LOG_SEVERITY="DebugS"
 export LSP_LND_P2P_HOST="127.0.0.1"
 export LSP_LND_P2P_PORT="9735"
+export LSP_MIN_CHAN_CAP_MSAT="20000000"
 export LSP_LIBPQ_CONN_STR="postgresql://postgres@localhost/lsp-test"
 
 #
@@ -179,6 +180,19 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"btc-lsp\",
 #   \"port\":30443,
+#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
+#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
+#   \"sig_header_name\":\"sig-bin\",
+#   \"compress_mode\":\"Compressed\"
+# }
+# "
+#
+# NOTE : for testnet DO k8s tests
+#
+# export LSP_GRPC_CLIENT_ENV="
+# {
+#   \"host\":\"testnet-lsp.coins.io\",
+#   \"port\":8443,
 #   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
 #   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\",

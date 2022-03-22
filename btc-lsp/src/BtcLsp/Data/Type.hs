@@ -223,6 +223,7 @@ newtype
     ( Eq,
       Ord,
       Show,
+      Read,
       Num,
       Psql.PersistField,
       Psql.PersistFieldSql
@@ -285,6 +286,10 @@ newtype FeeRate
 instance From (Ratio Word64) FeeRate
 
 instance From FeeRate (Ratio Word64)
+
+instance From FeeRate (Ratio Natural) where
+  from =
+    via @(Ratio Word64)
 
 instance TryFrom Rational FeeRate where
   tryFrom =

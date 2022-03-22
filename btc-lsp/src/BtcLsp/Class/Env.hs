@@ -6,6 +6,7 @@ module BtcLsp.Class.Env
 where
 
 import BtcLsp.Class.Storage
+import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Grpc.Server.LowLevel
@@ -27,6 +28,7 @@ class
   Env m
   where
   getGsEnv :: m GSEnv
+  getSwapIntoLnMinAmt :: m (Money 'Usr 'OnChain 'Fund)
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLndP2PSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey
