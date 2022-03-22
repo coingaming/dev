@@ -85,10 +85,7 @@ let secretEnv
 
 let env =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
-      # Deployment.mkEnv
-          Deployment.EnvVarType.Secret
-          (G.unOwner G.Owner.Bitcoind)
-          secretEnv
+      # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
 
 let mkContainer
     : Text → G.BitcoinNetwork → K.Container.Type
