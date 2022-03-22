@@ -1,4 +1,4 @@
-let K = ../k8s/Import.dhall
+let K = ../Kubernetes/Import.dhall
 
 let G = ../Global.dhall
 

@@ -1,8 +1,10 @@
-let K = ../k8s/Import.dhall
+let K = ../Kubernetes/Import.dhall
+
+let G = ../Global.dhall
 
 let Bitcoind = ../Service/Bitcoind.dhall
 
-let network = Bitcoind.BitcoinNetwork.TestNet
+let network = G.BitcoinNetwork.TestNet
 
 in 
 { apiVersion = "v1"

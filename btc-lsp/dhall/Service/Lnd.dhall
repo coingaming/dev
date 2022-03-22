@@ -1,14 +1,14 @@
-let K = ../k8s/Import.dhall
+let K = ../Kubernetes/Import.dhall
 
 let G = ../Global.dhall
 
-let Volume = ../k8s/Volume.dhall
+let Volume = ../Kubernetes/Volume.dhall
 
-let Service = ../k8s/Service.dhall
+let Service = ../Kubernetes/Service.dhall
 
-let Deployment = ../k8s/Deployment.dhall
+let Deployment = ../Kubernetes/Deployment.dhall
 
-let owner = G.unOwner G.Owner.LndLsp
+let owner = G.unOwner G.Owner.Lnd
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
@@ -94,6 +94,11 @@ let mkContainer
         K.Container::{
         , name
         , image = Some image
+            , args = Some
+                  [ "-c"
+                  , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
+                  ]
+        , command = Some [ "sh" ]
         , env = Some env
         , ports = Some (Deployment.mkContainerPorts ports)
         , volumeMounts = Some

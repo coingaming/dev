@@ -1,12 +1,12 @@
-let K = ../k8s/Import.dhall
+let K = ../Kubernetes/Import.dhall
 
 let G = ../Global.dhall
 
-let Volume = ../k8s/Volume.dhall
+let Volume = ../Kubernetes/Volume.dhall
 
-let Service = ../k8s/Service.dhall
+let Service = ../Kubernetes/Service.dhall
 
-let Deployment = ../k8s/Deployment.dhall
+let Deployment = ../Kubernetes/Deployment.dhall
 
 let owner = G.unOwner G.Owner.Bitcoind
 
