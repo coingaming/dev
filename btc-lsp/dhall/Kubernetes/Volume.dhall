@@ -1,7 +1,5 @@
 let K = ./Import.dhall
 
-let G = ../Global.dhall
-
 let Suffix
     : Type
     = < Kilobyte | Megabyte | Gigabyte | Terabyte | Petabyte | Exabyte >

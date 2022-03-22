@@ -6,12 +6,10 @@ let Lsp = ../Service/Lsp.dhall
 
 let network = G.BitcoinNetwork.MainNet
 
-in 
-{ apiVersion = "v1"
-, kind = "List"
-, items = 
-  [
-    K.Resource.Service (Lsp.mkService network)
-    , K.Resource.Deployment (Lsp.mkDeployment network)
-  ]
-}
+in  { apiVersion = "v1"
+    , kind = "List"
+    , items =
+      [ K.Resource.Service (Lsp.mkService network)
+      , K.Resource.Deployment (Lsp.mkDeployment network)
+      ]
+    }

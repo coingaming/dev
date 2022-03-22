@@ -24,9 +24,9 @@ let restPort
     : G.Port
     = { unPort = 8080 }
 
-let ports 
-  : List Natural
-  = G.unPort [ grpcPort, p2pPort, restPort ]
+let ports
+    : List Natural
+    = G.unPort [ grpcPort, p2pPort, restPort ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -41,7 +41,7 @@ let mkServiceType
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-      Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
+        Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
 
 let mkVolumeSize
     : G.BitcoinNetwork → Volume.Size.Type
@@ -85,7 +85,10 @@ let secretEnv
 
 let env =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
-      # Deployment.mkEnv Deployment.EnvVarType.Secret (G.unOwner G.Owner.Bitcoind) secretEnv
+      # Deployment.mkEnv
+          Deployment.EnvVarType.Secret
+          (G.unOwner G.Owner.Bitcoind)
+          secretEnv
 
 let mkContainer
     : Text → G.BitcoinNetwork → K.Container.Type
@@ -94,15 +97,14 @@ let mkContainer
         K.Container::{
         , name
         , image = Some image
-            , args = Some
-                  [ "-c"
-                  , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
-                  ]
+        , args = Some
+          [ "-c"
+          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
+          ]
         , command = Some [ "sh" ]
         , env = Some env
         , ports = Some (Deployment.mkContainerPorts ports)
-        , volumeMounts = Some
-          [ Deployment.mkVolumeMount owner "/root/.lnd" ]
+        , volumeMounts = Some [ Deployment.mkVolumeMount owner "/root/.lnd" ]
         }
 
 let mkDeployment
@@ -114,8 +116,7 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { 
-    , grpcPort
+in  { grpcPort
     , p2pPort
     , restPort
     , mkService

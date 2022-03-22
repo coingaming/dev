@@ -59,14 +59,15 @@ let mkTls
 let mkIngress
     : G.BitcoinNetwork → K.Ingress.Type
     = λ(net : G.BitcoinNetwork) →
-        let tlsList : Optional (List K.IngressTLS.Type) =
-              P.Optional.map
+        let tls
+            : Optional (List K.IngressTLS.Type)
+            = P.Optional.map
                 K.IngressTLS.Type
                 (List K.IngressTLS.Type)
                 (λ(tls : K.IngressTLS.Type) → [ tls ])
                 (mkTls net)
 
-        in  Ingress.mkIngress owner (mkHost net) tcpPort.unPort tlsList
+        in  Ingress.mkIngress owner (mkHost net) tcpPort.unPort tls
 
 let configMapEnv
     : List Text

@@ -31,11 +31,7 @@ let Port
 let unPort
     : List Port → List Natural
     = λ(ports : List Port) →
-     P.List.map
-          Port
-          Natural
-          (λ(port : Port) → port.unPort)
-      ports
+        P.List.map Port Natural (λ(port : Port) → port.unPort) ports
 
 let Owner
     : Type
@@ -53,4 +49,13 @@ let unOwner
           }
           x
 
-in  { BitcoinNetwork, unBitcoinNetwork, NetworkScheme, unNetworkScheme, HostName, Port, unPort, Owner, unOwner}
+in  { BitcoinNetwork
+    , unBitcoinNetwork
+    , NetworkScheme
+    , unNetworkScheme
+    , HostName
+    , Port
+    , unPort
+    , Owner
+    , unOwner
+    }

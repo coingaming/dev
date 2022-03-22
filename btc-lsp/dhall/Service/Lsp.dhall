@@ -4,8 +4,6 @@ let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
 
-let Volume = ../Kubernetes/Volume.dhall
-
 let Deployment = ../Kubernetes/Deployment.dhall
 
 let owner = G.unOwner G.Owner.Lsp
@@ -16,9 +14,9 @@ let grpcPort
     : G.Port
     = { unPort = 8443 }
 
-let ports 
-  : List Natural
-  = G.unPort [ grpcPort ]
+let ports
+    : List Natural
+    = G.unPort [ grpcPort ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -33,7 +31,7 @@ let mkServiceType
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-      Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
+        Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
 
 let configMapEnv
     : List Text
@@ -45,7 +43,11 @@ let configMapEnv
 
 let secretEnv
     : List Text
-    = [ "LSP_LIBPQ_CONN_STR", "LSP_LND_ENV", "LSP_GRPC_SERVER_ENV", "LSP_BITCOIND_ENV" ]
+    = [ "LSP_LIBPQ_CONN_STR"
+      , "LSP_LND_ENV"
+      , "LSP_GRPC_SERVER_ENV"
+      , "LSP_BITCOIND_ENV"
+      ]
 
 let env =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
@@ -71,8 +73,4 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { 
-    , grpcPort
-    , mkService
-    , mkDeployment
-    }
+in  { grpcPort, mkService, mkDeployment }

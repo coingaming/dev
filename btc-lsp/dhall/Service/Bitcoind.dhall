@@ -33,8 +33,7 @@ let mkRpcPort
 let mkPorts
     : G.BitcoinNetwork → List Natural
     = λ(net : G.BitcoinNetwork) →
-      G.unPort
-      [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net ]
+        G.unPort [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -49,7 +48,10 @@ let mkServiceType
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-      Service.mkService owner (mkServiceType net) (Service.mkPorts (mkPorts net))
+        Service.mkService
+          owner
+          (mkServiceType net)
+          (Service.mkPorts (mkPorts net))
 
 let mkVolumeSize
     : G.BitcoinNetwork → Volume.Size.Type
@@ -121,8 +123,7 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { 
-    , zmqPubRawBlockPort
+in  { zmqPubRawBlockPort
     , zmqPubRawTxPort
     , mkRpcPort
     , mkService
