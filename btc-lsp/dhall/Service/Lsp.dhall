@@ -39,6 +39,9 @@ let configMapEnv
       , "LSP_LOG_FORMAT"
       , "LSP_LOG_VERBOSITY"
       , "LSP_LOG_SEVERITY"
+      , "LSP_LND_P2P_HOST"
+      , "LSP_LND_P2P_PORT"
+      , "ELECTRS_ENV"
       ]
 
 let secretEnv
