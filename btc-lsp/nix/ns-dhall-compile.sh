@@ -5,9 +5,10 @@ set -e
 THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
-KUBERNETES_BUILD_DIR="$ROOT_DIR/build/kubernetes"
 
 . "$ROOT_DIR/nix/k8s-export-env.sh"
+
+KUBERNETES_BUILD_DIR="$ROOT_DIR/build/kubernetes/$BITCOIN_NETWORK"
 
 mkdir -p "$BUILD_DIR" "$KUBERNETES_BUILD_DIR"
 
@@ -19,15 +20,12 @@ dhall_to_yaml() {
   FILE_NAME_DHALL=$(basename -- "$FILE_PATH")
   FILE_NAME="${FILE_NAME_DHALL%.dhall}"
   FILE_NAME_YAML="$FILE_NAME.yml"
-  SRC_DHALL="$ROOT_DIR/dhall/$FILE_NAME_DHALL"
+  RESULT_YAML="$BUILD_PATH/$FILE_NAME_YAML"
 
-  if [ -f "$SRC_DHALL" ]; then
-    RESULT_YAML="$BUILD_PATH/$FILE_NAME_YAML"
-    dhall-to-yaml \
-      --file "$SRC_DHALL" \
-      --output "$RESULT_YAML" \
-      --generated-comment
-  fi
+  dhall-to-yaml \
+    --file "$FILE_PATH" \
+    --output "$RESULT_YAML" \
+    --generated-comment
 }
 
 for x in $ROOT_DIR/dhall/docker-compose.*.dhall; do

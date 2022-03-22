@@ -39,8 +39,8 @@ let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = Service.ServiceType.LoadBalancer
-          , TestNet = Service.ServiceType.LoadBalancer
+          { MainNet = Service.ServiceType.ClusterIP
+          , TestNet = Service.ServiceType.ClusterIP
           , RegTest = Service.ServiceType.ClusterIP
           }
           net
