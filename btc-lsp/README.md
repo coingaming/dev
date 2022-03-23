@@ -71,7 +71,7 @@ Run specific tests with hot code reloading:
 ghcid --setup ":set args -m importPubKey"
 ```
 
-## Kubernetres/Digitalocean
+## Kubernetres
 
 K8S setup is scripted in a way similar to Docker/Swarm setup. Some tools are required to be installed directly on host machine. They can be installed using nix-env:
 
@@ -87,8 +87,6 @@ kubectl-1.23.5
 minikube-1.25.2
 ```
 
-For local setup run in sequence:
-
 1. Setup cluster and services:
 
 ```sh
@@ -100,6 +98,30 @@ For local setup run in sequence:
 
 ```sh
 minikube tunnel
+```
+
+## Digitalocean
+
+1. Install (non nix) and configure doctl:
+
+https://docs.digitalocean.com/reference/doctl/how-to/install/
+
+2. Get cluster ID:
+
+```sh
+doctl k cluster get testnet-cluster
+```
+
+3. Setup kubecontext:
+
+```sh
+doctl kubernetes cluster kubeconfig save <cluster-id>
+```
+
+4. List running pods:
+
+```sh
+kubectl get po
 ```
 
 ## Troubleshoot
