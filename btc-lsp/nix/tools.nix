@@ -6,5 +6,5 @@ let nixpkgs = builtins.fetchTarball {
 in
 with pkgs;
 {
-  inherit kubectl minikube doctl;
+  inherit kubectl minikube doctl jq;
 }

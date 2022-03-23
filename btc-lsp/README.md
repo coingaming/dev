@@ -149,3 +149,9 @@ minikube dashboard
 ```sh
 kubectl port-forward <pod-name> 5432:<desired-port>
 ```
+
+5. Lnd after restart is locked. Usually Lsp unlocks it automatically, but if for some reason it's locked (for example Lsp is not running) then it's possible to unlock Lnd with:
+
+```sh
+./nix/k8s-lazy-init-unlock.sh
+```
