@@ -19,24 +19,24 @@ in  ''
 
     set -e
 
-    export LSP_LIBPQ_CONN_STR="postgresql://${Postgres.user}:${Postgres.pass}@${Postgres.host}/${Postgres.database}?sslmode=require"
-    export LSP_AES256_INIT_VECTOR="${Lsp.aes256InitVector}"
-    export LSP_AES256_SECRET_KEY="${Lsp.aes256SecretKey}"
-    export LSP_LND_ENV='{
+    export ${Lsp.env.lspLibpqConnStr}="postgresql://${Postgres.user}:${Postgres.pass}@${Postgres.host}/${Postgres.database}?sslmode=require"
+    export ${Lsp.env.lspAes256InitVector}="${Lsp.aes256InitVector}"
+    export ${Lsp.env.lspAes256SecretKey}="${Lsp.aes256SecretKey}"
+    export ${Lsp.env.lspLndEnv}='{
       "lnd_wallet_password":"${Lnd.walletPass}",
       "lnd_tls_cert":"${Lnd.tlsCert}",
       "lnd_hex_macaroon":"${Lnd.hexMacaroon}",
       "lnd_host":"${lndHost}",
       "lnd_port":"${G.unPort Lnd.grpcPort}"
     }'
-    export LSP_GRPC_SERVER_ENV='{
+    export ${Lsp.env.lspGrpcServerEnv}='{
       "port":"${G.unPort Lsp.grpcPort}",
       "sig_verify":true,
       "sig_header_name":"sig-bin",
       "tls_cert":"${Lsp.tlsCert}",
       "tls_key":"${Lsp.tlsKey}"
     }'
-    export LSP_BITCOIND_ENV='{
+    export ${Lsp.env.lspBitcoindEnv}='{
       "host":"${G.unNetworkScheme
                   G.NetworkScheme.Http}://${bitcoindHost}:${G.unPort
                                                               ( Bitcoind.mkRpcPort
@@ -45,14 +45,14 @@ in  ''
       "username":"${Bitcoind.rpcUser}",
       "password":"${Bitcoind.rpcPass}"
     }'
-    export LSP_ENDPOINT_PORT="${G.unPort Lsp.grpcPort}"
-    export LSP_LOG_ENV="${Lsp.logEnv}"
-    export LSP_LOG_FORMAT="${Lsp.logFormat}"
-    export LSP_LOG_VERBOSITY="${Lsp.logVerbosity}"
-    export LSP_LOG_SEVERITY="${Lsp.logSeverity}"
-    export LSP_LND_P2P_PORT="${G.unPort Lnd.p2pPort}"
-    export LSP_LND_P2P_HOST="${Lnd.mkHost network}"
-    export LSP_ELECTRS_ENV='{
+    export ${Lsp.env.lspEndpointPort}="${G.unPort Lsp.grpcPort}"
+    export ${Lsp.env.lspLogEnv}="${Lsp.logEnv}"
+    export ${Lsp.env.lspLogFormat}="${Lsp.logFormat}"
+    export ${Lsp.env.lspLogVerbosity}="${Lsp.logVerbosity}"
+    export ${Lsp.env.lspLogSeverity}="${Lsp.logSeverity}"
+    export ${Lsp.env.lspLndP2pPort}="${G.unPort Lnd.p2pPort}"
+    export ${Lsp.env.lspLndP2pHost}="${Lnd.mkHost network}"
+    export ${Lsp.env.lspElectrsEnv}='{
       "host":"electrs",
       "port":"80"
     }'

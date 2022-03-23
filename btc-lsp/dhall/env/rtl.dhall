@@ -9,8 +9,8 @@ in  ''
 
     set -e
 
-    export CONFIG_FROM_ENV="true"
-    export RTL_CONFIG_NODES_JSON='[
+    export ${Rtl.env.configFromEnv}="true"
+    export ${Rtl.env.rtlConfigNodesJson}='[
       {
         "hexMacaroon": "${Lnd.hexMacaroon}",
         "index": 1,
@@ -20,7 +20,7 @@ in  ''
                                                                           Lnd.restPort}"
       }
     ]'
-    export RTL_CONFIG_JSON='{
+    export ${Rtl.env.rtlConfigJson}='{
       "SSO":{
         "logoutRedirectLink": "",
         "rtlCookiePath": "",

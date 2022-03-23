@@ -15,8 +15,8 @@ in  ''
 
     ${sharedEnv}
 
-    export REGTEST="1"
-    export RPCBIND=":${rpcPort}"
-    export RPCPORT="${rpcPort}"
-    export TESTNET="0"
+    export ${Bitcoind.env.regTest}="1"
+    export ${Bitcoind.env.rpcBind}=":${rpcPort}"
+    export ${Bitcoind.env.rpcPort}="${rpcPort}"
+    export ${Bitcoind.env.testNet}="0"
     ''

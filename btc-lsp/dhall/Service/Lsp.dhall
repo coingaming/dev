@@ -30,6 +30,23 @@ let grpcPort
     : G.Port
     = { unPort = 8443 }
 
+let env =
+      { lspAes256InitVector = "LSP_AES256_INIT_VECTOR"
+      , lspAes256SecretKey = "LSP_AES256_SECRET_KEY"
+      , lspEndpointPort = "LSP_ENDPOINT_PORT"
+      , lspLogEnv = "LSP_LOG_ENV"
+      , lspLogFormat = "LSP_LOG_FORMAT"
+      , lspLogVerbosity = "LSP_LOG_VERBOSITY"
+      , lspLogSeverity = "LSP_LOG_SEVERITY"
+      , lspLndP2pHost = "LSP_LND_P2P_HOST"
+      , lspLndP2pPort = "LSP_LND_P2P_PORT"
+      , lspElectrsEnv = "LSP_ELECTRS_ENV"
+      , lspLibpqConnStr = "LSP_LIBPQ_CONN_STR"
+      , lspLndEnv = "LSP_LND_ENV"
+      , lspGrpcServerEnv = "LSP_GRPC_SERVER_ENV"
+      , lspBitcoindEnv = "LSP_BITCOIND_ENV"
+      }
+
 let ports
     : List Natural
     = G.unPorts [ grpcPort ]
@@ -51,24 +68,25 @@ let mkService
 
 let configMapEnv
     : List Text
-    = [ "LSP_LOG_ENV"
-      , "LSP_LOG_FORMAT"
-      , "LSP_LOG_VERBOSITY"
-      , "LSP_LOG_SEVERITY"
-      , "LSP_LND_P2P_HOST"
-      , "LSP_LND_P2P_PORT"
-      , "ELECTRS_ENV"
+    = [ env.lspEndpointPort
+      , env.lspLogEnv
+      , env.lspLogFormat
+      , env.lspLogVerbosity
+      , env.lspLogSeverity
+      , env.lspLndP2pHost
+      , env.lspLndP2pPort
+      , env.lspElectrsEnv
       ]
 
 let secretEnv
     : List Text
-    = [ "LSP_LIBPQ_CONN_STR"
-      , "LSP_LND_ENV"
-      , "LSP_GRPC_SERVER_ENV"
-      , "LSP_BITCOIND_ENV"
+    = [ env.lspLibpqConnStr
+      , env.lspLndEnv
+      , env.lspGrpcServerEnv
+      , env.lspBitcoindEnv
       ]
 
-let env =
+let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
 
@@ -79,7 +97,7 @@ let mkContainer
         K.Container::{
         , name
         , image = Some image
-        , env = Some env
+        , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts ports)
         }
 
@@ -100,6 +118,7 @@ in  { aes256InitVector
     , logSeverity
     , tlsCert
     , tlsKey
+    , env
     , grpcPort
     , mkService
     , mkDeployment

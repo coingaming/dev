@@ -24,6 +24,14 @@ let tcpPort
     : G.Port
     = { unPort = 5432 }
 
+let env =
+      { postgresMultipleDatabases = "POSTGRES_MULTIPLE_DATABASES"
+      , postgresUser = "POSTGRES_USER"
+      , postgresPass = "POSTGRES_PASS"
+      , postgresHost = "POSTGRES_HOST"
+      , postgresDb = "POSTGRES_DB"
+      }
+
 let ports
     : List Natural
     = G.unPorts [ tcpPort ]
@@ -69,13 +77,13 @@ let mkPersistentVolumeClaim
 
 let configMapEnv
     : List Text
-    = [ "POSTGRES_MULTIPLE_DATABASES" ]
+    = [ env.postgresMultipleDatabases ]
 
 let secretEnv
     : List Text
-    = [ "POSTGRES_USER", "POSTGRES_PASSWORD" ]
+    = [ env.postgresUser, env.postgresPass ]
 
-let env =
+let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
 
@@ -86,7 +94,7 @@ let mkContainer
         K.Container::{
         , name
         , image = Some image
-        , env = Some env
+        , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts ports)
         , volumeMounts = Some
           [ Deployment.mkVolumeMount owner "/var/lib/postgresql/data" ]
@@ -106,6 +114,7 @@ in  { user
     , host
     , database
     , tcpPort
+    , env
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

@@ -2,6 +2,8 @@ let G = ../Global.dhall
 
 let Bitcoind = ../Service/Bitcoind.dhall
 
+let Lnd = ../Service/Lnd.dhall
+
 let network = G.BitcoinNetwork.RegTest
 
 let bitcoindHost = G.unOwner G.Owner.Bitcoind
@@ -15,7 +17,9 @@ in  ''
 
     ${sharedEnv}
 
-    export BITCOIN_NETWORK="${G.unBitcoinNetwork network}"
-    export BITCOIN_RPCHOST="${bitcoindHost}:${G.unPort
-                                                (Bitcoind.mkRpcPort network)}"
+    export ${Lnd.env.bitcoinNetwork}="${G.unBitcoinNetwork network}"
+    export ${Lnd.env.bitcoinRpcHost}="${bitcoindHost}:${G.unPort
+                                                          ( Bitcoind.mkRpcPort
+                                                              network
+                                                          )}"
     ''

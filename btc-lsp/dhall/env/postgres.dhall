@@ -5,8 +5,8 @@ in  ''
 
     set -e
 
-    export POSTGRES_USER="${Postgres.user}"
-    export POSTGRES_PASS="${Postgres.pass}"
-    export POSTGRES_HOST="${Postgres.host}"
-    export POSTGRES_DB="${Postgres.database}"
+    export ${Postgres.env.postgresUser}="${Postgres.user}"
+    export ${Postgres.env.postgresPass}="${Postgres.pass}"
+    export ${Postgres.env.postgresHost}="${Postgres.host}"
+    export ${Postgres.env.postgresDb}="${Postgres.database}"
     ''

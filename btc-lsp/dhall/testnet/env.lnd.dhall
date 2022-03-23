@@ -1,5 +1,7 @@
 let G = ../Global.dhall
 
+let Lnd = ../Service/Lnd.dhall
+
 let Bitcoind = ../Service/Bitcoind.dhall
 
 let network = G.BitcoinNetwork.TestNet
@@ -15,7 +17,9 @@ in  ''
 
     ${sharedEnv}
 
-    export BITCOIN_NETWORK="${G.unBitcoinNetwork network}"
-    export BITCOIN_RPCHOST="${bitcoindHost}:${G.unPort
-                                                (Bitcoind.mkRpcPort network)}"
+    export ${Lnd.env.bitcoinNetwork}="${G.unBitcoinNetwork network}"
+    export ${Lnd.env.bitcoinRpcHost}="${bitcoindHost}:${G.unPort
+                                                          ( Bitcoind.mkRpcPort
+                                                              network
+                                                          )}"
     ''

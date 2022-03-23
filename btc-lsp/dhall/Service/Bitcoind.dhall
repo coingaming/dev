@@ -24,6 +24,23 @@ let zmqPubRawTxPort
     : G.Port
     = { unPort = 39704 }
 
+let env =
+      { configFromEnv = "CONFIG_FROM_ENV"
+      , disableWallet = "DISABLEWALLET"
+      , prune = "PRUNE"
+      , regTest = "REGTEST"
+      , rpcAllowIp = "RPCALLOWIP"
+      , rpcBind = "RPCBIND"
+      , rpcPort = "RPCPORT"
+      , server = "SERVER"
+      , testNet = "TESTNET"
+      , txIndex = "TXINDEX"
+      , zmqPubRawBlock = "ZMQPUBRAWBLOCK"
+      , zmqPubRawTx = "ZMQPUBRAWTX"
+      , rpcUser = "RPCUSER"
+      , rpcPassword = "RPCPASSWORD"
+      }
+
 let mkRpcPort
     : G.BitcoinNetwork → G.Port
     = λ(net : G.BitcoinNetwork) →
@@ -83,25 +100,25 @@ let mkPersistentVolumeClaim
 
 let configMapEnv
     : List Text
-    = [ "CONFIG_FROM_ENV"
-      , "DISABLEWALLET"
-      , "PRUNE"
-      , "REGTEST"
-      , "RPCALLOWIP"
-      , "RPCBIND"
-      , "RPCPORT"
-      , "SERVER"
-      , "TESTNET"
-      , "TXINDEX"
-      , "ZMQPUBRAWBLOCK"
-      , "ZMQPUBRAWTX"
+    = [ env.configFromEnv
+      , env.disableWallet
+      , env.prune
+      , env.regTest
+      , env.rpcAllowIp
+      , env.rpcBind
+      , env.rpcPort
+      , env.server
+      , env.testNet
+      , env.txIndex
+      , env.zmqPubRawBlock
+      , env.zmqPubRawTx
       ]
 
 let secretEnv
     : List Text
-    = [ "RPCUSER", "RPCPASSWORD" ]
+    = [ env.rpcUser, env.rpcPassword ]
 
-let env =
+let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
 
@@ -112,7 +129,7 @@ let mkContainer
         K.Container::{
         , name
         , image = Some image
-        , env = Some env
+        , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts (mkPorts net))
         , volumeMounts = Some
           [ Deployment.mkVolumeMount owner "/bitcoin/.bitcoin" ]
@@ -131,6 +148,7 @@ in  { rpcUser
     , rpcPass
     , zmqPubRawBlockPort
     , zmqPubRawTxPort
+    , env
     , mkRpcPort
     , mkService
     , mkPersistentVolumeClaim

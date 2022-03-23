@@ -20,6 +20,12 @@ let tcpPort
     : G.Port
     = { unPort = 3000 }
 
+let env =
+      { configFromEnv = "CONFIG_FROM_ENV"
+      , rtlConfigJson = "RTL_CONFIG_JSON"
+      , rtlConfigNodesJson = "RTL_CONFIG_NODES_JSON"
+      }
+
 let ports
     : List Natural
     = G.unPorts [ tcpPort ]
@@ -73,13 +79,13 @@ let mkIngress
 
 let configMapEnv
     : List Text
-    = [ "CONFIG_FROM_ENV" ]
+    = [ env.configFromEnv ]
 
 let secretEnv
     : List Text
-    = [ "RTL_CONFIG_JSON", "RTL_CONFIG_NODES_JSON" ]
+    = [ env.rtlConfigJson, env.rtlConfigNodesJson ]
 
-let env =
+let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
 
@@ -90,7 +96,7 @@ let mkContainer
         K.Container::{
         , name
         , image = Some image
-        , env = Some env
+        , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts ports)
         }
 
@@ -103,4 +109,4 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { dashboardPass, tcpPort, mkService, mkDeployment, mkIngress }
+in  { dashboardPass, tcpPort, env, mkService, mkDeployment, mkIngress }

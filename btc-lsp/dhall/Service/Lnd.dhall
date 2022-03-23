@@ -30,6 +30,20 @@ let restPort
     : G.Port
     = { unPort = 8080 }
 
+let env =
+      { bitcoinDefaultChanConfs = "BITCOIN_DEFAULTCHANCONFS"
+      , bitcoinNetwork = "BITCOIN_NETWORK"
+      , bitcoinRpcHost = "BITCOIN_RPCHOST"
+      , bitcoinZmqPubRawBlock = "BITCOIN_ZMQPUBRAWBLOCK"
+      , bitcoinZmqPubRawTx = "BITCOIN_ZMQPUBRAWTX"
+      , lndGrpcPort = "LND_GRPC_PORT"
+      , lndP2pPort = "LND_P2P_PORT"
+      , lndRestPort = "LND_REST_PORT"
+      , lndWalletPass = "LND_WALLET_PASS"
+      , bitcoinRpcUser = "BITCOIN_RPCUSER"
+      , bitcoinRpcPass = "BITCOIN_RPCPASS"
+      }
+
 let ports
     : List Natural
     = G.unPorts [ grpcPort, p2pPort, restPort ]
@@ -85,21 +99,21 @@ let mkPersistentVolumeClaim
 
 let configMapEnv
     : List Text
-    = [ "BITCOIN_DEFAULTCHANCONFS"
-      , "BITCOIN_NETWORK"
-      , "BITCOIN_RPCHOST"
-      , "BITCOIN_ZMQPUBRAWBLOCK"
-      , "BITCOIN_ZMQPUBRAWTX"
-      , "LND_GRPC_PORT"
-      , "LND_P2P_PORT"
-      , "LND_REST_PORT"
+    = [ env.bitcoinDefaultChanConfs
+      , env.bitcoinNetwork
+      , env.bitcoinRpcHost
+      , env.bitcoinZmqPubRawBlock
+      , env.bitcoinZmqPubRawTx
+      , env.lndGrpcPort
+      , env.lndP2pPort
+      , env.lndRestPort
       ]
 
 let secretEnv
     : List Text
-    = [ "BITCOIN_RPCUSER", "BITCOIN_RPCPASS" ]
+    = [ env.bitcoinRpcUser, env.bitcoinRpcPass ]
 
-let env =
+let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
 
@@ -115,7 +129,7 @@ let mkContainer
           , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
           ]
         , command = Some [ "sh" ]
-        , env = Some env
+        , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts ports)
         , volumeMounts = Some [ Deployment.mkVolumeMount owner "/root/.lnd" ]
         }
@@ -135,6 +149,7 @@ in  { walletPass
     , grpcPort
     , p2pPort
     , restPort
+    , env
     , mkHost
     , mkService
     , mkPersistentVolumeClaim
