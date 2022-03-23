@@ -9,5 +9,4 @@ in  ''
     export POSTGRES_PASS="${Postgres.pass}"
     export POSTGRES_HOST="${Postgres.host}"
     export POSTGRES_DB="${Postgres.database}"
-
     ''

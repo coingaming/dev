@@ -2,7 +2,7 @@ let G = ../Global.dhall
 
 let Bitcoind = ../Service/Bitcoind.dhall
 
-let network = G.BitcoinNetwork.RegTest
+let network = G.BitcoinNetwork.MainNet
 
 let bitcoindHost = G.unOwner G.Owner.Bitcoind
 

@@ -56,5 +56,4 @@ in  ''
       "host":"electrs",
       "port":"80"
     }'
-
     ''

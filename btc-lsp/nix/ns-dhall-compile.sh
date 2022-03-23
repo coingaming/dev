@@ -10,7 +10,7 @@ BUILD_DIR="$ROOT_DIR/build"
 
 KUBERNETES_BUILD_DIR="$ROOT_DIR/build/kubernetes/$BITCOIN_NETWORK"
 
-mkdir -p "$BUILD_DIR" "$KUBERNETES_BUILD_DIR"
+mkdir -p "$KUBERNETES_BUILD_DIR"
 
 dhall_to_yaml() {
   FILE_PATH="$1"
@@ -29,6 +29,24 @@ dhall_to_yaml() {
     --generated-comment
 }
 
+dhall_to_sh() {
+  FILE_PATH="$1"
+  BUILD_PATH="$2"
+  [ -f "$FILE_PATH" ] || (echo "FILE_DOES_NOT_EXIST $FILE_PATH" && exit 1)
+
+  FILE_NAME_DHALL=$(basename -- "$x")
+  FILE_NAME_WITHOUT_EXT="${FILE_NAME_DHALL%.dhall}"
+  FILE_NAME="${FILE_NAME_WITHOUT_EXT#env.}"
+  FILE_NAME_SH="$FILE_NAME.sh"
+  RESULT_SH="$BUILD_PATH/$FILE_NAME_SH"
+
+  dhall text \
+    --file "$x" \
+    --output "$RESULT_SH"
+
+  chmod a+x "$RESULT_SH"
+}
+
 for x in $ROOT_DIR/dhall/docker-compose.*.dhall; do
   dhall_to_yaml "$x" "$BUILD_DIR"
 done
@@ -37,21 +55,12 @@ for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/k8s.*.dhall; do
   dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
 done
 
+for x in $ROOT_DIR/dhall/env/*.dhall; do
+  dhall_to_sh "$x" "$KUBERNETES_BUILD_DIR"
+done
+
 for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/env.*.dhall; do
-
-  [ -f "$x" ] || (echo "FILE_DOES_NOT_EXIST $x" && exit 1)
-
-  FILE_NAME_DHALL=$(basename -- "$x")
-  FILE_NAME_WITHOUT_EXT="${FILE_NAME_DHALL%.dhall}"
-  FILE_NAME="${FILE_NAME_WITHOUT_EXT#env.}"
-  FILE_NAME_SH="$FILE_NAME.sh"
-  RESULT_SH="$KUBERNETES_BUILD_DIR/$FILE_NAME_SH"
-
-  dhall text \
-    --file "$x" \
-    --output "$RESULT_SH"
-
-  chmod a+x "$RESULT_SH"
+  dhall_to_sh "$x" "$KUBERNETES_BUILD_DIR"
 done
 
 sh -c "$THIS_DIR/ns-dhall-lint.sh"

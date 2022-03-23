@@ -2,7 +2,7 @@ let G = ../Global.dhall
 
 let Bitcoind = ../Service/Bitcoind.dhall
 
-let network = G.BitcoinNetwork.RegTest
+let network = G.BitcoinNetwork.MainNet
 
 let rpcPort = G.unPort (Bitcoind.mkRpcPort network)
 
@@ -15,7 +15,7 @@ in  ''
 
     ${sharedEnv}
 
-    export REGTEST="1"
+    export REGTEST="0"
     export RPCBIND=":${rpcPort}"
     export RPCPORT="${rpcPort}"
     export TESTNET="0"
