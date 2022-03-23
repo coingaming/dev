@@ -10,13 +10,31 @@ let owner = G.unOwner G.Owner.Lsp
 
 let image = "olegkivi/btc-lsp:8a274h12x8q8gc4p63m7yzcy8g307vip"
 
+let aes256InitVector = "dRgUkXp2s5v8y/B?"
+
+let aes256SecretKey = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
+
+let logEnv = "test"
+
+let logFormat = "Bracket"
+
+let logVerbosity = "V3"
+
+let logSeverity = "DebugS"
+
+let tlsCert =
+      ../../build/lsp/tls.cert as Text ? G.todo
+
+let tlsKey =
+      ../../build/lsp/tls.key as Text ? G.todo
+
 let grpcPort
     : G.Port
     = { unPort = 8443 }
 
 let ports
     : List Natural
-    = G.unPort [ grpcPort ]
+    = G.unPorts [ grpcPort ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -76,4 +94,4 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { grpcPort, mkService, mkDeployment }
+in  { aes256InitVector, aes256SecretKey, logEnv, logFormat, logVerbosity, logSeverity, tlsCert, tlsKey, grpcPort, mkService, mkDeployment }

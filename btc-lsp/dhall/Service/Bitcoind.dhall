@@ -12,6 +12,10 @@ let owner = G.unOwner G.Owner.Bitcoind
 
 let image = "heathmont/bitcoind:v1.0.9"
 
+let rpcUser = "bitcoinrpc"
+
+let rpcPass = G.defaultPass
+
 let zmqPubRawBlockPort
     : G.Port
     = { unPort = 39703 }
@@ -33,7 +37,7 @@ let mkRpcPort
 let mkPorts
     : G.BitcoinNetwork → List Natural
     = λ(net : G.BitcoinNetwork) →
-        G.unPort [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net ]
+        G.unPorts [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -123,7 +127,9 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { zmqPubRawBlockPort
+in  { rpcUser
+    , rpcPass
+    , zmqPubRawBlockPort
     , zmqPubRawTxPort
     , mkRpcPort
     , mkService

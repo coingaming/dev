@@ -12,13 +12,21 @@ let owner = G.unOwner G.Owner.Postgres
 
 let image = "heathmont/postgres:11-alpine-a2e8bbe"
 
+let user = "btc-lsp"
+
+let pass = G.defaultPass
+
+let host = owner
+
+let database = user
+
 let tcpPort
     : G.Port
     = { unPort = 5432 }
 
 let ports
     : List Natural
-    = G.unPort [ tcpPort ]
+    = G.unPorts [ tcpPort ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -93,4 +101,12 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { tcpPort, mkService, mkPersistentVolumeClaim, mkDeployment }
+in  { user
+    , pass
+    , host
+    , database
+    , tcpPort
+    , mkService
+    , mkPersistentVolumeClaim
+    , mkDeployment
+    }

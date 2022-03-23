@@ -12,6 +12,14 @@ let owner = G.unOwner G.Owner.Lnd
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
+let walletPass = G.defaultPass
+
+let hexMacaroon =
+      ../../build/lnd/macaroon.hex as Text ? G.todo
+
+let tlsCert =
+      ../../build/lnd/tls.cert as Text ? G.todo
+
 let grpcPort
     : G.Port
     = { unPort = 10009 }
@@ -26,7 +34,17 @@ let restPort
 
 let ports
     : List Natural
-    = G.unPort [ grpcPort, p2pPort, restPort ]
+    = G.unPorts [ grpcPort, p2pPort, restPort ]
+
+let mkHost
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = "lnd.coins.io"
+          , TestNet = "testnet-lnd.coins.io"
+          , RegTest = owner
+          }
+          net
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -96,7 +114,7 @@ let mkContainer
         , image = Some image
         , args = Some
           [ "-c"
-          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --tlsextradomain=\$\$TLS_EXTRADOMAIN --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
+          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
           ]
         , command = Some [ "sh" ]
         , env = Some env
@@ -113,7 +131,9 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { grpcPort
+in  { walletPass
+    , hexMacaroon
+    , grpcPort
     , p2pPort
     , restPort
     , mkService

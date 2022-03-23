@@ -29,6 +29,10 @@ let Port
     = { unPort : Natural }
 
 let unPort
+    : Port → Text
+    = λ(x : Port) → Natural/show x.unPort
+
+let unPorts
     : List Port → List Natural
     = λ(ports : List Port) →
         P.List.map Port Natural (λ(port : Port) → port.unPort) ports
@@ -49,6 +53,14 @@ let unOwner
           }
           x
 
+let defaultPass
+    : Text
+    = "developer"
+
+let todo
+    : Text
+    = "TODO"
+
 in  { BitcoinNetwork
     , unBitcoinNetwork
     , NetworkScheme
@@ -56,6 +68,9 @@ in  { BitcoinNetwork
     , HostName
     , Port
     , unPort
+    , unPorts
     , Owner
     , unOwner
+    , defaultPass
+    , todo
     }

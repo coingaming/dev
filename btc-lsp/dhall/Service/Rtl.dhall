@@ -14,13 +14,15 @@ let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
+let dashboardPass = G.defaultPass
+
 let tcpPort
     : G.Port
     = { unPort = 3000 }
 
 let ports
     : List Natural
-    = G.unPort [ tcpPort ]
+    = G.unPorts [ tcpPort ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -101,4 +103,4 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { tcpPort, mkService, mkDeployment, mkIngress }
+in  { dashboardPass, tcpPort, mkService, mkDeployment, mkIngress }
