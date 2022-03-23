@@ -85,6 +85,7 @@ If nix is not available, install tools in any other way you like:
 doctl-1.71.1
 kubectl-1.23.5
 minikube-1.25.2
+jq-1.6
 ```
 
 1. Setup cluster and services:
