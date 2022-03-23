@@ -119,12 +119,6 @@ doctl k cluster get testnet-cluster
 doctl kubernetes cluster kubeconfig save <cluster-id>
 ```
 
-4. List running pods:
-
-```sh
-kubectl get po
-```
-
 ## Troubleshoot
 
 1. Get list of running pods:
