@@ -22,11 +22,9 @@ let logVerbosity = "V3"
 
 let logSeverity = "DebugS"
 
-let tlsCert =
-      ../../build/lsp/tls.cert as Text ? G.todo
+let tlsCert = ../../build/lsp/tls.cert as Text ? G.todo
 
-let tlsKey =
-      ../../build/lsp/tls.key as Text ? G.todo
+let tlsKey = ../../build/lsp/tls.key as Text ? G.todo
 
 let grpcPort
     : G.Port
@@ -94,4 +92,15 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { aes256InitVector, aes256SecretKey, logEnv, logFormat, logVerbosity, logSeverity, tlsCert, tlsKey, grpcPort, mkService, mkDeployment }
+in  { aes256InitVector
+    , aes256SecretKey
+    , logEnv
+    , logFormat
+    , logVerbosity
+    , logSeverity
+    , tlsCert
+    , tlsKey
+    , grpcPort
+    , mkService
+    , mkDeployment
+    }

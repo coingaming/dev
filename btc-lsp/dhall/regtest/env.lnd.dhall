@@ -15,16 +15,16 @@ in  ''
 
     set -e
 
-    export BITCOIN_DEFAULTCHANCONFS=1
+    export BITCOIN_DEFAULTCHANCONFS="1"
     export BITCOIN_NETWORK="${G.unBitcoinNetwork network}"
     export BITCOIN_RPCUSER="${Bitcoind.rpcUser}"
     export BITCOIN_RPCPASS="${Bitcoind.rpcPass}"
     export BITCOIN_RPCHOST="${bitcoindHost}:${G.unPort
-                                            (Bitcoind.mkRpcPort network)}"
+                                                (Bitcoind.mkRpcPort network)}"
     export BITCOIN_ZMQPUBRAWBLOCK="${networkScheme}://${bitcoindHost}:${G.unPort
-                                                                      Bitcoind.zmqPubRawBlockPort}"
+                                                                          Bitcoind.zmqPubRawBlockPort}"
     export BITCOIN_ZMQPUBRAWTX="${networkScheme}://${bitcoindHost}:${G.unPort
-                                                                   Bitcoind.zmqPubRawTxPort}"
+                                                                       Bitcoind.zmqPubRawTxPort}"
     export LND_GRPC_PORT="${G.unPort Lnd.grpcPort}"
     export LND_P2P_PORT="${G.unPort Lnd.p2pPort}"
     export LND_REST_PORT="${G.unPort Lnd.restPort}"

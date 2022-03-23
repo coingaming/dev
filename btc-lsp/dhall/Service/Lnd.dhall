@@ -14,11 +14,9 @@ let image = "lightninglabs/lnd:v0.14.2-beta"
 
 let walletPass = G.defaultPass
 
-let hexMacaroon =
-      ../../build/lnd/macaroon.hex as Text ? G.todo
+let hexMacaroon = ../../build/lnd/macaroon.hex as Text ? G.todo
 
-let tlsCert =
-      ../../build/lnd/tls.cert as Text ? G.todo
+let tlsCert = ../../build/lnd/tls.cert as Text ? G.todo
 
 let grpcPort
     : G.Port
@@ -133,9 +131,11 @@ let mkDeployment
 
 in  { walletPass
     , hexMacaroon
+    , tlsCert
     , grpcPort
     , p2pPort
     , restPort
+    , mkHost
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

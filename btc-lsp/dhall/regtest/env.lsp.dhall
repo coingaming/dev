@@ -6,13 +6,13 @@ let Lnd = ../Service/Lnd.dhall
 
 let Lsp = ../Service/Lsp.dhall
 
+let Postgres = ../Service/Postgres.dhall
+
 let network = G.BitcoinNetwork.RegTest
 
 let bitcoindHost = G.unOwner G.Owner.Bitcoind
 
 let lndHost = G.unOwner G.Owner.Lnd
-
-let networkScheme = G.unNetworkScheme G.NetworkScheme.Tcp
 
 in  ''
     #!/bin/sh
@@ -37,7 +37,11 @@ in  ''
       "tls_key":"${Lsp.tlsKey}"
     }'
     export LSP_BITCOIND_ENV='{
-      "host":"${G.unNetworkScheme G.NetworkScheme.Http}://${bitcoindHost}:${G.unPort (Bitcoind.mkRpcPort network)}",
+      "host":"${G.unNetworkScheme
+                  G.NetworkScheme.Http}://${bitcoindHost}:${G.unPort
+                                                              ( Bitcoind.mkRpcPort
+                                                                  network
+                                                              )}",
       "username":"${Bitcoind.rpcUser}",
       "password":"${Bitcoind.rpcPass}"
     }'

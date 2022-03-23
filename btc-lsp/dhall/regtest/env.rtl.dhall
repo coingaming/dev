@@ -9,7 +9,7 @@ in  ''
 
     set -e
 
-    export CONFIG_FROM_ENV=true
+    export CONFIG_FROM_ENV="true"
     export RTL_CONFIG_NODES_JSON='[
       {
         "hexMacaroon": "${Lnd.hexMacaroon}",
