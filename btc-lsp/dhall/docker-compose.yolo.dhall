@@ -127,6 +127,7 @@ in  { networks.global.external = True
           , LSP_LOG_SEVERITY = "DebugS"
           , LSP_LND_P2P_HOST = "127.0.0.1"
           , LSP_LND_P2P_PORT = "9735"
+          , LSP_MIN_CHAN_CAP_MSAT = "20000000"
           , -- Rpc
             LSP_LND_ENV =
               ''

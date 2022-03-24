@@ -2,8 +2,8 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-BITCOIN_NETWORK="regtest"
-LND_WALLET_PASSWORD="developer"
+BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd-lsp bitcoin_network`
+LND_WALLET_PASSWORD=`sh $THIS_DIR/k8s-get-secret.sh btc-lsp lsp_lnd_env lnd_wallet_password`
 
 create_wallet() {
 expect <<- EOF
