@@ -32,7 +32,7 @@ in  ''
       --from-literal=${G.toLowerCase
                          rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
 
-    (kubectl create secret tls "${owner}-tls" \
+    (kubectl create secret tls ${Rtl.tlsSecretName} \
       --cert="$THIS_DIR/../${owner}/tls.crt" \
       --key="$THIS_DIR/../${owner}/tls.key") || true
     ''

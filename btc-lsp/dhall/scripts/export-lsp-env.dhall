@@ -52,6 +52,7 @@ in  ''
     export ${Lsp.env.lspLogSeverity}="${Lsp.logSeverity}"
     export ${Lsp.env.lspLndP2pPort}="${G.unPort Lnd.p2pPort}"
     export ${Lsp.env.lspLndP2pHost}="${Lnd.mkHost network}"
+    export ${Lsp.env.lspMinChanCapMsat}="${Natural/show Lnd.minChanSize}"
     export ${Lsp.env.lspElectrsEnv}='{
       "host":"electrs",
       "port":"80"

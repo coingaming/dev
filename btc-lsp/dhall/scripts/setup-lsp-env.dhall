@@ -20,6 +20,8 @@ let lspLndP2pHost = Lsp.env.lspLndP2pHost
 
 let lspElectrsEnv = Lsp.env.lspElectrsEnv
 
+let lspMinChanCapMsat = Lsp.env.lspMinChanCapMsat
+
 let lspLibpqConnStr = Lsp.env.lspLibpqConnStr
 
 let lspAes256InitVector = Lsp.env.lspAes256InitVector
@@ -57,6 +59,8 @@ in  ''
                                                          lspLndP2pPort}" \
       --from-literal=${G.toLowerCase lspLndP2pHost}="${G.mkEnvVar
                                                          lspLndP2pHost}" \
+      --from-literal=${G.toLowerCase
+                         lspMinChanCapMsat}="${G.mkEnvVar lspMinChanCapMsat}" \
       --from-literal=${G.toLowerCase
                          lspElectrsEnv}="${G.mkEnvVar lspElectrsEnv}") || true
 

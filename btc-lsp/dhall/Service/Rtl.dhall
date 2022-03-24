@@ -16,6 +16,8 @@ let image = "heathmont/rtl:9c8d7d6"
 
 let dashboardPass = G.defaultPass
 
+let tlsSecretName = "${owner}-tls"
+
 let tcpPort
     : G.Port
     = { unPort = 3000 }
@@ -58,7 +60,7 @@ let mkHost
 let mkTls
     : G.BitcoinNetwork → Optional K.IngressTLS.Type
     = λ(net : G.BitcoinNetwork) →
-        let tls = Some (Ingress.mkTls (mkHost net) "${owner}-tls")
+        let tls = Some (Ingress.mkTls (mkHost net) tlsSecretName)
 
         in  merge
               { MainNet = tls, TestNet = tls, RegTest = None K.IngressTLS.Type }
@@ -109,4 +111,11 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { dashboardPass, tcpPort, env, mkService, mkDeployment, mkIngress }
+in  { dashboardPass
+    , tlsSecretName
+    , tcpPort
+    , env
+    , mkService
+    , mkDeployment
+    , mkIngress
+    }

@@ -45,6 +45,7 @@ let env =
       , lspLndEnv = "LSP_LND_ENV"
       , lspGrpcServerEnv = "LSP_GRPC_SERVER_ENV"
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
+      , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
       }
 
 let ports
@@ -76,6 +77,7 @@ let configMapEnv
       , env.lspLndP2pHost
       , env.lspLndP2pPort
       , env.lspElectrsEnv
+      , env.lspMinChanCapMsat
       ]
 
 let secretEnv

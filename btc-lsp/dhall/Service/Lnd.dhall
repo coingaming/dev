@@ -18,6 +18,8 @@ let hexMacaroon = ../../build/lnd/macaroon.hex as Text ? G.todo
 
 let tlsCert = ../../build/lnd/tls.cert as Text ? G.todo
 
+let minChanSize = 20000000
+
 let grpcPort
     : G.Port
     = { unPort = 10009 }
@@ -145,6 +147,7 @@ let mkDeployment
 in  { walletPass
     , hexMacaroon
     , tlsCert
+    , minChanSize
     , grpcPort
     , p2pPort
     , restPort
