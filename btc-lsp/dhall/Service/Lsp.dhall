@@ -8,7 +8,7 @@ let Deployment = ../Kubernetes/Deployment.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
-let image = "olegkivi/btc-lsp:8a274h12x8q8gc4p63m7yzcy8g307vip"
+let image = ../../build/docker-image-btc-lsp.txt as Text
 
 let aes256InitVector = "dRgUkXp2s5v8y/B?"
 

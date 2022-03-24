@@ -19,5 +19,4 @@ in  ''
     export ${Lnd.env.lndGrpcPort}="${G.unPort Lnd.grpcPort}"
     export ${Lnd.env.lndP2pPort}="${G.unPort Lnd.p2pPort}"
     export ${Lnd.env.lndRestPort}="${G.unPort Lnd.restPort}"
-    export ${Lnd.env.lndWalletPass}="${Lnd.walletPass}"
     ''

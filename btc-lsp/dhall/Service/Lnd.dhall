@@ -39,7 +39,6 @@ let env =
       , lndGrpcPort = "LND_GRPC_PORT"
       , lndP2pPort = "LND_P2P_PORT"
       , lndRestPort = "LND_REST_PORT"
-      , lndWalletPass = "LND_WALLET_PASS"
       , bitcoinRpcUser = "BITCOIN_RPCUSER"
       , bitcoinRpcPass = "BITCOIN_RPCPASS"
       }
