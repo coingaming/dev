@@ -37,10 +37,7 @@ mkdir -p "$BUILD_DIR"
 
 echo "==> Generate keys"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/k8s-gen-keys.sh'"
-
-echo "==> Inlining relevant creds"
-sh "$THIS_DIR/k8s-inline-creds.sh"
+   "--run './nix/k8s-gen-keys.sh && ./nix/ns-inline-creds.sh'"
 
 case $SETUP_MODE in
   --source)
@@ -94,12 +91,9 @@ sleep 20
 echo "==> Generate additional creds"
 sh "$THIS_DIR/k8s-gen-creds.sh"
 
-echo "==> Inlining relevant creds"
-sh "$THIS_DIR/k8s-inline-creds.sh"
-
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/k8s-dhall-compile.sh'"
+   "--run './nix/ns-inline-creds.sh && ./nix/k8s-dhall-compile.sh'"
 
 echo "==> Updating environment for containers"
 kubectl delete secret rtl lsp
