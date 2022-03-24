@@ -14,7 +14,7 @@ let image = "heathmont/postgres:11-alpine-a2e8bbe"
 
 let user = "btc-lsp"
 
-let pass = G.defaultPass
+let password = G.defaultPass
 
 let host = owner
 
@@ -27,9 +27,9 @@ let tcpPort
 let env =
       { postgresMultipleDatabases = "POSTGRES_MULTIPLE_DATABASES"
       , postgresUser = "POSTGRES_USER"
-      , postgresPass = "POSTGRES_PASS"
+      , postgresPassword = "POSTGRES_PASSWORD"
       , postgresHost = "POSTGRES_HOST"
-      , postgresDb = "POSTGRES_DB"
+      , postgresDatabase = "POSTGRES_DATABASE"
       }
 
 let ports
@@ -81,7 +81,7 @@ let configMapEnv
 
 let secretEnv
     : List Text
-    = [ env.postgresUser, env.postgresPass ]
+    = [ env.postgresUser, env.postgresPassword ]
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
@@ -110,7 +110,7 @@ let mkDeployment
           (Some [ Deployment.mkVolume owner ])
 
 in  { user
-    , pass
+    , password
     , host
     , database
     , tcpPort

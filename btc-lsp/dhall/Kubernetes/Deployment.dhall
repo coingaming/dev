@@ -1,5 +1,7 @@
 let P = ../Prelude/Import.dhall
 
+let G = ../Global.dhall
+
 let K = ./Import.dhall
 
 let EnvVarType
@@ -32,7 +34,7 @@ let mkEnvVar
     = λ(name : Text) →
       λ(type : EnvVarType) →
       λ(source : Text) →
-        let key = P.Text.lowerASCII name
+        let key = G.toLowerCase name
 
         in  K.EnvVar::{
             , name

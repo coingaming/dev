@@ -8,9 +8,10 @@ BUILD_DIR="$ROOT_DIR/build"
 
 . "$ROOT_DIR/nix/k8s-export-env.sh"
 
-KUBERNETES_BUILD_DIR="$ROOT_DIR/build/kubernetes/$BITCOIN_NETWORK"
+RESOURCES_BUILD_DIR="$ROOT_DIR/build/resources"
+SCRIPTS_BUILD_DIR="$ROOT_DIR/build/scripts"
 
-mkdir -p "$KUBERNETES_BUILD_DIR"
+mkdir -p "$RESOURCES_BUILD_DIR" "$SCRIPTS_BUILD_DIR"
 
 dhall_to_yaml() {
   FILE_PATH="$1"
@@ -52,15 +53,15 @@ for x in $ROOT_DIR/dhall/docker-compose.*.dhall; do
 done
 
 for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/k8s.*.dhall; do
-  dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
+  dhall_to_yaml "$x" "$RESOURCES_BUILD_DIR"
 done
 
-for x in $ROOT_DIR/dhall/env/*.dhall; do
-  dhall_to_sh "$x" "$KUBERNETES_BUILD_DIR"
+for x in $ROOT_DIR/dhall/scripts/*.dhall; do
+  dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
 done
 
-for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/env.*.dhall; do
-  dhall_to_sh "$x" "$KUBERNETES_BUILD_DIR"
+for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/export*.dhall; do
+  dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
 done
 
 sh -c "$THIS_DIR/ns-dhall-lint.sh"

@@ -19,7 +19,7 @@ in  ''
 
     set -e
 
-    export ${Lsp.env.lspLibpqConnStr}="postgresql://${Postgres.user}:${Postgres.pass}@${Postgres.host}/${Postgres.database}?sslmode=require"
+    export ${Lsp.env.lspLibpqConnStr}="postgresql://${Postgres.user}:${Postgres.password}@${Postgres.host}/${Postgres.database}?sslmode=require"
     export ${Lsp.env.lspAes256InitVector}="${Lsp.aes256InitVector}"
     export ${Lsp.env.lspAes256SecretKey}="${Lsp.aes256SecretKey}"
     export ${Lsp.env.lspLndEnv}='{

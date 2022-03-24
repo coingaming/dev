@@ -53,6 +53,14 @@ let unOwner
           }
           x
 
+let toLowerCase
+    : Text → Text
+    = λ(x : Text) → P.Text.lowerASCII x
+
+let mkEnvVar
+    : Text → Text
+    = λ(name : Text) → "\$${name}"
+
 let defaultPass
     : Text
     = "developer"
@@ -73,4 +81,6 @@ in  { BitcoinNetwork
     , unOwner
     , defaultPass
     , todo
+    , toLowerCase
+    , mkEnvVar
     }
