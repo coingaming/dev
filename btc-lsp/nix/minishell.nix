@@ -13,6 +13,7 @@ stdenv.mkDerivation {
   buildInputs = [
     nix
     openssl
+    plantuml
     (pkgs.callPackage kompose-src {})
     #
     # TODO : replace it with minimal possible dhall setup

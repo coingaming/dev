@@ -1,31 +1,31 @@
 @startuml
 
 participant Customer
-participant "Lightning Service Provider" as Lsp
+participant "Lightning Service Provider" as LSP
 
-Customer -[#red]> Lsp: <color #red>GetCfg</color> \n Asks configuration
+Customer -[#red]> LSP: <color #red>GetCfg</color> \n Asks configuration
 
-note left: Swap into Lightning Network \n bitcoins from on-chain bitcoins \n with incoming liquidity feature \n\n <color #red>**red**</color> = Lsp gRPC protocol \n <color #green>**green**</color> = Lightning protocol \n <color #blue>**blue**</color> = On-chain protocol \n <color #grey>**grey**</color> = Internal procedures
+note left: Swap into Lightning Network \n bitcoins from on-chain bitcoins \n with incoming liquidity feature \n\n <color #red>**red**</color> = LSP gRPC protocol \n <color #green>**green**</color> = Lightning protocol \n <color #blue>**blue**</color> = On-chain protocol \n <color #grey>**grey**</color> = Internal procedures
 
-Lsp --[#red]> Customer: Provides limits, fee data \n and LN peer data
-Customer -[#green]>o Lsp: <color #green>AddPeer</color> \n Connects to LSP LN node \n and keeps connection up
+LSP --[#red]> Customer: Provides limits, fee data \n and LN peer data
+Customer -[#green]>o LSP: <color #green>AddPeer</color> \n Connects to LSP LN node \n and keeps connection up
 Customer -[#green]> Customer: <color #green>AddInvoice</color> and <color #green>NewAddress</color> \n Creates **SWP_INV** swap lightning \n invoice with undefined (zero) amount \n and **REF_ADDR** refund address
-Customer -[#red]> Lsp: <color #red>SwapIntoLn</color> \n Provides **SWP_INV** and \n **REF_ADDR**
-Lsp -[#green]> Lsp: <color #green>NewAddress</color> \n Creates **SWP_ADDR**
-Lsp --[#red]> Customer: Provides **SWP_ADDR** and \n minimal required **AMT_MIN** swap limit
+Customer -[#red]> LSP: <color #red>SwapIntoLn</color> \n Provides **SWP_INV** and \n **REF_ADDR**
+LSP -[#green]> LSP: <color #green>NewAddress</color> \n Creates **SWP_ADDR**
+LSP --[#red]> Customer: Provides **SWP_ADDR** and \n minimal required **AMT_MIN** swap limit
 
 alt swap is fully funded
-  Customer -[#blue]>o Lsp: Funds **SWP_ADDR** with \n **AMT** >= **AMT_MIN** bitcoins
-  Lsp -[#grey]> Lsp: Waits until customer \n LN node is online
-  Lsp -[#green]>o Customer: <color #green>OpenChannelSync</color> \n Opens LN channel with capacity \n **CAP** = 2 * (**AMT** - **FEE**)
-  Lsp -[#grey]> Lsp: Waits until LN channel \n is opened and active
-  Lsp -[#green]>o Customer: <color #green>SendPaymentSync</color> \n Sends LN bitcoins to Customer \n using **SWP_INV** and \n **AMT_USR** = **AMT** - **FEE**
-  Lsp -[#blue]>o Customer: <color #blue>SendCoins</color> \n Refunds excess coins from \n **SWP_ADDR** into **REF_ADDR** \n if needed
+  Customer -[#blue]>o LSP: Funds **SWP_ADDR** with \n **AMT** >= **AMT_MIN** bitcoins
+  LSP -[#grey]> LSP: Waits until customer \n LN node is online
+  LSP -[#green]>o Customer: <color #green>OpenChannelSync</color> \n Opens LN channel with capacity \n **CAP** = 2 * (**AMT** - **FEE**)
+  LSP -[#grey]> LSP: Waits until LN channel \n is opened and active
+  LSP -[#green]>o Customer: <color #green>SendPaymentSync</color> \n Sends LN bitcoins to Customer \n using **SWP_INV** and \n **AMT_USR** = **AMT** - **FEE**
   note left: After successful swap \n Customer is able to \n **send** and **receive** \n bitcoin over LN
+  LSP -[#blue]>o Customer: <color #blue>SendCoins</color> \n Refunds excess coins from \n **SWP_ADDR** into **REF_ADDR** \n if needed
 
 else swap is not fully funded
-  Lsp -[#grey]> Lsp: **SWP_INV** is expired
-  Lsp -[#blue]>o Customer: <color #blue>SendCoins</color> \n Refunds all coins from \n **SWP_ADDR** into **REF_ADDR** \n if needed
+  LSP -[#grey]> LSP: **SWP_INV** is expired
+  LSP -[#blue]>o Customer: <color #blue>SendCoins</color> \n Refunds all coins from \n **SWP_ADDR** into **REF_ADDR** \n if needed
 end
 
 @enduml
