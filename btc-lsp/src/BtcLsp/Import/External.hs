@@ -100,7 +100,8 @@ import Katip as X
     sl,
   )
 import LndClient as X
-  ( LndError (..),
+  ( ChanId (..),
+    LndError (..),
     MSat (..),
     NodePubKey (..),
     RPreimage (..),
