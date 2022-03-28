@@ -128,6 +128,7 @@ in  { networks.global.external = True
           , LSP_LND_P2P_HOST = "127.0.0.1"
           , LSP_LND_P2P_PORT = "9735"
           , LSP_MIN_CHAN_CAP_MSAT = "40000000"
+          , LSP_MSAT_PER_BYTE = "1000"
           , -- Rpc
             LSP_LND_ENV =
               ''
