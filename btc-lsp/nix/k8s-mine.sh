@@ -1,7 +1,7 @@
 #!/bin/sh
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-BITCOIN_NETWORK="regtest"
+BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
 
 echo "$0 ==> starting"
 
@@ -13,7 +13,7 @@ fi
 
 for OWNER in lsp; do
 
-  LND_SERVICE="lnd-$OWNER"
+  LND_SERVICE="lnd"
   echo "$0 ==> getting LND_POD of $LND_SERVICE"
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   echo "$0 ==> getting $BITCOIN_NETWORK LND_ADDRESS of $LND_SERVICE $LND_POD"

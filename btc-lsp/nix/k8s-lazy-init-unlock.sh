@@ -2,8 +2,8 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd-lsp bitcoin_network`
-LND_WALLET_PASSWORD=`sh $THIS_DIR/k8s-get-secret.sh btc-lsp lsp_lnd_env lnd_wallet_password`
+BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
+LND_WALLET_PASSWORD=`sh $THIS_DIR/k8s-get-secret.sh lsp lsp_lnd_env lnd_wallet_password`
 
 create_wallet() {
 expect <<- EOF
@@ -24,7 +24,7 @@ EOF
 
 for OWNER in lsp; do
 
-  LND_SERVICE="lnd-$OWNER"
+  LND_SERVICE="lnd"
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   ( echo "$LND_SERVICE ==> Checking wallet of $LND_POD" \
     && kubectl exec \
