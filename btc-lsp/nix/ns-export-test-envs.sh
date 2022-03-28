@@ -122,6 +122,7 @@ export LSP_LOG_SEVERITY="DebugS"
 export LSP_LND_P2P_HOST="127.0.0.1"
 export LSP_LND_P2P_PORT="9735"
 export LSP_MIN_CHAN_CAP_MSAT="20000000"
+export LSP_MSAT_PER_BYTE="1000"
 export LSP_LIBPQ_CONN_STR="postgresql://postgres@localhost/lsp-test"
 
 #

@@ -51,7 +51,7 @@
 - Refund to on-chain refund address if needed
 
 
-https://github.com/coingaming/src/blob/master/btc-lsp/docs/plantuml/Lsp-Swap-Into-Ln.png
+https://raw.githubusercontent.com/coingaming/src/master/btc-lsp/docs/plantuml/Lsp-Swap-Into-Ln.png
 
 ---
 

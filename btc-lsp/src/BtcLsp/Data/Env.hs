@@ -53,6 +53,7 @@ data Env = Env
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
     envSwapIntoLnMinAmt :: Money 'Usr 'OnChain 'Fund,
+    envMsatPerByte :: Maybe MSat,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
@@ -75,6 +76,7 @@ data RawConfig = RawConfig
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
     rawConfigMinChanCap :: Money 'Chan 'Ln 'Fund,
+    rawConfigMsatPerByte :: Maybe MSat,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
@@ -128,6 +130,7 @@ readRawConfig =
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LND_P2P_PORT" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_CHAN_CAP_MSAT" opts
+      <*> optional (E.var (E.auto <=< E.nonempty) "LSP_MSAT_PER_BYTE" opts)
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
       -- Electrs
@@ -198,6 +201,7 @@ withEnv rc this = do
                 envSwapIntoLnMinAmt =
                   Math.newSwapIntoLnMinAmt $
                     rawConfigMinChanCap rc,
+                envMsatPerByte = rawConfigMsatPerByte rc,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
                 envGrpcServer =

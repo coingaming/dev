@@ -47,6 +47,8 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     asks Env.envGrpcServer
   getSwapIntoLnMinAmt =
     asks Env.envSwapIntoLnMinAmt
+  getMsatPerByte =
+    asks Env.envMsatPerByte
   getLspPubKeyVar =
     asks Env.envLndPubKey
   getLspLndEnv =

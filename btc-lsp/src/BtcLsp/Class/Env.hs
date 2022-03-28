@@ -29,6 +29,7 @@ class
   where
   getGsEnv :: m GSEnv
   getSwapIntoLnMinAmt :: m (Money 'Usr 'OnChain 'Fund)
+  getMsatPerByte :: m (Maybe MSat)
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLndP2PSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey

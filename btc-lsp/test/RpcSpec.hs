@@ -18,6 +18,9 @@ import TestWithLndLsp
 
 spec :: Spec
 spec = do
+  itEnv "getMsatPerByte" $ do
+    x <- getMsatPerByte
+    liftIO $ x `shouldBe` Just 1000
   itEnv "Version" $ do
     ver <- withElectrs Rpc.version ($ ())
     liftIO $ ver `shouldSatisfy` isRight
