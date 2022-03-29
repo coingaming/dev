@@ -6,8 +6,8 @@ module BtcLsp.Grpc.Server.HighLevel
   )
 where
 
-import qualified BtcLsp.Cfg as Cfg
 import BtcLsp.Import
+import qualified BtcLsp.Math as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.PayReq as Lnd
@@ -83,6 +83,7 @@ getCfg ::
 getCfg _ _ = do
   pub <- getLspPubKey
   sa <- getLndP2PSocketAddress
+  swapMinAmt <- getSwapIntoLnMinAmt
   pure $
     defMessage
       & GetCfg.success
@@ -97,15 +98,15 @@ getCfg _ _ = do
                           .~ from (socketAddressPort sa)
                     ]
                & GetCfg.swapIntoLnMinAmt
-                 .~ from Cfg.swapLnMinAmt
+                 .~ from swapMinAmt
                & GetCfg.swapIntoLnMaxAmt
-                 .~ from Cfg.swapLnMaxAmt
+                 .~ from Math.swapLnMaxAmt
                & GetCfg.swapFromLnMinAmt
-                 .~ from Cfg.swapLnMinAmt
+                 .~ from swapMinAmt
                & GetCfg.swapFromLnMaxAmt
-                 .~ from Cfg.swapLnMaxAmt
+                 .~ from Math.swapLnMaxAmt
                & GetCfg.swapLnFeeRate
-                 .~ from Cfg.swapLnFeeRate
+                 .~ from Math.swapLnFeeRate
                & GetCfg.swapLnMinFee
-                 .~ from Cfg.swapLnMinFee
+                 .~ from Math.swapLnMinFee
            )

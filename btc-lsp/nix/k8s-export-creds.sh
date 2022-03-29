@@ -3,15 +3,15 @@
 set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-EXPORTED_CREDS_DIR="$THIS_DIR/../build/exported-creds"
+EXPORTS_DIR="$THIS_DIR/../build/exports"
 
-mkdir -p "$EXPORTED_CREDS_DIR"
+mkdir -p "$EXPORTS_DIR"
 
 for OWNER in lsp; do
-  LND_SERVICE="lnd-$OWNER"
+  LND_SERVICE="lnd"
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
 
   ( echo "$LND_SERVICE ==> exporting creds from $LND_POD" \
-    && kubectl cp "default/$LND_POD:/root/.lnd" "$EXPORTED_CREDS_DIR/lnd-$OWNER" ) \
+    && kubectl cp "default/$LND_POD:/root/.lnd" "$EXPORTS_DIR/$LND_SERVICE" ) \
   || true
 done

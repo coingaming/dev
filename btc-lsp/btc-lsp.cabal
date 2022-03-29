@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.5.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,7 +25,6 @@ source-repository head
 
 library
   exposed-modules:
-      BtcLsp.Cfg
       BtcLsp.Class.Env
       BtcLsp.Class.Storage
       BtcLsp.Data.AppM
@@ -45,6 +44,7 @@ library
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Math
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
@@ -169,7 +169,6 @@ library
 executable btc-lsp-exe
   main-is: Main.hs
   other-modules:
-      BtcLsp.Cfg
       BtcLsp.Class.Env
       BtcLsp.Class.Storage
       BtcLsp.Data.AppM
@@ -189,6 +188,7 @@ executable btc-lsp-exe
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Math
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
@@ -477,7 +477,6 @@ test-suite btc-lsp-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      BtcLsp.Cfg
       BtcLsp.Class.Env
       BtcLsp.Class.Storage
       BtcLsp.Data.AppM
@@ -497,6 +496,7 @@ test-suite btc-lsp-test
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Math
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
@@ -532,6 +532,7 @@ test-suite btc-lsp-test
       Proto.BtcLsp_Fields
       BlockScannerSpec
       LnChanWatcherSpec
+      MathSpec
       RpcSpec
       ServerSpec
       Spec

@@ -7,8 +7,6 @@ BUILD_DIR="$THIS_DIR/../build"
 SETUP_MODE="--prebuilt"
 GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
 
-. "$THIS_DIR/k8s-export-env.sh"
-
 if [ -z "$*" ]; then
   echo "==> using defaults"
 else
@@ -39,7 +37,7 @@ mkdir -p "$BUILD_DIR"
 
 echo "==> Generate keys"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-gen-keys.sh'"
+   "--run './nix/k8s-gen-keys.sh && ./nix/ns-inline-creds.sh'"
 
 case $SETUP_MODE in
   --source)
@@ -52,7 +50,6 @@ case $SETUP_MODE in
       cd "$BUILD_DIR"
       rm -rf docker-image-*
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
-      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-electrs.tar.gz"
     )
     ;;
   *)
@@ -67,28 +64,19 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | tr -d '\n' \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
-echo "==> Loading electrs docker image"
-docker load -q -i "$BUILD_DIR/docker-image-electrs.tar.gz" \
-  | awk '{print $NF}' \
-  | tr -d '\n' \
-  > "$BUILD_DIR/docker-image-electrs.txt"
+. "$THIS_DIR/k8s-export-env.sh"
 
 echo "==> Loading btc-lsp docker image into minikube"
 minikube image load \
   -p "$MINIKUBE_PROFILE" \
   --daemon=true $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
 
-echo "==> Loading electrs docker image into minikube"
-minikube image load \
-  -p "$MINIKUBE_PROFILE" \
-  --daemon=true $(cat "$BUILD_DIR/docker-image-electrs.txt")
+echo "==> Partial dhall"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/k8s-dhall-compile.sh'"
 
 echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"
-
-echo "==> Partial dhall"
-sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-dhall-compile.sh'"
 
 echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh"
@@ -101,15 +89,19 @@ sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 sleep 20
 
 echo "==> Generate additional creds"
-sh "$THIS_DIR/k8s-generate-creds.sh"
+sh "$THIS_DIR/k8s-gen-creds.sh"
 
-echo "==> Reconfiguring environment for containers"
-kubectl delete secret btc-lsp rtl
+echo "==> Full dhall"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/ns-inline-creds.sh && ./nix/k8s-dhall-compile.sh'"
+
+echo "==> Updating environment for containers"
+kubectl delete secret rtl lsp
 sh "$THIS_DIR/k8s-setup-env.sh"
 
-echo "==> Restarting k8s resources"
-sh "$THIS_DIR/k8s-restart.sh" btc-lsp
+echo "==> Restarting k8s deployments"
 sh "$THIS_DIR/k8s-restart.sh" rtl
+sh "$THIS_DIR/k8s-restart.sh" lsp
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh"

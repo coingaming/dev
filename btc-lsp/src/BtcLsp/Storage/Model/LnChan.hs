@@ -45,6 +45,7 @@ createIgnore swapId txid vout = runSql $ do
         lnChanFundingTxId = txid,
         lnChanFundingVout = vout,
         lnChanClosingTxId = Nothing,
+        lnChanExtId = Nothing,
         lnChanNumUpdates = 0,
         lnChanStatus = LnChanStatusPendingOpen,
         lnChanInsertedAt = ct,
@@ -94,6 +95,7 @@ upsertChannel ct mSS chan =
         lnChanFundingTxId = txid,
         lnChanFundingVout = vout,
         lnChanClosingTxId = Nothing,
+        lnChanExtId = extId,
         lnChanNumUpdates = upd,
         lnChanStatus = ss,
         lnChanInsertedAt = ct,
@@ -101,7 +103,9 @@ upsertChannel ct mSS chan =
         lnChanTotalSatoshisReceived = rcv,
         lnChanTotalSatoshisSent = sent
       }
-    [ LnChanStatus
+    [ LnChanExtId
+        Psql.=. Psql.val extId,
+      LnChanStatus
         Psql.=. Psql.val ss,
       LnChanNumUpdates
         Psql.=. Psql.val upd,
@@ -126,6 +130,7 @@ upsertChannel ct mSS chan =
     upd = Channel.numUpdates chan
     sent = Channel.totalSatoshisSent chan
     rcv = Channel.totalSatoshisReceived chan
+    extId = Just $ Channel.chanId chan
 
 upsertChannelPoint ::
   ( MonadIO m
@@ -141,6 +146,7 @@ upsertChannelPoint ct ss (Lnd.ChannelPoint txid vout) =
       { lnChanSwapIntoLnId = Nothing,
         lnChanFundingTxId = txid,
         lnChanFundingVout = vout,
+        lnChanExtId = Nothing,
         lnChanClosingTxId = Nothing,
         lnChanNumUpdates = 0,
         lnChanStatus = ss,
@@ -169,6 +175,7 @@ closedChannelUpsert ct close =
         lnChanFundingTxId = fundTxId,
         lnChanFundingVout = fundVout,
         lnChanClosingTxId = closeTxId,
+        lnChanExtId = extId,
         lnChanNumUpdates = 0,
         lnChanStatus = ss,
         lnChanInsertedAt = ct,
@@ -176,7 +183,9 @@ closedChannelUpsert ct close =
         lnChanTotalSatoshisReceived = MSat 0,
         lnChanTotalSatoshisSent = MSat 0
       }
-    [ LnChanClosingTxId
+    [ LnChanExtId
+        Psql.=. Psql.val extId,
+      LnChanClosingTxId
         Psql.=. Psql.val closeTxId,
       LnChanStatus
         Psql.=. Psql.val ss,
@@ -189,6 +198,7 @@ closedChannelUpsert ct close =
     fundTxId = ChannelPoint.fundingTxId cp
     fundVout = ChannelPoint.outputIndex cp
     closeTxId = Just $ CloseChannel.closingTxId close
+    extId = Just $ CloseChannel.chanId close
 
 persistChannelUpdates ::
   ( KatipContext m,

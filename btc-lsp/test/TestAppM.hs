@@ -93,6 +93,10 @@ runTestApp env app =
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
     asks $ envGrpcServer . testEnvLsp
+  getSwapIntoLnMinAmt =
+    asks $ envSwapIntoLnMinAmt . testEnvLsp
+  getMsatPerByte =
+    asks $ envMsatPerByte . testEnvLsp
   getLspPubKeyVar =
     asks $ envLndPubKey . testEnvLsp
   getLspLndEnv =

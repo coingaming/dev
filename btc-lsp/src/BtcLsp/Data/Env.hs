@@ -10,11 +10,13 @@ module BtcLsp.Data.Env
   )
 where
 
+import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Math as Math
 import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
 import qualified Data.Aeson as A (Result (..), Value (..), decode)
@@ -50,6 +52,8 @@ data Env = Env
     envLnd :: Lnd.LndEnv,
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
+    envSwapIntoLnMinAmt :: Money 'Usr 'OnChain 'Fund,
+    envMsatPerByte :: Maybe MSat,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
@@ -71,6 +75,8 @@ data RawConfig = RawConfig
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
+    rawConfigMinChanCap :: Money 'Chan 'Ln 'Fund,
+    rawConfigMsatPerByte :: Maybe MSat,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
@@ -123,6 +129,8 @@ readRawConfig =
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LND_P2P_PORT" opts
+      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_CHAN_CAP_MSAT" opts
+      <*> optional (E.var (E.auto <=< E.nonempty) "LSP_MSAT_PER_BYTE" opts)
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
       -- Electrs
@@ -190,6 +198,10 @@ withEnv rc this = do
                 envLnd = lnd,
                 envLndP2PHost = rawConfigLndP2PHost rc,
                 envLndP2PPort = rawConfigLndP2PPort rc,
+                envSwapIntoLnMinAmt =
+                  Math.newSwapIntoLnMinAmt $
+                    rawConfigMinChanCap rc,
+                envMsatPerByte = rawConfigMsatPerByte rc,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
                 envGrpcServer =

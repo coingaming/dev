@@ -35,9 +35,9 @@ apply = do
           . settleSwap
       )
       $ filter
-        ( \x ->
+        ( \(_, usr, _) ->
             Set.member
-              (userNodePubKey . entityVal $ snd x)
+              (userNodePubKey $ entityVal usr)
               peerSet
         )
         swaps
@@ -45,38 +45,45 @@ apply = do
   sleep $ MicroSecondsDelay 500000
   apply
 
-settleSwap :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
-settleSwap (swapEnt, userEnt) = do
+settleSwap ::
+  ( Env m
+  ) =>
+  (Entity SwapIntoLn, Entity User, Entity LnChan) ->
+  m ()
+settleSwap (swapEnt, userEnt, chanEnt) = do
   res <- runExceptT $ do
     pre <-
-      catchE sendPaymentT . const $ do
-        inv <-
-          withLndT
-            LndKatip.decodePayReq
-            ($ payReq)
-        pay <-
-          withLndT
-            LndKatip.trackPaymentSync
-            ( $
-                TrackPayment.TrackPaymentRequest
-                  { TrackPayment.paymentHash =
-                      PayReq.paymentHash inv,
-                    TrackPayment.noInflightUpdates =
-                      False
-                  }
-            )
-        if Payment.state pay == Payment.SUCCEEDED
-          then
-            pure $
-              Payment.paymentPreimage pay
-          else
-            throwE . FailureInternal $
-              "Wrong payment "
-                <> inspectPlain pay
-                <> " for swap "
-                <> inspectPlain swapEnt
-                <> " and user "
-                <> inspectPlain userEnt
+      catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
+        . const
+        $ catchE (sendPaymentT Nothing) . const $
+          do
+            inv <-
+              withLndT
+                LndKatip.decodePayReq
+                ($ payReq)
+            pay <-
+              withLndT
+                LndKatip.trackPaymentSync
+                ( $
+                    TrackPayment.TrackPaymentRequest
+                      { TrackPayment.paymentHash =
+                          PayReq.paymentHash inv,
+                        TrackPayment.noInflightUpdates =
+                          False
+                      }
+                )
+            if Payment.state pay == Payment.SUCCEEDED
+              then
+                pure $
+                  Payment.paymentPreimage pay
+              else
+                throwE . FailureInternal $
+                  "Wrong payment "
+                    <> inspectPlain pay
+                    <> " for swap "
+                    <> inspectPlain swapEnt
+                    <> " and user "
+                    <> inspectPlain userEnt
 
     lift $
       SwapIntoLn.updateSettled (entityKey swapEnt) pre
@@ -90,13 +97,14 @@ settleSwap (swapEnt, userEnt) = do
     payReq =
       from $
         swapIntoLnFundInvoice swap
-    sendPaymentT =
+    sendPaymentT extId =
       SendPayment.paymentPreimage
         <$> withLndT
           LndKatip.sendPayment
           ( $
               Lnd.SendPaymentRequest
                 { Lnd.paymentRequest = payReq,
-                  Lnd.amt = from $ swapIntoLnChanCapUser swap
+                  Lnd.amt = from $ swapIntoLnChanCapUser swap,
+                  Lnd.outgoingChanId = extId
                 }
           )
