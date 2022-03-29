@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -63,6 +63,7 @@ library
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
+      BtcLsp.Thread.Refunder
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
@@ -207,6 +208,7 @@ executable btc-lsp-exe
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
+      BtcLsp.Thread.Refunder
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
@@ -352,6 +354,7 @@ test-suite btc-lsp-test
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
+      BtcLsp.Thread.Refunder
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
