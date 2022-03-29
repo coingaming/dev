@@ -288,7 +288,6 @@ data DecodedRawTransaction =
                           , decTxnVersion  :: Integer
                           , decTxId        :: TransactionID
                           , decTxnLockTime :: Integer
-                          , decSize        :: Integer
                           , decVsize       :: Integer
                           -- | The vector of transactions in.
                           , decVin         :: Vector TxIn
@@ -301,7 +300,6 @@ instance FromJSON DecodedRawTransaction where
                                                  <*> o .: "version"
                                                  <*> o .: "txid"
                                                  <*> o .: "locktime"
-                                                 <*> o .: "size"
                                                  <*> o .: "vsize"
                                                  <*> o .: "vin"
                                                  <*> o .: "vout"
