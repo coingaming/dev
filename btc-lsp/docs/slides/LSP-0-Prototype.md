@@ -1,11 +1,36 @@
 # Lightning Network
 
 
-- **Off-chain P2P** bitcoin transport protocol
+- Off-chain P2P bitcoin transfer protocol
 
-- Always backed by real **on-chain** bitcoins, **not** IOU
+- Magic off-chain transfer of on-chain bitcoins, not IOU
 
-- Trustless, instant **and** final settlements
+- Trustless, instant, private and final settlements
+
+
+## Learn more about LN
+
+https://coingaming.learnamp.com/en/items/video-0d9df923-f1cc-4fc9-aed3-d77d829cddb9
+
+https://ocw.mit.edu/courses/media-arts-and-sciences/mas-s62-cryptocurrency-engineering-and-design-spring-2018/lecture-videos/index.htm
+
+
+## Off-chain bitcoins for the streets
+
+https://opendime.com/
+
+---
+
+# Lightning on mainnet
+
+
+- Deposits/withdrawals on https://www.bitfinex.com/
+
+- Mining pool withdrawals from https://www.nicehash.com/
+
+- Buy on Amazon with https://paywithmoon.com/
+
+- Private P2P bitcoin transfer with users and merchants
 
 ---
 
@@ -58,3 +83,7 @@ https://raw.githubusercontent.com/coingaming/src/master/btc-lsp/docs/plantuml/Ls
 # Give it a try
 
 https://github.com/coingaming/src/blob/master/btc-lsp/README.md
+
+# Slides
+
+https://github.com/coingaming/src/blob/master/btc-lsp/docs/slides/LSP-0-Prototype.md
