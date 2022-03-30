@@ -4,7 +4,7 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-sh "$THIS_DIR/k8s-setup-minikube.sh"
+sh "$THIS_DIR/mk-setup-profile.sh"
 
 echo "==> Drop old kubernetes cluster"
 minikube stop && minikube delete
@@ -20,9 +20,9 @@ minikube addons enable ingress
 
 echo "==> Setup hosts to access services from localhost"
 CLUSTER_IP=`minikube ip`
-sudo sh "$THIS_DIR/k8s-setup-hosts.sh" "$CLUSTER_IP"
+sudo sh "$THIS_DIR/mk-setup-hosts.sh" "$CLUSTER_IP"
 
 echo "==> Allow to use kubectl from nix-shell"
-sh "$THIS_DIR/k8s-edit-conf.sh"
+sh "$THIS_DIR/mk-setup-kubeconf.sh"
 
 echo "==> Cluster is ready for deployments!"
