@@ -16,6 +16,7 @@ in  ''
     set -e
 
     THIS_DIR="$(dirname "$(realpath "$0")")"
+    BITCOIN_NETWORK="$1"
 
     echo "==> Setting up env for ${owner}"
 
@@ -32,7 +33,9 @@ in  ''
       --from-literal=${G.toLowerCase
                          rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
 
-    (kubectl create secret tls ${Rtl.tlsSecretName} \
-      --cert="$THIS_DIR/../${owner}/tls.crt" \
-      --key="$THIS_DIR/../${owner}/tls.key") || true
+    if [ ! -z "$BITCOIN_NETWORK" ] && [ $BITCOIN_NETWORK != "regtest" ]; then
+      (kubectl create secret tls ${Rtl.tlsSecretName} \
+        --cert="$THIS_DIR/../${owner}/tls.crt" \
+        --key="$THIS_DIR/../${owner}/tls.key") || true
+    fi
     ''
