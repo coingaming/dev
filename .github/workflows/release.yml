@@ -14,8 +14,9 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ./nix.tar.gz
-        key: ${{ runner.os }}-nix-v3
+        key: ${{ runner.os }}-nix-v4
         restore-keys: |
+          ${{ runner.os }}-nix-v4
           ${{ runner.os }}-nix-v3
     - name: Restore cache
       run: |
