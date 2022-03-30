@@ -35,9 +35,9 @@ sh "$THIS_DIR/mk-setup-cluster.sh"
 echo "==> Clean up build"
 rm -rf "$BUILD_DIR" && mkdir -p "$BUILD_DIR"
 
-echo "==> Generate certs"
+echo "==> Generate creds"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-gen-certs.sh && ./nix/ns-inline-certs.sh'"
+   "--run './nix/ns-gen-creds.sh && ./nix/ns-inline-creds.sh'"
 
 case $SETUP_MODE in
   --source)
@@ -86,15 +86,15 @@ echo "==> Partial spin"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 sleep 20
 
-echo "==> Generate additional creds"
-sh "$THIS_DIR/k8s-gen-creds.sh"
+echo "==> Exporting creds from running pods"
+sh "$THIS_DIR/k8s-export-creds.sh"
 
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-inline-certs.sh && ./nix/ns-dhall-compile.sh'"
+   "--run './nix/ns-inline-creds.sh && ./nix/ns-dhall-compile.sh'"
 
-echo "==> Updating environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh"
+echo "==> Configuring environment for containers"
+sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
 
 echo "==> Deploying additional k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
@@ -104,3 +104,5 @@ sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
 echo "==> Mine initial coins"
 sh "$THIS_DIR/k8s-mine.sh" 105
+
+echo "==> Setup for $BITCOIN_NETWORK has been completed!"

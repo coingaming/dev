@@ -12,10 +12,6 @@ let owner = G.unOwner G.Owner.Bitcoind
 
 let image = "heathmont/bitcoind:v0.22.0"
 
-let rpcUser = "bitcoinrpc"
-
-let rpcPass = G.defaultPass
-
 let zmqPubRawBlockPort
     : G.Port
     = { unPort = 39703 }
@@ -40,6 +36,26 @@ let env =
       , rpcUser = "RPCUSER"
       , rpcPassword = "RPCPASSWORD"
       }
+
+let mkRpcUser
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = ../../build/bitcoind/rpcuser.txt as Text
+          , TestNet = ../../build/bitcoind/rpcuser.txt as Text
+          , RegTest = "bitcoinrpc"
+          }
+          net
+
+let mkRpcPass
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = ../../build/bitcoind/rpcpass.txt as Text
+          , TestNet = ../../build/bitcoind/rpcpass.txt as Text
+          , RegTest = G.defaultPass
+          }
+          net
 
 let mkRpcPort
     : G.BitcoinNetwork → G.Port
@@ -145,11 +161,12 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { rpcUser
-    , rpcPass
+in  { 
     , zmqPubRawBlockPort
     , zmqPubRawTxPort
     , env
+    , mkRpcUser
+    , mkRpcPass
     , mkRpcPort
     , mkService
     , mkPersistentVolumeClaim

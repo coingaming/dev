@@ -12,8 +12,6 @@ let owner = G.unOwner G.Owner.Lnd
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let walletPass = G.defaultPass
-
 let hexMacaroon = ../../build/lnd/macaroon.hex as Text ? G.todo
 
 let tlsCert = ../../build/lnd/inlined-tls.cert as Text ? G.todo
@@ -54,9 +52,19 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "lnd.mydomain.io"
-          , TestNet = "testnet-lnd.mydomain.io"
+          { MainNet = "lnd.${../../build/domain.txt as Text}"
+          , TestNet = "testnet-lnd.${../../build/domain.txt as Text}"
           , RegTest = owner
+          }
+          net
+
+let mkWalletPass
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = ../../build/lnd/password.txt as Text
+          , TestNet = ../../build/lnd/password.txt as Text
+          , RegTest = G.defaultPass
           }
           net
 
@@ -169,6 +177,7 @@ in  { walletPass
     , restPort
     , env
     , mkHost
+    , mkWalletPass
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

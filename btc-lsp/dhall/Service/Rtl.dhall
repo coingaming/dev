@@ -14,8 +14,6 @@ let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
-let dashboardPass = G.defaultPass
-
 let tlsSecretName = "${owner}-tls"
 
 let tcpPort
@@ -31,6 +29,33 @@ let env =
 let ports
     : List Natural
     = G.unPorts [ tcpPort ]
+
+let mkDashboardPass
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = ../../build/rtl/password.txt as Text
+          , TestNet = ../../build/rtl/password.txt as Text
+          , RegTest = G.defaultPass
+          }
+          net
+
+let mkRtlConfigJson
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        ''
+        {
+          "SSO":{
+            "logoutRedirectLink": "",
+            "rtlCookiePath": "",
+            "rtlSSO": 0
+          },
+          "defaultNodeIndex": 1,
+          "multiPass": "${Rtl.mkDashboardPass net}",
+          "nodes": [],
+          "port": "${G.unPort Rtl.tcpPort}"
+        }
+        ''
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -55,8 +80,8 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "rtl.mydomain.io"
-          , TestNet = "testnet-rtl.mydomain.io"
+          { MainNet = "rtl.${../../build/domain.txt as Text}"
+          , TestNet = "testnet-rtl.${../../build/domain.txt as Text}"
           , RegTest = owner
           }
           net
@@ -115,10 +140,10 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { dashboardPass
-    , tlsSecretName
+in  { tlsSecretName
     , tcpPort
     , env
+    , mkRtlConfigJson
     , mkService
     , mkDeployment
     , mkIngress

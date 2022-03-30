@@ -15,6 +15,4 @@ in  ''
                                                                           Bitcoind.zmqPubRawBlockPort}"
     export ${Bitcoind.env.zmqPubRawTx}="${networkScheme}://0.0.0.0:${G.unPort
                                                                        Bitcoind.zmqPubRawTxPort}"
-    export ${Bitcoind.env.rpcUser}="${Bitcoind.rpcUser}"
-    export ${Bitcoind.env.rpcPassword}="${Bitcoind.rpcPass}"
     ''

@@ -6,11 +6,21 @@ let Service = ../Kubernetes/Service.dhall
 
 let Deployment = ../Kubernetes/Deployment.dhall
 
+let Bitcoind = ../Bitcoind.dhall
+
+let Lnd = ../Lnd.dhall
+
+let Postgres = ../Postgres.dhall
+
 let owner = G.unOwner G.Owner.Lsp
 
 let aes256InitVector = "dRgUkXp2s5v8y/B?"
 
 let aes256SecretKey = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
+
+let tlsCert = ../../build/lsp/inlined-tls.cert as Text
+
+let tlsKey = ../../build/lsp/inlined-tls.key as Text
 
 let logEnv = "test"
 
@@ -19,10 +29,6 @@ let logFormat = "Bracket"
 let logVerbosity = "V3"
 
 let logSeverity = "DebugS"
-
-let tlsCert = ../../build/lsp/inlined-tls.cert as Text
-
-let tlsKey = ../../build/lsp/inlined-tls.key as Text
 
 let grpcPort
     : G.Port
@@ -45,6 +51,34 @@ let env =
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
       , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
       }
+
+let mkLspLndEnv
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        ''
+        {
+          "lnd_wallet_password":"${Lnd.mkWalletPass net}",
+          "lnd_tls_cert":"${Lnd.tlsCert}",
+          "lnd_hex_macaroon":"${Lnd.hexMacaroon}",
+          "lnd_host":"${G.unOwner G.Owner.Lnd}",
+          "lnd_port":${G.unPort Lnd.grpcPort}
+        }
+        ''
+
+let mkLspBitcoindEnv
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        ''
+        {
+          "host":"${G.unNetworkScheme
+                      G.NetworkScheme.Http}://${G.unOwner G.Owner.Bitcoind}:${G.unPort
+                                                                  ( Bitcoind.mkRpcPort
+                                                                      net
+                                                                  )}",
+          "username":"${Bitcoind.mkRpcUser network}",
+          "password":"${Bitcoind.mkRpcPass network}"
+        }
+        ''
 
 let ports
     : List Natural
@@ -143,8 +177,9 @@ in  { aes256InitVector
     , logSeverity
     , tlsCert
     , tlsKey
-    , env
     , grpcPort
+    , env
+    , mkLspLndEnv
     , mkService
     , mkDeployment
     }

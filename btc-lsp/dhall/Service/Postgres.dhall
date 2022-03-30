@@ -12,7 +12,7 @@ let owner = G.unOwner G.Owner.Postgres
 
 let image = "heathmont/postgres:11-alpine-a2e8bbe"
 
-let user = "btc-lsp"
+let user = "lsp"
 
 let password = G.defaultPass
 
@@ -31,6 +31,16 @@ let env =
       , postgresHost = "POSTGRES_HOST"
       , postgresDatabase = "POSTGRES_DATABASE"
       }
+
+let mkConnStr
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = ../../build/postgres/conn.txt as Text
+          , TestNet = ../../build/postgres/conn.txt as Text
+          , RegTest = "postgresql://${user}:${password}@${host}/${database}"
+          }
+          net
 
 let ports
     : List Natural
@@ -113,12 +123,13 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { user
+in  { 
+    , user
     , password
-    , host
     , database
     , tcpPort
     , env
+    , mkConnStr
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

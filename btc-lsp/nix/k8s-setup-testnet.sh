@@ -2,14 +2,28 @@
 
 set -e
 
+BITCOIN_NETWORK="testnet"
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
+
+# Dirs with service-specific files
+BITCOIND_PATH="$BUILD_DIR/bitcoind"
+LND_PATH="$BUILD_DIR/lnd"
 RTL_PATH="$BUILD_DIR/rtl"
-LSP_PATH="$BUILD_DIR/lsp"
+LSP_PATH=="$BUILD_DIR/lsp"
+POSTGRES_PATH=="$BUILD_DIR/postgres"
+
+# Save all LetsEncrypt stuff here
 LETSENCRYPT_DIR="$BUILD_DIR/letsencrypt"
-DOMAIN_TXT_PATH="$BUILD_DIR/domain.txt"
-DATABASE_TXT_PATH="$BUILD_DIR/database.txt"
-BITCOIN_NETWORK="testnet"
+
+# Save root domain here
+DOMAIN_PATH="$BUILD_DIR/domain.txt"
+
+# Save Postgres connection string here
+PG_CONN_PATH="$POSTGRES_PATH/conn.txt"
+
+# Name to use when creating resources within cloud provider
+CLOUD_RESOURCE_NAME="lsp-$BITCOIN_NETWORK"
 
 isInstalled () {
   if ! command -v "$1" &> /dev/null; then
@@ -31,9 +45,11 @@ confirmAction () {
 
 cleanBuildDir () {
   echo "Deleting everything in $BUILD_DIR"
-  rm -rf "$BUILD_DIR" && \
-  mkdir -p "$RTL_PATH" && \
-  mkdir -p "$LSP_PATH"
+  rm -rf "$BUILD_DIR" && mkdir -p $BUILD_DIR
+
+  echo "==> Generating new creds"
+  sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/ns-gen-creds.sh && ./nix/ns-inline-creds.sh'"
 }
 
 getLetsEncryptCert () {
@@ -128,8 +144,8 @@ deletePostgresInstance () {
 writePostgresURI() {
   PG_INSTANCE_ID=`getPostgresInstanceId $1`
   PG_URI=`doctl databases connection $PG_INSTANCE_ID --format URI --no-header`
-  echo "Saving connection details to $DATABASE_TXT_PATH"
-  echo -n "$PG_URI" > "$DATABASE_TXT_PATH"
+  echo "Saving connection details to $PG_CONN_PATH"
+  echo -n "$PG_URI" > "$PG_CONN_PATH"
 }
 
 recreatePostgresInstance () {
@@ -159,11 +175,11 @@ confirmAction \
 "==> Clean up previous build?" \
 "cleanBuildDir"
 
-if [ ! -f "$DOMAIN_TXT_PATH" ]; then
+if [ ! -f "$DOMAIN_PATH" ]; then
   echo "==> Domain name must be set before continuing"
   read -p "Input your domain name: " "DOMAIN"
-  echo "Saving $DOMAIN to $DOMAIN_TXT_PATH"
-  echo -n "$DOMAIN" > "$DOMAIN_TXT_PATH"
+  echo "Saving $DOMAIN to $DOMAIN_PATH"
+  echo -n "$DOMAIN" > "$DOMAIN_PATH"
 fi
 
 confirmAction \
@@ -174,11 +190,8 @@ echo "==> Checking that tls certs for \"rtl\" and \"lsp\" are provided"
 isCertProvided "$RTL_PATH" && isCertProvided "$LSP_PATH"
 echo "Certs are OK."
 
-RESOURCE_NAME="lsp-$BITCOIN_NETWORK"
-setupKubernetesCluster "$RESOURCE_NAME"
-setupPostgresInstance "$RESOURCE_NAME"
-
-exit
+setupKubernetesCluster "$CLOUD_RESOURCE_NAME"
+setupPostgresInstance "$CLOUD_RESOURCE_NAME"
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
@@ -188,32 +201,29 @@ echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
 
 echo "==> Deploying k8s resources"
-sh "$THIS_DIR/k8s-deploy.sh"
+sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh"
+sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd"
 
 echo "==> Partial spin"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 sleep 20
 
-echo "==> Generate additional creds"
-sh "$THIS_DIR/k8s-gen-creds.sh"
+echo "==> Exporting creds from running pods"
+sh "$THIS_DIR/k8s-export-creds.sh"
 
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-inline-certs.sh && ./nix/k8s-dhall-compile.sh $BITCOIN_NETWORK'"
+   "--run './nix/ns-inline-creds.sh && ./nix/k8s-dhall-compile.sh $BITCOIN_NETWORK'"
 
-# TODO: deploy step by step
-echo "==> Updating environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh"
+echo "==> Configuring environment for containers"
+sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
 
-echo "==> Restarting k8s deployments"
-sh "$THIS_DIR/k8s-restart.sh" rtl
-sh "$THIS_DIR/k8s-restart.sh" lsp
+echo "==> Deploying additional k8s resources"
+sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh"
+sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
-echo "==> Mine initial coins"
-sh "$THIS_DIR/k8s-mine.sh" 105
+echo "==> Setup for $BITCOIN_NETWORK has been completed!"

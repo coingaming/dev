@@ -19,4 +19,6 @@ in  ''
     export ${Bitcoind.env.rpcBind}=":${rpcPort}"
     export ${Bitcoind.env.rpcPort}="${rpcPort}"
     export ${Bitcoind.env.testNet}="1"
+    export ${Bitcoind.env.rpcUser}="${Bitcoind.mkRpcUser network}"
+    export ${Bitcoind.env.rpcPassword}="${Bitcoind.mkRpcPass network}"
     ''
