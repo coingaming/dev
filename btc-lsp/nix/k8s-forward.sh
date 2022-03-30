@@ -16,6 +16,6 @@ kubectl port-forward "$POSTGRES_POD" 5432:5432 &
 
 PIDS=$(jobs -pr)
 
-wait $PIDS
-
 trap "kill -9 $PIDS; exit" SIGINT SIGKILL SIGTERM
+
+wait $PIDS
