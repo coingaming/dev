@@ -8,7 +8,7 @@ let network = G.BitcoinNetwork.TestNet
 
 let bitcoindHost = G.unOwner G.Owner.Bitcoind
 
-let sharedEnv = ../env/lnd.dhall
+let sharedEnv = ../scripts/export-lnd-env.dhall
 
 in  ''
     #!/bin/sh

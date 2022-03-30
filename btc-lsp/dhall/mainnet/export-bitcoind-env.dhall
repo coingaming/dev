@@ -6,7 +6,7 @@ let network = G.BitcoinNetwork.MainNet
 
 let rpcPort = G.unPort (Bitcoind.mkRpcPort network)
 
-let sharedEnv = ../env/bitcoind.dhall
+let sharedEnv = ../scripts/export-bitcoind-env.dhall
 
 in  ''
     #!/bin/sh
