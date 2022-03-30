@@ -10,7 +10,7 @@ let Deployment = ../Kubernetes/Deployment.dhall
 
 let owner = G.unOwner G.Owner.Bitcoind
 
-let image = "heathmont/bitcoind:v1.0.9"
+let image = "heathmont/bitcoind:v0.22.0"
 
 let rpcUser = "bitcoinrpc"
 
