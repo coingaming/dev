@@ -41,6 +41,7 @@ let env =
       , lndGrpcPort = "LND_GRPC_PORT"
       , lndP2pPort = "LND_P2P_PORT"
       , lndRestPort = "LND_REST_PORT"
+      , lndWalletPass = "LND_WALLET_PASS"
       , bitcoinRpcUser = "BITCOIN_RPCUSER"
       , bitcoinRpcPass = "BITCOIN_RPCPASS"
       }
@@ -127,7 +128,7 @@ let configMapEnv
 
 let secretEnv
     : List Text
-    = [ env.bitcoinRpcUser, env.bitcoinRpcPass ]
+    = [ env.bitcoinRpcUser, env.bitcoinRpcPass, env.lndWalletPass ]
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv

@@ -2,4 +2,9 @@
 
 set -e
 
-minikube profile "btc-lsp"
+
+THIS_DIR="$(dirname "$(realpath "$0")")"
+
+. "$THIS_DIR/mk-export-profile.sh"
+
+minikube profile "$MINIKUBE_PROFILE"

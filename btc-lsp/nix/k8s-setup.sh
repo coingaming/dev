@@ -65,7 +65,6 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
 echo "==> Loading btc-lsp docker image into minikube"
-sh "$THIS_DIR/mk-setup-profile.sh"
 minikube image load \
   --daemon=true \
   $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
@@ -81,7 +80,7 @@ echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd postgres"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh"
+sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd postgres"
 
 echo "==> Partial spin"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
@@ -101,7 +100,7 @@ echo "==> Deploying additional k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh"
+sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
 echo "==> Mine initial coins"
 sh "$THIS_DIR/k8s-mine.sh" 105

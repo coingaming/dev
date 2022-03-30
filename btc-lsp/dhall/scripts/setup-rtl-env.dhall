@@ -29,10 +29,10 @@ in  ''
     if [ -f "$THIS_DIR/../${G.unOwner G.Owner.Lnd}/macaroon.hex" ]; then
       (kubectl create secret generic ${owner} \
         --from-literal=${G.toLowerCase
-                          rtlConfigNodesJson}="${G.mkEnvVar
+                           rtlConfigNodesJson}="${G.mkEnvVar
                                                     rtlConfigNodesJson}" \
         --from-literal=${G.toLowerCase
-                          rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
+                           rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
     fi
 
     if [ -n "$BITCOIN_NETWORK" ] && [ $BITCOIN_NETWORK != "regtest" ]; then

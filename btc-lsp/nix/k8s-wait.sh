@@ -11,6 +11,13 @@ check_state () {
   echo "Success! $1 is up and running!"
 }
 
-for MEMBER in bitcoind lnd rtl postgres; do
-  check_state "$MEMBER"
-done
+SERVICES="$1"
+
+if [ -n "$SERVICES" ]; then
+  for SERVICE in $SERVICES; do
+    check_state "$SERVICE"
+  done
+else
+  echo "Specify services to wait for."
+  exit 1;
+fi

@@ -4,16 +4,20 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-sh "$THIS_DIR/mk-setup-profile.sh"
+. "$THIS_DIR/mk-export-profile.sh"
 
 echo "==> Drop old kubernetes cluster"
 minikube stop && minikube delete
 
 echo "==> Create new kubernetes cluster"
 minikube start \
+  --profile="$MINIKUBE_PROFILE" \
   --driver=docker \
   --apiserver-names=kubernetes.docker.internal \
   --mount --mount-string="$HOME:$HOME"
+
+echo "==> Setting default minikube profile"
+sh "$THIS_DIR/mk-setup-profile.sh"
 
 echo "==> Enable ingress addon"
 minikube addons enable ingress
