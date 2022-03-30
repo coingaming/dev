@@ -20,9 +20,9 @@ let logVerbosity = "V3"
 
 let logSeverity = "DebugS"
 
-let tlsCert = ../../build/lsp/tls.cert as Text
+let tlsCert = ../../build/lsp/inlined-tls.cert as Text
 
-let tlsKey = ../../build/lsp/tls.key as Text
+let tlsKey = ../../build/lsp/inlined-tls.key as Text
 
 let grpcPort
     : G.Port
@@ -56,7 +56,7 @@ let mkServiceType
         merge
           { MainNet = Service.ServiceType.LoadBalancer
           , TestNet = Service.ServiceType.LoadBalancer
-          , RegTest = Service.ServiceType.NodePort
+          , RegTest = Service.ServiceType.ClusterIP
           }
           net
 

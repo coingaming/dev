@@ -16,7 +16,7 @@ let walletPass = G.defaultPass
 
 let hexMacaroon = ../../build/lnd/macaroon.hex as Text ? G.todo
 
-let tlsCert = ../../build/lnd/tls.cert as Text ? G.todo
+let tlsCert = ../../build/lnd/inlined-tls.cert as Text ? G.todo
 
 let minChanSize = 20000000
 
@@ -53,8 +53,8 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "lnd.coins.io"
-          , TestNet = "testnet-lnd.coins.io"
+          { MainNet = "lnd.mydomain.io"
+          , TestNet = "testnet-lnd.mydomain.io"
           , RegTest = owner
           }
           net
@@ -65,7 +65,7 @@ let mkServiceType
         merge
           { MainNet = Service.ServiceType.LoadBalancer
           , TestNet = Service.ServiceType.LoadBalancer
-          , RegTest = Service.ServiceType.NodePort
+          , RegTest = Service.ServiceType.ClusterIP
           }
           net
 

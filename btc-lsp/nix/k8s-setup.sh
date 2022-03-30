@@ -93,7 +93,7 @@ sh "$THIS_DIR/k8s-gen-creds.sh"
 
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-inline-creds.sh && ./nix/k8s-dhall-compile.sh'"
+   "--run './nix/ns-inline-certs.sh && ./nix/k8s-dhall-compile.sh'"
 
 echo "==> Updating environment for containers"
 kubectl delete secret rtl lsp
