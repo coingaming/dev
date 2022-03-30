@@ -4,24 +4,22 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-. "$THIS_DIR/k8s-export-env.sh"
+sh "$THIS_DIR/k8s-setup-minikube.sh"
 
 echo "==> Drop old kubernetes cluster"
-minikube stop --profile="$MINIKUBE_PROFILE" && \
-minikube delete --profile="$MINIKUBE_PROFILE"
+minikube stop && minikube delete
 
 echo "==> Create new kubernetes cluster"
 minikube start \
-  --profile="$MINIKUBE_PROFILE" \
   --driver=docker \
   --apiserver-names=kubernetes.docker.internal \
   --mount --mount-string="$HOME:$HOME"
 
 echo "==> Enable ingress addon"
-minikube addons enable ingress --profile="$MINIKUBE_PROFILE"
+minikube addons enable ingress
 
 echo "==> Setup hosts to access services from localhost"
-CLUSTER_IP=`minikube ip --profile=$MINIKUBE_PROFILE`
+CLUSTER_IP=`minikube ip`
 sudo sh "$THIS_DIR/k8s-setup-hosts.sh" "$CLUSTER_IP"
 
 echo "==> Allow to use kubectl from nix-shell"

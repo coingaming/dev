@@ -4,7 +4,7 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-. "$THIS_DIR/k8s-export-env.sh"
+sh "$THIS_DIR/k8s-setup-minikube.sh"
 
 BITCOIND_POD=`sh $THIS_DIR/k8s-get-pod.sh bitcoind`
 LND_POD=`sh $THIS_DIR/k8s-get-pod.sh lnd`
@@ -12,7 +12,7 @@ LSP_POD=`sh $THIS_DIR/k8s-get-pod.sh lsp`
 POSTGRES_POD=`sh $THIS_DIR/k8s-get-pod.sh postgres`
 
 if [ `uname -s` = "Darwin" ]; then
-  minikube tunnel --profile="$MINIKUBE_PROFILE" &
+  minikube tunnel &
 fi
 
 kubectl port-forward "$BITCOIND_POD" 18332:18332 39703:39703 39704:39704 &

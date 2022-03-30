@@ -65,12 +65,11 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | tr -d '\n' \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
-. "$THIS_DIR/k8s-export-env.sh"
-
 echo "==> Loading btc-lsp docker image into minikube"
+sh "$THIS_DIR/k8s-setup-minikube.sh"
 minikube image load \
-  -p "$MINIKUBE_PROFILE" \
-  --daemon=true $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
+  --daemon=true \
+  $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \

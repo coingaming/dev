@@ -4,6 +4,6 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-. "$THIS_DIR/k8s-export-env.sh"
+sh "$THIS_DIR/k8s-setup-minikube.sh"
 
-minikube stop --profile=$MINIKUBE_PROFILE
+minikube stop
