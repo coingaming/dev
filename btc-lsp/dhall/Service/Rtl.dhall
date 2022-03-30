@@ -55,8 +55,8 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "rtl.coins.io"
-          , TestNet = "testnet-rtl.coins.io"
+          { MainNet = "rtl.mydomain.io"
+          , TestNet = "testnet-rtl.mydomain.io"
           , RegTest = owner
           }
           net
