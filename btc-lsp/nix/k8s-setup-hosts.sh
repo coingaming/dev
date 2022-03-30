@@ -15,6 +15,6 @@ setup () {
   grep -q "$ENTRY" /etc/hosts || echo "$ENTRY" >> $HOSTS_FILE
 }
 
-for SERVICE in lnd rtl lsp; do
+for SERVICE in bitcoind lnd rtl lsp; do
   setup $SERVICE
 done
