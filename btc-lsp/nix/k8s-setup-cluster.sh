@@ -14,7 +14,7 @@ echo "==> Create new kubernetes cluster"
 minikube start \
   --profile="$MINIKUBE_PROFILE" \
   --driver=docker \
-  --apiserver-names=host.docker.internal \
+  --apiserver-names=kubernetes.docker.internal \
   --mount --mount-string="$HOME:$HOME"
 
 echo "==> Enable ingress addon"

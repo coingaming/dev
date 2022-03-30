@@ -4,7 +4,7 @@ set -e
 
 CONFIG_PATH="$HOME/.kube/config"
 LOCALHOST="127.0.0.1"
-DOCKERHOST="host.docker.internal"
+DOCKERHOST="kubernetes.docker.internal"
 
 if [ `uname -s` = "Darwin" ]; then
   sed -i ".bak" "s/$LOCALHOST/$DOCKERHOST/" "$CONFIG_PATH"
