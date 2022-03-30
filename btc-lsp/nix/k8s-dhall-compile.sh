@@ -5,14 +5,14 @@ set -e
 THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
-
-# Switch to regtest|testnet|mainnet to generate network-specific k8s resources
-BITCOIN_NETWORK=regtest
+BITCOIN_NETWORK="${1:-regtest}"
 
 KUBERNETES_BUILD_DIR="$ROOT_DIR/build/k8s"
 SCRIPTS_BUILD_DIR="$ROOT_DIR/build/scripts"
 
 mkdir -p "$KUBERNETES_BUILD_DIR" "$SCRIPTS_BUILD_DIR"
+
+echo "==> Compiling dhall for $BITCOIN_NETWORK environment"
 
 dhall_to_yaml() {
   FILE_PATH="$1"

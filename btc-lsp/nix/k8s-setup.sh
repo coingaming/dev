@@ -28,16 +28,16 @@ else
   done
 fi
 
-echo "==> Setup kubernetes cluster"
+echo "==> Setup regtest kubernetes cluster"
 sh "$THIS_DIR/k8s-setup-cluster.sh"
 
 echo "==> Build cleanup"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
-echo "==> Generate keys"
+echo "==> Generate certs"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/k8s-gen-keys.sh && ./nix/ns-inline-creds.sh'"
+   "--run './nix/k8s-gen-certs.sh && ./nix/ns-inline-creds.sh'"
 
 case $SETUP_MODE in
   --source)
