@@ -282,10 +282,9 @@ createRawTransaction client us tgts =
 -- | A successfully decoded raw transaction, from a given serialized,
 --   hex-encoded transaction.
 data DecodedRawTransaction =
-    DecodedRawTransaction { -- | The raw transaction.
-                            decRaw         :: RawTransaction
+    DecodedRawTransaction {
                           -- | The transaction version number.
-                          , decTxnVersion  :: Integer
+                            decTxnVersion  :: Integer
                           , decTxId        :: TransactionID
                           , decTxnLockTime :: Integer
                           , decSize        :: Integer
@@ -297,8 +296,7 @@ data DecodedRawTransaction =
                           } deriving (Show, Read, Ord, Eq)
 
 instance FromJSON DecodedRawTransaction where
-    parseJSON (Object o) = DecodedRawTransaction <$> o .: "hex"
-                                                 <*> o .: "version"
+    parseJSON (Object o) = DecodedRawTransaction <$> o .: "version"
                                                  <*> o .: "txid"
                                                  <*> o .: "locktime"
                                                  <*> o .: "size"
