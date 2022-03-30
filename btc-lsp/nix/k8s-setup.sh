@@ -6,6 +6,7 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
 SETUP_MODE="--prebuilt"
 GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
+BITCOIN_NETWORK=regtest
 
 if [ -z "$*" ]; then
   echo "==> using defaults"
@@ -76,7 +77,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/k8s-dhall-compile.sh'"
 
 echo "==> Configuring environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh"
+sh "$THIS_DIR/k8s-setup-env.sh $BITCOIN_NETWORK"
 
 echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh"

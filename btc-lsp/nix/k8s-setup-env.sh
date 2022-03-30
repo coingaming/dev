@@ -4,7 +4,7 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 SCRIPTS_DIR="$THIS_DIR/../build/scripts"
-BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
+BITCOIN_NETWORK="$1"
 
 sh "$SCRIPTS_DIR/setup-bitcoind-env.sh"
 sh "$SCRIPTS_DIR/setup-lnd-env.sh"
