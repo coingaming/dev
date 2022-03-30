@@ -71,6 +71,7 @@ let mkService
     = λ(net : G.BitcoinNetwork) →
         Service.mkService
           owner
+          (None (List { mapKey : Text, mapValue : Text }))
           (mkServiceType net)
           (Service.mkPorts (mkPorts net))
 

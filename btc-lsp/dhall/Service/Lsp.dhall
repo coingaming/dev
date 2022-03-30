@@ -8,8 +8,6 @@ let Deployment = ../Kubernetes/Deployment.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
-let image = ../../build/docker-image-btc-lsp.txt as Text
-
 let aes256InitVector = "dRgUkXp2s5v8y/B?"
 
 let aes256SecretKey = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
@@ -22,9 +20,9 @@ let logVerbosity = "V3"
 
 let logSeverity = "DebugS"
 
-let tlsCert = ../../build/lsp/tls.cert as Text ? G.todo
+let tlsCert = ../../build/lsp/tls.cert as Text
 
-let tlsKey = ../../build/lsp/tls.key as Text ? G.todo
+let tlsKey = ../../build/lsp/tls.key as Text
 
 let grpcPort
     : G.Port
@@ -62,10 +60,35 @@ let mkServiceType
           }
           net
 
+let mkServiceAnnotations
+    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
+          , TestNet =
+              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
+          , RegTest = None (List { mapKey : Text, mapValue : Text })
+          }
+          net
+
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-        Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
+        Service.mkService
+          owner
+          (mkServiceAnnotations net)
+          (mkServiceType net)
+          (Service.mkPorts ports)
+
+let mkContainerImage
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = "heathmont/btc-lsp"
+          , TestNet = "heathmont/btc-lsp"
+          , RegTest = ../../build/docker-image-btc-lsp.txt as Text ? G.todo
+          }
+          net
 
 let configMapEnv
     : List Text
@@ -98,7 +121,7 @@ let mkContainer
       λ(net : G.BitcoinNetwork) →
         K.Container::{
         , name
-        , image = Some image
+        , image = Some (mkContainerImage net)
         , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts ports)
         }
