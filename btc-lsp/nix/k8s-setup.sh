@@ -6,7 +6,7 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
 SETUP_MODE="--prebuilt"
 GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
-BITCOIN_NETWORK=regtest
+BITCOIN_NETWORK="regtest"
 
 if [ -z "$*" ]; then
   echo "==> using defaults"
@@ -29,16 +29,15 @@ else
   done
 fi
 
-echo "==> Setup regtest kubernetes cluster"
-sh "$THIS_DIR/k8s-setup-cluster.sh"
+echo "==> Setup $BITCOIN_NETWORK kubernetes cluster"
+sh "$THIS_DIR/mk-setup-cluster.sh"
 
-echo "==> Build cleanup"
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR"
+echo "==> Clean up build"
+rm -rf "$BUILD_DIR" && mkdir -p "$BUILD_DIR"
 
 echo "==> Generate certs"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/k8s-gen-certs.sh && ./nix/ns-inline-certs.sh'"
+   "--run './nix/ns-gen-certs.sh && ./nix/ns-inline-certs.sh'"
 
 case $SETUP_MODE in
   --source)
@@ -66,20 +65,20 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
 echo "==> Loading btc-lsp docker image into minikube"
-sh "$THIS_DIR/k8s-setup-minikube.sh"
+sh "$THIS_DIR/mk-setup-profile.sh"
 minikube image load \
   --daemon=true \
   $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/k8s-dhall-compile.sh'"
+   "--run './nix/ns-dhall-compile.sh'"
 
 echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
 
 echo "==> Deploying k8s resources"
-sh "$THIS_DIR/k8s-deploy.sh"
+sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd postgres"
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh"
@@ -93,15 +92,13 @@ sh "$THIS_DIR/k8s-gen-creds.sh"
 
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-inline-certs.sh && ./nix/k8s-dhall-compile.sh'"
+   "--run './nix/ns-inline-certs.sh && ./nix/ns-dhall-compile.sh'"
 
 echo "==> Updating environment for containers"
-kubectl delete secret rtl lsp
 sh "$THIS_DIR/k8s-setup-env.sh"
 
-echo "==> Restarting k8s deployments"
-sh "$THIS_DIR/k8s-restart.sh" rtl
-sh "$THIS_DIR/k8s-restart.sh" lsp
+echo "==> Deploying additional k8s resources"
+sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh"
