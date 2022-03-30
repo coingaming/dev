@@ -77,7 +77,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/k8s-dhall-compile.sh'"
 
 echo "==> Configuring environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh $BITCOIN_NETWORK"
+sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
 
 echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh"

@@ -8,7 +8,7 @@ BITCOIN_NETWORK="$1"
 
 sh "$SCRIPTS_DIR/setup-bitcoind-env.sh"
 sh "$SCRIPTS_DIR/setup-lnd-env.sh"
-sh "$SCRIPTS_DIR/setup-rtl-env.sh $BITCOIN_NETWORK" 
+sh "$SCRIPTS_DIR/setup-rtl-env.sh" "$BITCOIN_NETWORK"
 
 if [ $BITCOIN_NETWORK = "regtest" ]; then
   sh "$SCRIPTS_DIR/setup-postgres-env.sh"
