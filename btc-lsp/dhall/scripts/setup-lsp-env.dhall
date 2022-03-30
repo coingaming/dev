@@ -64,18 +64,20 @@ in  ''
       --from-literal=${G.toLowerCase
                          lspElectrsEnv}="${G.mkEnvVar lspElectrsEnv}") || true
 
-    (kubectl create secret generic ${owner} \
-      --from-literal=${G.toLowerCase lspLibpqConnStr}="${G.mkEnvVar
-                                                           lspLibpqConnStr}" \
-      --from-literal=${G.toLowerCase
-                         lspAes256InitVector}="${G.mkEnvVar
-                                                   lspAes256InitVector}" \
-      --from-literal=${G.toLowerCase
-                         lspAes256SecretKey}="${G.mkEnvVar
-                                                  lspAes256SecretKey}" \
-      --from-literal=${G.toLowerCase lspLndEnv}="${G.mkEnvVar lspLndEnv}" \
-      --from-literal=${G.toLowerCase lspGrpcServerEnv}="${G.mkEnvVar
-                                                            lspGrpcServerEnv}" \
-      --from-literal=${G.toLowerCase
-                         lspBitcoindEnv}="${G.mkEnvVar lspBitcoindEnv}") || true
+    if [ -f "$THIS_DIR/../${G.unOwner G.Owner.Lnd}/macaroon.hex" ]; then
+      (kubectl create secret generic ${owner} \
+        --from-literal=${G.toLowerCase lspLibpqConnStr}="${G.mkEnvVar
+                                                            lspLibpqConnStr}" \
+        --from-literal=${G.toLowerCase
+                          lspAes256InitVector}="${G.mkEnvVar
+                                                    lspAes256InitVector}" \
+        --from-literal=${G.toLowerCase
+                          lspAes256SecretKey}="${G.mkEnvVar
+                                                    lspAes256SecretKey}" \
+        --from-literal=${G.toLowerCase lspLndEnv}="${G.mkEnvVar lspLndEnv}" \
+        --from-literal=${G.toLowerCase lspGrpcServerEnv}="${G.mkEnvVar
+                                                              lspGrpcServerEnv}" \
+        --from-literal=${G.toLowerCase
+                          lspBitcoindEnv}="${G.mkEnvVar lspBitcoindEnv}") || true
+    fi
     ''

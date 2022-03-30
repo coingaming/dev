@@ -26,14 +26,16 @@ in  ''
       --from-literal=${G.toLowerCase
                          configFromEnv}="${G.mkEnvVar configFromEnv}") || true
 
-    (kubectl create secret generic ${owner} \
-      --from-literal=${G.toLowerCase
-                         rtlConfigNodesJson}="${G.mkEnvVar
-                                                  rtlConfigNodesJson}" \
-      --from-literal=${G.toLowerCase
-                         rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
+    if [ -f "$THIS_DIR/../${G.unOwner G.Owner.Lnd}/macaroon.hex" ]; then
+      (kubectl create secret generic ${owner} \
+        --from-literal=${G.toLowerCase
+                          rtlConfigNodesJson}="${G.mkEnvVar
+                                                    rtlConfigNodesJson}" \
+        --from-literal=${G.toLowerCase
+                          rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
+    fi
 
-    if [ ! -z "$BITCOIN_NETWORK" ] && [ $BITCOIN_NETWORK != "regtest" ]; then
+    if [ -n "$BITCOIN_NETWORK" ] && [ $BITCOIN_NETWORK != "regtest" ]; then
       (kubectl create secret tls ${Rtl.tlsSecretName} \
         --cert="$THIS_DIR/../${owner}/tls.crt" \
         --key="$THIS_DIR/../${owner}/tls.key") || true
