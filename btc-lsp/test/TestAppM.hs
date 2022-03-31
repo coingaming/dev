@@ -112,9 +112,12 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
-  withElectrs method args = do
-    env <- asks $ envElectrs . testEnvLsp
-    first FailureElectrs <$> args (method env)
+  withElectrs method args =
+    maybeM
+      (error "Electrs Env is missing")
+      ((first FailureElectrs <$>) . args . method)
+      . asks
+      $ envElectrs . testEnvLsp
   withBtc method args = do
     env <- asks $ Env.envBtc . testEnvLsp
     --
