@@ -32,6 +32,7 @@ let env =
       , rpcAllowIp = "RPCALLOWIP"
       , rpcBind = "RPCBIND"
       , rpcPort = "RPCPORT"
+      , p2pPort = "PORT"
       , server = "SERVER"
       , testNet = "TESTNET"
       , txIndex = "TXINDEX"
@@ -73,18 +74,40 @@ let mkRpcPort
           }
           net
 
+let mkP2pPort
+    : G.BitcoinNetwork → G.Port
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet.unPort = 8333
+          , TestNet.unPort = 18333
+          , RegTest.unPort = 18444
+          }
+          net
+
 let mkPorts
     : G.BitcoinNetwork → List Natural
     = λ(net : G.BitcoinNetwork) →
-        G.unPorts [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net ]
+        G.unPorts
+          [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net, mkP2pPort net ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = Service.ServiceType.ClusterIP
-          , TestNet = Service.ServiceType.ClusterIP
+          { MainNet = Service.ServiceType.LoadBalancer
+          , TestNet = Service.ServiceType.LoadBalancer
           , RegTest = Service.ServiceType.ClusterIP
+          }
+          net
+
+let mkServiceAnnotations
+    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
+          , TestNet =
+              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
+          , RegTest = None (List { mapKey : Text, mapValue : Text })
           }
           net
 
@@ -93,7 +116,7 @@ let mkService
     = λ(net : G.BitcoinNetwork) →
         Service.mkService
           owner
-          (None (List { mapKey : Text, mapValue : Text }))
+          (mkServiceAnnotations net)
           (mkServiceType net)
           (Service.mkPorts (mkPorts net))
 
@@ -130,6 +153,7 @@ let configMapEnv
       , env.rpcAllowIp
       , env.rpcBind
       , env.rpcPort
+      , env.p2pPort
       , env.server
       , env.testNet
       , env.txIndex
@@ -175,6 +199,7 @@ in  { zmqPubRawBlockPort
     , mkRpcUser
     , mkRpcPass
     , mkRpcPort
+    , mkP2pPort
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

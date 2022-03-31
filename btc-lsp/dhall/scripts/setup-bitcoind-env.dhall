@@ -18,6 +18,8 @@ let rpcBind = Bitcoind.env.rpcBind
 
 let rpcPort = Bitcoind.env.rpcPort
 
+let p2pPort = Bitcoind.env.p2pPort
+
 let server = Bitcoind.env.server
 
 let testNet = Bitcoind.env.testNet
@@ -57,6 +59,7 @@ in  ''
       --from-literal=${G.toLowerCase rpcAllowIp}="${G.mkEnvVar rpcAllowIp}" \
       --from-literal=${G.toLowerCase rpcBind}="${G.mkEnvVar rpcBind}" \
       --from-literal=${G.toLowerCase rpcPort}="${G.mkEnvVar rpcPort}" \
+      --from-literal=${G.toLowerCase p2pPort}="${G.mkEnvVar p2pPort}" \
       --from-literal=${G.toLowerCase server}="${G.mkEnvVar server}" \
       --from-literal=${G.toLowerCase testNet}="${G.mkEnvVar testNet}" \
       --from-literal=${G.toLowerCase txIndex}="${G.mkEnvVar txIndex}" \
