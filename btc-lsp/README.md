@@ -93,22 +93,23 @@ If nix is not available, install tools in any other way you like:
 
 ```
 doctl-1.71.1
+expect-5.45.4
+jq-1.6
 kubectl-1.23.5
 minikube-1.25.2
-jq-1.6
+wget-1.21.3
 ```
 
 1. Setup cluster and services:
 
 ```sh
-./nix/k8s-setup-cluster.sh
 ./nix/k8s-setup.sh --prebuilt
 ```
 
-2. Forward services to localhost (MacOS):
+2. Forward services to host network:
 
 ```sh
-minikube tunnel
+./nix/k8s-forward.sh
 ```
 
 ## Digitalocean
