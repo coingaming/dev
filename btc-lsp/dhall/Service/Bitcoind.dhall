@@ -12,6 +12,10 @@ let owner = G.unOwner G.Owner.Bitcoind
 
 let image = "heathmont/bitcoind:v0.22.0-neutrino"
 
+let secureRpcUser = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
+
+let secureRpcPass = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
+
 let zmqPubRawBlockPort
     : G.Port
     = { unPort = 39703 }
@@ -43,8 +47,8 @@ let mkRpcUser
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
-          , TestNet = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
+          { MainNet = secureRpcUser
+          , TestNet = secureRpcUser
           , RegTest = "bitcoinrpc"
           }
           net
@@ -53,8 +57,8 @@ let mkRpcPass
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
-          , TestNet = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
+          { MainNet = secureRpcPass
+          , TestNet = secureRpcPass
           , RegTest = G.defaultPass
           }
           net

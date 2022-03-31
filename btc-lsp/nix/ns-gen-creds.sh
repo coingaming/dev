@@ -39,7 +39,33 @@ genCert () {
   deleteSubjectAltName "$BUILD_PATH"
 }
 
-echo "==> Generating LSP TLS cert"
+genRandomString () {
+  openssl rand -base64 32
+}
+
+genSecureCred () {
+  SERVICE_NAME="$1"
+  FILENAME="$2"
+  BUILD_PATH="$BUILD_DIR/$SERVICE_NAME"
+
+  mkdir -p "$BUILD_PATH"
+
+  echo "Saving $FILENAME in $BUILD_PATH"
+  echo -n `genRandomString` > "$BUILD_PATH/$FILENAME"
+}
+
+echo "==> Generating Bitcoind creds"
+genSecureCred "bitcoind" "rpcuser.txt"
+genSecureCred "bitcoind" "rpcpass.txt"
+
+echo "==> Generating Lnd creds"
+genSecureCred "lnd" "walletpassword.txt"
+
+echo "==> Generating Rtl creds"
+genSecureCred "rtl" "multipass.txt"
+genCert "rtl"
+
+echo "==> Generating Lsp creds"
 genCert "lsp"
 
-echo "==> Generated certs"
+echo "==> Generated creds!"

@@ -16,6 +16,10 @@ let image = "heathmont/rtl:9c8d7d6"
 
 let tlsSecretName = "${owner}-tls"
 
+let domain = ../../build/rtl/domain.txt as Text ? G.todo
+
+let securePass = ../../build/rtl/multipass.txt as Text ? G.todo
+
 let tcpPort
     : G.Port
     = { unPort = 3000 }
@@ -30,12 +34,12 @@ let ports
     : List Natural
     = G.unPorts [ tcpPort ]
 
-let mkDashboardPass
+let mkMultiPass
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/rtl/password.txt as Text ? G.todo
-          , TestNet = ../../build/rtl/password.txt as Text ? G.todo
+          { MainNet = securePass
+          , TestNet = securePass
           , RegTest = G.defaultPass
           }
           net
@@ -51,7 +55,7 @@ let mkRtlConfigJson
             "rtlSSO": 0
           },
           "defaultNodeIndex": 1,
-          "multiPass": "${mkDashboardPass net}",
+          "multiPass": "${mkMultiPass net}",
           "nodes": [],
           "port": "${G.unPort tcpPort}"
         }
@@ -80,8 +84,8 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "rtl.${../../build/domain.txt as Text ? G.todo}"
-          , TestNet = "testnet-rtl.${../../build/domain.txt as Text ? G.todo}"
+          { MainNet = "rtl.${domain}"
+          , TestNet = "testnet-rtl.${domain}"
           , RegTest = owner
           }
           net

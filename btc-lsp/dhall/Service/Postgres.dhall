@@ -20,6 +20,8 @@ let host = owner
 
 let database = user
 
+let connStr = ../../build/postgres/conn.txt as Text ? G.todo
+
 let tcpPort
     : G.Port
     = { unPort = 5432 }
@@ -36,8 +38,8 @@ let mkConnStr
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/postgres/conn.txt as Text ? G.todo
-          , TestNet = ../../build/postgres/conn.txt as Text ? G.todo
+          { MainNet = connStr
+          , TestNet = connStr
           , RegTest = "postgresql://${user}:${password}@${host}/${database}"
           }
           net

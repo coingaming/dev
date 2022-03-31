@@ -16,7 +16,7 @@ in  ''
     set -e
 
     THIS_DIR="$(dirname "$(realpath "$0")")"
-    TLS_CERT_PATH="$THIS_DIR/../${owner}/tls.crt"
+    TLS_CERT_PATH="$THIS_DIR/../${owner}/tls.cert"
     TLS_KEY_PATH="$THIS_DIR/../${owner}/tls.key"
 
     . "$THIS_DIR/export-${owner}-env.sh"
@@ -37,6 +37,6 @@ in  ''
     if [ -f "$TLS_CERT_PATH" ] && [ -f "$TLS_KEY_PATH" ]; then
       (kubectl create secret tls ${Rtl.tlsSecretName} \
         --cert="$TLS_CERT_PATH" \
-        --key="$TLS_KEY") || true
+        --key="$TLS_KEY_PATH") || true
     fi
     ''
