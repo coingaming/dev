@@ -95,7 +95,13 @@ extractRelatedUtxoFromBlock blk =
           case mswp of
             Just swp ->
               newUtxo (trySat2MSat val) (tryFrom num) txid swp
-            Nothing ->
+            Nothing -> do
+              --
+              -- TODO : remove me!!!
+              --
+              $(logTM) DebugS . logStr $
+                "No swap found for address "
+                  <> inspect addr
               pure Nothing
         _ -> do
           $(logTM) ErrorS . logStr $
@@ -204,6 +210,14 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
+  --
+  -- TODO : remove me!!!
+  --
+  $(logTM) DebugS . logStr $
+    "Got new block "
+      <> inspect hash
+      <> " with content "
+      <> inspect blk
   utxos <- lift $ extractRelatedUtxoFromBlock blk
   persistBlockT blk utxos
   pure utxos
