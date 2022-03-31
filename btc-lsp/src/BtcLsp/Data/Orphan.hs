@@ -7,9 +7,38 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
+import qualified Network.Bitcoin.RawTransaction as Btc
 import qualified Text.PrettyPrint as PP
 import qualified Universum
 import qualified Witch
+
+deriving stock instance Generic Btc.TxnOutputType
+
+deriving stock instance Generic Btc.ScriptSig
+
+deriving stock instance Generic Btc.ScriptPubKey
+
+deriving stock instance Generic Btc.TxIn
+
+deriving stock instance Generic Btc.TxOut
+
+deriving stock instance Generic Btc.BlockVerbose
+
+deriving stock instance Generic Btc.DecodedRawTransaction
+
+instance Out Btc.TxnOutputType
+
+instance Out Btc.ScriptSig
+
+instance Out Btc.ScriptPubKey
+
+instance Out Btc.TxIn
+
+instance Out Btc.TxOut
+
+instance Out Btc.BlockVerbose
+
+instance Out Btc.DecodedRawTransaction
 
 instance From Text Lnd.PaymentRequest
 
