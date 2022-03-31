@@ -28,9 +28,3 @@ docker load -q -i \
 
 echo "btc-lsp ==> Chown"
 sudo chown -R $USER:$USER "$BTC_LSP_BUILD_DIR"
-
-echo "btc-lsp ==> DEBUG ls "
-ls -la "$BTC_LSP_BUILD_DIR"
-
-echo "btc-lsp ==> DEBUG image name"
-cat "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.txt"

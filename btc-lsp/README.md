@@ -71,6 +71,16 @@ Run specific tests with hot code reloading:
 ghcid --setup ":set args -m importPubKey"
 ```
 
+## Release
+
+Releases are automated by CI. To create new release, bump the version inside `VERSION` file. Then push all changes into github and merge into `master` branch. Then run:
+
+```sh
+../nix/hm-release.sh
+```
+
+The script will push new tag which will trigger new github release and package.
+
 ## Kubernetres
 
 K8S setup is scripted in a way similar to Docker/Swarm setup. Some tools are required to be installed directly on host machine. They can be installed using nix-env:
@@ -83,22 +93,23 @@ If nix is not available, install tools in any other way you like:
 
 ```
 doctl-1.71.1
+expect-5.45.4
+jq-1.6
 kubectl-1.23.5
 minikube-1.25.2
-jq-1.6
+wget-1.21.3
 ```
 
 1. Setup cluster and services:
 
 ```sh
-./nix/k8s-setup-cluster.sh
 ./nix/k8s-setup.sh --prebuilt
 ```
 
-2. Forward services to localhost (MacOS):
+2. Forward services to host network:
 
 ```sh
-minikube tunnel
+./nix/k8s-forward.sh
 ```
 
 ## Digitalocean
