@@ -8,7 +8,7 @@ let network = G.BitcoinNetwork.MainNet
 
 let bitcoindHost = G.unOwner G.Owner.Bitcoind
 
-let sharedEnv = ../env/lnd.dhall
+let sharedEnv = ../scripts/export-lnd-env.dhall
 
 in  ''
     #!/bin/sh
@@ -22,4 +22,7 @@ in  ''
                                                           ( Bitcoind.mkRpcPort
                                                               network
                                                           )}"
+    export ${Lnd.env.lndWalletPass}="${Lnd.mkWalletPass network}"
+    export ${Lnd.env.bitcoinRpcUser}="${Bitcoind.mkRpcUser network}"
+    export ${Lnd.env.bitcoinRpcPass}="${Bitcoind.mkRpcPass network}"
     ''

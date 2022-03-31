@@ -24,6 +24,8 @@ let lndP2pPort = Lnd.env.lndP2pPort
 
 let lndRestPort = Lnd.env.lndRestPort
 
+let lndWalletPass = Lnd.env.lndWalletPass
+
 in  ''
     #!/bin/bash
 
@@ -33,7 +35,7 @@ in  ''
 
     echo "==> Setting up env for ${owner}"
 
-    source "$THIS_DIR/export-${owner}-env.sh"
+    . "$THIS_DIR/export-${owner}-env.sh"
 
     (kubectl create configmap ${owner} \
       --from-literal=${G.toLowerCase
@@ -57,6 +59,8 @@ in  ''
     (kubectl create secret generic ${owner} \
       --from-literal=${G.toLowerCase bitcoinRpcUser}="${G.mkEnvVar
                                                           bitcoinRpcUser}" \
+      --from-literal=${G.toLowerCase bitcoinRpcPass}="${G.mkEnvVar
+                                                          bitcoinRpcPass}" \
       --from-literal=${G.toLowerCase
-                         bitcoinRpcPass}="${G.mkEnvVar bitcoinRpcPass}") || true
+                         lndWalletPass}="${G.mkEnvVar lndWalletPass}") || true
     ''

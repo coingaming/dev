@@ -6,7 +6,7 @@ let network = G.BitcoinNetwork.TestNet
 
 let rpcPort = G.unPort (Bitcoind.mkRpcPort network)
 
-let sharedEnv = ../env/bitcoind.dhall
+let sharedEnv = ../scripts/export-bitcoind-env.dhall
 
 in  ''
     #!/bin/sh
@@ -19,4 +19,6 @@ in  ''
     export ${Bitcoind.env.rpcBind}=":${rpcPort}"
     export ${Bitcoind.env.rpcPort}="${rpcPort}"
     export ${Bitcoind.env.testNet}="1"
+    export ${Bitcoind.env.rpcUser}="${Bitcoind.mkRpcUser network}"
+    export ${Bitcoind.env.rpcPassword}="${Bitcoind.mkRpcPass network}"
     ''

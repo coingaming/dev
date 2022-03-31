@@ -103,7 +103,7 @@ wget-1.21.3
 1. Setup cluster and services:
 
 ```sh
-./nix/k8s-setup.sh --prebuilt
+./nix/k8s-setup.sh
 ```
 
 2. Forward services to host network:
@@ -147,16 +147,10 @@ kubectl describe pod <pod-name>
 3. Get detailed info about current cluster state:
 
 ```sh
-minikube dashboard
+minikube dashboard --profile=btc-lsp
 ```
 
-4. To access postgres dbs from local machine (pgAdmin or Postico):
-
-```sh
-kubectl port-forward <pod-name> 5432:<desired-port>
-```
-
-5. Lnd after restart is locked. Usually Lsp unlocks it automatically, but if for some reason it's locked (for example Lsp is not running) then it's possible to unlock Lnd with:
+4. Lnd after restart is locked. Usually Lsp unlocks it automatically, but if for some reason it's locked (for example Lsp is not running) then you can unlock it with:
 
 ```sh
 ./nix/k8s-lazy-init-unlock.sh

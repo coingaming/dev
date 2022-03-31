@@ -16,10 +16,12 @@ in  ''
     set -e
 
     THIS_DIR="$(dirname "$(realpath "$0")")"
+    TLS_CERT_PATH="$THIS_DIR/../${owner}/tls.cert"
+    TLS_KEY_PATH="$THIS_DIR/../${owner}/tls.key"
+
+    . "$THIS_DIR/export-${owner}-env.sh"
 
     echo "==> Setting up env for ${owner}"
-
-    source "$THIS_DIR/export-${owner}-env.sh"
 
     (kubectl create configmap ${owner} \
       --from-literal=${G.toLowerCase
@@ -32,7 +34,9 @@ in  ''
       --from-literal=${G.toLowerCase
                          rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
 
-    (kubectl create secret tls ${Rtl.tlsSecretName} \
-      --cert="$THIS_DIR/../${owner}/tls.crt" \
-      --key="$THIS_DIR/../${owner}/tls.key") || true
+    if [ -f "$TLS_CERT_PATH" ] && [ -f "$TLS_KEY_PATH" ]; then
+      (kubectl create secret tls ${Rtl.tlsSecretName} \
+        --cert="$TLS_CERT_PATH" \
+        --key="$TLS_KEY_PATH") || true
+    fi
     ''

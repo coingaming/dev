@@ -14,9 +14,11 @@ let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
-let dashboardPass = G.defaultPass
-
 let tlsSecretName = "${owner}-tls"
+
+let domain = ../../build/rtl/domain.txt as Text ? G.todo
+
+let securePass = ../../build/rtl/multipass.txt as Text ? G.todo
 
 let tcpPort
     : G.Port
@@ -32,6 +34,33 @@ let ports
     : List Natural
     = G.unPorts [ tcpPort ]
 
+let mkMultiPass
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = securePass
+          , TestNet = securePass
+          , RegTest = G.defaultPass
+          }
+          net
+
+let mkRtlConfigJson
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        ''
+        {
+          "SSO":{
+            "logoutRedirectLink": "",
+            "rtlCookiePath": "",
+            "rtlSSO": 0
+          },
+          "defaultNodeIndex": 1,
+          "multiPass": "${mkMultiPass net}",
+          "nodes": [],
+          "port": "${G.unPort tcpPort}"
+        }
+        ''
+
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
@@ -45,14 +74,18 @@ let mkServiceType
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-        Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
+        Service.mkService
+          owner
+          (None (List { mapKey : Text, mapValue : Text }))
+          (mkServiceType net)
+          (Service.mkPorts ports)
 
 let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "rtl.coins.io"
-          , TestNet = "testnet-rtl.coins.io"
+          { MainNet = "rtl.${domain}"
+          , TestNet = "testnet-rtl.${domain}"
           , RegTest = owner
           }
           net
@@ -111,10 +144,10 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { dashboardPass
-    , tlsSecretName
+in  { tlsSecretName
     , tcpPort
     , env
+    , mkRtlConfigJson
     , mkService
     , mkDeployment
     , mkIngress

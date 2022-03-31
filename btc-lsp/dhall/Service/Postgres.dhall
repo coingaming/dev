@@ -12,13 +12,15 @@ let owner = G.unOwner G.Owner.Postgres
 
 let image = "heathmont/postgres:11-alpine-a2e8bbe"
 
-let user = "btc-lsp"
+let user = "lsp"
 
 let password = G.defaultPass
 
 let host = owner
 
 let database = user
+
+let connStr = ../../build/postgres/conn.txt as Text ? G.todo
 
 let tcpPort
     : G.Port
@@ -31,6 +33,16 @@ let env =
       , postgresHost = "POSTGRES_HOST"
       , postgresDatabase = "POSTGRES_DATABASE"
       }
+
+let mkConnStr
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = connStr
+          , TestNet = connStr
+          , RegTest = "postgresql://${user}:${password}@${host}/${database}"
+          }
+          net
 
 let ports
     : List Natural
@@ -49,7 +61,11 @@ let mkServiceType
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-        Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
+        Service.mkService
+          owner
+          (None (List { mapKey : Text, mapValue : Text }))
+          (mkServiceType net)
+          (Service.mkPorts ports)
 
 let mkVolumeSize
     : G.BitcoinNetwork → Volume.Size.Type
@@ -111,10 +127,10 @@ let mkDeployment
 
 in  { user
     , password
-    , host
     , database
     , tcpPort
     , env
+    , mkConnStr
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment
