@@ -2,6 +2,10 @@ let G = ../Global.dhall
 
 let Lsp = ../Service/Lsp.dhall
 
+let Lnd = ../Service/Lnd.dhall
+
+let Postgres = ../Service/Postgres.dhall
+
 let network = G.BitcoinNetwork.TestNet
 
 let sharedEnv = ../scripts/export-lsp-env.dhall
@@ -13,8 +17,9 @@ in  ''
 
     ${sharedEnv}
 
+    export ${Lsp.env.lspMsatPerByte}=""
     export ${Lsp.env.lspLibpqConnStr}=${Postgres.mkConnStr network}
     export ${Lsp.env.lspLndP2pHost}="${Lnd.mkHost network}"
-    export ${Lsp.env.lspLndEnv}='${Lsp.mkLndEnv network}'
-    export ${Lsp.env.lspBitcoindEnv}='${Lsp.mkBitcoindEnv network}'
+    export ${Lsp.env.lspLndEnv}='${Lsp.mkLspLndEnv network}'
+    export ${Lsp.env.lspBitcoindEnv}='${Lsp.mkLspBitcoindEnv network}'
     ''

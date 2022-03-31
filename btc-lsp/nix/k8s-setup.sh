@@ -74,7 +74,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
 
 echo "==> Configuring environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
+sh "$THIS_DIR/k8s-setup-env.sh"
 
 echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd postgres"
@@ -94,7 +94,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-inline-creds.sh && ./nix/ns-dhall-compile.sh'"
 
 echo "==> Configuring environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
+sh "$THIS_DIR/k8s-setup-env.sh"
 
 echo "==> Deploying additional k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"

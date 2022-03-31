@@ -22,8 +22,9 @@ DOMAIN_PATH="$BUILD_DIR/domain.txt"
 # Save Postgres connection string here
 PG_CONN_PATH="$POSTGRES_PATH/conn.txt"
 
-# Name to use when creating resources within cloud provider
-CLOUD_RESOURCE_NAME="lsp-$BITCOIN_NETWORK"
+# Names to use when creating resources within cloud provider
+K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
+PG_INSTANCE_NAME="lsp-$BITCOIN_NETWORK"
 
 isInstalled () {
   if ! command -v "$1" &> /dev/null; then
@@ -108,9 +109,7 @@ deleteKubernetesCluster () {
 }
 
 setupKubernetesCluster () {
-  isInstalled doctl && \
-  doctl account get && \
-  K8S_CLUSTER_NAME="$1"
+  isInstalled doctl && doctl account get
 
   if doctl kubernetes cluster get "$K8S_CLUSTER_NAME"; then
     confirmAction \
@@ -157,7 +156,6 @@ recreatePostgresInstance () {
 setupPostgresInstance () {
   isInstalled doctl && \
   doctl account get && \
-  PG_INSTANCE_NAME="$1"
   PG_INSTANCE_ID=`getPostgresInstanceId $PG_INSTANCE_NAME`
 
   if [ -n "$PG_INSTANCE_ID" ]; then
@@ -190,15 +188,15 @@ echo "==> Checking that tls certs for \"rtl\" and \"lsp\" are provided"
 isCertProvided "$RTL_PATH" && isCertProvided "$LSP_PATH"
 echo "Certs are OK."
 
-setupKubernetesCluster "$CLOUD_RESOURCE_NAME"
-setupPostgresInstance "$CLOUD_RESOURCE_NAME"
+setupKubernetesCluster
+setupPostgresInstance
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/k8s-dhall-compile.sh $BITCOIN_NETWORK'"
 
 echo "==> Configuring environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
+sh "$THIS_DIR/k8s-setup-env.sh"
 
 echo "==> Deploying k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd"
@@ -218,7 +216,7 @@ sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-inline-creds.sh && ./nix/k8s-dhall-compile.sh $BITCOIN_NETWORK'"
 
 echo "==> Configuring environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh" "$BITCOIN_NETWORK"
+sh "$THIS_DIR/k8s-setup-env.sh"
 
 echo "==> Deploying additional k8s resources"
 sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"

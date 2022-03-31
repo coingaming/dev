@@ -36,8 +36,8 @@ let mkConnStr
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/postgres/conn.txt as Text
-          , TestNet = ../../build/postgres/conn.txt as Text
+          { MainNet = ../../build/postgres/conn.txt as Text ? G.todo
+          , TestNet = ../../build/postgres/conn.txt as Text ? G.todo
           , RegTest = "postgresql://${user}:${password}@${host}/${database}"
           }
           net
@@ -123,8 +123,7 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { 
-    , user
+in  { user
     , password
     , database
     , tcpPort

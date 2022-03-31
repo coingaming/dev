@@ -29,6 +29,8 @@ dhall_to_yaml() {
     --file "$FILE_PATH" \
     --output "$RESULT_YAML" \
     --generated-comment
+
+  echo "Compiled $RESULT_YAML"
 }
 
 dhall_to_sh() {
@@ -46,6 +48,8 @@ dhall_to_sh() {
     --output "$RESULT_SH"
 
   chmod a+x "$RESULT_SH"
+
+  echo "Compiled $RESULT_SH"
 }
 
 for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/k8s.*.dhall; do
@@ -59,5 +63,11 @@ done
 for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/export*.dhall; do
   dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
 done
+
+if [ "$BITCOIN_NETWORK" = "regtest" ]; then
+  for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/setup*.dhall; do
+    dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
+  done
+fi
 
 sh -c "$THIS_DIR/ns-dhall-lint.sh"

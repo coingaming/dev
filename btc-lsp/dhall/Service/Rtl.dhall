@@ -34,8 +34,8 @@ let mkDashboardPass
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/rtl/password.txt as Text
-          , TestNet = ../../build/rtl/password.txt as Text
+          { MainNet = ../../build/rtl/password.txt as Text ? G.todo
+          , TestNet = ../../build/rtl/password.txt as Text ? G.todo
           , RegTest = G.defaultPass
           }
           net
@@ -51,9 +51,9 @@ let mkRtlConfigJson
             "rtlSSO": 0
           },
           "defaultNodeIndex": 1,
-          "multiPass": "${Rtl.mkDashboardPass net}",
+          "multiPass": "${mkDashboardPass net}",
           "nodes": [],
-          "port": "${G.unPort Rtl.tcpPort}"
+          "port": "${G.unPort tcpPort}"
         }
         ''
 
@@ -80,8 +80,8 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "rtl.${../../build/domain.txt as Text}"
-          , TestNet = "testnet-rtl.${../../build/domain.txt as Text}"
+          { MainNet = "rtl.${../../build/domain.txt as Text ? G.todo}"
+          , TestNet = "testnet-rtl.${../../build/domain.txt as Text ? G.todo}"
           , RegTest = owner
           }
           net

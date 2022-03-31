@@ -3,15 +3,17 @@
 set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-SCRIPTS_DIR="$THIS_DIR/../build/scripts"
-BITCOIN_NETWORK="$1"
+BUILD_DIR="$THIS_DIR/../build"
+SCRIPTS_DIR="$BUILD_DIR/scripts"
 
 sh "$SCRIPTS_DIR/setup-bitcoind-env.sh"
 sh "$SCRIPTS_DIR/setup-lnd-env.sh"
-sh "$SCRIPTS_DIR/setup-rtl-env.sh" "$BITCOIN_NETWORK"
 
-if [ $BITCOIN_NETWORK = "regtest" ]; then
+if [ -f "$SCRIPTS_DIR/setup-postgres-env.sh" ]; then
   sh "$SCRIPTS_DIR/setup-postgres-env.sh"
 fi
 
-sh "$SCRIPTS_DIR/setup-lsp-env.sh"
+if [ -f "$BUILD_DIR/lnd/macaroon.hex" ]; then
+  sh "$SCRIPTS_DIR/setup-rtl-env.sh"
+  sh "$SCRIPTS_DIR/setup-lsp-env.sh"
+fi

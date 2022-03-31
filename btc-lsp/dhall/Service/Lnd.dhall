@@ -18,6 +18,8 @@ let tlsCert = ../../build/lnd/inlined-tls.cert as Text ? G.todo
 
 let minChanSize = 20000000
 
+let msatPerByte = 1000
+
 let grpcPort
     : G.Port
     = { unPort = 10009 }
@@ -52,8 +54,8 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "lnd.${../../build/domain.txt as Text}"
-          , TestNet = "testnet-lnd.${../../build/domain.txt as Text}"
+          { MainNet = "lnd.${../../build/domain.txt as Text ? G.todo}"
+          , TestNet = "testnet-lnd.${../../build/domain.txt as Text ? G.todo}"
           , RegTest = owner
           }
           net
@@ -62,8 +64,8 @@ let mkWalletPass
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/lnd/password.txt as Text
-          , TestNet = ../../build/lnd/password.txt as Text
+          { MainNet = ../../build/lnd/password.txt as Text ? G.todo
+          , TestNet = ../../build/lnd/password.txt as Text ? G.todo
           , RegTest = G.defaultPass
           }
           net
@@ -168,10 +170,10 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { walletPass
-    , hexMacaroon
+in  { hexMacaroon
     , tlsCert
     , minChanSize
+    , msatPerByte
     , grpcPort
     , p2pPort
     , restPort

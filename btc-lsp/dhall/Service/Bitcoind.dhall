@@ -41,8 +41,8 @@ let mkRpcUser
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/bitcoind/rpcuser.txt as Text
-          , TestNet = ../../build/bitcoind/rpcuser.txt as Text
+          { MainNet = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
+          , TestNet = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
           , RegTest = "bitcoinrpc"
           }
           net
@@ -51,8 +51,8 @@ let mkRpcPass
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = ../../build/bitcoind/rpcpass.txt as Text
-          , TestNet = ../../build/bitcoind/rpcpass.txt as Text
+          { MainNet = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
+          , TestNet = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
           , RegTest = G.defaultPass
           }
           net
@@ -161,8 +161,7 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { 
-    , zmqPubRawBlockPort
+in  { zmqPubRawBlockPort
     , zmqPubRawTxPort
     , env
     , mkRpcUser

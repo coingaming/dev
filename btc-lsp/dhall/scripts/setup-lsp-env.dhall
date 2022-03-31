@@ -18,21 +18,17 @@ let lspLndP2pPort = Lsp.env.lspLndP2pPort
 
 let lspLndP2pHost = Lsp.env.lspLndP2pHost
 
-let lspElectrsEnv = Lsp.env.lspElectrsEnv
-
 let lspMinChanCapMsat = Lsp.env.lspMinChanCapMsat
 
 let lspLibpqConnStr = Lsp.env.lspLibpqConnStr
 
-let lspAes256InitVector = Lsp.env.lspAes256InitVector
-
-let lspAes256SecretKey = Lsp.env.lspAes256SecretKey
-
 let lspLndEnv = Lsp.env.lspLndEnv
+
+let lspBitcoindEnv = Lsp.env.lspBitcoindEnv
 
 let lspGrpcServerEnv = Lsp.env.lspGrpcServerEnv
 
-let lspBitcoindEnv = Lsp.env.lspBitcoindEnv
+let lspMsatPerByte = Lsp.env.lspMsatPerByte
 
 in  ''
     #!/bin/bash
@@ -41,9 +37,9 @@ in  ''
 
     THIS_DIR="$(dirname "$(realpath "$0")")"
 
-    echo "==> Setting up env for ${owner}"
-
     . "$THIS_DIR/export-${owner}-env.sh"
+
+    echo "==> Setting up env for ${owner}"
 
     (kubectl create configmap ${owner} \
       --from-literal=${G.toLowerCase lspEndpointPort}="${G.mkEnvVar
@@ -62,23 +58,14 @@ in  ''
       --from-literal=${G.toLowerCase
                          lspMinChanCapMsat}="${G.mkEnvVar lspMinChanCapMsat}" \
       --from-literal=${G.toLowerCase
-                         lspElectrsEnv}="${G.mkEnvVar lspElectrsEnv}") || true
+                         lspMsatPerByte}="${G.mkEnvVar lspMsatPerByte}") || true
 
-    if [ -f "$THIS_DIR/../${G.unOwner G.Owner.Lnd}/macaroon.hex" ]; then
-      (kubectl create secret generic ${owner} \
-        --from-literal=${G.toLowerCase lspLibpqConnStr}="${G.mkEnvVar
-                                                             lspLibpqConnStr}" \
-        --from-literal=${G.toLowerCase
-                           lspAes256InitVector}="${G.mkEnvVar
-                                                     lspAes256InitVector}" \
-        --from-literal=${G.toLowerCase
-                           lspAes256SecretKey}="${G.mkEnvVar
-                                                    lspAes256SecretKey}" \
-        --from-literal=${G.toLowerCase lspLndEnv}="${G.mkEnvVar lspLndEnv}" \
-        --from-literal=${G.toLowerCase
-                           lspGrpcServerEnv}="${G.mkEnvVar lspGrpcServerEnv}" \
-        --from-literal=${G.toLowerCase
-                           lspBitcoindEnv}="${G.mkEnvVar
-                                                lspBitcoindEnv}") || true
-    fi
+    (kubectl create secret generic ${owner} \
+      --from-literal=${G.toLowerCase lspLibpqConnStr}="${G.mkEnvVar
+                                                           lspLibpqConnStr}" \
+      --from-literal=${G.toLowerCase lspLndEnv}="${G.mkEnvVar lspLndEnv}" \
+      --from-literal=${G.toLowerCase lspGrpcServerEnv}="${G.mkEnvVar
+                                                            lspGrpcServerEnv}" \
+      --from-literal=${G.toLowerCase
+                         lspBitcoindEnv}="${G.mkEnvVar lspBitcoindEnv}") || true
     ''
