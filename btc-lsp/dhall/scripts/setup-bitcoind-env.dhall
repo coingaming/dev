@@ -28,6 +28,10 @@ let zmqPubRawBlock = Bitcoind.env.zmqPubRawBlock
 
 let zmqPubRawTx = Bitcoind.env.zmqPubRawTx
 
+let blockFilterIndex = Bitcoind.env.blockFilterIndex
+
+let peerBlockFilters = Bitcoind.env.peerBlockFilters
+
 let rpcUser = Bitcoind.env.rpcUser
 
 let rpcPassword = Bitcoind.env.rpcPassword
@@ -58,8 +62,12 @@ in  ''
       --from-literal=${G.toLowerCase txIndex}="${G.mkEnvVar txIndex}" \
       --from-literal=${G.toLowerCase zmqPubRawBlock}="${G.mkEnvVar
                                                           zmqPubRawBlock}" \
-      --from-literal=${G.toLowerCase zmqPubRawTx}="${G.mkEnvVar
-                                                       zmqPubRawTx}") || true
+      --from-literal=${G.toLowerCase zmqPubRawTx}="${G.mkEnvVar zmqPubRawTx}" \
+      --from-literal=${G.toLowerCase blockFilterIndex}="${G.mkEnvVar
+                                                            blockFilterIndex}" \
+      --from-literal=${G.toLowerCase
+                         peerBlockFilters}="${G.mkEnvVar
+                                                peerBlockFilters}") || true
 
     (kubectl create secret generic ${owner} \
       --from-literal=${G.toLowerCase rpcUser}="${G.mkEnvVar rpcUser}" \

@@ -60,14 +60,14 @@ for x in $ROOT_DIR/dhall/scripts/*.dhall; do
   dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
 done
 
-for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/export*.dhall; do
-  dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
-done
-
 if [ "$BITCOIN_NETWORK" = "regtest" ]; then
   for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/setup*.dhall; do
     dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
   done
 fi
+
+for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/export*.dhall; do
+  dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"
+done
 
 sh -c "$THIS_DIR/ns-dhall-lint.sh"

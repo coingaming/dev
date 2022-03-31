@@ -10,7 +10,7 @@ let Deployment = ../Kubernetes/Deployment.dhall
 
 let owner = G.unOwner G.Owner.Bitcoind
 
-let image = "heathmont/bitcoind:v0.22.0"
+let image = "heathmont/bitcoind:v0.22.0-neutrino"
 
 let zmqPubRawBlockPort
     : G.Port
@@ -33,6 +33,8 @@ let env =
       , txIndex = "TXINDEX"
       , zmqPubRawBlock = "ZMQPUBRAWBLOCK"
       , zmqPubRawTx = "ZMQPUBRAWTX"
+      , blockFilterIndex = "BLOCKFILTERINDEX"
+      , peerBlockFilters = "PEERBLOCKFILTERS"
       , rpcUser = "RPCUSER"
       , rpcPassword = "RPCPASSWORD"
       }
@@ -129,6 +131,8 @@ let configMapEnv
       , env.txIndex
       , env.zmqPubRawBlock
       , env.zmqPubRawTx
+      , env.blockFilterIndex
+      , env.peerBlockFilters
       ]
 
 let secretEnv
