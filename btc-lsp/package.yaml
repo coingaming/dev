@@ -46,6 +46,7 @@ dependencies:
 - pretty-simple
 - GenericPretty
 - generic-pretty-instances
+- ekg
 # lens
 - lens
 - microlens

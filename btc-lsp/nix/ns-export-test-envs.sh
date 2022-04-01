@@ -129,9 +129,6 @@ export LSP_LIBPQ_CONN_STR="postgresql://postgres@localhost/lsp-test"
 # gRPC
 #
 
-export LSP_AGENT_PRIVATE_KEY_PEM="$(cat "$BUILD_DIR/esdsa.prv" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
-export LSP_PARTNER_PUBLIC_KEY_PEM="$(cat "$BUILD_DIR/esdsa.pub" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
-
 export GRPC_TLS_KEY="$(cat "$BTC_LSP_DIR/key.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 export GRPC_TLS_CERT="$(cat "$BTC_LSP_DIR/cert.pem" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')"
 

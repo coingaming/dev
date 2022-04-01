@@ -117,6 +117,7 @@ library
     , chronos
     , containers
     , cryptonite
+    , ekg
     , envparse
     , errors
     , esqueleto >=3.5.3
@@ -261,6 +262,7 @@ executable btc-lsp-exe
     , chronos
     , containers
     , cryptonite
+    , ekg
     , envparse
     , errors
     , esqueleto >=3.5.3
@@ -417,6 +419,7 @@ test-suite btc-lsp-test
     , chronos
     , containers
     , cryptonite
+    , ekg
     , envparse
     , errors
     , esqueleto >=3.5.3

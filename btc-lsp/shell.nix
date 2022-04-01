@@ -37,6 +37,7 @@ in
     if withShellHook
     then ''
       echo "Spawning nix-shell with shellHook"
+      rm -rf ./build/shell
       sh ./nix/ns-gen-cfgs.sh
       sh ./nix/ns-gen-keys.sh
       . ./nix/ns-export-test-envs.sh
