@@ -2,6 +2,7 @@ let
   header = (import ./header.nix);
   pkgs = header.pkgs;
   lnd = import ./lnd.nix { inherit pkgs; };
+  bitcoin = import ./bitcoin.nix { inherit pkgs; };
 in
   {
     pkgs = pkgs;
@@ -28,8 +29,7 @@ in
           pkgs.haskellPackages.hspec-discover
           pkgs.postgresql
           pkgs.openssl
-          pkgs.bitcoin
-          pkgs.electrs
+          bitcoin
           lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''
