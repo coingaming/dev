@@ -29,6 +29,7 @@ in
           pkgs.haskellPackages.hspec-discover
           pkgs.postgresql
           pkgs.openssl
+          pkgs.electrs
           bitcoin
           lnd
         ];
