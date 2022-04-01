@@ -88,21 +88,11 @@ extractRelatedUtxoFromBlock blk =
       Btc.TransactionID ->
       Btc.TxOut ->
       m (Maybe Utxo)
+    mapVout txid (Btc.TxOut val num (Btc.StandardScriptPubKeyV22 _ _ _ addr)) =
+      handleAddr addr val num txid
     mapVout txid txout@(Btc.TxOut val num (Btc.StandardScriptPubKey _ _ _ _ addrsV)) =
       case V.toList addrsV of
-        [addr] -> do
-          mswp <- maybeSwap addr
-          case mswp of
-            Just swp ->
-              newUtxo (trySat2MSat val) (tryFrom num) txid swp
-            Nothing -> do
-              --
-              -- TODO : remove me!!!
-              --
-              $(logTM) DebugS . logStr $
-                "No swap found for address "
-                  <> inspect addr
-              pure Nothing
+        [addr] -> handleAddr addr val num txid
         _ -> do
           $(logTM) ErrorS . logStr $
             "Unsupported address vector in txid: "
@@ -112,6 +102,19 @@ extractRelatedUtxoFromBlock blk =
           pure Nothing
     mapVout _ _ =
       pure Nothing
+    handleAddr addr val num txid = do
+      mswp <- maybeSwap addr
+      case mswp of
+        Just swp ->
+          newUtxo (trySat2MSat val) (tryFrom num) txid swp
+        Nothing -> do
+          --
+          -- TODO : remove me!!!
+          --
+          $(logTM) DebugS . logStr $
+            "No swap found for address "
+              <> inspect addr
+          pure Nothing
     newUtxo (Right val) (Right n) txid swp =
       pure . Just $
         Utxo val n txid (entityKey swp)
