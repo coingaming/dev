@@ -47,7 +47,7 @@ confirmContinue () {
 }
 
 cleanBuildDir () {
-  echo "Deleting everything in BUILD_DIR"
+  echo "Deleting everything in $BUILD_DIR"
   rm -rfv "$BUILD_DIR" && mkdir -p "$BUILD_DIR"
 
   echo "==> Generating new credentials"
@@ -110,15 +110,20 @@ setupLetsEncryptCert () {
 }
 
 askForDomainName () {
+  local PREFIX="$1"
+
   if [ ! -f "$LND_DOMAIN_PATH" ] || [ ! -f "$RTL_DOMAIN_PATH" ]; then
     echo "==> Domain name must be set before continuing"
     read -p "Input your domain name: " "DOMAIN_NAME"
 
-    echo "Saving $DOMAIN_NAME to $LND_DOMAIN_PATH"
-    echo -n "$DOMAIN_NAME" > "$LND_DOMAIN_PATH"
+    local LND_DOMAIN="${PREFIX}lnd.$DOMAIN_NAME"
+    local RTL_DOMAIN="${PREFIX}rtl.$DOMAIN_NAME"
 
-    echo "Saving $DOMAIN_NAME to $RTL_DOMAIN_PATH"
-    echo -n "$DOMAIN_NAME" > "$RTL_DOMAIN_PATH"
+    echo "Saving $LND_DOMAIN to $LND_DOMAIN_PATH"
+    echo -n "$LND_DOMAIN" > "$LND_DOMAIN_PATH"
+
+    echo "Saving $RTL_DOMAIN to $RTL_DOMAIN_PATH"
+    echo -n "$RTL_DOMAIN" > "$RTL_DOMAIN_PATH"
   fi
 }
 

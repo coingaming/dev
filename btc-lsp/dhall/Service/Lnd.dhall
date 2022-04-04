@@ -54,16 +54,6 @@ let ports
     : List Natural
     = G.unPorts [ grpcPort, p2pPort, restPort ]
 
-let mkHost
-    : G.BitcoinNetwork → Text
-    = λ(net : G.BitcoinNetwork) →
-        merge
-          { MainNet = "lnd.${domain}"
-          , TestNet = "testnet-lnd.${domain}"
-          , RegTest = owner
-          }
-          net
-
 let mkWalletPass
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
@@ -174,7 +164,8 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { hexMacaroon
+in  { domain
+    , hexMacaroon
     , tlsCert
     , minChanSize
     , msatPerByte
@@ -182,7 +173,6 @@ in  { hexMacaroon
     , p2pPort
     , restPort
     , env
-    , mkHost
     , mkWalletPass
     , mkService
     , mkPersistentVolumeClaim

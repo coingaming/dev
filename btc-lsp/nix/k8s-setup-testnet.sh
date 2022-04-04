@@ -99,7 +99,7 @@ confirmAction \
 "==> Clean up previous build?" \
 "cleanBuildDir"
 
-askForDomainName
+askForDomainName "$BITCOIN_NETWORK-"
 
 confirmAction \
 "==> Setup LetsEncrypt certificate?" \

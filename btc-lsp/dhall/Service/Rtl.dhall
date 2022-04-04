@@ -14,9 +14,9 @@ let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
-let tlsSecretName = "${owner}-tls"
-
 let domain = ../../build/rtl/domain.txt as Text ? G.todo
+
+let tlsSecretName = "${owner}-tls"
 
 let securePass = ../../build/rtl/multipass.txt as Text ? G.todo
 
@@ -80,20 +80,10 @@ let mkService
           (mkServiceType net)
           (Service.mkPorts ports)
 
-let mkHost
-    : G.BitcoinNetwork → Text
-    = λ(net : G.BitcoinNetwork) →
-        merge
-          { MainNet = "rtl.${domain}"
-          , TestNet = "testnet-rtl.${domain}"
-          , RegTest = owner
-          }
-          net
-
 let mkTls
     : G.BitcoinNetwork → Optional K.IngressTLS.Type
     = λ(net : G.BitcoinNetwork) →
-        let tls = Some (Ingress.mkTls (mkHost net) tlsSecretName)
+        let tls = Some (Ingress.mkTls domain tlsSecretName)
 
         in  merge
               { MainNet = tls, TestNet = tls, RegTest = None K.IngressTLS.Type }
@@ -110,7 +100,7 @@ let mkIngress
                 (λ(tls : K.IngressTLS.Type) → [ tls ])
                 (mkTls net)
 
-        in  Ingress.mkIngress owner (mkHost net) tcpPort.unPort tls
+        in  Ingress.mkIngress owner domain tcpPort.unPort tls
 
 let configMapEnv
     : List Text

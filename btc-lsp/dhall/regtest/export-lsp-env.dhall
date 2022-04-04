@@ -19,7 +19,6 @@ in  ''
 
     export ${Lsp.env.lspMsatPerByte}="${Natural/show Lnd.msatPerByte}"
     export ${Lsp.env.lspLibpqConnStr}="${Postgres.mkConnStr network}"
-    export ${Lsp.env.lspLndP2pHost}="${Lnd.mkHost network}"
     export ${Lsp.env.lspLndEnv}='${Lsp.mkLspLndEnv network}'
     export ${Lsp.env.lspBitcoindEnv}='${Lsp.mkLspBitcoindEnv network}'
     ''
