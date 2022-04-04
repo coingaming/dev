@@ -59,7 +59,7 @@ Releases are automated by CI. To create new release, bump the version inside `VE
 
 The script will push new tag which will trigger new github release and package.
 
-## Kubernetres
+## Kubernetes
 
 Some tools are required to be installed directly on host machine. They can be installed using nix-env:
 
@@ -93,7 +93,7 @@ wget-1.21.3
 
 ## Testnet setup (DigitalOcean)
 
-If you have used nix-env you will already have doctl installed, otherwise install it manually.
+If you have used nix-env doctl will already be installed, otherwise install it manually.
 
 ```
 doctl-1.71.1
@@ -121,7 +121,7 @@ Get IPs of LoadBalancers:
 kubectl get svc
 ```
 
-Get IPs of Ingress:
+Get IP of Ingress:
 
 ```sh
 kubectl get ingress
