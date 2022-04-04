@@ -173,6 +173,8 @@ in  { domain
     , p2pPort
     , restPort
     , env
+    , configMapEnv
+    , secretEnv
     , mkWalletPass
     , mkService
     , mkPersistentVolumeClaim

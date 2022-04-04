@@ -4,28 +4,6 @@ let Lnd = ../Service/Lnd.dhall
 
 let owner = G.unOwner G.Owner.Lnd
 
-let bitcoinDefaultChanConfs = Lnd.env.bitcoinDefaultChanConfs
-
-let bitcoinNetwork = Lnd.env.bitcoinNetwork
-
-let bitcoinRpcHost = Lnd.env.bitcoinRpcHost
-
-let bitcoinZmqPubRawBlock = Lnd.env.bitcoinZmqPubRawBlock
-
-let bitcoinZmqPubRawTx = Lnd.env.bitcoinZmqPubRawTx
-
-let bitcoinRpcUser = Lnd.env.bitcoinRpcUser
-
-let bitcoinRpcPass = Lnd.env.bitcoinRpcPass
-
-let lndGrpcPort = Lnd.env.lndGrpcPort
-
-let lndP2pPort = Lnd.env.lndP2pPort
-
-let lndRestPort = Lnd.env.lndRestPort
-
-let lndWalletPass = Lnd.env.lndWalletPass
-
 in  ''
     #!/bin/bash
 
@@ -37,30 +15,11 @@ in  ''
 
     . "$THIS_DIR/export-${owner}-env.sh"
 
-    (kubectl create configmap ${owner} \
-      --from-literal=${G.toLowerCase
-                         bitcoinDefaultChanConfs}="${G.mkEnvVar
-                                                       bitcoinDefaultChanConfs}" \
-      --from-literal=${G.toLowerCase bitcoinNetwork}="${G.mkEnvVar
-                                                          bitcoinNetwork}" \
-      --from-literal=${G.toLowerCase bitcoinRpcHost}="${G.mkEnvVar
-                                                          bitcoinRpcHost}" \
-      --from-literal=${G.toLowerCase
-                         bitcoinZmqPubRawBlock}="${G.mkEnvVar
-                                                     bitcoinZmqPubRawBlock}" \
-      --from-literal=${G.toLowerCase
-                         bitcoinZmqPubRawTx}="${G.mkEnvVar
-                                                  bitcoinZmqPubRawTx}" \
-      --from-literal=${G.toLowerCase lndGrpcPort}="${G.mkEnvVar lndGrpcPort}" \
-      --from-literal=${G.toLowerCase lndP2pPort}="${G.mkEnvVar lndP2pPort}" \
-      --from-literal=${G.toLowerCase lndRestPort}="${G.mkEnvVar
-                                                       lndRestPort}") || true
+    (
+      kubectl create configmap ${owner} \${G.concatEnv Lnd.configMapEnv}
+    ) || true
 
-    (kubectl create secret generic ${owner} \
-      --from-literal=${G.toLowerCase bitcoinRpcUser}="${G.mkEnvVar
-                                                          bitcoinRpcUser}" \
-      --from-literal=${G.toLowerCase bitcoinRpcPass}="${G.mkEnvVar
-                                                          bitcoinRpcPass}" \
-      --from-literal=${G.toLowerCase
-                         lndWalletPass}="${G.mkEnvVar lndWalletPass}") || true
+    ( 
+      kubectl create secret generic ${owner} \${G.concatEnv Lnd.secretEnv}
+    ) || true
     ''

@@ -61,6 +61,25 @@ let mkEnvVar
     : Text → Text
     = λ(name : Text) → "\$${name}"
 
+let concatEnv
+    : List Text → Text
+    = λ(env : List Text) →
+        P.List.foldLeft
+          Text
+          env
+          Text
+          ( λ(acc : Text) →
+            λ(x : Text) →
+                  acc
+              ++  "\n"
+              ++  "  --from-literal="
+              ++  toLowerCase x
+              ++  "="
+              ++  "\"${mkEnvVar x}\""
+              ++  " \\"
+          )
+          ""
+
 let defaultPass
     : Text
     = "developer"
@@ -82,5 +101,5 @@ in  { BitcoinNetwork
     , defaultPass
     , todo
     , toLowerCase
-    , mkEnvVar
+    , concatEnv
     }

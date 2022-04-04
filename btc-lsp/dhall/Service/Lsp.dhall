@@ -180,6 +180,8 @@ in  { logEnv
     , logSeverity
     , grpcPort
     , env
+    , configMapEnv
+    , secretEnv
     , mkLspLndEnv
     , mkLspBitcoindEnv
     , mkLspGrpcServerEnv

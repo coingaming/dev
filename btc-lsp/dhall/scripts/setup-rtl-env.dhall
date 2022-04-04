@@ -4,12 +4,6 @@ let Rtl = ../Service/Rtl.dhall
 
 let owner = G.unOwner G.Owner.Rtl
 
-let configFromEnv = Rtl.env.configFromEnv
-
-let rtlConfigNodesJson = Rtl.env.rtlConfigNodesJson
-
-let rtlConfigJson = Rtl.env.rtlConfigJson
-
 in  ''
     #!/bin/bash
 
@@ -23,16 +17,13 @@ in  ''
 
     echo "==> Setting up env for ${owner}"
 
-    (kubectl create configmap ${owner} \
-      --from-literal=${G.toLowerCase
-                         configFromEnv}="${G.mkEnvVar configFromEnv}") || true
+    (
+      kubectl create configmap ${owner} \${G.concatEnv Rtl.configMapEnv}
+    ) || true
 
-    (kubectl create secret generic ${owner} \
-      --from-literal=${G.toLowerCase
-                         rtlConfigNodesJson}="${G.mkEnvVar
-                                                  rtlConfigNodesJson}" \
-      --from-literal=${G.toLowerCase
-                         rtlConfigJson}="${G.mkEnvVar rtlConfigJson}") || true
+    (
+      kubectl create secret generic ${owner} \${G.concatEnv Rtl.secretEnv}
+    ) || true
 
     if [ -f "$TLS_CERT_PATH" ] && [ -f "$TLS_KEY_PATH" ]; then
       (kubectl create secret tls ${Rtl.tlsSecretName} \

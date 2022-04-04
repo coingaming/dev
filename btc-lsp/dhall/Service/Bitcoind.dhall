@@ -196,6 +196,8 @@ let mkDeployment
 in  { zmqPubRawBlockPort
     , zmqPubRawTxPort
     , env
+    , configMapEnv
+    , secretEnv
     , mkRpcUser
     , mkRpcPass
     , mkRpcPort

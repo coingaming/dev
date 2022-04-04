@@ -137,6 +137,8 @@ let mkDeployment
 in  { tlsSecretName
     , tcpPort
     , env
+    , configMapEnv
+    , secretEnv
     , mkRtlConfigJson
     , mkService
     , mkDeployment

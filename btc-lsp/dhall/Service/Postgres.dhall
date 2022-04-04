@@ -130,6 +130,8 @@ in  { user
     , database
     , tcpPort
     , env
+    , configMapEnv
+    , secretEnv
     , mkConnStr
     , mkService
     , mkPersistentVolumeClaim
