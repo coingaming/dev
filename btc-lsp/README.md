@@ -93,11 +93,17 @@ wget-1.21.3
 
 ## Testnet setup (DigitalOcean)
 
+1. Install and configure doctl:
+
 If you have used nix-env doctl will already be installed, otherwise install it manually.
 
 ```
 doctl-1.71.1
 ```
+
+Follow the guide below to configure `doctl`.
+
+https://docs.digitalocean.com/reference/doctl/how-to/install/
 
 1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and services:
 
