@@ -5,10 +5,6 @@ let Lnd = ../Service/Lnd.dhall
 let Lsp = ../Service/Lsp.dhall
 
 in  ''
-    #!/bin/sh
-
-    set -e
-
     export ${Lsp.env.lspEndpointPort}=${G.unPort Lsp.grpcPort}
     export ${Lsp.env.lspLogEnv}="${Lsp.logEnv}"
     export ${Lsp.env.lspLogFormat}="${Lsp.logFormat}"

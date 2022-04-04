@@ -5,10 +5,6 @@ let Rtl = ../Service/Rtl.dhall
 let Lnd = ../Service/Lnd.dhall
 
 in  ''
-    #!/bin/sh
-
-    set -e
-
     export ${Rtl.env.configFromEnv}="true"
     export ${Rtl.env.rtlConfigNodesJson}='[
       {

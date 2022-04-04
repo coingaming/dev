@@ -9,7 +9,7 @@ inline_text() {
   awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' $1
 }
 
-echo "==> Compacting multiline creds (to work correctly with k8s secrets)"
+echo "==> Compacting multiline creds (to correctly work with k8s secrets)"
 for OWNER in lnd lsp; do
   BUILD_PATH="$BUILD_DIR/$OWNER"
 
