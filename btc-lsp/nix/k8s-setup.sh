@@ -82,7 +82,7 @@ sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd postgres"
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd postgres"
 
-echo "==> Partial spin"
+echo "==> Initializing LND wallet"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 sleep 20
 
