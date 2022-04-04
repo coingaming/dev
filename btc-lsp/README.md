@@ -158,3 +158,23 @@ minikube dashboard --profile=btc-lsp
 ```sh
 ./nix/k8s-lazy-init-unlock.sh
 ```
+
+5. Delete all failed Pods
+
+```sh
+kubectl delete pod --all-namespaces --field-selector 'status.phase=Failed'
+```
+
+6. Connect to existing cluster on DigitalOcean:
+
+Get cluster ID
+
+```sh
+doctl k cluster get testnet-cluster
+```
+
+Add context to kube config
+
+```sh
+doctl kubernetes cluster kubeconfig save <cluster-id>
+```
