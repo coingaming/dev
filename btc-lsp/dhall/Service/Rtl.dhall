@@ -10,6 +10,8 @@ let Ingress = ../Kubernetes/Ingress.dhall
 
 let Deployment = ../Kubernetes/Deployment.dhall
 
+let Lnd = ./Lnd.dhall
+
 let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
@@ -44,6 +46,19 @@ let mkMultiPass
           }
           net
 
+let mkRtlConfigNodesJson
+    : Text
+    = ''
+      {
+        "hexMacaroon": "${Lnd.hexMacaroon}",
+        "index": 1,
+        "lnServerUrl": "${G.unNetworkScheme
+                            G.NetworkScheme.Https}://${G.unOwner
+                                                         G.Owner.Lnd}:${G.unPort
+                                                                          Lnd.restPort}"
+      }
+      ''
+
 let mkRtlConfigJson
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
@@ -60,6 +75,16 @@ let mkRtlConfigJson
           "port": "${G.unPort tcpPort}"
         }
         ''
+
+let mkEnv
+    : G.BitcoinNetwork → P.Map.Type Text Text
+    = λ(net : G.BitcoinNetwork) →
+        [ { mapKey = env.configFromEnv, mapValue = "true" }
+        , { mapKey = env.rtlConfigNodesJson
+          , mapValue = "'${mkRtlConfigNodesJson}'"
+          }
+        , { mapKey = env.rtlConfigJson, mapValue = "'${mkRtlConfigJson net}'" }
+        ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -135,11 +160,9 @@ let mkDeployment
           (None (List K.Volume.Type))
 
 in  { tlsSecretName
-    , tcpPort
-    , env
+    , mkEnv
     , configMapEnv
     , secretEnv
-    , mkRtlConfigJson
     , mkService
     , mkDeployment
     , mkIngress

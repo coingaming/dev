@@ -1,3 +1,5 @@
+let P = ../Prelude/Import.dhall
+
 let G = ../Global.dhall
 
 let K = ../Kubernetes/Import.dhall
@@ -7,6 +9,8 @@ let Service = ../Kubernetes/Service.dhall
 let Volume = ../Kubernetes/Volume.dhall
 
 let Deployment = ../Kubernetes/Deployment.dhall
+
+let Bitcoind = ./Bitcoind.dhall
 
 let owner = G.unOwner G.Owner.Lnd
 
@@ -19,10 +23,6 @@ let tlsCert = ../../build/lnd/inlined-tls.cert as Text ? G.todo
 let domain = ../../build/lnd/domain.txt as Text ? G.todo
 
 let securePass = ../../build/lnd/walletpassword.txt as Text ? G.todo
-
-let minChanSize = 40000000
-
-let msatPerByte = 1000
 
 let grpcPort
     : G.Port
@@ -63,6 +63,42 @@ let mkWalletPass
           , RegTest = G.defaultPass
           }
           net
+
+let mkDomain
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
+
+let mkEnv
+    : G.BitcoinNetwork → P.Map.Type Text Text
+    = λ(net : G.BitcoinNetwork) →
+        let networkScheme = G.unNetworkScheme G.NetworkScheme.Tcp
+
+        let bitcoindHost = G.unOwner G.Owner.Bitcoind
+
+        in  [ { mapKey = env.bitcoinDefaultChanConfs, mapValue = "1" }
+            , { mapKey = env.bitcoinZmqPubRawBlock
+              , mapValue =
+                  "${networkScheme}://${bitcoindHost}:${G.unPort
+                                                          Bitcoind.zmqPubRawBlockPort}"
+              }
+            , { mapKey = env.bitcoinZmqPubRawTx
+              , mapValue =
+                  "${networkScheme}://${bitcoindHost}:${G.unPort
+                                                          Bitcoind.zmqPubRawTxPort}"
+              }
+            , { mapKey = env.lndGrpcPort, mapValue = G.unPort grpcPort }
+            , { mapKey = env.lndP2pPort, mapValue = G.unPort p2pPort }
+            , { mapKey = env.lndRestPort, mapValue = G.unPort restPort }
+            , { mapKey = env.bitcoinNetwork, mapValue = G.unBitcoinNetwork net }
+            , { mapKey = env.bitcoinRpcHost
+              , mapValue =
+                  "${bitcoindHost}:${G.unPort (Bitcoind.mkRpcPort net)}"
+              }
+            , { mapKey = env.lndWalletPass, mapValue = mkWalletPass net }
+            , { mapKey = env.bitcoinRpcUser, mapValue = Bitcoind.mkRpcUser net }
+            , { mapKey = env.bitcoinRpcPass, mapValue = Bitcoind.mkRpcPass net }
+            ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -164,15 +200,13 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { domain
-    , hexMacaroon
+in  { hexMacaroon
     , tlsCert
-    , minChanSize
-    , msatPerByte
     , grpcPort
     , p2pPort
     , restPort
-    , env
+    , mkDomain
+    , mkEnv
     , configMapEnv
     , secretEnv
     , mkWalletPass

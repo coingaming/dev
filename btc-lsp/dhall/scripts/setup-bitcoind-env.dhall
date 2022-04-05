@@ -16,10 +16,12 @@ in  ''
     . "$THIS_DIR/export-${owner}-env.sh"
 
     (
-      kubectl create configmap ${owner} \${G.concatEnv Bitcoind.configMapEnv}
+      kubectl create configmap ${owner} \${G.concatSetupEnv
+                                             Bitcoind.configMapEnv}
     ) || true
 
     (
-      kubectl create secret generic ${owner} \${G.concatEnv Bitcoind.secretEnv}
+      kubectl create secret generic ${owner} \${G.concatSetupEnv
+                                                  Bitcoind.secretEnv}
     ) || true
     ''

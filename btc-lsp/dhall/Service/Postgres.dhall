@@ -1,3 +1,5 @@
+let P = ../Prelude/Import.dhall
+
 let G = ../Global.dhall
 
 let K = ../Kubernetes/Import.dhall
@@ -12,13 +14,13 @@ let owner = G.unOwner G.Owner.Postgres
 
 let image = "heathmont/postgres:11-alpine-a2e8bbe"
 
-let user = "lsp"
+let userName = "lsp"
 
 let password = G.defaultPass
 
 let host = owner
 
-let database = user
+let databaseName = userName
 
 let connStr = ../../build/postgres/conn.txt as Text ? G.todo
 
@@ -40,13 +42,21 @@ let mkConnStr
         merge
           { MainNet = connStr
           , TestNet = connStr
-          , RegTest = "postgresql://${user}:${password}@${host}/${database}"
+          , RegTest =
+              "postgresql://${userName}:${password}@${host}/${databaseName}"
           }
           net
 
 let ports
     : List Natural
     = G.unPorts [ tcpPort ]
+
+let mkEnv
+    : P.Map.Type Text Text
+    = [ { mapKey = env.postgresUser, mapValue = userName }
+      , { mapKey = env.postgresPassword, mapValue = password }
+      , { mapKey = env.postgresMultipleDatabases, mapValue = databaseName }
+      ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -125,11 +135,7 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { user
-    , password
-    , database
-    , tcpPort
-    , env
+in  { mkEnv
     , configMapEnv
     , secretEnv
     , mkConnStr

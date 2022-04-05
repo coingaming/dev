@@ -61,7 +61,24 @@ let mkEnvVar
     : Text → Text
     = λ(name : Text) → "\$${name}"
 
-let concatEnv
+let concatExportEnv
+    : P.Map.Type Text Text → Text
+    = λ(env : P.Map.Type Text Text) →
+        P.List.foldLeft
+          (P.Map.Entry Text Text)
+          env
+          Text
+          ( λ(acc : Text) →
+            λ(x : P.Map.Entry Text Text) →
+              acc ++ "\n" ++ "export " ++ x.mapKey ++ "=" ++ x.mapValue
+          )
+          ''
+          #!/bin/sh
+
+          set -e
+          ''
+
+let concatSetupEnv
     : List Text → Text
     = λ(env : List Text) →
         P.List.foldLeft
@@ -101,5 +118,6 @@ in  { BitcoinNetwork
     , defaultPass
     , todo
     , toLowerCase
-    , concatEnv
+    , concatExportEnv
+    , concatSetupEnv
     }

@@ -16,10 +16,10 @@ in  ''
     echo "==> Setting up env for ${owner}"
 
     (
-      kubectl create configmap ${owner} \${G.concatEnv Lsp.configMapEnv}
+      kubectl create configmap ${owner} \${G.concatSetupEnv Lsp.configMapEnv}
     ) || true
 
     (
-      kubectl create secret generic ${owner} \${G.concatEnv Lsp.secretEnv}
+      kubectl create secret generic ${owner} \${G.concatSetupEnv Lsp.secretEnv}
     ) || true
     ''

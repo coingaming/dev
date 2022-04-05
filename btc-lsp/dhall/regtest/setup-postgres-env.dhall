@@ -16,10 +16,12 @@ in  ''
     . "$THIS_DIR/export-${owner}-env.sh"
 
     (
-      kubectl create configmap ${owner} \${G.concatEnv Postgres.configMapEnv}
+      kubectl create configmap ${owner} \${G.concatSetupEnv
+                                             Postgres.configMapEnv}
     ) || true
 
     (
-      kubectl create secret generic ${owner} \${G.concatEnv Postgres.secretEnv}
+      kubectl create secret generic ${owner} \${G.concatSetupEnv
+                                                  Postgres.secretEnv}
     ) || true
     ''

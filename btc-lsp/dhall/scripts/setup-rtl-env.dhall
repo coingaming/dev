@@ -18,11 +18,11 @@ in  ''
     echo "==> Setting up env for ${owner}"
 
     (
-      kubectl create configmap ${owner} \${G.concatEnv Rtl.configMapEnv}
+      kubectl create configmap ${owner} \${G.concatSetupEnv Rtl.configMapEnv}
     ) || true
 
     (
-      kubectl create secret generic ${owner} \${G.concatEnv Rtl.secretEnv}
+      kubectl create secret generic ${owner} \${G.concatSetupEnv Rtl.secretEnv}
     ) || true
 
     if [ -f "$TLS_CERT_PATH" ] && [ -f "$TLS_KEY_PATH" ]; then

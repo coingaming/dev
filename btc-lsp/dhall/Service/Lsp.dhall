@@ -1,3 +1,5 @@
+let P = ../Prelude/Import.dhall
+
 let G = ../Global.dhall
 
 let K = ../Kubernetes/Import.dhall
@@ -9,6 +11,8 @@ let Deployment = ../Kubernetes/Deployment.dhall
 let Bitcoind = ./Bitcoind.dhall
 
 let Lnd = ./Lnd.dhall
+
+let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
@@ -24,13 +28,16 @@ let logVerbosity = "V3"
 
 let logSeverity = "DebugS"
 
+let minChanSize = 40000000
+
+let msatPerByte = 1000
+
 let grpcPort
     : G.Port
     = { unPort = 8443 }
 
 let env =
-      { lspEndpointPort = "LSP_ENDPOINT_PORT"
-      , lspLogEnv = "LSP_LOG_ENV"
+      { lspLogEnv = "LSP_LOG_ENV"
       , lspLogFormat = "LSP_LOG_FORMAT"
       , lspLogVerbosity = "LSP_LOG_VERBOSITY"
       , lspLogSeverity = "LSP_LOG_SEVERITY"
@@ -76,18 +83,48 @@ let mkLspBitcoindEnv
 let mkLspGrpcServerEnv
     : Text
     = ''
-        {
-          "port":${G.unPort grpcPort},
-          "sig_verify":true,
-          "sig_header_name":"sig-bin",
-          "tls_cert":"${tlsCert}",
-          "tls_key":"${tlsKey}"
-        }
+      {
+        "port":${G.unPort grpcPort},
+        "sig_verify":true,
+        "sig_header_name":"sig-bin",
+        "tls_cert":"${tlsCert}",
+        "tls_key":"${tlsKey}"
+      }
       ''
+
+let mkMsatPerByte
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = "", TestNet = "", RegTest = Natural/show msatPerByte }
+          net
 
 let ports
     : List Natural
     = G.unPorts [ grpcPort ]
+
+let mkEnv
+    : G.BitcoinNetwork → P.Map.Type Text Text
+    = λ(net : G.BitcoinNetwork) →
+        [ { mapKey = env.lspLogEnv, mapValue = logEnv }
+        , { mapKey = env.lspLogFormat, mapValue = logFormat }
+        , { mapKey = env.lspLogVerbosity, mapValue = logVerbosity }
+        , { mapKey = env.lspLogSeverity, mapValue = logSeverity }
+        , { mapKey = env.lspGrpcServerEnv
+          , mapValue = "'${mkLspGrpcServerEnv}'"
+          }
+        , { mapKey = env.lspMinChanCapMsat
+          , mapValue = Natural/show minChanSize
+          }
+        , { mapKey = env.lspLndP2pPort, mapValue = G.unPort Lnd.p2pPort }
+        , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomain net }
+        , { mapKey = env.lspLndEnv, mapValue = "'${mkLspLndEnv net}'" }
+        , { mapKey = env.lspBitcoindEnv
+          , mapValue = "'${mkLspBitcoindEnv net}'"
+          }
+        , { mapKey = env.lspMsatPerByte, mapValue = mkMsatPerByte net }
+        , { mapKey = env.lspLibpqConnStr, mapValue = Postgres.mkConnStr net }
+        ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -131,8 +168,7 @@ let mkContainerImage
 
 let configMapEnv
     : List Text
-    = [ env.lspEndpointPort
-      , env.lspLogEnv
+    = [ env.lspLogEnv
       , env.lspLogFormat
       , env.lspLogVerbosity
       , env.lspLogSeverity
@@ -174,17 +210,4 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { logEnv
-    , logFormat
-    , logVerbosity
-    , logSeverity
-    , grpcPort
-    , env
-    , configMapEnv
-    , secretEnv
-    , mkLspLndEnv
-    , mkLspBitcoindEnv
-    , mkLspGrpcServerEnv
-    , mkService
-    , mkDeployment
-    }
+in  { mkEnv, configMapEnv, secretEnv, mkService, mkDeployment }

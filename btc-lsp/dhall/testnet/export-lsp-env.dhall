@@ -2,21 +2,6 @@ let G = ../Global.dhall
 
 let Lsp = ../Service/Lsp.dhall
 
-let Postgres = ../Service/Postgres.dhall
-
 let network = G.BitcoinNetwork.TestNet
 
-let sharedEnv = ../scripts/export-lsp-env.dhall
-
-in  ''
-    #!/bin/sh
-
-    set -e
-
-    ${sharedEnv}
-
-    export ${Lsp.env.lspMsatPerByte}=""
-    export ${Lsp.env.lspLibpqConnStr}="${Postgres.mkConnStr network}"
-    export ${Lsp.env.lspLndEnv}='${Lsp.mkLspLndEnv network}'
-    export ${Lsp.env.lspBitcoindEnv}='${Lsp.mkLspBitcoindEnv network}'
-    ''
+in  G.concatExportEnv (Lsp.mkEnv network)
