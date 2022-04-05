@@ -8,9 +8,8 @@ let
   hspec-discover = pkgs.haskellPackages.hspec-discover;
 in pkgs.dockerTools.buildImage {
   name = "heathmont/btc-lsp-integration";
-  contents = [ btc-lsp-integration hspec hspec-discover ];
+  contents = [ btc-lsp-integration ];
   config = {
-    Cmd = [ "${btc-lsp-integration}/bin/btc-lsp-integration-exe" ];
-    ExposedPorts = { "50051/tcp" = {}; };
+    Cmd = [ "${btc-lsp-integration}/bin/btc-lsp-integration" ];
   };
 }

@@ -11,7 +11,9 @@ import TestWithLndLsp (mainTestSetup)
 
 main :: IO ()
 main = do
+  liftIO $ print ("1=====TESTTESTTEST======" :: Text)
   mainTestSetup
+  liftIO $ print ("2=====TESTTESTTEST======" :: Text)
   hspecWith
     defaultConfig
       { configFormatter = Just progress

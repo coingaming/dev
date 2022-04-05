@@ -108,7 +108,7 @@ parseFromJSON x =
     Just j ->
       case fromJSON j of
         A.Success v -> Right v
-        A.Error {} -> failure "parseFromJSON => layer 1 fromJSON failure"
+        A.Error str -> failure ("parseFromJSON => layer 1 fromJSON failure: " <> str)
     Nothing ->
       failure "parseFromJSON => layer 1 parsing failure"
   where

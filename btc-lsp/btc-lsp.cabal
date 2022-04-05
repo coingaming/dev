@@ -344,6 +344,7 @@ executable btc-lsp-integration
       BtcLsp.Storage.Model.Block
       BtcLsp.Storage.Model.LnChan
       BtcLsp.Storage.Model.SwapIntoLn
+      BtcLsp.Storage.Model.SwapUtxo
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
       BtcLsp.Thread.BlockScanner

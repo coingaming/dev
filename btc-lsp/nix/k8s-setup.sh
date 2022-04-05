@@ -50,6 +50,7 @@ case $SETUP_MODE in
       cd "$BUILD_DIR"
       rm -rf docker-image-*
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
+      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-integration.tar.gz"
     )
     ;;
   *)
@@ -70,6 +71,17 @@ echo "==> Loading btc-lsp docker image into minikube"
 minikube image load \
   -p "$MINIKUBE_PROFILE" \
   --daemon=true $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
+
+echo "==> Loading integration docker image"
+docker load -q -i "$BUILD_DIR/docker-image-integration.tar.gz" \
+  | awk '{print $NF}' \
+  | tr -d '\n' \
+  > "$BUILD_DIR/docker-image-integration.txt"
+
+echo "==> Loading integration docker image into minikube"
+minikube image load \
+  -p "$MINIKUBE_PROFILE" \
+  --daemon=true $(cat "$BUILD_DIR/docker-image-integration.txt")
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \

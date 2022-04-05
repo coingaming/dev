@@ -39,7 +39,7 @@ let unPorts
 
 let Owner
     : Type
-    = < Bitcoind | Lsp | Lnd | Postgres | Rtl >
+    = < Bitcoind | Lsp | Lnd | Postgres | Rtl | Integration >
 
 let unOwner
     : Owner → Text
@@ -50,6 +50,7 @@ let unOwner
           , Lnd = "lnd"
           , Postgres = "postgres"
           , Rtl = "rtl"
+          , Integration = "integration"
           }
           x
 
@@ -69,6 +70,14 @@ let todo
     : Text
     = "TODO"
 
+let unJson
+    : P.JSON.Type → Text
+    = λ(x : P.JSON.Type) → Text/replace "\\u0024" "\$" (P.JSON.renderCompact x)
+
+let escape
+    : Text → Text
+    = λ(x : Text) → Text/replace "\"" "" (unJson (P.JSON.string x))
+
 in  { BitcoinNetwork
     , unBitcoinNetwork
     , NetworkScheme
@@ -83,4 +92,5 @@ in  { BitcoinNetwork
     , todo
     , toLowerCase
     , mkEnvVar
+    , escape
     }

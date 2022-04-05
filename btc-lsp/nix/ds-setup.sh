@@ -69,6 +69,7 @@ case $SETUP_MODE in
       rm -rf docker-image-*
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-electrs.tar.gz"
+      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-integration.tar.gz"
     )
     ;;
   *)

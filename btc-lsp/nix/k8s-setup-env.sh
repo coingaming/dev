@@ -8,6 +8,7 @@ SCRIPTS_DIR="$THIS_DIR/../build/scripts"
 sh "$SCRIPTS_DIR/setup-bitcoind-env.sh"
 sh "$SCRIPTS_DIR/setup-lnd-env.sh"
 sh "$SCRIPTS_DIR/setup-rtl-env.sh"
+sh "$SCRIPTS_DIR/setup-integration-env.sh"
 
 BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
 

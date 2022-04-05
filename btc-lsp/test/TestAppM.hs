@@ -40,10 +40,12 @@ import qualified LndClient.Data.GetInfo as GetInfo
 import qualified LndClient.Data.SignMessage as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
+import qualified LndClient.Data.LndEnv as LndEnv
 import qualified LndClient.RPC.Katip as Lnd
 import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
+import Network.GRPC.Client.Helpers
 import Test.Hspec
 
 data TestOwner
@@ -170,6 +172,9 @@ withTestEnv action =
     runTestApp env $
       finally
         ( do
+            print ("========WITH TEST ENV========" :: Text)
+            print (_grpcClientConfigHost $ LndEnv.envLndConfig $ LndTest.testLndEnv $ testEnvLndLsp env :: HostName)
+            print (_grpcClientConfigPort $ LndEnv.envLndConfig $ LndTest.testLndEnv $ testEnvLndLsp env :: PortNumber)
             LndTest.setupZeroChannels proxyOwner
             -- scheduleAll
             -- watchInvoices sub
@@ -197,6 +202,9 @@ withTestEnv' action = do
   gcEnv <- readGCEnv
   aliceRc <- readRawConfig
   lndLspEnv <- readLndLspEnv
+  print ("========LNDLSPENV=========" :: Text)
+  print (_grpcClientConfigHost $ LndEnv.envLndConfig lndLspEnv)
+  print (_grpcClientConfigPort $ LndEnv.envLndConfig lndLspEnv)
   btcClient <-
     Btc.getClient
       (unpack . bitcoindEnvHost $ rawConfigBtcEnv aliceRc)
