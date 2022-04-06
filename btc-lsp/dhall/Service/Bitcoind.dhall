@@ -1,3 +1,5 @@
+let P = ../Prelude/Import.dhall
+
 let G = ../Global.dhall
 
 let K = ../Kubernetes/Import.dhall
@@ -12,9 +14,9 @@ let owner = G.unOwner G.Owner.Bitcoind
 
 let image = "heathmont/bitcoind:v0.22.0-neutrino"
 
-let secureRpcUser = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
+let secureRpcUser = ../../build/secrets/bitcoind/rpcuser.txt as Text ? G.todo
 
-let secureRpcPass = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
+let secureRpcPass = ../../build/secrets/bitcoind/rpcpass.txt as Text ? G.todo
 
 let zmqPubRawBlockPort
     : G.Port
@@ -83,6 +85,48 @@ let mkP2pPort
           , RegTest.unPort = 18444
           }
           net
+
+let mkRegTest
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = "0", TestNet = "0", RegTest = "1" } net
+
+let mkTestNet
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = "0", TestNet = "1", RegTest = "0" } net
+
+let mkEnv
+    : G.BitcoinNetwork → P.Map.Type Text Text
+    = λ(net : G.BitcoinNetwork) →
+        let networkScheme = G.unNetworkScheme G.NetworkScheme.Tcp
+
+        let rpcPort = G.unPort (mkRpcPort net)
+
+        in  [ { mapKey = env.configFromEnv, mapValue = "true" }
+            , { mapKey = env.disableWallet, mapValue = "0" }
+            , { mapKey = env.prune, mapValue = "0" }
+            , { mapKey = env.rpcAllowIp, mapValue = "0.0.0.0/0" }
+            , { mapKey = env.server, mapValue = "1" }
+            , { mapKey = env.txIndex, mapValue = "1" }
+            , { mapKey = env.zmqPubRawBlock
+              , mapValue =
+                  "${networkScheme}://0.0.0.0:${G.unPort zmqPubRawBlockPort}"
+              }
+            , { mapKey = env.zmqPubRawTx
+              , mapValue =
+                  "${networkScheme}://0.0.0.0:${G.unPort zmqPubRawTxPort}"
+              }
+            , { mapKey = env.blockFilterIndex, mapValue = "1" }
+            , { mapKey = env.peerBlockFilters, mapValue = "1" }
+            , { mapKey = env.rpcBind, mapValue = ":${rpcPort}" }
+            , { mapKey = env.rpcPort, mapValue = rpcPort }
+            , { mapKey = env.p2pPort, mapValue = G.unPort (mkP2pPort net) }
+            , { mapKey = env.regTest, mapValue = mkRegTest net }
+            , { mapKey = env.testNet, mapValue = mkTestNet net }
+            , { mapKey = env.rpcUser, mapValue = mkRpcUser net }
+            , { mapKey = env.rpcPassword, mapValue = mkRpcPass net }
+            ]
 
 let mkPorts
     : G.BitcoinNetwork → List Natural
@@ -195,11 +239,12 @@ let mkDeployment
 
 in  { zmqPubRawBlockPort
     , zmqPubRawTxPort
-    , env
+    , mkEnv
+    , configMapEnv
+    , secretEnv
     , mkRpcUser
     , mkRpcPass
     , mkRpcPort
-    , mkP2pPort
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

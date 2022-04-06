@@ -2,9 +2,9 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
-BUILD_DIR="$ROOT_DIR/build"
+SECRETS_DIR="$ROOT_DIR/build/secrets"
 
-mkdir -p "$BUILD_DIR"
+mkdir -p "$SECRETS_DIR"
 
 newSubjectAltName () {
   BUILD_PATH="$1"
@@ -20,7 +20,7 @@ deleteSubjectAltName () {
 
 genCert () {
   SERVICE_NAME="$1"
-  BUILD_PATH="$BUILD_DIR/$SERVICE_NAME"
+  BUILD_PATH="$SECRETS_DIR/$SERVICE_NAME"
 
   mkdir -p "$BUILD_PATH"
 
@@ -46,7 +46,7 @@ genRandomString () {
 genSecureCred () {
   SERVICE_NAME="$1"
   FILENAME="$2"
-  BUILD_PATH="$BUILD_DIR/$SERVICE_NAME"
+  BUILD_PATH="$SECRETS_DIR/$SERVICE_NAME"
 
   mkdir -p "$BUILD_PATH"
 

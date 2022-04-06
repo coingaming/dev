@@ -2,16 +2,6 @@ let G = ../Global.dhall
 
 let Rtl = ../Service/Rtl.dhall
 
-let network = G.BitcoinNetwork.RegTest
+let network = G.BitcoinNetwork.MainNet
 
-let sharedEnv = ../scripts/export-rtl-env.dhall
-
-in  ''
-    #!/bin/sh
-
-    set -e
-
-    ${sharedEnv}
-
-    export ${Rtl.env.rtlConfigJson}='${Rtl.mkRtlConfigJson network}'
-    ''
+in  G.concatExportEnv (Rtl.mkEnv network)
