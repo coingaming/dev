@@ -22,7 +22,7 @@ import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
 import Network.GRPC.Server
 import Network.GRPC.Server.Wai (grpcApp)
-import Network.HTTP2.Server hiding (Request (..))
+import Network.HTTP2.Server hiding (Request)
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)

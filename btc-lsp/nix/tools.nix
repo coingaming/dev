@@ -6,7 +6,9 @@ let nixpkgs = builtins.fetchTarball {
 in
 with pkgs;
 {
-  inherit kubectl
+  inherit awscli2
+          eksctl
+          kubectl
           wget
           minikube
           doctl

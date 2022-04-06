@@ -26,7 +26,7 @@ import Control.Concurrent.STM.TChan as X
   )
 import Control.Concurrent.Thread.Delay as X (delay)
 import Control.Error.Util as X (failWith, failWithM)
-import Control.Monad.Extra as X (maybeM)
+import Control.Monad.Extra as X (eitherM, maybeM)
 import Control.Monad.Trans.Except as X
   ( catchE,
     except,
@@ -117,7 +117,7 @@ import LndClient.Util as X
     withSpawnLink,
   )
 import Network.GRPC.Client as X (CompressMode (..))
-import Network.HTTP2.Client as X (HostName, PortNumber)
+import Network.HTTP2.Client2 as X (HostName, PortNumber)
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X

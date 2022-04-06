@@ -19,7 +19,6 @@ import UnliftIO.Concurrent
   ( ThreadId,
     forkFinally,
     putMVar,
-    threadDelay,
   )
 
 forkThread ::
@@ -46,6 +45,9 @@ syncChannelList lnd = do
     Right chs -> void $ persistOpenedChannels chs
     Left {} -> pure ()
 
+--
+-- TODO : verify why this is needed?
+--
 watchChannelEvents ::
   ( Storage m,
     KatipContext m
@@ -64,17 +66,19 @@ watchChannelEvents lnd =
       act run
 
 applyPoll :: (Env m) => m ()
-applyPoll = do
-  lnd <- getLspLndEnv
-  void $ syncChannelList lnd
-  void $ threadDelay $ 60 * 1000000
-  applyPoll
+applyPoll =
+  forever $
+    getLspLndEnv
+      >>= syncChannelList
+      >> sleep (MicroSecondsDelay $ 60 * 1000000)
 
 applySub :: (Env m) => m ()
-applySub = do
-  lnd <- getLspLndEnv
-  withRunInIO $ \run -> do
-    void $
-      Lnd.subscribeChannelEvents
-        (void . run . persistChannelUpdates)
-        lnd
+applySub =
+  forever $ do
+    lnd <- getLspLndEnv
+    withRunInIO $ \run -> do
+      void $
+        Lnd.subscribeChannelEvents
+          (void . run . persistChannelUpdates)
+          lnd
+    sleep . MicroSecondsDelay $ 5 * 1000000

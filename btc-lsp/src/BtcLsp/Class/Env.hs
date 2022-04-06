@@ -34,6 +34,7 @@ class
   getLndP2PSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey
   getLspLndEnv :: m Lnd.LndEnv
+  getChanPrivacy :: m Privacy
   getLspPubKey = do
     var <- getLspPubKeyVar
     mPubKey <- tryReadMVar var

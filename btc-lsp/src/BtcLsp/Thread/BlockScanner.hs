@@ -19,12 +19,16 @@ import qualified Network.Bitcoin as Btc
 import qualified Universum
 
 apply :: (Env m) => m ()
-apply = do
-  res <- runExceptT scan
-  whenLeft res $ $(logTM) ErrorS . logStr . inspect
-  whenRight res markFunded
-  sleep $ MicroSecondsDelay 1000000
-  apply
+apply =
+  forever $ do
+    eitherM
+      ( $(logTM) ErrorS
+          . logStr
+          . inspect
+      )
+      markFunded
+      $ runExceptT scan
+    sleep $ MicroSecondsDelay 1000000
 
 markFunded :: (Env m) => [Utxo] -> m ()
 markFunded utxos =
@@ -98,16 +102,16 @@ handleAddr addr val num txid = do
     Just swp -> newUtxo (trySat2MSat val) (tryFrom num) txid swp
     Nothing -> pure Nothing
 
-
-newUtxo :: (Env m) =>
-  Either (TryFromException Btc.BTC MSat) MSat
-  -> Either (TryFromException Integer (Vout 'Funding)) (Vout 'Funding)
-  -> Btc.TransactionID
-  -> Entity SwapIntoLn
-  -> m (Maybe Utxo)
+newUtxo ::
+  (Env m) =>
+  Either (TryFromException Btc.BTC MSat) MSat ->
+  Either (TryFromException Integer (Vout 'Funding)) (Vout 'Funding) ->
+  Btc.TransactionID ->
+  Entity SwapIntoLn ->
+  m (Maybe Utxo)
 newUtxo (Right val) (Right n) txid swp =
-      pure . Just $
-        Utxo val n txid (entityKey swp)
+  pure . Just $
+    Utxo val n txid (entityKey swp)
 newUtxo val num txid swp = do
   $(logTM) ErrorS . logStr $
     "TryFrom overflow error val: "
@@ -216,14 +220,7 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  --
-  -- TODO : remove me!!!
-  --
-  $(logTM) DebugS . logStr $
-    "Got new block "
-      <> inspect hash
-      <> " with content "
-      <> inspect blk
+  $(logTM) DebugS . logStr $ "Got new block " <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk
   persistBlockT blk utxos
   pure utxos

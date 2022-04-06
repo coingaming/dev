@@ -16,32 +16,32 @@ import qualified LndClient.RPC.Katip as LndKatip
 import qualified LndClient.RPC.Silent as LndSilent
 
 apply :: (Env m) => m ()
-apply = do
-  ePeerList <- withLnd LndSilent.listPeers id
-  whenLeft ePeerList $
-    $(logTM) ErrorS
-      . logStr
-      . ("ListPeers procedure failed: " <>)
-      . inspect
-  let peerSet =
-        Set.fromList $
-          Peer.pubKey <$> fromRight [] ePeerList
-  swaps <- SwapIntoLn.getFundedSwaps
-  tasks <-
-    mapM
-      ( spawnLink
-          . openChan
-      )
-      $ filter
-        ( \x ->
-            Set.member
-              (userNodePubKey . entityVal $ snd x)
-              peerSet
+apply =
+  forever $ do
+    ePeerList <- withLnd LndSilent.listPeers id
+    whenLeft ePeerList $
+      $(logTM) ErrorS
+        . logStr
+        . ("ListPeers procedure failed: " <>)
+        . inspect
+    let peerSet =
+          Set.fromList $
+            Peer.pubKey <$> fromRight [] ePeerList
+    swaps <- SwapIntoLn.getFundedSwaps
+    tasks <-
+      mapM
+        ( spawnLink
+            . openChan
         )
-        swaps
-  mapM_ (liftIO . wait) tasks
-  sleep $ MicroSecondsDelay 500000
-  apply
+        $ filter
+          ( \x ->
+              Set.member
+                (userNodePubKey . entityVal $ snd x)
+                peerSet
+          )
+          swaps
+    mapM_ (liftIO . wait) tasks
+    sleep $ MicroSecondsDelay 500000
 
 --
 -- TODO : do not open channel in case where
@@ -50,6 +50,7 @@ apply = do
 openChan :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
 openChan (swapEnt, userEnt) = do
   let swap = entityVal swapEnt
+  prv <- getChanPrivacy
   msatPerByte <- getMsatPerByte
   res <- runExceptT $ do
     cp <-
@@ -66,7 +67,7 @@ openChan (swapEnt, userEnt) = do
                 Chan.pushMSat = Nothing,
                 Chan.targetConf = Nothing,
                 Chan.mSatPerByte = msatPerByte,
-                Chan.private = Just True,
+                Chan.private = Just $ prv == Private,
                 Chan.minHtlcMsat = Nothing,
                 Chan.remoteCsvDelay = Nothing,
                 Chan.minConfs = Nothing,
