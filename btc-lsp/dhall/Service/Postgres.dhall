@@ -22,7 +22,7 @@ let host = owner
 
 let databaseName = userName
 
-let connStr = ../../build/postgres/conn.txt as Text ? G.todo
+let connStr = ../../build/secrets/postgres/conn.txt as Text ? G.todo
 
 let tcpPort
     : G.Port

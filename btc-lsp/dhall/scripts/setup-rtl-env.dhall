@@ -10,8 +10,8 @@ in  ''
     set -e
 
     THIS_DIR="$(dirname "$(realpath "$0")")"
-    TLS_CERT_PATH="$THIS_DIR/../${owner}/tls.cert"
-    TLS_KEY_PATH="$THIS_DIR/../${owner}/tls.key"
+    TLS_CERT_PATH="$THIS_DIR/../secrets/${owner}/tls.cert"
+    TLS_KEY_PATH="$THIS_DIR/../secrets/${owner}/tls.key"
 
     . "$THIS_DIR/export-${owner}-env.sh"
 

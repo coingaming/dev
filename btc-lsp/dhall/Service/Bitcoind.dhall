@@ -14,9 +14,9 @@ let owner = G.unOwner G.Owner.Bitcoind
 
 let image = "heathmont/bitcoind:v0.22.0-neutrino"
 
-let secureRpcUser = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
+let secureRpcUser = ../../build/secrets/bitcoind/rpcuser.txt as Text ? G.todo
 
-let secureRpcPass = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
+let secureRpcPass = ../../build/secrets/bitcoind/rpcpass.txt as Text ? G.todo
 
 let zmqPubRawBlockPort
     : G.Port

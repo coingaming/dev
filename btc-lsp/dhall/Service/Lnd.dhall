@@ -16,13 +16,13 @@ let owner = G.unOwner G.Owner.Lnd
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let hexMacaroon = ../../build/lnd/macaroon.hex as Text ? G.todo
+let hexMacaroon = ../../build/secrets/lnd/macaroon.hex as Text ? G.todo
 
-let tlsCert = ../../build/lnd/inlined-tls.cert as Text ? G.todo
+let tlsCert = ../../build/secrets/lnd/inlined-tls.cert as Text ? G.todo
 
-let domain = ../../build/lnd/domain.txt as Text ? G.todo
+let domain = ../../build/secrets/lnd/domain.txt as Text ? G.todo
 
-let securePass = ../../build/lnd/walletpassword.txt as Text ? G.todo
+let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
 
 let grpcPort
     : G.Port

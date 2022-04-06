@@ -4,13 +4,14 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
+SECRETS_DIR="$BUILD_DIR/secrets"
 
 # Service-specific files are here
-BITCOIND_PATH="$BUILD_DIR/bitcoind"
-LND_PATH="$BUILD_DIR/lnd"
-RTL_PATH="$BUILD_DIR/rtl"
-LSP_PATH="$BUILD_DIR/lsp"
-POSTGRES_PATH="$BUILD_DIR/postgres"
+BITCOIND_PATH="$SECRETS_DIR/bitcoind"
+LND_PATH="$SECRETS_DIR/lnd"
+RTL_PATH="$SECRETS_DIR/rtl"
+LSP_PATH="$SECRETS_DIR/lsp"
+POSTGRES_PATH="$SECRETS_DIR/postgres"
 
 # Save all LetsEncrypt stuff here
 LETSENCRYPT_DIR="$BUILD_DIR/letsencrypt"

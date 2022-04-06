@@ -16,11 +16,11 @@ let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
-let domain = ../../build/rtl/domain.txt as Text ? G.todo
+let domain = ../../build/secrets/rtl/domain.txt as Text ? G.todo
 
 let tlsSecretName = "${owner}-tls"
 
-let securePass = ../../build/rtl/multipass.txt as Text ? G.todo
+let securePass = ../../build/secrets/rtl/multipass.txt as Text ? G.todo
 
 let tcpPort
     : G.Port

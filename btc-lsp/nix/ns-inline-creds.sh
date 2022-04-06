@@ -3,15 +3,15 @@
 set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-BUILD_DIR="$THIS_DIR/../build"
+SECRETS_DIR="$THIS_DIR/../build/secrets"
 
 inline_text() {
-  awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' $1
+  awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' "$1"
 }
 
 echo "==> Compacting multiline creds (to correctly work with k8s secrets)"
 for OWNER in lnd lsp; do
-  BUILD_PATH="$BUILD_DIR/$OWNER"
+  BUILD_PATH="$SECRETS_DIR/$OWNER"
 
   for FILE_PATH in "$BUILD_PATH"/tls.*; do
     if [ -f "$FILE_PATH" ]; then

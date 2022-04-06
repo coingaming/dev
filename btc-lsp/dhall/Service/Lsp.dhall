@@ -16,9 +16,9 @@ let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
-let tlsCert = ../../build/lsp/inlined-tls.cert as Text ? G.todo
+let tlsCert = ../../build/secrets/lsp/inlined-tls.cert as Text ? G.todo
 
-let tlsKey = ../../build/lsp/inlined-tls.key as Text ? G.todo
+let tlsKey = ../../build/secrets/lsp/inlined-tls.key as Text ? G.todo
 
 let logEnv = "test"
 
