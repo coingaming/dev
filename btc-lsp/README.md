@@ -79,7 +79,7 @@ wget-1.21.3
 
 ### Regtest setup
 
-1. Setup cluster and services:
+1. Setup cluster and deploy k8s resources:
 
 ```sh
 ./nix/k8s-setup.sh
@@ -93,13 +93,19 @@ wget-1.21.3
 
 ## Testnet setup (DigitalOcean)
 
+1. Install and configure doctl:
+
 If you have used nix-env doctl will already be installed, otherwise install it manually.
 
 ```
 doctl-1.71.1
 ```
 
-1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and services:
+Follow the guide below to configure `doctl`.
+
+https://docs.digitalocean.com/reference/doctl/how-to/install/
+
+1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and deploy k8s resources:
 
 ```sh
 ./nix/k8s-setup-testnet.sh
@@ -151,4 +157,24 @@ minikube dashboard --profile=btc-lsp
 
 ```sh
 ./nix/k8s-lazy-init-unlock.sh
+```
+
+5. Delete all failed Pods
+
+```sh
+kubectl delete pod --all-namespaces --field-selector 'status.phase=Failed'
+```
+
+6. Connect to existing cluster on DigitalOcean:
+
+Get cluster ID
+
+```sh
+doctl k cluster get lsp-testnet
+```
+
+Add context to kube config
+
+```sh
+doctl kubernetes cluster kubeconfig save <cluster-id>
 ```

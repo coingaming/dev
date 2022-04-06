@@ -3,14 +3,16 @@
 set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-BUILD_DIR="$THIS_DIR/../build"
+SECRETS_DIR="$THIS_DIR/../build/secrets"
 BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
+
+mkdir -p "$SECRETS_DIR"
 
 for OWNER in lsp; do
 
   SERVICE="lnd"
   POD=`sh $THIS_DIR/k8s-get-pod.sh $SERVICE`
-  SERVICE_DIR="$BUILD_DIR/$SERVICE"
+  SERVICE_DIR="$SECRETS_DIR/$SERVICE"
   mkdir -p "$SERVICE_DIR"
 
   echo "$SERVICE ==> LN tls cert"

@@ -10,15 +10,17 @@ let Ingress = ../Kubernetes/Ingress.dhall
 
 let Deployment = ../Kubernetes/Deployment.dhall
 
+let Lnd = ./Lnd.dhall
+
 let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
+let domain = ../../build/secrets/rtl/domain.txt as Text ? G.todo
+
 let tlsSecretName = "${owner}-tls"
 
-let domain = ../../build/rtl/domain.txt as Text ? G.todo
-
-let securePass = ../../build/rtl/multipass.txt as Text ? G.todo
+let securePass = ../../build/secrets/rtl/multipass.txt as Text ? G.todo
 
 let tcpPort
     : G.Port
@@ -44,22 +46,59 @@ let mkMultiPass
           }
           net
 
-let mkRtlConfigJson
+let mkDomain
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        ''
-        {
-          "SSO":{
-            "logoutRedirectLink": "",
-            "rtlCookiePath": "",
-            "rtlSSO": 0
-          },
-          "defaultNodeIndex": 1,
-          "multiPass": "${mkMultiPass net}",
-          "nodes": [],
-          "port": "${G.unPort tcpPort}"
-        }
-        ''
+        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
+
+let mkRtlConfigNodesJson
+    : P.JSON.Type
+    = P.JSON.array
+        [ P.JSON.object
+            ( toMap
+                { hexMacaroon = P.JSON.string Lnd.hexMacaroon
+                , index = P.JSON.natural 1
+                , lnServerUrl =
+                    P.JSON.string
+                      "${G.unNetworkScheme
+                           G.NetworkScheme.Https}://${G.unOwner
+                                                        G.Owner.Lnd}:${G.unPort
+                                                                         Lnd.restPort}"
+                }
+            )
+        ]
+
+let mkRtlConfigJson
+    : G.BitcoinNetwork → P.JSON.Type
+    = λ(net : G.BitcoinNetwork) →
+        P.JSON.object
+          ( toMap
+              { multiPass = P.JSON.string (mkMultiPass net)
+              , port = P.JSON.natural tcpPort.unPort
+              , defaultNodeIndex = P.JSON.natural 1
+              , SSO =
+                  P.JSON.object
+                    ( toMap
+                        { rtlSSO = P.JSON.natural 0
+                        , rtlCookiePath = P.JSON.string ""
+                        , logoutRedirectLink = P.JSON.string ""
+                        }
+                    )
+              , nodes = P.JSON.array ([] : List P.JSON.Type)
+              }
+          )
+
+let mkEnv
+    : G.BitcoinNetwork → P.Map.Type Text Text
+    = λ(net : G.BitcoinNetwork) →
+        [ { mapKey = env.configFromEnv, mapValue = "true" }
+        , { mapKey = env.rtlConfigNodesJson
+          , mapValue = "'${P.JSON.render mkRtlConfigNodesJson}'"
+          }
+        , { mapKey = env.rtlConfigJson
+          , mapValue = "'${P.JSON.render (mkRtlConfigJson net)}'"
+          }
+        ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -80,20 +119,10 @@ let mkService
           (mkServiceType net)
           (Service.mkPorts ports)
 
-let mkHost
-    : G.BitcoinNetwork → Text
-    = λ(net : G.BitcoinNetwork) →
-        merge
-          { MainNet = "rtl.${domain}"
-          , TestNet = "testnet-rtl.${domain}"
-          , RegTest = owner
-          }
-          net
-
 let mkTls
     : G.BitcoinNetwork → Optional K.IngressTLS.Type
     = λ(net : G.BitcoinNetwork) →
-        let tls = Some (Ingress.mkTls (mkHost net) tlsSecretName)
+        let tls = Some (Ingress.mkTls (mkDomain net) tlsSecretName)
 
         in  merge
               { MainNet = tls, TestNet = tls, RegTest = None K.IngressTLS.Type }
@@ -110,7 +139,7 @@ let mkIngress
                 (λ(tls : K.IngressTLS.Type) → [ tls ])
                 (mkTls net)
 
-        in  Ingress.mkIngress owner (mkHost net) tcpPort.unPort tls
+        in  Ingress.mkIngress owner (mkDomain net) tcpPort.unPort tls
 
 let configMapEnv
     : List Text
@@ -145,9 +174,9 @@ let mkDeployment
           (None (List K.Volume.Type))
 
 in  { tlsSecretName
-    , tcpPort
-    , env
-    , mkRtlConfigJson
+    , mkEnv
+    , configMapEnv
+    , secretEnv
     , mkService
     , mkDeployment
     , mkIngress
