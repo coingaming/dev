@@ -16,9 +16,9 @@ let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
-let tlsCert = ../../build/secrets/lsp/inlined-tls.cert as Text ? G.todo
+let tlsCert = ../../build/secrets/lsp/tls.cert as Text ? G.todo
 
-let tlsKey = ../../build/secrets/lsp/inlined-tls.key as Text ? G.todo
+let tlsKey = ../../build/secrets/lsp/tls.key as Text ? G.todo
 
 let logEnv = "test"
 
@@ -112,14 +112,12 @@ let mkEnv
         , { mapKey = env.lspLogFormat, mapValue = logFormat }
         , { mapKey = env.lspLogVerbosity, mapValue = logVerbosity }
         , { mapKey = env.lspLogSeverity, mapValue = logSeverity }
+        , { mapKey = env.lspLndP2pPort, mapValue = G.unPort Lnd.p2pPort }
+        , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomain net }
+        , { mapKey = env.lspLibpqConnStr, mapValue = Postgres.mkConnStr net }
         , { mapKey = env.lspGrpcServerEnv
           , mapValue = "'${P.JSON.render mkLspGrpcServerEnv}'"
           }
-        , { mapKey = env.lspMinChanCapMsat
-          , mapValue = Natural/show minChanSize
-          }
-        , { mapKey = env.lspLndP2pPort, mapValue = G.unPort Lnd.p2pPort }
-        , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomain net }
         , { mapKey = env.lspLndEnv
           , mapValue = "'${P.JSON.render (mkLspLndEnv net)}'"
           }
@@ -127,7 +125,9 @@ let mkEnv
           , mapValue = "'${P.JSON.render (mkLspBitcoindEnv net)}'"
           }
         , { mapKey = env.lspMsatPerByte, mapValue = mkMsatPerByte net }
-        , { mapKey = env.lspLibpqConnStr, mapValue = Postgres.mkConnStr net }
+        , { mapKey = env.lspMinChanCapMsat
+          , mapValue = Natural/show minChanSize
+          }
         ]
 
 let mkServiceType
@@ -164,8 +164,8 @@ let mkContainerImage
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.14"
-          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.14"
+          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.17"
+          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.17"
           , RegTest = ../../build/docker-image-btc-lsp.txt as Text ? G.todo
           }
           net

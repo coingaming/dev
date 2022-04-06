@@ -17,7 +17,7 @@ checkRequiredFiles
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-inline-creds.sh && ./nix/ns-dhall-compile.sh $BITCOIN_NETWORK'"
+   "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK'"
 
 confirmContinue "==> Deploy to $BITCOIN_NETWORK?"
 
@@ -39,7 +39,7 @@ sh "$THIS_DIR/k8s-export-creds.sh"
 
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-inline-creds.sh && ./nix/ns-dhall-compile.sh $BITCOIN_NETWORK'"
+   "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK'"
 
 echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"

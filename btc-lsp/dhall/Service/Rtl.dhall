@@ -46,20 +46,27 @@ let mkMultiPass
           }
           net
 
+let mkDomain
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
+
 let mkRtlConfigNodesJson
     : P.JSON.Type
-    = P.JSON.object
-        ( toMap
-            { hexMacaroon = P.JSON.string Lnd.hexMacaroon
-            , index = P.JSON.natural 1
-            , lnServerUrl =
-                P.JSON.string
-                  "${G.unNetworkScheme
-                       G.NetworkScheme.Https}://${G.unOwner
-                                                    G.Owner.Lnd}:${G.unPort
-                                                                     Lnd.restPort}"
-            }
-        )
+    = P.JSON.array
+        [ P.JSON.object
+            ( toMap
+                { hexMacaroon = P.JSON.string Lnd.hexMacaroon
+                , index = P.JSON.natural 1
+                , lnServerUrl =
+                    P.JSON.string
+                      "${G.unNetworkScheme
+                           G.NetworkScheme.Https}://${G.unOwner
+                                                        G.Owner.Lnd}:${G.unPort
+                                                                         Lnd.restPort}"
+                }
+            )
+        ]
 
 let mkRtlConfigJson
     : G.BitcoinNetwork → P.JSON.Type
@@ -115,7 +122,7 @@ let mkService
 let mkTls
     : G.BitcoinNetwork → Optional K.IngressTLS.Type
     = λ(net : G.BitcoinNetwork) →
-        let tls = Some (Ingress.mkTls domain tlsSecretName)
+        let tls = Some (Ingress.mkTls (mkDomain net) tlsSecretName)
 
         in  merge
               { MainNet = tls, TestNet = tls, RegTest = None K.IngressTLS.Type }
@@ -132,7 +139,7 @@ let mkIngress
                 (λ(tls : K.IngressTLS.Type) → [ tls ])
                 (mkTls net)
 
-        in  Ingress.mkIngress owner domain tcpPort.unPort tls
+        in  Ingress.mkIngress owner (mkDomain net) tcpPort.unPort tls
 
 let configMapEnv
     : List Text

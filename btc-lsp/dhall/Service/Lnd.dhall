@@ -18,7 +18,7 @@ let image = "lightninglabs/lnd:v0.14.2-beta"
 
 let hexMacaroon = ../../build/secrets/lnd/macaroon.hex as Text ? G.todo
 
-let tlsCert = ../../build/secrets/lnd/inlined-tls.cert as Text ? G.todo
+let tlsCert = ../../build/secrets/lnd/tls.cert as Text ? G.todo
 
 let domain = ../../build/secrets/lnd/domain.txt as Text ? G.todo
 

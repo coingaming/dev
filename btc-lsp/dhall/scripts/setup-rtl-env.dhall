@@ -25,9 +25,9 @@ in  ''
       kubectl create secret generic ${owner} \${G.concatSetupEnv Rtl.secretEnv}
     ) || true
 
-    if [ -f "$TLS_CERT_PATH" ] && [ -f "$TLS_KEY_PATH" ]; then
-      (kubectl create secret tls ${Rtl.tlsSecretName} \
-        --cert="$TLS_CERT_PATH" \
-        --key="$TLS_KEY_PATH") || true
-    fi
+    (
+      kubectl create secret tls ${Rtl.tlsSecretName} \
+      --cert="$TLS_CERT_PATH" \
+      --key="$TLS_KEY_PATH"
+    ) || true
     ''
