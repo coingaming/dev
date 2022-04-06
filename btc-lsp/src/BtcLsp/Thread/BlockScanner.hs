@@ -19,12 +19,16 @@ import qualified Network.Bitcoin as Btc
 import qualified Universum
 
 apply :: (Env m) => m ()
-apply = do
-  res <- runExceptT scan
-  whenLeft res $ $(logTM) ErrorS . logStr . inspect
-  whenRight res markFunded
-  sleep $ MicroSecondsDelay 1000000
-  apply
+apply =
+  forever $ do
+    eitherM
+      ( $(logTM) ErrorS
+          . logStr
+          . inspect
+      )
+      markFunded
+      $ runExceptT scan
+    sleep $ MicroSecondsDelay 1000000
 
 markFunded :: (Env m) => [Utxo] -> m ()
 markFunded utxos =

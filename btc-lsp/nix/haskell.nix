@@ -15,6 +15,7 @@ in
       };
       compiler-nix-name = "ghc865";
       modules = [{
+        enableLibraryProfiling = profile;
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;
         packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''

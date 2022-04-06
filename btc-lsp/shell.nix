@@ -11,14 +11,13 @@ let proto = import ./nix/proto-lens-protoc.nix;
       then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/e73945947a367ed9bae735e276664a3efe6ea80f") {bundle = ["dhall" "haskell"];})]
       else [];
 in
-(project {
-
-}).shellFor {
+(project { inherit profile; }).shellFor {
   withHoogle = true;
   buildInputs = ideBuildInputs ++ [
     pkgs.haskellPackages.hpack
     pkgs.haskellPackages.fswatcher
     pkgs.haskellPackages.cabal-plan
+    pkgs.haskellPackages.hp2pretty
     pkgs.zlib
     pkgs.protobuf
     pkgs.netcat-gnu

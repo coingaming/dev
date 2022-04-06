@@ -14,19 +14,20 @@ import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 import qualified BtcLsp.Thread.Server as Server
 import qualified BtcLsp.Thread.SwapperIntoLn as SwapperIntoLn
-import qualified Control.Concurrent as Concurrent
 import qualified LndClient.RPC.Katip as Lnd
-import qualified System.Remote.Monitoring as Ekg
+
+--import qualified Control.Concurrent as Concurrent
+--import qualified System.Remote.Monitoring as Ekg
 
 main :: IO ()
 main = do
   cfg <- readRawConfig
-  bracket
-    (Ekg.forkServer "localhost" 8000)
-    (Concurrent.killThread . Ekg.serverThreadId)
-    . const
-    . withEnv cfg
-    $ \env -> runApp env apply
+  -- bracket
+  --   (Ekg.forkServer "localhost" 8000)
+  --   (Concurrent.killThread . Ekg.serverThreadId)
+  --   . const
+  withEnv cfg $
+    \env -> runApp env apply
 
 apply :: (Env m) => m ()
 apply = do
