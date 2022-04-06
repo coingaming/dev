@@ -4,4 +4,4 @@ let Rtl = ../Service/Rtl.dhall
 
 let network = G.BitcoinNetwork.MainNet
 
-in  G.concatExportEnv (Rtl.mkEnv network)
+in  G.concatExportEnv (Rtl.mkEnv network [ G.Owner.LndLsp ])
