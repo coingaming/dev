@@ -79,7 +79,7 @@ wget-1.21.3
 
 ### Regtest setup
 
-1. Setup cluster and services:
+1. Setup cluster and deploy k8s resources:
 
 ```sh
 ./nix/k8s-setup.sh
@@ -105,7 +105,7 @@ Follow the guide below to configure `doctl`.
 
 https://docs.digitalocean.com/reference/doctl/how-to/install/
 
-1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and services:
+1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and deploy k8s resources:
 
 ```sh
 ./nix/k8s-setup-testnet.sh
@@ -170,7 +170,7 @@ kubectl delete pod --all-namespaces --field-selector 'status.phase=Failed'
 Get cluster ID
 
 ```sh
-doctl k cluster get testnet-cluster
+doctl k cluster get lsp-testnet
 ```
 
 Add context to kube config
