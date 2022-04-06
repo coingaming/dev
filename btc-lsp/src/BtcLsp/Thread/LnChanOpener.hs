@@ -50,6 +50,7 @@ apply =
 openChan :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
 openChan (swapEnt, userEnt) = do
   let swap = entityVal swapEnt
+  prv <- getChanPrivacy
   msatPerByte <- getMsatPerByte
   res <- runExceptT $ do
     cp <-
@@ -66,7 +67,7 @@ openChan (swapEnt, userEnt) = do
                 Chan.pushMSat = Nothing,
                 Chan.targetConf = Nothing,
                 Chan.mSatPerByte = msatPerByte,
-                Chan.private = Just True,
+                Chan.private = Just $ prv == Private,
                 Chan.minHtlcMsat = Nothing,
                 Chan.remoteCsvDelay = Nothing,
                 Chan.minConfs = Nothing,
