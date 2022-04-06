@@ -47,43 +47,50 @@ let mkMultiPass
           net
 
 let mkRtlConfigNodesJson
-    : Text
-    = ''
-      {
-        "hexMacaroon": "${Lnd.hexMacaroon}",
-        "index": 1,
-        "lnServerUrl": "${G.unNetworkScheme
-                            G.NetworkScheme.Https}://${G.unOwner
-                                                         G.Owner.Lnd}:${G.unPort
-                                                                          Lnd.restPort}"
-      }
-      ''
+    : P.JSON.Type
+    = P.JSON.object
+        ( toMap
+            { hexMacaroon = P.JSON.string Lnd.hexMacaroon
+            , index = P.JSON.natural 1
+            , lnServerUrl =
+                P.JSON.string
+                  "${G.unNetworkScheme
+                       G.NetworkScheme.Https}://${G.unOwner
+                                                    G.Owner.Lnd}:${G.unPort
+                                                                     Lnd.restPort}"
+            }
+        )
 
 let mkRtlConfigJson
-    : G.BitcoinNetwork → Text
+    : G.BitcoinNetwork → P.JSON.Type
     = λ(net : G.BitcoinNetwork) →
-        ''
-        {
-          "SSO":{
-            "logoutRedirectLink": "",
-            "rtlCookiePath": "",
-            "rtlSSO": 0
-          },
-          "defaultNodeIndex": 1,
-          "multiPass": "${mkMultiPass net}",
-          "nodes": [],
-          "port": "${G.unPort tcpPort}"
-        }
-        ''
+        P.JSON.object
+          ( toMap
+              { multiPass = P.JSON.string (mkMultiPass net)
+              , port = P.JSON.natural tcpPort.unPort
+              , defaultNodeIndex = P.JSON.natural 1
+              , SSO =
+                  P.JSON.object
+                    ( toMap
+                        { rtlSSO = P.JSON.natural 0
+                        , rtlCookiePath = P.JSON.string ""
+                        , logoutRedirectLink = P.JSON.string ""
+                        }
+                    )
+              , nodes = P.JSON.array ([] : List P.JSON.Type)
+              }
+          )
 
 let mkEnv
     : G.BitcoinNetwork → P.Map.Type Text Text
     = λ(net : G.BitcoinNetwork) →
         [ { mapKey = env.configFromEnv, mapValue = "true" }
         , { mapKey = env.rtlConfigNodesJson
-          , mapValue = "'${mkRtlConfigNodesJson}'"
+          , mapValue = "'${P.JSON.render mkRtlConfigNodesJson}'"
           }
-        , { mapKey = env.rtlConfigJson, mapValue = "'${mkRtlConfigJson net}'" }
+        , { mapKey = env.rtlConfigJson
+          , mapValue = "'${P.JSON.render (mkRtlConfigJson net)}'"
+          }
         ]
 
 let mkServiceType

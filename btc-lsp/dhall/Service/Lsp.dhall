@@ -52,45 +52,47 @@ let env =
       }
 
 let mkLspLndEnv
-    : G.BitcoinNetwork → Text
+    : G.BitcoinNetwork → P.JSON.Type
     = λ(net : G.BitcoinNetwork) →
-        ''
-        {
-          "lnd_wallet_password":"${Lnd.mkWalletPass net}",
-          "lnd_tls_cert":"${Lnd.tlsCert}",
-          "lnd_hex_macaroon":"${Lnd.hexMacaroon}",
-          "lnd_host":"${G.unOwner G.Owner.Lnd}",
-          "lnd_port":${G.unPort Lnd.grpcPort}
-        }
-        ''
+        P.JSON.object
+          ( toMap
+              { lnd_wallet_password = P.JSON.string (Lnd.mkWalletPass net)
+              , lnd_tls_cert = P.JSON.string Lnd.tlsCert
+              , lnd_hex_macaroon = P.JSON.string Lnd.hexMacaroon
+              , lnd_host = P.JSON.string (G.unOwner G.Owner.Lnd)
+              , lnd_port = P.JSON.natural Lnd.grpcPort.unPort
+              }
+          )
 
 let mkLspBitcoindEnv
-    : G.BitcoinNetwork → Text
+    : G.BitcoinNetwork → P.JSON.Type
     = λ(net : G.BitcoinNetwork) →
-        ''
-        {
-          "host":"${G.unNetworkScheme
-                      G.NetworkScheme.Http}://${G.unOwner
-                                                  G.Owner.Bitcoind}:${G.unPort
-                                                                        ( Bitcoind.mkRpcPort
-                                                                            net
-                                                                        )}",
-          "username":"${Bitcoind.mkRpcUser net}",
-          "password":"${Bitcoind.mkRpcPass net}"
-        }
-        ''
+        P.JSON.object
+          ( toMap
+              { host =
+                  P.JSON.string
+                    "${G.unNetworkScheme
+                         G.NetworkScheme.Http}://${G.unOwner
+                                                     G.Owner.Bitcoind}:${G.unPort
+                                                                           ( Bitcoind.mkRpcPort
+                                                                               net
+                                                                           )}"
+              , username = P.JSON.string (Bitcoind.mkRpcUser net)
+              , password = P.JSON.string (Bitcoind.mkRpcPass net)
+              }
+          )
 
 let mkLspGrpcServerEnv
-    : Text
-    = ''
-      {
-        "port":${G.unPort grpcPort},
-        "sig_verify":true,
-        "sig_header_name":"sig-bin",
-        "tls_cert":"${tlsCert}",
-        "tls_key":"${tlsKey}"
-      }
-      ''
+    : P.JSON.Type
+    = P.JSON.object
+        ( toMap
+            { port = P.JSON.natural grpcPort.unPort
+            , sig_verify = P.JSON.bool True
+            , sig_header_name = P.JSON.string "sig-bin"
+            , tls_cert = P.JSON.string tlsCert
+            , tls_key = P.JSON.string tlsKey
+            }
+        )
 
 let mkMsatPerByte
     : G.BitcoinNetwork → Text
@@ -111,16 +113,18 @@ let mkEnv
         , { mapKey = env.lspLogVerbosity, mapValue = logVerbosity }
         , { mapKey = env.lspLogSeverity, mapValue = logSeverity }
         , { mapKey = env.lspGrpcServerEnv
-          , mapValue = "'${mkLspGrpcServerEnv}'"
+          , mapValue = "'${P.JSON.render mkLspGrpcServerEnv}'"
           }
         , { mapKey = env.lspMinChanCapMsat
           , mapValue = Natural/show minChanSize
           }
         , { mapKey = env.lspLndP2pPort, mapValue = G.unPort Lnd.p2pPort }
         , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomain net }
-        , { mapKey = env.lspLndEnv, mapValue = "'${mkLspLndEnv net}'" }
+        , { mapKey = env.lspLndEnv
+          , mapValue = "'${P.JSON.render (mkLspLndEnv net)}'"
+          }
         , { mapKey = env.lspBitcoindEnv
-          , mapValue = "'${mkLspBitcoindEnv net}'"
+          , mapValue = "'${P.JSON.render (mkLspBitcoindEnv net)}'"
           }
         , { mapKey = env.lspMsatPerByte, mapValue = mkMsatPerByte net }
         , { mapKey = env.lspLibpqConnStr, mapValue = Postgres.mkConnStr net }
