@@ -49,11 +49,6 @@ Run specific tests with hot code reloading:
 ghcid --setup ":set args -m importPubKey"
 ```
 
-<<<<<<< HEAD
-## Kubernetres
-
-K8S setup is scripted in a way similar to Docker/Swarm setup. Some tools are required to be installed directly on host machine. They can be installed using nix-env:
-=======
 ## Release
 
 Releases are automated by CI. To create new release, bump the version inside `VERSION` file. Then push all changes into github and merge into `master` branch. Then run:
@@ -67,7 +62,6 @@ The script will push new tag which will trigger new github release and package.
 ## Kubernetes
 
 Some tools are required to be installed directly on host machine. They can be installed using nix-env:
->>>>>>> master
 
 ```sh
 ./nix/nix-install-tools.sh
@@ -76,43 +70,6 @@ Some tools are required to be installed directly on host machine. They can be in
 If nix is not available, install tools in any other way you like:
 
 ```
-<<<<<<< HEAD
-doctl-1.71.1
-kubectl-1.23.5
-minikube-1.25.2
-jq-1.6
-```
-
-1. Setup cluster and services:
-
-```sh
-./nix/k8s-setup-cluster.sh
-./nix/k8s-setup.sh --prebuilt
-```
-
-2. Forward services to localhost (MacOS):
-
-```sh
-minikube tunnel
-```
-
-## Digitalocean
-
-1. Install (non nix) and configure doctl:
-
-https://docs.digitalocean.com/reference/doctl/how-to/install/
-
-2. Get cluster ID:
-
-```sh
-doctl k cluster get testnet-cluster
-```
-
-3. Setup kubecontext:
-
-```sh
-doctl kubernetes cluster kubeconfig save <cluster-id>
-=======
 expect-5.45.4
 jq-1.6
 kubectl-1.23.5
@@ -174,7 +131,6 @@ Get IP of Ingress:
 
 ```sh
 kubectl get ingress
->>>>>>> master
 ```
 
 ## Troubleshoot
@@ -191,21 +147,6 @@ kubectl get po
 kubectl describe pod <pod-name>
 ```
 
-<<<<<<< HEAD
-3. Get detailed info about current cluster state:
-
-```sh
-minikube dashboard
-```
-
-4. To access postgres dbs from local machine (pgAdmin or Postico):
-
-```sh
-kubectl port-forward <pod-name> 5432:<desired-port>
-```
-
-5. Lnd after restart is locked. Usually Lsp unlocks it automatically, but if for some reason it's locked (for example Lsp is not running) then it's possible to unlock Lnd with:
-=======
 3. Get detailed info about current cluster state (regtest only):
 
 ```sh
@@ -213,7 +154,6 @@ minikube dashboard --profile=btc-lsp
 ```
 
 4. Lnd after restart is locked. Usually Lsp unlocks it automatically, but if for some reason it's locked (for example Lsp is not running) then you can unlock it with:
->>>>>>> master
 
 ```sh
 ./nix/k8s-lazy-init-unlock.sh
