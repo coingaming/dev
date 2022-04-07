@@ -14,11 +14,11 @@ let Bitcoind = ./Bitcoind.dhall
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let tlsCert = ../../build/secrets/lnd-lsp/tls.cert as Text ? G.todo
+let tlsCert = ../../build/secrets/lnd/tls.cert as Text ? G.todo
 
-let domain = ../../build/secrets/lnd-lsp/domain.txt as Text ? G.todo
+let domain = ../../build/secrets/lnd/domain.txt as Text ? G.todo
 
-let securePass = ../../build/secrets/lnd-lsp/walletpassword.txt as Text ? G.todo
+let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
 
 let grpcPort
     : G.Port
@@ -66,7 +66,7 @@ let mkDomain
         merge
           { MainNet = domain
           , TestNet = domain
-          , RegTest = G.unOwner G.Owner.LndLsp
+          , RegTest = G.unOwner G.Owner.Lnd
           }
           net
 
@@ -74,7 +74,7 @@ let mkHexMacaroon
     : G.Owner → Text
     = λ(owner : G.Owner) →
         merge
-          { LndLsp = ../../build/secrets/lnd-lsp/macaroon.hex as Text ? G.todo
+          { Lnd = ../../build/secrets/lnd/macaroon.hex as Text ? G.todo
           , LndAlice =
               ../../build/secrets/lnd-alice/macaroon.hex as Text ? G.todo
           , LndBob = ../../build/secrets/lnd-bob/macaroon.hex as Text ? G.todo
@@ -133,11 +133,11 @@ let mkServiceAnnotations
           { MainNet =
               Service.mkAnnotations
                 Service.CloudProvider.Aws
-                (G.unOwner G.Owner.LndLsp)
+                (G.unOwner G.Owner.Lnd)
           , TestNet =
               Service.mkAnnotations
                 Service.CloudProvider.DigitalOcean
-                (G.unOwner G.Owner.LndLsp)
+                (G.unOwner G.Owner.Lnd)
           , RegTest = None (List { mapKey : Text, mapValue : Text })
           }
           net
@@ -247,7 +247,7 @@ let mkSetupScript
 
             echo "==> Setting up env for ${ownerText}"
 
-            . "$THIS_DIR/export-${G.unOwner G.Owner.LndLsp}-env.sh"
+            . "$THIS_DIR/export-${G.unOwner G.Owner.Lnd}-env.sh"
 
             (
               kubectl create configmap ${ownerText} \${G.concatSetupEnv

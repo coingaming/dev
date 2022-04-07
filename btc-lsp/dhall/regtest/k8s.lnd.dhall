@@ -6,7 +6,7 @@ let Lnd = ../Service/Lnd.dhall
 
 let network = G.BitcoinNetwork.RegTest
 
-let owner = G.Owner.LndLsp
+let owner = G.Owner.Lnd
 
 in  { apiVersion = "v1"
     , kind = "List"

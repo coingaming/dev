@@ -7,7 +7,7 @@ BUILD_DIR="$THIS_DIR/../build"
 SCRIPTS_DIR="$BUILD_DIR/scripts"
 
 sh "$SCRIPTS_DIR/setup-bitcoind-env.sh"
-sh "$SCRIPTS_DIR/setup-lnd-lsp-env.sh"
+sh "$SCRIPTS_DIR/setup-lnd-env.sh"
 
 if [ -f "$SCRIPTS_DIR/setup-lnd-alice-env.sh" ]; then
   sh "$SCRIPTS_DIR/setup-lnd-alice-env.sh"
@@ -21,7 +21,7 @@ if [ -f "$SCRIPTS_DIR/setup-postgres-env.sh" ]; then
   sh "$SCRIPTS_DIR/setup-postgres-env.sh"
 fi
 
-if [ -f "$BUILD_DIR/secrets/lnd-lsp/macaroon.hex" ]; then
+if [ -f "$BUILD_DIR/secrets/lnd/macaroon.hex" ]; then
   sh "$SCRIPTS_DIR/setup-rtl-env.sh"
   sh "$SCRIPTS_DIR/setup-lsp-env.sh"
 fi

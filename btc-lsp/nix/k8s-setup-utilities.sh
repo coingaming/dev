@@ -8,7 +8,7 @@ SECRETS_DIR="$BUILD_DIR/secrets"
 
 # Service-specific files are here
 BITCOIND_PATH="$SECRETS_DIR/bitcoind"
-LND_PATH="$SECRETS_DIR/lnd-lsp"
+LND_PATH="$SECRETS_DIR/lnd"
 RTL_PATH="$SECRETS_DIR/rtl"
 LSP_PATH="$SECRETS_DIR/lsp"
 POSTGRES_PATH="$SECRETS_DIR/postgres"

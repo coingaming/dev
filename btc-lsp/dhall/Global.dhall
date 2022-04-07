@@ -39,7 +39,7 @@ let unPorts
 
 let Owner
     : Type
-    = < Bitcoind | Lsp | LndLsp | LndAlice | LndBob | Postgres | Rtl >
+    = < Bitcoind | Lsp | Lnd | LndAlice | LndBob | Postgres | Rtl >
 
 let unOwner
     : Owner → Text
@@ -47,7 +47,7 @@ let unOwner
         merge
           { Bitcoind = "bitcoind"
           , Lsp = "lsp"
-          , LndLsp = "lnd-lsp"
+          , Lnd = "lnd"
           , LndAlice = "lnd-alice"
           , LndBob = "lnd-bob"
           , Postgres = "postgres"
