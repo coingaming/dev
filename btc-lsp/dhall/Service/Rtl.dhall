@@ -52,21 +52,30 @@ let mkDomain
         merge { MainNet = domain, TestNet = domain, RegTest = owner } net
 
 let mkRtlConfigNodesJson
-    : P.JSON.Type
-    = P.JSON.array
-        [ P.JSON.object
-            ( toMap
-                { hexMacaroon = P.JSON.string Lnd.hexMacaroon
-                , index = P.JSON.natural 1
-                , lnServerUrl =
-                    P.JSON.string
-                      "${G.unNetworkScheme
-                           G.NetworkScheme.Https}://${G.unOwner
-                                                        G.Owner.Lnd}:${G.unPort
-                                                                         Lnd.restPort}"
-                }
-            )
-        ]
+    : List G.Owner → P.JSON.Type
+    = λ(lndOwners : List G.Owner) →
+        let nodeConfigs =
+              P.List.map
+                { index : Natural, value : G.Owner }
+                P.JSON.Type
+                ( λ(owner : { index : Natural, value : G.Owner }) →
+                    P.JSON.object
+                      ( toMap
+                          { hexMacaroon =
+                              P.JSON.string (Lnd.mkHexMacaroon owner.value)
+                          , index = P.JSON.natural (owner.index + 1)
+                          , lnServerUrl =
+                              P.JSON.string
+                                "${G.unNetworkScheme
+                                     G.NetworkScheme.Https}://${G.unOwner
+                                                                  owner.value}:${G.unPort
+                                                                                   Lnd.restPort}"
+                          }
+                      )
+                )
+                (P.List.indexed G.Owner lndOwners)
+
+        in  P.JSON.array nodeConfigs
 
 let mkRtlConfigJson
     : G.BitcoinNetwork → P.JSON.Type
@@ -89,11 +98,12 @@ let mkRtlConfigJson
           )
 
 let mkEnv
-    : G.BitcoinNetwork → P.Map.Type Text Text
+    : G.BitcoinNetwork → List G.Owner → P.Map.Type Text Text
     = λ(net : G.BitcoinNetwork) →
+      λ(lndOwners : List G.Owner) →
         [ { mapKey = env.configFromEnv, mapValue = "true" }
         , { mapKey = env.rtlConfigNodesJson
-          , mapValue = "'${P.JSON.render mkRtlConfigNodesJson}'"
+          , mapValue = "'${P.JSON.render (mkRtlConfigNodesJson lndOwners)}'"
           }
         , { mapKey = env.rtlConfigJson
           , mapValue = "'${P.JSON.render (mkRtlConfigJson net)}'"

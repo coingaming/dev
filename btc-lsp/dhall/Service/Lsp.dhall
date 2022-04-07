@@ -58,7 +58,7 @@ let mkLspLndEnv
           ( toMap
               { lnd_wallet_password = P.JSON.string (Lnd.mkWalletPass net)
               , lnd_tls_cert = P.JSON.string Lnd.tlsCert
-              , lnd_hex_macaroon = P.JSON.string Lnd.hexMacaroon
+              , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon G.Owner.Lnd)
               , lnd_host = P.JSON.string (G.unOwner G.Owner.Lnd)
               , lnd_port = P.JSON.natural Lnd.grpcPort.unPort
               }
@@ -175,8 +175,8 @@ let mkContainerImage
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.17"
-          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.17"
+          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.18"
+          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.18"
           , RegTest = ../../build/docker-image-btc-lsp.txt as Text ? G.todo
           }
           net
@@ -226,11 +226,16 @@ let mkDeployment
           (None (List K.Volume.Type))
 
 in  { mkEnv
+    , env
     , configMapEnv
+    , grpcPort
     , secretEnv
     , mkService
     , mkDeployment
     , mkLspGrpcClientEnv
+    , mkLspBitcoindEnv
+    , mkLspGrpcServerEnv
+    , mkLspLndEnv
     , logEnv
     , logFormat
     , logSeverity

@@ -39,7 +39,15 @@ let unPorts
 
 let Owner
     : Type
-    = < Bitcoind | Lsp | Lnd | Postgres | Rtl | Integration >
+    = < Bitcoind
+      | Lsp
+      | Lnd
+      | LndAlice
+      | LndBob
+      | Postgres
+      | Rtl
+      | Integration
+      >
 
 let unOwner
     : Owner → Text
@@ -48,6 +56,8 @@ let unOwner
           { Bitcoind = "bitcoind"
           , Lsp = "lsp"
           , Lnd = "lnd"
+          , LndAlice = "lnd-alice"
+          , LndBob = "lnd-bob"
           , Postgres = "postgres"
           , Rtl = "rtl"
           , Integration = "integration"
@@ -119,7 +129,6 @@ in  { BitcoinNetwork
     , defaultPass
     , todo
     , toLowerCase
-    , mkEnvVar
     , concatExportEnv
     , concatSetupEnv
     }

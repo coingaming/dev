@@ -9,6 +9,14 @@ SCRIPTS_DIR="$BUILD_DIR/scripts"
 sh "$SCRIPTS_DIR/setup-bitcoind-env.sh"
 sh "$SCRIPTS_DIR/setup-lnd-env.sh"
 
+if [ -f "$SCRIPTS_DIR/setup-lnd-alice-env.sh" ]; then
+  sh "$SCRIPTS_DIR/setup-lnd-alice-env.sh"
+fi
+
+if [ -f "$SCRIPTS_DIR/setup-lnd-bob-env.sh" ]; then
+  sh "$SCRIPTS_DIR/setup-lnd-bob-env.sh"
+fi
+
 if [ -f "$SCRIPTS_DIR/setup-postgres-env.sh" ]; then
   sh "$SCRIPTS_DIR/setup-postgres-env.sh"
 fi
