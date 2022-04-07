@@ -91,6 +91,26 @@ wget-1.21.3
 ./nix/k8s-forward.sh
 ```
 
+### Service/config upgrade
+
+1. Set k8s context to upgrade
+
+```sh
+kubectl config use-context <ctx-name>
+```
+
+2. Upgrade services/configs
+
+```sh
+./nix/k8s-upgrade.sh <net> <mode> <services>
+```
+
+Example
+
+```sh
+./nix/k8s-upgrade.sh --regtest --prebuilt lsp bitcoind
+```
+
 ## Testnet setup (DigitalOcean)
 
 1. Install and configure doctl:
@@ -177,4 +197,24 @@ Add context to kube config
 
 ```sh
 doctl kubernetes cluster kubeconfig save <cluster-id>
+```
+
+7. Manage k8s contexts:
+
+Display list of contexts
+
+```sh
+kubectl config get-contexts
+```
+
+Display the current context
+
+```sh
+kubectl config current-context
+```
+
+Set current context to btc-lsp
+
+```sh
+kubectl config use-context btc-lsp
 ```
