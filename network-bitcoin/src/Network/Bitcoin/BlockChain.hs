@@ -24,6 +24,8 @@ module Network.Bitcoin.BlockChain ( Client
                                   , getOutputSetInfo
                                   , OutputInfo(..)
                                   , getOutputInfo
+                                  , BlockChainInfo(..)
+                                  , getBlockChainInfo
                                   ) where
 
 import           Control.Monad
@@ -226,3 +228,25 @@ getOutputInfo :: Client
               -> Integer -- ^ The index we're looking at.
               -> IO (Maybe OutputInfo)
 getOutputInfo client txid n = callApi client "gettxout" [ tj txid, tj n ]
+
+-- | Details about blockchain.
+data BlockChainInfo =
+    BlockChainInfo { bciChain :: Text
+                   , bciBlocks :: BlockHeight
+                   , bciHeaders :: BlockHeight
+                   , bciInitialBlockDownload :: Bool
+                   }
+    deriving ( Show, Read, Ord, Eq )
+
+instance FromJSON BlockChainInfo where
+    parseJSON (Object o) = BlockChainInfo
+                            <$> o .: "chain"
+                            <*> o .: "blocks"
+                            <*> o .: "headers"
+                            <*> o .: "initialblockdownload"
+    parseJSON _ = mzero
+
+-- | Returns details about blockchain.
+getBlockChainInfo :: Client -> IO BlockChainInfo
+getBlockChainInfo client =
+  callApi client "getblockchaininfo" []

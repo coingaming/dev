@@ -26,6 +26,8 @@ deriving stock instance Generic Btc.BlockVerbose
 
 deriving stock instance Generic Btc.DecodedRawTransaction
 
+deriving stock instance Generic Btc.BlockChainInfo
+
 instance Out Btc.TxnOutputType
 
 instance Out Btc.ScriptSig
@@ -39,6 +41,8 @@ instance Out Btc.TxOut
 instance Out Btc.BlockVerbose
 
 instance Out Btc.DecodedRawTransaction
+
+instance Out Btc.BlockChainInfo
 
 instance From Text Lnd.PaymentRequest
 

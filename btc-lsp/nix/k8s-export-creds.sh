@@ -70,7 +70,7 @@ exportCreds () {
 
 exportCreds "lnd"
 
-if [ "$BITCOIN_NETWORK" == "regtest" ]; then
+if [ "$BITCOIN_NETWORK" = "regtest" ]; then
   for OWNER in lnd-alice lnd-bob; do
     exportCreds "$OWNER"
   done
