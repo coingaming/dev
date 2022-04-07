@@ -77,14 +77,13 @@ echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"
 
 echo "==> Deploying k8s resources"
-sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd postgres"
+sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd lnd-alice lnd-bob postgres"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd postgres"
+sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd lnd-alice lnd-bob postgres"
 
 echo "==> Initializing LND wallet"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
-sleep 20
 
 echo "==> Exporting creds from running pods"
 sh "$THIS_DIR/k8s-export-creds.sh"

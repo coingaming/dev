@@ -8,9 +8,8 @@ BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
 
 mkdir -p "$SECRETS_DIR"
 
-for OWNER in lsp; do
-
-  SERVICE="lnd"
+exportCreds () {
+  SERVICE="$1"
   POD=`sh $THIS_DIR/k8s-get-pod.sh $SERVICE`
   SERVICE_DIR="$SECRETS_DIR/$SERVICE"
   mkdir -p "$SERVICE_DIR"
@@ -67,5 +66,12 @@ for OWNER in lsp; do
       echo "ignoring pubkey ==> $KEY_FILE"
     fi
   fi
+}
 
-done
+exportCreds "lnd"
+
+if [ "$BITCOIN_NETWORK" == "regtest" ]; then
+  for OWNER in lnd-alice lnd-bob; do
+    exportCreds "$OWNER"
+  done
+fi
