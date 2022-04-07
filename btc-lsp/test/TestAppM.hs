@@ -103,6 +103,8 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     asks $ envLndPubKey . testEnvLsp
   getLspLndEnv =
     asks $ envLnd . testEnvLsp
+  getChanPrivacy =
+    asks $ envChanPrivacy . testEnvLsp
   getLndP2PSocketAddress = do
     host <- asks $ envLndP2PHost . testEnvLsp
     port <- asks $ envLndP2PPort . testEnvLsp

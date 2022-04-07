@@ -18,32 +18,32 @@ import qualified LndClient.RPC.Katip as LndKatip
 import qualified LndClient.RPC.Silent as LndSilent
 
 apply :: (Env m) => m ()
-apply = do
-  ePeerList <- withLnd LndSilent.listPeers id
-  whenLeft ePeerList $
-    $(logTM) ErrorS
-      . logStr
-      . ("ListPeers procedure failed: " <>)
-      . inspect
-  let peerSet =
-        Set.fromList $
-          Peer.pubKey <$> fromRight [] ePeerList
-  swaps <- SwapIntoLn.getSwapsToSettle
-  tasks <-
-    mapM
-      ( spawnLink
-          . settleSwap
-      )
-      $ filter
-        ( \(_, usr, _) ->
-            Set.member
-              (userNodePubKey $ entityVal usr)
-              peerSet
+apply =
+  forever $ do
+    ePeerList <- withLnd LndSilent.listPeers id
+    whenLeft ePeerList $
+      $(logTM) ErrorS
+        . logStr
+        . ("ListPeers procedure failed: " <>)
+        . inspect
+    let peerSet =
+          Set.fromList $
+            Peer.pubKey <$> fromRight [] ePeerList
+    swaps <- SwapIntoLn.getSwapsToSettle
+    tasks <-
+      mapM
+        ( spawnLink
+            . settleSwap
         )
-        swaps
-  mapM_ (liftIO . wait) tasks
-  sleep $ MicroSecondsDelay 500000
-  apply
+        $ filter
+          ( \(_, usr, _) ->
+              Set.member
+                (userNodePubKey $ entityVal usr)
+                peerSet
+          )
+          swaps
+    mapM_ (liftIO . wait) tasks
+    sleep $ MicroSecondsDelay 500000
 
 settleSwap ::
   ( Env m

@@ -13,7 +13,7 @@ if [ -f "$SCRIPTS_DIR/setup-postgres-env.sh" ]; then
   sh "$SCRIPTS_DIR/setup-postgres-env.sh"
 fi
 
-if [ -f "$BUILD_DIR/lnd/macaroon.hex" ]; then
+if [ -f "$BUILD_DIR/secrets/lnd/macaroon.hex" ]; then
   sh "$SCRIPTS_DIR/setup-rtl-env.sh"
   sh "$SCRIPTS_DIR/setup-lsp-env.sh"
   sh "$SCRIPTS_DIR/setup-integration-env.sh"

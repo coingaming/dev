@@ -24,4 +24,4 @@ PIDS=$(jobs -pr | tr '\n' ' ')
 
 trap "kill -9 $PIDS; exit" SIGINT SIGKILL SIGTERM
 
-wait $PIDS
+wait "$PIDS"
