@@ -106,14 +106,6 @@ let todo
     : Text
     = "TODO"
 
-let unJson
-    : P.JSON.Type → Text
-    = λ(x : P.JSON.Type) → Text/replace "\\u0024" "\$" (P.JSON.renderCompact x)
-
-let escape
-    : Text → Text
-    = λ(x : Text) → Text/replace "\"" "" (unJson (P.JSON.string x))
-
 in  { BitcoinNetwork
     , unBitcoinNetwork
     , NetworkScheme
@@ -128,7 +120,6 @@ in  { BitcoinNetwork
     , todo
     , toLowerCase
     , mkEnvVar
-    , escape
     , concatExportEnv
     , concatSetupEnv
     }

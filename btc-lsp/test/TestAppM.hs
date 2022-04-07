@@ -177,9 +177,6 @@ withTestEnv action =
     runTestApp env $
       finally
         ( do
-            print ("========WITH TEST ENV========" :: Text)
-            print (_grpcClientConfigHost $ LndEnv.envLndConfig $ LndTest.testLndEnv $ testEnvLndLsp env :: HostName)
-            print (_grpcClientConfigPort $ LndEnv.envLndConfig $ LndTest.testLndEnv $ testEnvLndLsp env :: PortNumber)
             LndTest.setupZeroChannels proxyOwner
             -- scheduleAll
             -- watchInvoices sub
@@ -207,9 +204,6 @@ withTestEnv' action = do
   gcEnv <- readGCEnv
   aliceRc <- readRawConfig
   lndLspEnv <- readLndLspEnv
-  print ("========LNDLSPENV=========" :: Text)
-  print (_grpcClientConfigHost $ LndEnv.envLndConfig lndLspEnv)
-  print (_grpcClientConfigPort $ LndEnv.envLndConfig lndLspEnv)
   btcClient <-
     Btc.getClient
       (unpack . bitcoindEnvHost $ rawConfigBtcEnv aliceRc)
