@@ -6,11 +6,14 @@ let Lnd = ../Service/Lnd.dhall
 
 let network = G.BitcoinNetwork.TestNet
 
+let owner = G.Owner.Lnd
+
 in  { apiVersion = "v1"
     , kind = "List"
     , items =
-      [ K.Resource.Service (Lnd.mkService network)
-      , K.Resource.PersistentVolumeClaim (Lnd.mkPersistentVolumeClaim network)
-      , K.Resource.Deployment (Lnd.mkDeployment network)
+      [ K.Resource.Service (Lnd.mkService network owner)
+      , K.Resource.PersistentVolumeClaim
+          (Lnd.mkPersistentVolumeClaim network owner)
+      , K.Resource.Deployment (Lnd.mkDeployment network owner)
       ]
     }
