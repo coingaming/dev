@@ -1,10 +1,10 @@
 let Integration = ../Service/Integration.dhall
 
+let P = ../Prelude/Import.dhall
+
 let Lsp = ../Service/Lsp.dhall
 
 let G = ../Global.dhall
-
-let lndHost = G.unOwner G.Owner.Lnd
 
 let network = G.BitcoinNetwork.RegTest
 
@@ -13,12 +13,8 @@ let Lnd = ../Service/Lnd.dhall
 let Postgres = ../Service/Postgres.dhall
 
 in  ''
-    export ${Integration.env.integrationGrpcClientEnv}='{
-      "host":"${lndHost}",
-      "port":${G.unPort Lsp.grpcPort},
-      "sig_header_name":"sig-bin",
-      "compress_mode":"Compressed"
-    }'
+    export ${Integration.env.integrationGrpcClientEnv}='${P.JSON.render
+                                                            Lsp.mkLspGrpcClientEnv}'
     export ${Integration.env.integrationBitcoindEnv}='${Integration.mkIntegrationBitcoindEnv
                                                           network}'
     export ${Integration.env.integrationGrpcServerEnv}='${Integration.mkIntegrationGrpcServerEnv}'
@@ -32,7 +28,7 @@ in  ''
     }'
     export ${Integration.env.integrationLibpqConnStr}='${Postgres.mkConnStr
                                                            network}'
-    export ${Integration.env.integrationLndP2pHost}="${Lnd.mkHost network}"
+    export ${Integration.env.integrationLndP2pHost}="${Lnd.mkDomain network}"
     export ${Integration.env.integrationLndP2pPort}="${G.unPort Lnd.p2pPort}"
     export ${Integration.env.integrationLogEnv}="${Lsp.logEnv}"
     export ${Integration.env.integrationLogFormat}="${Lsp.logFormat}"

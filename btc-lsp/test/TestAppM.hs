@@ -40,12 +40,10 @@ import qualified LndClient.Data.GetInfo as GetInfo
 import qualified LndClient.Data.SignMessage as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
-import qualified LndClient.Data.LndEnv as LndEnv
 import qualified LndClient.RPC.Katip as Lnd
 import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
-import Network.GRPC.Client.Helpers
 import Test.Hspec
 
 data TestOwner
