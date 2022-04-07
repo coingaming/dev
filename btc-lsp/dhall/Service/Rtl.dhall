@@ -56,24 +56,24 @@ let mkRtlConfigNodesJson
     = λ(lndOwners : List G.Owner) →
         let nodeConfigs =
               P.List.map
-                G.Owner
+                { index : Natural, value : G.Owner }
                 P.JSON.Type
-                ( λ(owner : G.Owner) →
+                ( λ(owner : { index : Natural, value : G.Owner }) →
                     P.JSON.object
                       ( toMap
                           { hexMacaroon =
-                              P.JSON.string (Lnd.mkHexMacaroon owner)
-                          , index = P.JSON.natural 1
+                              P.JSON.string (Lnd.mkHexMacaroon owner.value)
+                          , index = P.JSON.natural (owner.index + 1)
                           , lnServerUrl =
                               P.JSON.string
                                 "${G.unNetworkScheme
                                      G.NetworkScheme.Https}://${G.unOwner
-                                                                  owner}:${G.unPort
-                                                                             Lnd.restPort}"
+                                                                  owner.value}:${G.unPort
+                                                                                   Lnd.restPort}"
                           }
                       )
                 )
-                lndOwners
+                (P.List.indexed G.Owner lndOwners)
 
         in  P.JSON.array nodeConfigs
 
