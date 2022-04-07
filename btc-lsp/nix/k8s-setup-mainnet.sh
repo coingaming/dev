@@ -32,7 +32,6 @@ sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd"
 
 echo "==> Initializing LND wallet"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
-sleep 20
 
 echo "==> Exporting creds from running pods"
 sh "$THIS_DIR/k8s-export-creds.sh"

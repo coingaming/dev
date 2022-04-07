@@ -11,9 +11,9 @@ else
   BLOCKS="$1"
 fi
 
-for OWNER in lsp; do
+for OWNER in lnd lnd-alice lnd-bob; do
 
-  LND_SERVICE="lnd"
+  LND_SERVICE="$OWNER"
   echo "$0 ==> getting LND_POD of $LND_SERVICE"
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   echo "$0 ==> getting $BITCOIN_NETWORK LND_ADDRESS of $LND_SERVICE $LND_POD"

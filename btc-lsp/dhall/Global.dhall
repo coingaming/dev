@@ -39,7 +39,7 @@ let unPorts
 
 let Owner
     : Type
-    = < Bitcoind | Lsp | Lnd | Postgres | Rtl >
+    = < Bitcoind | Lsp | Lnd | LndAlice | LndBob | Postgres | Rtl >
 
 let unOwner
     : Owner → Text
@@ -48,6 +48,8 @@ let unOwner
           { Bitcoind = "bitcoind"
           , Lsp = "lsp"
           , Lnd = "lnd"
+          , LndAlice = "lnd-alice"
+          , LndBob = "lnd-bob"
           , Postgres = "postgres"
           , Rtl = "rtl"
           }

@@ -12,11 +12,7 @@ let Deployment = ../Kubernetes/Deployment.dhall
 
 let Bitcoind = ./Bitcoind.dhall
 
-let owner = G.unOwner G.Owner.Lnd
-
 let image = "lightninglabs/lnd:v0.14.2-beta"
-
-let hexMacaroon = ../../build/secrets/lnd/macaroon.hex as Text ? G.todo
 
 let tlsCert = ../../build/secrets/lnd/tls.cert as Text ? G.todo
 
@@ -67,7 +63,27 @@ let mkWalletPass
 let mkDomain
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
+        merge
+          { MainNet = domain
+          , TestNet = domain
+          , RegTest = G.unOwner G.Owner.Lnd
+          }
+          net
+
+let mkHexMacaroon
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        merge
+          { Lnd = ../../build/secrets/lnd/macaroon.hex as Text ? G.todo
+          , LndAlice =
+              ../../build/secrets/lnd-alice/macaroon.hex as Text ? G.todo
+          , LndBob = ../../build/secrets/lnd-bob/macaroon.hex as Text ? G.todo
+          , Bitcoind = G.todo
+          , Lsp = G.todo
+          , Postgres = G.todo
+          , Rtl = G.todo
+          }
+          owner
 
 let mkEnv
     : G.BitcoinNetwork → P.Map.Type Text Text
@@ -114,18 +130,24 @@ let mkServiceAnnotations
     : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
+          { MainNet =
+              Service.mkAnnotations
+                Service.CloudProvider.Aws
+                (G.unOwner G.Owner.Lnd)
           , TestNet =
-              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
+              Service.mkAnnotations
+                Service.CloudProvider.DigitalOcean
+                (G.unOwner G.Owner.Lnd)
           , RegTest = None (List { mapKey : Text, mapValue : Text })
           }
           net
 
 let mkService
-    : G.BitcoinNetwork → K.Service.Type
+    : G.BitcoinNetwork → G.Owner → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
+      λ(owner : G.Owner) →
         Service.mkService
-          owner
+          (G.unOwner owner)
           (mkServiceAnnotations net)
           (mkServiceType net)
           (Service.mkPorts ports)
@@ -150,9 +172,10 @@ let mkVolumeSize
           net
 
 let mkPersistentVolumeClaim
-    : G.BitcoinNetwork → K.PersistentVolumeClaim.Type
+    : G.BitcoinNetwork → G.Owner → K.PersistentVolumeClaim.Type
     = λ(net : G.BitcoinNetwork) →
-        Volume.mkPersistentVolumeClaim owner (mkVolumeSize net)
+      λ(owner : G.Owner) →
+        Volume.mkPersistentVolumeClaim (G.unOwner owner) (mkVolumeSize net)
 
 let configMapEnv
     : List Text
@@ -170,47 +193,83 @@ let secretEnv
     : List Text
     = [ env.bitcoinRpcUser, env.bitcoinRpcPass, env.lndWalletPass ]
 
-let mkContainerEnv =
-        Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
-      # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
+let mkContainerEnv
+    : G.Owner → List K.EnvVar.Type
+    = λ(owner : G.Owner) →
+          Deployment.mkEnv
+            Deployment.EnvVarType.ConfigMap
+            (G.unOwner owner)
+            configMapEnv
+        # Deployment.mkEnv
+            Deployment.EnvVarType.Secret
+            (G.unOwner owner)
+            secretEnv
 
 let mkContainer
-    : Text → G.BitcoinNetwork → K.Container.Type
-    = λ(name : Text) →
-      λ(net : G.BitcoinNetwork) →
+    : G.BitcoinNetwork → G.Owner → K.Container.Type
+    = λ(net : G.BitcoinNetwork) →
+      λ(owner : G.Owner) →
         K.Container::{
-        , name
+        , name = G.unOwner owner
         , image = Some image
         , args = Some
           [ "-c"
           , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100 --protocol.wumbo-channels --coin-selection-strategy=random --accept-amp"
           ]
         , command = Some [ "sh" ]
-        , env = Some mkContainerEnv
+        , env = Some (mkContainerEnv owner)
         , ports = Some (Deployment.mkContainerPorts ports)
-        , volumeMounts = Some [ Deployment.mkVolumeMount owner "/root/.lnd" ]
+        , volumeMounts = Some
+          [ Deployment.mkVolumeMount (G.unOwner owner) "/root/.lnd" ]
         }
 
 let mkDeployment
-    : G.BitcoinNetwork → K.Deployment.Type
+    : G.BitcoinNetwork → G.Owner → K.Deployment.Type
     = λ(net : G.BitcoinNetwork) →
+      λ(owner : G.Owner) →
         Deployment.mkDeployment
-          owner
+          (G.unOwner owner)
           (Some K.DeploymentStrategy::{ type = Some "Recreate" })
-          [ mkContainer owner net ]
-          (Some [ Deployment.mkVolume owner ])
+          [ mkContainer net owner ]
+          (Some [ Deployment.mkVolume (G.unOwner owner) ])
 
-in  { hexMacaroon
-    , tlsCert
+let mkSetupScript
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            . "$THIS_DIR/export-${G.unOwner G.Owner.Lnd}-env.sh"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            ( 
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+            ''
+
+in  { tlsCert
     , grpcPort
     , p2pPort
     , restPort
     , mkDomain
+    , mkHexMacaroon
     , mkEnv
-    , configMapEnv
-    , secretEnv
     , mkWalletPass
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment
+    , mkSetupScript
     }

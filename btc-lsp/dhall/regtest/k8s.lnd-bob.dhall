@@ -4,9 +4,9 @@ let K = ../Kubernetes/Import.dhall
 
 let Lnd = ../Service/Lnd.dhall
 
-let network = G.BitcoinNetwork.TestNet
+let network = G.BitcoinNetwork.RegTest
 
-let owner = G.Owner.Lnd
+let owner = G.Owner.LndBob
 
 in  { apiVersion = "v1"
     , kind = "List"

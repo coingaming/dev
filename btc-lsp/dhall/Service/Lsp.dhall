@@ -58,7 +58,7 @@ let mkLspLndEnv
           ( toMap
               { lnd_wallet_password = P.JSON.string (Lnd.mkWalletPass net)
               , lnd_tls_cert = P.JSON.string Lnd.tlsCert
-              , lnd_hex_macaroon = P.JSON.string Lnd.hexMacaroon
+              , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon G.Owner.Lnd)
               , lnd_host = P.JSON.string (G.unOwner G.Owner.Lnd)
               , lnd_port = P.JSON.natural Lnd.grpcPort.unPort
               }
