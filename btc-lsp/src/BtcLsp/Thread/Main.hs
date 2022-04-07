@@ -14,6 +14,7 @@ import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 import qualified BtcLsp.Thread.Server as Server
 import qualified BtcLsp.Thread.SwapperIntoLn as SwapperIntoLn
+import qualified BtcLsp.Thread.Refunder as Refunder
 import qualified LndClient.RPC.Katip as Lnd
 
 main :: IO ()
@@ -36,7 +37,7 @@ apply = do
             LnChanWatcher.applyPoll,
             LnChanOpener.apply,
             SwapperIntoLn.apply,
-            BlockScanner.apply
+            BlockScanner.apply [Refunder.apply]
           ]
       liftIO
         . void

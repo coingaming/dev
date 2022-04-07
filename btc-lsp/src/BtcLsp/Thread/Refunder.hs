@@ -1,4 +1,5 @@
-module BtcLsp.Thread.Refunder () where
+module BtcLsp.Thread.Refunder
+  (apply) where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
@@ -8,11 +9,9 @@ import Data.List (groupBy)
 import qualified Data.Map as M
 import qualified LndClient.Data.FinalizePsbt as FNP
 import qualified LndClient.Data.FundPsbt as FP
-import qualified LndClient.Data.ListUnspent as LU
 import qualified LndClient.Data.OutPoint as OP
 import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.Data.ReleaseOutput as RO
-import LndClient.Import
 import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 
@@ -71,11 +70,11 @@ sendUtxos :: (Env m) => [(OP.OutPoint, MSat)] -> Text -> Text -> ExceptT Failure
 sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
 
 processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
-processRefund utxos@(x : xs) = do
+processRefund utxos@(x:_) = do
   let swp = entityVal $ snd x
   let refAddr = swapIntoLnRefundAddress swp
   let utxos' = toOutPointAmt . entityVal . fst <$> utxos
-  r <- runExceptT $ sendUtxos utxos' (coerce refAddr) ("refund for " <> coerce refAddr)
+  r <- runExceptT $ sendUtxos utxos' (coerce refAddr) ("refund to " <> coerce refAddr)
   whenRight r $ const $ do
     void $ runSql $ markRefundedSql (entityKey . fst <$> utxos)
 processRefund _ = pure ()
@@ -84,8 +83,8 @@ toOutPointAmt :: SwapUtxo -> (OP.OutPoint, MSat)
 toOutPointAmt x =
   (OP.OutPoint (coerce $ swapUtxoTxid x) (coerce $ swapUtxoVout x), coerce $ swapUtxoAmount x)
 
-processRefunds :: (Env m) => m ()
-processRefunds = do
+apply :: (Env m) => m ()
+apply = do
   utxos <- runSql getUtxosForRefundSql
   let groupedBySwap = groupBy (\a b -> entityKey (snd a) == entityKey (snd b)) utxos
   mapM_ processRefund groupedBySwap

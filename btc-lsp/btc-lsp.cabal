@@ -373,10 +373,12 @@ test-suite btc-lsp-test
       BlockScannerSpec
       LnChanWatcherSpec
       MathSpec
+      RefunderSpec
       RpcSpec
       ServerSpec
       Spec
       TestAppM
+      TestHelpers
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp

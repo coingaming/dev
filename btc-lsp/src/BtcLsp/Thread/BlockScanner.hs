@@ -18,13 +18,14 @@ import qualified Data.Vector as V
 import qualified Network.Bitcoin as Btc
 import qualified Universum
 
-apply :: (Env m) => m ()
-apply = do
+apply :: (Env m) => [m ()] -> m ()
+apply afterScan = do
   res <- runExceptT scan
   whenLeft res $ $(logTM) ErrorS . logStr . inspect
   whenRight res markFunded
+  sequence_ afterScan
   sleep $ MicroSecondsDelay 1000000
-  apply
+  apply afterScan
 
 markFunded :: (Env m) => [Utxo] -> m ()
 markFunded utxos =

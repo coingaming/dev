@@ -6,7 +6,6 @@ module RefunderSpec
 where
 
 import BtcLsp.Import
-mport qualified Network.Bitcoin as Btc
 import Test.Hspec
 import TestOrphan ()
 import TestWithLndLsp
