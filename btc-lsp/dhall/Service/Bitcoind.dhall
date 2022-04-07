@@ -10,11 +10,11 @@ let Deployment = ../Kubernetes/Deployment.dhall
 
 let owner = G.unOwner G.Owner.Bitcoind
 
-let image = "heathmont/bitcoind:v1.0.9"
+let image = "heathmont/bitcoind:v0.22.0-neutrino"
 
-let rpcUser = "bitcoinrpc"
+let secureRpcUser = ../../build/bitcoind/rpcuser.txt as Text ? G.todo
 
-let rpcPass = G.defaultPass
+let secureRpcPass = ../../build/bitcoind/rpcpass.txt as Text ? G.todo
 
 let zmqPubRawBlockPort
     : G.Port
@@ -32,14 +32,37 @@ let env =
       , rpcAllowIp = "RPCALLOWIP"
       , rpcBind = "RPCBIND"
       , rpcPort = "RPCPORT"
+      , p2pPort = "PORT"
       , server = "SERVER"
       , testNet = "TESTNET"
       , txIndex = "TXINDEX"
       , zmqPubRawBlock = "ZMQPUBRAWBLOCK"
       , zmqPubRawTx = "ZMQPUBRAWTX"
+      , blockFilterIndex = "BLOCKFILTERINDEX"
+      , peerBlockFilters = "PEERBLOCKFILTERS"
       , rpcUser = "RPCUSER"
       , rpcPassword = "RPCPASSWORD"
       }
+
+let mkRpcUser
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = secureRpcUser
+          , TestNet = secureRpcUser
+          , RegTest = "bitcoinrpc"
+          }
+          net
+
+let mkRpcPass
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = secureRpcPass
+          , TestNet = secureRpcPass
+          , RegTest = G.defaultPass
+          }
+          net
 
 let mkRpcPort
     : G.BitcoinNetwork → G.Port
@@ -51,18 +74,40 @@ let mkRpcPort
           }
           net
 
+let mkP2pPort
+    : G.BitcoinNetwork → G.Port
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet.unPort = 8333
+          , TestNet.unPort = 18333
+          , RegTest.unPort = 18444
+          }
+          net
+
 let mkPorts
     : G.BitcoinNetwork → List Natural
     = λ(net : G.BitcoinNetwork) →
-        G.unPorts [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net ]
+        G.unPorts
+          [ zmqPubRawBlockPort, zmqPubRawTxPort, mkRpcPort net, mkP2pPort net ]
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = Service.ServiceType.ClusterIP
-          , TestNet = Service.ServiceType.ClusterIP
+          { MainNet = Service.ServiceType.LoadBalancer
+          , TestNet = Service.ServiceType.LoadBalancer
           , RegTest = Service.ServiceType.ClusterIP
+          }
+          net
+
+let mkServiceAnnotations
+    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
+          , TestNet =
+              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
+          , RegTest = None (List { mapKey : Text, mapValue : Text })
           }
           net
 
@@ -71,6 +116,7 @@ let mkService
     = λ(net : G.BitcoinNetwork) →
         Service.mkService
           owner
+          (mkServiceAnnotations net)
           (mkServiceType net)
           (Service.mkPorts (mkPorts net))
 
@@ -107,11 +153,14 @@ let configMapEnv
       , env.rpcAllowIp
       , env.rpcBind
       , env.rpcPort
+      , env.p2pPort
       , env.server
       , env.testNet
       , env.txIndex
       , env.zmqPubRawBlock
       , env.zmqPubRawTx
+      , env.blockFilterIndex
+      , env.peerBlockFilters
       ]
 
 let secretEnv
@@ -144,12 +193,13 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { rpcUser
-    , rpcPass
-    , zmqPubRawBlockPort
+in  { zmqPubRawBlockPort
     , zmqPubRawTxPort
     , env
+    , mkRpcUser
+    , mkRpcPass
     , mkRpcPort
+    , mkP2pPort
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

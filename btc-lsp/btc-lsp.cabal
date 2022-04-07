@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -313,7 +313,6 @@ executable btc-lsp-exe
 executable btc-lsp-integration
   main-is: Integration.hs
   other-modules:
-      BtcLsp.Cfg
       BtcLsp.Class.Env
       BtcLsp.Class.Storage
       BtcLsp.Data.AppM
@@ -333,6 +332,7 @@ executable btc-lsp-integration
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
+      BtcLsp.Math
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
@@ -370,6 +370,7 @@ executable btc-lsp-integration
       BlockScannerSpec
       LnChanWatcherSpec
       Main
+      MathSpec
       RpcSpec
       ServerSpec
       Spec

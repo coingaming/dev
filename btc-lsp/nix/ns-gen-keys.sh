@@ -4,13 +4,12 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
 SHELL_DIR="$BUILD_DIR/shell"
-SWARM_DIR="$BUILD_DIR/swarm"
 
 mkdir -p "$BUILD_DIR"
 
 newSubjectAltName () {
   SERVICE_NAME="$1"
-  echo "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:127.0.0.1,DNS:$SERVICE_NAME,DNS:yolo_$SERVICE_NAME" \
+  echo "subjectAltName=IP:127.0.0.1,DNS:localhost,DNS:127.0.0.1,DNS:$SERVICE_NAME" \
      > "$BUILD_DIR/subjectAltName"
 }
 
@@ -44,15 +43,6 @@ deleteSubjectAltName () {
 )
 
 (
-  echo "==> Generating deprecated ECDSA keypair"
-  cd "$BUILD_DIR"
-  openssl ecparam -name secp256k1 -genkey \
-    -noout -outform PEM -out esdsa.prv
-  openssl ec -inform PEM -in esdsa.prv \
-    -pubout -outform PEM -out esdsa.pub
-)
-
-(
   echo "==> Generating LSP TLS cert"
   cd "$BUILD_DIR"
   SERVICE_NAME="btc-lsp"
@@ -67,7 +57,7 @@ deleteSubjectAltName () {
   rm csr.csr
   deleteSubjectAltName
 
-  for RUNTIME_DIR in "$SWARM_DIR" "$SHELL_DIR"; do
+  for RUNTIME_DIR in "$SHELL_DIR"; do
     SERVICE_DIR="$RUNTIME_DIR/$SERVICE_NAME"
     mkdir -p "$SERVICE_DIR"
     cp ./btc_lsp_tls_key.pem "$SERVICE_DIR/key.pem"

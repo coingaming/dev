@@ -12,6 +12,8 @@ let integrationGrpcServerEnv = Integration.env.integrationGrpcServerEnv
 
 let integrationLndEnv = Integration.env.integrationLndEnv
 
+let integrationLndEnv2 = Integration.env.integrationLndEnv2
+
 let integrationElectrsEnv = Integration.env.integrationElectrsEnv
 
 let integrationLibpqConnStr = Integration.env.integrationLibpqConnStr
@@ -74,6 +76,9 @@ in  ''
                                                         integrationGrpcServerEnv}" \
       --from-literal=${G.toLowerCase
                          integrationLndEnv}="${G.mkEnvVar integrationLndEnv}" \
+      --from-literal=${G.toLowerCase
+                         integrationLndEnv2}="${G.mkEnvVar
+                                                  integrationLndEnv2}" \
       --from-literal=${G.toLowerCase
                          integrationLibpqConnStr}="${G.mkEnvVar
                                                        integrationLibpqConnStr}" \

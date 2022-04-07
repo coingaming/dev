@@ -20,15 +20,4 @@ in  ''
                                                                           Lnd.restPort}"
       }
     ]'
-    export ${Rtl.env.rtlConfigJson}='{
-      "SSO":{
-        "logoutRedirectLink": "",
-        "rtlCookiePath": "",
-        "rtlSSO": 0
-      },
-      "defaultNodeIndex": 1,
-      "multiPass": "${Rtl.dashboardPass}",
-      "nodes": [],
-      "port": "${G.unPort Rtl.tcpPort}"
-    }'
     ''

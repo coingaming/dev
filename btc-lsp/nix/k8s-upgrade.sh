@@ -32,9 +32,7 @@ else
   done
 fi
 
-sh -c "$THIS_DIR/ds-down.sh $1"
-
-case $SETUP_MODE in
+case "$SETUP_MODE" in
   --source)
     echo "==> Building from source"
     sh "$THIS_DIR/hm-release.sh"
@@ -45,7 +43,6 @@ case $SETUP_MODE in
       cd "$BUILD_DIR"
       rm -rf docker-image-*
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
-      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-electrs.tar.gz"
     )
     ;;
   --keep)
@@ -63,10 +60,17 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | tr -d '\n' \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
-echo "==> Loading electrs docker image"
-docker load -q -i "$BUILD_DIR/docker-image-electrs.tar.gz" \
-  | awk '{print $NF}' \
-  | tr -d '\n' \
-  > "$BUILD_DIR/docker-image-electrs.txt"
+echo "==> Setting default minikube profile"
+sh "$THIS_DIR/mk-setup-profile.sh"
 
-sh -c "$THIS_DIR/ds-update.sh"
+echo "==> Loading btc-lsp docker image into minikube"
+minikube image load \
+  --daemon=true \
+  $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
+
+echo "==> Generating updated k8s resources"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/ns-dhall-compile.sh'"
+
+echo "==> Deploying k8s resources"
+sh "$THIS_DIR/k8s-deploy.sh"

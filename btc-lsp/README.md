@@ -2,28 +2,6 @@
 
 Bitcoin Lightning Service Provider. Development environment is packed into nix-shell.
 
-## Docker/Swarm
-
-To spawn `btc-lsp` running [Docker/Swarm](https://docs.docker.com/engine/swarm/swarm-tutorial/create-swarm/) is required. On Mac you also need `brew install coreutils` and `brew install expect`. Also make sure Docker have access to reasonable amount of resources (at least 8GB of memory, reasonable storage and CPU capacity). Initial compilation will take a lot of time, CPU, memory, bandwidth and storage, but it's needed to be done only once.
-
-```sh
-sudo ./nix/ds-setup-hosts.sh
-
-./nix/ds-setup.sh
-
-docker service ls
-
-curl -d '' -v --cacert ./build/swarm/btc-lsp/cert.pem https://yolo_btc-lsp:443/BtcLsp.Service/SwapIntoLn
-```
-
-In case where you don't have initialized docker swarm (for example you never used it), you need to run:
-
-```sh
-./nix/ds-setup.sh --reset-swarm
-```
-
-Please keep in mind, flag `--reset-swarm` will probably kill all already existing swarm services.
-
 ## Auth
 
 Every `btc-lsp` gRPC request/response does have `ctx` (context) field in payload which contains credentials:
@@ -71,9 +49,25 @@ Run specific tests with hot code reloading:
 ghcid --setup ":set args -m importPubKey"
 ```
 
+<<<<<<< HEAD
 ## Kubernetres
 
 K8S setup is scripted in a way similar to Docker/Swarm setup. Some tools are required to be installed directly on host machine. They can be installed using nix-env:
+=======
+## Release
+
+Releases are automated by CI. To create new release, bump the version inside `VERSION` file. Then push all changes into github and merge into `master` branch. Then run:
+
+```sh
+../nix/hm-release.sh
+```
+
+The script will push new tag which will trigger new github release and package.
+
+## Kubernetes
+
+Some tools are required to be installed directly on host machine. They can be installed using nix-env:
+>>>>>>> master
 
 ```sh
 ./nix/nix-install-tools.sh
@@ -82,6 +76,7 @@ K8S setup is scripted in a way similar to Docker/Swarm setup. Some tools are req
 If nix is not available, install tools in any other way you like:
 
 ```
+<<<<<<< HEAD
 doctl-1.71.1
 kubectl-1.23.5
 minikube-1.25.2
@@ -117,6 +112,63 @@ doctl k cluster get testnet-cluster
 
 ```sh
 doctl kubernetes cluster kubeconfig save <cluster-id>
+=======
+expect-5.45.4
+jq-1.6
+kubectl-1.23.5
+minikube-1.25.2
+wget-1.21.3
+```
+
+### Regtest setup
+
+1. Setup cluster and services:
+
+```sh
+./nix/k8s-setup.sh
+```
+
+2. Forward services to host network:
+
+```sh
+./nix/k8s-forward.sh
+```
+
+## Testnet setup (DigitalOcean)
+
+If you have used nix-env doctl will already be installed, otherwise install it manually.
+
+```
+doctl-1.71.1
+```
+
+1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and services:
+
+```sh
+./nix/k8s-setup-testnet.sh
+```
+
+2. Create A-records within your DNS provider for created LoadBalancers and Ingress controller:
+
+
+```
+testnet-bitcoind.yourdomain.com
+testnet-lnd.yourdomain.com
+testnet-rtl.yourdomain.com
+testnet-lsp.yourdomain.com
+```
+
+Get IPs of LoadBalancers:
+
+```sh
+kubectl get svc
+```
+
+Get IP of Ingress:
+
+```sh
+kubectl get ingress
+>>>>>>> master
 ```
 
 ## Troubleshoot
@@ -133,6 +185,7 @@ kubectl get po
 kubectl describe pod <pod-name>
 ```
 
+<<<<<<< HEAD
 3. Get detailed info about current cluster state:
 
 ```sh
@@ -146,6 +199,15 @@ kubectl port-forward <pod-name> 5432:<desired-port>
 ```
 
 5. Lnd after restart is locked. Usually Lsp unlocks it automatically, but if for some reason it's locked (for example Lsp is not running) then it's possible to unlock Lnd with:
+=======
+3. Get detailed info about current cluster state (regtest only):
+
+```sh
+minikube dashboard --profile=btc-lsp
+```
+
+4. Lnd after restart is locked. Usually Lsp unlocks it automatically, but if for some reason it's locked (for example Lsp is not running) then you can unlock it with:
+>>>>>>> master
 
 ```sh
 ./nix/k8s-lazy-init-unlock.sh

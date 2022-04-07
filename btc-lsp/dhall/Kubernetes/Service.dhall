@@ -31,15 +31,45 @@ let mkPorts
           )
           ports
 
+let CloudProvider
+    : Type
+    = < Aws | DigitalOcean >
+
+let mkAnnotations
+    : CloudProvider → Text → Optional (List { mapKey : Text, mapValue : Text })
+    = λ(provider : CloudProvider) →
+      λ(name : Text) →
+        merge
+          { Aws = None (List { mapKey : Text, mapValue : Text })
+          , DigitalOcean = Some
+            [ { mapKey = "kubernetes.digitalocean.com/load-balancer-id"
+              , mapValue = "${name}-lb"
+              }
+            , { mapKey = "service.beta.kubernetes.io/do-loadbalancer-size-unit"
+              , mapValue = "1"
+              }
+            , { mapKey =
+                  "service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records"
+              , mapValue = "true"
+              }
+            ]
+          }
+          provider
+
 let mkService
-    : Text → ServiceType → List K.ServicePort.Type → K.Service.Type
+    : Text →
+      Optional (List { mapKey : Text, mapValue : Text }) →
+      ServiceType →
+      List K.ServicePort.Type →
+        K.Service.Type
     = λ(name : Text) →
+      λ(annotations : Optional (List { mapKey : Text, mapValue : Text })) →
       λ(type : ServiceType) →
       λ(ports : List K.ServicePort.Type) →
         let name = name
 
         in  K.Service::{
-            , metadata = K.ObjectMeta::{ name = Some name }
+            , metadata = K.ObjectMeta::{ name = Some name, annotations }
             , spec = Some K.ServiceSpec::{
               , type = Some (unServiceType type)
               , selector = Some [ { mapKey = "name", mapValue = name } ]
@@ -47,4 +77,4 @@ let mkService
               }
             }
 
-in  { ServiceType, mkService, mkPorts }
+in  { ServiceType, CloudProvider, mkAnnotations, mkPorts, mkService }

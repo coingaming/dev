@@ -12,13 +12,17 @@ let owner = G.unOwner G.Owner.Lnd
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let walletPass = G.defaultPass
-
 let hexMacaroon = ../../build/lnd/macaroon.hex as Text ? G.todo
 
-let tlsCert = ../../build/lnd/tls.cert as Text ? G.todo
+let tlsCert = ../../build/lnd/inlined-tls.cert as Text ? G.todo
 
-let minChanSize = 20000000
+let domain = ../../build/lnd/domain.txt as Text ? G.todo
+
+let securePass = ../../build/lnd/walletpassword.txt as Text ? G.todo
+
+let minChanSize = 40000000
+
+let msatPerByte = 1000
 
 let grpcPort
     : G.Port
@@ -41,6 +45,7 @@ let env =
       , lndGrpcPort = "LND_GRPC_PORT"
       , lndP2pPort = "LND_P2P_PORT"
       , lndRestPort = "LND_REST_PORT"
+      , lndWalletPass = "LND_WALLET_PASS"
       , bitcoinRpcUser = "BITCOIN_RPCUSER"
       , bitcoinRpcPass = "BITCOIN_RPCPASS"
       }
@@ -53,9 +58,19 @@ let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "lnd.coins.io"
-          , TestNet = "testnet-lnd.coins.io"
+          { MainNet = "lnd.${domain}"
+          , TestNet = "testnet-lnd.${domain}"
           , RegTest = owner
+          }
+          net
+
+let mkWalletPass
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = securePass
+          , TestNet = securePass
+          , RegTest = G.defaultPass
           }
           net
 
@@ -65,14 +80,29 @@ let mkServiceType
         merge
           { MainNet = Service.ServiceType.LoadBalancer
           , TestNet = Service.ServiceType.LoadBalancer
-          , RegTest = Service.ServiceType.NodePort
+          , RegTest = Service.ServiceType.ClusterIP
+          }
+          net
+
+let mkServiceAnnotations
+    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
+          , TestNet =
+              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
+          , RegTest = None (List { mapKey : Text, mapValue : Text })
           }
           net
 
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-        Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
+        Service.mkService
+          owner
+          (mkServiceAnnotations net)
+          (mkServiceType net)
+          (Service.mkPorts ports)
 
 let mkVolumeSize
     : G.BitcoinNetwork → Volume.Size.Type
@@ -112,7 +142,7 @@ let configMapEnv
 
 let secretEnv
     : List Text
-    = [ env.bitcoinRpcUser, env.bitcoinRpcPass ]
+    = [ env.bitcoinRpcUser, env.bitcoinRpcPass, env.lndWalletPass ]
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
@@ -127,7 +157,7 @@ let mkContainer
         , image = Some image
         , args = Some
           [ "-c"
-          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100"
+          , "lnd --bitcoin.active --bitcoin.\$\$BITCOIN_NETWORK --bitcoin.node=bitcoind --bitcoin.defaultchanconfs=\$\$BITCOIN_DEFAULTCHANCONFS --bitcoind.rpchost=\$\$BITCOIN_RPCHOST --bitcoind.rpcuser=\$\$BITCOIN_RPCUSER --bitcoind.rpcpass=\$\$BITCOIN_RPCPASS --bitcoind.zmqpubrawblock=\$\$BITCOIN_ZMQPUBRAWBLOCK --bitcoind.zmqpubrawtx=\$\$BITCOIN_ZMQPUBRAWTX --restlisten=0.0.0.0:\$\$LND_REST_PORT --rpclisten=0.0.0.0:\$\$LND_GRPC_PORT --listen=0.0.0.0:\$\$LND_P2P_PORT --maxpendingchannels=100 --protocol.wumbo-channels --coin-selection-strategy=random --accept-amp"
           ]
         , command = Some [ "sh" ]
         , env = Some mkContainerEnv
@@ -144,15 +174,16 @@ let mkDeployment
           [ mkContainer owner net ]
           (Some [ Deployment.mkVolume owner ])
 
-in  { walletPass
-    , hexMacaroon
+in  { hexMacaroon
     , tlsCert
     , minChanSize
+    , msatPerByte
     , grpcPort
     , p2pPort
     , restPort
     , env
     , mkHost
+    , mkWalletPass
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

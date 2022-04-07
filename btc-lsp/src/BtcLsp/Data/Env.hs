@@ -58,7 +58,7 @@ data Env = Env
     -- | Grpc
     envGrpcServer :: GSEnv,
     -- | Elecrts
-    envElectrs :: ElectrsEnv,
+    envElectrs :: Maybe ElectrsEnv,
     -- | Bitcoind
     envBtc :: Btc.Client
   }
@@ -80,7 +80,7 @@ data RawConfig = RawConfig
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Electrs Rpc
-    rawConfigElectrsEnv :: ElectrsEnv,
+    rawConfigElectrsEnv :: Maybe ElectrsEnv,
     -- | Bitcoind
     rawConfigBtcEnv :: BitcoindEnv
   }
@@ -134,7 +134,10 @@ readRawConfig =
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
       -- Electrs
-      <*> E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts
+      --
+      -- TODO : move into separate package
+      --
+      <*> optional (E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts)
       -- Bitcoind
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_BITCOIND_ENV" opts
 

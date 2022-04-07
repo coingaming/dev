@@ -56,7 +56,7 @@ release_electrs () {
 
 release_integration () {
   rm -rf "$THIS_DIR/../build/docker-image-integration.tar.gz"
-  rm -rf "$THIS_DIR/../build/docker-image-integrationn.txt"
+  rm -rf "$THIS_DIR/../build/docker-image-integration.txt"
   sh "$THIS_DIR/hm-shell-docker.sh" --mini "$NIX_EXTRA_ARGS" \
      "--run './nix/ns-release.sh docker-integration.nix && \
      cp -Lr ./result ./build/docker-image-integration.tar.gz'

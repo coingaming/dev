@@ -6,13 +6,15 @@ let Service = ../Kubernetes/Service.dhall
 
 let Deployment = ../Kubernetes/Deployment.dhall
 
+let Bitcoind = ./Bitcoind.dhall
+
+let Lnd = ./Lnd.dhall
+
 let owner = G.unOwner G.Owner.Lsp
 
-let image = ../../build/docker-image-btc-lsp.txt as Text
+let tlsCert = ../../build/lsp/inlined-tls.cert as Text ? G.todo
 
-let aes256InitVector = "dRgUkXp2s5v8y/B?"
-
-let aes256SecretKey = "y?B&E)H@MbQeThWmZq4t7w!z%C*F-JaN"
+let tlsKey = ../../build/lsp/inlined-tls.key as Text ? G.todo
 
 let logEnv = "test"
 
@@ -22,31 +24,66 @@ let logVerbosity = "V3"
 
 let logSeverity = "DebugS"
 
-let tlsCert = ../../build/lsp/tls.cert as Text ? G.todo
-
-let tlsKey = ../../build/lsp/tls.key as Text ? G.todo
-
 let grpcPort
     : G.Port
     = { unPort = 8443 }
 
 let env =
-      { lspAes256InitVector = "LSP_AES256_INIT_VECTOR"
-      , lspAes256SecretKey = "LSP_AES256_SECRET_KEY"
-      , lspEndpointPort = "LSP_ENDPOINT_PORT"
+      { lspEndpointPort = "LSP_ENDPOINT_PORT"
       , lspLogEnv = "LSP_LOG_ENV"
       , lspLogFormat = "LSP_LOG_FORMAT"
       , lspLogVerbosity = "LSP_LOG_VERBOSITY"
       , lspLogSeverity = "LSP_LOG_SEVERITY"
       , lspLndP2pHost = "LSP_LND_P2P_HOST"
       , lspLndP2pPort = "LSP_LND_P2P_PORT"
-      , lspElectrsEnv = "LSP_ELECTRS_ENV"
       , lspLibpqConnStr = "LSP_LIBPQ_CONN_STR"
       , lspLndEnv = "LSP_LND_ENV"
       , lspGrpcServerEnv = "LSP_GRPC_SERVER_ENV"
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
       , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
+      , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
       }
+
+let mkLspLndEnv
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        ''
+        {
+          "lnd_wallet_password":"${Lnd.mkWalletPass net}",
+          "lnd_tls_cert":"${Lnd.tlsCert}",
+          "lnd_hex_macaroon":"${Lnd.hexMacaroon}",
+          "lnd_host":"${G.unOwner G.Owner.Lnd}",
+          "lnd_port":${G.unPort Lnd.grpcPort}
+        }
+        ''
+
+let mkLspBitcoindEnv
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        ''
+        {
+          "host":"${G.unNetworkScheme
+                      G.NetworkScheme.Http}://${G.unOwner
+                                                  G.Owner.Bitcoind}:${G.unPort
+                                                                        ( Bitcoind.mkRpcPort
+                                                                            net
+                                                                        )}",
+          "username":"${Bitcoind.mkRpcUser net}",
+          "password":"${Bitcoind.mkRpcPass net}"
+        }
+        ''
+
+let mkLspGrpcServerEnv
+    : Text
+    = ''
+        {
+          "port":${G.unPort grpcPort},
+          "sig_verify":true,
+          "sig_header_name":"sig-bin",
+          "tls_cert":"${tlsCert}",
+          "tls_key":"${tlsKey}"
+        }
+      ''
 
 let ports
     : List Natural
@@ -58,14 +95,39 @@ let mkServiceType
         merge
           { MainNet = Service.ServiceType.LoadBalancer
           , TestNet = Service.ServiceType.LoadBalancer
-          , RegTest = Service.ServiceType.NodePort
+          , RegTest = Service.ServiceType.ClusterIP
+          }
+          net
+
+let mkServiceAnnotations
+    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
+          , TestNet =
+              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
+          , RegTest = None (List { mapKey : Text, mapValue : Text })
           }
           net
 
 let mkService
     : G.BitcoinNetwork → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
-        Service.mkService owner (mkServiceType net) (Service.mkPorts ports)
+        Service.mkService
+          owner
+          (mkServiceAnnotations net)
+          (mkServiceType net)
+          (Service.mkPorts ports)
+
+let mkContainerImage
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge
+          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.17"
+          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.17"
+          , RegTest = ../../build/docker-image-btc-lsp.txt as Text ? G.todo
+          }
+          net
 
 let configMapEnv
     : List Text
@@ -76,8 +138,8 @@ let configMapEnv
       , env.lspLogSeverity
       , env.lspLndP2pHost
       , env.lspLndP2pPort
-      , env.lspElectrsEnv
       , env.lspMinChanCapMsat
+      , env.lspMsatPerByte
       ]
 
 let secretEnv
@@ -98,7 +160,7 @@ let mkContainer
       λ(net : G.BitcoinNetwork) →
         K.Container::{
         , name
-        , image = Some image
+        , image = Some (mkContainerImage net)
         , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts ports)
         }
@@ -112,16 +174,15 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { aes256InitVector
-    , aes256SecretKey
-    , logEnv
+in  { logEnv
     , logFormat
     , logVerbosity
     , logSeverity
-    , tlsCert
-    , tlsKey
-    , env
     , grpcPort
+    , env
+    , mkLspLndEnv
+    , mkLspBitcoindEnv
+    , mkLspGrpcServerEnv
     , mkService
     , mkDeployment
     }

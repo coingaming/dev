@@ -10,8 +10,6 @@ let networkScheme = G.unNetworkScheme G.NetworkScheme.Tcp
 
 in  ''
     export ${Lnd.env.bitcoinDefaultChanConfs}="1"
-    export ${Lnd.env.bitcoinRpcUser}="${Bitcoind.rpcUser}"
-    export ${Lnd.env.bitcoinRpcPass}="${Bitcoind.rpcPass}"
     export ${Lnd.env.bitcoinZmqPubRawBlock}="${networkScheme}://${bitcoindHost}:${G.unPort
                                                                                     Bitcoind.zmqPubRawBlockPort}"
     export ${Lnd.env.bitcoinZmqPubRawTx}="${networkScheme}://${bitcoindHost}:${G.unPort
