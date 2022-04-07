@@ -46,24 +46,11 @@ let mkService
 
 let configMapEnv
     : List Text
-    = [ env.integrationGrpcClientEnv
-      , Lsp.env.lspLndP2pHost
-      , Lsp.env.lspLndP2pPort
-      , Lsp.env.lspLogEnv
-      , Lsp.env.lspLogFormat
-      , Lsp.env.lspLogSeverity
-      , Lsp.env.lspLogVerbosity
-      , Lsp.env.lspMinChanCapMsat
-      ]
+    = [ env.integrationGrpcClientEnv ] # Lsp.configMapEnv
 
 let secretEnv
     : List Text
-    = [ env.integrationLndEnv2
-      , Lsp.env.lspGrpcServerEnv
-      , Lsp.env.lspLndEnv
-      , Lsp.env.lspLibpqConnStr
-      , Lsp.env.lspBitcoindEnv
-      ]
+    = [ env.integrationLndEnv2 ] # Lsp.secretEnv
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
