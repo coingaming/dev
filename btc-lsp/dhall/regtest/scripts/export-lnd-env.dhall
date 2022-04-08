@@ -1,6 +1,6 @@
-let G = ../Global.dhall
+let G = ../../Global.dhall
 
-let Lnd = ../Service/Lnd.dhall
+let Lnd = ../../Service/Lnd.dhall
 
 let network = G.BitcoinNetwork.RegTest
 

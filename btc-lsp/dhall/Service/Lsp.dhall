@@ -51,6 +51,26 @@ let env =
       , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
       }
 
+let configMapEnv
+    : List Text
+    = [ env.lspLogEnv
+      , env.lspLogFormat
+      , env.lspLogVerbosity
+      , env.lspLogSeverity
+      , env.lspLndP2pHost
+      , env.lspLndP2pPort
+      , env.lspMinChanCapMsat
+      , env.lspMsatPerByte
+      ]
+
+let secretEnv
+    : List Text
+    = [ env.lspLibpqConnStr
+      , env.lspLndEnv
+      , env.lspGrpcServerEnv
+      , env.lspBitcoindEnv
+      ]
+
 let mkLspLndEnv
     : G.BitcoinNetwork → P.JSON.Type
     = λ(net : G.BitcoinNetwork) →
@@ -141,6 +161,33 @@ let mkEnv
           }
         ]
 
+let mkSetupEnv
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+
+            . "$THIS_DIR/export-${ownerText}-env.sh"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            (
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+            ''
+
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
@@ -181,26 +228,6 @@ let mkContainerImage
           }
           net
 
-let configMapEnv
-    : List Text
-    = [ env.lspLogEnv
-      , env.lspLogFormat
-      , env.lspLogVerbosity
-      , env.lspLogSeverity
-      , env.lspLndP2pHost
-      , env.lspLndP2pPort
-      , env.lspMinChanCapMsat
-      , env.lspMsatPerByte
-      ]
-
-let secretEnv
-    : List Text
-    = [ env.lspLibpqConnStr
-      , env.lspLndEnv
-      , env.lspGrpcServerEnv
-      , env.lspBitcoindEnv
-      ]
-
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
@@ -226,18 +253,12 @@ let mkDeployment
           (None (List K.Volume.Type))
 
 in  { mkEnv
-    , env
+    , mkSetupEnv
     , configMapEnv
     , grpcPort
     , secretEnv
     , mkService
     , mkDeployment
     , mkLspGrpcClientEnv
-    , mkLspBitcoindEnv
-    , mkLspGrpcServerEnv
     , mkLspLndEnv
-    , logEnv
-    , logFormat
-    , logSeverity
-    , logVerbosity
     }
