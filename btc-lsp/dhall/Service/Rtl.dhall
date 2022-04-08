@@ -32,6 +32,14 @@ let env =
       , rtlConfigNodesJson = "RTL_CONFIG_NODES_JSON"
       }
 
+let configMapEnv
+    : List Text
+    = [ env.configFromEnv ]
+
+let secretEnv
+    : List Text
+    = [ env.rtlConfigJson, env.rtlConfigNodesJson ]
+
 let ports
     : List Natural
     = G.unPorts [ tcpPort ]
@@ -110,6 +118,41 @@ let mkEnv
           }
         ]
 
+let mkSetupEnv
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+            TLS_CERT_PATH="$THIS_DIR/../secrets/${ownerText}/tls.cert"
+            TLS_KEY_PATH="$THIS_DIR/../secrets/${ownerText}/tls.key"
+
+            . "$THIS_DIR/export-${ownerText}-env.sh"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            (
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+
+            (
+              kubectl create secret tls ${tlsSecretName} \
+              --cert="$TLS_CERT_PATH" \
+              --key="$TLS_KEY_PATH"
+            ) || true
+            ''
+
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
@@ -151,14 +194,6 @@ let mkIngress
 
         in  Ingress.mkIngress owner (mkDomain net) tcpPort.unPort tls
 
-let configMapEnv
-    : List Text
-    = [ env.configFromEnv ]
-
-let secretEnv
-    : List Text
-    = [ env.rtlConfigJson, env.rtlConfigNodesJson ]
-
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
@@ -183,11 +218,4 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { tlsSecretName
-    , mkEnv
-    , configMapEnv
-    , secretEnv
-    , mkService
-    , mkDeployment
-    , mkIngress
-    }
+in  { mkEnv, mkSetupEnv, mkService, mkDeployment, mkIngress }
