@@ -253,18 +253,12 @@ let mkDeployment
           (None (List K.Volume.Type))
 
 in  { mkEnv
-    , env
+    , mkSetupEnv
     , configMapEnv
     , grpcPort
     , secretEnv
     , mkService
     , mkDeployment
     , mkLspGrpcClientEnv
-    , mkLspBitcoindEnv
-    , mkLspGrpcServerEnv
     , mkLspLndEnv
-    , logEnv
-    , logFormat
-    , logSeverity
-    , logVerbosity
     }
