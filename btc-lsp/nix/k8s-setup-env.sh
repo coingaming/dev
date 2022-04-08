@@ -24,4 +24,5 @@ fi
 if [ -f "$BUILD_DIR/secrets/lnd/macaroon.hex" ]; then
   sh "$SCRIPTS_DIR/setup-rtl-env.sh"
   sh "$SCRIPTS_DIR/setup-lsp-env.sh"
+  sh "$SCRIPTS_DIR/setup-integration-env.sh"
 fi

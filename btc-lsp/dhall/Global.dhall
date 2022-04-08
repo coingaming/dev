@@ -39,7 +39,15 @@ let unPorts
 
 let Owner
     : Type
-    = < Bitcoind | Lsp | Lnd | LndAlice | LndBob | Postgres | Rtl >
+    = < Bitcoind
+      | Lsp
+      | Lnd
+      | LndAlice
+      | LndBob
+      | Postgres
+      | Rtl
+      | Integration
+      >
 
 let unOwner
     : Owner → Text
@@ -52,6 +60,7 @@ let unOwner
           , LndBob = "lnd-bob"
           , Postgres = "postgres"
           , Rtl = "rtl"
+          , Integration = "integration"
           }
           x
 

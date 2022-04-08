@@ -19,6 +19,8 @@ in
         enableLibraryProfiling = profile;
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;
+        packages.btc-lsp.components.exes.btc-lsp-integration.dontStrip = false;
+        packages.btc-lsp.components.exes.btc-lsp-integration.enableShared = false;
         packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''
           ./nix/ns-gen-cfgs.sh
           ./nix/ns-gen-keys.sh
@@ -32,6 +34,14 @@ in
           pkgs.openssl
           pkgs.electrs
           bitcoin
+          lnd
+        ];
+        packages.btc-lsp.components.exes.btc-lsp-integration.build-tools = [
+          pkgs.haskellPackages.hspec-discover
+          pkgs.postgresql
+          pkgs.openssl
+          pkgs.bitcoin
+          pkgs.electrs
           lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''
