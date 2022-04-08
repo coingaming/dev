@@ -26,5 +26,12 @@ docker load -q -i \
   | tr -d '\n' \
   > "$BTC_LSP_BUILD_DIR/docker-image-electrs.txt"
 
+echo "integration ==> Docker integration image verification"
+docker load -q -i \
+  "$BTC_LSP_BUILD_DIR/docker-image-integration.tar.gz" \
+  | awk '{print $NF}' \
+  | tr -d '\n' \
+  > "$BTC_LSP_BUILD_DIR/docker-image-integration.txt"
+
 echo "btc-lsp ==> Chown"
 sudo chown -R $USER:$USER "$BTC_LSP_BUILD_DIR"

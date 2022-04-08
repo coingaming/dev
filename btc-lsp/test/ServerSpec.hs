@@ -45,6 +45,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                        & LowLevel.val .~ 10000000000
                    )
       -- Let app spawn
+      Main.waitForSync
       sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
@@ -98,6 +99,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
   itEnv "Server SwapIntoLn" $
     withSpawnLink Main.apply . const $ do
       -- Let app spawn
+      Main.waitForSync
       sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
