@@ -18,9 +18,12 @@ in  ''
     export ${Lsp.env.lspBitcoindEnv}='${P.JSON.render
                                           (Lsp.mkLspBitcoindEnv network)}'
     export ${Lsp.env.lspGrpcServerEnv}='${P.JSON.render Lsp.mkLspGrpcServerEnv}'
-    export ${Lsp.env.lspLndEnv}='${P.JSON.render (Lsp.mkLspLndEnv network)}'
+    export ${Lsp.env.lspLndEnv}='${P.JSON.render
+                                     (Lsp.mkLndEnv network G.Owner.Lnd)}'
     export ${Integration.env.integrationLndEnv2}='${P.JSON.render
-                                                      ( Lsp.mkLspLndEnv network
+                                                      ( Lsp.mkLndEnv
+                                                          network
+                                                          G.Owner.LndAlice
                                                       )}'
     export ${Lsp.env.lspLibpqConnStr}='${Postgres.mkConnStr network}'
     export ${Lsp.env.lspLndP2pHost}="${Lnd.mkDomain network}"

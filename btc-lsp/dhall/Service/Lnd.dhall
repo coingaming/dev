@@ -14,8 +14,6 @@ let Bitcoind = ./Bitcoind.dhall
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let tlsCert = ../../build/secrets/lnd/tls.cert as Text ? G.todo
-
 let domain = ../../build/secrets/lnd/domain.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
@@ -78,6 +76,21 @@ let mkHexMacaroon
           , LndAlice =
               ../../build/secrets/lnd-alice/macaroon.hex as Text ? G.todo
           , LndBob = ../../build/secrets/lnd-bob/macaroon.hex as Text ? G.todo
+          , Bitcoind = G.todo
+          , Lsp = G.todo
+          , Postgres = G.todo
+          , Rtl = G.todo
+          , Integration = G.todo
+          }
+          owner
+
+let mkTlsCert
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        merge
+          { Lnd = ../../build/secrets/lnd/tls.cert as Text ? G.todo
+          , LndAlice = ../../build/secrets/lnd-alice/tls.cert as Text ? G.todo
+          , LndBob = ../../build/secrets/lnd-bob/tls.cert as Text ? G.todo
           , Bitcoind = G.todo
           , Lsp = G.todo
           , Postgres = G.todo
@@ -261,7 +274,7 @@ let mkSetupScript
             ) || true
             ''
 
-in  { tlsCert
+in  { mkTlsCert
     , grpcPort
     , p2pPort
     , restPort

@@ -51,19 +51,6 @@ let env =
       , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
       }
 
-let mkLspLndEnv
-    : G.BitcoinNetwork → P.JSON.Type
-    = λ(net : G.BitcoinNetwork) →
-        P.JSON.object
-          ( toMap
-              { lnd_wallet_password = P.JSON.string (Lnd.mkWalletPass net)
-              , lnd_tls_cert = P.JSON.string Lnd.tlsCert
-              , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon G.Owner.Lnd)
-              , lnd_host = P.JSON.string (G.unOwner G.Owner.Lnd)
-              , lnd_port = P.JSON.natural Lnd.grpcPort.unPort
-              }
-          )
-
 let mkLspBitcoindEnv
     : G.BitcoinNetwork → P.JSON.Type
     = λ(net : G.BitcoinNetwork) →
@@ -112,6 +99,20 @@ let mkMsatPerByte
           { MainNet = "", TestNet = "", RegTest = Natural/show msatPerByte }
           net
 
+let mkLndEnv
+    : G.BitcoinNetwork → G.Owner → P.JSON.Type
+    = λ(net : G.BitcoinNetwork) →
+      λ(owner : G.Owner) →
+        P.JSON.object
+          ( toMap
+              { lnd_wallet_password = P.JSON.string (Lnd.mkWalletPass net)
+              , lnd_tls_cert = P.JSON.string (Lnd.mkTlsCert owner)
+              , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon owner)
+              , lnd_host = P.JSON.string (G.unOwner owner)
+              , lnd_port = P.JSON.natural grpcPort.unPort
+              }
+          )
+
 let ports
     : List Natural
     = G.unPorts [ grpcPort ]
@@ -130,7 +131,7 @@ let mkEnv
           , mapValue = "'${P.JSON.render mkLspGrpcServerEnv}'"
           }
         , { mapKey = env.lspLndEnv
-          , mapValue = "'${P.JSON.render (mkLspLndEnv net)}'"
+          , mapValue = "'${P.JSON.render (mkLndEnv net G.Owner.Lnd)}'"
           }
         , { mapKey = env.lspBitcoindEnv
           , mapValue = "'${P.JSON.render (mkLspBitcoindEnv net)}'"
@@ -235,9 +236,9 @@ in  { mkEnv
     , mkLspGrpcClientEnv
     , mkLspBitcoindEnv
     , mkLspGrpcServerEnv
-    , mkLspLndEnv
     , logEnv
     , logFormat
     , logSeverity
     , logVerbosity
+    , mkLndEnv
     }
