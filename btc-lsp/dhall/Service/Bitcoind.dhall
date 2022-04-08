@@ -46,6 +46,29 @@ let env =
       , rpcPassword = "RPCPASSWORD"
       }
 
+let configMapEnv
+    : List Text
+    = [ env.configFromEnv
+      , env.disableWallet
+      , env.prune
+      , env.regTest
+      , env.rpcAllowIp
+      , env.rpcBind
+      , env.rpcPort
+      , env.p2pPort
+      , env.server
+      , env.testNet
+      , env.txIndex
+      , env.zmqPubRawBlock
+      , env.zmqPubRawTx
+      , env.blockFilterIndex
+      , env.peerBlockFilters
+      ]
+
+let secretEnv
+    : List Text
+    = [ env.rpcUser, env.rpcPassword ]
+
 let mkRpcUser
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
@@ -128,6 +151,33 @@ let mkEnv
             , { mapKey = env.rpcPassword, mapValue = mkRpcPass net }
             ]
 
+let mkSetupEnv
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            . "$THIS_DIR/export-${ownerText}-env.sh"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            (
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+            ''
+
 let mkPorts
     : G.BitcoinNetwork → List Natural
     = λ(net : G.BitcoinNetwork) →
@@ -188,29 +238,6 @@ let mkPersistentVolumeClaim
     = λ(net : G.BitcoinNetwork) →
         Volume.mkPersistentVolumeClaim owner (mkVolumeSize net)
 
-let configMapEnv
-    : List Text
-    = [ env.configFromEnv
-      , env.disableWallet
-      , env.prune
-      , env.regTest
-      , env.rpcAllowIp
-      , env.rpcBind
-      , env.rpcPort
-      , env.p2pPort
-      , env.server
-      , env.testNet
-      , env.txIndex
-      , env.zmqPubRawBlock
-      , env.zmqPubRawTx
-      , env.blockFilterIndex
-      , env.peerBlockFilters
-      ]
-
-let secretEnv
-    : List Text
-    = [ env.rpcUser, env.rpcPassword ]
-
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
@@ -240,8 +267,7 @@ let mkDeployment
 in  { zmqPubRawBlockPort
     , zmqPubRawTxPort
     , mkEnv
-    , configMapEnv
-    , secretEnv
+    , mkSetupEnv
     , mkRpcUser
     , mkRpcPass
     , mkRpcPort
