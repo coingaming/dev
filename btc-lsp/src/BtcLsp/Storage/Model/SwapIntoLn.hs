@@ -172,7 +172,8 @@ getSwapsToSettle ::
   ) =>
   m
     [ ( Entity SwapIntoLn,
-        Entity User
+        Entity User,
+        Entity LnChan
       )
     ]
 getSwapsToSettle =
@@ -204,7 +205,7 @@ getSwapsToSettle =
             -- where user node is offline for a long time.
             -- Maybe limits, some proper retries etc.
             --
-            pure (swap, user)
+            pure (swap, user, chan)
 
 getByFundAddress ::
   ( Storage m

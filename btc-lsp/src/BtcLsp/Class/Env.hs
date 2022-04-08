@@ -29,10 +29,12 @@ class
   where
   getGsEnv :: m GSEnv
   getSwapIntoLnMinAmt :: m (Money 'Usr 'OnChain 'Fund)
+  getMsatPerByte :: m (Maybe MSat)
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLndP2PSocketAddress :: m SocketAddress
   getLspPubKey :: m Lnd.NodePubKey
   getLspLndEnv :: m Lnd.LndEnv
+  getChanPrivacy :: m Privacy
   getLspPubKey = do
     var <- getLspPubKeyVar
     mPubKey <- tryReadMVar var

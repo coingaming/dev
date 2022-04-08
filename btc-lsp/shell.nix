@@ -8,21 +8,21 @@ let proto = import ./nix/proto-lens-protoc.nix;
     kompose-src = import ./nix/kompose.nix;
     ideBuildInputs =
       if withHaskellIde
-      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/f5aaaddd0a8efcde271cd497c86e300da608c4a8") {bundle = ["dhall" "haskell"];})]
+      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/e73945947a367ed9bae735e276664a3efe6ea80f") {bundle = ["dhall" "haskell"];})]
       else [];
 in
-(project {
-
-}).shellFor {
+(project { inherit profile; }).shellFor {
   withHoogle = true;
   buildInputs = ideBuildInputs ++ [
     pkgs.haskellPackages.hpack
     pkgs.haskellPackages.fswatcher
     pkgs.haskellPackages.cabal-plan
+    pkgs.haskellPackages.hp2pretty
     pkgs.zlib
     pkgs.protobuf
     pkgs.netcat-gnu
     pkgs.socat
+    pkgs.plantuml
     proto.protoc-haskell-bin
     (pkgs.callPackage kompose-src {})
   ];
@@ -36,6 +36,7 @@ in
     if withShellHook
     then ''
       echo "Spawning nix-shell with shellHook"
+      rm -rf ./build/shell
       sh ./nix/ns-gen-cfgs.sh
       sh ./nix/ns-gen-keys.sh
       . ./nix/ns-export-test-envs.sh

@@ -4,14 +4,18 @@ on: [push]
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
     steps:
     - uses: actions/checkout@v2
     - uses: actions/cache@v2
       with:
         path: ./nix.tar.gz
-        key: ${{ runner.os }}-nix-v3
+        key: ${{ runner.os }}-nix-v6
         restore-keys: |
-          ${{ runner.os }}-nix-v3
+          ${{ runner.os }}-nix-v5
+          ${{ runner.os }}-nix-
     - name: Restore cache
       run: |
         docker run --rm \
@@ -22,13 +26,6 @@ jobs:
         || true
     - name: Release all
       run: ./nix/ci-release.sh
-    - name: Save cache
-      run: |
-        docker run --rm \
-          -v nix-$USER:/nix \
-          -v $(pwd):/app \
-          -w /app nixos/nix:2.3.12 \
-          sh -c "tar -czvf ./nix.tar.gz /nix/*"
     - name: Create github release
       if: github.ref_type == 'tag'
       id: create_release
@@ -40,6 +37,16 @@ jobs:
         release_name: ${{ github.ref_name }}
         draft: false
         prerelease: false
+    - name: Docker login
+      if: github.ref_type == 'tag'
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Docker push
+      if: github.ref_type == 'tag'
+      run: ./nix/ci-push.sh
     - name: Upload btc-lsp docker image
       if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
@@ -80,3 +87,10 @@ jobs:
         asset_path: ./btc-lsp/build/docker-image-electrs.txt
         asset_name: docker-image-electrs.txt
         asset_content_type: text/plain
+    - name: Save cache
+      run: |
+        docker run --rm \
+          -v nix-$USER:/nix \
+          -v $(pwd):/app \
+          -w /app nixos/nix:2.3.12 \
+          sh -c "tar -czvf ./nix.tar.gz /nix/*"

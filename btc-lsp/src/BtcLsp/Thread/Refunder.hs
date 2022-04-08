@@ -63,7 +63,7 @@ sendUtxosWithMinFee cfg utxos addr txLabel = do
       let amt' :: Word64 = coerce (totalUtxoAmt - fee)
       let r = MSat $ (* 1000) $ fromInteger $ ceiling (toRational amt' / 1000)
       let mtpl = FP.TxTemplate (fst <$> utxos') (M.fromList [(outAddr, r)])
-      FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
+      FP.FundPsbtRequest "" mtpl 2 False 1
 
 
 sendUtxos :: (Env m) => [(OP.OutPoint, MSat)] -> Text -> Text -> ExceptT Failure m PT.PublishTransactionResponse

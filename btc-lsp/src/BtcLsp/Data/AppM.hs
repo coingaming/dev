@@ -47,10 +47,14 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     asks Env.envGrpcServer
   getSwapIntoLnMinAmt =
     asks Env.envSwapIntoLnMinAmt
+  getMsatPerByte =
+    asks Env.envMsatPerByte
   getLspPubKeyVar =
     asks Env.envLndPubKey
   getLspLndEnv =
     asks Env.envLnd
+  getChanPrivacy =
+    asks Env.envChanPrivacy
   getLndP2PSocketAddress = do
     host <- asks Env.envLndP2PHost
     port <- asks Env.envLndP2PPort
@@ -62,9 +66,11 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
   withLnd method args = do
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)
-  withElectrs method args = do
-    env <- asks Env.envElectrs
-    first FailureElectrs <$> args (method env)
+  withElectrs method args =
+    maybeM
+      (error "Electrs Env is missing")
+      ((first FailureElectrs <$>) . args . method)
+      $ asks Env.envElectrs
   withBtc method args = do
     env <- asks Env.envBtc
     --

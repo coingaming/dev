@@ -2,6 +2,7 @@ let
   header = (import ./header.nix);
   pkgs = header.pkgs;
   lnd = import ./lnd.nix { inherit pkgs; };
+  bitcoin = import ./bitcoin.nix { inherit pkgs; };
 in
   {
     pkgs = pkgs;
@@ -15,6 +16,7 @@ in
       };
       compiler-nix-name = "ghc865";
       modules = [{
+        enableLibraryProfiling = profile;
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;
         packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''
@@ -28,8 +30,8 @@ in
           pkgs.haskellPackages.hspec-discover
           pkgs.postgresql
           pkgs.openssl
-          pkgs.bitcoin
           pkgs.electrs
+          bitcoin
           lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''

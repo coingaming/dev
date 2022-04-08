@@ -35,6 +35,7 @@ module BtcLsp.Data.Type
     BlkHeight (..),
     BlkStatus (..),
     SwapUtxoStatus (..),
+    Privacy (..),
   )
 where
 
@@ -548,6 +549,13 @@ data SwapUtxoStatus
   deriving (Eq, Ord, Show, Read, Generic)
 
 instance Out SwapUtxoStatus
+
+data Privacy
+  = Private
+  | Public
+  deriving (Eq, Ord, Show, Read, Generic)
+
+instance Out Privacy
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"

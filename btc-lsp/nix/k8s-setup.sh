@@ -6,8 +6,7 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
 SETUP_MODE="--prebuilt"
 GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
-
-. "$THIS_DIR/k8s-export-env.sh"
+BITCOIN_NETWORK="regtest"
 
 if [ -z "$*" ]; then
   echo "==> using defaults"
@@ -30,16 +29,15 @@ else
   done
 fi
 
-echo "==> Setup kubernetes cluster"
-sh "$THIS_DIR/k8s-setup-cluster.sh"
+echo "==> Setup $BITCOIN_NETWORK kubernetes cluster"
+sh "$THIS_DIR/mk-setup-cluster.sh"
 
-echo "==> Build cleanup"
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR"
+echo "==> Clean up build"
+rm -rf "$BUILD_DIR" && mkdir -p "$BUILD_DIR"
 
-echo "==> Generate keys"
+echo "==> Generate creds"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-gen-keys.sh'"
+   "--run './nix/ns-gen-creds.sh'"
 
 case $SETUP_MODE in
   --source)
@@ -52,7 +50,6 @@ case $SETUP_MODE in
       cd "$BUILD_DIR"
       rm -rf docker-image-*
       wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-btc-lsp.tar.gz"
-      wget "https://github.com/coingaming/src/releases/download/$GITHUB_RELEASE/docker-image-electrs.tar.gz"
     )
     ;;
   *)
@@ -67,52 +64,44 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
   | tr -d '\n' \
   > "$BUILD_DIR/docker-image-btc-lsp.txt"
 
-echo "==> Loading electrs docker image"
-docker load -q -i "$BUILD_DIR/docker-image-electrs.tar.gz" \
-  | awk '{print $NF}' \
-  | tr -d '\n' \
-  > "$BUILD_DIR/docker-image-electrs.txt"
-
 echo "==> Loading btc-lsp docker image into minikube"
 minikube image load \
-  -p "$MINIKUBE_PROFILE" \
-  --daemon=true $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
-
-echo "==> Loading electrs docker image into minikube"
-minikube image load \
-  -p "$MINIKUBE_PROFILE" \
-  --daemon=true $(cat "$BUILD_DIR/docker-image-electrs.txt")
-
-echo "==> Configuring environment for containers"
-sh "$THIS_DIR/k8s-setup-env.sh"
+  --daemon=true \
+  $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh'"
 
-echo "==> Deploying k8s resources"
-sh "$THIS_DIR/k8s-deploy.sh"
-
-echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh"
-
-echo "==> Partial spin"
-sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
-sleep 20
-
-echo "==> Generate additional creds"
-sh "$THIS_DIR/k8s-generate-creds.sh"
-
-echo "==> Reconfiguring environment for containers"
-kubectl delete secret btc-lsp rtl
+echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"
 
-echo "==> Restarting k8s resources"
-sh "$THIS_DIR/k8s-restart.sh" btc-lsp
-sh "$THIS_DIR/k8s-restart.sh" rtl
+echo "==> Deploying k8s resources"
+sh "$THIS_DIR/k8s-deploy.sh" "bitcoind lnd lnd-alice lnd-bob postgres"
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh"
+sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd lnd-alice lnd-bob postgres"
+
+echo "==> Initializing LND wallet"
+sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
+
+echo "==> Exporting creds from running pods"
+sh "$THIS_DIR/k8s-export-creds.sh"
+
+echo "==> Full dhall"
+sh "$THIS_DIR/hm-shell-docker.sh" --mini \
+   "--run './nix/ns-dhall-compile.sh'"
+
+echo "==> Configuring environment for containers"
+sh "$THIS_DIR/k8s-setup-env.sh"
+
+echo "==> Deploying additional k8s resources"
+sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
+
+echo "==> Waiting until containers are ready"
+sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
 echo "==> Mine initial coins"
 sh "$THIS_DIR/k8s-mine.sh" 105
+
+echo "==> Setup for $BITCOIN_NETWORK has been completed!"

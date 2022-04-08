@@ -135,16 +135,31 @@ data ScriptPubKey = NonStandardScriptPubKey { -- | The JSON "asm" field.
                                          -- | The addresses associated with this key.
                                          , sspkAddresses :: Vector Address
                                          }
+                  | StandardScriptPubKeyV22 { -- | The JSON "asm" field.
+                                           sspkAsm       :: HexString
+                                         -- | The JSON "hex" field.
+                                         , sspkHex       :: HexString
+                                         -- | The number of required signatures.
+                                         , sspkType      :: TxnOutputType
+                                         -- | The addresses associated with this key.
+                                         , sspkAddress   :: Address
+                                         }
+
     deriving ( Show, Read, Ord, Eq )
 
 instance FromJSON ScriptPubKey where
-    parseJSON (Object o) = parseStandard <|> parseNonstandard
+    parseJSON (Object o) = parseStandard <|> parseStandardV22 <|> parseNonstandard
         where
             parseStandard = StandardScriptPubKey <$> o .: "asm"
                                                  <*> o .: "hex"
                                                  <*> o .: "reqSigs"
                                                  <*> o .: "type"
                                                  <*> o .: "addresses"
+            parseStandardV22 = StandardScriptPubKeyV22
+                                                 <$> o .: "asm"
+                                                 <*> o .: "hex"
+                                                 <*> o .: "type"
+                                                 <*> o .: "address"
             parseNonstandard = NonStandardScriptPubKey <$> o .: "asm"
                                                        <*> o .: "hex"
     parseJSON _ = mzero

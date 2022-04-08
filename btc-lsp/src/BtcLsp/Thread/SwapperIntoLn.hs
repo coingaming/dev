@@ -18,65 +18,72 @@ import qualified LndClient.RPC.Katip as LndKatip
 import qualified LndClient.RPC.Silent as LndSilent
 
 apply :: (Env m) => m ()
-apply = do
-  ePeerList <- withLnd LndSilent.listPeers id
-  whenLeft ePeerList $
-    $(logTM) ErrorS
-      . logStr
-      . ("ListPeers procedure failed: " <>)
-      . inspect
-  let peerSet =
-        Set.fromList $
-          Peer.pubKey <$> fromRight [] ePeerList
-  swaps <- SwapIntoLn.getSwapsToSettle
-  tasks <-
-    mapM
-      ( spawnLink
-          . settleSwap
-      )
-      $ filter
-        ( \x ->
-            Set.member
-              (userNodePubKey . entityVal $ snd x)
-              peerSet
+apply =
+  forever $ do
+    ePeerList <- withLnd LndSilent.listPeers id
+    whenLeft ePeerList $
+      $(logTM) ErrorS
+        . logStr
+        . ("ListPeers procedure failed: " <>)
+        . inspect
+    let peerSet =
+          Set.fromList $
+            Peer.pubKey <$> fromRight [] ePeerList
+    swaps <- SwapIntoLn.getSwapsToSettle
+    tasks <-
+      mapM
+        ( spawnLink
+            . settleSwap
         )
-        swaps
-  mapM_ (liftIO . wait) tasks
-  sleep $ MicroSecondsDelay 500000
-  apply
+        $ filter
+          ( \(_, usr, _) ->
+              Set.member
+                (userNodePubKey $ entityVal usr)
+                peerSet
+          )
+          swaps
+    mapM_ (liftIO . wait) tasks
+    sleep $ MicroSecondsDelay 500000
 
-settleSwap :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
-settleSwap (swapEnt, userEnt) = do
+settleSwap ::
+  ( Env m
+  ) =>
+  (Entity SwapIntoLn, Entity User, Entity LnChan) ->
+  m ()
+settleSwap (swapEnt, userEnt, chanEnt) = do
   res <- runExceptT $ do
     pre <-
-      catchE sendPaymentT . const $ do
-        inv <-
-          withLndT
-            LndKatip.decodePayReq
-            ($ payReq)
-        pay <-
-          withLndT
-            LndKatip.trackPaymentSync
-            ( $
-                TrackPayment.TrackPaymentRequest
-                  { TrackPayment.paymentHash =
-                      PayReq.paymentHash inv,
-                    TrackPayment.noInflightUpdates =
-                      False
-                  }
-            )
-        if Payment.state pay == Payment.SUCCEEDED
-          then
-            pure $
-              Payment.paymentPreimage pay
-          else
-            throwE . FailureInternal $
-              "Wrong payment "
-                <> inspectPlain pay
-                <> " for swap "
-                <> inspectPlain swapEnt
-                <> " and user "
-                <> inspectPlain userEnt
+      catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
+        . const
+        $ catchE (sendPaymentT Nothing) . const $
+          do
+            inv <-
+              withLndT
+                LndKatip.decodePayReq
+                ($ payReq)
+            pay <-
+              withLndT
+                LndKatip.trackPaymentSync
+                ( $
+                    TrackPayment.TrackPaymentRequest
+                      { TrackPayment.paymentHash =
+                          PayReq.paymentHash inv,
+                        TrackPayment.noInflightUpdates =
+                          False
+                      }
+                )
+            if Payment.state pay == Payment.SUCCEEDED
+              then
+                pure $
+                  Payment.paymentPreimage pay
+              else
+                throwE . FailureInternal $
+                  "Wrong payment "
+                    <> inspectPlain pay
+                    <> " for swap "
+                    <> inspectPlain swapEnt
+                    <> " and user "
+                    <> inspectPlain userEnt
 
     lift $
       SwapIntoLn.updateSettled (entityKey swapEnt) pre
@@ -90,13 +97,14 @@ settleSwap (swapEnt, userEnt) = do
     payReq =
       from $
         swapIntoLnFundInvoice swap
-    sendPaymentT =
+    sendPaymentT extId =
       SendPayment.paymentPreimage
         <$> withLndT
           LndKatip.sendPayment
           ( $
               Lnd.SendPaymentRequest
                 { Lnd.paymentRequest = payReq,
-                  Lnd.amt = from $ swapIntoLnChanCapUser swap
+                  Lnd.amt = from $ swapIntoLnChanCapUser swap,
+                  Lnd.outgoingChanId = extId
                 }
           )

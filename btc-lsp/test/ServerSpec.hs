@@ -45,6 +45,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                        & LowLevel.val .~ 10000000000
                    )
       -- Let app spawn
+      Main.waitForSync
       sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
@@ -98,6 +99,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
   itEnv "Server SwapIntoLn" $
     withSpawnLink Main.apply . const $ do
       -- Let app spawn
+      Main.waitForSync
       sleep $ MicroSecondsDelay 500000
       --
       -- TODO : implement withGCEnv!!!
@@ -159,9 +161,19 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
 
       res1 <- runExceptT $ do
         resp <- except res0
-        let fundAddr = resp ^. (SwapIntoLn.success . SwapIntoLn.fundOnChainAddress . SwapIntoLn.val . SwapIntoLn.val)
-        void $ withBtcT Btc.sendToAddress (\h -> h fundAddr 0.01 Nothing Nothing)
-        lift $ LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
+        let fundAddr =
+              resp
+                ^. ( SwapIntoLn.success
+                       . SwapIntoLn.fundOnChainAddress
+                       . SwapIntoLn.val
+                       . SwapIntoLn.val
+                   )
+        void $
+          withBtcT
+            Btc.sendToAddress
+            (\h -> h fundAddr 0.01 Nothing Nothing)
+        lift $
+          LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
         sleep $ MicroSecondsDelay 5000000
         lift $ mine 6 LndLsp
         lb <- withBtcT Btc.getBlockCount id

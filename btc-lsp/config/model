@@ -60,6 +60,7 @@ LnChan
   fundingTxId (TxId 'Funding)
   fundingVout (Vout 'Funding)
   closingTxId (TxId 'Closing) Maybe
+  extId ChanId Maybe
   -- We need to track is channel used or not.
   -- If channel is not used for a long time, then
   -- it should be closed because it's not efficient

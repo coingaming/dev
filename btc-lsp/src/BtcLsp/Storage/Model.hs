@@ -9,6 +9,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE NoStrictData #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module BtcLsp.Storage.Model where

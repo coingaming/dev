@@ -13,11 +13,12 @@ stdenv.mkDerivation {
   buildInputs = [
     nix
     openssl
+    plantuml
     (pkgs.callPackage kompose-src {})
     #
     # TODO : replace it with minimal possible dhall setup
     #
-    (import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/f5aaaddd0a8efcde271cd497c86e300da608c4a8") {bundle = ["dhall"];})
+    (import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/e73945947a367ed9bae735e276664a3efe6ea80f") {bundle = ["dhall"];})
   ];
   LANG="en_US.UTF-8";
   TERM="xterm-256color";

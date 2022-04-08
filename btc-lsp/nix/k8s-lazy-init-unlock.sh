@@ -2,8 +2,9 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd-lsp bitcoin_network`
-LND_WALLET_PASSWORD=`sh $THIS_DIR/k8s-get-secret.sh btc-lsp lsp_lnd_env lnd_wallet_password`
+BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
+LND_WALLET_PASSWORD=`sh $THIS_DIR/k8s-get-secret.sh lnd lnd_wallet_pass`
+LND_MACAROON_PATH="/root/.lnd/data/chain/bitcoin/$BITCOIN_NETWORK/admin.macaroon"
 
 create_wallet() {
 expect <<- EOF
@@ -22,9 +23,8 @@ expect <<- EOF
 EOF
 }
 
-for OWNER in lsp; do
-
-  LND_SERVICE="lnd-$OWNER"
+initWallet () {
+  LND_SERVICE="$1"
   LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   ( echo "$LND_SERVICE ==> Checking wallet of $LND_POD" \
     && kubectl exec \
@@ -38,7 +38,25 @@ for OWNER in lsp; do
         --network="$BITCOIN_NETWORK" unlock \
         --stdin ) \
   || ( echo "$LND_SERVICE ==> Creating wallet $LND_POD" \
-       && create_wallet \
+        && create_wallet \
         "kubectl exec -it $LND_POD -- lncli --network=$BITCOIN_NETWORK create" ) \
   || true
-done
+
+  while kubectl exec \
+  -i "$LND_POD" \
+  -- sh \
+  -c "[ ! -f $LND_MACAROON_PATH ]"
+  do
+   sleep 5
+   echo "Waiting for wallet init..."
+  done
+}
+
+initWallet "lnd"
+
+if [ "$BITCOIN_NETWORK" = "regtest" ]; then
+  for OWNER in lnd-alice lnd-bob; do
+    initWallet "$OWNER"
+  done
+fi
+

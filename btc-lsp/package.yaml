@@ -141,6 +141,17 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+  btc-lsp-prof:
+    main: Main.hs
+    source-dirs:
+    - app
+    ghc-options:
+    - -O2
+    - -threaded
+    - -prof
+    - -fprof-auto
+    - "\"-with-rtsopts=-N -s -p -h -xt\""
+    - -fexternal-interpreter
 
 tests:
   btc-lsp-test:
