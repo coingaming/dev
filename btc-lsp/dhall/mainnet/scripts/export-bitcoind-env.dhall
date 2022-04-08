@@ -1,6 +1,6 @@
-let G = ../Global.dhall
+let G = ../../Global.dhall
 
-let Bitcoind = ../Service/Bitcoind.dhall
+let Bitcoind = ../../Service/Bitcoind.dhall
 
 let network = G.BitcoinNetwork.MainNet
 
