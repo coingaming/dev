@@ -13,7 +13,7 @@ in  ''
 
     echo "==> Setting up env for ${owner}"
 
-    source "$THIS_DIR/export-${owner}-env.sh"
+    . "$THIS_DIR/export-${owner}-env.sh"
 
     (
       kubectl create configmap ${owner} \${G.concatSetupEnv
