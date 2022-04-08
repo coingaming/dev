@@ -114,6 +114,17 @@ let mkLspGrpcServerEnv
             }
         )
 
+let mkLspGrpcClientEnv
+    : P.JSON.Type
+    = P.JSON.object
+        ( toMap
+            { host = P.JSON.string (G.unOwner G.Owner.Lnd)
+            , port = P.JSON.natural grpcPort.unPort
+            , sig_header_name = P.JSON.string "sig-bin"
+            , compress_mode = P.JSON.string "Compressed"
+            }
+        )
+
 let mkMsatPerByte
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
@@ -241,4 +252,19 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { mkEnv, mkSetupEnv, mkService, mkDeployment }
+in  { mkEnv
+    , env
+    , configMapEnv
+    , grpcPort
+    , secretEnv
+    , mkService
+    , mkDeployment
+    , mkLspGrpcClientEnv
+    , mkLspBitcoindEnv
+    , mkLspGrpcServerEnv
+    , mkLspLndEnv
+    , logEnv
+    , logFormat
+    , logSeverity
+    , logVerbosity
+    }

@@ -98,6 +98,7 @@ let mkHexMacaroon
           , Lsp = G.todo
           , Postgres = G.todo
           , Rtl = G.todo
+          , Integration = G.todo
           }
           owner
 
