@@ -28,7 +28,7 @@ apply afterScan =
           . logStr
           . inspect
       )
-      (\u -> markFunded u >> sequence_ afterScan)
+      (\u -> unless (null u) (markFunded u >> sequence_ afterScan))
       $ runExceptT scan
     sleep $ MicroSecondsDelay 1000000
 

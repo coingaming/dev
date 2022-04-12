@@ -1,4 +1,6 @@
 {-# OPTIONS_GHC -Wno-deprecations #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
 module BtcLsp.Thread.Refunder
   (apply) where
 
@@ -15,7 +17,6 @@ import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.Data.ReleaseOutput as RO
 import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
-import qualified LndClient.Data.ListUnspent as LU
 
 toHex :: ByteString -> Text
 toHex = decodeUtf8 . B16.encode
@@ -34,36 +35,35 @@ defSendUtxoConfig =
       satPerVbyte = 1
     }
 
+debugLog :: (KatipContext m) => Text -> m ()
+debugLog = $(logTM) DebugS . logStr
+
+errorLog :: (KatipContext m) => Text -> m ()
+errorLog = $(logTM) ErrorS . logStr
+
+
 sendUtxosWithMinFee ::
   (Env m) =>
   SendUtxoConfig ->
   [(OP.OutPoint, MSat)] ->
   Text ->
   Text ->
-  ExceptT Failure m PT.PublishTransactionResponse
+  ExceptT Failure m (TxId 'Funding, MSat, MSat)
 sendUtxosWithMinFee cfg utxos addr txLabel = do
   when (estimateAmt <= dustLimit cfg) $ liftIO $ fail "Total utxos amount is below dust limit"
-  unspent <- withLndT listUnspent ($ LU.ListUnspentRequest 0 10 "")
-  traceShowM unspent
   let ePsbtReq = fundPsbtReq utxos addr estimateAmt
   ePsbt <- withLndT fundPsbt ($ ePsbtReq)
-  print ("Estimate psbt" :: Text)
-  traceShowM ePsbt
   finPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt ePsbt) "")
   decodedETx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finPsbt)
-  print ("Estimate transaction" :: Text)
-  traceShowM decodedETx
   let fee = MSat $ fromInteger (satPerVbyte cfg * 1000 * Btc.decVsize decodedETx)
   void $ releaseUtxos (FP.lockedUtxos ePsbt)
-
   let rPsbtReq = fundPsbtReq utxos addr fee
   rPsbt <- withLndT fundPsbt ($ rPsbtReq)
   finRPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt rPsbt) "")
-
-  print ("Final psbt" :: Text)
-  traceShowM finRPsbt
-
-  withLndT publishTransaction ($ PT.PublishTransactionRequest (FNP.rawFinalTx finRPsbt) txLabel)
+  ptRes <- withLndT publishTransaction ($ PT.PublishTransactionRequest (FNP.rawFinalTx finRPsbt) txLabel)
+  if null $ PT.publishError ptRes
+     then pure (from $ FNP.rawFinalTx finRPsbt, totalUtxoAmt, fee)
+     else liftIO $ fail "Failed to publish refund transaction"
   where
     estimateAmt = totalUtxoAmt - estimateFee cfg
     totalUtxoAmt = sum $ snd <$> utxos
@@ -78,7 +78,7 @@ sendUtxosWithMinFee cfg utxos addr txLabel = do
       FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
 
 
-sendUtxos :: (Env m) => [(OP.OutPoint, MSat)] -> Text -> Text -> ExceptT Failure m PT.PublishTransactionResponse
+sendUtxos :: (Env m) => [(OP.OutPoint, MSat)] -> Text -> Text -> ExceptT Failure m (TxId 'Funding, MSat, MSat)
 sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
 
 processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
@@ -86,8 +86,17 @@ processRefund utxos@(x:_) = do
   let swp = entityVal $ snd x
   let refAddr = swapIntoLnRefundAddress swp
   let utxos' = toOutPointAmt . entityVal . fst <$> utxos
+  debugLog $ "Start refunding utxos:" <> inspect utxos' <> " to address:" <> inspect refAddr
   r <- runExceptT $ sendUtxos utxos' (coerce refAddr) ("refund to " <> coerce refAddr)
-  whenRight r $ const $ do
+  whenLeft r $ \e ->
+      errorLog $ "Failed to refund utxos:"
+      <> inspect utxos' <> " to address:" <> inspect refAddr
+      <> " with error:" <> inspect e
+  whenRight r $ \(rtxid, total, fee) -> do
+    debugLog $
+      "Successfully refunded utxos: " <> inspect utxos' <> " to address:" <> inspect refAddr
+      <> " on chain rawTx:" <> inspect rtxid <> " amount: " <> inspect total <> " with fee:"
+      <> inspect fee
     void $ runSql $ markRefundedSql (entityKey . fst <$> utxos)
 processRefund _ = pure ()
 
@@ -98,6 +107,5 @@ toOutPointAmt x =
 apply :: (Env m) => m ()
 apply = do
   utxos <- runSql getUtxosForRefundSql
-  traceShowM utxos
   let groupedBySwap = groupBy (\a b -> entityKey (snd a) == entityKey (snd b)) utxos
   mapM_ processRefund groupedBySwap

@@ -51,7 +51,6 @@ getUtxosForRefundSql = do
     Psql.from $ \(swap `Psql.InnerJoin` utxo) -> do
       Psql.on ((swap Psql.^. SwapIntoLnId) Psql.==. (utxo Psql.^. SwapUtxoSwapIntoLnId))
       Psql.where_
-        ((swap Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapFunded)
-        Psql.||. (swap Psql.^. SwapIntoLnExpiresAt Psql.>. Psql.now_)
+        (((swap Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapFunded) Psql.||. (swap Psql.^. SwapIntoLnExpiresAt Psql.>. Psql.now_))
         Psql.&&. (utxo Psql.^. SwapUtxoStatus Psql.!=. Psql.val SwapUtxoRefunded))
       pure (utxo, swap)
