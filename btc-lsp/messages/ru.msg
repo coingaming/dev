@@ -13,9 +13,9 @@ SignoutRBreadcrumb: Выйти
 ProfileRBreadcrumb: Профиль
 CreateRBreadcrumb: Создать
 
-HomeRTitle: Добро пожаловать | Lsp
-SignoutRTitle: Выйти | Lsp
-ProfileRTitle usr@YesodUser: #{usr} | Lsp
+HomeRTitle: Добро пожаловать | LSP
+SignoutRTitle: Выйти | LSP
+ProfileRTitle usr@YesodUser: #{usr} | LSP
 
 Home: Главная
 Profile: Профиль
@@ -29,5 +29,5 @@ ProfilePageGreet usr@YesodUser: Вы вошли как #{usr}
 Name: Имя
 Password: Пароль
 
-HomeBigHeader: BtcLsp
-HomeSmallHeader: Lightning Network Service Provider
+HomeBigHeader: БТК ЛСП
+HomeSmallHeader: Сервис Провайдер Лайтнинг Сети

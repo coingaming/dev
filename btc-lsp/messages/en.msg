@@ -13,9 +13,9 @@ SignoutRBreadcrumb: Signout
 ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
 
-HomeRTitle: Welcome | Lsp
-SignoutRTitle: Logout | Lsp
-ProfileRTitle usr@YesodUser: #{usr} | Lsp
+HomeRTitle: Welcome | LSP
+SignoutRTitle: Logout | LSP
+ProfileRTitle usr@YesodUser: #{usr} | LSP
 
 Home: Home
 Profile: Profile
@@ -29,5 +29,5 @@ ProfilePageGreet usr@YesodUser: You are logged in as #{usr}
 Name: Name
 Password: Password
 
-HomeBigHeader: BtcLsp
+HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider

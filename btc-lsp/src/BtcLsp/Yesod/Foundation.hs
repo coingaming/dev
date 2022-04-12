@@ -336,6 +336,7 @@ unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
 -- moved to documentation in the Wiki. Following are some hopefully helpful
 -- links:
 --
+--
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
 -- https://github.com/yesodweb/yesod/wiki/Serve-static-files-from-a-separate-domain
 -- https://github.com/yesodweb/yesod/wiki/i18n-messages-in-the-scaffolding
