@@ -1,6 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Grpc.Server.LowLevel
@@ -31,7 +28,7 @@ import Text.PrettyPrint.GenericPretty.Import (inspect)
 import Universum
 
 data GSEnv = GSEnv
-  { gsEnvPort :: Int,
+  { gsEnvPort :: GSPort,
     gsEnvSigVerify :: Bool,
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
@@ -58,6 +55,19 @@ instance FromJSON GSEnv where
             <*> pure (const $ pure ())
             <*> pure (const $ pure Nothing)
       )
+
+newtype GSPort
+  = GSPort PortNumber
+  deriving
+    ( Enum,
+      Eq,
+      Integral,
+      Num,
+      Ord,
+      Read,
+      Real,
+      Show
+    )
 
 runServer ::
   GSEnv ->
