@@ -3,6 +3,7 @@
 
 YesodUser
     ident Text
+    name Text Maybe
     password Text Maybe
     UniqueYesodUser ident
 Email

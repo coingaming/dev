@@ -1,10 +1,6 @@
-<div .ui.container>
-
-    <h1>
-      Access granted!
-
-    <p>
-      This page is protected and access is allowed only for authenticated users.
-
-    <p>
-      Your data is protected with us <strong><span class="username">#{yesodUserIdent user}</span></strong>!
+<div .ui.container.compact.center>
+  <div .row>
+    <p .lead.text-center>
+      _{MsgProfilePageGreet model}
+  <div .row.margin-top>
+    ^{form}

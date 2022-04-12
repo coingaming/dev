@@ -77,10 +77,15 @@ library
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
       BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
       BtcLsp.Yesod.Foundation
       BtcLsp.Yesod.Handler.Comment
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
       BtcLsp.Yesod.Handler.Profile
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
@@ -132,6 +137,7 @@ library
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
+    , blaze-html
     , bytestring ==0.10.*
     , case-insensitive
     , casing
@@ -139,6 +145,7 @@ library
     , classy-prelude ==1.5.*
     , classy-prelude-conduit ==1.5.*
     , classy-prelude-yesod ==1.5.*
+    , colonnade
     , conduit >=1.0 && <2.0
     , containers
     , cryptonite
@@ -206,6 +213,7 @@ library
     , yaml ==0.11.*
     , yesod ==1.6.*
     , yesod-auth ==1.6.*
+    , yesod-colonnade
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
@@ -261,10 +269,15 @@ executable btc-lsp-exe
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
       BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
       BtcLsp.Yesod.Foundation
       BtcLsp.Yesod.Handler.Comment
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
       BtcLsp.Yesod.Handler.Profile
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
@@ -317,6 +330,7 @@ executable btc-lsp-exe
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
+    , blaze-html
     , bytestring ==0.10.*
     , case-insensitive
     , casing
@@ -324,6 +338,7 @@ executable btc-lsp-exe
     , classy-prelude ==1.5.*
     , classy-prelude-conduit ==1.5.*
     , classy-prelude-yesod ==1.5.*
+    , colonnade
     , conduit >=1.0 && <2.0
     , containers
     , cryptonite
@@ -391,6 +406,7 @@ executable btc-lsp-exe
     , yaml ==0.11.*
     , yesod ==1.6.*
     , yesod-auth ==1.6.*
+    , yesod-colonnade
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
@@ -443,10 +459,15 @@ executable btc-lsp-integration
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
       BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
       BtcLsp.Yesod.Foundation
       BtcLsp.Yesod.Handler.Comment
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
       BtcLsp.Yesod.Handler.Profile
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
@@ -512,6 +533,7 @@ executable btc-lsp-integration
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
+    , blaze-html
     , bytestring ==0.10.*
     , case-insensitive
     , casing
@@ -519,6 +541,7 @@ executable btc-lsp-integration
     , classy-prelude ==1.5.*
     , classy-prelude-conduit ==1.5.*
     , classy-prelude-yesod ==1.5.*
+    , colonnade
     , conduit >=1.0 && <2.0
     , containers
     , cryptonite
@@ -593,6 +616,7 @@ executable btc-lsp-integration
     , yaml ==0.11.*
     , yesod ==1.6.*
     , yesod-auth ==1.6.*
+    , yesod-colonnade
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
@@ -643,10 +667,15 @@ executable btc-lsp-prof
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
       BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
       BtcLsp.Yesod.Foundation
       BtcLsp.Yesod.Handler.Comment
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
       BtcLsp.Yesod.Handler.Profile
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
@@ -699,6 +728,7 @@ executable btc-lsp-prof
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
+    , blaze-html
     , bytestring ==0.10.*
     , case-insensitive
     , casing
@@ -706,6 +736,7 @@ executable btc-lsp-prof
     , classy-prelude ==1.5.*
     , classy-prelude-conduit ==1.5.*
     , classy-prelude-yesod ==1.5.*
+    , colonnade
     , conduit >=1.0 && <2.0
     , containers
     , cryptonite
@@ -773,6 +804,7 @@ executable btc-lsp-prof
     , yaml ==0.11.*
     , yesod ==1.6.*
     , yesod-auth ==1.6.*
+    , yesod-colonnade
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
@@ -824,10 +856,15 @@ test-suite btc-lsp-test
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
       BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
       BtcLsp.Yesod.Foundation
       BtcLsp.Yesod.Handler.Comment
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
       BtcLsp.Yesod.Handler.Profile
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
@@ -890,6 +927,7 @@ test-suite btc-lsp-test
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
+    , blaze-html
     , bytestring ==0.10.*
     , case-insensitive
     , casing
@@ -897,6 +935,7 @@ test-suite btc-lsp-test
     , classy-prelude ==1.5.*
     , classy-prelude-conduit ==1.5.*
     , classy-prelude-yesod ==1.5.*
+    , colonnade
     , conduit >=1.0 && <2.0
     , containers
     , cryptonite
@@ -970,6 +1009,7 @@ test-suite btc-lsp-test
     , yaml ==0.11.*
     , yesod ==1.6.*
     , yesod-auth ==1.6.*
+    , yesod-colonnade
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*

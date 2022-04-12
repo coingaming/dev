@@ -1,4 +1,3 @@
-{-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -7,13 +6,13 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# OPTIONS_GHC -Wno-partial-fields #-}
 
 module BtcLsp.Yesod.Foundation where
 
+import qualified BtcLsp.Yesod.Data.Language
 import BtcLsp.Yesod.Import.NoFoundation
 import Control.Monad.Logger (LogSource)
--- Used only when in "auth-dummy-login" setting is enabled.
-
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Kind as Kind
 import qualified Data.Text.Encoding as TE
@@ -21,7 +20,6 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth.Dummy
-import Yesod.Auth.OpenId (IdentifierType (Claimed), authOpenId)
 import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
@@ -40,10 +38,14 @@ data App = App
     appLogger :: Logger
   }
 
+mkMessage "App" "messages" "en"
+
 data MenuItem = MenuItem
-  { menuItemLabel :: Text,
+  { menuItemLabel :: AppMessage,
     menuItemRoute :: Route App,
-    menuItemAccessCallback :: Bool
+    menuItemAccessCallback :: Bool,
+    menuItemActiveCallback :: Bool,
+    menuItemNoReferrer :: Bool
   }
 
 data MenuTypes
@@ -123,27 +125,35 @@ instance Yesod App where
     let menuItems =
           [ NavbarLeft $
               MenuItem
-                { menuItemLabel = "Home",
+                { menuItemLabel = MsgHome,
                   menuItemRoute = HomeR,
-                  menuItemAccessCallback = True
+                  menuItemAccessCallback = True,
+                  menuItemActiveCallback = mcurrentRoute == Just HomeR,
+                  menuItemNoReferrer = False
                 },
             NavbarLeft $
               MenuItem
-                { menuItemLabel = "Profile",
+                { menuItemLabel = MsgProfile,
                   menuItemRoute = ProfileR,
-                  menuItemAccessCallback = isJust muser
+                  menuItemAccessCallback = isJust muser,
+                  menuItemActiveCallback = mcurrentRoute == Just ProfileR,
+                  menuItemNoReferrer = False
                 },
             NavbarRight $
               MenuItem
-                { menuItemLabel = "Login",
+                { menuItemLabel = MsgLogin,
                   menuItemRoute = AuthR LoginR,
-                  menuItemAccessCallback = isNothing muser
+                  menuItemAccessCallback = isNothing muser,
+                  menuItemActiveCallback = mcurrentRoute == Just (AuthR LoginR),
+                  menuItemNoReferrer = True
                 },
             NavbarRight $
               MenuItem
-                { menuItemLabel = "Logout",
+                { menuItemLabel = MsgLogout,
                   menuItemRoute = AuthR LogoutR,
-                  menuItemAccessCallback = isJust muser
+                  menuItemAccessCallback = isJust muser,
+                  menuItemActiveCallback = False,
+                  menuItemNoReferrer = True
                 }
           ]
 
@@ -161,6 +171,7 @@ instance Yesod App where
 
     pc <- widgetToPageContent $ do
       addStylesheet $ StaticR css_bootstrap_css
+      addStylesheet $ StaticR css_app_css
       --  generated from @Settings/StaticFiles.hs@
       $(widgetFile "default-layout")
     withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -184,6 +195,7 @@ instance Yesod App where
   isAuthorized FaviconR _ = return Authorized
   isAuthorized RobotsR _ = return Authorized
   isAuthorized (StaticR _) _ = return Authorized
+  isAuthorized (LanguageR _) _ = return Authorized
   -- the profile route requires that the user is authenticated, so we
   -- delegate to that function
   isAuthorized ProfileR _ = isAuthenticated
@@ -258,7 +270,7 @@ instance YesodAuth App where
 
   -- Where to send a user after successful login
   loginDest :: App -> Route App
-  loginDest _ = HomeR
+  loginDest _ = ProfileR
 
   -- Where to send a user after logout
   logoutDest :: App -> Route App
@@ -282,13 +294,14 @@ instance YesodAuth App where
             <$> insert
               YesodUser
                 { yesodUserIdent = credsIdent creds,
+                  yesodUserName = Nothing,
                   yesodUserPassword = Nothing
                 }
 
   -- You can add other plugins like Google Email, email or OAuth here
   authPlugins :: App -> [AuthPlugin App]
   authPlugins app =
-    authOpenId Claimed [] : extraAuthPlugins
+    extraAuthPlugins
     where
       -- Enable authDummy login if enabled.
       extraAuthPlugins = [authDummy | appAuthDummyLogin $ appSettings app]

@@ -142,6 +142,10 @@ dependencies:
 - case-insensitive
 - wai
 - foreign-store
+# yesod-extra
+- blaze-html
+- colonnade
+- yesod-colonnade
 
 source-dirs:
 - src

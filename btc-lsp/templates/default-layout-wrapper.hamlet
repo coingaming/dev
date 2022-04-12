@@ -13,6 +13,7 @@ $newline never
     <meta name="author" content="">
 
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/css/flag-icon.min.css" rel="stylesheet">
 
     ^{pageHead pc}
 
@@ -47,7 +48,8 @@ $newline never
       document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
   <body>
     ^{pageBody pc}
-
+    <script>
+      \ $("input[type=\"hidden\"]").parent("div.form-group").addClass("hidden");
     $maybe analytics <- appAnalytics $ appSettings master
       <script>
         if(!window.location.href.match(/localhost/)){

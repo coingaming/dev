@@ -26,3 +26,7 @@ import Database.Persist.Quasi
 share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
   $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
+
+instance ToMessage YesodUser where
+  toMessage =
+    yesodUserIdent
