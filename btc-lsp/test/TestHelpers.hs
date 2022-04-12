@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 module TestHelpers
-  (genAddress, createDummySwap)
+  (genAddress, createDummySwap, getLatestBlock, putLatestBlockToDB)
 where
 
 import BtcLsp.Import
@@ -12,6 +12,8 @@ import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import TestOrphan ()
 import TestWithLndLsp
+import qualified Network.Bitcoin as Btc
+import qualified BtcLsp.Storage.Model.Block as Block
 
 
 genAddress ::
@@ -65,3 +67,16 @@ createDummySwap key = do
   fundInv <- genPaymentReq
   expAt <- lift $ getFutureTime (Lnd.Seconds 3600)
   lift $ SWP.createIgnore u fundInv (from fundAddr) (from refundAddr) expAt
+
+getLatestBlock :: ExceptT Failure (TestAppM 'LndLsp IO) Btc.BlockVerbose
+getLatestBlock = do
+  blkCount <- withBtcT Btc.getBlockCount id
+  hash <- withBtcT Btc.getBlockHash ($ blkCount)
+  withBtcT Btc.getBlockVerbose ($ hash)
+
+putLatestBlockToDB :: ExceptT Failure (TestAppM 'LndLsp IO) (Btc.BlockVerbose, Entity Block)
+putLatestBlockToDB = do
+  blk <- getLatestBlock
+  height <- tryFromT $ Btc.vBlkHeight blk
+  k <- lift $ runSql $ Block.createUpdateSql height (from $ Btc.vBlockHash blk) (from <$> Btc.vPrevBlock blk)
+  pure (blk, k)

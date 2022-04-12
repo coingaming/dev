@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Thread.BlockScanner
   ( apply,
@@ -17,6 +18,7 @@ import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Vector as V
 import qualified Network.Bitcoin as Btc
 import qualified Universum
+import LndClient (txIdParser)
 
 apply :: (Env m) => [m ()] -> m ()
 apply afterScan =
@@ -26,7 +28,7 @@ apply afterScan =
           . logStr
           . inspect
       )
-      markFunded >> sequence_ afterScan
+      (\u -> markFunded u >> sequence_ afterScan)
       $ runExceptT scan
     sleep $ MicroSecondsDelay 1000000
 
@@ -66,7 +68,7 @@ markFunded utxos =
 data Utxo = Utxo
   { utxoValue :: MSat,
     utxoN :: Vout 'Funding,
-    utxoId :: Btc.TransactionID,
+    utxoId :: TxId 'Funding,
     utxoSwapId :: SwapIntoLnId
   }
   deriving (Show)
@@ -99,19 +101,19 @@ handleAddr :: Env m => Btc.Address -> Btc.BTC -> Integer -> Btc.TransactionID ->
 handleAddr addr val num txid = do
   mswp <- maybeSwap addr
   case mswp of
-    Just swp -> newUtxo (trySat2MSat val) (tryFrom num) txid swp
+    Just swp -> newUtxo (trySat2MSat val) (tryFrom num) (txIdParser txid) swp
     Nothing -> pure Nothing
 
 newUtxo ::
   (Env m) =>
   Either (TryFromException Btc.BTC MSat) MSat ->
   Either (TryFromException Integer (Vout 'Funding)) (Vout 'Funding) ->
-  Btc.TransactionID ->
+  Either LndError ByteString ->
   Entity SwapIntoLn ->
   m (Maybe Utxo)
-newUtxo (Right val) (Right n) txid swp =
+newUtxo (Right val) (Right n) (Right txid) swp =
   pure . Just $
-    Utxo val n txid (entityKey swp)
+    Utxo val n (from txid) (entityKey swp)
 newUtxo val num txid swp = do
   $(logTM) ErrorS . logStr $
     "TryFrom overflow error val: "
@@ -166,11 +168,11 @@ persistBlockT blk utxos = do
     SwapUtxo.createManySql $
       toSwapUtxo ct b <$> utxos
   where
-    toSwapUtxo now blkId (Utxo value' n' txid' swpId') =
+    toSwapUtxo now blkId (Utxo value' n' txid' swpId') = do
       SwapUtxo
         { swapUtxoSwapIntoLnId = swpId',
           swapUtxoBlockId = entityKey blkId,
-          swapUtxoTxid = from txid',
+          swapUtxoTxid = txid',
           swapUtxoVout = n',
           swapUtxoAmount = from value',
           swapUtxoStatus = SwapUtxoFirstSeen,

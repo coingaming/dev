@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-deprecations #-}
 module BtcLsp.Thread.Refunder
   (apply) where
 
@@ -14,6 +15,7 @@ import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.Data.ReleaseOutput as RO
 import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
+import qualified LndClient.Data.ListUnspent as LU
 
 toHex :: ByteString -> Text
 toHex = decodeUtf8 . B16.encode
@@ -41,16 +43,26 @@ sendUtxosWithMinFee ::
   ExceptT Failure m PT.PublishTransactionResponse
 sendUtxosWithMinFee cfg utxos addr txLabel = do
   when (estimateAmt <= dustLimit cfg) $ liftIO $ fail "Total utxos amount is below dust limit"
+  unspent <- withLndT listUnspent ($ LU.ListUnspentRequest 0 10 "")
+  traceShowM unspent
   let ePsbtReq = fundPsbtReq utxos addr estimateAmt
   ePsbt <- withLndT fundPsbt ($ ePsbtReq)
+  print ("Estimate psbt" :: Text)
+  traceShowM ePsbt
   finPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt ePsbt) "")
   decodedETx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finPsbt)
+  print ("Estimate transaction" :: Text)
+  traceShowM decodedETx
   let fee = MSat $ fromInteger (satPerVbyte cfg * 1000 * Btc.decVsize decodedETx)
   void $ releaseUtxos (FP.lockedUtxos ePsbt)
 
   let rPsbtReq = fundPsbtReq utxos addr fee
   rPsbt <- withLndT fundPsbt ($ rPsbtReq)
   finRPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt rPsbt) "")
+
+  print ("Final psbt" :: Text)
+  traceShowM finRPsbt
+
   withLndT publishTransaction ($ PT.PublishTransactionRequest (FNP.rawFinalTx finRPsbt) txLabel)
   where
     estimateAmt = totalUtxoAmt - estimateFee cfg
@@ -63,7 +75,7 @@ sendUtxosWithMinFee cfg utxos addr txLabel = do
       let amt' :: Word64 = coerce (totalUtxoAmt - fee)
       let r = MSat $ (* 1000) $ fromInteger $ ceiling (toRational amt' / 1000)
       let mtpl = FP.TxTemplate (fst <$> utxos') (M.fromList [(outAddr, r)])
-      FP.FundPsbtRequest "" mtpl 2 False 1
+      FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
 
 
 sendUtxos :: (Env m) => [(OP.OutPoint, MSat)] -> Text -> Text -> ExceptT Failure m PT.PublishTransactionResponse
@@ -86,10 +98,6 @@ toOutPointAmt x =
 apply :: (Env m) => m ()
 apply = do
   utxos <- runSql getUtxosForRefundSql
+  traceShowM utxos
   let groupedBySwap = groupBy (\a b -> entityKey (snd a) == entityKey (snd b)) utxos
   mapM_ processRefund groupedBySwap
-
-
-
-
-
