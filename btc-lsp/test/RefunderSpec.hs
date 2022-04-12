@@ -39,7 +39,7 @@ spec =
       void putLatestBlockToDB
       lift $ mine 4 LndLsp
     withSpawnLink scanner $ const $ do
-      mine 1 LndLsp
+      mine 2 LndLsp
       sleep $ MicroSecondsDelay 50000000
     liftIO $ shouldBe True True
 
