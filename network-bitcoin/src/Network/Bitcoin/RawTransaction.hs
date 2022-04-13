@@ -49,7 +49,7 @@ type RawTransaction = HexString
 
 -- | Get a raw transaction from its unique ID.
 getRawTransaction :: Client -> TransactionID -> IO RawTransaction
-getRawTransaction client txid =
+getRawTransaction client (TransactionID txid) =
     callApi client "getrawtransaction" [ tj txid, tj verbose ]
         where verbose = False
 
@@ -233,7 +233,7 @@ instance FromJSON RawTransactionInfo where
 --   returned is quite sprawling and undocumented, so any patches to help
 --   simplify things would be greatly appreciated.
 getRawTransactionInfo :: Client -> TransactionID -> IO RawTransactionInfo
-getRawTransactionInfo client txid =
+getRawTransactionInfo client (TransactionID txid) =
     callApi client "getrawtransaction" [ tj txid, tj verbose ]
         where verbose = True
 
