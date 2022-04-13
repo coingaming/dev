@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.5.
 --
 -- see: https://github.com/sol/hpack
 
@@ -22,6 +22,16 @@ extra-source-files:
 source-repository head
   type: git
   location: https://github.com/githubuser/btc-lsp
+
+flag dev
+  description: Turn on development settings, like auto-reload templates.
+  manual: False
+  default: False
+
+flag library-only
+  description: Build for use with "yesod devel"
+  manual: False
+  default: False
 
 library
   exposed-modules:
@@ -66,6 +76,21 @@ library
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
+      BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
+      BtcLsp.Yesod.Foundation
+      BtcLsp.Yesod.Handler.Common
+      BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
+      BtcLsp.Yesod.Handler.Profile
+      BtcLsp.Yesod.Import
+      BtcLsp.Yesod.Import.NoFoundation
+      BtcLsp.Yesod.Model
+      BtcLsp.Yesod.Settings
+      BtcLsp.Yesod.Settings.StaticFiles
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -105,25 +130,39 @@ library
   build-depends:
       GenericPretty
     , SHA
-    , aeson
+    , aeson ==1.4.*
     , async
     , base >=4.7 && <5
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
-    , bytestring
+    , blaze-html
+    , bytestring ==0.10.*
     , case-insensitive
     , casing
     , chronos
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , classy-prelude-yesod ==1.5.*
+    , colonnade
+    , conduit >=1.0 && <2.0
     , containers
     , cryptonite
+    , data-default
+    , directory >=1.1 && <1.4
     , envparse
     , errors
     , esqueleto >=3.5.3
     , extra
+    , fast-logger >=2.2 && <3.1
+    , file-embed
+    , foreign-store
     , generic-pretty-instances
     , hex-text
+    , hjsmin >=0.1 && <0.3
     , http-client
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
     , http-types
     , http2
     , http2-client
@@ -135,7 +174,8 @@ library
     , lnd-client
     , memory
     , microlens
-    , monad-logger
+    , monad-control >=0.3 && <1.1
+    , monad-logger ==0.3.*
     , network
     , network-bitcoin
     , persistent >=2.13.2.1
@@ -147,23 +187,40 @@ library
     , proto-lens
     , proto-lens-runtime
     , resource-pool
+    , safe
     , scientific
     , secp256k1-haskell
+    , shakespeare ==2.0.*
     , stm
     , template-haskell
-    , text
+    , text >=0.11 && <2.0
     , time
     , transformers
     , unbounded-delays
     , universum
     , unliftio
+    , unordered-containers
     , uuid
     , vector
     , wai
-    , warp
+    , wai-extra ==3.0.*
+    , wai-logger >=2.2 && <2.4
+    , warp >=3.0 && <3.4
     , warp-grpc
     , warp-tls
     , witch
+    , yaml ==0.11.*
+    , yesod ==1.6.*
+    , yesod-auth ==1.6.*
+    , yesod-colonnade
+    , yesod-core ==1.6.*
+    , yesod-form ==1.6.*
+    , yesod-static ==1.6.*
+  if (flag(dev)) || (flag(library-only))
+    ghc-options: -Wall -fwarn-tabs -O0
+    cpp-options: -DDEVELOPMENT
+  else
+    ghc-options: -Wall -fwarn-tabs -O2
   default-language: Haskell2010
 
 executable btc-lsp-exe
@@ -210,6 +267,21 @@ executable btc-lsp-exe
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
+      BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
+      BtcLsp.Yesod.Foundation
+      BtcLsp.Yesod.Handler.Common
+      BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
+      BtcLsp.Yesod.Handler.Profile
+      BtcLsp.Yesod.Import
+      BtcLsp.Yesod.Import.NoFoundation
+      BtcLsp.Yesod.Model
+      BtcLsp.Yesod.Settings
+      BtcLsp.Yesod.Settings.StaticFiles
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -222,6 +294,7 @@ executable btc-lsp-exe
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
+      DevelMain
       Paths_btc_lsp
   hs-source-dirs:
       src
@@ -249,25 +322,39 @@ executable btc-lsp-exe
   build-depends:
       GenericPretty
     , SHA
-    , aeson
+    , aeson ==1.4.*
     , async
     , base >=4.7 && <5
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
-    , bytestring
+    , blaze-html
+    , bytestring ==0.10.*
     , case-insensitive
     , casing
     , chronos
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , classy-prelude-yesod ==1.5.*
+    , colonnade
+    , conduit >=1.0 && <2.0
     , containers
     , cryptonite
+    , data-default
+    , directory >=1.1 && <1.4
     , envparse
     , errors
     , esqueleto >=3.5.3
     , extra
+    , fast-logger >=2.2 && <3.1
+    , file-embed
+    , foreign-store
     , generic-pretty-instances
     , hex-text
+    , hjsmin >=0.1 && <0.3
     , http-client
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
     , http-types
     , http2
     , http2-client
@@ -279,7 +366,8 @@ executable btc-lsp-exe
     , lnd-client
     , memory
     , microlens
-    , monad-logger
+    , monad-control >=0.3 && <1.1
+    , monad-logger ==0.3.*
     , network
     , network-bitcoin
     , persistent >=2.13.2.1
@@ -291,23 +379,37 @@ executable btc-lsp-exe
     , proto-lens
     , proto-lens-runtime
     , resource-pool
+    , safe
     , scientific
     , secp256k1-haskell
+    , shakespeare ==2.0.*
     , stm
     , template-haskell
-    , text
+    , text >=0.11 && <2.0
     , time
     , transformers
     , unbounded-delays
     , universum
     , unliftio
+    , unordered-containers
     , uuid
     , vector
     , wai
-    , warp
+    , wai-extra ==3.0.*
+    , wai-logger >=2.2 && <2.4
+    , warp >=3.0 && <3.4
     , warp-grpc
     , warp-tls
     , witch
+    , yaml ==0.11.*
+    , yesod ==1.6.*
+    , yesod-auth ==1.6.*
+    , yesod-colonnade
+    , yesod-core ==1.6.*
+    , yesod-form ==1.6.*
+    , yesod-static ==1.6.*
+  if flag(library-only)
+    buildable: False
   default-language: Haskell2010
 
 executable btc-lsp-integration
@@ -354,6 +456,21 @@ executable btc-lsp-integration
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
+      BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
+      BtcLsp.Yesod.Foundation
+      BtcLsp.Yesod.Handler.Common
+      BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
+      BtcLsp.Yesod.Handler.Profile
+      BtcLsp.Yesod.Import
+      BtcLsp.Yesod.Import.NoFoundation
+      BtcLsp.Yesod.Model
+      BtcLsp.Yesod.Settings
+      BtcLsp.Yesod.Settings.StaticFiles
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -407,30 +524,44 @@ executable btc-lsp-integration
       GenericPretty
     , QuickCheck
     , SHA
-    , aeson
+    , aeson ==1.4.*
     , async
     , base >=4.7 && <5
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
-    , bytestring
+    , blaze-html
+    , bytestring ==0.10.*
     , case-insensitive
     , casing
     , chronos
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , classy-prelude-yesod ==1.5.*
+    , colonnade
+    , conduit >=1.0 && <2.0
     , containers
     , cryptonite
+    , data-default
+    , directory >=1.1 && <1.4
     , envparse
     , errors
     , esqueleto >=3.5.3
     , extra
+    , fast-logger >=2.2 && <3.1
+    , file-embed
+    , foreign-store
     , generic-arbitrary
     , generic-pretty-instances
     , hex-text
+    , hjsmin >=0.1 && <0.3
     , hspec
     , hspec-discover
     , hspec-expectations
     , hspec-wai
     , http-client
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
     , http-types
     , http2
     , http2-client
@@ -442,7 +573,8 @@ executable btc-lsp-integration
     , lnd-client
     , memory
     , microlens
-    , monad-logger
+    , monad-control >=0.3 && <1.1
+    , monad-logger ==0.3.*
     , network
     , network-bitcoin
     , persistent >=2.13.2.1
@@ -456,23 +588,35 @@ executable btc-lsp-integration
     , proto-lens-runtime
     , quickcheck-instances
     , resource-pool
+    , safe
     , scientific
     , secp256k1-haskell
+    , shakespeare ==2.0.*
     , stm
     , template-haskell
-    , text
+    , text >=0.11 && <2.0
     , time
     , transformers
     , unbounded-delays
     , universum
     , unliftio
+    , unordered-containers
     , uuid
     , vector
     , wai
-    , warp
+    , wai-extra ==3.0.*
+    , wai-logger >=2.2 && <2.4
+    , warp >=3.0 && <3.4
     , warp-grpc
     , warp-tls
     , witch
+    , yaml ==0.11.*
+    , yesod ==1.6.*
+    , yesod-auth ==1.6.*
+    , yesod-colonnade
+    , yesod-core ==1.6.*
+    , yesod-form ==1.6.*
+    , yesod-static ==1.6.*
   default-language: Haskell2010
 
 executable btc-lsp-prof
@@ -519,6 +663,21 @@ executable btc-lsp-prof
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
+      BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
+      BtcLsp.Yesod.Foundation
+      BtcLsp.Yesod.Handler.Common
+      BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
+      BtcLsp.Yesod.Handler.Profile
+      BtcLsp.Yesod.Import
+      BtcLsp.Yesod.Import.NoFoundation
+      BtcLsp.Yesod.Model
+      BtcLsp.Yesod.Settings
+      BtcLsp.Yesod.Settings.StaticFiles
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -531,6 +690,7 @@ executable btc-lsp-prof
       Proto.BtcLsp.Method.SwapIntoLn
       Proto.BtcLsp.Method.SwapIntoLn_Fields
       Proto.BtcLsp_Fields
+      DevelMain
       Paths_btc_lsp
   hs-source-dirs:
       src
@@ -558,25 +718,39 @@ executable btc-lsp-prof
   build-depends:
       GenericPretty
     , SHA
-    , aeson
+    , aeson ==1.4.*
     , async
     , base >=4.7 && <5
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
-    , bytestring
+    , blaze-html
+    , bytestring ==0.10.*
     , case-insensitive
     , casing
     , chronos
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , classy-prelude-yesod ==1.5.*
+    , colonnade
+    , conduit >=1.0 && <2.0
     , containers
     , cryptonite
+    , data-default
+    , directory >=1.1 && <1.4
     , envparse
     , errors
     , esqueleto >=3.5.3
     , extra
+    , fast-logger >=2.2 && <3.1
+    , file-embed
+    , foreign-store
     , generic-pretty-instances
     , hex-text
+    , hjsmin >=0.1 && <0.3
     , http-client
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
     , http-types
     , http2
     , http2-client
@@ -588,7 +762,8 @@ executable btc-lsp-prof
     , lnd-client
     , memory
     , microlens
-    , monad-logger
+    , monad-control >=0.3 && <1.1
+    , monad-logger ==0.3.*
     , network
     , network-bitcoin
     , persistent >=2.13.2.1
@@ -600,23 +775,35 @@ executable btc-lsp-prof
     , proto-lens
     , proto-lens-runtime
     , resource-pool
+    , safe
     , scientific
     , secp256k1-haskell
+    , shakespeare ==2.0.*
     , stm
     , template-haskell
-    , text
+    , text >=0.11 && <2.0
     , time
     , transformers
     , unbounded-delays
     , universum
     , unliftio
+    , unordered-containers
     , uuid
     , vector
     , wai
-    , warp
+    , wai-extra ==3.0.*
+    , wai-logger >=2.2 && <2.4
+    , warp >=3.0 && <3.4
     , warp-grpc
     , warp-tls
     , witch
+    , yaml ==0.11.*
+    , yesod ==1.6.*
+    , yesod-auth ==1.6.*
+    , yesod-colonnade
+    , yesod-core ==1.6.*
+    , yesod-form ==1.6.*
+    , yesod-static ==1.6.*
   default-language: Haskell2010
 
 test-suite btc-lsp-test
@@ -664,6 +851,21 @@ test-suite btc-lsp-test
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
+      BtcLsp.Yesod.Application
+      BtcLsp.Yesod.Data.BootstrapColor
+      BtcLsp.Yesod.Data.Colored
+      BtcLsp.Yesod.Data.Language
+      BtcLsp.Yesod.Data.Widget
+      BtcLsp.Yesod.Foundation
+      BtcLsp.Yesod.Handler.Common
+      BtcLsp.Yesod.Handler.Home
+      BtcLsp.Yesod.Handler.Language
+      BtcLsp.Yesod.Handler.Profile
+      BtcLsp.Yesod.Import
+      BtcLsp.Yesod.Import.NoFoundation
+      BtcLsp.Yesod.Model
+      BtcLsp.Yesod.Settings
+      BtcLsp.Yesod.Settings.StaticFiles
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -714,29 +916,43 @@ test-suite btc-lsp-test
       GenericPretty
     , QuickCheck
     , SHA
-    , aeson
+    , aeson ==1.4.*
     , async
     , base >=4.7 && <5
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
-    , bytestring
+    , blaze-html
+    , bytestring ==0.10.*
     , case-insensitive
     , casing
     , chronos
+    , classy-prelude ==1.5.*
+    , classy-prelude-conduit ==1.5.*
+    , classy-prelude-yesod ==1.5.*
+    , colonnade
+    , conduit >=1.0 && <2.0
     , containers
     , cryptonite
+    , data-default
+    , directory >=1.1 && <1.4
     , envparse
     , errors
     , esqueleto >=3.5.3
     , extra
+    , fast-logger >=2.2 && <3.1
+    , file-embed
+    , foreign-store
     , generic-arbitrary
     , generic-pretty-instances
     , hex-text
+    , hjsmin >=0.1 && <0.3
     , hspec
     , hspec-expectations
     , hspec-wai
     , http-client
+    , http-client-tls ==0.3.*
+    , http-conduit ==2.3.*
     , http-types
     , http2
     , http2-client
@@ -748,7 +964,8 @@ test-suite btc-lsp-test
     , lnd-client
     , memory
     , microlens
-    , monad-logger
+    , monad-control >=0.3 && <1.1
+    , monad-logger ==0.3.*
     , network
     , network-bitcoin
     , persistent >=2.13.2.1
@@ -762,21 +979,33 @@ test-suite btc-lsp-test
     , proto-lens-runtime
     , quickcheck-instances
     , resource-pool
+    , safe
     , scientific
     , secp256k1-haskell
+    , shakespeare ==2.0.*
     , stm
     , template-haskell
-    , text
+    , text >=0.11 && <2.0
     , time
     , transformers
     , unbounded-delays
     , universum
     , unliftio
+    , unordered-containers
     , uuid
     , vector
     , wai
-    , warp
+    , wai-extra ==3.0.*
+    , wai-logger >=2.2 && <2.4
+    , warp >=3.0 && <3.4
     , warp-grpc
     , warp-tls
     , witch
+    , yaml ==0.11.*
+    , yesod ==1.6.*
+    , yesod-auth ==1.6.*
+    , yesod-colonnade
+    , yesod-core ==1.6.*
+    , yesod-form ==1.6.*
+    , yesod-static ==1.6.*
   default-language: Haskell2010

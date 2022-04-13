@@ -17,6 +17,7 @@ in
       compiler-nix-name = "ghc865";
       modules = [{
         enableLibraryProfiling = profile;
+        packages.classy-prelude-yesod.components.library.doHaddock = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;
         packages.btc-lsp.components.exes.btc-lsp-integration.dontStrip = false;

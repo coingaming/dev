@@ -1,0 +1,6 @@
+<div .ui.container.compact.center>
+  <div .row>
+    <p .lead.text-center>
+      _{MsgProfilePageGreet model}
+  <div .row.margin-top>
+    ^{form}
