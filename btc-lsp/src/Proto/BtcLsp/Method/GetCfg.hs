@@ -143,8 +143,7 @@ instance Data.ProtoLens.Message Request where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData Request where
@@ -377,8 +376,7 @@ instance Data.ProtoLens.Message Response where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              ((Data.Monoid.<>)
                 (case
                      Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'either") _x
@@ -393,8 +391,7 @@ instance Data.ProtoLens.Message Response where
                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage
-                             v)
+                             Data.ProtoLens.encodeMessage v)
                    (Prelude.Just (Response'Failure' v))
                      -> (Data.Monoid.<>)
                           (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
@@ -404,8 +401,7 @@ instance Data.ProtoLens.Message Response where
                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage
-                             v))
+                             Data.ProtoLens.encodeMessage v))
                 (Data.ProtoLens.Encoding.Wire.buildFieldSet
                    (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData Response where
@@ -555,11 +551,9 @@ instance Data.ProtoLens.Message Response'Failure where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields
-                           (\ !t -> Prelude.reverse t)
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
                            (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'input")
-                              frozen'input
+                              (Data.ProtoLens.Field.field @"vec'input") frozen'input
                               (Lens.Family2.set
                                  (Data.ProtoLens.Field.field @"vec'internal") frozen'internal x)))
                else
@@ -591,8 +585,7 @@ instance Data.ProtoLens.Message Response'Failure where
                                 loop
                                   (Lens.Family2.over
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'input
-                                  mutable'internal
+                                  mutable'input mutable'internal
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
           (do mutable'input <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
@@ -614,8 +607,7 @@ instance Data.ProtoLens.Message Response'Failure where
                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                           Data.ProtoLens.encodeMessage
-                           _v))
+                           Data.ProtoLens.encodeMessage _v))
                 (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'input") _x))
              ((Data.Monoid.<>)
                 (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
@@ -628,8 +620,7 @@ instance Data.ProtoLens.Message Response'Failure where
                                       (Data.ProtoLens.Encoding.Bytes.putVarInt
                                          (Prelude.fromIntegral (Data.ByteString.length bs)))
                                       (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage
-                              _v))
+                              Data.ProtoLens.encodeMessage _v))
                    (Lens.Family2.view
                       (Data.ProtoLens.Field.field @"vec'internal") _x))
                 (Data.ProtoLens.Encoding.Wire.buildFieldSet
@@ -965,11 +956,9 @@ instance Data.ProtoLens.Message Response'Success where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields
-                           (\ !t -> Prelude.reverse t)
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
                            (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'lspLnNodes")
-                              frozen'lspLnNodes
+                              (Data.ProtoLens.Field.field @"vec'lspLnNodes") frozen'lspLnNodes
                               x))
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -1070,8 +1059,7 @@ instance Data.ProtoLens.Message Response'Success where
                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                           Data.ProtoLens.encodeMessage
-                           _v))
+                           Data.ProtoLens.encodeMessage _v))
                 (Lens.Family2.view
                    (Data.ProtoLens.Field.field @"vec'lspLnNodes") _x))
              ((Data.Monoid.<>)
@@ -1089,8 +1077,7 @@ instance Data.ProtoLens.Message Response'Success where
                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage
-                             _v))
+                             Data.ProtoLens.encodeMessage _v))
                 ((Data.Monoid.<>)
                    (case
                         Lens.Family2.view
@@ -1106,8 +1093,7 @@ instance Data.ProtoLens.Message Response'Success where
                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage
-                                _v))
+                                Data.ProtoLens.encodeMessage _v))
                    ((Data.Monoid.<>)
                       (case
                            Lens.Family2.view
@@ -1123,8 +1109,7 @@ instance Data.ProtoLens.Message Response'Success where
                                            (Data.ProtoLens.Encoding.Bytes.putVarInt
                                               (Prelude.fromIntegral (Data.ByteString.length bs)))
                                            (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                   Data.ProtoLens.encodeMessage
-                                   _v))
+                                   Data.ProtoLens.encodeMessage _v))
                       ((Data.Monoid.<>)
                          (case
                               Lens.Family2.view
@@ -1140,8 +1125,7 @@ instance Data.ProtoLens.Message Response'Success where
                                               (Data.ProtoLens.Encoding.Bytes.putVarInt
                                                  (Prelude.fromIntegral (Data.ByteString.length bs)))
                                               (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                      Data.ProtoLens.encodeMessage
-                                      _v))
+                                      Data.ProtoLens.encodeMessage _v))
                          ((Data.Monoid.<>)
                             (case
                                  Lens.Family2.view
@@ -1158,8 +1142,7 @@ instance Data.ProtoLens.Message Response'Success where
                                                     (Prelude.fromIntegral
                                                        (Data.ByteString.length bs)))
                                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                         Data.ProtoLens.encodeMessage
-                                         _v))
+                                         Data.ProtoLens.encodeMessage _v))
                             ((Data.Monoid.<>)
                                (case
                                     Lens.Family2.view
@@ -1176,8 +1159,7 @@ instance Data.ProtoLens.Message Response'Success where
                                                        (Prelude.fromIntegral
                                                           (Data.ByteString.length bs)))
                                                     (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                            Data.ProtoLens.encodeMessage
-                                            _v))
+                                            Data.ProtoLens.encodeMessage _v))
                                (Data.ProtoLens.Encoding.Wire.buildFieldSet
                                   (Lens.Family2.view Data.ProtoLens.unknownFields _x))))))))
 instance Control.DeepSeq.NFData Response'Success where

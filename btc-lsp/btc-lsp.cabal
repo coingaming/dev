@@ -216,6 +216,8 @@ library
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if (flag(dev)) || (flag(library-only))
     ghc-options: -Wall -fwarn-tabs -O0
     cpp-options: -DDEVELOPMENT
@@ -408,6 +410,8 @@ executable btc-lsp-exe
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(library-only)
     buildable: False
   default-language: Haskell2010
@@ -617,6 +621,8 @@ executable btc-lsp-integration
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   default-language: Haskell2010
 
 executable btc-lsp-prof
@@ -804,6 +810,8 @@ executable btc-lsp-prof
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   default-language: Haskell2010
 
 test-suite btc-lsp-test
@@ -1008,4 +1016,6 @@ test-suite btc-lsp-test
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   default-language: Haskell2010

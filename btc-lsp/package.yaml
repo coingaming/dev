@@ -183,6 +183,13 @@ ghc-options:
 - -Wno-safe # Don’t use Safe Haskell warnings
 - -Wno-missing-local-signatures # Warning for polymorphic local bindings; nothing wrong with those.
 - -Wno-missing-export-lists # Because of proto-lens
+when:
+  - condition: impl(ghc >= 8.10.7)
+    ghc-options:
+    - -Wno-missing-safe-haskell-mode
+    - -Wno-prepositive-qualified-module
+    - -fenable-th-splice-warnings
+    - -fprint-potential-instances
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
