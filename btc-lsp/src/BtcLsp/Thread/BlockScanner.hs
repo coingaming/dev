@@ -19,6 +19,7 @@ import qualified Data.Vector as V
 import qualified Network.Bitcoin as Btc
 import qualified Universum
 import LndClient (txIdParser)
+import qualified Network.Bitcoin.Types as Btc
 
 apply :: (Env m) => [m ()] -> m ()
 apply afterScan =
@@ -101,7 +102,7 @@ handleAddr :: Env m => Btc.Address -> Btc.BTC -> Integer -> Btc.TransactionID ->
 handleAddr addr val num txid = do
   mswp <- maybeSwap addr
   case mswp of
-    Just swp -> newUtxo (trySat2MSat val) (tryFrom num) (txIdParser txid) swp
+    Just swp -> newUtxo (trySat2MSat val) (tryFrom num) (txIdParser $ Btc.unTransactionID txid) swp
     Nothing -> pure Nothing
 
 newUtxo ::

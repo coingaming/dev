@@ -60,6 +60,8 @@ deriving stock instance Generic Btc.Block
 
 instance Out Btc.Block
 
+instance Out Btc.TransactionID
+
 instance Out Natural where
   docPrec x =
     docPrec x . into @Integer
@@ -85,9 +87,6 @@ instance Out SomeException where
     PP.text . Universum.show
   doc =
     docPrec 0
-
-instance From Btc.TransactionID (TxId 'Funding) where
-  from = via @ByteString
 
 instance From Word32 (Vout 'Funding)
 
