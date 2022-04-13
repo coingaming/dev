@@ -30,7 +30,7 @@ alias lncli-bob="lncli -n regtest --lnddir=$LND_BOB_DIR"
 # app
 #
 
-export LND_LSP_ENV="
+export LSP_LND_ENV="
 {
     \"lnd_wallet_password\":\"developer\",
     \"lnd_tls_cert\":\"$(cat "$LND_LSP_DIR/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')\",
@@ -67,7 +67,7 @@ export LND_LSP_ENV="
 }
 "
 
-export LSP_LND_ENV="
+export LND_ALICE_ENV="
 {
   \"lnd_wallet_password\":\"developer\",
   \"lnd_tls_cert\":\"$(cat "$LND_ALICE_DIR/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')\",
@@ -120,7 +120,7 @@ export LSP_LOG_VERBOSITY="V3" # V0-V3
 #
 export LSP_LOG_SEVERITY="DebugS"
 export LSP_LND_P2P_HOST="127.0.0.1"
-export LSP_LND_P2P_PORT="9735"
+export LSP_LND_P2P_PORT="9736"
 export LSP_MIN_CHAN_CAP_MSAT="20000000"
 export LSP_MSAT_PER_BYTE="1000"
 export LSP_LIBPQ_CONN_STR="postgresql://postgres@localhost/lsp-test"

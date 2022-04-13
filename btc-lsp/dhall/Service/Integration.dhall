@@ -1,3 +1,5 @@
+let P = ../Prelude/Import.dhall
+
 let G = ../Global.dhall
 
 let K = ../Kubernetes/Import.dhall
@@ -10,16 +12,68 @@ let Lsp = ../Service/Lsp.dhall
 
 let owner = G.unOwner G.Owner.Integration
 
-let image = ../../build/docker-image-integration.txt as Text
+let image = ../../build/docker-image-integration.txt as Text ? G.todo
 
 let env =
-      { integrationGrpcClientEnv = "LSP_GRPC_CLIENT_ENV"
-      , integrationLndEnv2 = "LND_LSP_ENV"
+      { grpcClientEnv = "LSP_GRPC_CLIENT_ENV"
+      , lndAliceEnv = "LND_ALICE_ENV"
+      , lndBobEnv = "LND_BOB_ENV"
       }
+
+let configMapEnv
+    : List Text
+    = [ env.grpcClientEnv ] # Lsp.configMapEnv
+
+let secretEnv
+    : List Text
+    = [ env.lndAliceEnv, env.lndBobEnv ] # Lsp.secretEnv
 
 let ports
     : List Natural
     = G.unPorts [ Lsp.grpcPort ]
+
+let mkEnv
+    : G.BitcoinNetwork → P.Map.Type Text Text
+    = λ(net : G.BitcoinNetwork) →
+          [ { mapKey = env.grpcClientEnv
+            , mapValue = "'${P.JSON.render Lsp.mkLspGrpcClientEnv}'"
+            }
+          , { mapKey = env.lndAliceEnv
+            , mapValue =
+                "'${P.JSON.render (Lsp.mkLndEnv net G.Owner.LndAlice)}'"
+            }
+          , { mapKey = env.lndBobEnv
+            , mapValue = "'${P.JSON.render (Lsp.mkLndEnv net G.Owner.LndBob)}'"
+            }
+          ]
+        # Lsp.mkEnv net
+
+let mkSetupEnv
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+
+            . "$THIS_DIR/export-${ownerText}-env.sh"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            (
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+            ''
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -43,14 +97,6 @@ let mkService
           (mkServiceAnnotations net)
           (mkServiceType net)
           (Service.mkPorts ports)
-
-let configMapEnv
-    : List Text
-    = [ env.integrationGrpcClientEnv ] # Lsp.configMapEnv
-
-let secretEnv
-    : List Text
-    = [ env.integrationLndEnv2 ] # Lsp.secretEnv
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
@@ -76,4 +122,4 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { env, configMapEnv, secretEnv, mkService, mkDeployment }
+in  { mkEnv, mkSetupEnv, mkService, mkDeployment }

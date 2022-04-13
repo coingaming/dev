@@ -201,16 +201,16 @@ withLndTestT owner method args = do
 withTestEnv' :: (TestEnv owner -> IO ()) -> IO ()
 withTestEnv' action = do
   gcEnv <- readGCEnv
-  aliceRc <- readRawConfig
-  lndLspEnv <- readLndLspEnv
+  lspRc <- readRawConfig
+  lndAliceEnv <- readLndAliceEnv
   btcClient <-
     Btc.getClient
-      (unpack . bitcoindEnvHost $ rawConfigBtcEnv aliceRc)
-      (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv aliceRc)
-      (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv aliceRc)
-  let lspRc =
-        aliceRc
-          { rawConfigLndEnv = lndLspEnv
+      (unpack . bitcoindEnvHost $ rawConfigBtcEnv lspRc)
+      (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv lspRc)
+      (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv lspRc)
+  let aliceRc =
+        lspRc
+          { rawConfigLndEnv = lndAliceEnv
           }
   withEnv lspRc $ \lspAppEnv ->
     liftIO $
@@ -311,13 +311,13 @@ xitEnv testName expr =
         (sl "TestName" testName)
         expr
 
-readLndLspEnv :: IO LndEnv
-readLndLspEnv =
+readLndAliceEnv :: IO LndEnv
+readLndAliceEnv =
   E.parse
     (E.header "LndEnv")
     $ E.var
       (parser <=< E.nonempty)
-      "LND_LSP_ENV"
+      "LND_ALICE_ENV"
       (E.keep <> E.help "")
   where
     parser :: String -> Either E.Error LndEnv

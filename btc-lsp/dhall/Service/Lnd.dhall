@@ -44,6 +44,22 @@ let env =
       , bitcoinRpcPass = "BITCOIN_RPCPASS"
       }
 
+let configMapEnv
+    : List Text
+    = [ env.bitcoinDefaultChanConfs
+      , env.bitcoinNetwork
+      , env.bitcoinRpcHost
+      , env.bitcoinZmqPubRawBlock
+      , env.bitcoinZmqPubRawTx
+      , env.lndGrpcPort
+      , env.lndP2pPort
+      , env.lndRestPort
+      ]
+
+let secretEnv
+    : List Text
+    = [ env.bitcoinRpcUser, env.bitcoinRpcPass, env.lndWalletPass ]
+
 let ports
     : List Natural
     = G.unPorts [ grpcPort, p2pPort, restPort ]
@@ -130,6 +146,33 @@ let mkEnv
             , { mapKey = env.bitcoinRpcPass, mapValue = Bitcoind.mkRpcPass net }
             ]
 
+let mkSetupEnv
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            . "$THIS_DIR/export-${G.unOwner G.Owner.Lnd}-env.sh"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            (
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+            ''
+
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
     = λ(net : G.BitcoinNetwork) →
@@ -191,22 +234,6 @@ let mkPersistentVolumeClaim
       λ(owner : G.Owner) →
         Volume.mkPersistentVolumeClaim (G.unOwner owner) (mkVolumeSize net)
 
-let configMapEnv
-    : List Text
-    = [ env.bitcoinDefaultChanConfs
-      , env.bitcoinNetwork
-      , env.bitcoinRpcHost
-      , env.bitcoinZmqPubRawBlock
-      , env.bitcoinZmqPubRawTx
-      , env.lndGrpcPort
-      , env.lndP2pPort
-      , env.lndRestPort
-      ]
-
-let secretEnv
-    : List Text
-    = [ env.bitcoinRpcUser, env.bitcoinRpcPass, env.lndWalletPass ]
-
 let mkContainerEnv
     : G.Owner → List K.EnvVar.Type
     = λ(owner : G.Owner) →
@@ -247,43 +274,19 @@ let mkDeployment
           [ mkContainer net owner ]
           (Some [ Deployment.mkVolume (G.unOwner owner) ])
 
-let mkSetupScript
-    : G.Owner → Text
-    = λ(owner : G.Owner) →
-        let ownerText = G.unOwner owner
-
-        in  ''
-            #!/bin/bash
-
-            set -e
-
-            THIS_DIR="$(dirname "$(realpath "$0")")"
-
-            echo "==> Setting up env for ${ownerText}"
-
-            . "$THIS_DIR/export-${G.unOwner G.Owner.Lnd}-env.sh"
-
-            (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
-                                                         configMapEnv}
-            ) || true
-
-            (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
-                                                              secretEnv}
-            ) || true
-            ''
-
 in  { mkTlsCert
+      --=======
+      --in  { tlsCert
+      -->>>>>>> master
     , grpcPort
     , p2pPort
     , restPort
     , mkDomain
     , mkHexMacaroon
     , mkEnv
+    , mkSetupEnv
     , mkWalletPass
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment
-    , mkSetupScript
     }
