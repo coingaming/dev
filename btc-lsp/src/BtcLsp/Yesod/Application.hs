@@ -27,7 +27,6 @@ where
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
-import BtcLsp.Yesod.Handler.Comment
 import BtcLsp.Yesod.Handler.Common
 import BtcLsp.Yesod.Handler.Home
 import BtcLsp.Yesod.Handler.Language

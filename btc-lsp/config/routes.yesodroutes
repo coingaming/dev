@@ -10,7 +10,4 @@
 /language/#BtcLsp.Yesod.Data.Language.Code LanguageR GET
 
 / HomeR GET
-
-/comments CommentR POST
-
 /profile ProfileR GET POST
