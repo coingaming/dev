@@ -23,7 +23,7 @@ in  ''
     export ${Integration.env.integrationLndEnv2}='${P.JSON.render
                                                       ( Lsp.mkLndEnv
                                                           network
-                                                          G.Owner.LndAlice
+                                                          G.Owner.LndBob
                                                       )}'
     export ${Lsp.env.lspLibpqConnStr}='${Postgres.mkConnStr network}'
     export ${Lsp.env.lspLndP2pHost}="${Lnd.mkDomain network}"

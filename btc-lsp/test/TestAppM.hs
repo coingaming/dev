@@ -45,6 +45,7 @@ import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
+import Prelude (show)
 
 data TestOwner
   = LndLsp
@@ -220,11 +221,11 @@ withTestEnv' action = do
         runKatipContextT katipLE katipCTX katipNS $
           LndTest.withTestEnv
             (envLnd lspAppEnv)
-            (Lnd.NodeLocation "localhost:9736")
+            (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost lspAppEnv) (envLndP2PPort lspAppEnv))
             $ \lspTestEnv ->
               LndTest.withTestEnv
                 (envLnd aliceAppEnv)
-                (Lnd.NodeLocation "localhost:9737")
+                (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost aliceAppEnv) (envLndP2PPort aliceAppEnv))
                 $ \aliceTestEnv ->
                   liftIO . action $
                     TestEnv
@@ -248,6 +249,9 @@ withTestEnv' action = do
                                     )
                             }
                       }
+  where
+    getP2PAddr host port = pack host <> ":" <> pack (show port)
+
 
 signT ::
   Lnd.LndEnv ->
