@@ -275,9 +275,6 @@ let mkDeployment
           (Some [ Deployment.mkVolume (G.unOwner owner) ])
 
 in  { mkTlsCert
-      --=======
-      --in  { tlsCert
-      -->>>>>>> master
     , grpcPort
     , p2pPort
     , restPort

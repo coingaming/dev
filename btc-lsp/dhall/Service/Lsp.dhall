@@ -261,7 +261,6 @@ in  { mkEnv
     , mkService
     , mkDeployment
     , mkLspGrpcClientEnv
-      --<<<<<<< HEAD
     , mkLspBitcoindEnv
     , mkLspGrpcServerEnv
     , logEnv
@@ -269,7 +268,4 @@ in  { mkEnv
     , logSeverity
     , logVerbosity
     , mkLndEnv
-      --=======
-      --, mkLspLndEnv
-        -->>>>>>> master
     }
