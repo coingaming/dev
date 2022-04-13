@@ -21,6 +21,9 @@ package witch
 package signable
   ghc-options: -Wwarn
 
+package lnd-client
+  ghc-options: -Wwarn
+
 source-repository-package
   type: git
   location: https://github.com/coingaming/signable.git
@@ -57,8 +60,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/src.git
-  tag: 324fdc0ba4292e4229ccfe96c61cd8a4fc603fed
-  --sha256: 08bxxwvaingxjhnsmbmz62jh6h2giggzwif2ixp897xh49sx86bc
+  tag: 2f56b82df10f5d0161ded69ba61ff0a1ca3df354
+  --sha256: 0y9dcnfrgf6ganllvk1rrslqv1nqxg4dyhvhha2zmknq7lqq84cc
   subdir: generic-pretty-instances
 
 source-repository-package

@@ -29,6 +29,9 @@ flags:
     description: Turn on development settings, like auto-reload templates.
     manual: false
     default: false
+  ghcid:
+    manual: true
+    default: false
 
 dependencies:
 # foundation
@@ -114,9 +117,6 @@ dependencies:
 - classy-prelude-yesod >=1.5 && <1.6
 - bytestring >=0.10 && <0.11
 - text >=0.11 && <2.0
-  #- persistent >=2.9 && <2.11
-  #- persistent-postgresql >=2.9 && <2.11
-  #- persistent-template >=2.5 && <2.9
 - template-haskell
 - shakespeare >=2.0 && <2.1
 - hjsmin >=0.1 && <0.3
@@ -146,9 +146,6 @@ dependencies:
 - blaze-html
 - colonnade
 - yesod-colonnade
-
-source-dirs:
-- src
 
 default-extensions:
 - NoImplicitPrelude
@@ -186,6 +183,10 @@ ghc-options:
 when:
   - condition: impl(ghc >= 8.10.7)
     ghc-options:
+    #
+    # TODO : remove -Wno-unused-packages flag somehow!!!
+    #
+    - -Wno-unused-packages
     - -Wno-missing-safe-haskell-mode
     - -Wno-prepositive-qualified-module
     - -fenable-th-splice-warnings
@@ -194,6 +195,8 @@ when:
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
 library:
+  source-dirs:
+  - src
   when:
   - condition: (flag(dev)) || (flag(library-only))
     then:
@@ -220,6 +223,13 @@ executables:
     when:
     - condition: flag(library-only)
       buildable: false
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp
   btc-lsp-integration:
     main: Integration.hs
     source-dirs:
@@ -240,6 +250,14 @@ executables:
     - hspec-expectations
     - hspec-wai
     - hspec-discover
+    when:
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp
   btc-lsp-prof:
     main: Main.hs
     source-dirs:
@@ -251,6 +269,14 @@ executables:
     - -fprof-auto
     - "\"-with-rtsopts=-N -s -p -h -xt\""
     - -fexternal-interpreter
+    when:
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp
 
 tests:
   btc-lsp-test:
@@ -269,3 +295,12 @@ tests:
     - hspec
     - hspec-expectations
     - hspec-wai
+    when:
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp
+

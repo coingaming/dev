@@ -27,7 +27,6 @@ import Data.Scientific (floatingOrInteger)
 import GHC.TypeLits (Symbol)
 import Network.GRPC.Client
 import Network.GRPC.Client.Helpers
-import Network.GRPC.HTTP2.Encoding (gzip)
 import qualified Network.GRPC.HTTP2.Encoding as G
 import qualified Network.GRPC.HTTP2.ProtoLens as ProtoLens
 import Network.HTTP2.Client2
@@ -68,7 +67,7 @@ instance FromJSON GCEnv where
 
 newtype GCPort
   = GCPort PortNumber
-  deriving
+  deriving newtype
     ( Enum,
       Eq,
       Integral,
