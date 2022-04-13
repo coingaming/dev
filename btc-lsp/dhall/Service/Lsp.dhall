@@ -34,6 +34,10 @@ let msatPerByte = 1000
 
 let grpcPort
     : G.Port
+    = { unPort = 8443 }
+
+let lndGrpcPort
+    : G.Port
     = { unPort = 10009 }
 
 let env =
@@ -129,7 +133,7 @@ let mkLndEnv
               , lnd_tls_cert = P.JSON.string (Lnd.mkTlsCert owner)
               , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon owner)
               , lnd_host = P.JSON.string (G.unOwner owner)
-              , lnd_port = P.JSON.natural grpcPort.unPort
+              , lnd_port = P.JSON.natural lndGrpcPort.unPort
               }
           )
 
