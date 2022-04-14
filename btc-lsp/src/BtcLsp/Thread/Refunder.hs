@@ -82,30 +82,30 @@ sendUtxos ::
 sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
 
 processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
-processRefund utxos@(x : _) = do
-  let swp = entityVal $ snd x
-  let refAddr = swapIntoLnRefundAddress swp
-  let utxos' = toOutPointAmt . entityVal . fst <$> utxos
-  debugLog $ "Start refunding utxos:" <> inspect utxos' <> " to address:" <> inspect refAddr
-  r <- runExceptT $ sendUtxos utxos' (coerce refAddr) ("refund to " <> coerce refAddr)
-  whenLeft r $ \e ->
-    errorLog $
-      "Failed to refund utxos:"
-        <> inspect utxos'
-        <> " to address:"
-        <> inspect refAddr
-        <> " with error:"
-        <> inspect e
-  whenRight r $ \(rtxid, total, fee) -> do
-    debugLog $
-      "Successfully refunded utxos: " <> inspect utxos' <> " to address:" <> inspect refAddr
-        <> " on chain rawTx:"
-        <> inspect rtxid
-        <> " amount: "
-        <> inspect total
-        <> " with fee:"
-        <> inspect fee
-    void $ runSql $ markRefundedSql (entityKey . fst <$> utxos)
+processRefund utxos@(x : _) =
+  let refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
+      utxos' = toOutPointAmt . entityVal . fst <$> utxos
+   in do
+    debugLog $ "Start refunding utxos:" <> inspect utxos' <> " to address:" <> inspect refAddr
+    r <- runExceptT $ sendUtxos utxos' (coerce refAddr) ("refund to " <> coerce refAddr)
+    whenLeft r $ \e ->
+      errorLog $
+        "Failed to refund utxos:"
+          <> inspect utxos'
+          <> " to address:"
+          <> inspect refAddr
+          <> " with error:"
+          <> inspect e
+    whenRight r $ \(rtxid, total, fee) -> do
+      debugLog $
+        "Successfully refunded utxos: " <> inspect utxos' <> " to address:" <> inspect refAddr
+          <> " on chain rawTx:"
+          <> inspect rtxid
+          <> " amount: "
+          <> inspect total
+          <> " with fee:"
+          <> inspect fee
+      void $ runSql $ markRefundedSql (entityKey . fst <$> utxos)
 processRefund _ = pure ()
 
 toOutPointAmt :: SwapUtxo -> (OP.OutPoint, MSat)
@@ -113,7 +113,10 @@ toOutPointAmt x =
   (OP.OutPoint (coerce $ swapUtxoTxid x) (coerce $ swapUtxoVout x), coerce $ swapUtxoAmount x)
 
 apply :: (Env m) => m ()
-apply = do
-  utxos <- runSql getUtxosForRefundSql
-  let groupedBySwap = groupBy (\a b -> entityKey (snd a) == entityKey (snd b)) utxos
-  mapM_ processRefund groupedBySwap
+apply = runSql getUtxosForRefundSql <&>
+  groupBy (\a b -> swpId a == swpId b) >>= mapM_ processRefund
+    where swpId = entityKey . snd
+
+
+
+

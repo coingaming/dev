@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings  #-}
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE DeriveGeneric #-}
 -- | Contains the common types used through bitcoin RPC calls, that aren't
 --   specific to a single submodule.
 module Network.Bitcoin.Types ( Client
@@ -18,9 +17,9 @@ import           Control.Exception
 import qualified Data.ByteString.Lazy as BL
 import           Data.Fixed
 import           Data.Text            (Text)
+import           Control.Monad
 import           Data.Typeable
 import Data.Aeson
-import GHC.Generics
 
 -- | 'Client' describes authentication credentials and host info for
 -- making API requests to the Bitcoin daemon.
@@ -55,10 +54,15 @@ type HexString = Text
 -- | A hexadecimal string representation of a 256-bit unsigned integer.
 --
 --   This integer is a unique transaction identifier.
-newtype TransactionID = TransactionID { unTransactionID :: Text } deriving (Show, Read, Ord, Eq, Generic)
+newtype TransactionID = TransactionID { unTransactionID :: Text }
+    deriving (Ord, Eq, Show, Read)
 
-instance FromJSON TransactionID
-instance ToJSON TransactionID
+instance FromJSON TransactionID where
+    parseJSON (String i) = pure $ TransactionID i
+    parseJSON _ = mzero
+
+instance ToJSON TransactionID where
+    toJSON (TransactionID txid) = String txid
 
 -- | A satoshi is the smallest subdivision of bitcoins. For the resolution,
 --   use 'resolution' from 'Data.Fixed'.

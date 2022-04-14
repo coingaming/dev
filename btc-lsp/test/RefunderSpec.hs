@@ -22,6 +22,8 @@ import LndClient.LndTest (mine)
 scanner :: Env m => m ()
 scanner = BSC.apply [RF.apply]
 
+
+
 spec :: Spec
 spec =
   itEnv "Refunder Spec" $ do

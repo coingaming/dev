@@ -34,7 +34,7 @@ main = defaultMain . testGroup "network-bitcoin tests" $
 
 
 client :: IO Client
-client = getClient "http://127.0.0.1:18444" "bitcoinrpc" "bitcoinrpcpassword"
+client = getClient "http://127.0.0.1:18443" "developer" "developer"
 
 
 nbTest name = testProperty name . once . monadicIO
