@@ -1,9 +1,10 @@
---test=":main --fail-fast --color -f failed-examples"
 --restart=cabal.project
 --restart=package.yaml
---restart=config/
 --restart=nix/ns-export-test-envs.sh
 --restart=proto/
 --restart=integration/
+--restart=config/
+--restart=messages/
+--restart=static/css/
+--restart=static/fonts/
 --restart=templates/
---command="nix/ns-lazy-respawn.sh && . nix/ns-export-test-envs.sh && cabal new-repl test:btc-lsp-test --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
