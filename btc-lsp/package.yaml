@@ -220,6 +220,9 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
     when:
     - condition: flag(library-only)
       buildable: false
@@ -241,6 +244,9 @@ executables:
     - -with-rtsopts=-N
     - -main-is
     - Integration
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
     dependencies:
     - QuickCheck
     - quickcheck-instances
@@ -269,6 +275,9 @@ executables:
     - -fprof-auto
     - "\"-with-rtsopts=-N -s -p -h -xt\""
     - -fexternal-interpreter
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
     when:
     - condition: flag(ghcid)
       then:
@@ -287,6 +296,9 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
     dependencies:
     - QuickCheck
     - quickcheck-instances

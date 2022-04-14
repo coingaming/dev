@@ -17,8 +17,6 @@ in
       compiler-nix-name = "ghc8107";
       modules = [{
         enableLibraryProfiling = profile;
-        packages.signable.ghcOptions = ["-Wwarn"];
-        packages.lnd-client.ghcOptions = ["-Wwarn"];
         packages.classy-prelude-yesod.components.library.doHaddock = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.dontStrip = false;
         packages.btc-lsp.components.exes.btc-lsp-exe.enableShared = false;

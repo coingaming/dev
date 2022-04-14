@@ -1,41 +1,22 @@
 packages: *.cabal
 
-allow-newer: http2-grpc-proto-lens:proto-lens,
-  signable:proto-lens, signable:proto-lens-runtime,
-  http2-grpc-proto-lens:proto-lens, http2-client:http2,
-  lnd-client:aeson, chronos:aeson, lnd-client:base64-bytestring,
-  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client,
-  lnd-client:network-bitcoin, http2-client-grpc:http2,
-  yesod-colonnade:base, lnd-client:template-haskell,
-  lnd-client:bytestring, lnd-client:containers,
-  lnd-client:text
-  --
-  -- TODO : remove base64-bytestring jailbreak,
-  -- probably need to upgrade qrcode-juicypixels in
-  -- lnd-client. Otherwise some runtime stuff might be broken!
-  --
+allow-newer: http2-grpc-proto-lens:proto-lens, signable:proto-lens, signable:proto-lens-runtime, http2-grpc-proto-lens:proto-lens, http2-client:http2, chronos:aeson, qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client, http2-client-grpc:http2, yesod-colonnade:base, lnd-client:base64-bytestring
 
 package witch
   flags: +remove-time
 
-package signable
-  ghc-options: -Wwarn
-
-package lnd-client
-  ghc-options: -Wwarn
-
 source-repository-package
   type: git
   location: https://github.com/coingaming/signable.git
-  tag: 538f48773621d88a8624c26e9242a102ebcff7e2
-  --sha256: 0b6sdcfwwnjgwf3lk66jlgkszxkqvhry607lgcbxwv2kh6blkxxj
+  tag: 403a04f9d29181fcc627abb359f31140d6400bfb
+  --sha256: 0p6ck18ap0w518iaq8r09maxz7j23d8ykaskg5sshcb0hcdwpbqf
   subdir: haskell
 
 source-repository-package
   type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 09bfv5yqwqwz197nxynid3qwc0clhf7i6yxilfvcfvabw7kwp2bf
-  tag: d68cc63f6619f95fca766476c0de06f17cd29d46
+  --sha256: 145iwxigmbgnscakxpwjaysi75vn8n0x5zs92md5f2z42vxns3in
+  tag: 23a43d703b042dbeaceebccc5f24ea519deb41f3
 
 source-repository-package
   type: git
