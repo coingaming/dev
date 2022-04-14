@@ -14,8 +14,6 @@ let Bitcoind = ./Bitcoind.dhall
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let tlsCert = ../../build/secrets/lnd/tls.cert as Text ? G.todo
-
 let domain = ../../build/secrets/lnd/domain.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
@@ -102,6 +100,21 @@ let mkHexMacaroon
           }
           owner
 
+let mkTlsCert
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        merge
+          { Lnd = ../../build/secrets/lnd/tls.cert as Text ? G.todo
+          , LndAlice = ../../build/secrets/lnd-alice/tls.cert as Text ? G.todo
+          , LndBob = ../../build/secrets/lnd-bob/tls.cert as Text ? G.todo
+          , Bitcoind = G.todo
+          , Lsp = G.todo
+          , Postgres = G.todo
+          , Rtl = G.todo
+          , Integration = G.todo
+          }
+          owner
+
 let mkEnv
     : G.BitcoinNetwork → P.Map.Type Text Text
     = λ(net : G.BitcoinNetwork) →
@@ -154,7 +167,7 @@ let mkSetupEnv
                                                          configMapEnv}
             ) || true
 
-            ( 
+            (
               kubectl create secret generic ${ownerText} \${G.concatSetupEnv
                                                               secretEnv}
             ) || true
@@ -261,7 +274,7 @@ let mkDeployment
           [ mkContainer net owner ]
           (Some [ Deployment.mkVolume (G.unOwner owner) ])
 
-in  { tlsCert
+in  { mkTlsCert
     , grpcPort
     , p2pPort
     , restPort

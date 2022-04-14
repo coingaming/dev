@@ -39,10 +39,11 @@ let mkEnv
             , mapValue = "'${P.JSON.render Lsp.mkLspGrpcClientEnv}'"
             }
           , { mapKey = env.lndAliceEnv
-            , mapValue = "'${P.JSON.render (Lsp.mkLspLndEnv net)}'"
+            , mapValue =
+                "'${P.JSON.render (Lsp.mkLndEnv net G.Owner.LndAlice)}'"
             }
           , { mapKey = env.lndBobEnv
-            , mapValue = "'${P.JSON.render (Lsp.mkLspLndEnv net)}'"
+            , mapValue = "'${P.JSON.render (Lsp.mkLndEnv net G.Owner.LndBob)}'"
             }
           ]
         # Lsp.mkEnv net

@@ -45,6 +45,7 @@ import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
+import Prelude (show)
 
 data TestOwner
   = LndLsp
@@ -200,16 +201,16 @@ withLndTestT owner method args = do
 withTestEnv' :: (TestEnv owner -> IO ()) -> IO ()
 withTestEnv' action = do
   gcEnv <- readGCEnv
-  aliceRc <- readRawConfig
-  lndLspEnv <- readLndLspEnv
+  lspRc <- readRawConfig
+  lndAliceEnv <- readLndAliceEnv
   btcClient <-
     Btc.getClient
-      (unpack . bitcoindEnvHost $ rawConfigBtcEnv aliceRc)
-      (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv aliceRc)
-      (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv aliceRc)
-  let lspRc =
-        aliceRc
-          { rawConfigLndEnv = lndLspEnv
+      (unpack . bitcoindEnvHost $ rawConfigBtcEnv lspRc)
+      (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv lspRc)
+      (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv lspRc)
+  let aliceRc =
+        lspRc
+          { rawConfigLndEnv = lndAliceEnv
           }
   withEnv lspRc $ \lspAppEnv ->
     liftIO $
@@ -220,11 +221,11 @@ withTestEnv' action = do
         runKatipContextT katipLE katipCTX katipNS $
           LndTest.withTestEnv
             (envLnd lspAppEnv)
-            (Lnd.NodeLocation "localhost:9736")
+            (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost lspAppEnv) (envLndP2PPort lspAppEnv))
             $ \lspTestEnv ->
               LndTest.withTestEnv
                 (envLnd aliceAppEnv)
-                (Lnd.NodeLocation "localhost:9737")
+                (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost aliceAppEnv) (envLndP2PPort aliceAppEnv))
                 $ \aliceTestEnv ->
                   liftIO . action $
                     TestEnv
@@ -248,6 +249,9 @@ withTestEnv' action = do
                                     )
                             }
                       }
+  where
+    getP2PAddr host port = pack host <> ":" <> pack (show port)
+
 
 signT ::
   Lnd.LndEnv ->
@@ -307,13 +311,13 @@ xitEnv testName expr =
         (sl "TestName" testName)
         expr
 
-readLndLspEnv :: IO LndEnv
-readLndLspEnv =
+readLndAliceEnv :: IO LndEnv
+readLndAliceEnv =
   E.parse
     (E.header "LndEnv")
     $ E.var
       (parser <=< E.nonempty)
-      "LND_LSP_ENV"
+      "LND_ALICE_ENV"
       (E.keep <> E.help "")
   where
     parser :: String -> Either E.Error LndEnv
