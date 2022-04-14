@@ -36,10 +36,6 @@ let grpcPort
     : G.Port
     = { unPort = 8443 }
 
-let lndGrpcPort
-    : G.Port
-    = { unPort = 10009 }
-
 let env =
       { lspLogEnv = "LSP_LOG_ENV"
       , lspLogFormat = "LSP_LOG_FORMAT"
@@ -133,7 +129,7 @@ let mkLndEnv
               , lnd_tls_cert = P.JSON.string (Lnd.mkTlsCert owner)
               , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon owner)
               , lnd_host = P.JSON.string (G.unOwner owner)
-              , lnd_port = P.JSON.natural lndGrpcPort.unPort
+              , lnd_port = P.JSON.natural Lnd.grpcPort.unPort
               }
           )
 
