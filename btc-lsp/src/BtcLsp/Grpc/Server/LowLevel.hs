@@ -8,6 +8,7 @@ module BtcLsp.Grpc.Server.LowLevel
 where
 
 import BtcLsp.Grpc.Data
+import BtcLsp.Grpc.Sig
 import BtcLsp.Import.Witch
 import Control.Concurrent (modifyMVar)
 import Data.Aeson (FromJSON (..), withObject, (.:))
@@ -29,7 +30,7 @@ import Universum
 
 data GSEnv = GSEnv
   { gsEnvPort :: GSPort,
-    gsEnvSigVerify :: Bool,
+    gsEnvSigVerify :: SigVerify,
     gsEnvSigHeaderName :: SigHeaderName,
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
@@ -37,7 +38,7 @@ data GSEnv = GSEnv
     --
     -- TODO : more typed data
     --
-    gsEnvSigner :: ByteString -> IO (Maybe ByteString)
+    gsEnvSigner :: SigMsg -> IO (Maybe Sig)
   }
   deriving (Generic)
 

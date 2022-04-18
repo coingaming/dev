@@ -15,6 +15,12 @@ import qualified Data.ByteString.Base64 as B64
 import qualified Data.CaseInsensitive as CI
 import Network.Wai.Internal (Request (..))
 
+data SigVerify = Enabled | Disabled
+
+newtype SigMsg = SigMsg ByteString
+
+newtype Sig = Sig ByteString
+
 sigFromReq :: SigHeaderName -> Request -> Either Failure C.Sig
 sigFromReq sigHeaderName waiReq = do
   (_, b64sig) <-
