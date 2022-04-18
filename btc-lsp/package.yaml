@@ -217,6 +217,9 @@ executables:
     source-dirs:
     - app
     ghc-options:
+    - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
@@ -239,6 +242,9 @@ executables:
     - integration
     - test
     ghc-options:
+    - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
@@ -269,6 +275,8 @@ executables:
     - app
     ghc-options:
     - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -prof
     - -fprof-auto
@@ -292,6 +300,9 @@ tests:
     source-dirs:
     - test
     ghc-options:
+    - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N

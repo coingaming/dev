@@ -1,6 +1,8 @@
 packages: *.cabal
 
-allow-newer: http2-grpc-proto-lens:proto-lens, signable:proto-lens, signable:proto-lens-runtime, http2-grpc-proto-lens:proto-lens, http2-client:http2, chronos:aeson, qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client, http2-client-grpc:http2, yesod-colonnade:base, lnd-client:base64-bytestring
+allow-newer: yesod-colonnade:base,
+             lnd-client:base64-bytestring,
+             qrcode-juicypixels:base64-bytestring
 
 package witch
   flags: +remove-time
@@ -15,8 +17,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 145iwxigmbgnscakxpwjaysi75vn8n0x5zs92md5f2z42vxns3in
-  tag: 23a43d703b042dbeaceebccc5f24ea519deb41f3
+  --sha256: 16rykarp4w3frwlrkvyavgnkbqxqias1qgh02m8jssfqpmaziwi0
+  tag: 9a319a7ef603025e3e6ec95a6aa014122499c713
 
 source-repository-package
   type: git
