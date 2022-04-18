@@ -255,7 +255,8 @@ executable btc-lsp-exe
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , SHA
@@ -464,7 +465,8 @@ executable btc-lsp-integration
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N -main-is Integration
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N -main-is Integration -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , QuickCheck
@@ -529,7 +531,6 @@ executable btc-lsp-integration
     , pretty
     , pretty-simple
     , proto-lens
-    , proto-lens-arbitrary
     , proto-lens-runtime
     , quickcheck-instances
     , resource-pool
@@ -667,7 +668,8 @@ executable btc-lsp-prof
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , SHA
@@ -872,7 +874,8 @@ test-suite btc-lsp-test
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , QuickCheck
@@ -936,7 +939,6 @@ test-suite btc-lsp-test
     , pretty
     , pretty-simple
     , proto-lens
-    , proto-lens-arbitrary
     , proto-lens-runtime
     , quickcheck-instances
     , resource-pool

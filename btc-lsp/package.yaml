@@ -251,7 +251,6 @@ executables:
     - QuickCheck
     - quickcheck-instances
     - generic-arbitrary
-    - proto-lens-arbitrary
     - hspec
     - hspec-expectations
     - hspec-wai
@@ -303,7 +302,6 @@ tests:
     - QuickCheck
     - quickcheck-instances
     - generic-arbitrary
-    - proto-lens-arbitrary
     - hspec
     - hspec-expectations
     - hspec-wai
