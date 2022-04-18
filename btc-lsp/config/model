@@ -34,6 +34,7 @@ SwapUtxo
   vout (Vout 'Funding)
   amount (Money 'Usr 'OnChain 'Fund)
   status SwapUtxoStatus
+  refundTxId (TxId 'Funding) Maybe
   insertedAt UTCTime
   updatedAt UTCTime
   UniqueSwapUtxo txid vout

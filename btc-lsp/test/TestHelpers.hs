@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 module TestHelpers
-  (genAddress, createDummySwap, getLatestBlock, putLatestBlockToDB)
+  (genAddress, createDummySwap, getLatestBlock, putLatestBlockToDB, waitCond)
 where
 
 import BtcLsp.Import
@@ -14,6 +14,7 @@ import TestOrphan ()
 import TestWithLndLsp
 import qualified Network.Bitcoin as Btc
 import qualified BtcLsp.Storage.Model.Block as Block
+import LndClient.LndTest (mine)
 
 
 genAddress ::
@@ -80,3 +81,14 @@ putLatestBlockToDB = do
   height <- tryFromT $ Btc.vBlkHeight blk
   k <- lift $ runSql $ Block.createUpdateSql height (from $ Btc.vBlockHash blk) (from <$> Btc.vPrevBlock blk)
   pure (blk, k)
+
+waitCond :: (Env m, LndTest m TestOwner) => Integer -> (a -> m (Bool,a)) -> a -> m Bool
+waitCond times condition st = do
+  (cond, newSt) <- condition st
+  if cond
+    then pure True
+    else if times == 0 then pure False
+    else do
+      sleep $ MicroSecondsDelay 1000000
+      mine 1 LndLsp
+      waitCond (times - 1) condition newSt

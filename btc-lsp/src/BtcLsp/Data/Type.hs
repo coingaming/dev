@@ -201,6 +201,7 @@ data LnChanStatus
   = LnChanStatusPendingOpen
   | LnChanStatusOpened
   | LnChanStatusActive
+  | LnChanStatusFullyResolved
   | LnChanStatusInactive
   | LnChanStatusPendingClose
   | LnChanStatusClosed

@@ -8,6 +8,7 @@ import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.RawTransaction as Btc
+import qualified Network.Bitcoin.Types as Btc
 import qualified Text.PrettyPrint as PP
 import qualified Universum
 import qualified Witch
@@ -27,6 +28,10 @@ deriving stock instance Generic Btc.BlockVerbose
 deriving stock instance Generic Btc.DecodedRawTransaction
 
 deriving stock instance Generic Btc.BlockChainInfo
+
+deriving stock instance Generic Btc.TransactionID
+
+instance Out Btc.TransactionID
 
 instance Out Btc.TxnOutputType
 
@@ -59,8 +64,6 @@ instance From Lnd.Seconds Word64
 deriving stock instance Generic Btc.Block
 
 instance Out Btc.Block
-
-instance Out Btc.TransactionID
 
 instance Out Natural where
   docPrec x =

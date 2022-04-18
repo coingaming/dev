@@ -1,6 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Thread.BlockScanner
   ( apply,
@@ -177,6 +176,7 @@ persistBlockT blk utxos = do
           swapUtxoVout = n',
           swapUtxoAmount = from value',
           swapUtxoStatus = SwapUtxoFirstSeen,
+          swapUtxoRefundTxId = Nothing,
           swapUtxoInsertedAt = now,
           swapUtxoUpdatedAt = now
         }

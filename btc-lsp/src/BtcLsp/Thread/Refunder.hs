@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Thread.Refunder (apply) where
 
@@ -17,6 +16,8 @@ import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.Data.ReleaseOutput as RO
 import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
+import qualified Network.Bitcoin.Types as Btc
+import LndClient (txIdParser)
 
 toHex :: ByteString -> Text
 toHex = decodeUtf8 . B16.encode
@@ -96,16 +97,18 @@ processRefund utxos@(x : _) =
           <> inspect refAddr
           <> " with error:"
           <> inspect e
-    whenRight r $ \(rtxid, total, fee) -> do
+    whenRight r $ \(rtx, total, fee) -> do
       debugLog $
         "Successfully refunded utxos: " <> inspect utxos' <> " to address:" <> inspect refAddr
           <> " on chain rawTx:"
-          <> inspect rtxid
+          <> inspect rtx
           <> " amount: "
           <> inspect total
           <> " with fee:"
           <> inspect fee
-      void $ runSql $ markRefundedSql (entityKey . fst <$> utxos)
+      case txIdParser $ Btc.unTransactionID $ Btc.decTxId rtx of
+        Right rtxid -> void $ runSql $ markRefundedSql (entityKey . fst <$> utxos) (from rtxid)
+        Left e -> errorLog $ "Failed to convert txid:" <> inspect e
 processRefund _ = pure ()
 
 toOutPointAmt :: SwapUtxo -> (OP.OutPoint, MSat)

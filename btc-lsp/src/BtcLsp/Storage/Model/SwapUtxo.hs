@@ -3,7 +3,8 @@ module BtcLsp.Storage.Model.SwapUtxo
     getFundsBySwapIdSql,
     markAsUsedForChanFundingSql,
     markRefundedSql,
-    getUtxosForRefundSql
+    getUtxosForRefundSql,
+    getUtxosBySwapIdSql
   )
 where
 
@@ -34,12 +35,13 @@ markAsUsedForChanFundingSql ids = do
       ]
     Psql.where_ $ row Psql.^. SwapUtxoId `Psql.in_` Psql.valList ids
 
-markRefundedSql:: (Storage m) => [SwapUtxoId] -> ReaderT Psql.SqlBackend m ()
-markRefundedSql ids = do
+markRefundedSql:: (Storage m) => [SwapUtxoId] -> TxId 'Funding -> ReaderT Psql.SqlBackend m ()
+markRefundedSql ids rTxId = do
   Psql.update $ \row -> do
     Psql.set
       row
       [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoRefunded,
+        SwapUtxoRefundTxId Psql.=. Psql.val (Just rTxId),
         SwapUtxoUpdatedAt Psql.=. Psql.now_
       ]
     Psql.where_ $ row Psql.^. SwapUtxoId `Psql.in_` Psql.valList ids
@@ -54,3 +56,13 @@ getUtxosForRefundSql = do
         (((swap Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapFunded) Psql.||. (swap Psql.^. SwapIntoLnExpiresAt Psql.>. Psql.now_))
         Psql.&&. (utxo Psql.^. SwapUtxoStatus Psql.!=. Psql.val SwapUtxoRefunded))
       pure (utxo, swap)
+
+getUtxosBySwapIdSql :: (Storage m) => SwapIntoLnId -> ReaderT Psql.SqlBackend m [Entity SwapUtxo]
+getUtxosBySwapIdSql swapId = do
+  Psql.select $
+    Psql.from $ \row -> do
+      Psql.where_
+        ( row Psql.^. SwapUtxoSwapIntoLnId Psql.==. Psql.val swapId )
+      pure row
+
+
