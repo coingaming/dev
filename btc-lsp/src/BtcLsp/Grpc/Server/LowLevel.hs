@@ -35,10 +35,7 @@ data GSEnv = GSEnv
     gsEnvTlsCert :: TlsCert 'Server,
     gsEnvTlsKey :: TlsKey 'Server,
     gsEnvLogger :: Text -> IO (),
-    --
-    -- TODO : more typed data
-    --
-    gsEnvSigner :: SigMsg -> IO (Maybe Sig)
+    gsEnvSigner :: SigMsg -> IO (Maybe SigBytes)
   }
   deriving (Generic)
 
@@ -81,9 +78,9 @@ runServer env handlers =
         (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
     )
     (setPort (gsEnvPort env) defaultSettings)
-    $ if gsEnvSigVerify env
-      then extractBodyBytesMiddleware env $ serverApp handlers
-      else serverApp handlers env (RawRequestBytes mempty)
+    $ case gsEnvSigVerify env of
+        SigVerify.Enabled -> extractBodyBytesMiddleware env $ serverApp handlers
+        SigVerify.Disabled -> serverApp handlers env (RawRequestBytes mempty)
 
 serverApp ::
   (GSEnv -> RawRequestBytes -> [ServiceHandler]) ->

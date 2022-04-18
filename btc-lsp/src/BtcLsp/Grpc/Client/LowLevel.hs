@@ -6,6 +6,7 @@ module BtcLsp.Grpc.Client.LowLevel
 where
 
 import BtcLsp.Grpc.Data
+import BtcLsp.Grpc.Sig
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import.Witch
 import Data.Aeson
@@ -44,10 +45,7 @@ data GCEnv = GCEnv
     gcEnvPort :: GCPort,
     gcEnvSigHeaderName :: SigHeaderName,
     gcEnvCompressMode :: CompressMode,
-    --
-    -- TODO : more typed data
-    --
-    gcEnvSigner :: ByteString -> IO (Maybe ByteString)
+    gcEnvSigner :: SigMsg -> IO (Maybe SigBytes)
   }
   deriving stock
     ( Generic
