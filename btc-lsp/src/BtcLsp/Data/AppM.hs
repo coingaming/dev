@@ -1,9 +1,4 @@
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralisedNewtypeDeriving #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# OPTIONS_GHC -Wno-missing-deriving-strategies #-}
 
 module BtcLsp.Data.AppM
   ( runApp,
@@ -18,9 +13,9 @@ import qualified BtcLsp.Import.Psql as Psql
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
   }
-  deriving
-    ( Functor,
-      Applicative,
+  deriving stock (Functor)
+  deriving newtype
+    ( Applicative,
       Monad,
       MonadIO,
       MonadReader Env.Env,
