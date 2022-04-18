@@ -19,7 +19,7 @@ data SigVerify = Enabled | Disabled
 
 newtype SigMsg = SigMsg ByteString
 
-newtype Sig = Sig ByteString
+newtype SigBytes = SigBytes ByteString
 
 sigFromReq :: SigHeaderName -> Request -> Either Failure C.Sig
 sigFromReq sigHeaderName waiReq = do
