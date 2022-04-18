@@ -1,6 +1,9 @@
 module BtcLsp.Grpc.Sig
   ( sigFromReq,
     prepareMsg,
+    SigVerify,
+    SigMsg,
+    SigBytes
   )
 where
 
