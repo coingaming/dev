@@ -12,10 +12,10 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ./nix.tar.gz
-        key: ${{ runner.os }}-nix-v9
+        key: ${{ runner.os }}-v1
         restore-keys: |
-          ${{ runner.os }}-nix-v8
-          ${{ runner.os }}-nix-
+          ${{ runner.os }}-v1
+          ${{ runner.os }}-
     - name: Restore cache
       run: |
         docker run --rm \
