@@ -36,6 +36,14 @@ let env =
       , postgresDatabase = "POSTGRES_DATABASE"
       }
 
+let configMapEnv
+    : List Text
+    = [ env.postgresMultipleDatabases ]
+
+let secretEnv
+    : List Text
+    = [ env.postgresUser, env.postgresPassword ]
+
 let mkConnStr
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
@@ -47,6 +55,26 @@ let mkConnStr
           }
           net
 
+let mkUser
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = userName } net
+
+let mkPassword
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = password } net
+
+let mkHost
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = host } net
+
+let mkDatabaseName
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = databaseName } net
+
 let ports
     : List Natural
     = G.unPorts [ tcpPort ]
@@ -57,6 +85,33 @@ let mkEnv
       , { mapKey = env.postgresPassword, mapValue = password }
       , { mapKey = env.postgresMultipleDatabases, mapValue = databaseName }
       ]
+
+let mkSetupEnv
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            . "$THIS_DIR/export-${ownerText}-env.sh"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            (
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+            ''
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -101,14 +156,6 @@ let mkPersistentVolumeClaim
     = λ(net : G.BitcoinNetwork) →
         Volume.mkPersistentVolumeClaim owner (mkVolumeSize net)
 
-let configMapEnv
-    : List Text
-    = [ env.postgresMultipleDatabases ]
-
-let secretEnv
-    : List Text
-    = [ env.postgresUser, env.postgresPassword ]
-
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
@@ -136,9 +183,12 @@ let mkDeployment
           (Some [ Deployment.mkVolume owner ])
 
 in  { mkEnv
-    , configMapEnv
-    , secretEnv
+    , mkSetupEnv
     , mkConnStr
+    , mkUser
+    , mkPassword
+    , mkHost
+    , mkDatabaseName
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment

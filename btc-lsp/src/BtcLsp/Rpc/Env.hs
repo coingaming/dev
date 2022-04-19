@@ -7,13 +7,13 @@ module BtcLsp.Rpc.Env
 where
 
 import BtcLsp.Import.External
-import Data.Aeson (FromJSON (..), withObject, (.:))
+import Data.Aeson (withObject, (.:))
 
 data ElectrsEnv = ElectrsEnv
   { electrsEnvPort :: Text,
     electrsEnvHost :: Text
   }
-  deriving (Generic)
+  deriving stock (Generic)
 
 instance FromJSON ElectrsEnv where
   parseJSON =
@@ -30,7 +30,7 @@ data BitcoindEnv = BitcoindEnv
     bitcoindEnvUsername :: Text,
     bitcoindEnvPassword :: Text
   }
-  deriving (Generic)
+  deriving stock (Generic)
 
 instance FromJSON BitcoindEnv where
   parseJSON =

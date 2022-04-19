@@ -49,20 +49,35 @@ let env =
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
       , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
       , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
+      , lspYesodPguser = "LSP_YESOD_PGUSER"
+      , lspYesodPgpassword = "LSP_YESOD_PGPASS"
+      , lspYesodPghost = "LSP_YESOD_PGHOST"
+      , lspYesodPgdatabase = "LSP_YESOD_PGDATABASE"
       }
 
-let mkLspLndEnv
-    : G.BitcoinNetwork → P.JSON.Type
-    = λ(net : G.BitcoinNetwork) →
-        P.JSON.object
-          ( toMap
-              { lnd_wallet_password = P.JSON.string (Lnd.mkWalletPass net)
-              , lnd_tls_cert = P.JSON.string Lnd.tlsCert
-              , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon G.Owner.Lnd)
-              , lnd_host = P.JSON.string (G.unOwner G.Owner.Lnd)
-              , lnd_port = P.JSON.natural Lnd.grpcPort.unPort
-              }
-          )
+let configMapEnv
+    : List Text
+    = [ env.lspLogEnv
+      , env.lspLogFormat
+      , env.lspLogVerbosity
+      , env.lspLogSeverity
+      , env.lspLndP2pHost
+      , env.lspLndP2pPort
+      , env.lspMinChanCapMsat
+      , env.lspMsatPerByte
+      , env.lspYesodPghost
+      , env.lspYesodPgdatabase
+      ]
+
+let secretEnv
+    : List Text
+    = [ env.lspLibpqConnStr
+      , env.lspLndEnv
+      , env.lspGrpcServerEnv
+      , env.lspBitcoindEnv
+      , env.lspYesodPguser
+      , env.lspYesodPgpassword
+      ]
 
 let mkLspBitcoindEnv
     : G.BitcoinNetwork → P.JSON.Type
@@ -94,12 +109,37 @@ let mkLspGrpcServerEnv
             }
         )
 
+let mkLspGrpcClientEnv
+    : P.JSON.Type
+    = P.JSON.object
+        ( toMap
+            { host = P.JSON.string (G.unOwner G.Owner.Lnd)
+            , port = P.JSON.natural grpcPort.unPort
+            , sig_header_name = P.JSON.string "sig-bin"
+            , compress_mode = P.JSON.string "Compressed"
+            }
+        )
+
 let mkMsatPerByte
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
           { MainNet = "", TestNet = "", RegTest = Natural/show msatPerByte }
           net
+
+let mkLndEnv
+    : G.BitcoinNetwork → G.Owner → P.JSON.Type
+    = λ(net : G.BitcoinNetwork) →
+      λ(owner : G.Owner) →
+        P.JSON.object
+          ( toMap
+              { lnd_wallet_password = P.JSON.string (Lnd.mkWalletPass net)
+              , lnd_tls_cert = P.JSON.string (Lnd.mkTlsCert owner)
+              , lnd_hex_macaroon = P.JSON.string (Lnd.mkHexMacaroon owner)
+              , lnd_host = P.JSON.string (G.unOwner owner)
+              , lnd_port = P.JSON.natural Lnd.grpcPort.unPort
+              }
+          )
 
 let ports
     : List Natural
@@ -119,7 +159,7 @@ let mkEnv
           , mapValue = "'${P.JSON.render mkLspGrpcServerEnv}'"
           }
         , { mapKey = env.lspLndEnv
-          , mapValue = "'${P.JSON.render (mkLspLndEnv net)}'"
+          , mapValue = "'${P.JSON.render (mkLndEnv net G.Owner.Lnd)}'"
           }
         , { mapKey = env.lspBitcoindEnv
           , mapValue = "'${P.JSON.render (mkLspBitcoindEnv net)}'"
@@ -128,7 +168,42 @@ let mkEnv
         , { mapKey = env.lspMinChanCapMsat
           , mapValue = Natural/show minChanSize
           }
+        , { mapKey = env.lspYesodPguser, mapValue = Postgres.mkUser net }
+        , { mapKey = env.lspYesodPgpassword
+          , mapValue = Postgres.mkPassword net
+          }
+        , { mapKey = env.lspYesodPghost, mapValue = Postgres.mkHost net }
+        , { mapKey = env.lspYesodPgdatabase
+          , mapValue = Postgres.mkDatabaseName net
+          }
         ]
+
+let mkSetupEnv
+    : G.Owner → Text
+    = λ(owner : G.Owner) →
+        let ownerText = G.unOwner owner
+
+        in  ''
+            #!/bin/bash
+
+            set -e
+
+            THIS_DIR="$(dirname "$(realpath "$0")")"
+
+            . "$THIS_DIR/export-${ownerText}-env.sh"
+
+            echo "==> Setting up env for ${ownerText}"
+
+            (
+              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+                                                         configMapEnv}
+            ) || true
+
+            (
+              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+                                                              secretEnv}
+            ) || true
+            ''
 
 let mkServiceType
     : G.BitcoinNetwork → Service.ServiceType
@@ -170,26 +245,6 @@ let mkContainerImage
           }
           net
 
-let configMapEnv
-    : List Text
-    = [ env.lspLogEnv
-      , env.lspLogFormat
-      , env.lspLogVerbosity
-      , env.lspLogSeverity
-      , env.lspLndP2pHost
-      , env.lspLndP2pPort
-      , env.lspMinChanCapMsat
-      , env.lspMsatPerByte
-      ]
-
-let secretEnv
-    : List Text
-    = [ env.lspLibpqConnStr
-      , env.lspLndEnv
-      , env.lspGrpcServerEnv
-      , env.lspBitcoindEnv
-      ]
-
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
       # Deployment.mkEnv Deployment.EnvVarType.Secret owner secretEnv
@@ -214,4 +269,19 @@ let mkDeployment
           [ mkContainer owner net ]
           (None (List K.Volume.Type))
 
-in  { mkEnv, configMapEnv, secretEnv, mkService, mkDeployment }
+in  { mkEnv
+    , mkSetupEnv
+    , configMapEnv
+    , grpcPort
+    , secretEnv
+    , mkService
+    , mkDeployment
+    , mkLspGrpcClientEnv
+    , mkLspBitcoindEnv
+    , mkLspGrpcServerEnv
+    , logEnv
+    , logFormat
+    , logSeverity
+    , logVerbosity
+    , mkLndEnv
+    }

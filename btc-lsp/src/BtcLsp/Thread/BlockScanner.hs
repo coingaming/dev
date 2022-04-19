@@ -77,7 +77,7 @@ data Utxo = Utxo
     utxoSwapId :: SwapIntoLnId,
     utxoLockId :: Maybe ByteString
   }
-  deriving (Show)
+  deriving stock (Show)
 
 --
 -- TODO: presist log of unsupported transactions

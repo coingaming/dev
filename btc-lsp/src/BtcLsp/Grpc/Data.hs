@@ -35,7 +35,7 @@ instance Out RawRequestBytes
 
 newtype SigHeaderName
   = SigHeaderName Text
-  deriving
+  deriving newtype
     ( Eq,
       Ord,
       Show,

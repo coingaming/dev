@@ -12,10 +12,10 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ./nix.tar.gz
-        key: ${{ runner.os }}-nix-v6
+        key: nix-v1
         restore-keys: |
-          ${{ runner.os }}-nix-v5
-          ${{ runner.os }}-nix-
+          nix-v1
+          nix-
     - name: Restore cache
       run: |
         docker run --rm \
@@ -86,6 +86,26 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./btc-lsp/build/docker-image-electrs.txt
         asset_name: docker-image-electrs.txt
+        asset_content_type: text/plain
+    - name: Upload integration docker image
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./btc-lsp/build/docker-image-integration.tar.gz
+        asset_name: docker-image-integration.tar.gz
+        asset_content_type: application/gzip
+    - name: Upload integration docker image version
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./btc-lsp/build/docker-image-integration.txt
+        asset_name: docker-image-integration.txt
         asset_content_type: text/plain
     - name: Save cache
       run: |

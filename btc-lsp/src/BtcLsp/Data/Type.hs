@@ -96,46 +96,54 @@ epoch =
 
 newtype FieldIndex
   = FieldIndex Word32
-  deriving
-    ( TH.Lift,
-      Show
+  deriving newtype
+    ( Show
+    )
+  deriving stock
+    ( TH.Lift
     )
 
 newtype ReversedFieldLocation
   = ReversedFieldLocation [FieldIndex]
-  deriving
-    ( TH.Lift,
-      Semigroup,
+  deriving newtype
+    ( Semigroup,
       Show
+    )
+  deriving stock
+    ( TH.Lift
     )
 
 data LogFormat
   = Bracket
   | JSON
-  deriving
+  deriving stock
     ( Read
     )
 
 newtype Seconds
   = Seconds Word64
-  deriving
+  deriving newtype
     ( Eq,
       Ord,
       Show,
-      Num,
-      Generic
+      Num
+    )
+  deriving stock
+    ( Generic
     )
 
 instance Out Seconds
 
 newtype MicroSeconds
   = MicroSeconds Integer
-  deriving
+  deriving newtype
     ( Eq,
       Ord,
       Show,
-      Num,
-      Generic
+      Num
+    )
+  deriving stock
+    ( Generic
     )
 
 instance Out MicroSeconds
@@ -143,7 +151,7 @@ instance Out MicroSeconds
 data TaskRes
   = TaskResDoNotRetry
   | TaskResRetryAfter MicroSeconds
-  deriving
+  deriving stock
     ( Eq,
       Ord,
       Show
@@ -152,7 +160,7 @@ data TaskRes
 data TableName
   = UserTable
   | LnChanTable
-  deriving
+  deriving stock
     ( Enum
     )
 
@@ -188,7 +196,7 @@ data LnInvoiceStatus
   | LnInvoiceStatusSettled
   | LnInvoiceStatusCancelled
   | LnInvoiceStatusExpired
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Read,
@@ -205,7 +213,7 @@ data LnChanStatus
   | LnChanStatusInactive
   | LnChanStatusPendingClose
   | LnChanStatusClosed
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Read,
@@ -349,7 +357,7 @@ data SwapStatus
   | -- | Final statuses
     SwapRefunded
   | SwapSucceeded
-  deriving
+  deriving stock
     ( Eq,
       Ord,
       Show,
@@ -364,7 +372,7 @@ instance Out SwapStatus
 data Timing
   = Permanent
   | Temporary
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Eq,
@@ -375,7 +383,7 @@ data Error a = Error
   { unTiming :: Timing,
     unError :: a
   }
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Eq,
@@ -464,7 +472,11 @@ data RpcError
   | RpcHexDecodeError
   | CannotSyncBlockchain
   | OtherError Text
-  deriving (Eq, Generic, Show)
+  deriving stock
+    ( Eq,
+      Generic,
+      Show
+    )
 
 instance Out RpcError
 
@@ -539,7 +551,13 @@ instance From BlkHeight Btc.BlockHeight where
 data BlkStatus
   = BlkConfirmed
   | BlkOrphan
-  deriving (Eq, Ord, Show, Read, Generic)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
 
 instance Out BlkStatus
 
@@ -547,14 +565,26 @@ data SwapUtxoStatus
   = SwapUtxoUsedForChanFunding
   | SwapUtxoRefunded
   | SwapUtxoFirstSeen
-  deriving (Eq, Ord, Show, Read, Generic)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
 
 instance Out SwapUtxoStatus
 
 data Privacy
   = Private
   | Public
-  deriving (Eq, Ord, Show, Read, Generic)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
 
 instance Out Privacy
 

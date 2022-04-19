@@ -73,7 +73,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                               )
                          & Proto.port
                            .~ ( defMessage
-                                  & Proto.val .~ 9735
+                                  & Proto.val .~ 9736
                               )
                      ]
                 & GetCfg.swapIntoLnMinAmt .~ minAmt

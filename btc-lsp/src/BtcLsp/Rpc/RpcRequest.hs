@@ -15,7 +15,7 @@ data RpcRequest a = RpcRequest
     method :: Method,
     params :: a
   }
-  deriving (Generic, Show)
+  deriving stock (Generic, Show)
 
 instance ToJSON a => ToJSON (RpcRequest a)
 
@@ -23,7 +23,7 @@ data Method
   = GetBalance
   | Version
   | GetBlockHeader
-  deriving (Generic, Show)
+  deriving stock (Generic, Show)
 
 instance ToJSON Method where
   toJSON GetBalance = String "blockchain.scripthash.get_balance"
