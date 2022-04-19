@@ -56,14 +56,14 @@ instance Data.ProtoLens.Service.Types.HasMethodImpl Service "getCfg" where
   type MethodName Service "getCfg" = "GetCfg"
   type MethodInput Service "getCfg" = Proto.BtcLsp.Method.GetCfg.Request
   type MethodOutput Service "getCfg" = Proto.BtcLsp.Method.GetCfg.Response
-  type MethodStreamingType Service "getCfg" =  'Data.ProtoLens.Service.Types.NonStreaming
+  type MethodStreamingType Service "getCfg" = 'Data.ProtoLens.Service.Types.NonStreaming
 instance Data.ProtoLens.Service.Types.HasMethodImpl Service "swapIntoLn" where
   type MethodName Service "swapIntoLn" = "SwapIntoLn"
   type MethodInput Service "swapIntoLn" = Proto.BtcLsp.Method.SwapIntoLn.Request
   type MethodOutput Service "swapIntoLn" = Proto.BtcLsp.Method.SwapIntoLn.Response
-  type MethodStreamingType Service "swapIntoLn" =  'Data.ProtoLens.Service.Types.NonStreaming
+  type MethodStreamingType Service "swapIntoLn" = 'Data.ProtoLens.Service.Types.NonStreaming
 instance Data.ProtoLens.Service.Types.HasMethodImpl Service "swapFromLn" where
   type MethodName Service "swapFromLn" = "SwapFromLn"
   type MethodInput Service "swapFromLn" = Proto.BtcLsp.Method.SwapFromLn.Request
   type MethodOutput Service "swapFromLn" = Proto.BtcLsp.Method.SwapFromLn.Response
-  type MethodStreamingType Service "swapFromLn" =  'Data.ProtoLens.Service.Types.NonStreaming
+  type MethodStreamingType Service "swapFromLn" = 'Data.ProtoLens.Service.Types.NonStreaming

@@ -1,10 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralisedNewtypeDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeFamilies #-}
 
 module TestAppM
   ( runTestApp,
@@ -50,7 +46,7 @@ import Prelude (show)
 data TestOwner
   = LndLsp
   | LndAlice
-  deriving
+  deriving stock
     ( Eq,
       Ord,
       Bounded,
@@ -78,9 +74,9 @@ data TestEnv (owner :: TestOwner) = TestEnv
 newtype TestAppM owner m a = TestAppM
   { unTestAppM :: ReaderT (TestEnv owner) m a
   }
-  deriving
-    ( Functor,
-      Applicative,
+  deriving stock (Functor)
+  deriving newtype
+    ( Applicative,
       Monad,
       MonadIO,
       MonadReader (TestEnv owner),

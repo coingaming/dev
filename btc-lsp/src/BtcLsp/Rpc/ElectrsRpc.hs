@@ -7,7 +7,7 @@ module BtcLsp.Rpc.ElectrsRpc
     blockHeader,
     Balance (..),
     ScriptHash (..),
-    BlockHeader (..)
+    BlockHeader (..),
   )
 where
 
@@ -23,10 +23,11 @@ import qualified Network.Bitcoin.Wallet as BtcW
 import qualified Text.Hex as TH
 
 newtype ScriptHash = ScriptHash Text
-  deriving (Generic)
+  deriving stock (Generic)
 
 newtype BlockHeader = BlockHeader Text
-  deriving (Generic, Eq)
+  deriving newtype (Eq)
+  deriving stock (Generic)
 
 instance Out BlockHeader
 
@@ -34,7 +35,7 @@ data Balance = Balance
   { confirmed :: MSat,
     unconfirmed :: MSat
   }
-  deriving (Generic, Show)
+  deriving stock (Generic, Show)
 
 getBalanceFromSat :: MSat -> MSat -> Balance
 getBalanceFromSat c u = Balance (c * 1000) (u * 1000)

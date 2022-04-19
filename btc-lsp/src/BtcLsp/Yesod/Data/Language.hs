@@ -12,7 +12,13 @@ import qualified Universum
 data Code
   = En
   | Ru
-  deriving (Show, Read, Eq, Enum, Bounded)
+  deriving stock
+    ( Show,
+      Read,
+      Eq,
+      Enum,
+      Bounded
+    )
 
 derivePersistField "Code"
 

@@ -28,6 +28,10 @@ flag dev
   manual: False
   default: False
 
+flag ghcid
+  manual: True
+  default: False
+
 flag library-only
   description: Build for use with "yesod devel"
   manual: False
@@ -216,6 +220,8 @@ library
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if (flag(dev)) || (flag(library-only))
     ghc-options: -Wall -fwarn-tabs -O0
     cpp-options: -DDEVELOPMENT
@@ -226,78 +232,9 @@ library
 executable btc-lsp-exe
   main-is: Main.hs
   other-modules:
-      BtcLsp.Class.Env
-      BtcLsp.Class.Storage
-      BtcLsp.Data.AppM
-      BtcLsp.Data.Env
-      BtcLsp.Data.Kind
-      BtcLsp.Data.Orphan
-      BtcLsp.Data.Type
-      BtcLsp.Grpc.Client.HighLevel
-      BtcLsp.Grpc.Client.LowLevel
-      BtcLsp.Grpc.Combinator
-      BtcLsp.Grpc.Data
-      BtcLsp.Grpc.Orphan
-      BtcLsp.Grpc.Server.HighLevel
-      BtcLsp.Grpc.Server.LowLevel
-      BtcLsp.Grpc.Sig
-      BtcLsp.Import
-      BtcLsp.Import.External
-      BtcLsp.Import.Psql
-      BtcLsp.Import.Witch
-      BtcLsp.Math
-      BtcLsp.Rpc.Client
-      BtcLsp.Rpc.ElectrsRpc
-      BtcLsp.Rpc.Env
-      BtcLsp.Rpc.Helper
-      BtcLsp.Rpc.RpcRequest
-      BtcLsp.Rpc.RpcResponse
-      BtcLsp.Storage.Migration
-      BtcLsp.Storage.Model
-      BtcLsp.Storage.Model.Block
-      BtcLsp.Storage.Model.LnChan
-      BtcLsp.Storage.Model.SwapIntoLn
-      BtcLsp.Storage.Model.SwapUtxo
-      BtcLsp.Storage.Model.User
-      BtcLsp.Storage.Util
-      BtcLsp.Thread.BlockScanner
-      BtcLsp.Thread.LnChanOpener
-      BtcLsp.Thread.LnChanWatcher
-      BtcLsp.Thread.Main
-      BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Time
-      BtcLsp.Yesod.Application
-      BtcLsp.Yesod.Data.BootstrapColor
-      BtcLsp.Yesod.Data.Colored
-      BtcLsp.Yesod.Data.Language
-      BtcLsp.Yesod.Data.Widget
-      BtcLsp.Yesod.Foundation
-      BtcLsp.Yesod.Handler.Common
-      BtcLsp.Yesod.Handler.Home
-      BtcLsp.Yesod.Handler.Language
-      BtcLsp.Yesod.Handler.Profile
-      BtcLsp.Yesod.Import
-      BtcLsp.Yesod.Import.NoFoundation
-      BtcLsp.Yesod.Model
-      BtcLsp.Yesod.Settings
-      BtcLsp.Yesod.Settings.StaticFiles
-      Proto.BtcLsp
-      Proto.BtcLsp.Data.HighLevel
-      Proto.BtcLsp.Data.HighLevel_Fields
-      Proto.BtcLsp.Data.LowLevel
-      Proto.BtcLsp.Data.LowLevel_Fields
-      Proto.BtcLsp.Method.GetCfg
-      Proto.BtcLsp.Method.GetCfg_Fields
-      Proto.BtcLsp.Method.SwapFromLn
-      Proto.BtcLsp.Method.SwapFromLn_Fields
-      Proto.BtcLsp.Method.SwapIntoLn
-      Proto.BtcLsp.Method.SwapIntoLn_Fields
-      Proto.BtcLsp_Fields
       DevelMain
       Paths_btc_lsp
   hs-source-dirs:
-      src
       app
   default-extensions:
       NoImplicitPrelude
@@ -318,7 +255,8 @@ executable btc-lsp-exe
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , SHA
@@ -408,81 +346,90 @@ executable btc-lsp-exe
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(library-only)
     buildable: False
+  if flag(ghcid)
+    other-modules:
+        BtcLsp.Class.Env
+        BtcLsp.Class.Storage
+        BtcLsp.Data.AppM
+        BtcLsp.Data.Env
+        BtcLsp.Data.Kind
+        BtcLsp.Data.Orphan
+        BtcLsp.Data.Type
+        BtcLsp.Grpc.Client.HighLevel
+        BtcLsp.Grpc.Client.LowLevel
+        BtcLsp.Grpc.Combinator
+        BtcLsp.Grpc.Data
+        BtcLsp.Grpc.Orphan
+        BtcLsp.Grpc.Server.HighLevel
+        BtcLsp.Grpc.Server.LowLevel
+        BtcLsp.Grpc.Sig
+        BtcLsp.Import
+        BtcLsp.Import.External
+        BtcLsp.Import.Psql
+        BtcLsp.Import.Witch
+        BtcLsp.Math
+        BtcLsp.Rpc.Client
+        BtcLsp.Rpc.ElectrsRpc
+        BtcLsp.Rpc.Env
+        BtcLsp.Rpc.Helper
+        BtcLsp.Rpc.RpcRequest
+        BtcLsp.Rpc.RpcResponse
+        BtcLsp.Storage.Migration
+        BtcLsp.Storage.Model
+        BtcLsp.Storage.Model.Block
+        BtcLsp.Storage.Model.LnChan
+        BtcLsp.Storage.Model.SwapIntoLn
+        BtcLsp.Storage.Model.SwapUtxo
+        BtcLsp.Storage.Model.User
+        BtcLsp.Storage.Util
+        BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.LnChanOpener
+        BtcLsp.Thread.LnChanWatcher
+        BtcLsp.Thread.Main
+        BtcLsp.Thread.Server
+        BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Time
+        BtcLsp.Yesod.Application
+        BtcLsp.Yesod.Data.BootstrapColor
+        BtcLsp.Yesod.Data.Colored
+        BtcLsp.Yesod.Data.Language
+        BtcLsp.Yesod.Data.Widget
+        BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.Common
+        BtcLsp.Yesod.Handler.Home
+        BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Import
+        BtcLsp.Yesod.Import.NoFoundation
+        BtcLsp.Yesod.Model
+        BtcLsp.Yesod.Settings
+        BtcLsp.Yesod.Settings.StaticFiles
+        Proto.BtcLsp
+        Proto.BtcLsp.Data.HighLevel
+        Proto.BtcLsp.Data.HighLevel_Fields
+        Proto.BtcLsp.Data.LowLevel
+        Proto.BtcLsp.Data.LowLevel_Fields
+        Proto.BtcLsp.Method.GetCfg
+        Proto.BtcLsp.Method.GetCfg_Fields
+        Proto.BtcLsp.Method.SwapFromLn
+        Proto.BtcLsp.Method.SwapFromLn_Fields
+        Proto.BtcLsp.Method.SwapIntoLn
+        Proto.BtcLsp.Method.SwapIntoLn_Fields
+        Proto.BtcLsp_Fields
+    hs-source-dirs:
+        src
+  else
+    build-depends:
+        btc-lsp
   default-language: Haskell2010
 
 executable btc-lsp-integration
   main-is: Integration.hs
   other-modules:
-      BtcLsp.Class.Env
-      BtcLsp.Class.Storage
-      BtcLsp.Data.AppM
-      BtcLsp.Data.Env
-      BtcLsp.Data.Kind
-      BtcLsp.Data.Orphan
-      BtcLsp.Data.Type
-      BtcLsp.Grpc.Client.HighLevel
-      BtcLsp.Grpc.Client.LowLevel
-      BtcLsp.Grpc.Combinator
-      BtcLsp.Grpc.Data
-      BtcLsp.Grpc.Orphan
-      BtcLsp.Grpc.Server.HighLevel
-      BtcLsp.Grpc.Server.LowLevel
-      BtcLsp.Grpc.Sig
-      BtcLsp.Import
-      BtcLsp.Import.External
-      BtcLsp.Import.Psql
-      BtcLsp.Import.Witch
-      BtcLsp.Math
-      BtcLsp.Rpc.Client
-      BtcLsp.Rpc.ElectrsRpc
-      BtcLsp.Rpc.Env
-      BtcLsp.Rpc.Helper
-      BtcLsp.Rpc.RpcRequest
-      BtcLsp.Rpc.RpcResponse
-      BtcLsp.Storage.Migration
-      BtcLsp.Storage.Model
-      BtcLsp.Storage.Model.Block
-      BtcLsp.Storage.Model.LnChan
-      BtcLsp.Storage.Model.SwapIntoLn
-      BtcLsp.Storage.Model.SwapUtxo
-      BtcLsp.Storage.Model.User
-      BtcLsp.Storage.Util
-      BtcLsp.Thread.BlockScanner
-      BtcLsp.Thread.LnChanOpener
-      BtcLsp.Thread.LnChanWatcher
-      BtcLsp.Thread.Main
-      BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Time
-      BtcLsp.Yesod.Application
-      BtcLsp.Yesod.Data.BootstrapColor
-      BtcLsp.Yesod.Data.Colored
-      BtcLsp.Yesod.Data.Language
-      BtcLsp.Yesod.Data.Widget
-      BtcLsp.Yesod.Foundation
-      BtcLsp.Yesod.Handler.Common
-      BtcLsp.Yesod.Handler.Home
-      BtcLsp.Yesod.Handler.Language
-      BtcLsp.Yesod.Handler.Profile
-      BtcLsp.Yesod.Import
-      BtcLsp.Yesod.Import.NoFoundation
-      BtcLsp.Yesod.Model
-      BtcLsp.Yesod.Settings
-      BtcLsp.Yesod.Settings.StaticFiles
-      Proto.BtcLsp
-      Proto.BtcLsp.Data.HighLevel
-      Proto.BtcLsp.Data.HighLevel_Fields
-      Proto.BtcLsp.Data.LowLevel
-      Proto.BtcLsp.Data.LowLevel_Fields
-      Proto.BtcLsp.Method.GetCfg
-      Proto.BtcLsp.Method.GetCfg_Fields
-      Proto.BtcLsp.Method.SwapFromLn
-      Proto.BtcLsp.Method.SwapFromLn_Fields
-      Proto.BtcLsp.Method.SwapIntoLn
-      Proto.BtcLsp.Method.SwapIntoLn_Fields
-      Proto.BtcLsp_Fields
       IntegrationSpec
       BlockScannerSpec
       LnChanWatcherSpec
@@ -497,7 +444,6 @@ executable btc-lsp-integration
       TestWithLndLsp
       Paths_btc_lsp
   hs-source-dirs:
-      src
       integration
       test
   default-extensions:
@@ -519,7 +465,8 @@ executable btc-lsp-integration
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N -main-is Integration
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -main-is Integration -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , QuickCheck
@@ -584,7 +531,6 @@ executable btc-lsp-integration
     , pretty
     , pretty-simple
     , proto-lens
-    , proto-lens-arbitrary
     , proto-lens-runtime
     , quickcheck-instances
     , resource-pool
@@ -617,83 +563,91 @@ executable btc-lsp-integration
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+  if flag(ghcid)
+    other-modules:
+        BtcLsp.Class.Env
+        BtcLsp.Class.Storage
+        BtcLsp.Data.AppM
+        BtcLsp.Data.Env
+        BtcLsp.Data.Kind
+        BtcLsp.Data.Orphan
+        BtcLsp.Data.Type
+        BtcLsp.Grpc.Client.HighLevel
+        BtcLsp.Grpc.Client.LowLevel
+        BtcLsp.Grpc.Combinator
+        BtcLsp.Grpc.Data
+        BtcLsp.Grpc.Orphan
+        BtcLsp.Grpc.Server.HighLevel
+        BtcLsp.Grpc.Server.LowLevel
+        BtcLsp.Grpc.Sig
+        BtcLsp.Import
+        BtcLsp.Import.External
+        BtcLsp.Import.Psql
+        BtcLsp.Import.Witch
+        BtcLsp.Math
+        BtcLsp.Rpc.Client
+        BtcLsp.Rpc.ElectrsRpc
+        BtcLsp.Rpc.Env
+        BtcLsp.Rpc.Helper
+        BtcLsp.Rpc.RpcRequest
+        BtcLsp.Rpc.RpcResponse
+        BtcLsp.Storage.Migration
+        BtcLsp.Storage.Model
+        BtcLsp.Storage.Model.Block
+        BtcLsp.Storage.Model.LnChan
+        BtcLsp.Storage.Model.SwapIntoLn
+        BtcLsp.Storage.Model.SwapUtxo
+        BtcLsp.Storage.Model.User
+        BtcLsp.Storage.Util
+        BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.LnChanOpener
+        BtcLsp.Thread.LnChanWatcher
+        BtcLsp.Thread.Main
+        BtcLsp.Thread.Server
+        BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Time
+        BtcLsp.Yesod.Application
+        BtcLsp.Yesod.Data.BootstrapColor
+        BtcLsp.Yesod.Data.Colored
+        BtcLsp.Yesod.Data.Language
+        BtcLsp.Yesod.Data.Widget
+        BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.Common
+        BtcLsp.Yesod.Handler.Home
+        BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Import
+        BtcLsp.Yesod.Import.NoFoundation
+        BtcLsp.Yesod.Model
+        BtcLsp.Yesod.Settings
+        BtcLsp.Yesod.Settings.StaticFiles
+        Proto.BtcLsp
+        Proto.BtcLsp.Data.HighLevel
+        Proto.BtcLsp.Data.HighLevel_Fields
+        Proto.BtcLsp.Data.LowLevel
+        Proto.BtcLsp.Data.LowLevel_Fields
+        Proto.BtcLsp.Method.GetCfg
+        Proto.BtcLsp.Method.GetCfg_Fields
+        Proto.BtcLsp.Method.SwapFromLn
+        Proto.BtcLsp.Method.SwapFromLn_Fields
+        Proto.BtcLsp.Method.SwapIntoLn
+        Proto.BtcLsp.Method.SwapIntoLn_Fields
+        Proto.BtcLsp_Fields
+    hs-source-dirs:
+        src
+  else
+    build-depends:
+        btc-lsp
   default-language: Haskell2010
 
 executable btc-lsp-prof
   main-is: Main.hs
   other-modules:
-      BtcLsp.Class.Env
-      BtcLsp.Class.Storage
-      BtcLsp.Data.AppM
-      BtcLsp.Data.Env
-      BtcLsp.Data.Kind
-      BtcLsp.Data.Orphan
-      BtcLsp.Data.Type
-      BtcLsp.Grpc.Client.HighLevel
-      BtcLsp.Grpc.Client.LowLevel
-      BtcLsp.Grpc.Combinator
-      BtcLsp.Grpc.Data
-      BtcLsp.Grpc.Orphan
-      BtcLsp.Grpc.Server.HighLevel
-      BtcLsp.Grpc.Server.LowLevel
-      BtcLsp.Grpc.Sig
-      BtcLsp.Import
-      BtcLsp.Import.External
-      BtcLsp.Import.Psql
-      BtcLsp.Import.Witch
-      BtcLsp.Math
-      BtcLsp.Rpc.Client
-      BtcLsp.Rpc.ElectrsRpc
-      BtcLsp.Rpc.Env
-      BtcLsp.Rpc.Helper
-      BtcLsp.Rpc.RpcRequest
-      BtcLsp.Rpc.RpcResponse
-      BtcLsp.Storage.Migration
-      BtcLsp.Storage.Model
-      BtcLsp.Storage.Model.Block
-      BtcLsp.Storage.Model.LnChan
-      BtcLsp.Storage.Model.SwapIntoLn
-      BtcLsp.Storage.Model.SwapUtxo
-      BtcLsp.Storage.Model.User
-      BtcLsp.Storage.Util
-      BtcLsp.Thread.BlockScanner
-      BtcLsp.Thread.LnChanOpener
-      BtcLsp.Thread.LnChanWatcher
-      BtcLsp.Thread.Main
-      BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Time
-      BtcLsp.Yesod.Application
-      BtcLsp.Yesod.Data.BootstrapColor
-      BtcLsp.Yesod.Data.Colored
-      BtcLsp.Yesod.Data.Language
-      BtcLsp.Yesod.Data.Widget
-      BtcLsp.Yesod.Foundation
-      BtcLsp.Yesod.Handler.Common
-      BtcLsp.Yesod.Handler.Home
-      BtcLsp.Yesod.Handler.Language
-      BtcLsp.Yesod.Handler.Profile
-      BtcLsp.Yesod.Import
-      BtcLsp.Yesod.Import.NoFoundation
-      BtcLsp.Yesod.Model
-      BtcLsp.Yesod.Settings
-      BtcLsp.Yesod.Settings.StaticFiles
-      Proto.BtcLsp
-      Proto.BtcLsp.Data.HighLevel
-      Proto.BtcLsp.Data.HighLevel_Fields
-      Proto.BtcLsp.Data.LowLevel
-      Proto.BtcLsp.Data.LowLevel_Fields
-      Proto.BtcLsp.Method.GetCfg
-      Proto.BtcLsp.Method.GetCfg_Fields
-      Proto.BtcLsp.Method.SwapFromLn
-      Proto.BtcLsp.Method.SwapFromLn_Fields
-      Proto.BtcLsp.Method.SwapIntoLn
-      Proto.BtcLsp.Method.SwapIntoLn_Fields
-      Proto.BtcLsp_Fields
       DevelMain
       Paths_btc_lsp
   hs-source-dirs:
-      src
       app
   default-extensions:
       NoImplicitPrelude
@@ -714,7 +668,8 @@ executable btc-lsp-prof
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , SHA
@@ -804,80 +759,89 @@ executable btc-lsp-prof
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+  if flag(ghcid)
+    other-modules:
+        BtcLsp.Class.Env
+        BtcLsp.Class.Storage
+        BtcLsp.Data.AppM
+        BtcLsp.Data.Env
+        BtcLsp.Data.Kind
+        BtcLsp.Data.Orphan
+        BtcLsp.Data.Type
+        BtcLsp.Grpc.Client.HighLevel
+        BtcLsp.Grpc.Client.LowLevel
+        BtcLsp.Grpc.Combinator
+        BtcLsp.Grpc.Data
+        BtcLsp.Grpc.Orphan
+        BtcLsp.Grpc.Server.HighLevel
+        BtcLsp.Grpc.Server.LowLevel
+        BtcLsp.Grpc.Sig
+        BtcLsp.Import
+        BtcLsp.Import.External
+        BtcLsp.Import.Psql
+        BtcLsp.Import.Witch
+        BtcLsp.Math
+        BtcLsp.Rpc.Client
+        BtcLsp.Rpc.ElectrsRpc
+        BtcLsp.Rpc.Env
+        BtcLsp.Rpc.Helper
+        BtcLsp.Rpc.RpcRequest
+        BtcLsp.Rpc.RpcResponse
+        BtcLsp.Storage.Migration
+        BtcLsp.Storage.Model
+        BtcLsp.Storage.Model.Block
+        BtcLsp.Storage.Model.LnChan
+        BtcLsp.Storage.Model.SwapIntoLn
+        BtcLsp.Storage.Model.SwapUtxo
+        BtcLsp.Storage.Model.User
+        BtcLsp.Storage.Util
+        BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.LnChanOpener
+        BtcLsp.Thread.LnChanWatcher
+        BtcLsp.Thread.Main
+        BtcLsp.Thread.Server
+        BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Time
+        BtcLsp.Yesod.Application
+        BtcLsp.Yesod.Data.BootstrapColor
+        BtcLsp.Yesod.Data.Colored
+        BtcLsp.Yesod.Data.Language
+        BtcLsp.Yesod.Data.Widget
+        BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.Common
+        BtcLsp.Yesod.Handler.Home
+        BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Import
+        BtcLsp.Yesod.Import.NoFoundation
+        BtcLsp.Yesod.Model
+        BtcLsp.Yesod.Settings
+        BtcLsp.Yesod.Settings.StaticFiles
+        Proto.BtcLsp
+        Proto.BtcLsp.Data.HighLevel
+        Proto.BtcLsp.Data.HighLevel_Fields
+        Proto.BtcLsp.Data.LowLevel
+        Proto.BtcLsp.Data.LowLevel_Fields
+        Proto.BtcLsp.Method.GetCfg
+        Proto.BtcLsp.Method.GetCfg_Fields
+        Proto.BtcLsp.Method.SwapFromLn
+        Proto.BtcLsp.Method.SwapFromLn_Fields
+        Proto.BtcLsp.Method.SwapIntoLn
+        Proto.BtcLsp.Method.SwapIntoLn_Fields
+        Proto.BtcLsp_Fields
+    hs-source-dirs:
+        src
+  else
+    build-depends:
+        btc-lsp
   default-language: Haskell2010
 
 test-suite btc-lsp-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      BtcLsp.Class.Env
-      BtcLsp.Class.Storage
-      BtcLsp.Data.AppM
-      BtcLsp.Data.Env
-      BtcLsp.Data.Kind
-      BtcLsp.Data.Orphan
-      BtcLsp.Data.Type
-      BtcLsp.Grpc.Client.HighLevel
-      BtcLsp.Grpc.Client.LowLevel
-      BtcLsp.Grpc.Combinator
-      BtcLsp.Grpc.Data
-      BtcLsp.Grpc.Orphan
-      BtcLsp.Grpc.Server.HighLevel
-      BtcLsp.Grpc.Server.LowLevel
-      BtcLsp.Grpc.Sig
-      BtcLsp.Import
-      BtcLsp.Import.External
-      BtcLsp.Import.Psql
-      BtcLsp.Import.Witch
-      BtcLsp.Math
-      BtcLsp.Rpc.Client
-      BtcLsp.Rpc.ElectrsRpc
-      BtcLsp.Rpc.Env
-      BtcLsp.Rpc.Helper
-      BtcLsp.Rpc.RpcRequest
-      BtcLsp.Rpc.RpcResponse
-      BtcLsp.Storage.Migration
-      BtcLsp.Storage.Model
-      BtcLsp.Storage.Model.Block
-      BtcLsp.Storage.Model.LnChan
-      BtcLsp.Storage.Model.SwapIntoLn
-      BtcLsp.Storage.Model.SwapUtxo
-      BtcLsp.Storage.Model.User
-      BtcLsp.Storage.Util
-      BtcLsp.Thread.BlockScanner
-      BtcLsp.Thread.LnChanOpener
-      BtcLsp.Thread.LnChanWatcher
-      BtcLsp.Thread.Main
-      BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Time
-      BtcLsp.Yesod.Application
-      BtcLsp.Yesod.Data.BootstrapColor
-      BtcLsp.Yesod.Data.Colored
-      BtcLsp.Yesod.Data.Language
-      BtcLsp.Yesod.Data.Widget
-      BtcLsp.Yesod.Foundation
-      BtcLsp.Yesod.Handler.Common
-      BtcLsp.Yesod.Handler.Home
-      BtcLsp.Yesod.Handler.Language
-      BtcLsp.Yesod.Handler.Profile
-      BtcLsp.Yesod.Import
-      BtcLsp.Yesod.Import.NoFoundation
-      BtcLsp.Yesod.Model
-      BtcLsp.Yesod.Settings
-      BtcLsp.Yesod.Settings.StaticFiles
-      Proto.BtcLsp
-      Proto.BtcLsp.Data.HighLevel
-      Proto.BtcLsp.Data.HighLevel_Fields
-      Proto.BtcLsp.Data.LowLevel
-      Proto.BtcLsp.Data.LowLevel_Fields
-      Proto.BtcLsp.Method.GetCfg
-      Proto.BtcLsp.Method.GetCfg_Fields
-      Proto.BtcLsp.Method.SwapFromLn
-      Proto.BtcLsp.Method.SwapFromLn_Fields
-      Proto.BtcLsp.Method.SwapIntoLn
-      Proto.BtcLsp.Method.SwapIntoLn_Fields
-      Proto.BtcLsp_Fields
       BlockScannerSpec
       LnChanWatcherSpec
       MathSpec
@@ -890,7 +854,6 @@ test-suite btc-lsp-test
       TestWithLndLsp
       Paths_btc_lsp
   hs-source-dirs:
-      src
       test
   default-extensions:
       NoImplicitPrelude
@@ -911,7 +874,8 @@ test-suite btc-lsp-test
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
   build-depends:
       GenericPretty
     , QuickCheck
@@ -975,7 +939,6 @@ test-suite btc-lsp-test
     , pretty
     , pretty-simple
     , proto-lens
-    , proto-lens-arbitrary
     , proto-lens-runtime
     , quickcheck-instances
     , resource-pool
@@ -1008,4 +971,81 @@ test-suite btc-lsp-test
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+  if flag(ghcid)
+    other-modules:
+        BtcLsp.Class.Env
+        BtcLsp.Class.Storage
+        BtcLsp.Data.AppM
+        BtcLsp.Data.Env
+        BtcLsp.Data.Kind
+        BtcLsp.Data.Orphan
+        BtcLsp.Data.Type
+        BtcLsp.Grpc.Client.HighLevel
+        BtcLsp.Grpc.Client.LowLevel
+        BtcLsp.Grpc.Combinator
+        BtcLsp.Grpc.Data
+        BtcLsp.Grpc.Orphan
+        BtcLsp.Grpc.Server.HighLevel
+        BtcLsp.Grpc.Server.LowLevel
+        BtcLsp.Grpc.Sig
+        BtcLsp.Import
+        BtcLsp.Import.External
+        BtcLsp.Import.Psql
+        BtcLsp.Import.Witch
+        BtcLsp.Math
+        BtcLsp.Rpc.Client
+        BtcLsp.Rpc.ElectrsRpc
+        BtcLsp.Rpc.Env
+        BtcLsp.Rpc.Helper
+        BtcLsp.Rpc.RpcRequest
+        BtcLsp.Rpc.RpcResponse
+        BtcLsp.Storage.Migration
+        BtcLsp.Storage.Model
+        BtcLsp.Storage.Model.Block
+        BtcLsp.Storage.Model.LnChan
+        BtcLsp.Storage.Model.SwapIntoLn
+        BtcLsp.Storage.Model.SwapUtxo
+        BtcLsp.Storage.Model.User
+        BtcLsp.Storage.Util
+        BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.LnChanOpener
+        BtcLsp.Thread.LnChanWatcher
+        BtcLsp.Thread.Main
+        BtcLsp.Thread.Server
+        BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Time
+        BtcLsp.Yesod.Application
+        BtcLsp.Yesod.Data.BootstrapColor
+        BtcLsp.Yesod.Data.Colored
+        BtcLsp.Yesod.Data.Language
+        BtcLsp.Yesod.Data.Widget
+        BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.Common
+        BtcLsp.Yesod.Handler.Home
+        BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Import
+        BtcLsp.Yesod.Import.NoFoundation
+        BtcLsp.Yesod.Model
+        BtcLsp.Yesod.Settings
+        BtcLsp.Yesod.Settings.StaticFiles
+        Proto.BtcLsp
+        Proto.BtcLsp.Data.HighLevel
+        Proto.BtcLsp.Data.HighLevel_Fields
+        Proto.BtcLsp.Data.LowLevel
+        Proto.BtcLsp.Data.LowLevel_Fields
+        Proto.BtcLsp.Method.GetCfg
+        Proto.BtcLsp.Method.GetCfg_Fields
+        Proto.BtcLsp.Method.SwapFromLn
+        Proto.BtcLsp.Method.SwapFromLn_Fields
+        Proto.BtcLsp.Method.SwapIntoLn
+        Proto.BtcLsp.Method.SwapIntoLn_Fields
+        Proto.BtcLsp_Fields
+    hs-source-dirs:
+        src
+  else
+    build-depends:
+        btc-lsp
   default-language: Haskell2010

@@ -80,7 +80,7 @@ waitForLndSync =
         waitAndRetry
     )
     ( \x ->
-        unless (Lnd.syncedToChain x && Lnd.syncedToGraph x) $ do
+        unless (Lnd.syncedToChain x) $ do
           $(logTM) InfoS . logStr $ "Waiting Lnd: " <> inspect x
           waitAndRetry
     )

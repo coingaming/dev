@@ -7,4 +7,8 @@ data BootstrapColor
   | Info
   | Warning
   | Danger
-  deriving (Show, Read, Eq)
+  deriving stock
+    ( Show,
+      Read,
+      Eq
+    )

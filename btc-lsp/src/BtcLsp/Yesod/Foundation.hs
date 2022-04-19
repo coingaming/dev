@@ -6,6 +6,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# OPTIONS_GHC -Wno-missing-deriving-strategies #-}
 {-# OPTIONS_GHC -Wno-partial-fields #-}
 
 module BtcLsp.Yesod.Foundation where
@@ -247,10 +248,28 @@ instance YesodBreadcrumbs App where
     -- | The route the user is visiting currently.
     Route App ->
     Handler (Text, Maybe (Route App))
-  breadcrumb HomeR = return ("Home", Nothing)
-  breadcrumb (AuthR _) = return ("Login", Just HomeR)
-  breadcrumb ProfileR = return ("Profile", Just HomeR)
-  breadcrumb _ = return ("home", Nothing)
+  breadcrumb r = do
+    render <- getMessageRender
+    pure (render $ getMsg r, getParent r)
+    where
+      getMsg :: Route App -> AppMessage
+      getMsg = \case
+        StaticR _ -> MsgNothing
+        FaviconR -> MsgNothing
+        RobotsR -> MsgNothing
+        LanguageR {} -> MsgNothing
+        HomeR -> MsgHomeRBreadcrumb
+        AuthR {} -> MsgAuthRBreadcrumb
+        ProfileR -> MsgProfileRBreadcrumb
+      getParent :: Route App -> Maybe (Route App)
+      getParent = \case
+        StaticR {} -> Nothing
+        FaviconR -> Nothing
+        RobotsR -> Nothing
+        LanguageR {} -> Nothing
+        HomeR -> Nothing
+        AuthR {} -> Just HomeR
+        ProfileR -> Just HomeR
 
 -- How to run database actions.
 instance YesodPersist App where
