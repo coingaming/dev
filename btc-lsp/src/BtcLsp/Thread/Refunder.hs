@@ -93,7 +93,13 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
       let amt' :: Word64 = coerce (totalUtxoAmt - fee)
       let r = roundWord64ToMSat amt'
       let mtpl = FP.TxTemplate (getOutPoint <$> utxos') (M.fromList [(outAddr, r)])
-      FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
+      FP.FundPsbtRequest {
+        FP.account = "",
+        FP.template = mtpl,
+        FP.minConfs = 2,
+        FP.spendUnconfirmed = False,
+        FP.fee = FP.SatPerVbyte 1
+      }
 
 sendUtxos ::
   (Env m) => [RefundUtxo] -> OnChainAddress 'Refund -> TxLabel -> ExceptT Failure m SendUtxosResult
