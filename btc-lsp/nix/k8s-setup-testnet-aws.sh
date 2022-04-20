@@ -7,8 +7,8 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 . "$THIS_DIR/k8s-setup-utilities.sh"
 
 BITCOIN_NETWORK="testnet"
-EKS_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
-RDS_DB_IDENTIFIER="lsp-$BITCOIN_NETWORK"
+K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
+DB_INSTANCE_NAME="lsp-$BITCOIN_NETWORK"
 K8S_API_ENDPOINT_PUBLIC_ACCESS_CIDR="$1"
 
 if [ -z "$K8S_API_ENDPOINT_PUBLIC_ACCESS_CIDR" ]; then
@@ -26,7 +26,6 @@ isAwsConfigured () {
 }
 
 createK8Scluster () {
-  local K8S_CLUSTER_NAME="$1"
   local AWS_REGION=`aws configure get region`
 
   echo "Creating \"$K8S_CLUSTER_NAME\" k8s cluster on AWS..."
@@ -56,13 +55,11 @@ createK8Scluster () {
       privateAccess: true
     publicAccessCIDRs:
       # VPN
-      - ${VPN_CIDR}
+      - ${K8S_API_ENDPOINT_PUBLIC_ACCESS_CIDR}
 EOF
 }
 
 deleteK8Scluster () {
-  local K8S_CLUSTER_NAME="$1"
-
   echo "Deleting \"$K8S_CLUSTER_NAME\" k8s cluster from AWS..."
   eksctl delete cluster "$K8S_CLUSTER_NAME" --wait
 }
@@ -70,22 +67,18 @@ deleteK8Scluster () {
 setupK8Scluster () {
   isInstalled eksctl && isAwsConfigured
 
-  local K8S_CLUSTER_NAME="$1"
-
   if eksctl get cluster --name "$K8S_CLUSTER_NAME"; then
     confirmAction \
     "==> Delete existing \"$K8S_CLUSTER_NAME\" k8s cluster and create a new one" \
-    "deleteK8Scluster $K8S_CLUSTER_NAME && createK8Scluster $K8S_CLUSTER_NAME"
+    "deleteK8Scluster && createK8Scluster"
   else
     confirmAction \
     "==> Create new \"$K8S_CLUSTER_NAME\" k8s cluster" \
-    "createK8Scluster $K8S_CLUSTER_NAME"
+    "createK8Scluster"
   fi
 }
 
 getVpcId () {
-  local K8S_CLUSTER_NAME="$1"
-
   aws eks describe-cluster \
     --name "$K8S_CLUSTER_NAME" \
     --query "cluster.resourcesVpcConfig.vpcId" \
@@ -93,7 +86,6 @@ getVpcId () {
 }
 
 getSecurityGroupId () {
-  local K8S_CLUSTER_NAME="$1"
   local VPC_ID=`getVpcId $K8S_CLUSTER_NAME`
 
   aws ec2 describe-security-groups \
@@ -101,93 +93,8 @@ getSecurityGroupId () {
     --query "SecurityGroups[0].GroupId" --output text
 }
 
-createDBinstance () {
-  local DB_INSTANCE_IDENTIFIER="$1"
-  local K8S_CLUSTER_NAME="$2"
-  local DB_USERNAME="lsp"
-  local DB_PASSWORD=`cat $POSTGRES_PATH/dbpassword.txt`
-  local SG_ID=`getSecurityGroupId $K8S_CLUSTER_NAME`
-
-  # Save username
-  echo "$DB_USERNAME" > "$POSTGRES_PATH/dbusername.txt"
-
-  createDBsubnetGroup "$K8S_CLUSTER_NAME" "$K8S_CLUSTER_NAME"
-
-  echo "Creating \"$DB_INSTANCE_IDENTIFIER\" database instance on AWS..."
-  aws rds create-db-instance \
-    --engine postgres \
-    --db-instance-identifier "$DB_INSTANCE_IDENTIFIER" \
-    --allocated-storage 20 \
-    --db-instance-class "db.t3.micro" \
-    --no-publicly-accessible \
-    --storage-type gp2 \
-    --no-multi-az \
-    --no-storage-encrypted \
-    --no-deletion-protection \
-    --master-username "$DB_USERNAME" \
-    --master-user-password "$DB_PASSWORD" \
-    --db-subnet-group-name "$K8S_CLUSTER_NAME" \
-    --vpc-security-group-ids "$SG_ID"
-}
-
-deleteDBinstance () {
-  local DB_INSTANCE_IDENTIFIER="$1"
-  local SUBNET_GROUP_NAME="$2"
-
-  deleteDBsubnetGroup "$SUBNET_GROUP_NAME"
-
-  echo "Deleting \"$DB_INSTANCE_IDENTIFIER\" database instance from AWS..."
-  aws rds delete-db-instance \
-    --db-instance-identifier "$DB_INSTANCE_IDENTIFIER" \
-    --skip-final-snapshot \
-    --delete-automated-backups
-
-  echo "Waiting until \"$DB_INSTANCE_IDENTIFIER\" database instance is fully deleted..."
-  aws rds wait db-instance-deleted --db-instance-identifier="$DB_INSTANCE_IDENTIFIER"
-}
-
-writeDBURI () {
-  exit
-
-  aws rds describe-db-instances \
-  --query "*[].[DBInstanceIdentifier,Endpoint.Address,Endpoint.Port,MasterUsername]"
-
-  local PG_INSTANCE_NAME="$1"
-  local PG_INSTANCE_ID=`getPostgresInstanceId $1`
-  local PG_URI=`doctl databases connection $PG_INSTANCE_ID --format URI --no-header`
-  local PG_CONN_PATH="$POSTGRES_PATH/conn.txt"
-
-  echo "==> Saving pg connection details"
-  mkdir -p "$POSTGRES_PATH"
-
-  echo -n "$PG_URI" > "$PG_CONN_PATH"
-  echo "Saved connection details to $PG_CONN_PATH"
-}
-
-setupDBInstance () {
-  isInstalled aws && isAwsConfigured
-
-  local K8S_CLUSTER_NAME="$1"
-  local DB_INSTANCE_IDENTIFIER="$2"
-  local DB_INSTANCE_EXISTS=$(aws rds describe-db-instances \
-    --filters "Name=db-instance-id,Values=$DB_INSTANCE_IDENTIFIER" \
-    --query 'DBInstances[*].[DBInstanceIdentifier]' \
-    --output text)
-
-  if [ -n "$DB_INSTANCE_EXISTS" ]; then
-    confirmAction \
-    "==> Delete existing \"$DB_INSTANCE_IDENTIFIER\" database instance and create a new one" \
-    "deleteDBinstance $DB_INSTANCE_IDENTIFIER $K8S_CLUSTER_NAME && createDBinstance $DB_INSTANCE_IDENTIFIER $K8S_CLUSTER_NAME && writeDBURI $DB_INSTANCE_IDENTIFIER"
-  else
-    confirmAction \
-    "==> Create new \"$DB_INSTANCE_IDENTIFIER\" database instance" \
-    "createDBinstance $DB_INSTANCE_IDENTIFIER $K8S_CLUSTER_NAME && writeDBURI $DB_INSTANCE_IDENTIFIER"
-  fi
-}
-
 createDBsubnetGroup () {
-  local K8S_CLUSTER_NAME="$1"
-  local SUBNET_GROUP_NAME="$2"
+  local SUBNET_GROUP_NAME="$1"
   local VPC_ID=`getVpcId $K8S_CLUSTER_NAME`
 
   local PRIVATE_SUBNETS_ID=$(aws ec2 describe-subnets \
@@ -210,6 +117,81 @@ deleteDBsubnetGroup () {
     --db-subnet-group-name "$SUBNET_GROUP_NAME"
 }
 
+createDBinstance () {
+  local DB_USERNAME="lsp"
+  local DB_PASSWORD=`cat $POSTGRES_PATH/dbpassword.txt`
+  local SG_ID=`getSecurityGroupId $K8S_CLUSTER_NAME`
+
+  # Save username
+  echo -n "$DB_USERNAME" > "$POSTGRES_PATH/dbusername.txt"
+
+  createDBsubnetGroup "$K8S_CLUSTER_NAME"
+
+  echo "Creating \"$DB_INSTANCE_NAME\" database instance on AWS..."
+  aws rds create-db-instance \
+    --engine postgres \
+    --db-instance-identifier "$DB_INSTANCE_NAME" \
+    --allocated-storage 20 \
+    --db-instance-class "db.t3.micro" \
+    --no-publicly-accessible \
+    --storage-type gp2 \
+    --no-multi-az \
+    --no-storage-encrypted \
+    --no-deletion-protection \
+    --master-username "$DB_USERNAME" \
+    --master-user-password "$DB_PASSWORD" \
+    --db-subnet-group-name "$K8S_CLUSTER_NAME" \
+    --vpc-security-group-ids "$SG_ID"
+}
+
+deleteDBinstance () {
+  local SUBNET_GROUP_NAME="$1"
+
+  deleteDBsubnetGroup "$SUBNET_GROUP_NAME"
+
+  echo "Deleting \"$DB_INSTANCE_NAME\" database instance from AWS..."
+  aws rds delete-db-instance \
+    --db-instance-identifier "$DB_INSTANCE_NAME" \
+    --skip-final-snapshot \
+    --delete-automated-backups
+
+  echo "Waiting until \"$DB_INSTANCE_NAME\" database instance is fully deleted..."
+  aws rds wait db-instance-deleted --db-instance-identifier="$DB_INSTANCE_NAME"
+}
+
+writeDBURI () {
+  local DB_USERNAME=`cat $POSTGRES_PATH/dbusername.txt`
+  local DB_PASSWORD=`cat $POSTGRES_PATH/dbpassword.txt`
+  local DB_HOST=$(aws rds describe-db-instances \
+    --filters "Name=db-instance-id,Values=$DB_INSTANCE_NAME" \
+    --query "*[].[Endpoint.Address,Endpoint.Port]" \
+    --output json | jq -c -r .[0][0])
+  local DB_URI="postgresql://$DB_USERNAME:$DB_PASSWORD@$DB_HOST/postgres"
+  local DB_CONN_PATH="$POSTGRES_PATH/conn.txt"
+
+  echo -n "$DB_URI" > "$DB_CONN_PATH"
+  echo "Saved connection details to $DB_CONN_PATH"
+}
+
+setupDBInstance () {
+  isInstalled aws && isAwsConfigured
+
+  local DB_INSTANCE_EXISTS=$(aws rds describe-db-instances \
+    --filters "Name=db-instance-id,Values=$DB_INSTANCE_NAME" \
+    --query 'DBInstances[*].[DBInstanceIdentifier]' \
+    --output text)
+
+  if [ -n "$DB_INSTANCE_EXISTS" ]; then
+    confirmAction \
+    "==> Delete existing \"$DB_INSTANCE_NAME\" database instance and create a new one" \
+    "deleteDBinstance && createDBinstance && writeDBURI"
+  else
+    confirmAction \
+    "==> Create new \"$DB_INSTANCE_NAME\" database instance" \
+    "createDBinstance && writeDBURI"
+  fi
+}
+
 confirmAction \
 "==> Clean up previous build" \
 "cleanBuildDir"
@@ -221,10 +203,8 @@ confirmAction \
 # "setupLetsEncryptCert"
 
 checkRequiredFiles
-
-setupK8Scluster "$EKS_CLUSTER_NAME"
-
-setupDBInstance "$EKS_CLUSTER_NAME" "$RDS_DB_IDENTIFIER"
+setupK8Scluster
+setupDBInstance
 
 exit
 
