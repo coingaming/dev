@@ -36,36 +36,30 @@ defSendUtxoConfig =
       satPerVbyte = 1
     }
 
-debugLog :: (KatipContext m) => Text -> m ()
-debugLog = $(logTM) DebugS . logStr
+data RefundUtxo = RefundUtxo
+  { getOutPoint :: OP.OutPoint,
+    getAmt :: MSat,
+    getLockId :: Maybe UtxoLockId
+  }
+  deriving stock (Show, Generic)
 
-errorLog :: (KatipContext m) => Text -> m ()
-errorLog = $(logTM) ErrorS . logStr
+instance Out RefundUtxo
 
-getOutPoint :: (OP.OutPoint, MSat, Maybe UtxoLockId) -> OP.OutPoint
-getOutPoint (u, _, _) = u
-
-getAmt :: (OP.OutPoint, MSat, Maybe UtxoLockId) -> MSat
-getAmt (_, a, _) = a
-
-getLockId :: (OP.OutPoint, MSat, Maybe UtxoLockId) -> Maybe UtxoLockId
-getLockId (_, _, l) = l
+newtype TxLabel = TxLabel Text deriving newtype (Show, Eq, Ord, Semigroup)
 
 sendUtxosWithMinFee ::
   (Env m) =>
   SendUtxoConfig ->
-  [(OP.OutPoint, MSat, Maybe UtxoLockId)] ->
-  Text ->
-  Text ->
+  [RefundUtxo] ->
+  OnChainAddress 'Refund ->
+  TxLabel ->
   ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
-sendUtxosWithMinFee cfg utxos addr txLabel = do
+sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
   when (estimateAmt <= dustLimit cfg) $ liftIO $ fail "Total utxos amount is below dust limit"
-  mapM_
-    ( \r -> case getLockId r of
-        Just l -> void $ withLndT releaseOutput ($ RO.ReleaseOutputRequest (coerce l) (Just $ getOutPoint r))
-        _ -> pure ()
-    )
-    utxos
+  mapM_ (\refUtxo ->
+    whenJust (getLockId refUtxo) (\lid ->
+      void $ withLndT releaseOutput
+      ($ RO.ReleaseOutputRequest (coerce lid) (Just $ getOutPoint refUtxo)))) utxos
   ePsbt <- withLndT fundPsbt ($ ePsbtReq)
   finPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt ePsbt) "")
   decodedETx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finPsbt)
@@ -94,7 +88,7 @@ sendUtxosWithMinFee cfg utxos addr txLabel = do
       FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
 
 sendUtxos ::
-  (Env m) => [(OP.OutPoint, MSat, Maybe UtxoLockId)] -> Text -> Text -> ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
+  (Env m) => [RefundUtxo] -> OnChainAddress 'Refund -> TxLabel -> ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
 sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
 
 processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
@@ -102,10 +96,10 @@ processRefund utxos@(x : _) =
   let refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
       utxos' = toOutPointAmt . entityVal . fst <$> utxos
    in do
-        debugLog $ "Start refunding utxos:" <> inspect utxos' <> " to address:" <> inspect refAddr
-        r <- runExceptT $ sendUtxos utxos' (coerce refAddr) ("refund to " <> coerce refAddr)
+        $(logTM) DebugS . logStr $ "Start refunding utxos:" <> inspect utxos' <> " to address:" <> inspect refAddr
+        r <- runExceptT $ sendUtxos utxos' (coerce refAddr) (TxLabel "refund to " <> coerce refAddr)
         whenLeft r $ \e ->
-          errorLog $
+          $(logTM) ErrorS . logStr $
             "Failed to refund utxos:"
               <> inspect utxos'
               <> " to address:"
@@ -113,7 +107,7 @@ processRefund utxos@(x : _) =
               <> " with error:"
               <> inspect e
         whenRight r $ \(rtx, total, fee) -> do
-          debugLog $
+          $(logTM) DebugS . logStr $
             "Successfully refunded utxos: " <> inspect utxos' <> " to address:" <> inspect refAddr
               <> " on chain rawTx:"
               <> inspect rtx
@@ -123,12 +117,12 @@ processRefund utxos@(x : _) =
               <> inspect fee
           case txIdParser $ Btc.unTransactionID $ Btc.decTxId rtx of
             Right rtxid -> void $ runSql $ markRefundedSql (entityKey . fst <$> utxos) (from rtxid)
-            Left e -> errorLog $ "Failed to convert txid:" <> inspect e
+            Left e -> $(logTM) ErrorS . logStr $ "Failed to convert txid:" <> inspect e
 processRefund _ = pure ()
 
-toOutPointAmt :: SwapUtxo -> (OP.OutPoint, MSat, Maybe UtxoLockId)
+toOutPointAmt :: SwapUtxo -> RefundUtxo
 toOutPointAmt x =
-  (OP.OutPoint (coerce $ swapUtxoTxid x) (coerce $ swapUtxoVout x), coerce $ swapUtxoAmount x, swapUtxoLockId x)
+  RefundUtxo (OP.OutPoint (coerce $ swapUtxoTxid x) (coerce $ swapUtxoVout x)) (coerce $ swapUtxoAmount x) (swapUtxoLockId x)
 
 apply :: (Env m) => m ()
 apply =
