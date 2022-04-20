@@ -31,10 +31,6 @@ let mkPorts
           )
           ports
 
-let CloudProvider
-    : Type
-    = < Aws | DigitalOcean >
-
 let mkAnnotations
     : CloudProvider → Text → Optional (List { mapKey : Text, mapValue : Text })
     = λ(provider : CloudProvider) →

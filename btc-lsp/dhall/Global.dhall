@@ -1,5 +1,9 @@
 let P = ./Prelude/Import.dhall
 
+let CloudProvider
+    : Type
+    = < Aws | DigitalOcean >
+
 let BitcoinNetwork
     : Type
     = < TestNet | RegTest | MainNet >
