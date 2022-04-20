@@ -18,6 +18,7 @@ import qualified LndClient.Data.ReleaseOutput as RO
 import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
+import BtcLsp.Math (roundWord64ToMSat)
 
 toHex :: ByteString -> Text
 toHex = decodeUtf8 . B16.encode
@@ -90,7 +91,7 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
         toROR (FP.UtxoLease id' op _) = RO.ReleaseOutputRequest id' (Just op)
     fundPsbtReq utxos' outAddr fee = do
       let amt' :: Word64 = coerce (totalUtxoAmt - fee)
-      let r = MSat $ (* 1000) $ fromInteger $ ceiling (toRational amt' / 1000)
+      let r = roundWord64ToMSat amt'
       let mtpl = FP.TxTemplate (getOutPoint <$> utxos') (M.fromList [(outAddr, r)])
       FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
 
