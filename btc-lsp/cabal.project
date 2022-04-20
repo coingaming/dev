@@ -36,8 +36,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/src.git
-  tag: 2f56b82df10f5d0161ded69ba61ff0a1ca3df354
-  --sha256: 0y9dcnfrgf6ganllvk1rrslqv1nqxg4dyhvhha2zmknq7lqq84cc
+  tag: bd13f5e66383aa56366bb075d19ae38e737aa9cd
+  --sha256: 0dyp954h1qhrrylzvdr31i3rgn5s8hkj8r8aaf3wkzjc6jrll41z
   subdir: generic-pretty-instances
 
 source-repository-package
