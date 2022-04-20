@@ -42,19 +42,19 @@ debugLog = $(logTM) DebugS . logStr
 errorLog :: (KatipContext m) => Text -> m ()
 errorLog = $(logTM) ErrorS . logStr
 
-getOutPoint :: (OP.OutPoint, MSat, Maybe ByteString) -> OP.OutPoint
+getOutPoint :: (OP.OutPoint, MSat, Maybe UtxoLockId) -> OP.OutPoint
 getOutPoint (u, _, _) = u
 
-getAmt :: (OP.OutPoint, MSat, Maybe ByteString) -> MSat
+getAmt :: (OP.OutPoint, MSat, Maybe UtxoLockId) -> MSat
 getAmt (_, a, _) = a
 
-getLockId :: (OP.OutPoint, MSat, Maybe ByteString) -> Maybe ByteString
+getLockId :: (OP.OutPoint, MSat, Maybe UtxoLockId) -> Maybe UtxoLockId
 getLockId (_, _, l) = l
 
 sendUtxosWithMinFee ::
   (Env m) =>
   SendUtxoConfig ->
-  [(OP.OutPoint, MSat, Maybe ByteString)] ->
+  [(OP.OutPoint, MSat, Maybe UtxoLockId)] ->
   Text ->
   Text ->
   ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
@@ -62,7 +62,7 @@ sendUtxosWithMinFee cfg utxos addr txLabel = do
   when (estimateAmt <= dustLimit cfg) $ liftIO $ fail "Total utxos amount is below dust limit"
   mapM_
     ( \r -> case getLockId r of
-        Just l -> void $ withLndT releaseOutput ($ RO.ReleaseOutputRequest l (Just $ getOutPoint r))
+        Just l -> void $ withLndT releaseOutput ($ RO.ReleaseOutputRequest (coerce l) (Just $ getOutPoint r))
         _ -> pure ()
     )
     utxos
@@ -94,7 +94,7 @@ sendUtxosWithMinFee cfg utxos addr txLabel = do
       FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
 
 sendUtxos ::
-  (Env m) => [(OP.OutPoint, MSat, Maybe ByteString)] -> Text -> Text -> ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
+  (Env m) => [(OP.OutPoint, MSat, Maybe UtxoLockId)] -> Text -> Text -> ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
 sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
 
 processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
@@ -126,7 +126,7 @@ processRefund utxos@(x : _) =
             Left e -> errorLog $ "Failed to convert txid:" <> inspect e
 processRefund _ = pure ()
 
-toOutPointAmt :: SwapUtxo -> (OP.OutPoint, MSat, Maybe ByteString)
+toOutPointAmt :: SwapUtxo -> (OP.OutPoint, MSat, Maybe UtxoLockId)
 toOutPointAmt x =
   (OP.OutPoint (coerce $ swapUtxoTxid x) (coerce $ swapUtxoVout x), coerce $ swapUtxoAmount x, swapUtxoLockId x)
 

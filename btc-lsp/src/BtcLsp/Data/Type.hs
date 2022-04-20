@@ -36,6 +36,7 @@ module BtcLsp.Data.Type
     BlkStatus (..),
     SwapUtxoStatus (..),
     Privacy (..),
+    UtxoLockId(..)
   )
 where
 
@@ -588,8 +589,20 @@ data Privacy
 
 instance Out Privacy
 
+newtype UtxoLockId = UtxoLockId ByteString
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
+
+instance Out UtxoLockId
+
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"
 Psql.derivePersistField "SwapStatus"
 Psql.derivePersistField "BlkStatus"
 Psql.derivePersistField "SwapUtxoStatus"
+Psql.derivePersistField "UtxoLockId"

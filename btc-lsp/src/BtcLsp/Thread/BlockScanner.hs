@@ -75,7 +75,7 @@ data Utxo = Utxo
     utxoN :: Vout 'Funding,
     utxoId :: TxId 'Funding,
     utxoSwapId :: SwapIntoLnId,
-    utxoLockId :: Maybe ByteString
+    utxoLockId :: Maybe UtxoLockId
   }
   deriving stock (Show)
 
@@ -249,7 +249,7 @@ lockUtxo u =
       lockId = calcLockId u
   in do
     void $ withLndT leaseOutput ($ LO.LeaseOutputRequest (calcLockId u) (Just outP) expS)
-    pure $ u { utxoLockId = Just lockId }
+    pure $ u { utxoLockId = Just $ coerce lockId }
 
 lockUtxos :: Env m => [Utxo] -> ExceptT Failure m [Utxo]
 lockUtxos = mapM lockUtxo
