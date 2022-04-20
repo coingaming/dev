@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Thread.Refunder (apply) where
+module BtcLsp.Thread.Refunder (apply, SendUtxosResult(..)) where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
@@ -43,6 +43,13 @@ data RefundUtxo = RefundUtxo
   }
   deriving stock (Show, Generic)
 
+
+data SendUtxosResult = SendUtxosResult {
+  getGetDecTrx :: Btc.DecodedRawTransaction,
+  getTotalAmt :: MSat,
+  getFee :: MSat
+}
+
 instance Out RefundUtxo
 
 newtype TxLabel = TxLabel Text deriving newtype (Show, Eq, Ord, Semigroup)
@@ -53,9 +60,9 @@ sendUtxosWithMinFee ::
   [RefundUtxo] ->
   OnChainAddress 'Refund ->
   TxLabel ->
-  ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
+  ExceptT Failure m SendUtxosResult
 sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
-  when (estimateAmt <= dustLimit cfg) $ liftIO $ fail "Total utxos amount is below dust limit"
+  when (estimateAmt <= dustLimit cfg) $ throwE $ FailureInternal "Total utxos amount is below dust limit"
   mapM_ (\refUtxo ->
     whenJust (getLockId refUtxo) (\lid ->
       void $ withLndT releaseOutput
@@ -71,8 +78,8 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
   decodedFTx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finRPsbt)
   ptRes <- withLndT publishTransaction ($ PT.PublishTransactionRequest (FNP.rawFinalTx finRPsbt) txLabel)
   if null $ PT.publishError ptRes
-    then pure (decodedFTx, totalUtxoAmt, fee)
-    else liftIO $ fail "Failed to publish refund transaction"
+    then pure $ SendUtxosResult decodedFTx totalUtxoAmt fee
+    else throwE $ FailureInternal "Failed to publish refund transaction"
   where
     ePsbtReq = fundPsbtReq utxos addr estimateAmt
     estimateAmt = totalUtxoAmt - estimateFee cfg
@@ -88,7 +95,7 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
       FP.FundPsbtRequest "" mtpl 2 False (FP.SatPerVbyte 1)
 
 sendUtxos ::
-  (Env m) => [RefundUtxo] -> OnChainAddress 'Refund -> TxLabel -> ExceptT Failure m (Btc.DecodedRawTransaction, MSat, MSat)
+  (Env m) => [RefundUtxo] -> OnChainAddress 'Refund -> TxLabel -> ExceptT Failure m SendUtxosResult
 sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
 
 processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
@@ -106,7 +113,7 @@ processRefund utxos@(x : _) =
               <> inspect refAddr
               <> " with error:"
               <> inspect e
-        whenRight r $ \(rtx, total, fee) -> do
+        whenRight r $ \(SendUtxosResult rtx total fee) -> do
           $(logTM) DebugS . logStr $
             "Successfully refunded utxos: " <> inspect utxos' <> " to address:" <> inspect refAddr
               <> " on chain rawTx:"
