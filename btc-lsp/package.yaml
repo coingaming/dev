@@ -76,6 +76,8 @@ dependencies:
 - base16-bytestring
 - hex-text
 - base64-bytestring >= 1.2.1
+- qrcode-juicypixels
+- qrcode-core
 # threads
 - async
 - stm

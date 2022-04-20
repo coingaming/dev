@@ -1,0 +1,9 @@
+<div .ui.container-fluid.compact.center>
+  <div .panel.panel-default>
+    <div .panel-body>
+      <p .mini>_{MsgOpenChanInstruction}
+      <img .img-responsive.center-block src=#{qrCodeSrc} alt=#{nodeUrl}>
+      <div .input-group>
+        <input .form-control type="text" value=#{nodeUrl} readonly>
+        <span .input-group-btn>
+          <button .btn.btn-primary type="button" autofocus>copy
