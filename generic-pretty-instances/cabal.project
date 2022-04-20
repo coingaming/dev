@@ -1,8 +1,5 @@
 packages: *.cabal
 
-package signable
-  ghc-options: -Wwarn
-
 source-repository-package
   type: git
   location: https://github.com/coingaming/proto-lens.git
@@ -16,9 +13,3 @@ source-repository-package
   tag: 7e75e2c95d9bf608965ff8335ee618978181034a
   --sha256: 11k3y5p7m771n48d5qkzm5dj2rzdc0b26ixm35yh71rvrbxszhnf
   subdir: proto-lens-runtime
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/signable.git
-  tag: 6c977086dbf0e6d23118b164c1620a3129da819c
-  subdir: haskell
