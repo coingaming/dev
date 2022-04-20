@@ -152,6 +152,9 @@ executables:
     - -with-rtsopts=-N
     - -main-is
     - Integration
+    - -optl-fuse-ld=gold
+    ld-options:
+      - -fuse-ld=gold
     dependencies:
     - QuickCheck
     - quickcheck-instances
@@ -190,3 +193,26 @@ tests:
     - hspec
     - hspec-expectations
     - hspec-wai
+  btc-lsp-integration-test:
+    main: Integration.hs
+    source-dirs:
+    - integration
+    - test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -main-is
+    - Integration
+    - -optl-fuse-ld=gold
+    ld-options:
+      - -fuse-ld=gold
+    dependencies:
+    - QuickCheck
+    - quickcheck-instances
+    - generic-arbitrary
+    - proto-lens-arbitrary
+    - hspec
+    - hspec-expectations
+    - hspec-wai
+    - hspec-discover

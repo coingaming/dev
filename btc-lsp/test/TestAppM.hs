@@ -258,6 +258,7 @@ signT ::
   ByteString ->
   KatipContextT IO (Maybe ByteString)
 signT env msg = do
+  $(logTM) DebugS . logStr $ ("=====Sign TestAppM.hs " :: Text)
   eSig <-
     Lnd.signMessage env $
       Lnd.SignMessageRequest
