@@ -15,6 +15,7 @@ import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 import qualified BtcLsp.Thread.Server as Server
 import qualified BtcLsp.Thread.SwapperIntoLn as SwapperIntoLn
+import qualified BtcLsp.Thread.Refunder as Refunder
 import qualified BtcLsp.Yesod.Application as Yesod
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.RPC.Katip as Lnd
@@ -42,7 +43,7 @@ apply = do
             LnChanWatcher.applyPoll,
             LnChanOpener.apply,
             SwapperIntoLn.apply,
-            BlockScanner.apply,
+            BlockScanner.apply [Refunder.apply],
             liftIO Yesod.appMain
           ]
       liftIO
