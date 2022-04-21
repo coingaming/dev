@@ -16,17 +16,24 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Vector as V
 import qualified Network.Bitcoin as Btc
-import qualified Universum
+import LndClient (txIdParser)
+import qualified Network.Bitcoin.Types as Btc
+import qualified LndClient.Data.LeaseOutput as LO
+import qualified LndClient.Data.OutPoint as OP
+import LndClient.RPC.Katip
+import Universum (show)
+import Data.Digest.Pure.SHA (sha256, bytestringDigest)
+import qualified Data.ByteString.Lazy as L
 
-apply :: (Env m) => m ()
-apply =
+apply :: (Env m) => [m ()] -> m ()
+apply afterScan =
   forever $ do
     eitherM
       ( $(logTM) ErrorS
           . logStr
           . inspect
       )
-      markFunded
+      (\u -> unless (null u) (markFunded u >> sequence_ afterScan))
       $ runExceptT scan
     sleep $ MicroSecondsDelay 1000000
 
@@ -66,8 +73,9 @@ markFunded utxos =
 data Utxo = Utxo
   { utxoValue :: MSat,
     utxoN :: Vout 'Funding,
-    utxoId :: Btc.TransactionID,
-    utxoSwapId :: SwapIntoLnId
+    utxoId :: TxId 'Funding,
+    utxoSwapId :: SwapIntoLnId,
+    utxoLockId :: Maybe UtxoLockId
   }
   deriving stock (Show)
 
@@ -99,19 +107,19 @@ handleAddr :: Env m => Btc.Address -> Btc.BTC -> Integer -> Btc.TransactionID ->
 handleAddr addr val num txid = do
   mswp <- maybeSwap addr
   case mswp of
-    Just swp -> newUtxo (trySat2MSat val) (tryFrom num) txid swp
+    Just swp -> newUtxo (trySat2MSat val) (tryFrom num) (txIdParser $ Btc.unTransactionID txid) swp
     Nothing -> pure Nothing
 
 newUtxo ::
   (Env m) =>
   Either (TryFromException Btc.BTC MSat) MSat ->
   Either (TryFromException Integer (Vout 'Funding)) (Vout 'Funding) ->
-  Btc.TransactionID ->
+  Either LndError ByteString ->
   Entity SwapIntoLn ->
   m (Maybe Utxo)
-newUtxo (Right val) (Right n) txid swp =
+newUtxo (Right val) (Right n) (Right txid) swp =
   pure . Just $
-    Utxo val n txid (entityKey swp)
+    Utxo val n (from txid) (entityKey swp) Nothing
 newUtxo val num txid swp = do
   $(logTM) ErrorS . logStr $
     "TryFrom overflow error val: "
@@ -166,14 +174,16 @@ persistBlockT blk utxos = do
     SwapUtxo.createManySql $
       toSwapUtxo ct b <$> utxos
   where
-    toSwapUtxo now blkId (Utxo value' n' txid' swpId') =
+    toSwapUtxo now blkId (Utxo value' n' txid' swpId' lockId') = do
       SwapUtxo
         { swapUtxoSwapIntoLnId = swpId',
           swapUtxoBlockId = entityKey blkId,
-          swapUtxoTxid = from txid',
+          swapUtxoTxid = txid',
           swapUtxoVout = n',
           swapUtxoAmount = from value',
           swapUtxoStatus = SwapUtxoFirstSeen,
+          swapUtxoRefundTxId = Nothing,
+          swapUtxoLockId = lockId',
           swapUtxoInsertedAt = now,
           swapUtxoUpdatedAt = now
         }
@@ -222,8 +232,27 @@ scanOneBlock height = do
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
   $(logTM) DebugS . logStr $ "Got new block " <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk
-  persistBlockT blk utxos
+  lockedUtxos <- lockUtxos utxos
+  persistBlockT blk lockedUtxos
   pure utxos
+
+calcLockId :: Utxo -> ByteString
+calcLockId u = let
+  txb :: L.ByteString = L.fromStrict $ coerce $ utxoId u
+  txvout :: L.ByteString = show $ utxoN u
+  in L.toStrict . bytestringDigest . sha256 $ (txb <> txvout)
+
+lockUtxo :: Env m => Utxo -> ExceptT Failure m Utxo
+lockUtxo u =
+  let expS :: Word64 = 3600 * 24 * 365 * 10
+      outP = OP.OutPoint (coerce $ utxoId u) (coerce $ utxoN u)
+      lockId = calcLockId u
+  in do
+    void $ withLndT leaseOutput ($ LO.LeaseOutputRequest (calcLockId u) (Just outP) expS)
+    pure $ u { utxoLockId = Just $ coerce lockId }
+
+lockUtxos :: Env m => [Utxo] -> ExceptT Failure m [Utxo]
+lockUtxos = mapM lockUtxo
 
 maybeSwap ::
   ( Env m

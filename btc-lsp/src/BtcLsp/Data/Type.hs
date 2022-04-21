@@ -39,6 +39,7 @@ module BtcLsp.Data.Type
     NodePubKeyHex (..),
     NodeUri (..),
     NodeUriHex (..),
+    UtxoLockId (..),
   )
 where
 
@@ -214,6 +215,7 @@ data LnChanStatus
   = LnChanStatusPendingOpen
   | LnChanStatusOpened
   | LnChanStatusActive
+  | LnChanStatusFullyResolved
   | LnChanStatusInactive
   | LnChanStatusPendingClose
   | LnChanStatusClosed
@@ -619,6 +621,12 @@ instance TryFrom NodePubKey NodePubKeyHex where
                       )
       $ src
 
+newtype UtxoLockId = UtxoLockId ByteString
+  deriving newtype (Eq, Ord, Show, Read)
+  deriving stock (Generic)
+
+instance Out UtxoLockId
+
 data NodeUri = NodeUri
   { nodeUriPubKey :: NodePubKey,
     nodeUriSocketAddress :: SocketAddress
@@ -667,3 +675,4 @@ Psql.derivePersistField "LnChanStatus"
 Psql.derivePersistField "SwapStatus"
 Psql.derivePersistField "BlkStatus"
 Psql.derivePersistField "SwapUtxoStatus"
+Psql.derivePersistField "UtxoLockId"
