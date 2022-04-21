@@ -38,6 +38,7 @@ module BtcLsp.Data.Type
     Privacy (..),
     NodePubKeyHex (..),
     NodeUri (..),
+    NodeUriHex (..),
   )
 where
 
@@ -494,6 +495,8 @@ data SocketAddress = SocketAddress
       Generic
     )
 
+instance Out SocketAddress
+
 newtype BlkHash
   = BlkHash Btc.BlockHash
   deriving stock (Eq, Ord, Show, Generic)
@@ -616,21 +619,34 @@ instance TryFrom NodePubKey NodePubKeyHex where
                       )
       $ src
 
-newtype NodeUri
-  = NodeUri Text
-  deriving newtype (Eq, Ord, Show, Read, IsString)
-  deriving stock (Generic)
+data NodeUri = NodeUri
+  { nodeUriPubKey :: NodePubKey,
+    nodeUriSocketAddress :: SocketAddress
+  }
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
 
 instance Out NodeUri
 
-instance From NodeUri Text
+newtype NodeUriHex
+  = NodeUriHex Text
+  deriving newtype (Eq, Ord, Show, Read, IsString)
+  deriving stock (Generic)
 
-instance From Text NodeUri
+instance Out NodeUriHex
 
-instance TryFrom (NodePubKey, SocketAddress) NodeUri where
-  tryFrom src@(pub, sock) =
+instance From NodeUriHex Text
+
+instance From Text NodeUriHex
+
+instance TryFrom NodeUri NodeUriHex where
+  tryFrom src =
     bimap
-      (withTarget @NodeUri . withSource src)
+      (withTarget @NodeUriHex . withSource src)
       ( \pubHex ->
           from @Text $
             from pubHex
@@ -639,8 +655,10 @@ instance TryFrom (NodePubKey, SocketAddress) NodeUri where
               <> ":"
               <> from (showIntegral port)
       )
-      $ tryFrom @NodePubKey @NodePubKeyHex $ pub
+      $ tryFrom @NodePubKey @NodePubKeyHex $
+        nodeUriPubKey src
     where
+      sock = nodeUriSocketAddress src
       host = socketAddressHost sock
       port = socketAddressPort sock
 

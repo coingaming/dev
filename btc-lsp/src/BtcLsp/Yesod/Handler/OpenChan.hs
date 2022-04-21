@@ -22,15 +22,13 @@ import qualified Codec.QRCode.JuicyPixels as JP
 getOpenChanR :: Handler Html
 getOpenChanR = do
   App {appMRunner = UnliftIO run} <- getYesod
-  nodeCreds <-
-    liftIO . run $
-      (,) <$> getLspPubKey <*> getLndP2PSocketAddress
-  nodeUri <-
+  nodeUri <- liftIO $ run getLndNodeUri
+  nodeUriHex <-
     eitherM
       (const badMethod)
-      (pure . from @NodeUri @Text)
+      (pure . from @NodeUriHex @Text)
       . pure
-      $ tryFrom nodeCreds
+      $ tryFrom nodeUri
   qrCodeSrc <-
     maybeM badMethod pure
       . pure
@@ -38,7 +36,7 @@ getOpenChanR = do
         <$> QR.encodeAutomatic
           (QR.defaultQRCodeOptions QR.L)
           QR.Iso8859_1OrUtf8WithoutECI
-          nodeUri
+          nodeUriHex
   defaultLayout $ do
     setTitleI MsgOpenChanRTitle
     $(widgetFile "open_chan")

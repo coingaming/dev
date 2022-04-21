@@ -6,6 +6,7 @@ Active: Active
 Continue: Continue
 Update: Update
 Updated: Updated
+Copy: copy
 
 HomeRBreadcrumb: Home
 AuthRBreadcrumb: Login
@@ -35,4 +36,4 @@ HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
 
 OpenChan: Open Channel
-OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node.
+OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.

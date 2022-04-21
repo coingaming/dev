@@ -66,6 +66,12 @@ instance Out Natural where
   doc =
     docPrec 0
 
+instance Out PortNumber where
+  docPrec x =
+    docPrec x . toInteger
+  doc =
+    docPrec 0
+
 instance
   (Psql.ToBackendKey Psql.SqlBackend a) =>
   TryFrom (Psql.Key a) Natural
