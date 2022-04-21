@@ -6,6 +6,7 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
 BITCOIN_NETWORK="${1:-regtest}"
+CLOUD_PROVIDER="${2:-digitalocean}"
 
 KUBERNETES_BUILD_DIR="$ROOT_DIR/build/k8s"
 SCRIPTS_BUILD_DIR="$ROOT_DIR/build/scripts"
@@ -51,6 +52,12 @@ dhall_to_sh() {
 
   echo "Compiled $RESULT_SH"
 }
+
+if [ "$BITCOIN_NETWORK" = "testnet" ] || [ "$BITCOIN_NETWORK" = "mainnet" ]; then
+  for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/$CLOUD_PROVIDER/k8s.*.dhall; do
+    dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
+  done
+fi
 
 for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/k8s.*.dhall; do
   dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
