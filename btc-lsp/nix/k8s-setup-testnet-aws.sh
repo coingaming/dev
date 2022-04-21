@@ -10,6 +10,7 @@ BITCOIN_NETWORK="testnet"
 CLOUD_PROVIDER="aws"
 K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
 DB_INSTANCE_NAME="lsp-$BITCOIN_NETWORK"
+DB_USERNAME="lsp"
 
 isAwsConfigured () {
   for VARNAME in "aws_access_key_id" "aws_secret_access_key" "region"; do
@@ -35,7 +36,7 @@ createK8Scluster () {
     name: ${K8S_CLUSTER_NAME}
     region: ${AWS_REGION}
   managedNodeGroups:
-    - name: standard-workers
+    - name: Standard-Workers
       desiredCapacity: 3
       instanceType: t3.medium
       maxSize: 4
@@ -58,8 +59,11 @@ EOF
 }
 
 deleteK8Scluster () {
-  echo "Deleting \"$K8S_CLUSTER_NAME\" k8s cluster from AWS..."
+  # DB and DBsubnetGroup must be deleted prior to cluster deletion otherwise eksctl will fail to cleanly delete the cluster
+  deleteDBinstance
   deleteDBsubnetGroup "$K8S_CLUSTER_NAME"
+
+  echo "Deleting \"$K8S_CLUSTER_NAME\" k8s cluster from AWS..."
   eksctl delete cluster "$K8S_CLUSTER_NAME" --wait
 }
 
@@ -117,14 +121,8 @@ deleteDBsubnetGroup () {
 }
 
 createDBinstance () {
-  local DB_USERNAME="lsp"
   local DB_PASSWORD=`cat $POSTGRES_PATH/dbpassword.txt`
   local SG_ID=`getSecurityGroupId $K8S_CLUSTER_NAME`
-
-  # Save username
-  echo -n "$DB_USERNAME" > "$POSTGRES_PATH/dbusername.txt"
-
-  createDBsubnetGroup "$K8S_CLUSTER_NAME"
 
   echo "Creating \"$DB_INSTANCE_NAME\" database instance on AWS..."
   aws rds create-db-instance \
@@ -141,13 +139,13 @@ createDBinstance () {
     --master-user-password "$DB_PASSWORD" \
     --db-subnet-group-name "$K8S_CLUSTER_NAME" \
     --vpc-security-group-ids "$SG_ID"
+
+  echo "Waiting until \"$DB_INSTANCE_NAME\" database instance is fully ready..."
+  aws rds wait db-instance-available \
+    --db-instance-identifier="$DB_INSTANCE_NAME"
 }
 
 deleteDBinstance () {
-  local SUBNET_GROUP_NAME="$1"
-
-  deleteDBsubnetGroup "$SUBNET_GROUP_NAME"
-
   echo "Deleting \"$DB_INSTANCE_NAME\" database instance from AWS..."
   aws rds delete-db-instance \
     --db-instance-identifier "$DB_INSTANCE_NAME" \
@@ -160,7 +158,6 @@ deleteDBinstance () {
 }
 
 writeDBURI () {
-  local DB_USERNAME=`cat $POSTGRES_PATH/dbusername.txt`
   local DB_PASSWORD=`cat $POSTGRES_PATH/dbpassword.txt`
   local DB_HOST=$(aws rds describe-db-instances \
     --filters "Name=db-instance-id,Values=$DB_INSTANCE_NAME" \
@@ -181,14 +178,17 @@ setupDBInstance () {
     --query 'DBInstances[*].[DBInstanceIdentifier]' \
     --output text)
 
+  local CREATE_DB="createDBsubnetGroup $K8S_CLUSTER_NAME && createDBinstance && writeDBURI"
+  local DELETE_DB="deleteDBinstance && deleteDBsubnetGroup $K8S_CLUSTER_NAME"
+
   if [ -n "$DB_INSTANCE_EXISTS" ]; then
     confirmAction \
     "==> Delete existing \"$DB_INSTANCE_NAME\" database instance and create a new one" \
-    "deleteDBinstance $K8S_CLUSTER_NAME && createDBinstance && writeDBURI"
+    "$DELETE_DB && $CREATE_DB"
   else
     confirmAction \
     "==> Create new \"$DB_INSTANCE_NAME\" database instance" \
-    "createDBinstance && writeDBURI"
+    "$CREATE_DB"
   fi
 }
 
@@ -208,7 +208,7 @@ checkRequiredFiles
 setupK8Scluster
 setupDBInstance
 
-echo "==> Checking that postgres connection details are saved"
+echo "==> Checking that db connection details are saved"
 checkFileExistsNotEmpty "$POSTGRES_PATH/conn.txt" 
 echo "Connection details are OK."
 
