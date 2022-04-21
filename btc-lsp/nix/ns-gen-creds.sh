@@ -40,7 +40,7 @@ genCert () {
 }
 
 genRandomString () {
-  < /dev/urandom tr -dc 'a-zA-Z0-9#_$' | head -c $((3+$RANDOM%19))
+  openssl rand -base64 32
 }
 
 genSecureCred () {
@@ -69,7 +69,6 @@ echo "==> Generating Lsp creds"
 genCert "lsp"
 
 echo "==> Generating Postgres creds"
-genSecureCred "postgres" "dbusername.txt"
 genSecureCred "postgres" "dbpassword.txt"
 
 echo "==> Generated creds!"
