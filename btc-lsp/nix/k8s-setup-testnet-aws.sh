@@ -7,14 +7,9 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 . "$THIS_DIR/k8s-setup-utilities.sh"
 
 BITCOIN_NETWORK="testnet"
+CLOUD_PROVIDER="aws"
 K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
 DB_INSTANCE_NAME="lsp-$BITCOIN_NETWORK"
-K8S_API_ENDPOINT_PUBLIC_ACCESS_CIDR="$1"
-
-if [ -z "$K8S_API_ENDPOINT_PUBLIC_ACCESS_CIDR" ]; then
-  echo "Public CIDR range is required! (to access Kubernetes API endpoint after cluster creation)"
-  exit 1;
-fi
 
 isAwsConfigured () {
   for VARNAME in "aws_access_key_id" "aws_secret_access_key" "region"; do
@@ -29,6 +24,9 @@ createK8Scluster () {
   local AWS_REGION=`aws configure get region`
 
   echo "Creating \"$K8S_CLUSTER_NAME\" k8s cluster on AWS..."
+
+  echo "Public CIDR range is required! (to access Kubernetes API endpoint after cluster creation)"
+  read -p "Input your public CIDR: " "K8S_API_ENDPOINT_PUBLIC_ACCESS_CIDR"
 
   cat <<EOF | eksctl create cluster -f -
   apiVersion: eksctl.io/v1alpha5
@@ -61,6 +59,7 @@ EOF
 
 deleteK8Scluster () {
   echo "Deleting \"$K8S_CLUSTER_NAME\" k8s cluster from AWS..."
+  deleteDBsubnetGroup "$K8S_CLUSTER_NAME"
   eksctl delete cluster "$K8S_CLUSTER_NAME" --wait
 }
 
@@ -156,7 +155,8 @@ deleteDBinstance () {
     --delete-automated-backups
 
   echo "Waiting until \"$DB_INSTANCE_NAME\" database instance is fully deleted..."
-  aws rds wait db-instance-deleted --db-instance-identifier="$DB_INSTANCE_NAME"
+  aws rds wait db-instance-deleted \
+    --db-instance-identifier="$DB_INSTANCE_NAME"
 }
 
 writeDBURI () {
@@ -184,7 +184,7 @@ setupDBInstance () {
   if [ -n "$DB_INSTANCE_EXISTS" ]; then
     confirmAction \
     "==> Delete existing \"$DB_INSTANCE_NAME\" database instance and create a new one" \
-    "deleteDBinstance && createDBinstance && writeDBURI"
+    "deleteDBinstance $K8S_CLUSTER_NAME && createDBinstance && writeDBURI"
   else
     confirmAction \
     "==> Create new \"$DB_INSTANCE_NAME\" database instance" \
@@ -192,21 +192,21 @@ setupDBInstance () {
   fi
 }
 
+echo "==> Starting setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER."
+
 confirmAction \
 "==> Clean up previous build" \
 "cleanBuildDir"
 
-#askForDomainName "$BITCOIN_NETWORK-"
+askForDomainName "$BITCOIN_NETWORK-$CLOUD_PROVIDER-"
 
-# confirmAction \
-# "==> Setup LetsEncrypt certificate?" \
-# "setupLetsEncryptCert"
+confirmAction \
+"==> Setup LetsEncrypt certificate?" \
+"setupLetsEncryptCert"
 
 checkRequiredFiles
 setupK8Scluster
 setupDBInstance
-
-exit
 
 echo "==> Checking that postgres connection details are saved"
 checkFileExistsNotEmpty "$POSTGRES_PATH/conn.txt" 
@@ -214,9 +214,9 @@ echo "Connection details are OK."
 
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK'"
+   "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK $CLOUD_PROVIDER'"
 
-confirmContinue "==> Deploy to $BITCOIN_NETWORK?"
+confirmContinue "==> Deploy $BITCOIN_NETWORK to $CLOUD_PROVIDER?"
 
 echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"
@@ -235,7 +235,7 @@ sh "$THIS_DIR/k8s-export-creds.sh"
 
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK'"
+   "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK $CLOUD_PROVIDER'"
 
 echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"
@@ -246,4 +246,4 @@ sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
-echo "==> Setup for $BITCOIN_NETWORK has been completed!"
+echo "==> Setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
