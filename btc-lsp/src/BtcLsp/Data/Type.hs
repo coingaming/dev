@@ -36,6 +36,8 @@ module BtcLsp.Data.Type
     BlkStatus (..),
     SwapUtxoStatus (..),
     Privacy (..),
+    NodePubKeyHex (..),
+    NodeUri (..),
   )
 where
 
@@ -43,6 +45,8 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified Data.ByteString.Base16 as B16
+import qualified Data.Text.Encoding as TE
 import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Language.Haskell.TH.Syntax as TH
@@ -586,6 +590,59 @@ data Privacy
     )
 
 instance Out Privacy
+
+newtype NodePubKeyHex
+  = NodePubKeyHex Text
+  deriving newtype (Eq, Ord, Show, Read, IsString)
+  deriving stock (Generic)
+
+instance Out NodePubKeyHex
+
+instance From NodePubKeyHex Text
+
+instance From Text NodePubKeyHex
+
+instance TryFrom NodePubKey NodePubKeyHex where
+  tryFrom src =
+    from
+      `composeTryRhs` ( first
+                          ( TryFromException src
+                              . Just
+                              . toException
+                          )
+                          . TE.decodeUtf8'
+                          . B16.encode
+                          . coerce
+                      )
+      $ src
+
+newtype NodeUri
+  = NodeUri Text
+  deriving newtype (Eq, Ord, Show, Read, IsString)
+  deriving stock (Generic)
+
+instance Out NodeUri
+
+instance From NodeUri Text
+
+instance From Text NodeUri
+
+instance TryFrom (NodePubKey, SocketAddress) NodeUri where
+  tryFrom src@(pub, sock) =
+    bimap
+      (withTarget @NodeUri . withSource src)
+      ( \pubHex ->
+          from @Text $
+            from pubHex
+              <> "@"
+              <> from host
+              <> ":"
+              <> from (showIntegral port)
+      )
+      $ tryFrom @NodePubKey @NodePubKeyHex $ pub
+    where
+      host = socketAddressHost sock
+      port = socketAddressPort sock
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"

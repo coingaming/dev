@@ -43,7 +43,7 @@ apply = do
             LnChanOpener.apply,
             SwapperIntoLn.apply,
             BlockScanner.apply,
-            liftIO Yesod.appMain
+            withUnliftIO Yesod.appMain
           ]
       liftIO
         . void

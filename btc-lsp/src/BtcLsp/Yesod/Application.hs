@@ -15,6 +15,7 @@ where
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
+import qualified BtcLsp.Class.Env as Class
 import BtcLsp.Yesod.Handler.Common
 import BtcLsp.Yesod.Handler.Home
 import BtcLsp.Yesod.Handler.Language
@@ -63,8 +64,8 @@ mkYesodDispatch "App" resourcesApp
 -- performs initialization and returns a foundation datatype value. This is also
 -- the place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-makeFoundation :: AppSettings -> IO App
-makeFoundation appSettings = do
+makeFoundation :: (Class.Env m) => UnliftIO m -> AppSettings -> IO App
+makeFoundation appMRunner appSettings = do
   -- Some basic initializations: HTTP connection manager, logger, and static
   -- subsite.
   appHttpManager <- getGlobalManager
@@ -142,8 +143,8 @@ warpSettings foundation =
         defaultSettings
 
 -- | The @main@ function for an executable running this site.
-appMain :: IO ()
-appMain = do
+appMain :: (Class.Env m) => UnliftIO m -> IO ()
+appMain appMRunner = do
   -- Get the settings from all relevant sources
   settings <-
     loadYamlSettingsArgs
@@ -153,7 +154,7 @@ appMain = do
       useEnv
 
   -- Generate the foundation from the settings
-  foundation <- makeFoundation settings
+  foundation <- makeFoundation appMRunner settings
 
   -- Generate a WAI Application from the foundation
   app <- makeApplication foundation
