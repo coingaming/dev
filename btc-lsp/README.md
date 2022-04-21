@@ -128,10 +128,55 @@ https://docs.digitalocean.com/reference/doctl/how-to/install/
 1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and deploy k8s resources:
 
 ```sh
-./nix/k8s-setup-testnet.sh
+./nix/k8s-setup-testnet.sh digitalocean
 ```
 
 2. Create A-records within your DNS provider for created LoadBalancers and Ingress controller:
+
+
+```
+testnet-bitcoind.yourdomain.com
+testnet-lnd.yourdomain.com
+testnet-rtl.yourdomain.com
+testnet-lsp.yourdomain.com
+```
+
+Get IPs of LoadBalancers:
+
+```sh
+kubectl get svc
+```
+
+Get IP of Ingress:
+
+```sh
+kubectl get ingress
+```
+
+## Testnet setup (AWS)
+
+1. Install aws cli and eksctl:
+
+If you have used nix-env doctl will already be installed, otherwise install it manually.
+
+```
+aws-cli-2.5.4
+eksctl-0.93.0
+```
+
+2. Configure aws cli (access_key_id, secret_access_key, region)
+
+```sh
+aws configure
+```
+
+2. Setup LetsEncrypt, Elastic Kubernetes Service, RDS Postgres and deploy k8s resources:
+
+```sh
+./nix/k8s-setup-testnet.sh aws
+```
+
+3. Create A-records within your DNS provider for created LoadBalancers and Ingress controller:
 
 
 ```
@@ -199,7 +244,13 @@ Add context to kube config
 doctl kubernetes cluster kubeconfig save <cluster-id>
 ```
 
-7. Manage k8s contexts:
+7. Connect to existing eks cluster on AWS:
+
+```sh
+aws eks update-kubeconfig --name lsp-testnet
+```
+
+8. Manage k8s contexts:
 
 Display list of contexts
 
