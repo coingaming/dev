@@ -8,19 +8,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module BtcLsp.Yesod.Application
-  ( getApplicationDev,
-    appMain,
-    develMain,
-    makeFoundation,
-    makeLogWare,
-
-    -- * for DevelMain
-    getApplicationRepl,
-    shutdownApp,
-
-    -- * for GHCI
-    handler,
-    db,
+  ( appMain,
   )
 where
 
@@ -47,7 +35,6 @@ import Network.Wai.Handler.Warp
   ( Settings,
     defaultSettings,
     defaultShouldDisplayException,
-    getPort,
     runSettings,
     setHost,
     setOnException,
@@ -154,22 +141,6 @@ warpSettings foundation =
         )
         defaultSettings
 
--- | For yesod devel, return the Warp settings and WAI Application.
-getApplicationDev :: IO (Settings, Application)
-getApplicationDev = do
-  settings <- getAppSettings
-  foundation <- makeFoundation settings
-  wsettings <- getDevSettings $ warpSettings foundation
-  app <- makeApplication foundation
-  return (wsettings, app)
-
-getAppSettings :: IO AppSettings
-getAppSettings = loadYamlSettings [configSettingsYml] [] useEnv
-
--- | main function for use by yesod devel
-develMain :: IO ()
-develMain = develMainHelper getApplicationDev
-
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
 appMain = do
@@ -189,29 +160,3 @@ appMain = do
 
   -- Run the application with Warp
   runSettings (warpSettings foundation) app
-
---------------------------------------------------------------
--- Functions for DevelMain.hs (a way to run the app from GHCi)
---------------------------------------------------------------
-getApplicationRepl :: IO (Int, App, Application)
-getApplicationRepl = do
-  settings <- getAppSettings
-  foundation <- makeFoundation settings
-  wsettings <- getDevSettings $ warpSettings foundation
-  app1 <- makeApplication foundation
-  return (getPort wsettings, foundation, app1)
-
-shutdownApp :: App -> IO ()
-shutdownApp _ = return ()
-
----------------------------------------------
--- Functions for use in development with GHCi
----------------------------------------------
-
--- | Run a handler
-handler :: Handler a -> IO a
-handler h = getAppSettings >>= makeFoundation >>= flip unsafeHandler h
-
--- | Run DB queries
-db :: ReaderT SqlBackend Handler a -> IO a
-db = handler . runDB

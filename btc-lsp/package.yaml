@@ -19,16 +19,7 @@ extra-source-files:
 # common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
 
-# Define flags used by "yesod devel" to make compilation faster
 flags:
-  library-only:
-    description: Build for use with "yesod devel"
-    manual: false
-    default: false
-  dev:
-    description: Turn on development settings, like auto-reload templates.
-    manual: false
-    default: false
   ghcid:
     manual: true
     default: false
@@ -199,19 +190,9 @@ when:
 library:
   source-dirs:
   - src
-  when:
-  - condition: (flag(dev)) || (flag(library-only))
-    then:
-      ghc-options:
-      - -Wall
-      - -fwarn-tabs
-      - -O0
-      cpp-options: -DDEVELOPMENT
-    else:
-      ghc-options:
-      - -Wall
-      - -fwarn-tabs
-      - -O2
+  ghc-options:
+  - -fwarn-tabs
+  - -O2
 
 executables:
   btc-lsp-exe:
@@ -229,8 +210,6 @@ executables:
     ld-options:
     - -fuse-ld=gold
     when:
-    - condition: flag(library-only)
-      buildable: false
     - condition: flag(ghcid)
       then:
         source-dirs:
@@ -326,4 +305,3 @@ tests:
       else:
         dependencies:
         - btc-lsp
-
