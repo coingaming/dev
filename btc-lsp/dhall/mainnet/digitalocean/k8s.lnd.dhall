@@ -4,7 +4,7 @@ let K = ../../Kubernetes/Import.dhall
 
 let Lnd = ../../Service/Lnd.dhall
 
-let network = G.BitcoinNetwork.TestNet
+let network = G.BitcoinNetwork.MainNet
 
 let owner = G.Owner.Lnd
 

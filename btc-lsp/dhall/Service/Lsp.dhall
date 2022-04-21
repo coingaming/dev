@@ -200,22 +200,24 @@ let mkServiceType
           net
 
 let mkServiceAnnotations
-    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    : G.BitcoinNetwork → Optional G.CloudProvider → Optional (List { mapKey : Text, mapValue : Text })
     = λ(net : G.BitcoinNetwork) →
+      λ(cloudProvider : Optional G.CloudProvider) →
         merge
-          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
+          { MainNet = P.Optional.concatMap G.CloudProvider (P.Map.Type Text Text) (Service.mkAnnotations owner) cloudProvider
           , TestNet =
-              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
-          , RegTest = None (List { mapKey : Text, mapValue : Text })
+              P.Optional.concatMap G.CloudProvider (P.Map.Type Text Text) (Service.mkAnnotations owner) cloudProvider
+          , RegTest = None (P.Map.Type Text Text)
           }
           net
 
 let mkService
-    : G.BitcoinNetwork → K.Service.Type
+    : G.BitcoinNetwork → Optional G.CloudProvider → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
+      λ(cloudProvider : Optional G.CloudProvider) →
         Service.mkService
           owner
-          (mkServiceAnnotations net)
+          (mkServiceAnnotations net cloudProvider)
           (mkServiceType net)
           (Service.mkPorts ports)
 

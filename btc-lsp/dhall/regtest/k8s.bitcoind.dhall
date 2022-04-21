@@ -9,7 +9,7 @@ let network = G.BitcoinNetwork.RegTest
 in  { apiVersion = "v1"
     , kind = "List"
     , items =
-      [ K.Resource.Service (Bitcoind.mkService network)
+      [ K.Resource.Service (Bitcoind.mkService network (None G.CloudProvider))
       , K.Resource.PersistentVolumeClaim
           (Bitcoind.mkPersistentVolumeClaim network)
       , K.Resource.Deployment (Bitcoind.mkDeployment network)

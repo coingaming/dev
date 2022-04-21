@@ -9,7 +9,7 @@ let network = G.BitcoinNetwork.RegTest
 in  { apiVersion = "v1"
     , kind = "List"
     , items =
-      [ K.Resource.Service (Lsp.mkService network)
+      [ K.Resource.Service (Lsp.mkService network (None G.CloudProvider))
       , K.Resource.Deployment (Lsp.mkDeployment network)
       ]
     }

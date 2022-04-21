@@ -1,5 +1,7 @@
 let P = ../Prelude/Import.dhall
 
+let G = ../Global.dhall
+
 let K = ./Import.dhall
 
 let ServiceType
@@ -32,9 +34,11 @@ let mkPorts
           ports
 
 let mkAnnotations
-    : CloudProvider → Text → Optional (List { mapKey : Text, mapValue : Text })
-    = λ(provider : CloudProvider) →
-      λ(name : Text) →
+    : Text →
+      G.CloudProvider →
+        Optional (List { mapKey : Text, mapValue : Text })
+    = λ(name : Text) →
+      λ(cloudProvider : G.CloudProvider) →
         merge
           { Aws = None (List { mapKey : Text, mapValue : Text })
           , DigitalOcean = Some
@@ -50,7 +54,7 @@ let mkAnnotations
               }
             ]
           }
-          provider
+          cloudProvider
 
 let mkService
     : Text →
@@ -73,4 +77,4 @@ let mkService
               }
             }
 
-in  { ServiceType, CloudProvider, mkAnnotations, mkPorts, mkService }
+in  { ServiceType, mkAnnotations, mkPorts, mkService }

@@ -4,7 +4,7 @@ let K = ../../Kubernetes/Import.dhall
 
 let Lsp = ../../Service/Lsp.dhall
 
-let network = G.BitcoinNetwork.TestNet
+let network = G.BitcoinNetwork.MainNet
 
 let cloudProvider = Some G.CloudProvider.DigitalOcean
 

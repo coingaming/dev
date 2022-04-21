@@ -120,7 +120,8 @@ let todo
     : Text
     = "TODO"
 
-in  { BitcoinNetwork
+in  { CloudProvider
+    , BitcoinNetwork
     , unBitcoinNetwork
     , NetworkScheme
     , unNetworkScheme
