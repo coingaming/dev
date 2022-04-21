@@ -142,7 +142,6 @@ checkRequiredFiles () {
   checkFileExistsNotEmpty "$LSP_PATH/tls.cert" 
   checkFileExistsNotEmpty "$LSP_PATH/tls.key"
 
-  checkFileExistsNotEmpty "$POSTGRES_PATH/dbusername.txt" 
   checkFileExistsNotEmpty "$POSTGRES_PATH/dbpassword.txt"
   echo "All files are OK."
 }
