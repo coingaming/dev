@@ -15,6 +15,7 @@ import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 import qualified BtcLsp.Thread.Server as Server
 import qualified BtcLsp.Thread.SwapperIntoLn as SwapperIntoLn
+import qualified BtcLsp.Yesod.Application as Yesod
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
@@ -41,7 +42,8 @@ apply = do
             LnChanWatcher.applyPoll,
             LnChanOpener.apply,
             SwapperIntoLn.apply,
-            BlockScanner.apply
+            BlockScanner.apply,
+            liftIO Yesod.appMain
           ]
       liftIO
         . void
@@ -78,7 +80,7 @@ waitForLndSync =
         waitAndRetry
     )
     ( \x ->
-        unless (Lnd.syncedToChain x && Lnd.syncedToGraph x) $ do
+        unless (Lnd.syncedToChain x) $ do
           $(logTM) InfoS . logStr $ "Waiting Lnd: " <> inspect x
           waitAndRetry
     )

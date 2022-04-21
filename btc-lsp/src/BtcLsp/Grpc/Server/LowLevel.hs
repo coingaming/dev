@@ -21,12 +21,10 @@ import Data.Coerce (coerce)
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
 import Network.GRPC.Server
-import Network.GRPC.Server.Wai (grpcApp)
 import Network.HTTP2.Server hiding (Request)
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
-import Network.Wai.Internal (Request (..))
 import Text.PrettyPrint.GenericPretty.Import (inspect)
 import Universum
 
@@ -42,7 +40,7 @@ data GSEnv = GSEnv
     --
     gsEnvSigner :: ByteString -> IO (Maybe ByteString)
   }
-  deriving (Generic)
+  deriving stock (Generic)
 
 instance FromJSON GSEnv where
   parseJSON =

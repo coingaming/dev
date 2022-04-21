@@ -69,7 +69,7 @@ data Utxo = Utxo
     utxoId :: Btc.TransactionID,
     utxoSwapId :: SwapIntoLnId
   }
-  deriving (Show)
+  deriving stock (Show)
 
 --
 -- TODO: presist log of unsupported transactions

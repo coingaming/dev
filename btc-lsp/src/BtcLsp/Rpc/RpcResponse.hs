@@ -10,6 +10,6 @@ data RpcResponse a = RpcResponse
     jsonrpc :: Text,
     result :: a
   }
-  deriving (Generic, Show)
+  deriving stock (Generic, Show)
 
 instance FromJSON a => FromJSON (RpcResponse a)

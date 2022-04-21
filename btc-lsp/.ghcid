@@ -1,8 +1,11 @@
---test=":main --fail-fast --color -f failed-examples"
 --restart=cabal.project
 --restart=package.yaml
---restart=config/model
 --restart=nix/ns-export-test-envs.sh
 --restart=proto/
 --restart=integration/
+--restart=config/
+--restart=messages/
+--restart=static/css/
+--restart=static/fonts/
+--restart=templates/
 --command="((kill -0 `cat ./build/shell/bitcoind/regtest/bitcoind.pid` && kill -0 `cat ./build/shell/lnd-lsp/lnd.pid` && kill -0 `cat ./build/shell/lnd-alice/lnd.pid` && kill -0 `cat ./build/shell/lnd-bob/lnd.pid` && pg_ctl -D ./build/shell/postgres status) || ((./nix/ns-shutdown-test-deps.sh || true) && (setsid ./nix/ns-prepare.sh & wait))) && . ./nix/ns-export-test-envs.sh && (./nix/ns-gen-proto.sh || true) && hpack && cabal new-repl test:btc-lsp-integration-test --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j"

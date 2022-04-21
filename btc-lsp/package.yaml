@@ -19,6 +19,20 @@ extra-source-files:
 # common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/githubuser/btc-lsp#readme>
 
+# Define flags used by "yesod devel" to make compilation faster
+flags:
+  library-only:
+    description: Build for use with "yesod devel"
+    manual: false
+    default: false
+  dev:
+    description: Turn on development settings, like auto-reload templates.
+    manual: false
+    default: false
+  ghcid:
+    manual: true
+    default: false
+
 dependencies:
 # foundation
 - base >= 4.7 && < 5
@@ -92,9 +106,46 @@ dependencies:
 - envparse
 - scientific
 - vector
-
-source-dirs:
-- src
+# yesod
+- yesod >=1.6 && <1.7
+- yesod-core >=1.6 && <1.7
+- yesod-auth >=1.6 && <1.7
+- yesod-static >=1.6 && <1.7
+- yesod-form >=1.6 && <1.7
+- classy-prelude >=1.5 && <1.6
+- classy-prelude-conduit >=1.5 && <1.6
+- classy-prelude-yesod >=1.5 && <1.6
+- bytestring >=0.10 && <0.11
+- text >=0.11 && <2.0
+- template-haskell
+- shakespeare >=2.0 && <2.1
+- hjsmin >=0.1 && <0.3
+- monad-control >=0.3 && <1.1
+- wai-extra >=3.0 && <3.1
+- yaml >=0.11 && <0.12
+- http-client-tls >=0.3 && <0.4
+- http-conduit >=2.3 && <2.4
+- directory >=1.1 && <1.4
+- warp >=3.0 && <3.4
+- data-default
+- aeson >=1.4 && <1.5
+- conduit >=1.0 && <2.0
+- monad-logger >=0.3 && <0.4
+- fast-logger >=2.2 && <3.1
+- wai-logger >=2.2 && <2.4
+- file-embed
+- safe
+- unordered-containers
+- containers
+- vector
+- time
+- case-insensitive
+- wai
+- foreign-store
+# yesod-extra
+- blaze-html
+- colonnade
+- yesod-colonnade
 
 default-extensions:
 - NoImplicitPrelude
@@ -129,8 +180,36 @@ ghc-options:
 - -Wno-safe # Don’t use Safe Haskell warnings
 - -Wno-missing-local-signatures # Warning for polymorphic local bindings; nothing wrong with those.
 - -Wno-missing-export-lists # Because of proto-lens
+when:
+  - condition: impl(ghc >= 8.10.7)
+    ghc-options:
+    #
+    # TODO : remove -Wno-unused-packages flag somehow!!!
+    #
+    - -Wno-unused-packages
+    - -Wno-missing-safe-haskell-mode
+    - -Wno-prepositive-qualified-module
+    - -fenable-th-splice-warnings
+    - -fprint-potential-instances
 
-library: {}
+# The library contains all of our application code. The executable
+# defined below is just a thin wrapper.
+library:
+  source-dirs:
+  - src
+  when:
+  - condition: (flag(dev)) || (flag(library-only))
+    then:
+      ghc-options:
+      - -Wall
+      - -fwarn-tabs
+      - -O0
+      cpp-options: -DDEVELOPMENT
+    else:
+      ghc-options:
+      - -Wall
+      - -fwarn-tabs
+      - -O2
 
 executables:
   btc-lsp-exe:
@@ -138,15 +217,34 @@ executables:
     source-dirs:
     - app
     ghc-options:
+    - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
+    when:
+    - condition: flag(library-only)
+      buildable: false
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp
   btc-lsp-integration:
     main: Integration.hs
     source-dirs:
     - integration
     - test
     ghc-options:
+    - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
@@ -154,27 +252,47 @@ executables:
     - Integration
     - -optl-fuse-ld=gold
     ld-options:
-      - -fuse-ld=gold
+    - -fuse-ld=gold
     dependencies:
     - QuickCheck
     - quickcheck-instances
     - generic-arbitrary
-    - proto-lens-arbitrary
     - hspec
     - hspec-expectations
     - hspec-wai
     - hspec-discover
+    when:
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp
   btc-lsp-prof:
     main: Main.hs
     source-dirs:
     - app
     ghc-options:
     - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -prof
     - -fprof-auto
     - "\"-with-rtsopts=-N -s -p -h -xt\""
     - -fexternal-interpreter
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
+    when:
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp
 
 tests:
   btc-lsp-test:
@@ -182,14 +300,19 @@ tests:
     source-dirs:
     - test
     ghc-options:
+    - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
     dependencies:
     - QuickCheck
     - quickcheck-instances
     - generic-arbitrary
-    - proto-lens-arbitrary
     - hspec
     - hspec-expectations
     - hspec-wai
@@ -216,3 +339,11 @@ tests:
     - hspec-expectations
     - hspec-wai
     - hspec-discover
+    when:
+    - condition: flag(ghcid)
+      then:
+        source-dirs:
+        - src
+      else:
+        dependencies:
+        - btc-lsp

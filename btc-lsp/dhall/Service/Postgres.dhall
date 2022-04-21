@@ -55,6 +55,26 @@ let mkConnStr
           }
           net
 
+let mkUser
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = userName } net
+
+let mkPassword
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = password } net
+
+let mkHost
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = host } net
+
+let mkDatabaseName
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = databaseName } net
+
 let ports
     : List Natural
     = G.unPorts [ tcpPort ]
@@ -165,6 +185,10 @@ let mkDeployment
 in  { mkEnv
     , mkSetupEnv
     , mkConnStr
+    , mkUser
+    , mkPassword
+    , mkHost
+    , mkDatabaseName
     , mkService
     , mkPersistentVolumeClaim
     , mkDeployment
