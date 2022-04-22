@@ -11,6 +11,7 @@ CLOUD_PROVIDER="aws"
 K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
 DB_INSTANCE_NAME="lsp-$BITCOIN_NETWORK"
 DB_USERNAME="lsp"
+TMP_DIR="/tmp"
 
 isAwsConfigured () {
   for VARNAME in "aws_access_key_id" "aws_secret_access_key" "region"; do
@@ -68,17 +69,59 @@ deleteK8Scluster () {
 }
 
 setupK8Scluster () {
-  isInstalled eksctl && isAwsConfigured
+  isInstalled eksctl && isInstalled helm && isAwsConfigured
+
+  local CREATE_AWS_LB_CONTROLLER="createIAMOpenIDConnectProvider && createAWSLBControllerPolicy && createAWSLBServiceAccount createAWSLBController"
 
   if eksctl get cluster --name "$K8S_CLUSTER_NAME"; then
     confirmAction \
     "==> Delete existing \"$K8S_CLUSTER_NAME\" k8s cluster and create a new one" \
-    "deleteK8Scluster && createK8Scluster"
+    "deleteK8Scluster && createK8Scluster && $CREATE_AWS_LB_CONTROLLER"
   else
     confirmAction \
     "==> Create new \"$K8S_CLUSTER_NAME\" k8s cluster" \
     "createK8Scluster"
   fi
+}
+
+createAWSLBControllerPolicy () {
+  local POLICY_FILEPATH="$TMP_DIR/iam_policy.json"
+  curl -o "$POLICY_FILEPATH" https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.1/docs/install/iam_policy.json
+  aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document "file://$POLICY_FILEPATH" && \
+  rm "$POLICY_FIPATH"
+}
+
+createIAMOpenIDConnectProvider () {
+  eksctl utils associate-iam-oidc-provider \
+  --cluster="$K8S_CLUSTER_NAME" \
+  --approve
+}
+
+createAWSLBServiceAccount () {
+  local AWS_ACCOUNT_ID=`aws sts get-caller-identity | jq -r '.Account'`
+
+  eksctl create iamserviceaccount \
+  --cluster="$K8S_CLUSTER_NAME" \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name "AmazonEKSLoadBalancerControllerRole" \
+  --attach-policy-arn="arn:aws:iam::$AWS_ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy" \
+  --approve
+}
+
+createAWSLBController () {
+  helm repo add eks https://aws.github.io/eks-charts && \
+  helm repo update && \
+  helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName="$K8S_CLUSTER_NAME" \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller
+
+  kubectl get deployment \
+    -n kube-system aws-load-balancer-controller
 }
 
 getVpcId () {
