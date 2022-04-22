@@ -155,13 +155,14 @@ kubectl get ingress
 
 ## Testnet setup (AWS)
 
-1. Install aws cli and eksctl:
+1. Install aws cli, eksctl and helm:
 
 If you have used nix-env doctl will already be installed, otherwise install it manually.
 
 ```
 aws-cli-2.5.4
 eksctl-0.93.0
+helm
 ```
 
 2. Configure aws cli (access_key_id, secret_access_key, region)
@@ -180,10 +181,10 @@ aws configure
 
 
 ```
-testnet-bitcoind.yourdomain.com
-testnet-lnd.yourdomain.com
-testnet-rtl.yourdomain.com
-testnet-lsp.yourdomain.com
+testnet-aws-bitcoind.yourdomain.com
+testnet-aws-lnd.yourdomain.com
+testnet-aws-rtl.yourdomain.com
+testnet-aws-lsp.yourdomain.com
 ```
 
 Get IPs of LoadBalancers:
@@ -268,4 +269,16 @@ Set current context to btc-lsp
 
 ```sh
 kubectl config use-context btc-lsp
+```
+
+9. List k8s nodes
+
+```sh
+kubectl get nodes -o wide
+```
+
+10. Get current storage class
+
+```sh
+kubectl get storageclass
 ```
