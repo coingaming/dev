@@ -9,13 +9,6 @@ package witch
 
 source-repository-package
   type: git
-  location: https://github.com/coingaming/signable.git
-  tag: 403a04f9d29181fcc627abb359f31140d6400bfb
-  --sha256: 0p6ck18ap0w518iaq8r09maxz7j23d8ykaskg5sshcb0hcdwpbqf
-  subdir: haskell
-
-source-repository-package
-  type: git
   location: https://github.com/coingaming/lnd-client.git
   --sha256: 0ma3rqr5adakr6nmdm9f57njrqx4z7rg5x7lgf0hgvyhnkjbc6xk
   tag: 98974c514cd82253dbd6111bafbbb2bbff6bffe2
@@ -43,8 +36,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/src.git
-  tag: 2f56b82df10f5d0161ded69ba61ff0a1ca3df354
-  --sha256: 0y9dcnfrgf6ganllvk1rrslqv1nqxg4dyhvhha2zmknq7lqq84cc
+  tag: bd13f5e66383aa56366bb075d19ae38e737aa9cd
+  --sha256: 0dyp954h1qhrrylzvdr31i3rgn5s8hkj8r8aaf3wkzjc6jrll41z
   subdir: generic-pretty-instances
 
 source-repository-package

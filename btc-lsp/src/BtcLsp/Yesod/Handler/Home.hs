@@ -16,7 +16,8 @@ import BtcLsp.Yesod.Import
 -- functions. You can spread them across multiple files if you are so
 -- inclined, or create a single monolithic file.
 getHomeR :: Handler Html
-getHomeR =
+getHomeR = do
+  master <- getYesod
   defaultLayout $ do
     setTitleI MsgHomeRTitle
     $(widgetFile "homepage")

@@ -57,7 +57,6 @@ library
     , proto-lens
     , proto-lens-runtime
     , secp256k1-haskell ==0.6.*
-    , signable
     , text
     , time
     , universum
@@ -101,7 +100,6 @@ test-suite generic-pretty-instances-test
     , proto-lens
     , proto-lens-runtime
     , secp256k1-haskell ==0.6.*
-    , signable
     , text
     , time
     , universum
