@@ -1,3 +1,5 @@
+let G = ../Global.dhall
+
 let K = ./Import.dhall
 
 let mkTls
@@ -6,16 +8,27 @@ let mkTls
       λ(secret : Text) →
         K.IngressTLS::{ hosts = Some [ host ], secretName = Some secret }
 
+let mkIngressClassName
+    : G.CloudProvider → Text
+    = λ(cloudProvider : G.CloudProvider) →
+        merge { Aws = "alb", DigitalOcean = "nginx" } cloudProvider
+
 let mkIngress
-    : Text → Text → Natural → Optional (List K.IngressTLS.Type) → K.Ingress.Type
+    : Text →
+      Text →
+      Natural →
+      G.CloudProvider →
+      Optional (List K.IngressTLS.Type) →
+        K.Ingress.Type
     = λ(name : Text) →
       λ(host : Text) →
       λ(port : Natural) →
+      λ(cloudProvider : G.CloudProvider) →
       λ(tls : Optional (List K.IngressTLS.Type)) →
         K.Ingress::{
         , metadata = K.ObjectMeta::{ name = Some name }
         , spec = Some K.IngressSpec::{
-          , ingressClassName = Some "nginx"
+          , ingressClassName = Some (mkIngressClassName cloudProvider)
           , tls
           , rules = Some
             [ K.IngressRule::{

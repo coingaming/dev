@@ -40,7 +40,18 @@ let mkAnnotations
     = λ(name : Text) →
       λ(cloudProvider : G.CloudProvider) →
         merge
-          { Aws = None (List { mapKey : Text, mapValue : Text })
+          { Aws = Some
+            [ { mapKey = "service.beta.kubernetes.io/aws-load-balancer-type"
+              , mapValue = "external"
+              }
+            , { mapKey =
+                  "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type"
+              , mapValue = "ip"
+              }
+            , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-scheme"
+              , mapValue = "internet-facing"
+              }
+            ]
           , DigitalOcean = Some
             [ { mapKey = "kubernetes.digitalocean.com/load-balancer-id"
               , mapValue = "${name}-lb"

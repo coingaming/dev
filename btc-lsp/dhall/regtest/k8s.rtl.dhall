@@ -10,7 +10,7 @@ in  { apiVersion = "v1"
     , kind = "List"
     , items =
       [ K.Resource.Service (Rtl.mkService network)
-      , K.Resource.Ingress (Rtl.mkIngress network)
+      , K.Resource.Ingress (Rtl.mkIngress network (None G.CloudProvider))
       , K.Resource.Deployment (Rtl.mkDeployment network)
       ]
     }

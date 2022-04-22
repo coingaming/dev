@@ -182,8 +182,9 @@ let mkTls
               net
 
 let mkIngress
-    : G.BitcoinNetwork → K.Ingress.Type
+    : G.BitcoinNetwork → G.CloudProvider → K.Ingress.Type
     = λ(net : G.BitcoinNetwork) →
+      λ(cloudProvider : G.CloudProvider) →
         let tls
             : Optional (List K.IngressTLS.Type)
             = P.Optional.map
@@ -192,7 +193,12 @@ let mkIngress
                 (λ(tls : K.IngressTLS.Type) → [ tls ])
                 (mkTls net)
 
-        in  Ingress.mkIngress owner (mkDomain net) tcpPort.unPort tls
+        in  Ingress.mkIngress
+              owner
+              (mkDomain net)
+              tcpPort.unPort
+              cloudProvider
+              tls
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
