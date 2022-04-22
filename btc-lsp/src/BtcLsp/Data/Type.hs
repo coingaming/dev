@@ -591,6 +591,8 @@ data Privacy
       Ord,
       Show,
       Read,
+      Enum,
+      Bounded,
       Generic
     )
 

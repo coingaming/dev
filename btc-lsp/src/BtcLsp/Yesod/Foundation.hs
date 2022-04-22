@@ -201,6 +201,7 @@ instance Yesod App where
   isAuthorized (StaticR _) _ = return Authorized
   isAuthorized (LanguageR _) _ = return Authorized
   isAuthorized OpenChanR {} _ = pure Authorized
+  isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
   -- the profile route requires that the user is authenticated, so we
   -- delegate to that function
   isAuthorized ProfileR _ = isAuthenticated
@@ -266,6 +267,7 @@ instance YesodBreadcrumbs App where
         HomeR -> MsgHomeRBreadcrumb
         AuthR {} -> MsgAuthRBreadcrumb
         OpenChanR -> MsgOpenChanRBreadcrumb
+        SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
         ProfileR -> MsgProfileRBreadcrumb
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
@@ -276,6 +278,7 @@ instance YesodBreadcrumbs App where
         HomeR -> Nothing
         AuthR {} -> Just HomeR
         OpenChanR -> Just HomeR
+        SwapIntoLnCreateR -> Just HomeR
         ProfileR -> Just HomeR
 
 -- How to run database actions.

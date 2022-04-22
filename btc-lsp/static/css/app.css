@@ -83,6 +83,10 @@ input[type="checkbox"] .has-error .form-control {
   margin-top: 5px;
 }
 
+.large-margin-top {
+  margin-top: 38px;
+}
+
 .margin-bottom {
   margin-bottom: 15px;
 }

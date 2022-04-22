@@ -82,6 +82,7 @@ library
       BtcLsp.Yesod.Handler.Language
       BtcLsp.Yesod.Handler.OpenChan
       BtcLsp.Yesod.Handler.Profile
+      BtcLsp.Yesod.Handler.SwapIntoLnCreate
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
       BtcLsp.Yesod.Model
@@ -395,6 +396,7 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -617,6 +619,7 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -817,6 +820,7 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -1036,6 +1040,7 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
