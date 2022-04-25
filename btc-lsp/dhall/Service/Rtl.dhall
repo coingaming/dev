@@ -172,6 +172,38 @@ let mkService
           (mkServiceType net)
           (Service.mkPorts ports)
 
+let mkIngressAnnotations
+    : G.BitcoinNetwork →
+      Optional G.CloudProvider →
+        Optional (P.Map.Type Text Text)
+    = λ(net : G.BitcoinNetwork) →
+      λ(cloudProvider : Optional G.CloudProvider) →
+        merge
+          { MainNet =
+              P.Optional.concatMap
+                G.CloudProvider
+                (P.Map.Type Text Text)
+                (Ingress.mkAnnotations owner)
+                cloudProvider
+          , TestNet =
+              P.Optional.concatMap
+                G.CloudProvider
+                (P.Map.Type Text Text)
+                (Ingress.mkAnnotations owner)
+                cloudProvider
+          , RegTest = None (P.Map.Type Text Text)
+          }
+          net
+
+let mkIngressClassName
+    : Optional G.CloudProvider → Optional Text
+    = λ(cloudProvider : Optional G.CloudProvider) →
+        P.Optional.map
+          G.CloudProvider
+          Text
+          Ingress.mkIngressClassName
+          cloudProvider
+
 let mkTls
     : G.BitcoinNetwork → Optional K.IngressTLS.Type
     = λ(net : G.BitcoinNetwork) →
@@ -182,9 +214,9 @@ let mkTls
               net
 
 let mkIngress
-    : G.BitcoinNetwork → G.CloudProvider → K.Ingress.Type
+    : G.BitcoinNetwork → Optional G.CloudProvider → K.Ingress.Type
     = λ(net : G.BitcoinNetwork) →
-      λ(cloudProvider : G.CloudProvider) →
+      λ(cloudProvider : Optional G.CloudProvider) →
         let tls
             : Optional (List K.IngressTLS.Type)
             = P.Optional.map
@@ -195,9 +227,10 @@ let mkIngress
 
         in  Ingress.mkIngress
               owner
+              (mkIngressAnnotations net cloudProvider)
               (mkDomain net)
               tcpPort.unPort
-              cloudProvider
+              (mkIngressClassName cloudProvider)
               tls
 
 let mkContainerEnv =

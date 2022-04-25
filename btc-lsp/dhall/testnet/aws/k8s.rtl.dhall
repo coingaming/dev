@@ -6,7 +6,7 @@ let Rtl = ../../Service/Rtl.dhall
 
 let network = G.BitcoinNetwork.TestNet
 
-let cloudProvider = G.CloudProvider.Aws
+let cloudProvider = Some G.CloudProvider.Aws
 
 in  { apiVersion = "v1"
     , kind = "List"
