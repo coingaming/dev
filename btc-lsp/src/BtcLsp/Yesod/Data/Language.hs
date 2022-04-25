@@ -4,7 +4,6 @@
 module BtcLsp.Yesod.Data.Language where
 
 import BtcLsp.Import.External
-import BtcLsp.Yesod.Import.NoFoundation (PathPiece (..))
 import qualified Data.Text as T
 import Database.Persist.TH
 import qualified Universum

@@ -1,5 +1,6 @@
 Nothing:
 Proxy txt@Text: #{txt}
+Failure txt@Text: Failure #{txt}
 Yes: Yes
 No: No
 Active: Active
@@ -15,12 +16,14 @@ ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
 OpenChanRBreadcrumb: Open Channel
 SwapIntoLnCreateRBreadcrumb: Swap
+SwapIntoLnSelectRBreadcrumb swp@HexSha256'LnInvoice'Fund: #{swp}
 
 HomeRTitle: Welcome | LSP
 SignoutRTitle: Logout | LSP
 ProfileRTitle usr@YesodUser: #{usr} | LSP
 OpenChanRTitle: Open Channel | LSP
 SwapIntoLnCreateRTitle: Swap | LSP
+SwapIntoLnSelectRTitle swp@HexSha256'LnInvoice'Fund: #{swp} | Swap | LSP
 
 Home: Home
 Profile: Profile
@@ -40,6 +43,7 @@ HomeSmallHeader: Lightning Network Service Provider
 OpenChan: Open Channel
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
+Swap: Swap
 SwapInvoice: Swap invoice
 RefundAddress: Refund address
 ChannelPrivacy: Channel privacy

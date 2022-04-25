@@ -11,6 +11,7 @@ import BtcLsp.Data.Orphan as X ()
 import BtcLsp.Data.Type as X
 import BtcLsp.Grpc.Combinator as X
 import BtcLsp.Grpc.Orphan as X ()
+import BtcLsp.Hash as X
 import BtcLsp.Import.External as X
 import BtcLsp.Math as X (SwapCap (..), newSwapCapM)
 import BtcLsp.Storage.Model as X hiding (Key (..))

@@ -134,3 +134,32 @@ updateDeleteCol updateResolver deleteResolver =
           <a .btn.btn-danger.btn-sm href=@{deleteResolver x}>
             <span .glyphicon.glyphicon-trash aria-hidden="true">
       |]
+
+fromTextField ::
+  forall m a.
+  ( Monad m,
+    From Text a,
+    From a Text,
+    'False ~ (Text == a),
+    'False ~ (a == Text),
+    RenderMessage (HandlerSite m) FormMessage
+  ) =>
+  Field m a
+fromTextField =
+  Field
+    { fieldParse = \f xs ->
+        ((from <$>) <$>) <$> fieldParse txtField f xs,
+      fieldView = \theId fieldName attrs val isReq ->
+        fieldView
+          txtField
+          theId
+          fieldName
+          attrs
+          (from <$> val)
+          isReq,
+      fieldEnctype =
+        fieldEnctype txtField
+    }
+  where
+    txtField :: Field m Text
+    txtField = textField

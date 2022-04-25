@@ -18,7 +18,7 @@ import BtcLsp.Rpc.RpcRequest as Req
 import BtcLsp.Rpc.RpcResponse as Resp
 import Data.Aeson (decode, encode, withObject, (.:))
 import qualified Data.ByteString.Lazy as BS
-import Data.Digest.Pure.SHA
+import qualified Data.Digest.Pure.SHA as SHA
 import qualified Network.Bitcoin.Wallet as BtcW
 import qualified Text.Hex as TH
 
@@ -101,6 +101,6 @@ getScriptHash addr = runExceptT $ do
         . TH.encodeHex
         . BS.toStrict
         . BS.reverse
-        . bytestringDigest
-        . sha256
+        . SHA.bytestringDigest
+        . SHA.sha256
         . BS.fromStrict

@@ -322,6 +322,8 @@ newtype OnChainAddress (mrel :: MoneyRelation)
     ( Eq,
       Ord,
       Show,
+      Read,
+      PathPiece,
       Psql.PersistField,
       Psql.PersistFieldSql
     )

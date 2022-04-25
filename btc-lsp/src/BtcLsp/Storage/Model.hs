@@ -17,6 +17,7 @@ module BtcLsp.Storage.Model where
 import BtcLsp.Class.Storage
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
+import BtcLsp.Hash
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import Database.Persist.Quasi

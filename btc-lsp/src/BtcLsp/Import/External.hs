@@ -123,6 +123,7 @@ import Text.PrettyPrint.GenericPretty.Import as X
     inspectStrPlain,
   )
 import Text.PrettyPrint.GenericPretty.Instance as X ()
+import Text.Shakespeare.I18N as X (ToMessage (..))
 import Universum as X hiding
   ( atomically,
     bracket,
@@ -142,4 +143,4 @@ import UnliftIO as X
     withRunInIO,
     withUnliftIO,
   )
-import Yesod.Core as X (showIntegral)
+import Yesod.Core as X (PathPiece (..), showIntegral)

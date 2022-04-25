@@ -81,6 +81,7 @@ dependencies:
 - SHA
 - lnd-client
 - cryptonite
+- cryptohash-sha256
 - secp256k1-haskell
 # web
 - wai

@@ -26,6 +26,15 @@ import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 
+--
+-- NOTE : need this type alias only because of
+-- poor support of advanced Haskell in TH functions
+-- of Yesod which handle routes.yesodroutes.
+--
+-- !!! DO NOT USE THIS TYPE ALIAS DIRECTLY IN CODE !!!
+--
+type HexSha256'LnInvoice'Fund = HexSha256 (LnInvoice 'Fund)
+
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -202,6 +211,7 @@ instance Yesod App where
   isAuthorized (LanguageR _) _ = return Authorized
   isAuthorized OpenChanR {} _ = pure Authorized
   isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
+  isAuthorized SwapIntoLnSelectR {} _ = pure Authorized
   -- the profile route requires that the user is authenticated, so we
   -- delegate to that function
   isAuthorized ProfileR _ = isAuthenticated
@@ -268,6 +278,7 @@ instance YesodBreadcrumbs App where
         AuthR {} -> MsgAuthRBreadcrumb
         OpenChanR -> MsgOpenChanRBreadcrumb
         SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
+        SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
         ProfileR -> MsgProfileRBreadcrumb
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
@@ -279,6 +290,7 @@ instance YesodBreadcrumbs App where
         AuthR {} -> Just HomeR
         OpenChanR -> Just HomeR
         SwapIntoLnCreateR -> Just HomeR
+        SwapIntoLnSelectR {} -> Just SwapIntoLnCreateR
         ProfileR -> Just HomeR
 
 -- How to run database actions.

@@ -32,10 +32,11 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
     -- into on-chain address.
     --
     Psql.upsertBy
-      (UniqueSwapIntoLnFundInvoice fundInv)
+      (UniqueSwapIntoLnFundInvHash fundInvHash)
       SwapIntoLn
         { swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
+          swapIntoLnFundInvHash = fundInvHash,
           swapIntoLnFundAddress = fundAddr,
           swapIntoLnFundProof = Nothing,
           swapIntoLnRefundAddress = refundAddr,
@@ -51,6 +52,8 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
       [ SwapIntoLnUpdatedAt
           Psql.=. Psql.val ct
       ]
+  where
+    fundInvHash = sha256 fundInv
 
 updateFundedSql ::
   ( Storage m

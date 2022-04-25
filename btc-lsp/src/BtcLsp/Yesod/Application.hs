@@ -22,6 +22,7 @@ import BtcLsp.Yesod.Handler.Language
 import BtcLsp.Yesod.Handler.OpenChan
 import BtcLsp.Yesod.Handler.Profile
 import BtcLsp.Yesod.Handler.SwapIntoLnCreate
+import BtcLsp.Yesod.Handler.SwapIntoLnSelect
 import BtcLsp.Yesod.Import
 import Control.Monad.Logger (liftLoc, runLoggingT)
 import Database.Persist.Postgresql

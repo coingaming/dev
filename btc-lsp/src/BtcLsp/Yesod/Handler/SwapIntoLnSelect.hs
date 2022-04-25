@@ -4,9 +4,9 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module BtcLsp.Yesod.Handler.SwapIntoLnCreate
-  ( getSwapIntoLnCreateR,
-    postSwapIntoLnCreateR,
+module BtcLsp.Yesod.Handler.SwapIntoLnSelect
+  ( getSwapIntoLnSelectR,
+    postSwapIntoLnSelectR,
   )
 where
 
@@ -34,17 +34,17 @@ data SwapRequest = SwapRequest
 
 instance Out SwapRequest
 
-getSwapIntoLnCreateR :: Handler Html
-getSwapIntoLnCreateR = do
+getSwapIntoLnSelectR :: HexSha256 (LnInvoice 'Fund) -> Handler Html
+getSwapIntoLnSelectR fundInvHash = do
   (formWidget, formEnctype) <-
     generateFormPost $
       renderBootstrap3
         BootstrapBasicForm
         aForm
-  renderPage formWidget formEnctype
+  renderPage fundInvHash formWidget formEnctype
 
-postSwapIntoLnCreateR :: Handler Html
-postSwapIntoLnCreateR = do
+postSwapIntoLnSelectR :: HexSha256 (LnInvoice 'Fund) -> Handler Html
+postSwapIntoLnSelectR fundInvHash = do
   ((formResult, formWidget), formEnctype) <-
     runFormPost $
       renderBootstrap3
@@ -70,8 +70,8 @@ postSwapIntoLnCreateR = do
           $ swapRequestRefund req
       case eSwap of
         Left e -> do
-          setMessageI . MsgFailure $ inspectPlain e
-          renderPage formWidget formEnctype
+          setMessageI . MsgFailure $ inspect e
+          renderPage fundInvHash formWidget formEnctype
         Right swapEnt ->
           redirect
             . SwapIntoLnSelectR
@@ -79,15 +79,19 @@ postSwapIntoLnCreateR = do
             . swapIntoLnFundInvHash
             $ entityVal swapEnt
     _ ->
-      renderPage formWidget formEnctype
+      renderPage fundInvHash formWidget formEnctype
 
-renderPage :: Widget -> Enctype -> Handler Html
-renderPage formWidget formEnctype = do
-  let formRoute = SwapIntoLnCreateR
+renderPage ::
+  HexSha256 (LnInvoice 'Fund) ->
+  Widget ->
+  Enctype ->
+  Handler Html
+renderPage fundInvHash formWidget formEnctype = do
+  let formRoute = SwapIntoLnSelectR fundInvHash
   let formMsgSubmit = MsgContinue
   let form = $(widgetFile "simple_form")
   defaultLayout $ do
-    setTitleI MsgSwapIntoLnCreateRTitle
+    setTitleI $ MsgSwapIntoLnSelectRTitle fundInvHash
     $(widgetFile "swap_into_ln_create")
 
 aForm :: AForm Handler SwapRequest

@@ -44,6 +44,7 @@ library
       BtcLsp.Grpc.Server.HighLevel
       BtcLsp.Grpc.Server.LowLevel
       BtcLsp.Grpc.Sig
+      BtcLsp.Hash
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
@@ -83,6 +84,7 @@ library
       BtcLsp.Yesod.Handler.OpenChan
       BtcLsp.Yesod.Handler.Profile
       BtcLsp.Yesod.Handler.SwapIntoLnCreate
+      BtcLsp.Yesod.Handler.SwapIntoLnSelect
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
       BtcLsp.Yesod.Model
@@ -145,6 +147,7 @@ library
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
+    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -268,6 +271,7 @@ executable btc-lsp-exe
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
+    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -358,6 +362,7 @@ executable btc-lsp-exe
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
+        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql
@@ -397,6 +402,7 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -485,6 +491,7 @@ executable btc-lsp-integration
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
+    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -581,6 +588,7 @@ executable btc-lsp-integration
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
+        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql
@@ -620,6 +628,7 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -692,6 +701,7 @@ executable btc-lsp-prof
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
+    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -782,6 +792,7 @@ executable btc-lsp-prof
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
+        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql
@@ -821,6 +832,7 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -907,6 +919,7 @@ test-suite btc-lsp-test
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
+    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -1002,6 +1015,7 @@ test-suite btc-lsp-test
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
+        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql
@@ -1041,6 +1055,7 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
