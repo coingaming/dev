@@ -10,7 +10,6 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
-import qualified BtcLsp.Rpc.Helper as Rpc
 import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -26,9 +25,8 @@ import TestOrphan ()
 import TestWithLndLsp
 
 spec :: Spec
-spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
+spec = do
   itEnv "Server SwapIntoLn" $ do
-    -- withSpawnLink Main.apply . const $ do
     -- Let app spawn
     Main.waitForSync
     sleep $ MicroSecondsDelay 500000
@@ -67,7 +65,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
             )
       Client.swapIntoLnT
         gcEnv
-          { gcEnvCompressMode = compressMode
+          { gcEnvCompressMode = Compressed
           }
         =<< setGrpcCtxT
           LndAlice
@@ -100,49 +98,18 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                      . SwapIntoLn.val
                      . SwapIntoLn.val
                  )
+      addr <- withBtcT Btc.getNewAddress (\h -> h Nothing)
+      void $ withBtcT Btc.generateToAddress (\h -> h 10 addr (Just 10))
       void $
         withBtcT
           Btc.sendToAddress
           (\h -> h fundAddr 0.01 Nothing Nothing)
       lift $
         LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
-      sleep $ MicroSecondsDelay 5000000
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
-      $(logTM) DebugS . logStr $ ("22222222222222222222222222222222222222222222" :: Text)
       lift $ mine 6 LndLsp
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      $(logTM) DebugS . logStr $ ("33333333333333333333333333333333333333333333" :: Text)
-      lb <- withBtcT Btc.getBlockCount id
-      natLB <- tryFromT lb
-      void $ Rpc.waitTillLastBlockProcessedT natLB
-      sleep $ MicroSecondsDelay 5000000
+      sleep $ MicroSecondsDelay 10000000
       lift $ mine 6 LndLsp
+      sleep $ MicroSecondsDelay 10000000
       withLndT
         Lnd.listChannels
         ( $

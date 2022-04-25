@@ -7,4 +7,4 @@ cradle:
     - path: "./test"
       component: test:btc-lsp-test
     - path: "./integration"
-      component: test:btc-lsp-integration
+      component: test:btc-lsp-integration-test
