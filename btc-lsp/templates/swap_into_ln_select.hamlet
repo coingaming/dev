@@ -1,0 +1,22 @@
+<div .ui.container-fluid.compact.center.text-overflow>
+  <ul .list-group>
+    <li .list-group-item>
+      <dl>
+        <dt>_{MsgSwapIntoLnUserId}
+        <dd>#{userPub}
+    <li .list-group-item>
+      <dl>
+        <dt>_{MsgSwapIntoLnFundInvoice}
+        <dd>#{toText swapIntoLnFundInvoice}
+    <li .list-group-item>
+      <dl>
+        <dt>_{MsgSwapIntoLnFundInvHash}
+        <dd>#{toText fundInvHash}
+    <li .list-group-item>
+      <dl>
+        <dt>_{MsgSwapIntoLnFundAddress}
+        <dd>#{toText swapIntoLnFundAddress}
+    <li .list-group-item>
+      <dl>
+        <dt>_{MsgSwapIntoLnRefundAddress}
+        <dd>#{toText swapIntoLnRefundAddress}

@@ -163,3 +163,13 @@ fromTextField =
   where
     txtField :: Field m Text
     txtField = textField
+
+toText ::
+  ( From a Text,
+    'False ~ (Text == a),
+    'False ~ (a == Text)
+  ) =>
+  a ->
+  Text
+toText =
+  from

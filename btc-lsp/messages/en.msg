@@ -44,6 +44,10 @@ OpenChan: Open Channel
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
 Swap: Swap
-SwapInvoice: Swap invoice
-RefundAddress: Refund address
-ChannelPrivacy: Channel privacy
+SwapIntoLnUserId: User Pub Key
+SwapIntoLnFundInvoice: Swap Invoice
+SwapIntoLnFundInvHash: Swap Hash
+SwapIntoLnFundAddress: Swap Address
+SwapIntoLnFundProof: Proof of Swap
+SwapIntoLnRefundAddress: Refund Address
+ChannelPrivacy: Channel Privacy

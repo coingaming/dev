@@ -14,6 +14,7 @@ where
 import BtcLsp.Data.Type
 import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
 import Yesod.Form.Bootstrap3
 
@@ -22,13 +23,16 @@ getSwapIntoLnSelectR fundInvHash = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
-    ( \swpEnt -> do
-        (formWidget, formEnctype) <-
-          generateFormPost $
-            renderBootstrap3
-              BootstrapBasicForm
-              (aForm swpEnt)
-        renderPage fundInvHash formWidget formEnctype
+    ( \(swpEnt, usrEnt) -> do
+        let SwapIntoLn {..} = entityVal swpEnt
+        let userPub =
+              toHex
+                . coerce
+                . userNodePubKey
+                $ entityVal usrEnt
+        defaultLayout $ do
+          setTitleI $ MsgSwapIntoLnSelectRTitle fundInvHash
+          $(widgetFile "swap_into_ln_select")
     )
     . liftIO
     . run
@@ -39,7 +43,7 @@ postSwapIntoLnSelectR fundInvHash = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
-    ( \swpEnt -> do
+    ( \(swpEnt, _) -> do
         ((formResult, formWidget), formEnctype) <-
           runFormPost $
             renderBootstrap3
@@ -77,18 +81,21 @@ aForm (Entity entKey SwapIntoLn {..}) =
   Entity entKey
     <$> ( SwapIntoLn swapIntoLnUserId
             <$> areq
-              hiddenField
-              (bfs MsgNothing)
+              fromTextField
+              (bfsDisabled MsgSwapIntoLnFundInvoice)
               (Just swapIntoLnFundInvoice)
             <*> pure swapIntoLnFundInvHash
             <*> areq
-              hiddenField
-              (bfs MsgNothing)
+              fromTextField
+              (bfsDisabled MsgSwapIntoLnFundAddress)
               (Just swapIntoLnFundAddress)
+            --
+            -- TODO : show proof
+            --
             <*> pure swapIntoLnFundProof
             <*> areq
-              hiddenField
-              (bfs MsgNothing)
+              fromTextField
+              (bfsDisabled MsgSwapIntoLnRefundAddress)
               (Just swapIntoLnRefundAddress)
             <*> pure swapIntoLnChanCapUser
             <*> pure swapIntoLnChanCapLsp
@@ -102,12 +109,6 @@ aForm (Entity entKey SwapIntoLn {..}) =
               hiddenField
               (bfs MsgNothing)
               (Just swapIntoLnExpiresAt)
-            <*> areq
-              hiddenField
-              (bfs MsgNothing)
-              (Just swapIntoLnInsertedAt)
-            <*> areq
-              hiddenField
-              (bfs MsgNothing)
-              (Just swapIntoLnUpdatedAt)
+            <*> pure swapIntoLnInsertedAt
+            <*> pure swapIntoLnUpdatedAt
         )

@@ -63,6 +63,7 @@ library
       BtcLsp.Storage.Model.SwapUtxo
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Text
       BtcLsp.Thread.BlockScanner
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
@@ -382,6 +383,7 @@ executable btc-lsp-exe
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
@@ -608,6 +610,7 @@ executable btc-lsp-integration
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
@@ -812,6 +815,7 @@ executable btc-lsp-prof
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
@@ -1035,6 +1039,7 @@ test-suite btc-lsp-test
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher

@@ -10,11 +10,14 @@ import BtcLsp.Data.Kind as Import
 import BtcLsp.Data.Type as Import
 import BtcLsp.Import.External as Import
   ( ExceptT (..),
+    NodePubKey (..),
+    coerce,
     eitherM,
     maybeM,
     runExceptT,
   )
 import BtcLsp.Import.Witch as Import
+import BtcLsp.Text as Import
 import BtcLsp.Yesod.Model as Import
 import BtcLsp.Yesod.Settings as Import
 import BtcLsp.Yesod.Settings.StaticFiles as Import

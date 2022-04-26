@@ -3,6 +3,14 @@ html, body {
   overflow-x: hidden;
 }
 
+dl {
+  margin-bottom: 0 !important;
+}
+
+.text-overflow {
+  word-break: break-all;
+}
+
 .form-control:focus,
 input:focus {
   -webkit-box-shadow: none !important;

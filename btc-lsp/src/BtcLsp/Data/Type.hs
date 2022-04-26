@@ -359,15 +359,9 @@ data SwapStatus
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan
-  | -- | Swap has been funded with insufficient
-    -- non-dust amt, but funding invoice has
-    -- been expired. Then lsp is doing refund
-    -- into given refund on-chain address and
-    -- waiting for some confirmations.
-    SwapWaitingRefund
   | -- | Final statuses
-    SwapRefunded
-  | SwapSucceeded
+    SwapSucceeded
+  | SwapExpired
   deriving stock
     ( Eq,
       Ord,
@@ -703,6 +697,10 @@ newtype RHashHex = RHashHex
     )
 
 instance Out RHashHex
+
+instance From RHashHex Text
+
+instance From Text RHashHex
 
 instance ToMessage RHashHex where
   toMessage =

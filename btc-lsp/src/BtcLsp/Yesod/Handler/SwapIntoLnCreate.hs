@@ -95,11 +95,11 @@ aForm =
   SwapRequest
     <$> areq
       fromTextField
-      (bfsAutoFocus MsgSwapInvoice)
+      (bfsAutoFocus MsgSwapIntoLnFundInvoice)
       Nothing
     <*> areq
       fromTextField
-      (bfs MsgRefundAddress)
+      (bfs MsgSwapIntoLnRefundAddress)
       Nothing
     <*> areq
       (selectField optionsEnum)

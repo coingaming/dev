@@ -214,12 +214,21 @@ getByRHashHex ::
   ( Storage m
   ) =>
   RHashHex ->
-  m (Maybe (Entity SwapIntoLn))
-getByRHashHex =
-  runSql
-    . Psql.getBy
-    . UniqueSwapIntoLnFundInvHash
-    . from
+  m (Maybe (Entity SwapIntoLn, Entity User))
+getByRHashHex hash =
+  runSql . (listToMaybe <$>) $
+    Psql.select $
+      Psql.from $ \(swap `Psql.InnerJoin` user) -> do
+        Psql.on
+          ( swap Psql.^. SwapIntoLnUserId
+              Psql.==. user Psql.^. UserId
+          )
+        Psql.where_
+          ( swap Psql.^. SwapIntoLnFundInvHash
+              Psql.==. Psql.val (from hash)
+          )
+        Psql.limit 1
+        pure (swap, user)
 
 getByFundAddress ::
   ( Storage m
