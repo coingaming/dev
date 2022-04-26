@@ -1,6 +1,8 @@
 --restart=cabal.project
 --restart=package.yaml
 --restart=nix/ns-export-test-envs.sh
+--restart=nix/ns-ghcid-test.sh
+--restart=nix/ns-ghcid-main.sh
 --restart=proto/
 --restart=integration/
 --restart=config/

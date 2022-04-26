@@ -106,9 +106,10 @@ spec = do
           (\h -> h fundAddr 0.01 Nothing Nothing)
       lift $
         LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
-      lift $ mine 6 LndLsp
+      lift $ mine 10 LndLsp
       sleep $ MicroSecondsDelay 10000000
-      lift $ mine 6 LndLsp
+      lift Main.waitForSync
+      lift $ mine 10 LndLsp
       sleep $ MicroSecondsDelay 10000000
       withLndT
         Lnd.listChannels

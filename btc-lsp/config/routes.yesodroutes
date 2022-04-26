@@ -11,3 +11,4 @@
 
 / HomeR GET
 /profile ProfileR GET POST
+/open-channel OpenChanR GET

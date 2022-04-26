@@ -8,6 +8,7 @@ import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.RawTransaction as Btc
+import qualified Network.Bitcoin.Types as Btc
 import qualified Text.PrettyPrint as PP
 import qualified Universum
 import qualified Witch
@@ -27,6 +28,10 @@ deriving stock instance Generic Btc.BlockVerbose
 deriving stock instance Generic Btc.DecodedRawTransaction
 
 deriving stock instance Generic Btc.BlockChainInfo
+
+deriving stock instance Generic Btc.TransactionID
+
+instance Out Btc.TransactionID
 
 instance Out Btc.TxnOutputType
 
@@ -66,6 +71,12 @@ instance Out Natural where
   doc =
     docPrec 0
 
+instance Out PortNumber where
+  docPrec x =
+    docPrec x . toInteger
+  doc =
+    docPrec 0
+
 instance
   (Psql.ToBackendKey Psql.SqlBackend a) =>
   TryFrom (Psql.Key a) Natural
@@ -85,9 +96,6 @@ instance Out SomeException where
     PP.text . Universum.show
   doc =
     docPrec 0
-
-instance From Btc.TransactionID (TxId 'Funding) where
-  from = via @ByteString
 
 instance From Word32 (Vout 'Funding)
 

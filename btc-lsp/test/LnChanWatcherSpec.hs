@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-deprecations #-}
 module LnChanWatcherSpec
   ( spec,
   )
@@ -100,7 +101,7 @@ testThread result = do
     let r =
           and
             <$> sequence
-              [(== LnChanStatusClosed) . lnChanStatus <$> ch]
+              [(== LnChanStatusFullyResolved) . lnChanStatus <$> ch]
     pure $ justTrue r
   void $ killThread ctid
   putMVar result [isPendingOpenOk, isOpenedOk, isInactivedOk, isClosedOk]
@@ -117,4 +118,4 @@ spec =
       takeMVar thndl
       r <- sequence <$> takeMVar res
       let k = and <$> r
-      liftIO $ shouldBe (Just True) k
+      liftIO $ shouldBe k (Just True)

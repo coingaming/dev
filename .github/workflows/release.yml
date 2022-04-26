@@ -12,7 +12,7 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ./nix.tar.gz
-        key: nix-v1
+        key: nix-v2
         restore-keys: |
           nix-v1
           nix-

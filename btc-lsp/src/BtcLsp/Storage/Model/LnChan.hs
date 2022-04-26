@@ -219,7 +219,7 @@ persistChannelUpdates (Lnd.ChannelEventUpdate channelEvent _) = do
     Lnd.ChannelEventUpdateChannelClosedChannel close ->
       closedChannelUpsert ct close
     Lnd.ChannelEventUpdateChannelFullyResolved cp ->
-      upsertChannelPoint ct LnChanStatusActive cp
+      upsertChannelPoint ct LnChanStatusFullyResolved cp
     Lnd.ChannelEventUpdateChannelPendingOpenChannel
       (Lnd.PendingUpdate txid vout) ->
         upsertChannelPoint ct LnChanStatusPendingOpen $

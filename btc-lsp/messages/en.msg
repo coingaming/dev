@@ -6,16 +6,19 @@ Active: Active
 Continue: Continue
 Update: Update
 Updated: Updated
+Copy: copy
 
 HomeRBreadcrumb: Home
 AuthRBreadcrumb: Login
 SignoutRBreadcrumb: Signout
 ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
+OpenChanRBreadcrumb: Open Channel
 
 HomeRTitle: Welcome | LSP
 SignoutRTitle: Logout | LSP
 ProfileRTitle usr@YesodUser: #{usr} | LSP
+OpenChanRTitle: Open Channel | LSP
 
 Home: Home
 Profile: Profile
@@ -31,3 +34,6 @@ Password: Password
 
 HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
+
+OpenChan: Open Channel
+OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.

@@ -49,7 +49,7 @@ type RawTransaction = HexString
 
 -- | Get a raw transaction from its unique ID.
 getRawTransaction :: Client -> TransactionID -> IO RawTransaction
-getRawTransaction client txid =
+getRawTransaction client (TransactionID txid) =
     callApi client "getrawtransaction" [ tj txid, tj verbose ]
         where verbose = False
 
@@ -233,7 +233,7 @@ instance FromJSON RawTransactionInfo where
 --   returned is quite sprawling and undocumented, so any patches to help
 --   simplify things would be greatly appreciated.
 getRawTransactionInfo :: Client -> TransactionID -> IO RawTransactionInfo
-getRawTransactionInfo client txid =
+getRawTransactionInfo client (TransactionID txid) =
     callApi client "getrawtransaction" [ tj txid, tj verbose ]
         where verbose = True
 
@@ -297,12 +297,13 @@ createRawTransaction client us tgts =
 -- | A successfully decoded raw transaction, from a given serialized,
 --   hex-encoded transaction.
 data DecodedRawTransaction =
-    DecodedRawTransaction { -- | The raw transaction.
-                            decRaw         :: RawTransaction
+    DecodedRawTransaction {
                           -- | The transaction version number.
-                          , decTxnVersion  :: Integer
+                            decTxnVersion  :: Integer
                           , decTxId        :: TransactionID
                           , decTxnLockTime :: Integer
+                          , decSize        :: Integer
+                          , decVsize       :: Integer
                           -- | The vector of transactions in.
                           , decVin         :: Vector TxIn
                           -- | The vector of transactions out.
@@ -310,10 +311,11 @@ data DecodedRawTransaction =
                           } deriving (Show, Read, Ord, Eq)
 
 instance FromJSON DecodedRawTransaction where
-    parseJSON (Object o) = DecodedRawTransaction <$> o .: "hex"
-                                                 <*> o .: "version"
+    parseJSON (Object o) = DecodedRawTransaction <$> o .: "version"
                                                  <*> o .: "txid"
                                                  <*> o .: "locktime"
+                                                 <*> o .: "size"
+                                                 <*> o .: "vsize"
                                                  <*> o .: "vin"
                                                  <*> o .: "vout"
     parseJSON _ = mzero
