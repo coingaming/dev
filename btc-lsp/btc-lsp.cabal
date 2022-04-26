@@ -44,7 +44,6 @@ library
       BtcLsp.Grpc.Server.HighLevel
       BtcLsp.Grpc.Server.LowLevel
       BtcLsp.Grpc.Sig
-      BtcLsp.Hash
       BtcLsp.Import
       BtcLsp.Import.External
       BtcLsp.Import.Psql
@@ -362,7 +361,6 @@ executable btc-lsp-exe
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
-        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql
@@ -588,7 +586,6 @@ executable btc-lsp-integration
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
-        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql
@@ -792,7 +789,6 @@ executable btc-lsp-prof
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
-        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql
@@ -1015,7 +1011,6 @@ test-suite btc-lsp-test
         BtcLsp.Grpc.Server.HighLevel
         BtcLsp.Grpc.Server.LowLevel
         BtcLsp.Grpc.Sig
-        BtcLsp.Hash
         BtcLsp.Import
         BtcLsp.Import.External
         BtcLsp.Import.Psql

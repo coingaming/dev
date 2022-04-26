@@ -16,14 +16,14 @@ ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
 OpenChanRBreadcrumb: Open Channel
 SwapIntoLnCreateRBreadcrumb: Swap
-SwapIntoLnSelectRBreadcrumb swp@HexSha256'LnInvoice'Fund: #{swp}
+SwapIntoLnSelectRBreadcrumb rhx@RHashHex: #{rhx}
 
 HomeRTitle: Welcome | LSP
 SignoutRTitle: Logout | LSP
 ProfileRTitle usr@YesodUser: #{usr} | LSP
 OpenChanRTitle: Open Channel | LSP
 SwapIntoLnCreateRTitle: Swap | LSP
-SwapIntoLnSelectRTitle swp@HexSha256'LnInvoice'Fund: #{swp} | Swap | LSP
+SwapIntoLnSelectRTitle rhx@RHashHex: #{rhx} | Swap | LSP
 
 Home: Home
 Profile: Profile

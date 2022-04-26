@@ -8,7 +8,6 @@ where
 import BtcLsp.Class.Env as Import hiding (Env)
 import BtcLsp.Data.Kind as Import
 import BtcLsp.Data.Type as Import
-import BtcLsp.Hash as Import
 import BtcLsp.Import.External as Import
   ( ExceptT (..),
     eitherM,

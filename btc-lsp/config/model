@@ -12,7 +12,7 @@ User
 SwapIntoLn
   userId UserId
   fundInvoice (LnInvoice 'Fund)
-  fundInvHash (Sha256 (LnInvoice 'Fund))
+  fundInvHash RHash
   fundAddress (OnChainAddress 'Fund)
   fundProof RPreimage Maybe
   refundAddress (OnChainAddress 'Refund)

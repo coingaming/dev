@@ -34,7 +34,7 @@ data SwapRequest = SwapRequest
 
 instance Out SwapRequest
 
-getSwapIntoLnSelectR :: HexSha256 (LnInvoice 'Fund) -> Handler Html
+getSwapIntoLnSelectR :: RHashHex -> Handler Html
 getSwapIntoLnSelectR fundInvHash = do
   (formWidget, formEnctype) <-
     generateFormPost $
@@ -43,7 +43,7 @@ getSwapIntoLnSelectR fundInvHash = do
         aForm
   renderPage fundInvHash formWidget formEnctype
 
-postSwapIntoLnSelectR :: HexSha256 (LnInvoice 'Fund) -> Handler Html
+postSwapIntoLnSelectR :: RHashHex -> Handler Html
 postSwapIntoLnSelectR fundInvHash = do
   ((formResult, formWidget), formEnctype) <-
     runFormPost $
@@ -82,7 +82,7 @@ postSwapIntoLnSelectR fundInvHash = do
       renderPage fundInvHash formWidget formEnctype
 
 renderPage ::
-  HexSha256 (LnInvoice 'Fund) ->
+  RHashHex ->
   Widget ->
   Enctype ->
   Handler Html

@@ -40,6 +40,7 @@ module BtcLsp.Data.Type
     NodeUri (..),
     NodeUriHex (..),
     UtxoLockId (..),
+    RHashHex (..),
   )
 where
 
@@ -673,6 +674,48 @@ instance TryFrom NodeUri NodeUriHex where
       sock = nodeUriSocketAddress src
       host = socketAddressHost sock
       port = socketAddressPort sock
+
+newtype RHashHex = RHashHex
+  { unRHashHex :: Text
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      PathPiece
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out RHashHex
+
+instance ToMessage RHashHex where
+  toMessage = unRHashHex
+
+instance From RHash RHashHex where
+  from =
+    --
+    -- NOTE : decodeUtf8 in general is unsafe
+    -- but here we know that it will not fail
+    -- because of B16
+    --
+    RHashHex
+      . decodeUtf8
+      . B16.encode
+      . coerce
+
+instance From RHashHex RHash where
+  from =
+    --
+    -- NOTE : this is not RFC 4648-compliant,
+    -- using only for the practical purposes
+    --
+    RHash
+      . B16.decodeLenient
+      . encodeUtf8
+      . unRHashHex
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"

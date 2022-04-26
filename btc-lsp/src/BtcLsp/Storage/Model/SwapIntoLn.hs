@@ -19,11 +19,12 @@ createIgnore ::
   ) =>
   Entity User ->
   LnInvoice 'Fund ->
+  RHash ->
   OnChainAddress 'Fund ->
   OnChainAddress 'Refund ->
   UTCTime ->
   m (Entity SwapIntoLn)
-createIgnore userEnt fundInv fundAddr refundAddr expAt =
+createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
   runSql $ do
     ct <- getCurrentTime
     --
@@ -32,11 +33,11 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
     -- into on-chain address.
     --
     Psql.upsertBy
-      (UniqueSwapIntoLnFundInvHash fundInvHash)
+      (UniqueSwapIntoLnFundInvHash fundHash)
       SwapIntoLn
         { swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
-          swapIntoLnFundInvHash = fundInvHash,
+          swapIntoLnFundInvHash = fundHash,
           swapIntoLnFundAddress = fundAddr,
           swapIntoLnFundProof = Nothing,
           swapIntoLnRefundAddress = refundAddr,
@@ -52,8 +53,6 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
       [ SwapIntoLnUpdatedAt
           Psql.=. Psql.val ct
       ]
-  where
-    fundInvHash = sha256 fundInv
 
 updateFundedSql ::
   ( Storage m

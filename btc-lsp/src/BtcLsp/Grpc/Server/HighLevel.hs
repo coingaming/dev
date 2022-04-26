@@ -95,6 +95,7 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
     SwapIntoLn.createIgnore
       userEnt
       fundInv
+      (Lnd.paymentHash fundInvLnd)
       fundAddr
       refundAddr
       expAt
