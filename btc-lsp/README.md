@@ -157,46 +157,26 @@ kubectl get ingress
 
 1. Install aws cli, eksctl and helm:
 
-If you have used nix-env doctl will already be installed, otherwise install it manually.
+If you have used nix-env everything will be already installed, otherwise install manually.
 
 ```
 aws-cli-2.5.4
 eksctl-0.93.0
-helm
+helm-3.8.2
 ```
 
-2. Configure aws cli (access_key_id, secret_access_key, region)
+2. Create IAM user with `AdministratorAccess` in AWS Console
+
+3. Configure aws cli (access_key_id, secret_access_key, region)
 
 ```sh
 aws configure
 ```
 
-2. Setup LetsEncrypt, Elastic Kubernetes Service, RDS Postgres and deploy k8s resources:
+4. Setup EKS, RDS, Route53, ACM and deploy K8S resources:
 
 ```sh
 ./nix/k8s-setup-testnet.sh aws
-```
-
-3. Create A-records within your DNS provider for created LoadBalancers and Ingress controller:
-
-
-```
-testnet-aws-bitcoind.yourdomain.com
-testnet-aws-lnd.yourdomain.com
-testnet-aws-rtl.yourdomain.com
-testnet-aws-lsp.yourdomain.com
-```
-
-Get IPs of LoadBalancers:
-
-```sh
-kubectl get svc
-```
-
-Get IP of Ingress:
-
-```sh
-kubectl get ingress
 ```
 
 ## Troubleshoot
