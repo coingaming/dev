@@ -11,6 +11,7 @@ import BtcLsp.Data.Type as Import
 import BtcLsp.Import.External as Import
   ( ExceptT (..),
     NodePubKey (..),
+    RPreimage (..),
     coerce,
     eitherM,
     maybeM,

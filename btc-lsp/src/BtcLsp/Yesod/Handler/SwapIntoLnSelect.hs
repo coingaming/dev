@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -30,9 +31,34 @@ getSwapIntoLnSelectR fundInvHash = do
                 . coerce
                 . userNodePubKey
                 $ entityVal usrEnt
+        let items =
+              [ ( MsgSwapIntoLnUserId,
+                  Just userPub
+                ),
+                ( MsgSwapIntoLnFundInvoice,
+                  Just $ toText swapIntoLnFundInvoice
+                ),
+                ( MsgSwapIntoLnFundInvHash,
+                  Just . toText $
+                    into @RHashHex swapIntoLnFundInvHash
+                ),
+                ( MsgSwapIntoLnFundAddress,
+                  Just $ toText swapIntoLnFundAddress
+                ),
+                ( MsgSwapIntoLnFundProof,
+                  toHex . coerce
+                    <$> swapIntoLnFundProof
+                ),
+                ( MsgSwapIntoLnFundInvoice,
+                  Just $ toText swapIntoLnRefundAddress
+                )
+              ]
+                >>= \case
+                  (msg, Just txt) -> [(msg, txt)]
+                  (_, Nothing) -> []
         defaultLayout $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle fundInvHash
-          $(widgetFile "swap_into_ln_select")
+          $(widgetFile "simple_list_group")
     )
     . liftIO
     . run

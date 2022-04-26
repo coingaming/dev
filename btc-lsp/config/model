@@ -12,6 +12,11 @@ User
 SwapIntoLn
   userId UserId
   fundInvoice (LnInvoice 'Fund)
+  --
+  -- TODO : Don't use RHash directly, as reference
+  -- because it's privacy leak for the users.
+  -- Generate uuid instead!!!
+  --
   fundInvHash RHash
   fundAddress (OnChainAddress 'Fund)
   fundProof RPreimage Maybe

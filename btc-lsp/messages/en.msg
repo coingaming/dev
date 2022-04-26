@@ -50,4 +50,12 @@ SwapIntoLnFundInvHash: Swap Hash
 SwapIntoLnFundAddress: Swap Address
 SwapIntoLnFundProof: Proof of Swap
 SwapIntoLnRefundAddress: Refund Address
+SwapIntoLnChanCapUser: User Channel Capacity
+SwapIntoLnChanCapLsp: Lsp Channel Capacity
+SwapIntoLnFeeLsp: Lsp Swap Fee
+SwapIntoLnFeeMiner: Channel Mining Fee
+SwapIntoLnStatus: Swap Status
+SwapIntoLnExpiresAt: Expires at
+SwapIntoLnInsertedAt: Inserted at
+SwapIntoLnUpdatedAt: Updated at
 ChannelPrivacy: Channel Privacy
