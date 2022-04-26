@@ -1,36 +1,12 @@
 let P = ../Prelude/Import.dhall
 
-let G = ../Global.dhall
-
 let K = ./Import.dhall
-
-let mkAnnotations
-    : Text → G.CloudProvider → Optional (P.Map.Type Text Text)
-    = λ(name : Text) →
-      λ(cloudProvider : G.CloudProvider) →
-        merge
-          { Aws = Some
-            [ { mapKey = "alb.ingress.kubernetes.io/scheme"
-              , mapValue = "internet-facing"
-              }
-            , { mapKey = "alb.ingress.kubernetes.io/target-type"
-              , mapValue = "ip"
-              }
-            ]
-          , DigitalOcean = None (P.Map.Type Text Text)
-          }
-          cloudProvider
 
 let mkTls
     : Text → Text → K.IngressTLS.Type
     = λ(host : Text) →
       λ(secret : Text) →
         K.IngressTLS::{ hosts = Some [ host ], secretName = Some secret }
-
-let mkIngressClassName
-    : G.CloudProvider → Text
-    = λ(cloudProvider : G.CloudProvider) →
-        merge { Aws = "alb", DigitalOcean = "nginx" } cloudProvider
 
 let mkIngress
     : Text →
@@ -75,4 +51,4 @@ let mkIngress
           }
         }
 
-in  { mkAnnotations, mkIngressClassName, mkTls, mkIngress }
+in  { mkTls, mkIngress }

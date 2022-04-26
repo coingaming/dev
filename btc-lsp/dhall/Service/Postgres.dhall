@@ -2,6 +2,8 @@ let P = ../Prelude/Import.dhall
 
 let G = ../Global.dhall
 
+let S = ../Service.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
@@ -83,12 +85,12 @@ let mkSetupEnv
             . "$THIS_DIR/export-${ownerText}-env.sh"
 
             (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+              kubectl create configmap ${ownerText} \${S.concatSetupEnv
                                                          configMapEnv}
             ) || true
 
             (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+              kubectl create secret generic ${ownerText} \${S.concatSetupEnv
                                                               secretEnv}
             ) || true
             ''

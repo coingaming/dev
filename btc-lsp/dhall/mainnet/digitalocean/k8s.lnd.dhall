@@ -1,5 +1,7 @@
 let G = ../../Global.dhall
 
+let C = ../../CloudProvider.dhall
+
 let K = ../../Kubernetes/Import.dhall
 
 let Lnd = ../../Service/Lnd.dhall
@@ -8,7 +10,7 @@ let network = G.BitcoinNetwork.MainNet
 
 let owner = G.Owner.Lnd
 
-let cloudProvider = Some G.CloudProvider.DigitalOcean
+let cloudProvider = Some C.ProviderType.DigitalOcean
 
 in  { apiVersion = "v1"
     , kind = "List"

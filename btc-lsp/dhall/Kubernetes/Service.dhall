@@ -1,6 +1,6 @@
 let P = ../Prelude/Import.dhall
 
-let G = ../Global.dhall
+let C = ../CloudProvider.dhall
 
 let K = ./Import.dhall
 
@@ -34,11 +34,9 @@ let mkPorts
           ports
 
 let mkAnnotations
-    : Text →
-      G.CloudProvider →
-        Optional (List { mapKey : Text, mapValue : Text })
+    : Text → C.ProviderType → Optional (List { mapKey : Text, mapValue : Text })
     = λ(name : Text) →
-      λ(cloudProvider : G.CloudProvider) →
+      λ(cloudProvider : C.ProviderType) →
         merge
           { Aws = Some
             [ { mapKey = "service.beta.kubernetes.io/aws-load-balancer-type"

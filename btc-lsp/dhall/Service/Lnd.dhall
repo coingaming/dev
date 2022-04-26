@@ -2,6 +2,10 @@ let P = ../Prelude/Import.dhall
 
 let G = ../Global.dhall
 
+let C = ../CloudProvider.dhall
+
+let S = ../Service.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
@@ -14,7 +18,7 @@ let Bitcoind = ./Bitcoind.dhall
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let domain = ../../build/secrets/lnd/domain.txt as Text ? G.todo
+let domain = ../../build/secrets/lnd/domain-name.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
 
@@ -163,12 +167,12 @@ let mkSetupEnv
             . "$THIS_DIR/export-${G.unOwner G.Owner.Lnd}-env.sh"
 
             (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+              kubectl create configmap ${ownerText} \${S.concatSetupEnv
                                                          configMapEnv}
             ) || true
 
             (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+              kubectl create secret generic ${ownerText} \${S.concatSetupEnv
                                                               secretEnv}
             ) || true
             ''
@@ -185,20 +189,20 @@ let mkServiceType
 
 let mkServiceAnnotations
     : G.BitcoinNetwork →
-      Optional G.CloudProvider →
+      Optional C.ProviderType →
         Optional (List { mapKey : Text, mapValue : Text })
     = λ(net : G.BitcoinNetwork) →
-      λ(cloudProvider : Optional G.CloudProvider) →
+      λ(cloudProvider : Optional C.ProviderType) →
         merge
           { MainNet =
               P.Optional.concatMap
-                G.CloudProvider
+                C.ProviderType
                 (P.Map.Type Text Text)
                 (Service.mkAnnotations (G.unOwner G.Owner.Lnd))
                 cloudProvider
           , TestNet =
               P.Optional.concatMap
-                G.CloudProvider
+                C.ProviderType
                 (P.Map.Type Text Text)
                 (Service.mkAnnotations (G.unOwner G.Owner.Lnd))
                 cloudProvider
@@ -207,10 +211,10 @@ let mkServiceAnnotations
           net
 
 let mkService
-    : G.BitcoinNetwork → G.Owner → Optional G.CloudProvider → K.Service.Type
+    : G.BitcoinNetwork → G.Owner → Optional C.ProviderType → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
       λ(owner : G.Owner) →
-      λ(cloudProvider : Optional G.CloudProvider) →
+      λ(cloudProvider : Optional C.ProviderType) →
         Service.mkService
           (G.unOwner owner)
           (mkServiceAnnotations net cloudProvider)

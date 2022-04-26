@@ -1,12 +1,14 @@
 let G = ../../Global.dhall
 
+let C = ../../CloudProvider.dhall
+
 let K = ../../Kubernetes/Import.dhall
 
 let Bitcoind = ../../Service/Bitcoind.dhall
 
 let network = G.BitcoinNetwork.TestNet
 
-let cloudProvider = Some G.CloudProvider.Aws
+let cloudProvider = Some C.ProviderType.Aws
 
 in  { apiVersion = "v1"
     , kind = "List"
