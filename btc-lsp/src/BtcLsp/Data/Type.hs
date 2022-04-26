@@ -236,8 +236,9 @@ newtype
   Money
     (owner :: Owner)
     (btcl :: BitcoinLayer)
-    (mrel :: MoneyRelation)
-  = Money MSat
+    (mrel :: MoneyRelation) = Money
+  { unMoney :: MSat
+  }
   deriving newtype
     ( Eq,
       Ord,

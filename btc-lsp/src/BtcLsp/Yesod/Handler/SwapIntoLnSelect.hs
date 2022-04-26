@@ -49,8 +49,32 @@ getSwapIntoLnSelectR fundInvHash = do
                   toHex . coerce
                     <$> swapIntoLnFundProof
                 ),
-                ( MsgSwapIntoLnFundInvoice,
+                ( MsgSwapIntoLnRefundAddress,
                   Just $ toText swapIntoLnRefundAddress
+                ),
+                ( MsgSwapIntoLnChanCapUser,
+                  Just $ inspectSat swapIntoLnChanCapUser
+                ),
+                ( MsgSwapIntoLnChanCapLsp,
+                  Just $ inspectSat swapIntoLnChanCapLsp
+                ),
+                ( MsgSwapIntoLnFeeLsp,
+                  Just $ inspectSat swapIntoLnFeeLsp
+                ),
+                ( MsgSwapIntoLnFeeMiner,
+                  Just $ inspectSat swapIntoLnFeeMiner
+                ),
+                ( MsgSwapIntoLnStatus,
+                  Just $ inspectPlain swapIntoLnStatus
+                ),
+                ( MsgSwapIntoLnExpiresAt,
+                  Just $ toPathPiece swapIntoLnExpiresAt
+                ),
+                ( MsgSwapIntoLnInsertedAt,
+                  Just $ toPathPiece swapIntoLnInsertedAt
+                ),
+                ( MsgSwapIntoLnUpdatedAt,
+                  Just $ toPathPiece swapIntoLnUpdatedAt
                 )
               ]
                 >>= \case
