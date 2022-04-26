@@ -11,7 +11,6 @@ import TestWithLndLsp (mainTestSetup)
 
 main :: IO ()
 main = do
-  print ("|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" :: Text)
   mainTestSetup
   hspecWith
     defaultConfig

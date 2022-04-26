@@ -230,7 +230,6 @@ withEnv rc this = do
       ByteString ->
       KatipContextT IO (Maybe ByteString)
     signT lnd msg = do
-      $(logTM) DebugS . logStr $ ("=====Sign Env.hs " :: Text)
       eSig <-
         Lnd.signMessage lnd $
           Lnd.SignMessageRequest
