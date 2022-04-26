@@ -52,11 +52,24 @@ initWallet () {
   done
 }
 
+createBtcWallet () {
+  SERVICE="$1"
+  BITCOIND_POD=`sh $THIS_DIR/k8s-get-pod.sh $SERVICE`
+  ( echo "Create BTC Wallet of $BITCOIND_POD" \
+    && kubectl exec \
+        -it "$BITCOIND_POD" \
+        -- bitcoin-cli \
+        -rpcwait -$BITCOIN_NETWORK \
+        createwallet "testwallet") || true
+
+}
+
 initWallet "lnd"
 
 if [ "$BITCOIN_NETWORK" = "regtest" ]; then
   for OWNER in lnd-alice lnd-bob; do
     initWallet "$OWNER"
   done
+  createBtcWallet "bitcoind"
 fi
 

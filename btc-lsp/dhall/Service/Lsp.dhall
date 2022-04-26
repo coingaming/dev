@@ -113,7 +113,7 @@ let mkLspGrpcClientEnv
     : P.JSON.Type
     = P.JSON.object
         ( toMap
-            { host = P.JSON.string (G.unOwner G.Owner.Lnd)
+            { host = P.JSON.string (G.unOwner G.Owner.Lsp)
             , port = P.JSON.natural grpcPort.unPort
             , sig_header_name = P.JSON.string "sig-bin"
             , compress_mode = P.JSON.string "Compressed"
