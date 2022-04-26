@@ -8,10 +8,11 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 
 BITCOIN_NETWORK="testnet"
 CLOUD_PROVIDER="aws"
-K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
-DB_INSTANCE_NAME="lsp-$BITCOIN_NETWORK"
 DB_USERNAME="lsp"
 TMP_DIR="/tmp"
+K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
+DB_INSTANCE_NAME="$K8S_CLUSTER_NAME"
+IDEMPOTENCY_TOKEN=`date +%F | md5 | cut -c1-5`
 
 isAwsConfigured () {
   for VARNAME in "aws_access_key_id" "aws_secret_access_key" "region"; do
@@ -22,10 +23,50 @@ isAwsConfigured () {
   done
 }
 
+createIAMOpenIDConnectProvider () {
+  eksctl utils associate-iam-oidc-provider \
+    --cluster="$K8S_CLUSTER_NAME" \
+    --approve
+}
+
+createAWSLBControllerPolicy () {
+  local POLICY_FILEPATH="$TMP_DIR/iam_policy.json"
+  curl -o "$POLICY_FILEPATH" https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.1/docs/install/iam_policy.json
+  aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document "file://$POLICY_FILEPATH" && \
+  rm "$POLICY_FIPATH"
+}
+
+createAWSLBServiceAccount () {
+  local AWS_ACCOUNT_ID=`aws sts get-caller-identity | jq -r '.Account'`
+
+  eksctl create iamserviceaccount \
+    --cluster="$K8S_CLUSTER_NAME" \
+    --namespace=kube-system \
+    --name=aws-load-balancer-controller \
+    --role-name "AmazonEKSLoadBalancerControllerRole" \
+    --attach-policy-arn="arn:aws:iam::$AWS_ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy" \
+    --approve
+}
+
+createAWSLBController () {
+  helm repo add eks https://aws.github.io/eks-charts && \
+  helm repo update && \
+  helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+    -n kube-system \
+    --set clusterName="$K8S_CLUSTER_NAME" \
+    --set serviceAccount.create=false \
+    --set serviceAccount.name=aws-load-balancer-controller
+
+  kubectl get deployment \
+    -n kube-system aws-load-balancer-controller
+}
+
 createK8Scluster () {
   local AWS_REGION=`aws configure get region`
 
-  echo "Creating \"$K8S_CLUSTER_NAME\" k8s cluster on AWS..."
+  echo "Creating \"$K8S_CLUSTER_NAME\" k8s cluster on AWS [EKS]..."
 
   echo "Public CIDR range is required! (to access Kubernetes API endpoint after cluster creation)"
   read -p "Input your public CIDR: " "K8S_API_ENDPOINT_PUBLIC_ACCESS_CIDR"
@@ -71,7 +112,7 @@ deleteK8Scluster () {
 setupK8Scluster () {
   isInstalled eksctl && isInstalled helm && isAwsConfigured
 
-  local CREATE_AWS_LB_CONTROLLER="createIAMOpenIDConnectProvider && createAWSLBControllerPolicy && createAWSLBServiceAccount createAWSLBController"
+  local CREATE_AWS_LB_CONTROLLER="createIAMOpenIDConnectProvider && createAWSLBControllerPolicy && createAWSLBServiceAccount && createAWSLBController"
 
   if eksctl get cluster --name "$K8S_CLUSTER_NAME"; then
     confirmAction \
@@ -80,48 +121,128 @@ setupK8Scluster () {
   else
     confirmAction \
     "==> Create new \"$K8S_CLUSTER_NAME\" k8s cluster" \
-    "createK8Scluster"
+    "createK8Scluster && $CREATE_AWS_LB_CONTROLLER"
   fi
 }
 
-createAWSLBControllerPolicy () {
-  local POLICY_FILEPATH="$TMP_DIR/iam_policy.json"
-  curl -o "$POLICY_FILEPATH" https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.1/docs/install/iam_policy.json
-  aws iam create-policy \
-    --policy-name AWSLoadBalancerControllerIAMPolicy \
-    --policy-document "file://$POLICY_FILEPATH" && \
-  rm "$POLICY_FIPATH"
+createHostedZone () {
+  echo "Creating \"$DOMAIN_NAME\" hosted zone on AWS [Route53]..."
+
+  aws route53 create-hosted-zone \
+    --name "$DOMAIN_NAME" \
+    --caller-reference "$IDEMPOTENCY_TOKEN"
 }
 
-createIAMOpenIDConnectProvider () {
-  eksctl utils associate-iam-oidc-provider \
-  --cluster="$K8S_CLUSTER_NAME" \
-  --approve
+deleteHostedZone () {
+  echo "Deleting \"$DOMAIN_NAME\" hosted zone from AWS..."
+  aws route53 delete-hosted-zone "$DOMAIN_NAME" --wait
 }
 
-createAWSLBServiceAccount () {
-  local AWS_ACCOUNT_ID=`aws sts get-caller-identity | jq -r '.Account'`
-
-  eksctl create iamserviceaccount \
-  --cluster="$K8S_CLUSTER_NAME" \
-  --namespace=kube-system \
-  --name=aws-load-balancer-controller \
-  --role-name "AmazonEKSLoadBalancerControllerRole" \
-  --attach-policy-arn="arn:aws:iam::$AWS_ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy" \
-  --approve
+setupHostedZone () {
+  createHostedZone
 }
 
-createAWSLBController () {
-  helm repo add eks https://aws.github.io/eks-charts && \
-  helm repo update && \
-  helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-  -n kube-system \
-  --set clusterName="$K8S_CLUSTER_NAME" \
-  --set serviceAccount.create=false \
-  --set serviceAccount.name=aws-load-balancer-controller
+getManagedCertARN () {
+  aws acm list-certificates \
+    --query "CertificateSummaryList[?DomainName=='$BITCOIND_DOMAIN'].CertificateArn" \
+    --output text | cut -f1
+}
 
-  kubectl get deployment \
-    -n kube-system aws-load-balancer-controller
+createManagedCert () {
+  echo "Creating \"*.$DOMAIN_NAME\" managed certificate on AWS [ACM]..."
+
+  local CERT_ARN=$(aws acm request-certificate \
+    --domain-name "$BITCOIND_DOMAIN" \
+    --subject-alternative-names "$LND_DOMAIN" "$RTL_DOMAIN" "$LSP_DOMAIN" \
+    --validation-method DNS \
+    --idempotency-token "$IDEMPOTENCY_TOKEN" \
+    --query CertificateArn \
+    --options CertificateTransparencyLoggingPreference=DISABLED \
+    --output text)
+
+  local VALIDATION_NAME=$(aws acm describe-certificate \
+    --certificate-arn "$CERT_ARN" \
+    --query "Certificate.DomainValidationOptions[?DomainName=='$BITCOIND_DOMAIN'].ResourceRecord.Name" \
+    --output text)
+
+  local VALIDATION_VALUE=$(aws acm describe-certificate \
+    --certificate-arn "$CERT_ARN" \
+    --query "Certificate.DomainValidationOptions[?DomainName=='$BITCOIND_DOMAIN'].ResourceRecord.Value" \
+    --output text)
+
+  local HOSTED_ZONE_ID=$(aws route53 list-hosted-zones-by-name \
+    --dns-name "$DOMAIN_NAME" \
+    --query "HostedZones[?Name=='$DOMAIN_NAME.'].Id" \
+    --output text)
+
+  local HOSTED_ZONE=${HOSTED_ZONE_ID##*/}
+
+  local CHANGE_BATCH=$(cat <<EOM
+  {
+    "Changes": [
+      {
+        "Action": "UPSERT",
+        "ResourceRecordSet": {
+          "Name": "${VALIDATION_NAME}",
+          "Type": "CNAME",
+          "TTL": 300,
+          "ResourceRecords": [
+            {
+              "Value": "${VALIDATION_VALUE}"
+            }
+          ]
+        }
+      }
+    ]
+  }
+EOM
+)
+
+  local CHANGE_BATCH_REQUEST_ID=$(aws route53 change-resource-record-sets \
+    --hosted-zone-id "$HOSTED_ZONE" \
+    --change-batch "$CHANGE_BATCH" \
+    --query "ChangeInfo.Id" \
+    --output text)
+
+  echo "Waiting for validation records to be created..."
+  aws route53 wait resource-record-sets-changed \
+    --id "$CHANGE_BATCH_REQUEST_ID"
+
+  echo "Waiting for certificate to validate..."
+  aws acm wait certificate-validated \
+    --certificate-arn "$CERT_ARN"
+}
+
+deleteManagedCert () {
+  local CERT_ARN=`getManagedCertARN`
+
+  # TODO: must also delete CNAME record from Route53
+
+  echo "Deleting \"$CERT_ARN\" cert from AWS..."
+  aws acm delete-certificate \
+    --certificate-arn "$CERT_ARN"
+}
+
+writeCertARN () {
+  local CERT_ARN=`getManagedCertARN`
+
+  for SERVICE_DIR in "$BITCOIND_PATH" "$LND_PATH" "$RTL_PATH" "$LSP_PATH"; do
+    echo "$CERT_ARN" > "$SERVICE_DIR/cert-arn.txt"
+  done
+}
+
+setupManagedCert () {
+  local CERT_ARN=`getManagedCertARN`
+     
+  if [ -n "$CERT_ARN" ]; then
+    confirmAction \
+      "==> Delete existing \"$DOMAIN_NAME\" cert and create a new one" \
+      "deleteManagedCert && createManagedCert && writeCertARN"
+  else
+    confirmAction \
+      "==> Create new \"$DOMAIN_NAME\" cert" \
+      "createManagedCert && writeCertARN"
+  fi
 }
 
 getVpcId () {
@@ -241,14 +362,16 @@ confirmAction \
 "==> Clean up previous build" \
 "cleanBuildDir"
 
-askForDomainName "$BITCOIN_NETWORK-$CLOUD_PROVIDER-"
+askForDomainName
 
-confirmAction \
-"==> Setup LetsEncrypt certificate?" \
-"setupLetsEncryptCert"
+setupManagedCert
+
+exit 1;
 
 checkRequiredFiles
 setupK8Scluster
+setupHostedZone
+setupManagedCert
 setupDBInstance
 
 echo "==> Checking that db connection details are saved"
@@ -288,5 +411,13 @@ sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
+
+# TODO: create records in DNS for lsp rtl etc...
+# TODO: disable generation for lnd, lsp certs
+# TODO: delegate testnet-aws.coins.io and testnet-do.coins.io from cloudflare
+# TODO: setup certmanager for DO setup
+# TODO: dont generate rtl-tls secret for AWS setup
+# TODO: create shared secret where domain and certificate arn are written
+setupDNSRecords
 
 echo "==> Setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
