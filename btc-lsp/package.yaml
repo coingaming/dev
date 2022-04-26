@@ -277,6 +277,27 @@ executables:
         - btc-lsp
 
 tests:
+  btc-lsp-test:
+    main: Main.hs
+    source-dirs:
+    - test
+    ghc-options:
+    - -O2
+    - -optc-O3
+    - -funfolding-use-threshold=16
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -optl-fuse-ld=gold
+    ld-options:
+    - -fuse-ld=gold
+    dependencies:
+    - QuickCheck
+    - quickcheck-instances
+    - generic-arbitrary
+    - hspec
+    - hspec-expectations
+    - hspec-wai
   btc-lsp-integration-test:
     main: Integration.hs
     source-dirs:
@@ -308,24 +329,3 @@ tests:
       else:
         dependencies:
         - btc-lsp
-  btc-lsp-test:
-    main: Main.hs
-    source-dirs:
-    - test
-    ghc-options:
-    - -O2
-    - -optc-O3
-    - -funfolding-use-threshold=16
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    - -optl-fuse-ld=gold
-    ld-options:
-    - -fuse-ld=gold
-    dependencies:
-    - QuickCheck
-    - quickcheck-instances
-    - generic-arbitrary
-    - hspec
-    - hspec-expectations
-    - hspec-wai
