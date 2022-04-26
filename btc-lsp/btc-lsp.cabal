@@ -125,6 +125,7 @@ library
       StandaloneDeriving
       DerivingVia
       ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -fwarn-tabs -O2
   build-depends:
       GenericPretty
@@ -146,7 +147,6 @@ library
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
-    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -169,6 +169,7 @@ library
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -248,6 +249,7 @@ executable btc-lsp-exe
       StandaloneDeriving
       DerivingVia
       ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -270,7 +272,6 @@ executable btc-lsp-exe
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
-    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -293,6 +294,7 @@ executable btc-lsp-exe
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -466,6 +468,7 @@ executable btc-lsp-integration
       StandaloneDeriving
       DerivingVia
       ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -main-is Integration -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -489,7 +492,6 @@ executable btc-lsp-integration
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
-    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -517,6 +519,7 @@ executable btc-lsp-integration
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -676,6 +679,7 @@ executable btc-lsp-prof
       StandaloneDeriving
       DerivingVia
       ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -698,7 +702,6 @@ executable btc-lsp-prof
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
-    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -721,6 +724,7 @@ executable btc-lsp-prof
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -892,6 +896,7 @@ test-suite btc-lsp-test
       StandaloneDeriving
       DerivingVia
       ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -915,7 +920,6 @@ test-suite btc-lsp-test
     , colonnade
     , conduit >=1.0 && <2.0
     , containers
-    , cryptohash-sha256
     , cryptonite
     , data-default
     , directory >=1.1 && <1.4
@@ -942,6 +946,7 @@ test-suite btc-lsp-test
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client

@@ -37,6 +37,7 @@ dependencies:
 # time
 - time
 - chronos
+- iso8601-time
 - unbounded-delays
 # storage
 - persistent >= 2.13.2.1
@@ -81,7 +82,6 @@ dependencies:
 - SHA
 - lnd-client
 - cryptonite
-- cryptohash-sha256
 - secp256k1-haskell
 # web
 - wai
@@ -161,6 +161,7 @@ default-extensions:
 - StandaloneDeriving
 - DerivingVia
 - ExistentialQuantification
+- InstanceSigs
 
 ghc-options:
 # For details on warnings: https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html

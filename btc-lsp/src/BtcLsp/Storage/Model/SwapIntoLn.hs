@@ -5,6 +5,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
+    getByRHashHex,
     getByFundAddress,
     getLatestSwapT,
     getWaitingFundSql,
@@ -208,6 +209,17 @@ getSwapsToSettle =
             -- Maybe limits, some proper retries etc.
             --
             pure (swap, user, chan)
+
+getByRHashHex ::
+  ( Storage m
+  ) =>
+  RHashHex ->
+  m (Maybe (Entity SwapIntoLn))
+getByRHashHex =
+  runSql
+    . Psql.getBy
+    . UniqueSwapIntoLnFundInvHash
+    . from
 
 getByFundAddress ::
   ( Storage m

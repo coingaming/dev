@@ -124,6 +124,10 @@ form > div.form-group > span > label > input[type="checkbox"] {
   padding: 15px;
 }
 
+.breadcrumb {
+  text-transform: none !important;
+}
+
 .breadcrumb > li {
   font-size: 16px;
 }

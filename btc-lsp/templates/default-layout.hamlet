@@ -34,9 +34,9 @@
       <ul .breadcrumb>
           $forall bc <- parents
               <li>
-                  <a .text-capitalize href="@{fst bc}">#{snd bc}
+                  <a href="@{fst bc}">#{snd bc}
 
-          <li .active.text-capitalize>#{title}
+          <li .active>#{title}
     $if (Just HomeR /= mcurrentRoute)
       $maybe msg <- mmsg
         <div .alert.alert-info #message>#{msg}

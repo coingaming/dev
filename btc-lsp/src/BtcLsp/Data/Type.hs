@@ -49,6 +49,7 @@ import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Data.ByteString.Base16 as B16
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
@@ -177,7 +178,8 @@ newtype LnInvoice (mrel :: MoneyRelation)
     ( Eq,
       Show,
       Psql.PersistField,
-      Psql.PersistFieldSql
+      Psql.PersistFieldSql,
+      PathPiece
     )
   deriving stock
     ( Generic
@@ -377,6 +379,17 @@ data SwapStatus
     )
 
 instance Out SwapStatus
+
+instance PathPiece SwapStatus where
+  fromPathPiece :: Text -> Maybe SwapStatus
+  fromPathPiece =
+    readMaybe
+      . unpack
+      . T.toTitle
+  toPathPiece :: SwapStatus -> Text
+  toPathPiece =
+    T.toLower
+      . Universum.show
 
 data Timing
   = Permanent
@@ -692,7 +705,10 @@ newtype RHashHex = RHashHex
 instance Out RHashHex
 
 instance ToMessage RHashHex where
-  toMessage = unRHashHex
+  toMessage =
+    (<> "...")
+      . T.take 7
+      . unRHashHex
 
 instance From RHash RHashHex where
   from =
