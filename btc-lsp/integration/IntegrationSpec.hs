@@ -17,7 +17,7 @@ import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
 import qualified LndClient.LndTest as LndTest
 import qualified LndClient.RPC.Katip as Lnd
-import qualified Network.Bitcoin as Btc
+import qualified LndClient.Data.SendCoins as Lnd
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
@@ -75,7 +75,6 @@ spec = do
               & SwapIntoLn.refundOnChainAddress
                 .~ from @(OnChainAddress 'Refund) refundAddr
           )
-    --      liftIO $ True `shouldBe` True
     --
     -- TODO : do more precise match!!!
     --
@@ -98,12 +97,7 @@ spec = do
                      . SwapIntoLn.val
                      . SwapIntoLn.val
                  )
-      addr <- withBtcT Btc.getNewAddress (\h -> h Nothing)
-      void $ withBtcT Btc.generateToAddress (\h -> h 10 addr (Just 10))
-      void $
-        withBtcT
-          Btc.sendToAddress
-          (\h -> h fundAddr 0.01 Nothing Nothing)
+      void $ withLndTestT LndAlice Lnd.sendCoins (\h -> h (Lnd.SendCoinsRequest fundAddr (MSat 200000000)))
       lift $
         LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
       lift $ mine 10 LndLsp
