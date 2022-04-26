@@ -12,11 +12,11 @@ DB_USERNAME="lsp"
 TMP_DIR="/tmp"
 K8S_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
 DB_INSTANCE_NAME="$K8S_CLUSTER_NAME"
-IDEMPOTENCY_TOKEN=`date +%F | md5 | cut -c1-5`
+IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
 
 isAwsConfigured () {
   for VARNAME in "aws_access_key_id" "aws_secret_access_key" "region"; do
-    if [ -z `aws configure get $VARNAME` ]; then
+    if [ -z $(aws configure get $VARNAME) ]; then
       echo "Please set up \"$VARNAME\" by running \"aws configure\" in your terminal."
       exit 1;
     fi
@@ -39,7 +39,7 @@ createAWSLBControllerPolicy () {
 }
 
 createAWSLBServiceAccount () {
-  local AWS_ACCOUNT_ID=`aws sts get-caller-identity | jq -r '.Account'`
+  local AWS_ACCOUNT_ID=$(aws sts get-caller-identity | jq -r '.Account')
 
   eksctl create iamserviceaccount \
     --cluster="$K8S_CLUSTER_NAME" \
@@ -64,7 +64,7 @@ createAWSLBController () {
 }
 
 createK8Scluster () {
-  local AWS_REGION=`aws configure get region`
+  local AWS_REGION=$(aws configure get region)
 
   echo "Creating \"$K8S_CLUSTER_NAME\" k8s cluster on AWS [EKS]..."
 
@@ -125,6 +125,13 @@ setupK8Scluster () {
   fi
 }
 
+getHostedZoneId () {
+  aws route53 list-hosted-zones-by-name \
+    --dns-name "$DOMAIN_NAME" \
+    --query "HostedZones[?Name=='$DOMAIN_NAME.'].Id" \
+    --output text
+}
+
 createHostedZone () {
   echo "Creating \"$DOMAIN_NAME\" hosted zone on AWS [Route53]..."
 
@@ -143,58 +150,38 @@ setupHostedZone () {
 }
 
 getManagedCertARN () {
+  local SERVICE_DOMAIN_NAME="$1"
+
   aws acm list-certificates \
-    --query "CertificateSummaryList[?DomainName=='$BITCOIND_DOMAIN'].CertificateArn" \
+    --query "CertificateSummaryList[?DomainName=='$SERVICE_DOMAIN_NAME'].CertificateArn" \
     --output text | cut -f1
 }
 
-createManagedCert () {
-  echo "Creating \"*.$DOMAIN_NAME\" managed certificate on AWS [ACM]..."
+upsertDNSRecord () {
+  local RECORD_NAME="$1"
+  local RECORD_VALUE="$2"
 
-  local CERT_ARN=$(aws acm request-certificate \
-    --domain-name "$BITCOIND_DOMAIN" \
-    --subject-alternative-names "$LND_DOMAIN" "$RTL_DOMAIN" "$LSP_DOMAIN" \
-    --validation-method DNS \
-    --idempotency-token "$IDEMPOTENCY_TOKEN" \
-    --query CertificateArn \
-    --options CertificateTransparencyLoggingPreference=DISABLED \
-    --output text)
-
-  local VALIDATION_NAME=$(aws acm describe-certificate \
-    --certificate-arn "$CERT_ARN" \
-    --query "Certificate.DomainValidationOptions[?DomainName=='$BITCOIND_DOMAIN'].ResourceRecord.Name" \
-    --output text)
-
-  local VALIDATION_VALUE=$(aws acm describe-certificate \
-    --certificate-arn "$CERT_ARN" \
-    --query "Certificate.DomainValidationOptions[?DomainName=='$BITCOIND_DOMAIN'].ResourceRecord.Value" \
-    --output text)
-
-  local HOSTED_ZONE_ID=$(aws route53 list-hosted-zones-by-name \
-    --dns-name "$DOMAIN_NAME" \
-    --query "HostedZones[?Name=='$DOMAIN_NAME.'].Id" \
-    --output text)
-
+  local HOSTED_ZONE_ID=$(getHostedZoneId)
   local HOSTED_ZONE=${HOSTED_ZONE_ID##*/}
 
   local CHANGE_BATCH=$(cat <<EOM
-  {
-    "Changes": [
-      {
-        "Action": "UPSERT",
-        "ResourceRecordSet": {
-          "Name": "${VALIDATION_NAME}",
-          "Type": "CNAME",
-          "TTL": 300,
-          "ResourceRecords": [
-            {
-              "Value": "${VALIDATION_VALUE}"
-            }
-          ]
+    {
+      "Changes": [
+        {
+          "Action": "UPSERT",
+          "ResourceRecordSet": {
+            "Name": "${RECORD_NAME}",
+            "Type": "CNAME",
+            "TTL": 300,
+            "ResourceRecords": [
+              {
+                "Value": "${RECORD_VALUE}"
+              }
+            ]
+          }
         }
-      }
-    ]
-  }
+      ]
+    }
 EOM
 )
 
@@ -204,9 +191,38 @@ EOM
     --query "ChangeInfo.Id" \
     --output text)
 
-  echo "Waiting for validation records to be created..."
+  echo "Waiting for validation records to be created in Route53..."
   aws route53 wait resource-record-sets-changed \
     --id "$CHANGE_BATCH_REQUEST_ID"
+}
+
+createManagedCert () {
+  local SERVICE_DOMAIN_NAME="$1"
+
+  echo "Creating certificate for $SERVICE_DOMAIN_NAME on AWS [ACM]..."
+
+  local CERT_ARN=$(aws acm request-certificate \
+    --domain-name "$SERVICE_DOMAIN_NAME" \
+    --validation-method DNS \
+    --idempotency-token "$IDEMPOTENCY_TOKEN" \
+    --query CertificateArn \
+    --options CertificateTransparencyLoggingPreference=DISABLED \
+    --output text)
+
+  echo "Waiting until certificate is registered in ACM..."
+  sleep 10;
+  
+  local VALIDATION_NAME=$(aws acm describe-certificate \
+    --certificate-arn "$CERT_ARN" \
+    --query "Certificate.DomainValidationOptions[?DomainName=='$SERVICE_DOMAIN_NAME'].ResourceRecord.Name" \
+    --output text)
+
+  local VALIDATION_VALUE=$(aws acm describe-certificate \
+    --certificate-arn "$CERT_ARN" \
+    --query "Certificate.DomainValidationOptions[?DomainName=='$SERVICE_DOMAIN_NAME'].ResourceRecord.Value" \
+    --output text)
+
+  upsertDNSRecord "$VALIDATION_NAME" "$VALIDATION_VALUE"
 
   echo "Waiting for certificate to validate..."
   aws acm wait certificate-validated \
@@ -214,35 +230,38 @@ EOM
 }
 
 deleteManagedCert () {
-  local CERT_ARN=`getManagedCertARN`
+  local CERT_ARN="$1"
 
-  # TODO: must also delete CNAME record from Route53
-
-  echo "Deleting \"$CERT_ARN\" cert from AWS..."
+  echo "Deleting \"$CERT_ARN\" certificate from AWS [ACM]..."
   aws acm delete-certificate \
     --certificate-arn "$CERT_ARN"
 }
 
 writeCertARN () {
-  local CERT_ARN=`getManagedCertARN`
+  local SERVICE_NAME="$1"
+  local SERVICE_DOMAIN_NAME="$2"
+  local CERT_ARN=$(getManagedCertARN "$SERVICE_DOMAIN_NAME")
+  local SERVICE_CERT_ARN_PATH="$SECRETS_DIR/$SERVICE/cert-arn.txt"
 
-  for SERVICE_DIR in "$BITCOIND_PATH" "$LND_PATH" "$RTL_PATH" "$LSP_PATH"; do
-    echo "$CERT_ARN" > "$SERVICE_DIR/cert-arn.txt"
-  done
+  echo "Saving $CERT_ARN to $SERVICE_CERT_ARN_PATH"
+  echo -n "$CERT_ARN" > "$SERVICE_CERT_ARN_PATH"
 }
 
-setupManagedCert () {
-  local CERT_ARN=`getManagedCertARN`
+setupManagedCerts () {
+  for SERVICE in bitcoind lnd rtl lsp; do
+    local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domain-name.txt")
+    local CERT_ARN=$(getManagedCertARN "$SERVICE_DOMAIN_NAME")
      
-  if [ -n "$CERT_ARN" ]; then
-    confirmAction \
-      "==> Delete existing \"$DOMAIN_NAME\" cert and create a new one" \
-      "deleteManagedCert && createManagedCert && writeCertARN"
-  else
-    confirmAction \
-      "==> Create new \"$DOMAIN_NAME\" cert" \
-      "createManagedCert && writeCertARN"
-  fi
+    if [ -n "$CERT_ARN" ]; then
+      confirmAction \
+        "==> Delete existing \"$SERVICE_DOMAIN_NAME\" cert and create a new one" \
+        "deleteManagedCert $CERT_ARN && createManagedCert $SERVICE_DOMAIN_NAME && writeCertARN $SERVICE $SERVICE_DOMAIN_NAME"
+    else
+      confirmAction \
+        "==> Create new \"$SERVICE_DOMAIN_NAME\" cert" \
+        "createManagedCert $SERVICE_DOMAIN_NAME && writeCertARN $SERVICE $SERVICE_DOMAIN_NAME"
+    fi
+  done
 }
 
 getVpcId () {
@@ -253,7 +272,7 @@ getVpcId () {
 }
 
 getSecurityGroupId () {
-  local VPC_ID=`getVpcId $K8S_CLUSTER_NAME`
+  local VPC_ID=$(getVpcId "$K8S_CLUSTER_NAME")
 
   aws ec2 describe-security-groups \
     --filters "Name=group-name,Values=eks-cluster-sg-$K8S_CLUSTER_NAME*" "Name=vpc-id,Values=$VPC_ID" \
@@ -262,7 +281,7 @@ getSecurityGroupId () {
 
 createDBsubnetGroup () {
   local SUBNET_GROUP_NAME="$1"
-  local VPC_ID=`getVpcId $K8S_CLUSTER_NAME`
+  local VPC_ID=$(getVpcId "$K8S_CLUSTER_NAME")
 
   local PRIVATE_SUBNETS_ID=$(aws ec2 describe-subnets \
     --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:Name,Values=eksctl-$K8S_CLUSTER_NAME-cluster/SubnetPrivate*" \
@@ -285,8 +304,8 @@ deleteDBsubnetGroup () {
 }
 
 createDBinstance () {
-  local DB_PASSWORD=`cat $POSTGRES_PATH/dbpassword.txt`
-  local SG_ID=`getSecurityGroupId $K8S_CLUSTER_NAME`
+  local DB_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
+  local SG_ID=$(getSecurityGroupId "$K8S_CLUSTER_NAME")
 
   echo "Creating \"$DB_INSTANCE_NAME\" database instance on AWS..."
   aws rds create-db-instance \
@@ -322,7 +341,7 @@ deleteDBinstance () {
 }
 
 writeDBURI () {
-  local DB_PASSWORD=`cat $POSTGRES_PATH/dbpassword.txt`
+  local DB_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
   local DB_HOST=$(aws rds describe-db-instances \
     --filters "Name=db-instance-id,Values=$DB_INSTANCE_NAME" \
     --query "*[].[Endpoint.Address,Endpoint.Port]" \
@@ -356,18 +375,43 @@ setupDBInstance () {
   fi
 }
 
+getK8SServiceExternalIP () {
+  local SERVICE_NAME="$1"
+
+  kubectl get svc "$SERVICE_NAME" -o json | jq -r ".status.loadBalancer.ingress[].hostname"
+}
+
+getK8SIngressExternalIP () {
+  local INGRESS_NAME="$1"
+
+  kubectl get ingress "$INGRESS_NAME" -o json | jq -r ".status.loadBalancer.ingress[].hostname"
+}
+
+setupDNSRecords () {
+  for SERVICE in bitcoind lnd lsp; do
+    local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domain-name.txt")
+    local SERVICE_EXTERNAL_IP=$(getK8SServiceExternalIP $SERVICE)
+
+    echo "Adding CNAME DNS record for $SERVICE_DOMAIN_NAME k8s service..."
+
+    upsertDNSRecord "$SERVICE_DOMAIN_NAME" "$SERVICE_EXTERNAL_IP"
+  done
+
+  local RTL_DOMAIN_NAME=$(cat "$RTL_PATH/domain-name.txt")
+  local RTL_EXTERNAL_IP=$(getK8SIngressExternalIP rtl)
+
+  echo "Adding CNAME DNS record for $RTL_DOMAIN_NAME k8s ingress.."
+
+  upsertDNSRecord "$RTL_DOMAIN_NAME" "$RTL_EXTERNAL_IP"
+}
+
 echo "==> Starting setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER."
 
 confirmAction \
 "==> Clean up previous build" \
 "cleanBuildDir"
 
-askForDomainName
-
-setupManagedCert
-
-exit 1;
-
+writeDomainName
 checkRequiredFiles
 setupK8Scluster
 setupHostedZone
@@ -412,12 +456,6 @@ sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
-# TODO: create records in DNS for lsp rtl etc...
-# TODO: disable generation for lnd, lsp certs
-# TODO: delegate testnet-aws.coins.io and testnet-do.coins.io from cloudflare
-# TODO: setup certmanager for DO setup
-# TODO: dont generate rtl-tls secret for AWS setup
-# TODO: create shared secret where domain and certificate arn are written
 setupDNSRecords
 
 echo "==> Setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
