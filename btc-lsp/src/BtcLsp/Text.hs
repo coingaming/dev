@@ -3,6 +3,7 @@
 module BtcLsp.Text
   ( toHex,
     inspectSat,
+    mkHtmlUuid,
   )
 where
 
@@ -10,6 +11,9 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified Data.ByteString.Base16 as B16
+import qualified Data.UUID as UUID
+import qualified Data.UUID.V4 as UUID
+import qualified Language.Haskell.TH.Syntax as TH
 import qualified Prelude
 
 toHex :: ByteString -> Text
@@ -49,3 +53,10 @@ displayRational len rat =
 displayRational2 :: Rational -> Text
 displayRational2 =
   displayRational 2
+
+mkHtmlUuid :: TH.Q TH.Exp
+mkHtmlUuid =
+  TH.lift
+    . ("uuid-" <>)
+    . UUID.toText
+    =<< TH.runIO UUID.nextRandom

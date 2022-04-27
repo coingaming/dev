@@ -75,8 +75,7 @@ postSwapIntoLnCreateR = do
         Right swapEnt ->
           redirect
             . SwapIntoLnSelectR
-            . from
-            . swapIntoLnFundInvHash
+            . swapIntoLnUuid
             $ entityVal swapEnt
     _ ->
       renderPage formWidget formEnctype

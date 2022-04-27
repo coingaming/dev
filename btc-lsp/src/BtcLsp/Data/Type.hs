@@ -41,6 +41,9 @@ module BtcLsp.Data.Type
     NodeUriHex (..),
     UtxoLockId (..),
     RHashHex (..),
+    Uuid,
+    unUuid,
+    newUuid,
   )
 where
 
@@ -53,6 +56,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
+import qualified Data.UUID as UUID
+import qualified Data.UUID.V4 as UUID
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
@@ -703,12 +708,6 @@ instance From RHashHex Text
 
 instance From Text RHashHex
 
-instance ToMessage RHashHex where
-  toMessage =
-    (<> "...")
-      . T.take 7
-      . unRHashHex
-
 instance From RHash RHashHex where
   from =
     --
@@ -731,6 +730,79 @@ instance From RHashHex RHash where
       . B16.decodeLenient
       . encodeUtf8
       . unRHashHex
+
+newtype Uuid (tab :: Table) = Uuid
+  { unUuid' :: UUID
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read
+    )
+  deriving stock (Generic)
+
+unUuid :: Uuid tab -> UUID
+unUuid =
+  unUuid'
+
+instance Out (Uuid tab) where
+  docPrec x =
+    docPrec x
+      . UUID.toText
+      . unUuid
+  doc =
+    docPrec 0
+
+newUuid :: (MonadIO m) => m (Uuid tab)
+newUuid =
+  liftIO $
+    Uuid <$> UUID.nextRandom
+
+--
+-- NOTE :  we're taking advantage of
+-- PostgreSQL understanding UUID values
+--
+instance Psql.PersistField (Uuid tab) where
+  toPersistValue =
+    Psql.PersistLiteral_ Psql.Escaped
+      . UUID.toASCIIBytes
+      . unUuid
+  fromPersistValue = \case
+    Psql.PersistLiteral_ Psql.Escaped x ->
+      maybe
+        ( Left $
+            "Failed to deserialize a UUID, got literal: "
+              <> inspectPlain x
+        )
+        ( Right
+            . Uuid
+        )
+        $ UUID.fromASCIIBytes x
+    failure ->
+      Left $
+        "Failed to deserialize a UUID, got: "
+          <> inspectPlain failure
+
+instance Psql.PersistFieldSql (Uuid tab) where
+  sqlType =
+    const $
+      Psql.SqlOther "uuid"
+
+instance ToMessage (Uuid tab) where
+  toMessage =
+    (<> "...")
+      . T.take 7
+      . UUID.toText
+      . unUuid
+
+instance PathPiece (Uuid tab) where
+  fromPathPiece =
+    (Uuid <$>)
+      . UUID.fromText
+  toPathPiece =
+    UUID.toText
+      . unUuid
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"

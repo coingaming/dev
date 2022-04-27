@@ -10,13 +10,9 @@ User
   deriving Eq Show Generic
 
 SwapIntoLn
+  uuid (Uuid 'SwapIntoLnTable)
   userId UserId
   fundInvoice (LnInvoice 'Fund)
-  --
-  -- TODO : Don't use RHash directly, as reference
-  -- because it's privacy leak for the users.
-  -- Generate uuid instead!!!
-  --
   fundInvHash RHash
   fundAddress (OnChainAddress 'Fund)
   fundProof RPreimage Maybe
@@ -29,6 +25,7 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
+  UniqueSwapIntoLnFundInvUuid uuid
   UniqueSwapIntoLnFundInvHash fundInvHash
   UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic

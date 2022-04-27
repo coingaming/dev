@@ -5,7 +5,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
-    getByRHashHex,
+    getByUuid,
     getByFundAddress,
     getLatestSwapT,
     getWaitingFundSql,
@@ -28,6 +28,7 @@ createIgnore ::
 createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
   runSql $ do
     ct <- getCurrentTime
+    uuid <- newUuid
     --
     -- NOTE : Set initial amount to zero because
     -- we don't know how much user will deposit
@@ -36,7 +37,8 @@ createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
     Psql.upsertBy
       (UniqueSwapIntoLnFundInvHash fundHash)
       SwapIntoLn
-        { swapIntoLnUserId = entityKey userEnt,
+        { swapIntoLnUuid = uuid,
+          swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
           swapIntoLnFundInvHash = fundHash,
           swapIntoLnFundAddress = fundAddr,
@@ -210,12 +212,12 @@ getSwapsToSettle =
             --
             pure (swap, user, chan)
 
-getByRHashHex ::
+getByUuid ::
   ( Storage m
   ) =>
-  RHashHex ->
+  Uuid 'SwapIntoLnTable ->
   m (Maybe (Entity SwapIntoLn, Entity User))
-getByRHashHex hash =
+getByUuid uuid =
   runSql . (listToMaybe <$>) $
     Psql.select $
       Psql.from $ \(swap `Psql.InnerJoin` user) -> do
@@ -224,8 +226,8 @@ getByRHashHex hash =
               Psql.==. user Psql.^. UserId
           )
         Psql.where_
-          ( swap Psql.^. SwapIntoLnFundInvHash
-              Psql.==. Psql.val (from hash)
+          ( swap Psql.^. SwapIntoLnUuid
+              Psql.==. Psql.val uuid
           )
         Psql.limit 1
         pure (swap, user)
