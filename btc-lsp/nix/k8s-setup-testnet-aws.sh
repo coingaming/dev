@@ -210,6 +210,7 @@ createManagedCert () {
     --output text)
 
   echo "Waiting until certificate is registered in ACM..."
+  # TODO: refactor for polling instead of sleep!
   sleep 10;
   
   local VALIDATION_NAME=$(aws acm describe-certificate \
@@ -248,7 +249,7 @@ writeCertARN () {
 }
 
 setupManagedCerts () {
-  for SERVICE in bitcoind lnd rtl lsp; do
+  for SERVICE in rtl lsp; do
     local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domain-name.txt")
     local CERT_ARN=$(getManagedCertARN "$SERVICE_DOMAIN_NAME")
      
@@ -405,6 +406,55 @@ setupDNSRecords () {
   upsertDNSRecord "$RTL_DOMAIN_NAME" "$RTL_EXTERNAL_IP"
 }
 
+getElbArn () {
+  local SERVICE="$1"
+  local VPC_ID=$(getVpcId)
+
+  aws elbv2 describe-load-balancers \
+    --query 'LoadBalancers[*].[LoadBalancerArn, VpcId]' \
+    --output json | \
+    jq -r '.[] | select(.[1] == "'$VPC_ID'")' | \
+    jq -s | \
+    jq -r '.[] | select(.[0] | contains("'$SERVICE'")) | .[0]'
+}
+
+getElbListenerArn () {
+  local ELB_ARN="$1"
+  local LISTENER_PORT="$2"
+
+  aws elbv2 describe-listeners \
+    --load-balancer-arn "$ELB_ARN" \
+    --query 'Listeners[*].[ListenerArn, Port]' \
+    --output json | \
+    jq -r '.[] | select(.[1] == '$LISTENER_PORT') | .[0]'
+}
+
+deleteElbListener () {
+  local LISTENER_ARN="$1"
+
+  echo "Deleting \"$LISTENER_ARN\" ELB listener from AWS..."
+
+  aws elbv2 delete-listener --listener-arn "$LISTENER_ARN"
+}
+
+setupElbListener () {
+  local SERVICE_NAME="$1"
+  local SERVICE_PORTS="$2"
+  local ELB_ARN=$(getElbArn "$SERVICE_NAME")
+
+  for SERVICE_PORT in $SERVICE_PORTS; do
+    local ELB_LISTENER_ARN=$(getElbListenerArn "$ELB_ARN" "$SERVICE_PORT")
+
+    echo "Deleting port $SERVICE_PORT from $SERVICE_NAME load balancer..."
+    (deleteElbListener "$ELB_LISTENER_ARN") || true
+  done
+}
+
+setupElbListeners () {
+  setupElbListener "bitcoind" "18332 39703 39704"
+  setupElbListener "lnd" "10009 8080"
+}
+
 echo "==> Starting setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER."
 
 confirmAction \
@@ -412,7 +462,7 @@ confirmAction \
 "cleanBuildDir"
 
 writeDomainName
-checkRequiredFiles
+checkRequiredFiles # TODO: dont use func here, check for file existence separately!! (or some files need to be always present?!)
 setupK8Scluster
 setupHostedZone
 setupManagedCert
@@ -457,5 +507,6 @@ echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
 setupDNSRecords
+setupELBListeners
 
 echo "==> Setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
