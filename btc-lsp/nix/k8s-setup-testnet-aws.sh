@@ -119,9 +119,10 @@ deleteKubernetesCluster () {
 setupKubernetesCluster () {
   isInstalled eksctl && isInstalled helm && isAwsConfigured
 
+  local KUBERNETES_CLUSTER_EXISTS=$(eksctl get cluster --name "$KUBERNETES_CLUSTER_NAME")
   local CREATE_AWS_LB_CONTROLLER="createIamOpenIdConnectProvider && createAwsLbControllerPolicy && createAwsLbServiceAccount && createAwsLbController"
 
-  if eksctl get cluster --name "$KUBERNETES_CLUSTER_NAME"; then
+  if [ -n "$KUBERNETES_CLUSTER_EXISTS" ]; then
     confirmAction \
     "==> Delete existing \"$KUBERNETES_CLUSTER_NAME\" k8s cluster and create a new one" \
     "deleteKubernetesCluster && createKubernetesCluster && $CREATE_AWS_LB_CONTROLLER"
@@ -152,7 +153,17 @@ deleteHostedZone () {
 }
 
 setupHostedZone () {
-  createHostedZone
+  local HOSTED_ZONE_EXISTS=$(getHostedZoneId)
+
+  if [ -n "$HOSTED_ZONE_EXISTS" ]; then
+    confirmAction \
+    "==> Delete existing \"$DOMAIN_NAME\" hosted zone and create a new one" \
+    "deleteHostedZone && createHostedZone"
+  else
+    confirmAction \
+    "==> Create new \"$DOMAIN_NAME\" hosted zone" \
+    "createHostedZone"
+  fi
 }
 
 getManagedCertArn () {
@@ -467,10 +478,16 @@ confirmAction \
 "cleanBuildDir"
 
 writeDomainName
-checkRequiredFiles # TODO: dont use func here, check for file existence separately!! (or some files need to be always present?!)
+checkRequiredFiles
 setupKubernetesCluster
 setupHostedZone
-setupManagedCert
+setupManagedCerts
+
+echo "==> Checking that certificate arns are saved"
+checkFileExistsNotEmpty "$RTL_PATH/cert-arn.txt"
+checkFileExistsNotEmpty "$LSP_PATH/cert-arn.txt"
+echo "Cert arns are OK."
+
 setupDbInstance
 
 echo "==> Checking that db connection details are saved"
