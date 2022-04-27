@@ -764,18 +764,21 @@ instance Psql.PersistField (Uuid tab) where
     Psql.PersistLiteral_ Psql.Escaped
       . UUID.toASCIIBytes
       . from
-  fromPersistValue (Psql.PersistLiteral_ Psql.Escaped uuid) =
-    case UUID.fromASCIIBytes uuid of
-      Nothing ->
-        Left $
-          "Failed to deserialize a UUID, got literal: "
-            <> inspectPlain uuid
-      Just uuid' ->
-        Right $ from uuid'
-  fromPersistValue x =
-    Left $
-      "Failed to deserialize a UUID, got: "
-        <> inspectPlain x
+  fromPersistValue = \case
+    Psql.PersistLiteral_ Psql.Escaped x ->
+      maybe
+        ( Left $
+            "Failed to deserialize a UUID, got literal: "
+              <> inspectPlain x
+        )
+        ( Right
+            . from
+        )
+        $ UUID.fromASCIIBytes x
+    failure ->
+      Left $
+        "Failed to deserialize a UUID, got: "
+          <> inspectPlain failure
 
 instance Psql.PersistFieldSql (Uuid tab) where
   sqlType =
