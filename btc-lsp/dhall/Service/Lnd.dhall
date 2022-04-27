@@ -18,7 +18,7 @@ let Bitcoind = ./Bitcoind.dhall
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let domain = ../../build/secrets/lnd/domain-name.txt as Text ? G.todo
+let domainName = ../../build/secrets/lnd/domain-name.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
 
@@ -78,12 +78,12 @@ let mkWalletPass
           }
           net
 
-let mkDomain
+let mkDomainName
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = domain
-          , TestNet = domain
+          { MainNet = domainName
+          , TestNet = domainName
           , RegTest = G.unOwner G.Owner.Lnd
           }
           net
@@ -190,25 +190,27 @@ let mkServiceType
 let mkServiceAnnotations
     : G.BitcoinNetwork →
       Optional C.ProviderType →
-        Optional (List { mapKey : Text, mapValue : Text })
+        Optional (P.Map.Type Text Text)
     = λ(net : G.BitcoinNetwork) →
       λ(cloudProvider : Optional C.ProviderType) →
-        merge
-          { MainNet =
-              P.Optional.concatMap
-                C.ProviderType
-                (P.Map.Type Text Text)
-                (Service.mkAnnotations (G.unOwner G.Owner.Lnd))
-                cloudProvider
-          , TestNet =
-              P.Optional.concatMap
-                C.ProviderType
-                (P.Map.Type Text Text)
-                (Service.mkAnnotations (G.unOwner G.Owner.Lnd))
-                cloudProvider
-          , RegTest = None (P.Map.Type Text Text)
-          }
-          net
+      let annotations = P.Optional.concatMap
+        C.ProviderType
+        (P.Map.Type Text Text)
+        (λ(cloudProvider : C.ProviderType) → 
+          merge
+            { Aws = None (P.Map.Type Text Text)
+            , DigitalOcean = Some
+              [ 
+                { mapKey = "kubernetes.digitalocean.com/load-balancer-id"
+                , mapValue = "${G.unOwner G.Owner.Lnd}-lb"
+                }
+              ]
+            }
+          cloudProvider
+        )
+        cloudProvider
+
+      in S.mkServiceAnnotations net annotations cloudProvider
 
 let mkService
     : G.BitcoinNetwork → G.Owner → Optional C.ProviderType → K.Service.Type
@@ -290,7 +292,7 @@ in  { mkTlsCert
     , grpcPort
     , p2pPort
     , restPort
-    , mkDomain
+    , mkDomainName
     , mkHexMacaroon
     , mkEnv
     , mkSetupEnv

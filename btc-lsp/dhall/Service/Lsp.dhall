@@ -149,7 +149,7 @@ let mkEnv
         , { mapKey = env.lspLogVerbosity, mapValue = logVerbosity }
         , { mapKey = env.lspLogSeverity, mapValue = logSeverity }
         , { mapKey = env.lspLndP2pPort, mapValue = G.unPort Lnd.p2pPort }
-        , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomain net }
+        , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomainName net }
         , { mapKey = env.lspLibpqConnStr, mapValue = Postgres.mkConnStr net }
         , { mapKey = env.lspGrpcServerEnv
           , mapValue = "'${P.JSON.render mkLspGrpcServerEnv}'"
@@ -206,25 +206,37 @@ let mkServiceType
 let mkServiceAnnotations
     : G.BitcoinNetwork →
       Optional C.ProviderType →
-        Optional (List { mapKey : Text, mapValue : Text })
+        Optional (P.Map.Type Text Text)
     = λ(net : G.BitcoinNetwork) →
       λ(cloudProvider : Optional C.ProviderType) →
-        merge
-          { MainNet =
-              P.Optional.concatMap
-                C.ProviderType
-                (P.Map.Type Text Text)
-                (Service.mkAnnotations owner)
-                cloudProvider
-          , TestNet =
-              P.Optional.concatMap
-                C.ProviderType
-                (P.Map.Type Text Text)
-                (Service.mkAnnotations owner)
-                cloudProvider
-          , RegTest = None (P.Map.Type Text Text)
-          }
-          net
+      let annotations = P.Optional.concatMap
+        C.ProviderType
+        (P.Map.Type Text Text)
+        (λ(cloudProvider : C.ProviderType) → 
+          merge
+            { Aws = Some
+              [ { mapKey = "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol"
+                , mapValue = "*"
+                }
+              , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"
+                , mapValue = ../../build/secrets/lsp/cert-arn.txt as Text ? G.todo
+                }
+              , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"
+                , mapValue = Natural/show grpcPort.unPort
+                }
+              ]
+            , DigitalOcean = Some
+              [ 
+                { mapKey = "kubernetes.digitalocean.com/load-balancer-id"
+                , mapValue = "${owner}-lb"
+                }
+              ]
+            }
+          cloudProvider
+        )
+        cloudProvider
+
+      in S.mkServiceAnnotations net annotations cloudProvider 
 
 let mkService
     : G.BitcoinNetwork → Optional C.ProviderType → K.Service.Type

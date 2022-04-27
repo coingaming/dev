@@ -88,8 +88,8 @@ let mkServiceType
           net
 
 let mkServiceAnnotations
-    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
-    = λ(net : G.BitcoinNetwork) → None (List { mapKey : Text, mapValue : Text })
+    : G.BitcoinNetwork → Optional (P.Map.Type Text Text)
+    = λ(net : G.BitcoinNetwork) → None (P.Map.Type Text Text)
 
 let mkService
     : G.BitcoinNetwork → K.Service.Type

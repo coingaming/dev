@@ -4,6 +4,42 @@ let G = ./Global.dhall
 
 let C = ./CloudProvider.dhall
 
+let mkServiceAnnotations
+    : G.BitcoinNetwork →
+      Optional (P.Map.Type Text Text) →
+      Optional C.ProviderType →
+        Optional (P.Map.Type Text Text)
+    = λ(net : G.BitcoinNetwork) →
+      λ(customAnnotations : Optional (P.Map.Type Text Text)) →
+      λ(cloudProvider : Optional C.ProviderType) →
+        let serviceAnnotations = 
+          P.Optional.map
+            C.ProviderType
+            (P.Map.Type Text Text)
+            C.mkServiceAnnotations
+            cloudProvider
+
+        let fullAnnotations = 
+          P.Optional.map
+            (P.Map.Type Text Text)
+            (P.Map.Type Text Text)
+            (λ(sa : P.Map.Type Text Text) →
+              P.Optional.fold
+              (P.Map.Type Text Text)
+              customAnnotations
+              (P.Map.Type Text Text)
+              (λ(ca : P.Map.Type Text Text) → sa # ca)
+              sa
+            )
+            serviceAnnotations
+
+        in merge
+          { MainNet = fullAnnotations
+          , TestNet = fullAnnotations
+          , RegTest = None (P.Map.Type Text Text)
+          }
+          net
+
 let mkIngressAnnotations
     : G.BitcoinNetwork →
       Optional C.ProviderType →
@@ -71,8 +107,10 @@ let concatSetupEnv
           )
           ""
 
-in  { concatExportEnv
-    , concatSetupEnv
+in  { 
+    , mkServiceAnnotations
     , mkIngressAnnotations
     , mkIngressClassName
+    , concatExportEnv
+    , concatSetupEnv
     }

@@ -33,38 +33,6 @@ let mkPorts
           )
           ports
 
-let mkAnnotations
-    : Text → C.ProviderType → Optional (List { mapKey : Text, mapValue : Text })
-    = λ(name : Text) →
-      λ(cloudProvider : C.ProviderType) →
-        merge
-          { Aws = Some
-            [ { mapKey = "service.beta.kubernetes.io/aws-load-balancer-type"
-              , mapValue = "external"
-              }
-            , { mapKey =
-                  "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type"
-              , mapValue = "ip"
-              }
-            , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-scheme"
-              , mapValue = "internet-facing"
-              }
-            ]
-          , DigitalOcean = Some
-            [ { mapKey = "kubernetes.digitalocean.com/load-balancer-id"
-              , mapValue = "${name}-lb"
-              }
-            , { mapKey = "service.beta.kubernetes.io/do-loadbalancer-size-unit"
-              , mapValue = "1"
-              }
-            , { mapKey =
-                  "service.beta.kubernetes.io/do-loadbalancer-disable-lets-encrypt-dns-records"
-              , mapValue = "true"
-              }
-            ]
-          }
-          cloudProvider
-
 let mkService
     : Text →
       Optional (List { mapKey : Text, mapValue : Text }) →
@@ -86,4 +54,4 @@ let mkService
               }
             }
 
-in  { ServiceType, mkAnnotations, mkPorts, mkService }
+in  { ServiceType, mkPorts, mkService }
