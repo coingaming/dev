@@ -50,22 +50,23 @@ import Database.Esqueleto.Legacy as X
     where_,
     (!=.),
     (&&.),
-    (||.),
     (+=.),
     (<.),
-    (>.),
     (=.),
     (==.),
+    (>.),
     (>=.),
     (?.),
     (^.),
+    (||.),
   )
 import Database.Esqueleto.PostgreSQL as X
   ( now_,
     upsertBy,
   )
 import Database.Persist as X
-  ( SelectOpt (..),
+  ( LiteralType (..),
+    SelectOpt (..),
     selectList,
   )
 import qualified Database.Persist as P

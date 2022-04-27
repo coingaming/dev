@@ -28,6 +28,7 @@ createIgnore ::
 createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
   runSql $ do
     ct <- getCurrentTime
+    uuid <- newUuid
     --
     -- NOTE : Set initial amount to zero because
     -- we don't know how much user will deposit
@@ -36,7 +37,8 @@ createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
     Psql.upsertBy
       (UniqueSwapIntoLnFundInvHash fundHash)
       SwapIntoLn
-        { swapIntoLnUserId = entityKey userEnt,
+        { swapIntoLnUuid = uuid,
+          swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
           swapIntoLnFundInvHash = fundHash,
           swapIntoLnFundAddress = fundAddr,

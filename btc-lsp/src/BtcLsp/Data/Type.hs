@@ -41,6 +41,8 @@ module BtcLsp.Data.Type
     NodeUriHex (..),
     UtxoLockId (..),
     RHashHex (..),
+    Uuid (..),
+    newUuid,
   )
 where
 
@@ -53,6 +55,8 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
+import qualified Data.UUID as UUID
+import qualified Data.UUID.V4 as UUID
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
@@ -731,6 +735,58 @@ instance From RHashHex RHash where
       . B16.decodeLenient
       . encodeUtf8
       . unRHashHex
+
+newtype Uuid (tab :: Table)
+  = Uuid UUID
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read
+    )
+  deriving stock (Generic)
+
+instance From (Uuid tab) UUID
+
+instance From UUID (Uuid tab)
+
+instance Out (Uuid tab) where
+  docPrec x =
+    docPrec x . UUID.toText . from
+  doc =
+    docPrec 0
+
+newUuid :: (MonadIO m) => m (Uuid tab)
+newUuid =
+  liftIO $
+    from <$> UUID.nextRandom
+
+--
+-- NOTE :  we're taking advantage of
+-- PostgreSQL understanding UUID values
+--
+instance Psql.PersistField (Uuid tab) where
+  toPersistValue =
+    Psql.PersistLiteral_ Psql.Escaped
+      . UUID.toASCIIBytes
+      . from
+  fromPersistValue (Psql.PersistLiteral_ Psql.Escaped uuid) =
+    case UUID.fromASCIIBytes uuid of
+      Nothing ->
+        Left $
+          "Failed to deserialize a UUID, got literal: "
+            <> inspectPlain uuid
+      Just uuid' ->
+        Right $ from uuid'
+  fromPersistValue x =
+    Left $
+      "Failed to deserialize a UUID, got: "
+        <> inspectPlain x
+
+instance Psql.PersistFieldSql (Uuid tab) where
+  sqlType =
+    const $
+      Psql.SqlOther "uuid"
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"

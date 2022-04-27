@@ -4,7 +4,7 @@
       <p .mini>_{MsgOpenChanInstruction}
       <img .img-responsive.center-block src=#{qrCodeSrc} alt=#{nodeUriHex}>
       <div .input-group>
-        <!-- TODO : improve input ids!!! -->
-        <input .form-control id="data" type="text" value=#{nodeUriHex} readonly>
+        <input .form-control id=#{htmlUuid} type="text" value=#{nodeUriHex} readonly>
         <span .input-group-btn>
-          <button .btn.btn-primary type="button" data-clipboard-target="#data" autofocus>_{MsgCopy}
+          <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+            _{MsgCopy}

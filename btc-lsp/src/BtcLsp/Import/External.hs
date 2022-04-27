@@ -65,6 +65,7 @@ import Data.Time.Clock as X
     secondsToDiffTime,
   )
 import Data.Type.Equality as X (type (==))
+import Data.UUID as X (UUID)
 import Database.Esqueleto.Legacy as X
   ( Entity (..),
   )

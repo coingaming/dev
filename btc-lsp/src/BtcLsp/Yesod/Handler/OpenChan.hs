@@ -40,3 +40,5 @@ getOpenChanR = do
   defaultLayout $ do
     setTitleI MsgOpenChanRTitle
     $(widgetFile "open_chan")
+  where
+    htmlUuid = $(mkHtmlUuid)

@@ -129,7 +129,7 @@ renderPage fundInvHash formWidget formEnctype = do
 aForm :: Entity SwapIntoLn -> AForm Handler (Entity SwapIntoLn)
 aForm (Entity entKey SwapIntoLn {..}) =
   Entity entKey
-    <$> ( SwapIntoLn swapIntoLnUserId
+    <$> ( SwapIntoLn swapIntoLnUuid swapIntoLnUserId
             <$> areq
               fromTextField
               (bfsDisabled MsgSwapIntoLnFundInvoice)
