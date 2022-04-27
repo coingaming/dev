@@ -1,21 +1,29 @@
 Nothing:
 Proxy txt@Text: #{txt}
+Failure txt@Text: Failure #{txt}
 Yes: Yes
 No: No
 Active: Active
 Continue: Continue
 Update: Update
 Updated: Updated
+Copy: copy
 
 HomeRBreadcrumb: Home
 AuthRBreadcrumb: Login
 SignoutRBreadcrumb: Signout
 ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
+OpenChanRBreadcrumb: Open Channel
+SwapIntoLnCreateRBreadcrumb: Swap
+SwapIntoLnSelectRBreadcrumb rhx@RHashHex: #{rhx}
 
 HomeRTitle: Welcome | LSP
 SignoutRTitle: Logout | LSP
 ProfileRTitle usr@YesodUser: #{usr} | LSP
+OpenChanRTitle: Open Channel | LSP
+SwapIntoLnCreateRTitle: Swap | LSP
+SwapIntoLnSelectRTitle rhx@RHashHex: #{rhx} | Swap | LSP
 
 Home: Home
 Profile: Profile
@@ -31,3 +39,23 @@ Password: Password
 
 HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
+
+OpenChan: Open Channel
+OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
+
+Swap: Swap
+SwapIntoLnUserId: User Pub Key
+SwapIntoLnFundInvoice: Swap Invoice
+SwapIntoLnFundInvHash: Swap Hash
+SwapIntoLnFundAddress: Swap Address
+SwapIntoLnFundProof: Proof of Swap
+SwapIntoLnRefundAddress: Refund Address
+SwapIntoLnChanCapUser: User Channel Capacity
+SwapIntoLnChanCapLsp: Lsp Channel Capacity
+SwapIntoLnFeeLsp: Lsp Swap Fee
+SwapIntoLnFeeMiner: Channel Mining Fee
+SwapIntoLnStatus: Swap Status
+SwapIntoLnExpiresAt: Expires at
+SwapIntoLnInsertedAt: Inserted at
+SwapIntoLnUpdatedAt: Updated at
+ChannelPrivacy: Channel Privacy

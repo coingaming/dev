@@ -181,8 +181,7 @@ instance Data.ProtoLens.Message Ctx where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              ((Data.Monoid.<>)
                 (case
                      Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'lnPubKey") _x
@@ -197,8 +196,7 @@ instance Data.ProtoLens.Message Ctx where
                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage
-                             _v))
+                             Data.ProtoLens.encodeMessage _v))
                 (Data.ProtoLens.Encoding.Wire.buildFieldSet
                    (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData Ctx where
@@ -314,8 +312,7 @@ instance Data.ProtoLens.Message FeeMoney where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData FeeMoney where
@@ -430,8 +427,7 @@ instance Data.ProtoLens.Message FeeRate where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData FeeRate where
@@ -657,8 +653,7 @@ instance Data.ProtoLens.Message FundLnHodlInvoice where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData FundLnHodlInvoice where
@@ -776,8 +771,7 @@ instance Data.ProtoLens.Message FundLnInvoice where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData FundLnInvoice where
@@ -892,8 +886,7 @@ instance Data.ProtoLens.Message FundMoney where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData FundMoney where
@@ -1014,8 +1007,7 @@ instance Data.ProtoLens.Message FundOnChainAddress where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData FundOnChainAddress where
@@ -1126,12 +1118,10 @@ instance Data.ProtoLens.Message InputFailure where
                                   (Prelude.show (missing :: [Prelude.String]))))
                       Prelude.return
                         (Lens.Family2.over
-                           Data.ProtoLens.unknownFields
-                           (\ !t -> Prelude.reverse t)
+                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
                            (Lens.Family2.set
                               (Data.ProtoLens.Field.field @"vec'fieldLocation")
-                              frozen'fieldLocation
-                              x))
+                              frozen'fieldLocation x))
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
@@ -1183,8 +1173,7 @@ instance Data.ProtoLens.Message InputFailure where
                                    (Data.ProtoLens.Encoding.Bytes.putVarInt
                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                           Data.ProtoLens.encodeMessage
-                           _v))
+                           Data.ProtoLens.encodeMessage _v))
                 (Lens.Family2.view
                    (Data.ProtoLens.Field.field @"vec'fieldLocation") _x))
              ((Data.Monoid.<>)
@@ -1198,8 +1187,7 @@ instance Data.ProtoLens.Message InputFailure where
                          ((Prelude..)
                             ((Prelude..)
                                Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                            Prelude.fromEnum
-                            _v))
+                            Prelude.fromEnum _v))
                 (Data.ProtoLens.Encoding.Wire.buildFieldSet
                    (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
 instance Control.DeepSeq.NFData InputFailure where
@@ -1261,8 +1249,7 @@ instance Prelude.Enum InputFailureKind where
            ((Prelude.++)
               "toEnum: unknown value for enum InputFailureKind: "
               (Prelude.show k__)))
-        Prelude.id
-        (Data.ProtoLens.maybeToEnum k__)
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
   fromEnum REQUIRED = 0
   fromEnum NOT_FOUND = 1
   fromEnum PARSING_FAILED = 2
@@ -1402,8 +1389,7 @@ instance Data.ProtoLens.Message LnHost where
                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                         Data.Text.Encoding.encodeUtf8
-                         _v))
+                         Data.Text.Encoding.encodeUtf8 _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData LnHost where
@@ -1584,8 +1570,7 @@ instance Data.ProtoLens.Message LnPeer where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              ((Data.Monoid.<>)
                 (case
                      Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'host") _x
@@ -1600,8 +1585,7 @@ instance Data.ProtoLens.Message LnPeer where
                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                             Data.ProtoLens.encodeMessage
-                             _v))
+                             Data.ProtoLens.encodeMessage _v))
                 ((Data.Monoid.<>)
                    (case
                         Lens.Family2.view (Data.ProtoLens.Field.field @"maybe'port") _x
@@ -1616,8 +1600,7 @@ instance Data.ProtoLens.Message LnPeer where
                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage
-                                _v))
+                                Data.ProtoLens.encodeMessage _v))
                    (Data.ProtoLens.Encoding.Wire.buildFieldSet
                       (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData LnPeer where
@@ -1949,8 +1932,7 @@ instance Data.ProtoLens.Message LocalBalance where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData LocalBalance where
@@ -2166,8 +2148,7 @@ instance Data.ProtoLens.Message RefundMoney where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData RefundMoney where
@@ -2288,8 +2269,7 @@ instance Data.ProtoLens.Message RefundOnChainAddress where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData RefundOnChainAddress where
@@ -2407,8 +2387,7 @@ instance Data.ProtoLens.Message RemoteBalance where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                          Data.ProtoLens.encodeMessage
-                          _v))
+                          Data.ProtoLens.encodeMessage _v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
 instance Control.DeepSeq.NFData RemoteBalance where

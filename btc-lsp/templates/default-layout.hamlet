@@ -29,30 +29,23 @@
                         <a href="@{route}" :noReferrer:rel="noreferrer">_{label}
 
 <!-- Page Contents -->
-
 <div .container>
     $if not $ null parents
       <ul .breadcrumb>
           $forall bc <- parents
               <li>
-                  <a .text-capitalize href="@{fst bc}">#{snd bc}
+                  <a href="@{fst bc}">#{snd bc}
 
-          <li .active.text-capitalize>#{title}
+          <li .active>#{title}
     $if (Just HomeR /= mcurrentRoute)
       $maybe msg <- mmsg
         <div .alert.alert-info #message>#{msg}
 
-
-$if (Just HomeR == mcurrentRoute)
-    ^{widget}
-$else
-    <div .container-fluid>
-        <div .row>
-            <div .col-md-12>
-                ^{widget}
+^{widget}
 
 <!-- Footer -->
-<footer .footer>
-  <div .container.text-center>
-    <p .text-muted>
-      #{appCopyright $ appSettings master}
+$if (Just HomeR /= mcurrentRoute)
+  <footer .footer>
+    <div .container.text-center>
+      <p .text-muted>
+        #{appCopyright $ appSettings master}

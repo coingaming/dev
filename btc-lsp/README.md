@@ -37,16 +37,16 @@ Work with Haskell sources in shell:
 vi .
 ```
 
-Run all tests with hot code reloading:
+Run tests with hot code reloading:
 
 ```sh
-ghcid
+./nix/ns-ghcid-test.sh
 ```
 
-Run specific tests with hot code reloading:
+Run app with hot code reloading:
 
 ```sh
-ghcid --setup ":set args -m importPubKey"
+./nix/ns-ghcid-main.sh
 ```
 
 ## Release

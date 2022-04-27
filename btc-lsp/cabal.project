@@ -1,32 +1,17 @@
 packages: *.cabal
 
-allow-newer: http2-grpc-proto-lens:proto-lens,
-  signable:proto-lens, signable:proto-lens-runtime,
-  http2-grpc-proto-lens:proto-lens, http2-client:http2,
-  lnd-client:aeson, chronos:aeson, lnd-client:base64-bytestring,
-  qrcode-juicypixels:base64-bytestring, http2-client-grpc:http2-client,
-  lnd-client:network-bitcoin, http2-client-grpc:http2
-  --
-  -- TODO : remove base64-bytestring jailbreak,
-  -- probably need to upgrade qrcode-juicypixels in
-  -- lnd-client. Otherwise some runtime stuff might be broken!
-  --
+allow-newer: yesod-colonnade:base,
+             lnd-client:base64-bytestring,
+             qrcode-juicypixels:base64-bytestring
 
 package witch
   flags: +remove-time
 
 source-repository-package
   type: git
-  location: https://github.com/coingaming/signable.git
-  tag: 6c977086dbf0e6d23118b164c1620a3129da819c
-  --sha256: 08qplf0agnip3z5wiq5x0nsm3kz28gs3qapi099i68qiz1ma58y9
-  subdir: haskell
-
-source-repository-package
-  type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 0af0fpmd7d928grdkrfnmds5r9lpwnh3xbv4g67l6c2pxbicg2v9
-  tag: 58198771f23d1f79d237d7390dfec5b0fb28193e
+  --sha256: 0aydszfm0a8c9p37r3vic9416hs2pmcidqnqr367nfn1iin7cbvq
+  tag: f1c4bcb5ac3195001294c707405fbb168c0feb58
 
 source-repository-package
   type: git
@@ -51,15 +36,15 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/src.git
-  tag: 324fdc0ba4292e4229ccfe96c61cd8a4fc603fed
-  --sha256: 08bxxwvaingxjhnsmbmz62jh6h2giggzwif2ixp897xh49sx86bc
+  tag: bd13f5e66383aa56366bb075d19ae38e737aa9cd
+  --sha256: 0dyp954h1qhrrylzvdr31i3rgn5s8hkj8r8aaf3wkzjc6jrll41z
   subdir: generic-pretty-instances
 
 source-repository-package
   type: git
   location: https://github.com/coingaming/src.git
-  tag: 74f7fc422ff2dc1ad29f724b380f83f53d11c35e
-  --sha256: 1kn6r8izzmgs8q96r5fihwxjr74zdkfgdqcw8ycg3dnvwp3zlcy2
+  tag: d5b0b1114d97d8b65bc808a95d148dfab42865f2
+  --sha256: 08qghjm61n990ykqdqpybwnl7xcz5l6j21630lm4msc5nxyhinaj
   subdir: network-bitcoin
 
 source-repository-package

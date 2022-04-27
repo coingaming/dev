@@ -5,9 +5,11 @@ module BtcLsp.Data.Orphan () where
 
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified Data.Time.ISO8601 as Time
 import qualified LndClient as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.RawTransaction as Btc
+import qualified Network.Bitcoin.Types as Btc
 import qualified Text.PrettyPrint as PP
 import qualified Universum
 import qualified Witch
@@ -27,6 +29,10 @@ deriving stock instance Generic Btc.BlockVerbose
 deriving stock instance Generic Btc.DecodedRawTransaction
 
 deriving stock instance Generic Btc.BlockChainInfo
+
+deriving stock instance Generic Btc.TransactionID
+
+instance Out Btc.TransactionID
 
 instance Out Btc.TxnOutputType
 
@@ -58,11 +64,19 @@ instance From Lnd.Seconds Word64
 
 deriving stock instance Generic Btc.Block
 
+deriving newtype instance PathPiece Lnd.PaymentRequest
+
 instance Out Btc.Block
 
 instance Out Natural where
   docPrec x =
     docPrec x . into @Integer
+  doc =
+    docPrec 0
+
+instance Out PortNumber where
+  docPrec x =
+    docPrec x . toInteger
   doc =
     docPrec 0
 
@@ -86,9 +100,6 @@ instance Out SomeException where
   doc =
     docPrec 0
 
-instance From Btc.TransactionID (TxId 'Funding) where
-  from = via @ByteString
-
 instance From Word32 (Vout 'Funding)
 
 instance From ByteString (TxId 'Funding)
@@ -97,3 +108,13 @@ instance TryFrom Integer (Vout 'Funding) where
   tryFrom =
     from @Word32
       `composeTryRhs` tryFrom
+
+instance PathPiece UTCTime where
+  fromPathPiece :: Text -> Maybe UTCTime
+  fromPathPiece =
+    Time.parseISO8601
+      . unpack
+  toPathPiece :: UTCTime -> Text
+  toPathPiece =
+    pack
+      . Time.formatISO8601

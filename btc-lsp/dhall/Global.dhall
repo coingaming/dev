@@ -11,6 +11,15 @@ let unBitcoinNetwork
           { TestNet = "testnet", RegTest = "regtest", MainNet = "mainnet" }
           x
 
+let Encryption
+    : Type
+    = < Encrypted | UnEncrypted >
+
+let unEncryption
+    : Encryption → Text
+    = λ(x : Encryption) →
+        merge { Encrypted = "Encrypted", UnEncrypted = "UnEncrypted" } x
+
 let NetworkScheme
     : Type
     = < Tcp | Http | Https >
@@ -78,6 +87,8 @@ let todo
 
 in  { BitcoinNetwork
     , unBitcoinNetwork
+    , Encryption
+    , unEncryption
     , NetworkScheme
     , unNetworkScheme
     , HostName

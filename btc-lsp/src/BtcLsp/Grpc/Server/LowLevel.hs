@@ -13,7 +13,7 @@ where
 import BtcLsp.Grpc.Data
 import BtcLsp.Import.Witch
 import Control.Concurrent (modifyMVar)
-import Data.Aeson (FromJSON (..), withObject, (.:))
+import Data.Aeson (FromJSON (..), withObject, (.:), (.:?))
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.CaseInsensitive as CI
@@ -21,12 +21,10 @@ import Data.Coerce (coerce)
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
 import Network.GRPC.Server
-import Network.GRPC.Server.Wai (grpcApp)
 import Network.HTTP2.Server hiding (Request)
 import Network.Wai
-import Network.Wai.Handler.Warp
+import Network.Wai.Handler.Warp as Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
-import Network.Wai.Internal (Request (..))
 import Text.PrettyPrint.GenericPretty.Import (inspect)
 import Universum
 
@@ -34,15 +32,15 @@ data GSEnv = GSEnv
   { gsEnvPort :: Int,
     gsEnvSigVerify :: Bool,
     gsEnvSigHeaderName :: SigHeaderName,
-    gsEnvTlsCert :: TlsCert 'Server,
-    gsEnvTlsKey :: TlsKey 'Server,
+    gsEnvEncryption :: Encryption,
+    gsEnvTls :: Maybe (TlsData 'Server),
     gsEnvLogger :: Text -> IO (),
     --
     -- TODO : more typed data
     --
     gsEnvSigner :: ByteString -> IO (Maybe ByteString)
   }
-  deriving (Generic)
+  deriving stock (Generic)
 
 instance FromJSON GSEnv where
   parseJSON =
@@ -53,8 +51,8 @@ instance FromJSON GSEnv where
             <$> x .: "port"
             <*> x .: "sig_verify"
             <*> x .: "sig_header_name"
-            <*> x .: "tls_cert"
-            <*> x .: "tls_key"
+            <*> x .: "encryption"
+            <*> x .:? "tls"
             <*> pure (const $ pure ())
             <*> pure (const $ pure Nothing)
       )
@@ -64,15 +62,25 @@ runServer ::
   (GSEnv -> RawRequestBytes -> [ServiceHandler]) ->
   IO ()
 runServer env handlers =
-  runTLS
-    ( tlsSettingsMemory
-        (TE.encodeUtf8 . coerce $ gsEnvTlsCert env)
-        (TE.encodeUtf8 . coerce $ gsEnvTlsKey env)
-    )
-    (setPort (gsEnvPort env) defaultSettings)
+  case (gsEnvEncryption env, gsEnvTls env) of
+    (Encrypted, Just tls) ->
+      runTLS
+        ( tlsSettingsMemory
+            (TE.encodeUtf8 . coerce $ tlsCert tls)
+            (TE.encodeUtf8 . coerce $ tlsKey tls)
+        )
+        (setPort port defaultSettings)
+    (Encrypted, Nothing) ->
+      error $
+        "Fatal error - can not run LSP gRPC endpoint"
+          <> " over TLS unless TlsData is provided!"
+    (UnEncrypted, _) ->
+      Warp.run port
     $ if gsEnvSigVerify env
       then extractBodyBytesMiddleware env $ serverApp handlers
       else serverApp handlers env (RawRequestBytes mempty)
+  where
+    port = gsEnvPort env
 
 serverApp ::
   (GSEnv -> RawRequestBytes -> [ServiceHandler]) ->

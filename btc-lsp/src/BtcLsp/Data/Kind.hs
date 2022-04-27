@@ -12,7 +12,7 @@ data MoneyRelation
   | Refund
   | Gain
   | Loss
-  deriving
+  deriving stock
     ( Eq,
       Ord,
       Show,
@@ -22,7 +22,7 @@ data MoneyRelation
 data BitcoinLayer
   = OnChain
   | Ln
-  deriving
+  deriving stock
     ( Eq,
       Ord,
       Show,
@@ -33,7 +33,7 @@ data Owner
   = Lsp
   | Usr
   | Chan
-  deriving
+  deriving stock
     ( Eq,
       Ord,
       Show,

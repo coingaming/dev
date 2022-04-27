@@ -14,7 +14,7 @@ in
         name = "btc-lsp";
         src = ../.;
       };
-      compiler-nix-name = "ghc865";
+      compiler-nix-name = "ghc8107";
       modules = [{
         enableLibraryProfiling = profile;
         packages.classy-prelude-yesod.components.library.doHaddock = false;

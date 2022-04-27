@@ -1,10 +1,8 @@
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Yesod.Data.Language where
 
 import BtcLsp.Import.External
-import BtcLsp.Yesod.Import.NoFoundation (PathPiece (..))
 import qualified Data.Text as T
 import Database.Persist.TH
 import qualified Universum
@@ -12,7 +10,13 @@ import qualified Universum
 data Code
   = En
   | Ru
-  deriving (Show, Read, Eq, Enum, Bounded)
+  deriving stock
+    ( Show,
+      Read,
+      Eq,
+      Enum,
+      Bounded
+    )
 
 derivePersistField "Code"
 

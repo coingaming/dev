@@ -31,7 +31,6 @@ dependencies:
 - proto-lens-runtime
 - persistent
 - time
-- signable
 - secp256k1-haskell   >= 0.6 && < 0.7
 - case-insensitive
 
@@ -61,7 +60,7 @@ ghc-options:
 - -Wno-safe # Don’t use Safe Haskell warnings
 - -Wno-missing-local-signatures # Warning for polymorphic local bindings; nothing wrong with those.
 when:
-  - condition: impl(ghc >= 9)
+  - condition: impl(ghc >= 8.10.7)
     ghc-options:
     - -Wno-unused-packages # Because of some proto-lens-runtime magic
     - -Wno-prepositive-qualified-module

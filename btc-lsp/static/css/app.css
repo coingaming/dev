@@ -3,6 +3,14 @@ html, body {
   overflow-x: hidden;
 }
 
+dl {
+  margin-bottom: 0 !important;
+}
+
+.text-overflow {
+  word-break: break-all;
+}
+
 .form-control:focus,
 input:focus {
   -webkit-box-shadow: none !important;
@@ -83,6 +91,10 @@ input[type="checkbox"] .has-error .form-control {
   margin-top: 5px;
 }
 
+.large-margin-top {
+  margin-top: 38px;
+}
+
 .margin-bottom {
   margin-bottom: 15px;
 }
@@ -118,6 +130,10 @@ form > div.form-group > span > label > input[type="checkbox"] {
 
 .padded {
   padding: 15px;
+}
+
+.breadcrumb {
+  text-transform: none !important;
 }
 
 .breadcrumb > li {

@@ -7,7 +7,10 @@ where
 import BtcLsp.Import
 import BtcLsp.Rpc.ElectrsRpc as Rpc
 import qualified Data.ByteString.Lazy as BS
-import Data.Digest.Pure.SHA (bytestringDigest, sha256)
+import qualified Data.Digest.Pure.SHA as SHA
+  ( bytestringDigest,
+    sha256,
+  )
 import Network.Bitcoin (getBlockCount, getBlockHash)
 import qualified Text.Hex as TH
 
@@ -40,8 +43,8 @@ waitTillLastBlockProcessedT decr = do
     doubleSha256AndReverse =
       BS.toStrict
         . BS.reverse
-        . bytestringDigest
-        . sha256
-        . bytestringDigest
-        . sha256
+        . SHA.bytestringDigest
+        . SHA.sha256
+        . SHA.bytestringDigest
+        . SHA.sha256
         . BS.fromStrict

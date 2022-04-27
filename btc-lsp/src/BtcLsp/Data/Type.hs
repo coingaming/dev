@@ -36,6 +36,11 @@ module BtcLsp.Data.Type
     BlkStatus (..),
     SwapUtxoStatus (..),
     Privacy (..),
+    NodePubKeyHex (..),
+    NodeUri (..),
+    NodeUriHex (..),
+    UtxoLockId (..),
+    RHashHex (..),
   )
 where
 
@@ -43,6 +48,9 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified Data.ByteString.Base16 as B16
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
 import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Language.Haskell.TH.Syntax as TH
@@ -96,46 +104,54 @@ epoch =
 
 newtype FieldIndex
   = FieldIndex Word32
-  deriving
-    ( TH.Lift,
-      Show
+  deriving newtype
+    ( Show
+    )
+  deriving stock
+    ( TH.Lift
     )
 
 newtype ReversedFieldLocation
   = ReversedFieldLocation [FieldIndex]
-  deriving
-    ( TH.Lift,
-      Semigroup,
+  deriving newtype
+    ( Semigroup,
       Show
+    )
+  deriving stock
+    ( TH.Lift
     )
 
 data LogFormat
   = Bracket
   | JSON
-  deriving
+  deriving stock
     ( Read
     )
 
 newtype Seconds
   = Seconds Word64
-  deriving
+  deriving newtype
     ( Eq,
       Ord,
       Show,
-      Num,
-      Generic
+      Num
+    )
+  deriving stock
+    ( Generic
     )
 
 instance Out Seconds
 
 newtype MicroSeconds
   = MicroSeconds Integer
-  deriving
+  deriving newtype
     ( Eq,
       Ord,
       Show,
-      Num,
-      Generic
+      Num
+    )
+  deriving stock
+    ( Generic
     )
 
 instance Out MicroSeconds
@@ -143,7 +159,7 @@ instance Out MicroSeconds
 data TaskRes
   = TaskResDoNotRetry
   | TaskResRetryAfter MicroSeconds
-  deriving
+  deriving stock
     ( Eq,
       Ord,
       Show
@@ -152,7 +168,7 @@ data TaskRes
 data TableName
   = UserTable
   | LnChanTable
-  deriving
+  deriving stock
     ( Enum
     )
 
@@ -162,7 +178,8 @@ newtype LnInvoice (mrel :: MoneyRelation)
     ( Eq,
       Show,
       Psql.PersistField,
-      Psql.PersistFieldSql
+      Psql.PersistFieldSql,
+      PathPiece
     )
   deriving stock
     ( Generic
@@ -188,7 +205,7 @@ data LnInvoiceStatus
   | LnInvoiceStatusSettled
   | LnInvoiceStatusCancelled
   | LnInvoiceStatusExpired
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Read,
@@ -201,10 +218,11 @@ data LnChanStatus
   = LnChanStatusPendingOpen
   | LnChanStatusOpened
   | LnChanStatusActive
+  | LnChanStatusFullyResolved
   | LnChanStatusInactive
   | LnChanStatusPendingClose
   | LnChanStatusClosed
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Read,
@@ -218,8 +236,9 @@ newtype
   Money
     (owner :: Owner)
     (btcl :: BitcoinLayer)
-    (mrel :: MoneyRelation)
-  = Money MSat
+    (mrel :: MoneyRelation) = Money
+  { unMoney :: MSat
+  }
   deriving newtype
     ( Eq,
       Ord,
@@ -307,6 +326,8 @@ newtype OnChainAddress (mrel :: MoneyRelation)
     ( Eq,
       Ord,
       Show,
+      Read,
+      PathPiece,
       Psql.PersistField,
       Psql.PersistFieldSql
     )
@@ -339,16 +360,10 @@ data SwapStatus
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan
-  | -- | Swap has been funded with insufficient
-    -- non-dust amt, but funding invoice has
-    -- been expired. Then lsp is doing refund
-    -- into given refund on-chain address and
-    -- waiting for some confirmations.
-    SwapWaitingRefund
   | -- | Final statuses
-    SwapRefunded
-  | SwapSucceeded
-  deriving
+    SwapSucceeded
+  | SwapExpired
+  deriving stock
     ( Eq,
       Ord,
       Show,
@@ -360,10 +375,21 @@ data SwapStatus
 
 instance Out SwapStatus
 
+instance PathPiece SwapStatus where
+  fromPathPiece :: Text -> Maybe SwapStatus
+  fromPathPiece =
+    readMaybe
+      . unpack
+      . T.toTitle
+  toPathPiece :: SwapStatus -> Text
+  toPathPiece =
+    T.toLower
+      . Universum.show
+
 data Timing
   = Permanent
   | Temporary
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Eq,
@@ -374,7 +400,7 @@ data Error a = Error
   { unTiming :: Timing,
     unError :: a
   }
-  deriving
+  deriving stock
     ( Generic,
       Show,
       Eq,
@@ -463,7 +489,11 @@ data RpcError
   | RpcHexDecodeError
   | CannotSyncBlockchain
   | OtherError Text
-  deriving (Eq, Generic, Show)
+  deriving stock
+    ( Eq,
+      Generic,
+      Show
+    )
 
 instance Out RpcError
 
@@ -477,6 +507,8 @@ data SocketAddress = SocketAddress
       Show,
       Generic
     )
+
+instance Out SocketAddress
 
 newtype BlkHash
   = BlkHash Btc.BlockHash
@@ -538,7 +570,13 @@ instance From BlkHeight Btc.BlockHeight where
 data BlkStatus
   = BlkConfirmed
   | BlkOrphan
-  deriving (Eq, Ord, Show, Read, Generic)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
 
 instance Out BlkStatus
 
@@ -546,19 +584,157 @@ data SwapUtxoStatus
   = SwapUtxoUsedForChanFunding
   | SwapUtxoRefunded
   | SwapUtxoFirstSeen
-  deriving (Eq, Ord, Show, Read, Generic)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
 
 instance Out SwapUtxoStatus
 
 data Privacy
   = Private
   | Public
-  deriving (Eq, Ord, Show, Read, Generic)
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Enum,
+      Bounded,
+      Generic
+    )
 
 instance Out Privacy
+
+newtype NodePubKeyHex
+  = NodePubKeyHex Text
+  deriving newtype (Eq, Ord, Show, Read, IsString)
+  deriving stock (Generic)
+
+instance Out NodePubKeyHex
+
+instance From NodePubKeyHex Text
+
+instance From Text NodePubKeyHex
+
+instance TryFrom NodePubKey NodePubKeyHex where
+  tryFrom src =
+    from
+      `composeTryRhs` ( first
+                          ( TryFromException src
+                              . Just
+                              . toException
+                          )
+                          . TE.decodeUtf8'
+                          . B16.encode
+                          . coerce
+                      )
+      $ src
+
+newtype UtxoLockId = UtxoLockId ByteString
+  deriving newtype (Eq, Ord, Show, Read)
+  deriving stock (Generic)
+
+instance Out UtxoLockId
+
+data NodeUri = NodeUri
+  { nodeUriPubKey :: NodePubKey,
+    nodeUriSocketAddress :: SocketAddress
+  }
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
+
+instance Out NodeUri
+
+newtype NodeUriHex
+  = NodeUriHex Text
+  deriving newtype (Eq, Ord, Show, Read, IsString)
+  deriving stock (Generic)
+
+instance Out NodeUriHex
+
+instance From NodeUriHex Text
+
+instance From Text NodeUriHex
+
+instance TryFrom NodeUri NodeUriHex where
+  tryFrom src =
+    bimap
+      (withTarget @NodeUriHex . withSource src)
+      ( \pubHex ->
+          from @Text $
+            from pubHex
+              <> "@"
+              <> from host
+              <> ":"
+              <> from (showIntegral port)
+      )
+      $ tryFrom @NodePubKey @NodePubKeyHex $
+        nodeUriPubKey src
+    where
+      sock = nodeUriSocketAddress src
+      host = socketAddressHost sock
+      port = socketAddressPort sock
+
+newtype RHashHex = RHashHex
+  { unRHashHex :: Text
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      PathPiece
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out RHashHex
+
+instance From RHashHex Text
+
+instance From Text RHashHex
+
+instance ToMessage RHashHex where
+  toMessage =
+    (<> "...")
+      . T.take 7
+      . unRHashHex
+
+instance From RHash RHashHex where
+  from =
+    --
+    -- NOTE : decodeUtf8 in general is unsafe
+    -- but here we know that it will not fail
+    -- because of B16
+    --
+    RHashHex
+      . decodeUtf8
+      . B16.encode
+      . coerce
+
+instance From RHashHex RHash where
+  from =
+    --
+    -- NOTE : this is not RFC 4648-compliant,
+    -- using only for the practical purposes
+    --
+    RHash
+      . B16.decodeLenient
+      . encodeUtf8
+      . unRHashHex
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"
 Psql.derivePersistField "SwapStatus"
 Psql.derivePersistField "BlkStatus"
 Psql.derivePersistField "SwapUtxoStatus"
+Psql.derivePersistField "UtxoLockId"

@@ -6,16 +6,19 @@ Active: Активно
 Continue: Продолжить
 Update: Обновить
 Updated: Обновлено
+Copy: копировать
 
 HomeRBreadcrumb: Главная
 AuthRBreadcrumb: Войти
 SignoutRBreadcrumb: Выйти
 ProfileRBreadcrumb: Профиль
 CreateRBreadcrumb: Создать
+OpenChanRBreadcrumb: Открыть Канал
 
-HomeRTitle: Добро пожаловать | LSP
-SignoutRTitle: Выйти | LSP
-ProfileRTitle usr@YesodUser: #{usr} | LSP
+HomeRTitle: Добро пожаловать | ЛСП
+SignoutRTitle: Выйти | ЛСП
+ProfileRTitle usr@YesodUser: #{usr} | ЛСП
+OpenChanRTitle: Открыть Канал | ЛСП
 
 Home: Главная
 Profile: Профиль
@@ -31,3 +34,6 @@ Password: Пароль
 
 HomeBigHeader: БТК ЛСП
 HomeSmallHeader: Сервис Провайдер Лайтнинг Сети
+
+OpenChan: Открыть Канал
+OpenChanInstruction: Чтобы открыть канал к ЛСП, отсканируйте QR код вашим лайтнинг кошельком или вручную скопируйте адрес лайтнинг ноды внизу.

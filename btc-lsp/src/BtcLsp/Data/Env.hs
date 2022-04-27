@@ -19,10 +19,9 @@ import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math as Math
 import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
-import qualified Data.Aeson as A (Result (..), Value (..), decode)
+import qualified Data.Aeson as A (decode)
 import qualified Data.ByteString as BS
 import Data.ByteString.Lazy.Char8 as C8L (pack)
-import qualified Data.Text.Lazy.Encoding as LTE
 import qualified Env as E
   ( Error (..),
     Mod,
@@ -88,34 +87,13 @@ data RawConfig = RawConfig
     rawConfigBtcEnv :: BitcoindEnv
   }
 
---
--- TODO : do we really need support of
--- double-quoted JSONs now???
---
-
--- | Here we enable normal JSON parsing
--- as well as double-quoted JSON parsing
--- which is handy in some devops-related
--- corner cases.
 parseFromJSON :: (FromJSON a) => String -> Either E.Error a
-parseFromJSON x =
-  case A.decode $ C8L.pack x of
-    Just (A.String s) ->
-      maybeToRight
-        ( E.UnreadError
-            "parseFromJSON => layer 2 parsing failure"
-        )
-        $ A.decode $
-          LTE.encodeUtf8 $
-            fromStrict s
-    Just j ->
-      case fromJSON j of
-        A.Success v -> Right v
-        A.Error {} -> failure "parseFromJSON => layer 1 fromJSON failure"
-    Nothing ->
-      failure "parseFromJSON => layer 1 parsing failure"
-  where
-    failure = Left . E.UnreadError
+parseFromJSON =
+  maybe
+    (Left $ E.UnreadError "parseFromJSON failed")
+    Right
+    . A.decode
+    . C8L.pack
 
 readRawConfig :: IO RawConfig
 readRawConfig =

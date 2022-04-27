@@ -53,6 +53,10 @@ let env =
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
       , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
       , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
+      , lspYesodPguser = "LSP_YESOD_PGUSER"
+      , lspYesodPgpassword = "LSP_YESOD_PGPASS"
+      , lspYesodPghost = "LSP_YESOD_PGHOST"
+      , lspYesodPgdatabase = "LSP_YESOD_PGDATABASE"
       }
 
 let configMapEnv
@@ -65,6 +69,8 @@ let configMapEnv
       , env.lspLndP2pPort
       , env.lspMinChanCapMsat
       , env.lspMsatPerByte
+      , env.lspYesodPghost
+      , env.lspYesodPgdatabase
       ]
 
 let secretEnv
@@ -73,6 +79,8 @@ let secretEnv
       , env.lspLndEnv
       , env.lspGrpcServerEnv
       , env.lspBitcoindEnv
+      , env.lspYesodPguser
+      , env.lspYesodPgpassword
       ]
 
 let mkLspBitcoindEnv
@@ -100,8 +108,14 @@ let mkLspGrpcServerEnv
             { port = P.JSON.natural grpcPort.unPort
             , sig_verify = P.JSON.bool True
             , sig_header_name = P.JSON.string "sig-bin"
-            , tls_cert = P.JSON.string tlsCert
-            , tls_key = P.JSON.string tlsKey
+            , encryption = P.JSON.string (G.unEncryption G.Encryption.Encrypted)
+            , tls =
+                P.JSON.object
+                  ( toMap
+                      { cert = P.JSON.string tlsCert
+                      , key = P.JSON.string tlsKey
+                      }
+                  )
             }
         )
 
@@ -109,7 +123,7 @@ let mkLspGrpcClientEnv
     : P.JSON.Type
     = P.JSON.object
         ( toMap
-            { host = P.JSON.string (G.unOwner G.Owner.Lnd)
+            { host = P.JSON.string (G.unOwner G.Owner.Lsp)
             , port = P.JSON.natural grpcPort.unPort
             , sig_header_name = P.JSON.string "sig-bin"
             , compress_mode = P.JSON.string "Compressed"
@@ -163,6 +177,14 @@ let mkEnv
         , { mapKey = env.lspMsatPerByte, mapValue = mkMsatPerByte net }
         , { mapKey = env.lspMinChanCapMsat
           , mapValue = Natural/show minChanSize
+          }
+        , { mapKey = env.lspYesodPguser, mapValue = Postgres.mkUser net }
+        , { mapKey = env.lspYesodPgpassword
+          , mapValue = Postgres.mkPassword net
+          }
+        , { mapKey = env.lspYesodPghost, mapValue = Postgres.mkHost net }
+        , { mapKey = env.lspYesodPgdatabase
+          , mapValue = Postgres.mkDatabaseName net
           }
         ]
 

@@ -24,7 +24,23 @@ alias bitcoin-cli="bitcoin-cli -rpcwait -datadir=$BTCD_DIR -rpcport=18443"
 
 alias lncli-lsp="lncli -n regtest --rpcserver 127.0.0.1:10010 --lnddir=$LND_LSP_DIR"
 alias lncli-alice="lncli -n regtest --rpcserver 127.0.0.1:10011 --lnddir=$LND_ALICE_DIR"
-alias lncli-bob="lncli -n regtest --lnddir=$LND_BOB_DIR"
+alias lncli-bob="lncli -n regtest --rpcserver 127.0.0.1:10012 --lnddir=$LND_BOB_DIR"
+
+lncli_lsp() {
+  lncli -n regtest --rpcserver 127.0.0.1:10010 --lnddir=$LND_LSP_DIR $@
+}
+
+lncli_alice() {
+  lncli -n regtest --rpcserver 127.0.0.1:10011 --lnddir=$LND_ALICE_DIR $@
+}
+
+lncli_bob() {
+  lncli -n regtest --rpcserver 127.0.0.1:10012 --lnddir=$LND_BOB_DIR $@
+}
+
+export lncli_src_lsp="lncli -n regtest --rpcserver 127.0.0.1:10010 --lnddir=$LND_LSP_DIR"
+export lncli_src_alice="lncli -n regtest --rpcserver 127.0.0.1:10011 --lnddir=$LND_ALICE_DIR"
+export lncli_src_bob="lncli -n regtest --rpcserver 127.0.0.1:10012 --lnddir=$LND_BOB_DIR"
 
 #
 # app
@@ -136,8 +152,6 @@ export LSP_GRPC_CLIENT_ENV="
 {
   \"host\":\"127.0.0.1\",
   \"port\":8444,
-  \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-  \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
   \"sig_header_name\":\"sig-bin\",
   \"compress_mode\":\"Compressed\"
 }
@@ -150,8 +164,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"yolo_btc-lsp\",
 #   \"port\":443,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\",
 #   \"compress_mode\":\"Compressed\"
 # }
@@ -166,8 +178,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"127.0.0.1\",
 #   \"port\":8081,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\"
 # }
 # "
@@ -178,8 +188,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"btc-lsp\",
 #   \"port\":30443,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\",
 #   \"compress_mode\":\"Compressed\"
 # }
@@ -191,8 +199,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"testnet-lsp.coins.io\",
 #   \"port\":8443,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\",
 #   \"compress_mode\":\"Compressed\"
 # }
@@ -203,8 +209,11 @@ export LSP_GRPC_SERVER_ENV="
   \"port\":8444,
   \"sig_verify\":true,
   \"sig_header_name\":\"sig-bin\",
-  \"tls_cert\":\"$GRPC_TLS_CERT\",
-  \"tls_key\":\"$GRPC_TLS_KEY\"
+  \"encryption\":\"Encrypted\",
+  \"tls\":{
+    \"cert\":\"$GRPC_TLS_CERT\",
+    \"key\":\"$GRPC_TLS_KEY\"
+  }
 }
 "
 
