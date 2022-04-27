@@ -6,7 +6,6 @@ BITCOIN_NETWORK="testnet"
 CLOUD_PROVIDER="aws"
 KUBERNETES_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
 DATABASE_INSTANCE_NAME="$KUBERNETES_CLUSTER_NAME"
-DATABASE_USERNAME="lsp"
 IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
 
 isAwsConfigured () {
@@ -30,7 +29,8 @@ getSecurityGroupId () {
 
   aws ec2 describe-security-groups \
     --filters "Name=group-name,Values=eks-cluster-sg-$KUBERNETES_CLUSTER_NAME*" "Name=vpc-id,Values=$VPC_ID" \
-    --query "SecurityGroups[0].GroupId" --output text
+    --query "SecurityGroups[0].GroupId" \
+    --output text
 }
 
 getHostedZoneId () {
@@ -50,6 +50,26 @@ getManagedCertArn () {
     --output text | cut -f1
 }
 
+getDNSValidationName () {
+  local CERT_ARN="$1"
+  local DOMAIN_NAME="$2"
+
+  aws acm describe-certificate \
+    --certificate-arn "$CERT_ARN" \
+    --query "Certificate.DomainValidationOptions[?DomainName=='$DOMAIN_NAME'].ResourceRecord.Name" \
+    --output text
+}
+
+getDNSValidationValue () {
+  local CERT_ARN="$1"
+  local DOMAIN_NAME="$2"
+
+  aws acm describe-certificate \
+    --certificate-arn "$CERT_ARN" \
+    --query "Certificate.DomainValidationOptions[?DomainName=='$DOMAIN_NAME'].ResourceRecord.Value" \
+    --output text
+}
+
 getKubernetesServiceExternalIP () {
   local SERVICE_NAME="$1"
 
@@ -62,45 +82,6 @@ getKubernetesIngressExternalIP () {
 
   kubectl get ingress "$INGRESS_NAME" -o json | \
     jq -r ".status.loadBalancer.ingress[].hostname"
-}
-
-upsertDNSRecord () {
-  local RECORD_NAME="$1"
-  local RECORD_VALUE="$2"
-
-  local HOSTED_ZONE_ID=$(getHostedZoneId)
-  local HOSTED_ZONE=${HOSTED_ZONE_ID##*/}
-
-  local CHANGE_BATCH=$(cat <<EOM
-    {
-      "Changes": [
-        {
-          "Action": "UPSERT",
-          "ResourceRecordSet": {
-            "Name": "${RECORD_NAME}",
-            "Type": "CNAME",
-            "TTL": 300,
-            "ResourceRecords": [
-              {
-                "Value": "${RECORD_VALUE}"
-              }
-            ]
-          }
-        }
-      ]
-    }
-EOM
-)
-
-  local CHANGE_BATCH_REQUEST_ID=$(aws route53 change-resource-record-sets \
-    --hosted-zone-id "$HOSTED_ZONE" \
-    --change-batch "$CHANGE_BATCH" \
-    --query "ChangeInfo.Id" \
-    --output text)
-
-  echo "Waiting for validation records to be created in Route53..."
-  aws route53 wait resource-record-sets-changed \
-    --id "$CHANGE_BATCH_REQUEST_ID"
 }
 
 getElbArn () {

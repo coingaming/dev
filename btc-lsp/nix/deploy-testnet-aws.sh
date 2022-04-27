@@ -4,8 +4,8 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-. "$THIS_DIR/k8s-setup-utilities.sh"
-. "$THIS_DIR/deploy-aws-utilities.sh"
+. "$THIS_DIR/utilities.sh"
+. "$THIS_DIR/aws-utilities.sh"
 
 createKubernetesCluster () {
   local AWS_REGION=$(aws configure get region)
@@ -92,8 +92,8 @@ createAwsLbController () {
 }
 
 setupKubernetesCluster () {
-  if eksctl get cluster --name "$KUBERNETES_CLUSTER_NAME"; then
-    echo "Kubernetes cluster \"$KUBERNETES_CLUSTER_NAME\" already exists..."
+  if [ $(eksctl get cluster --name "$KUBERNETES_CLUSTER_NAME" > /dev/null; echo $? ) ]; then
+    echo "==> Cluster \"$KUBERNETES_CLUSTER_NAME\" already exists."
   else
     createKubernetesCluster && \
       createIamOpenIdConnectProvider && \
@@ -114,16 +114,56 @@ setupHostedZone () {
   local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
 
   if [ -n "$HOSTED_ZONE_ID" ]; then
-    echo "Hosted zone for \"$DOMAIN_NAME\" already exists..."
+    echo "==> Hosted zone for \"$DOMAIN_NAME\" already exists."
   else
     createHostedZone
   fi
 }
 
+upsertDNSRecord () {
+  local DOMAIN_NAME="$1"
+  local RECORD_NAME="$2"
+  local RECORD_VALUE="$3"
+
+  local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
+  local HOSTED_ZONE=${HOSTED_ZONE_ID##*/}
+
+  local CHANGE_BATCH=$(cat <<EOM
+    {
+      "Changes": [
+        {
+          "Action": "UPSERT",
+          "ResourceRecordSet": {
+            "Name": "${RECORD_NAME}",
+            "Type": "CNAME",
+            "TTL": 300,
+            "ResourceRecords": [
+              {
+                "Value": "${RECORD_VALUE}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+EOM
+)
+
+  local CHANGE_BATCH_REQUEST_ID=$(aws route53 change-resource-record-sets \
+    --hosted-zone-id "$HOSTED_ZONE" \
+    --change-batch "$CHANGE_BATCH" \
+    --query "ChangeInfo.Id" \
+    --output text)
+
+  echo "Waiting until dns records are added to Route53..."
+  aws route53 wait resource-record-sets-changed \
+    --id "$CHANGE_BATCH_REQUEST_ID"
+}
+
 createManagedCert () {
   local SERVICE_DOMAIN_NAME="$1"
 
-  echo "Creating certificate for $SERVICE_DOMAIN_NAME on AWS [ACM]..."
+  echo "==> Creating certificate for \"$SERVICE_DOMAIN_NAME\" on AWS [ACM]..."
   local CERT_ARN=$(aws acm request-certificate \
     --domain-name "$SERVICE_DOMAIN_NAME" \
     --validation-method DNS \
@@ -132,21 +172,15 @@ createManagedCert () {
     --options CertificateTransparencyLoggingPreference=DISABLED \
     --output text)
 
-  echo "Waiting until certificate is registered in ACM..."
-  # TODO: refactor for polling instead of sleep!
-  sleep 10;
+  echo "Waiting until dns record appears in ACM..."
+  until [ -n "$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")" ] ; do
+    sleep 1;
+  done
   
-  local VALIDATION_NAME=$(aws acm describe-certificate \
-    --certificate-arn "$CERT_ARN" \
-    --query "Certificate.DomainValidationOptions[?DomainName=='$SERVICE_DOMAIN_NAME'].ResourceRecord.Name" \
-    --output text)
+  local VALIDATION_NAME=$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
+  local VALIDATION_VALUE=$(getDNSValidationValue "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
 
-  local VALIDATION_VALUE=$(aws acm describe-certificate \
-    --certificate-arn "$CERT_ARN" \
-    --query "Certificate.DomainValidationOptions[?DomainName=='$SERVICE_DOMAIN_NAME'].ResourceRecord.Value" \
-    --output text)
-
-  upsertDNSRecord "$VALIDATION_NAME" "$VALIDATION_VALUE"
+  upsertDNSRecord "$DOMAIN_NAME" "$VALIDATION_NAME" "$VALIDATION_VALUE"
 
   echo "Waiting for certificate to validate..."
   aws acm wait certificate-validated \
@@ -157,7 +191,7 @@ writeCertArn () {
   local SERVICE_NAME="$1"
   local SERVICE_DOMAIN_NAME="$2"
   local CERT_ARN=$(getManagedCertArn "$SERVICE_DOMAIN_NAME")
-  local SERVICE_CERT_ARN_PATH="$SECRETS_DIR/$SERVICE/cert-arn.txt"
+  local SERVICE_CERT_ARN_PATH="$SECRETS_DIR/$SERVICE/certarn.txt"
 
   echo "Saving $CERT_ARN to $SERVICE_CERT_ARN_PATH"
   echo -n "$CERT_ARN" > "$SERVICE_CERT_ARN_PATH"
@@ -165,14 +199,13 @@ writeCertArn () {
 
 setupManagedCerts () {
   for SERVICE in rtl lsp; do
-    local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domain-name.txt")
+    local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
     local CERT_ARN=$(getManagedCertArn "$SERVICE_DOMAIN_NAME")
      
     if [ -n "$CERT_ARN" ]; then
-      echo "Certificate for \"$SERVICE_DOMAIN_NAME\" already exists..."
+      echo "==> Certificate for \"$SERVICE_DOMAIN_NAME\" already exists."
     else
-      createManagedCert "$SERVICE_DOMAIN_NAME" && \
-        writeCertArn "$SERVICE" "$SERVICE_DOMAIN_NAME"
+      createManagedCert "$SERVICE_DOMAIN_NAME" && writeCertArn "$SERVICE" "$SERVICE_DOMAIN_NAME"
     fi
   done
 }
@@ -193,14 +226,25 @@ createDbSubnetGroup () {
     --subnet-ids "$PRIVATE_SUBNETS_ID"
 }
 
+setupDbSubnetGroup () {
+  if [ $(aws rds describe-db-subnet-groups --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME" > /dev/null; echo $? ) ]; then
+    echo "==> Database subnet group for \"$DATABASE_INSTANCE_NAME\" already exists."
+  else
+    createDbSubnetGroup "$KUBERNETES_CLUSTER_NAME"
+  fi
+}
+
 createDbInstance () {
-  local DB_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
-  local SG_ID=$(getSecurityGroupId "$KUBERNETES_CLUSTER_NAME")
+  local DATABASE_USERNAME="$1"
+  local DATABASE_PASSWORD="$2"
+  local DATABASE_NAME="$3"
+  local SECURITY_GROUP_ID=$(getSecurityGroupId "$KUBERNETES_CLUSTER_NAME")
 
   echo "==> Creating \"$DATABASE_INSTANCE_NAME\" database instance on AWS [RDS]..."
   aws rds create-db-instance \
     --engine postgres \
     --db-instance-identifier "$DATABASE_INSTANCE_NAME" \
+    --db-name "$DATABASE_NAME" \
     --allocated-storage 20 \
     --db-instance-class "db.t3.micro" \
     --no-publicly-accessible \
@@ -209,59 +253,60 @@ createDbInstance () {
     --no-storage-encrypted \
     --no-deletion-protection \
     --master-username "$DATABASE_USERNAME" \
-    --master-user-password "$DB_PASSWORD" \
+    --master-user-password "$DATABASE_PASSWORD" \
     --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME" \
-    --vpc-security-group-ids "$SG_ID"
+    --vpc-security-group-ids "$SECURITY_GROUP_ID"
 
-  echo "Waiting until \"$DATABASE_INSTANCE_NAME\" database instance is fully ready..."
+  echo "Waiting until \"$DATABASE_INSTANCE_NAME\" database instance is up and running..."
   aws rds wait db-instance-available \
     --db-instance-identifier="$DATABASE_INSTANCE_NAME"
 }
 
 writeDbUri () {
-  local DB_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
-  local DB_HOST=$(aws rds describe-db-instances \
+  local DATABASE_USERNAME="$1"
+  local DATABASE_PASSWORD="$2"
+  local DATABASE_NAME="$3"
+  local DATABASE_HOST=$(aws rds describe-db-instances \
     --filters "Name=db-instance-id,Values=$DATABASE_INSTANCE_NAME" \
     --query "*[].[Endpoint.Address,Endpoint.Port]" \
     --output json | jq -c -r .[0][0])
-  local DB_URI="postgresql://$DATABASE_USERNAME:$DB_PASSWORD@$DB_HOST/postgres"
-  local DB_CONN_PATH="$POSTGRES_PATH/conn.txt"
+  local DATABASE_URI="postgresql://$DATABASE_USERNAME:$DATABASE_PASSWORD@$DATABASE_HOST/$DATABASE_NAME"
 
-  echo -n "$DB_URI" > "$DB_CONN_PATH"
-  echo "Saved connection details to $DB_CONN_PATH"
+  echo "Saving database connection details to $DATABASE_URI_PATH"
+  echo -n "$DATABASE_URI" > "$DATABASE_URI_PATH"
 }
 
 setupDbInstance () {
-  local DB_INSTANCE_IDENTIFIER=$(aws rds describe-db-instances \
+  local DATABASE_USERNAME="$DATABASE_INSTANCE_NAME-user"
+  local DATABASE_PASSWORD=$(cat "$DATABASE_PASSWORD_PATH")
+  local DATABASE_NAME="$DATABASE_INSTANCE_NAME-db"
+  local DATABASE_INSTANCE_IDENTIFIER=$(aws rds describe-db-instances \
     --filters "Name=db-instance-id,Values=$DATABASE_INSTANCE_NAME" \
     --query 'DBInstances[*].[DBInstanceIdentifier]' \
     --output text)
 
-  if [ -n "$DB_INSTANCE_IDENTIFIER" ]; then
-    echo "Database instance for \"$DATABASE_INSTANCE_NAME\" already exists..."
+  if [ -n "$DATABASE_INSTANCE_IDENTIFIER" ]; then
+    echo "==> Database instance for \"$DATABASE_INSTANCE_NAME\" already exists."
   else
-    createDbSubnetGroup "$KUBERNETES_CLUSTER_NAME" && \
-    createDbInstance && \
-    writeDbUri
+    createDbInstance "$DATABASE_USERNAME" "$DATABASE_PASSWORD" "$DATABASE_NAME" && \
+      writeDbUri "$DATABASE_USERNAME" "$DATABASE_PASSWORD" "$DATABASE_NAME"
   fi
 }
 
 setupDNSRecords () {
   for SERVICE in bitcoind lnd lsp; do
-    local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domain-name.txt")
+    local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
     local SERVICE_EXTERNAL_IP=$(getKubernetesServiceExternalIP "$SERVICE")
 
-    echo "Adding CNAME DNS record for $SERVICE_DOMAIN_NAME k8s service..."
-
-    upsertDNSRecord "$SERVICE_DOMAIN_NAME" "$SERVICE_EXTERNAL_IP"
+    echo "==> Adding CNAME record for $SERVICE_DOMAIN_NAME k8s service..."
+    upsertDNSRecord "$DOMAIN_NAME" "$SERVICE_DOMAIN_NAME" "$SERVICE_EXTERNAL_IP"
   done
 
-  local RTL_DOMAIN_NAME=$(cat "$RTL_PATH/domain-name.txt")
+  local RTL_DOMAIN_NAME=$(cat "$RTL_PATH/domainname.txt")
   local RTL_EXTERNAL_IP=$(getKubernetesIngressExternalIP rtl)
 
-  echo "Adding CNAME DNS record for $RTL_DOMAIN_NAME k8s ingress.."
-
-  upsertDNSRecord "$RTL_DOMAIN_NAME" "$RTL_EXTERNAL_IP"
+  echo "==> Adding CNAME DNS record for $RTL_DOMAIN_NAME k8s ingress.."
+  upsertDNSRecord "$DOMAIN_NAME" "$RTL_DOMAIN_NAME" "$RTL_EXTERNAL_IP"
 }
 
 deleteElbListener () {
@@ -279,9 +324,11 @@ setupElbListener () {
 
   for SERVICE_PORT in $SERVICE_PORTS; do
     local ELB_LISTENER_ARN=$(getElbListenerArn "$ELB_ARN" "$SERVICE_PORT")
-
-    echo "Deleting port $SERVICE_PORT from $SERVICE_NAME load balancer..."
-    (deleteElbListener "$ELB_LISTENER_ARN") || true
+    
+    if [ -n "$ELB_LISTENER_ARN" ]; then 
+      echo "==> Deleting port $SERVICE_PORT from $SERVICE_NAME load balancer..."
+      deleteElbListener "$ELB_LISTENER_ARN"
+    fi
   done
 }
 
@@ -290,36 +337,49 @@ setupElbListeners () {
   setupElbListener "lnd" "10009 8080"
 }
 
-confirmContinue "==> Start setting up $BITCOIN_NETWORK on $CLOUD_PROVIDER?"
-
 isInstalled eksctl && \
   isInstalled helm && \
   isInstalled aws && \
-  isAwsConfigured && \
-  cleanBuildDir && \
-  genSecureCreds && \
-  writeDomainName && \
-  checkRequiredFiles && \
-  setupKubernetesCluster && \
-  setupHostedZone && \
-  setupManagedCerts
+  isAwsConfigured
+
+confirmContinue "==> Start setting up $BITCOIN_NETWORK on $CLOUD_PROVIDER"
+
+confirmAction \
+"==> Clean up previous build" \
+"cleanBuildDir && genSecureCreds"
+
+# Check that everything needed is present
+checkGeneratedFiles && writeDomainName
+
+echo "==> Checking that domain names are saved"
+for SERVICE in bitcoind lnd lsp; do
+  checkFileExistsNotEmpty "$SECRETS_DIR/$SERVICE/domainname.txt"
+done
+echo "Domain names are OK."
+
+# Create eks cluster, route53 hosted zone and request certs from acm
+setupKubernetesCluster && \
+setupHostedZone && \
+setupManagedCerts
 
 echo "==> Checking that certificate arns are saved"
-checkFileExistsNotEmpty "$RTL_PATH/cert-arn.txt"
-checkFileExistsNotEmpty "$LSP_PATH/cert-arn.txt"
+checkFileExistsNotEmpty "$RTL_PATH/certarn.txt"
+checkFileExistsNotEmpty "$LSP_PATH/certarn.txt"
 echo "Cert arns are OK."
 
-setupDbInstance
+# Create subnet group and rds postgres instance
+setupDbSubnetGroup && setupDbInstance
 
 echo "==> Checking that db connection details are saved"
-checkFileExistsNotEmpty "$POSTGRES_PATH/conn.txt" 
+checkFileExistsNotEmpty "$DATABASE_URI_PATH"
 echo "Connection details are OK."
 
+confirmContinue "==> Deploy $BITCOIN_NETWORK to $CLOUD_PROVIDER"
+
+# Deploy partial env
 echo "==> Partial dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK $CLOUD_PROVIDER'"
-
-confirmContinue "==> Deploy $BITCOIN_NETWORK to $CLOUD_PROVIDER?"
 
 echo "==> Configuring environment for containers"
 sh "$THIS_DIR/k8s-setup-env.sh"
@@ -336,6 +396,7 @@ sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 echo "==> Exporting creds from running pods"
 sh "$THIS_DIR/k8s-export-creds.sh"
 
+# Deploy full env
 echo "==> Full dhall"
 sh "$THIS_DIR/hm-shell-docker.sh" --mini \
    "--run './nix/ns-dhall-compile.sh $BITCOIN_NETWORK $CLOUD_PROVIDER'"
@@ -349,7 +410,7 @@ sh "$THIS_DIR/k8s-deploy.sh" "rtl lsp"
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 
-setupDNSRecords
-setupElbListeners
+# Create dns records in route53 and delete some ports (which should be private!) from elb
+setupDNSRecords && setupElbListeners
 
 echo "==> Setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
