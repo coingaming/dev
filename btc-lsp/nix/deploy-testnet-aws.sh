@@ -61,7 +61,7 @@ createAwsLbControllerPolicy () {
     --policy-name AWSLoadBalancerControllerIAMPolicy \
     --policy-document "file://$POLICY_FILEPATH"
 
-  rm "$POLICY_FIPATH"
+  rm "$POLICY_FILEPATH"
 }
 
 createAwsLbServiceAccount () {
@@ -87,6 +87,7 @@ createAwsLbController () {
     --set serviceAccount.create=false \
     --set serviceAccount.name=aws-load-balancer-controller
 
+  echo "Verifying that AwsLBController has been successfully installed..."
   kubectl get deployment \
     -n kube-system aws-load-balancer-controller
 }
@@ -342,7 +343,7 @@ isInstalled eksctl && \
   isInstalled aws && \
   isAwsConfigured
 
-confirmContinue "==> Start setting up $BITCOIN_NETWORK on $CLOUD_PROVIDER"
+confirmContinue "==> Start setting up LSP $BITCOIN_NETWORK on $CLOUD_PROVIDER"
 
 confirmAction \
 "==> Clean up previous build" \
@@ -374,7 +375,7 @@ echo "==> Checking that db connection details are saved"
 checkFileExistsNotEmpty "$DATABASE_URI_PATH"
 echo "Connection details are OK."
 
-confirmContinue "==> Deploy $BITCOIN_NETWORK to $CLOUD_PROVIDER"
+confirmContinue "==> Deploy lsp $BITCOIN_NETWORK to $CLOUD_PROVIDER"
 
 # Deploy partial env
 echo "==> Partial dhall"
@@ -413,4 +414,4 @@ sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 # Create dns records in route53 and delete some ports (which should be private!) from elb
 setupDNSRecords && setupElbListeners
 
-echo "==> Setup for $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
+echo "==> Setup for lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
