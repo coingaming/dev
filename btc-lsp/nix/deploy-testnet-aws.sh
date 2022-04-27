@@ -279,7 +279,7 @@ writeDbUri () {
 
 setupDbInstance () {
   local DATABASE_USERNAME="$DATABASE_INSTANCE_NAME-user"
-  local DATABASE_PASSWORD=$(cat "$DATABASE_PASSWORD_PATH")
+  local DATABASE_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
   local DATABASE_NAME="$DATABASE_INSTANCE_NAME-db"
   local DATABASE_INSTANCE_IDENTIFIER=$(aws rds describe-db-instances \
     --filters "Name=db-instance-id,Values=$DATABASE_INSTANCE_NAME" \
@@ -306,7 +306,7 @@ setupDNSRecords () {
   local RTL_DOMAIN_NAME=$(cat "$RTL_PATH/domainname.txt")
   local RTL_EXTERNAL_IP=$(getKubernetesIngressExternalIP rtl)
 
-  echo "==> Adding CNAME DNS record for $RTL_DOMAIN_NAME k8s ingress.."
+  echo "==> Adding CNAME record for $RTL_DOMAIN_NAME k8s ingress.."
   upsertDNSRecord "$DOMAIN_NAME" "$RTL_DOMAIN_NAME" "$RTL_EXTERNAL_IP"
 }
 
