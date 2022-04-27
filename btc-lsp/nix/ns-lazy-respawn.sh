@@ -20,6 +20,6 @@ SHELL_DIR="$THIS_DIR/../build/shell"
 
 . $THIS_DIR/ns-export-test-envs.sh
 
-($THIS_DIR/ns-gen-proto.sh || true)
+#($THIS_DIR/ns-gen-proto.sh || true)
 
 hpack

@@ -12,3 +12,5 @@
 / HomeR GET
 /profile ProfileR GET POST
 /open-channel OpenChanR GET
+/swap-into-ln/create SwapIntoLnCreateR GET POST
+/swap-into-ln/select/#RHashHex SwapIntoLnSelectR GET POST

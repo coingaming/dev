@@ -2,6 +2,7 @@
 
 module BtcLsp.Grpc.Server.HighLevel
   ( swapIntoLn,
+    swapIntoLnT,
     getCfg,
   )
 where
@@ -36,28 +37,11 @@ swapIntoLn userEnt req = do
       withLndT
         Lnd.decodePayReq
         ($ from fundInv)
-    --
-    -- TODO : proper input failure
-    --
-    when (Lnd.numMsat fundInvLnd /= MSat 0)
-      . throwE
-      $ FailureInput [defMessage]
-    fundAddr <-
-      from
-        <$> withLndT
-          Lnd.newAddress
-          ( $
-              Lnd.NewAddressRequest
-                { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-                  Lnd.account = Nothing
-                }
-          )
-    expAt <-
-      lift
-        . getFutureTime
-        $ Lnd.expiry fundInvLnd
-    lift $
-      SwapIntoLn.createIgnore userEnt fundInv fundAddr refundAddr expAt
+    swapIntoLnT
+      userEnt
+      fundInv
+      fundInvLnd
+      refundAddr
   pure $ case res of
     Left e ->
       failResE e
@@ -73,6 +57,48 @@ swapIntoLn userEnt req = do
                          + from (swapIntoLnFeeLsp swap)
                      )
              )
+
+swapIntoLnT ::
+  ( Env m
+  ) =>
+  Entity User ->
+  LnInvoice 'Fund ->
+  Lnd.PayReq ->
+  OnChainAddress 'Refund ->
+  ExceptT Failure m (Entity SwapIntoLn)
+swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
+  --
+  -- TODO : proper input failure
+  --
+  when
+    ( Lnd.numMsat fundInvLnd /= MSat 0
+        || Lnd.destination fundInvLnd
+          /= userNodePubKey (entityVal userEnt)
+    )
+    . throwE
+    $ FailureInput [defMessage]
+  fundAddr <-
+    from
+      <$> withLndT
+        Lnd.newAddress
+        ( $
+            Lnd.NewAddressRequest
+              { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                Lnd.account = Nothing
+              }
+        )
+  expAt <-
+    lift
+      . getFutureTime
+      $ Lnd.expiry fundInvLnd
+  lift $
+    SwapIntoLn.createIgnore
+      userEnt
+      fundInv
+      (Lnd.paymentHash fundInvLnd)
+      fundAddr
+      refundAddr
+      expAt
 
 getCfg ::
   ( Env m

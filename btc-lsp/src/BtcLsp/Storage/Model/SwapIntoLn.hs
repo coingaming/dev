@@ -5,6 +5,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
+    getByRHashHex,
     getByFundAddress,
     getLatestSwapT,
     getWaitingFundSql,
@@ -19,11 +20,12 @@ createIgnore ::
   ) =>
   Entity User ->
   LnInvoice 'Fund ->
+  RHash ->
   OnChainAddress 'Fund ->
   OnChainAddress 'Refund ->
   UTCTime ->
   m (Entity SwapIntoLn)
-createIgnore userEnt fundInv fundAddr refundAddr expAt =
+createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
   runSql $ do
     ct <- getCurrentTime
     --
@@ -32,10 +34,11 @@ createIgnore userEnt fundInv fundAddr refundAddr expAt =
     -- into on-chain address.
     --
     Psql.upsertBy
-      (UniqueSwapIntoLnFundInvoice fundInv)
+      (UniqueSwapIntoLnFundInvHash fundHash)
       SwapIntoLn
         { swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
+          swapIntoLnFundInvHash = fundHash,
           swapIntoLnFundAddress = fundAddr,
           swapIntoLnFundProof = Nothing,
           swapIntoLnRefundAddress = refundAddr,
@@ -206,6 +209,26 @@ getSwapsToSettle =
             -- Maybe limits, some proper retries etc.
             --
             pure (swap, user, chan)
+
+getByRHashHex ::
+  ( Storage m
+  ) =>
+  RHashHex ->
+  m (Maybe (Entity SwapIntoLn, Entity User))
+getByRHashHex hash =
+  runSql . (listToMaybe <$>) $
+    Psql.select $
+      Psql.from $ \(swap `Psql.InnerJoin` user) -> do
+        Psql.on
+          ( swap Psql.^. SwapIntoLnUserId
+              Psql.==. user Psql.^. UserId
+          )
+        Psql.where_
+          ( swap Psql.^. SwapIntoLnFundInvHash
+              Psql.==. Psql.val (from hash)
+          )
+        Psql.limit 1
+        pure (swap, user)
 
 getByFundAddress ::
   ( Storage m

@@ -1,5 +1,5 @@
-<div .ui.container.compact>
+<div .ui.container-fluid.compact.center>
   <form role=form method=post enctype=#{formEnctype} action=@{formRoute}>
     ^{formWidget}
-    <div .text-center>
+    <div .text-center.large-margin-top>
       <button type="submit" .btn.btn-primary.col-xs-12>_{formMsgSubmit}
