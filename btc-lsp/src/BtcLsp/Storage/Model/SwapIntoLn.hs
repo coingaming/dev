@@ -5,7 +5,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
-    getByRHashHex,
+    getByUuid,
     getByFundAddress,
     getLatestSwapT,
     getWaitingFundSql,
@@ -212,12 +212,12 @@ getSwapsToSettle =
             --
             pure (swap, user, chan)
 
-getByRHashHex ::
+getByUuid ::
   ( Storage m
   ) =>
-  RHashHex ->
+  Uuid 'SwapIntoLnTable ->
   m (Maybe (Entity SwapIntoLn, Entity User))
-getByRHashHex hash =
+getByUuid uuid =
   runSql . (listToMaybe <$>) $
     Psql.select $
       Psql.from $ \(swap `Psql.InnerJoin` user) -> do
@@ -226,8 +226,8 @@ getByRHashHex hash =
               Psql.==. user Psql.^. UserId
           )
         Psql.where_
-          ( swap Psql.^. SwapIntoLnFundInvHash
-              Psql.==. Psql.val (from hash)
+          ( swap Psql.^. SwapIntoLnUuid
+              Psql.==. Psql.val uuid
           )
         Psql.limit 1
         pure (swap, user)

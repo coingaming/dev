@@ -16,14 +16,14 @@ ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
 OpenChanRBreadcrumb: Open Channel
 SwapIntoLnCreateRBreadcrumb: Swap
-SwapIntoLnSelectRBreadcrumb rhx@RHashHex: #{rhx}
+SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
 
 HomeRTitle: Welcome | LSP
 SignoutRTitle: Logout | LSP
 ProfileRTitle usr@YesodUser: #{usr} | LSP
 OpenChanRTitle: Open Channel | LSP
 SwapIntoLnCreateRTitle: Swap | LSP
-SwapIntoLnSelectRTitle rhx@RHashHex: #{rhx} | Swap | LSP
+SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Swap | LSP
 
 Home: Home
 Profile: Profile
@@ -44,6 +44,7 @@ OpenChan: Open Channel
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
 Swap: Swap
+SwapIntoLnUuid: Swap Uuid
 SwapIntoLnUserId: User Pub Key
 SwapIntoLnFundInvoice: Swap Invoice
 SwapIntoLnFundInvHash: Swap Hash

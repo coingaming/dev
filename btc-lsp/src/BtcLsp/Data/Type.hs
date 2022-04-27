@@ -707,12 +707,6 @@ instance From RHashHex Text
 
 instance From Text RHashHex
 
-instance ToMessage RHashHex where
-  toMessage =
-    (<> "...")
-      . T.take 7
-      . unRHashHex
-
 instance From RHash RHashHex where
   from =
     --
@@ -787,6 +781,21 @@ instance Psql.PersistFieldSql (Uuid tab) where
   sqlType =
     const $
       Psql.SqlOther "uuid"
+
+instance ToMessage (Uuid tab) where
+  toMessage =
+    (<> "...")
+      . T.take 7
+      . UUID.toText
+      . from
+
+instance PathPiece (Uuid tab) where
+  fromPathPiece =
+    (from <$>)
+      . UUID.fromText
+  toPathPiece =
+    UUID.toText
+      . from
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"

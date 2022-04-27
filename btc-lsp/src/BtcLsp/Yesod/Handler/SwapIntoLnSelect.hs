@@ -17,10 +17,11 @@ import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
+import qualified Data.UUID as UUID
 import Yesod.Form.Bootstrap3
 
-getSwapIntoLnSelectR :: RHashHex -> Handler Html
-getSwapIntoLnSelectR fundInvHash = do
+getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
+getSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
@@ -32,7 +33,13 @@ getSwapIntoLnSelectR fundInvHash = do
                 . userNodePubKey
                 $ entityVal usrEnt
         let items =
-              [ ( MsgSwapIntoLnUserId,
+              [ ( MsgSwapIntoLnUuid,
+                  Just
+                    . UUID.toText
+                    . from
+                    $ swapIntoLnUuid
+                ),
+                ( MsgSwapIntoLnUserId,
                   Just userPub
                 ),
                 ( MsgSwapIntoLnFundInvoice,
@@ -81,15 +88,15 @@ getSwapIntoLnSelectR fundInvHash = do
                   (msg, Just txt) -> [(msg, txt)]
                   (_, Nothing) -> []
         defaultLayout $ do
-          setTitleI $ MsgSwapIntoLnSelectRTitle fundInvHash
+          setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
           $(widgetFile "simple_list_group")
     )
     . liftIO
     . run
-    $ SwapIntoLn.getByRHashHex fundInvHash
+    $ SwapIntoLn.getByUuid uuid
 
-postSwapIntoLnSelectR :: RHashHex -> Handler Html
-postSwapIntoLnSelectR fundInvHash = do
+postSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
+postSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
@@ -105,25 +112,25 @@ postSwapIntoLnSelectR fundInvHash = do
             --
             -- TODO : !!!
             --
-            renderPage fundInvHash formWidget formEnctype
+            renderPage uuid formWidget formEnctype
           _ ->
-            renderPage fundInvHash formWidget formEnctype
+            renderPage uuid formWidget formEnctype
     )
     . liftIO
     . run
-    $ SwapIntoLn.getByRHashHex fundInvHash
+    $ SwapIntoLn.getByUuid uuid
 
 renderPage ::
-  RHashHex ->
+  Uuid 'SwapIntoLnTable ->
   Widget ->
   Enctype ->
   Handler Html
-renderPage fundInvHash formWidget formEnctype = do
-  let formRoute = SwapIntoLnSelectR fundInvHash
+renderPage uuid formWidget formEnctype = do
+  let formRoute = SwapIntoLnSelectR uuid
   let formMsgSubmit = MsgContinue
   let form = $(widgetFile "simple_form")
   defaultLayout $ do
-    setTitleI $ MsgSwapIntoLnSelectRTitle fundInvHash
+    setTitleI $ MsgSwapIntoLnSelectRTitle uuid
     $(widgetFile "swap_into_ln_create")
 
 aForm :: Entity SwapIntoLn -> AForm Handler (Entity SwapIntoLn)
