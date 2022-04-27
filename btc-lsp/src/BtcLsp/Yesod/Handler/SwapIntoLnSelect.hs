@@ -36,7 +36,7 @@ getSwapIntoLnSelectR uuid = do
               [ ( MsgSwapIntoLnUuid,
                   Just
                     . UUID.toText
-                    . from
+                    . unUuid
                     $ swapIntoLnUuid
                 ),
                 ( MsgSwapIntoLnUserId,

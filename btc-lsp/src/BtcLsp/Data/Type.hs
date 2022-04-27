@@ -41,7 +41,8 @@ module BtcLsp.Data.Type
     NodeUriHex (..),
     UtxoLockId (..),
     RHashHex (..),
-    Uuid (..),
+    Uuid,
+    unUuid,
     newUuid,
   )
 where
@@ -730,8 +731,9 @@ instance From RHashHex RHash where
       . encodeUtf8
       . unRHashHex
 
-newtype Uuid (tab :: Table)
-  = Uuid UUID
+newtype Uuid (tab :: Table) = Uuid
+  { unUuid' :: UUID
+  }
   deriving newtype
     ( Eq,
       Ord,
@@ -740,20 +742,22 @@ newtype Uuid (tab :: Table)
     )
   deriving stock (Generic)
 
-instance From (Uuid tab) UUID
-
-instance From UUID (Uuid tab)
+unUuid :: Uuid tab -> UUID
+unUuid =
+  unUuid'
 
 instance Out (Uuid tab) where
   docPrec x =
-    docPrec x . UUID.toText . from
+    docPrec x
+      . UUID.toText
+      . unUuid
   doc =
     docPrec 0
 
 newUuid :: (MonadIO m) => m (Uuid tab)
 newUuid =
   liftIO $
-    from <$> UUID.nextRandom
+    Uuid <$> UUID.nextRandom
 
 --
 -- NOTE :  we're taking advantage of
@@ -763,7 +767,7 @@ instance Psql.PersistField (Uuid tab) where
   toPersistValue =
     Psql.PersistLiteral_ Psql.Escaped
       . UUID.toASCIIBytes
-      . from
+      . unUuid
   fromPersistValue = \case
     Psql.PersistLiteral_ Psql.Escaped x ->
       maybe
@@ -772,7 +776,7 @@ instance Psql.PersistField (Uuid tab) where
               <> inspectPlain x
         )
         ( Right
-            . from
+            . Uuid
         )
         $ UUID.fromASCIIBytes x
     failure ->
@@ -790,15 +794,15 @@ instance ToMessage (Uuid tab) where
     (<> "...")
       . T.take 7
       . UUID.toText
-      . from
+      . unUuid
 
 instance PathPiece (Uuid tab) where
   fromPathPiece =
-    (from <$>)
+    (Uuid <$>)
       . UUID.fromText
   toPathPiece =
     UUID.toText
-      . from
+      . unUuid
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"
