@@ -20,10 +20,6 @@ let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
-let tlsCert = ../../build/secrets/lsp/tls.cert as Text ? G.todo
-
-let tlsKey = ../../build/secrets/lsp/tls.key as Text ? G.todo
-
 let logEnv = "test"
 
 let logFormat = "Bracket"
@@ -109,13 +105,6 @@ let mkLspGrpcServerEnv
             , sig_verify = P.JSON.bool True
             , sig_header_name = P.JSON.string "sig-bin"
             , encryption = P.JSON.string (G.unEncryption G.Encryption.Encrypted)
-            , tls =
-                P.JSON.object
-                  ( toMap
-                      { cert = P.JSON.string tlsCert
-                      , key = P.JSON.string tlsKey
-                      }
-                  )
             }
         )
 
@@ -241,7 +230,7 @@ let mkServiceAnnotations
                 , mapValue = "*"
                 }
               , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"
-                , mapValue = ../../build/secrets/lsp/cert-arn.txt as Text ? G.todo
+                , mapValue = ../../build/secrets/lsp/certarn.txt as Text ? G.todo
                 }
               , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"
                 , mapValue = Natural/show grpcPort.unPort

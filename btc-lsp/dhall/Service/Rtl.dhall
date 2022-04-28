@@ -20,9 +20,9 @@ let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
-let domainName = ../../build/secrets/rtl/domain-name.txt as Text ? G.todo
+let domainName = ../../build/secrets/rtl/domainname.txt as Text ? G.todo
 
-let certArn = ../../build/secrets/rtl/cert-arn.txt as Text ? G.todo
+let certArn = ../../build/secrets/rtl/certarn.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/rtl/multipass.txt as Text ? G.todo
 

@@ -18,7 +18,7 @@ let Bitcoind = ./Bitcoind.dhall
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let domainName = ../../build/secrets/lnd/domain-name.txt as Text ? G.todo
+let domainName = ../../build/secrets/lnd/domainname.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
 
