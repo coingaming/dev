@@ -1,16 +1,17 @@
 #!/bin/bash
+# shellcheck disable=SC2155
 
 set -e
 
-BITCOIN_NETWORK="testnet"
-CLOUD_PROVIDER="aws"
-KUBERNETES_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
-DATABASE_INSTANCE_NAME="$KUBERNETES_CLUSTER_NAME"
-IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
+export BITCOIN_NETWORK="testnet"
+export CLOUD_PROVIDER="aws"
+export KUBERNETES_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
+export DATABASE_INSTANCE_NAME="$KUBERNETES_CLUSTER_NAME"
+export IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
 
 isAwsConfigured () {
   for VARNAME in "aws_access_key_id" "aws_secret_access_key" "region"; do
-    if [ -z $(aws configure get $VARNAME) ]; then
+    if [ -z "$(aws configure get $VARNAME)" ]; then
       echo "Please set up \"$VARNAME\" by running \"aws configure\" in your terminal."
       exit 1;
     fi
@@ -56,6 +57,15 @@ getManagedCertArn () {
     --output text | cut -f1
 }
 
+getDNSRecordsByType () {
+  local HOSTED_ZONE_ID="$1"
+  local RECORD_TYPE="$2"
+
+  aws route53 list-resource-record-sets \
+    --hosted-zone-id "$HOSTED_ZONE_ID" \
+    --query "ResourceRecordSets[?Type=='$RECORD_TYPE']"
+}
+
 getDNSRecord () {
   local HOSTED_ZONE_ID="$1"
   local DOMAIN_NAME="$2"
@@ -84,6 +94,45 @@ getDNSValidationValue () {
     --certificate-arn "$CERT_ARN" \
     --query "Certificate.DomainValidationOptions[?DomainName=='$DOMAIN_NAME'].ResourceRecord.Value" \
     --output text
+}
+
+changeDNSRecord () {
+  local HOSTED_ZONE_ID="$1"
+  local ACTION="$2"
+  local RECORD_NAME="$3"
+  local RECORD_VALUE="$4"
+  local RECORD_TYPE="${5:-CNAME}"
+  local RECORD_TTL="${6:-300}"
+  local CHANGE_BATCH=$(cat <<EOM
+    {
+      "Changes": [
+        {
+          "Action": "${ACTION}",
+          "ResourceRecordSet": {
+            "Name": "${RECORD_NAME}",
+            "Type": "${RECORD_TYPE}",
+            "TTL": ${RECORD_TTL},
+            "ResourceRecords": [
+              {
+                "Value": "${RECORD_VALUE}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+EOM
+)
+
+  local CHANGE_BATCH_REQUEST_ID=$(aws route53 change-resource-record-sets \
+    --hosted-zone-id "$HOSTED_ZONE_ID" \
+    --change-batch "$CHANGE_BATCH" \
+    --query "ChangeInfo.Id" \
+    --output text)
+
+  echo "Waiting until changes to dns records are applied in Route53..."
+  aws route53 wait resource-record-sets-changed \
+    --id "$CHANGE_BATCH_REQUEST_ID"
 }
 
 getDbSubnetGroupArn () {

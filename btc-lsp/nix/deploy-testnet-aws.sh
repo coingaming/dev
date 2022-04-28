@@ -121,46 +121,9 @@ setupHostedZone () {
   fi
 }
 
-upsertDNSRecord () {
-  local DOMAIN_NAME="$1"
-  local RECORD_NAME="$2"
-  local RECORD_VALUE="$3"
-
-  local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
-  local CHANGE_BATCH=$(cat <<EOM
-    {
-      "Changes": [
-        {
-          "Action": "UPSERT",
-          "ResourceRecordSet": {
-            "Name": "${RECORD_NAME}",
-            "Type": "CNAME",
-            "TTL": 300,
-            "ResourceRecords": [
-              {
-                "Value": "${RECORD_VALUE}"
-              }
-            ]
-          }
-        }
-      ]
-    }
-EOM
-)
-
-  local CHANGE_BATCH_REQUEST_ID=$(aws route53 change-resource-record-sets \
-    --hosted-zone-id "$HOSTED_ZONE_ID" \
-    --change-batch "$CHANGE_BATCH" \
-    --query "ChangeInfo.Id" \
-    --output text)
-
-  echo "Waiting until dns records are added to Route53..."
-  aws route53 wait resource-record-sets-changed \
-    --id "$CHANGE_BATCH_REQUEST_ID"
-}
-
 createManagedCert () {
   local SERVICE_DOMAIN_NAME="$1"
+  local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
 
   echo "==> Creating certificate for \"$SERVICE_DOMAIN_NAME\" on AWS [ACM]..."
   local CERT_ARN=$(aws acm request-certificate \
@@ -179,7 +142,7 @@ createManagedCert () {
   local VALIDATION_NAME=$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
   local VALIDATION_VALUE=$(getDNSValidationValue "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
 
-  upsertDNSRecord "$DOMAIN_NAME" "$VALIDATION_NAME" "$VALIDATION_VALUE"
+  changeDNSRecord "$HOSTED_ZONE_ID" "UPSERT" "$VALIDATION_NAME" "$VALIDATION_VALUE"
 
   echo "Waiting for certificate to validate..."
   aws acm wait certificate-validated \
@@ -301,7 +264,7 @@ setupDNSRecord () {
     echo "==> CNAME record for \"$SERVICE_DOMAIN_NAME\" already exists."
   else
     echo "==> Adding CNAME record for \"$SERVICE_DOMAIN_NAME\""
-    upsertDNSRecord "$DOMAIN_NAME" "$SERVICE_DOMAIN_NAME" "$CNAME_VALUE"
+    changeDNSRecord "$HOSTED_ZONE_ID" "UPSERT" "$SERVICE_DOMAIN_NAME" "$CNAME_VALUE"
   fi
 }
 
