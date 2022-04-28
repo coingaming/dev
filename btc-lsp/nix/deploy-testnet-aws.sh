@@ -26,12 +26,12 @@ createKubernetesCluster () {
       instanceType: t3.medium
       maxSize: 4
       minSize: 1
+      volumeSize: 10
       privateNetworking: true
       iam:
         withAddonPolicies:
           autoScaler: true
           awsLoadBalancerController: true
-          certManager: true
           ebs: true
   vpc:
     clusterEndpoints:
