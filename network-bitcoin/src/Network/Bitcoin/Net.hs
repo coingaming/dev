@@ -93,5 +93,5 @@ addNode client url com = unNil <$> callApi client "addnode" [tj url, tj com]
 disconnectNode :: Client -> Maybe Text -> Maybe Int -> IO ()
 disconnectNode client url nodeId = unNil <$> callApi client "disconnectnode" [tj url, tj nodeId]
 
-setNetworkActive :: Client -> Boolean -> IO ()
+setNetworkActive :: Client -> Bool -> IO ()
 setNetworkActive client state = unNil <$> callApi client "setnetworkactive" [tj state]
