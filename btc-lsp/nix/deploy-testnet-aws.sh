@@ -93,7 +93,7 @@ createAwsLbController () {
 }
 
 setupKubernetesCluster () {
-  if [ $(eksctl get cluster --name "$KUBERNETES_CLUSTER_NAME" > /dev/null; echo $? ) ]; then
+  if [ $(eksctl get cluster --name "$KUBERNETES_CLUSTER_NAME" > /dev/null; echo $?) ]; then
     echo "==> Cluster \"$KUBERNETES_CLUSTER_NAME\" already exists."
   else
     createKubernetesCluster && \
@@ -127,8 +127,6 @@ upsertDNSRecord () {
   local RECORD_VALUE="$3"
 
   local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
-  local HOSTED_ZONE=${HOSTED_ZONE_ID##*/}
-
   local CHANGE_BATCH=$(cat <<EOM
     {
       "Changes": [
@@ -151,7 +149,7 @@ EOM
 )
 
   local CHANGE_BATCH_REQUEST_ID=$(aws route53 change-resource-record-sets \
-    --hosted-zone-id "$HOSTED_ZONE" \
+    --hosted-zone-id "$HOSTED_ZONE_ID" \
     --change-batch "$CHANGE_BATCH" \
     --query "ChangeInfo.Id" \
     --output text)
@@ -228,7 +226,12 @@ createDbSubnetGroup () {
 }
 
 setupDbSubnetGroup () {
-  if [ $(aws rds describe-db-subnet-groups --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME" > /dev/null; echo $? ) ]; then
+  SUBNET_GROUP_NAME=$(aws rds describe-db-subnet-groups \
+    --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME" \
+    --query "DBSubnetGroups[].DBSubnetGroupName" \
+    --output text)
+
+  if [ -n "$SUBNET_GROUP_NAME" ]; then
     echo "==> Database subnet group for \"$DATABASE_INSTANCE_NAME\" already exists."
   else
     createDbSubnetGroup "$KUBERNETES_CLUSTER_NAME"
@@ -294,20 +297,34 @@ setupDbInstance () {
   fi
 }
 
+setupDNSRecord () {
+  local HOSTED_ZONE_ID="$1"
+  local SERVICE_DOMAIN_NAME="$2"
+  local CNAME_VALUE="$3"
+  local DNS_RECORD=$(getDNSRecord "$HOSTED_ZONE_ID" "$SERVICE_DOMAIN_NAME")
+
+  if [ -n "$DNS_RECORD" ]; then
+    echo "==> CNAME record for \"$SERVICE_DOMAIN_NAME\" already exists."
+  else
+    echo "==> Adding CNAME record for \"$SERVICE_DOMAIN_NAME\""
+    upsertDNSRecord "$DOMAIN_NAME" "$SERVICE_DOMAIN_NAME" "$CNAME_VALUE"
+  fi
+}
+
 setupDNSRecords () {
+  local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
+
   for SERVICE in bitcoind lnd lsp; do
     local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
-    local SERVICE_EXTERNAL_IP=$(getKubernetesServiceExternalIP "$SERVICE")
+    local CNAME_VALUE=$(getKubernetesServiceExternalIP "$SERVICE")
 
-    echo "==> Adding CNAME record for $SERVICE_DOMAIN_NAME k8s service..."
-    upsertDNSRecord "$DOMAIN_NAME" "$SERVICE_DOMAIN_NAME" "$SERVICE_EXTERNAL_IP"
+    setupDNSRecord "$HOSTED_ZONE_ID" "$SERVICE_DOMAIN_NAME" "$CNAME_VALUE"
   done
 
-  local RTL_DOMAIN_NAME=$(cat "$RTL_PATH/domainname.txt")
-  local RTL_EXTERNAL_IP=$(getKubernetesIngressExternalIP rtl)
+  local SERVICE_DOMAIN_NAME=$(cat "$RTL_PATH/domainname.txt")
+  local CNAME_VALUE=$(getKubernetesIngressExternalIP rtl)
 
-  echo "==> Adding CNAME record for $RTL_DOMAIN_NAME k8s ingress.."
-  upsertDNSRecord "$DOMAIN_NAME" "$RTL_DOMAIN_NAME" "$RTL_EXTERNAL_IP"
+  setupDNSRecord "$HOSTED_ZONE_ID" "$SERVICE_DOMAIN_NAME" "$CNAME_VALUE"
 }
 
 deleteElbListener () {
@@ -338,19 +355,20 @@ setupElbListeners () {
   setupElbListener "lnd" "10009 8080"
 }
 
+# Check that required executables are installed & configured
 isInstalled eksctl && \
   isInstalled helm && \
   isInstalled aws && \
   isAwsConfigured
 
-confirmContinue "==> Start setting up LSP $BITCOIN_NETWORK on $CLOUD_PROVIDER"
+confirmContinue "==> Start setting up lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER"
 
 confirmAction \
 "==> Clean up previous build" \
 "cleanBuildDir && genSecureCreds"
 
-# Check that everything needed is present
-checkGeneratedFiles && writeDomainName
+# Check that required files are generated
+checkRequiredFiles && writeDomainName
 
 echo "==> Checking that domain names are saved"
 for SERVICE in bitcoind lnd lsp; do

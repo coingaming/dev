@@ -55,20 +55,6 @@ isInstalled () {
   fi
 }
 
-checkFileExistsNotEmpty () {
-  local FILEPATH="$1"
-
-  if [ -f "$FILEPATH" ]; then
-    if [ ! -s "$FILEPATH" ]; then
-      echo "$FILEPATH is empty"
-      exit 1;
-    fi
-  else
-    echo "$FILEPATH does not exist"
-    exit 1;
-  fi
-}
-
 writeDomainName () {
   echo "==> Domain name must be set before continuing"
   read -p "Input your domain name: " "DOMAIN_NAME"
@@ -85,7 +71,21 @@ writeDomainName () {
   done
 }
 
-checkGeneratedFiles () {
+checkFileExistsNotEmpty () {
+  local FILEPATH="$1"
+
+  if [ -f "$FILEPATH" ]; then
+    if [ ! -s "$FILEPATH" ]; then
+      echo "$FILEPATH is empty"
+      exit 1;
+    fi
+  else
+    echo "$FILEPATH does not exist"
+    exit 1;
+  fi
+}
+
+checkRequiredFiles () {
   echo "==> Checking that all required files exist and are not empty"
   checkFileExistsNotEmpty "$BITCOIND_PATH/rpcuser.txt" 
   checkFileExistsNotEmpty "$BITCOIND_PATH/rpcpass.txt"

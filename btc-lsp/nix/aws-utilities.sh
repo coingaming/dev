@@ -43,11 +43,21 @@ getHostedZoneId () {
 }
 
 getManagedCertArn () {
-  local SERVICE_DOMAIN_NAME="$1"
+  local DOMAIN_NAME="$1"
 
   aws acm list-certificates \
-    --query "CertificateSummaryList[?DomainName=='$SERVICE_DOMAIN_NAME'].CertificateArn" \
+    --query "CertificateSummaryList[?DomainName=='$DOMAIN_NAME'].CertificateArn" \
     --output text | cut -f1
+}
+
+getDNSRecord () {
+  local HOSTED_ZONE_ID="$1"
+  local DOMAIN_NAME="$2"
+
+  aws route53 list-resource-record-sets \
+    --hosted-zone-id "$HOSTED_ZONE_ID" \
+    --query "ResourceRecordSets[?Name=='$DOMAIN_NAME.'].Name" \
+    --output text
 }
 
 getDNSValidationName () {
