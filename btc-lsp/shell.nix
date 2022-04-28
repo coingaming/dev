@@ -8,7 +8,7 @@ let proto = import ./nix/proto-lens-protoc.nix;
     kompose-src = import ./nix/kompose.nix;
     ideBuildInputs =
       if withHaskellIde
-      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/e73945947a367ed9bae735e276664a3efe6ea80f") {bundle = ["dhall" "haskell"];})]
+      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/86769387b5dc55d74f69b4566e46d966b2a9b166") {bundle = ["dhall" "haskell"];})]
       else [];
 in
 (project { inherit profile; }).shellFor {
@@ -30,7 +30,7 @@ in
     cabal = "3.2.0.0";
     hlint = "3.2.7";
     ghcid = "latest";
-    haskell-language-server = "1.6.1.0";
+    haskell-language-server = "1.6.1.1";
   };
   shellHook =
     if withShellHook

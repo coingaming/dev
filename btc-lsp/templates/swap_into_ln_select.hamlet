@@ -1,7 +1,19 @@
-<div .ui.container.center.text-overflow>
-  <div .panel.panel-default>
+<div .ui.container.center>
+  <div .panel.panel-#{bsColor2Class color}>
+    <div .panel-heading>_{msgShort}
     <div .panel-body>
+      <div .jumbotron.bg-color-inherit>
+        <p>_{msgLong}
+        $if swapIntoLnStatus == SwapWaitingFund
+          <img .img-responsive.center-block.margin-bottom src=#{qrCodeSrc} alt=#{toText swapIntoLnFundAddress}>
+          <div .input-group>
+            <input .form-control id=#{htmlUuid} type="text" value=#{toText swapIntoLnFundAddress} readonly>
+            <span .input-group-btn>
+              <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+                _{MsgCopy}
+      <hr>
       $forall (msg, txt) <- items
-        <div .row.margin-bottom>
-          <div .col-xs-12.col-sm-3.col-md-3.col-lg-3>_{msg}
+        <div .row.margin-bottom.text-overflow>
+          <div .col-xs-12.col-sm-3.col-md-3.col-lg-3>
+            <strong>_{msg}
           <div .col-xs-12.col-sm-9.col-md-9.col-lg-9>#{txt}

@@ -27,11 +27,43 @@ getSwapIntoLnSelectR uuid = do
     notFound
     ( \SwapIntoLn.SwapInfo {..} -> do
         let SwapIntoLn {..} = entityVal swapInfoSwap
+        let (msgShort, msgLong, color) =
+              case swapIntoLnStatus of
+                SwapWaitingFund ->
+                  ( MsgSwapIntoLnWaitingFundShort,
+                    MsgSwapIntoLnWaitingFundLong,
+                    Info
+                  )
+                SwapFunded ->
+                  ( MsgSwapIntoLnFundedShort,
+                    MsgSwapIntoLnFundedLong,
+                    Info
+                  )
+                SwapWaitingChan ->
+                  ( MsgSwapIntoLnWaitingChanShort,
+                    MsgSwapIntoLnWaitingChanLong,
+                    Info
+                  )
+                SwapSucceeded ->
+                  ( MsgSwapIntoLnSucceededShort,
+                    MsgSwapIntoLnSucceededLong,
+                    Success
+                  )
+                SwapExpired ->
+                  ( MsgSwapIntoLnExpiredShort,
+                    MsgSwapIntoLnExpiredLong,
+                    Danger
+                  )
         let userPub =
               toHex
                 . coerce
                 . userNodePubKey
                 $ entityVal swapInfoUser
+        qrCodeSrc <-
+          maybeM badMethod pure
+            . pure
+            . toQr
+            $ from swapIntoLnFundAddress
         let items =
               [ ( MsgSwapIntoLnUuid,
                   Just
@@ -94,6 +126,8 @@ getSwapIntoLnSelectR uuid = do
     . liftIO
     . run
     $ SwapIntoLn.getByUuid uuid
+  where
+    htmlUuid = $(mkHtmlUuid)
 
 postSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 postSwapIntoLnSelectR uuid = do
