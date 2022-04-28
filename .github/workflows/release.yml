@@ -12,9 +12,9 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ./nix.tar.gz
-        key: nix-v3
+        key: nix-v4
         restore-keys: |
-          nix-v2
+          nix-v3
           nix-
     - name: Restore cache
       run: |
