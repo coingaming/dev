@@ -1,5 +1,3 @@
-let G = ../../Global.dhall
-
 let S = ../../Service.dhall
 
 let Postgres = ../../Service/Postgres.dhall

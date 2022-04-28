@@ -204,24 +204,25 @@ let mkServiceAnnotations
         Optional (P.Map.Type Text Text)
     = λ(net : G.BitcoinNetwork) →
       λ(cloudProvider : Optional C.ProviderType) →
-      let annotations = P.Optional.concatMap
-        C.ProviderType
-        (P.Map.Type Text Text)
-        (λ(cloudProvider : C.ProviderType) → 
-          merge
-            { Aws = None (P.Map.Type Text Text)
-            , DigitalOcean = Some
-              [ 
-                { mapKey = "kubernetes.digitalocean.com/load-balancer-id"
-                , mapValue = "${owner}-lb"
-                }
-              ]
-            }
-          cloudProvider
-        )
-        cloudProvider
+        let annotations =
+              P.Optional.concatMap
+                C.ProviderType
+                (P.Map.Type Text Text)
+                ( λ(cloudProvider : C.ProviderType) →
+                    merge
+                      { Aws = None (P.Map.Type Text Text)
+                      , DigitalOcean = Some
+                        [ { mapKey =
+                              "kubernetes.digitalocean.com/load-balancer-id"
+                          , mapValue = "${owner}-lb"
+                          }
+                        ]
+                      }
+                      cloudProvider
+                )
+                cloudProvider
 
-      in S.mkServiceAnnotations net annotations cloudProvider
+        in  S.mkServiceAnnotations net annotations cloudProvider
 
 let mkService
     : G.BitcoinNetwork → Optional C.ProviderType → K.Service.Type

@@ -104,7 +104,8 @@ let mkLspGrpcServerEnv
             { port = P.JSON.natural grpcPort.unPort
             , sig_verify = P.JSON.bool True
             , sig_header_name = P.JSON.string "sig-bin"
-            , encryption = P.JSON.string (G.unEncryption G.Encryption.Encrypted)
+            , encryption =
+                P.JSON.string (G.unEncryption G.Encryption.UnEncrypted)
             }
         )
 
@@ -220,34 +221,40 @@ let mkServiceAnnotations
         Optional (P.Map.Type Text Text)
     = λ(net : G.BitcoinNetwork) →
       λ(cloudProvider : Optional C.ProviderType) →
-      let annotations = P.Optional.concatMap
-        C.ProviderType
-        (P.Map.Type Text Text)
-        (λ(cloudProvider : C.ProviderType) → 
-          merge
-            { Aws = Some
-              [ { mapKey = "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol"
-                , mapValue = "*"
-                }
-              , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"
-                , mapValue = ../../build/secrets/lsp/certarn.txt as Text ? G.todo
-                }
-              , { mapKey = "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"
-                , mapValue = Natural/show grpcPort.unPort
-                }
-              ]
-            , DigitalOcean = Some
-              [ 
-                { mapKey = "kubernetes.digitalocean.com/load-balancer-id"
-                , mapValue = "${owner}-lb"
-                }
-              ]
-            }
-          cloudProvider
-        )
-        cloudProvider
+        let annotations =
+              P.Optional.concatMap
+                C.ProviderType
+                (P.Map.Type Text Text)
+                ( λ(cloudProvider : C.ProviderType) →
+                    merge
+                      { Aws = Some
+                        [ { mapKey =
+                              "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol"
+                          , mapValue = "*"
+                          }
+                        , { mapKey =
+                              "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"
+                          , mapValue =
+                                ../../build/secrets/lsp/certarn.txt as Text
+                              ? G.todo
+                          }
+                        , { mapKey =
+                              "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"
+                          , mapValue = Natural/show grpcPort.unPort
+                          }
+                        ]
+                      , DigitalOcean = Some
+                        [ { mapKey =
+                              "kubernetes.digitalocean.com/load-balancer-id"
+                          , mapValue = "${owner}-lb"
+                          }
+                        ]
+                      }
+                      cloudProvider
+                )
+                cloudProvider
 
-      in S.mkServiceAnnotations net annotations cloudProvider 
+        in  S.mkServiceAnnotations net annotations cloudProvider
 
 let mkService
     : G.BitcoinNetwork → Optional C.ProviderType → K.Service.Type

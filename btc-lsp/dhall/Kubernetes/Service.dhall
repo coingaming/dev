@@ -1,7 +1,5 @@
 let P = ../Prelude/Import.dhall
 
-let C = ../CloudProvider.dhall
-
 let K = ./Import.dhall
 
 let ServiceType
