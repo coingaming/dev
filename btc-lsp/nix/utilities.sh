@@ -11,7 +11,6 @@ LND_PATH="$SECRETS_DIR/lnd"
 RTL_PATH="$SECRETS_DIR/rtl"
 LSP_PATH="$SECRETS_DIR/lsp"
 POSTGRES_PATH="$SECRETS_DIR/postgres"
-
 DATABASE_URI_PATH="$POSTGRES_PATH/dburi.txt"
 
 confirmAction () {
@@ -55,19 +54,23 @@ isInstalled () {
   fi
 }
 
-writeDomainName () {
+setDomainName () {
   echo "==> Domain name must be set before continuing"
   read -p "Input your domain name: " "DOMAIN_NAME"
+}
 
+writeDomainName () {
   for SERVICE in bitcoind lnd rtl lsp; do
     local SERVICE_DIR="$SECRETS_DIR/$SERVICE"
     local SERVICE_DOMAIN="$SERVICE.$DOMAIN_NAME"
     local SERVICE_DOMAIN_FILEPATH="$SERVICE_DIR/domainname.txt"
 
-    mkdir -p "$SERVICE_DIR"
+    if [ ! -f "$SERVICE_DOMAIN_FILEPATH" ]; then
+      mkdir -p "$SERVICE_DIR"
 
-    echo "Saving $SERVICE_DOMAIN to $SERVICE_DOMAIN_FILEPATH"
-    echo -n "$SERVICE_DOMAIN" > "$SERVICE_DOMAIN_FILEPATH"
+      echo "Saving $SERVICE_DOMAIN to $SERVICE_DOMAIN_FILEPATH"
+      echo -n "$SERVICE_DOMAIN" > "$SERVICE_DOMAIN_FILEPATH"
+    fi
   done
 }
 

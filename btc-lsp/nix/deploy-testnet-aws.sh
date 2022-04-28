@@ -93,7 +93,7 @@ createAwsLbController () {
 }
 
 setupKubernetesCluster () {
-  if [ $(eksctl get cluster --name "$KUBERNETES_CLUSTER_NAME" > /dev/null; echo $?) ]; then
+  if [ $(eksClusterExists) ]; then
     echo "==> Cluster \"$KUBERNETES_CLUSTER_NAME\" already exists."
   else
     createKubernetesCluster && \
@@ -226,12 +226,9 @@ createDbSubnetGroup () {
 }
 
 setupDbSubnetGroup () {
-  SUBNET_GROUP_NAME=$(aws rds describe-db-subnet-groups \
-    --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME" \
-    --query "DBSubnetGroups[].DBSubnetGroupName" \
-    --output text)
+  local DB_SUBNET_GROUP_ARN=$(getDbSubnetGroupArn "$KUBERNETES_CLUSTER_NAME")
 
-  if [ -n "$SUBNET_GROUP_NAME" ]; then
+  if [ -n "$DB_SUBNET_GROUP_ARN" ]; then
     echo "==> Database subnet group for \"$DATABASE_INSTANCE_NAME\" already exists."
   else
     createDbSubnetGroup "$KUBERNETES_CLUSTER_NAME"
@@ -284,10 +281,7 @@ setupDbInstance () {
   local DATABASE_USERNAME="$DATABASE_INSTANCE_NAME-user"
   local DATABASE_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
   local DATABASE_NAME="$DATABASE_INSTANCE_NAME-db"
-  local DATABASE_INSTANCE_IDENTIFIER=$(aws rds describe-db-instances \
-    --filters "Name=db-instance-id,Values=$DATABASE_INSTANCE_NAME" \
-    --query 'DBInstances[*].[DBInstanceIdentifier]' \
-    --output text)
+  local DATABASE_INSTANCE_IDENTIFIER=$(getDatabaseInstanceIdentifier)
 
   if [ -n "$DATABASE_INSTANCE_IDENTIFIER" ]; then
     echo "==> Database instance for \"$DATABASE_INSTANCE_NAME\" already exists."
@@ -368,10 +362,12 @@ confirmAction \
 "cleanBuildDir && genSecureCreds"
 
 # Check that required files are generated
-checkRequiredFiles && writeDomainName
+checkRequiredFiles && \
+  setDomainName && \
+  writeDomainName
 
 echo "==> Checking that domain names are saved"
-for SERVICE in bitcoind lnd lsp; do
+for SERVICE in bitcoind lnd rtl lsp; do
   checkFileExistsNotEmpty "$SECRETS_DIR/$SERVICE/domainname.txt"
 done
 echo "Domain names are OK."

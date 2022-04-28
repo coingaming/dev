@@ -17,6 +17,12 @@ isAwsConfigured () {
   done
 }
 
+eksClusterExists () {
+  eksctl get cluster \
+    --name "$KUBERNETES_CLUSTER_NAME" > /dev/null; \
+    echo $?
+}
+
 getVpcId () {
   aws eks describe-cluster \
     --name "$KUBERNETES_CLUSTER_NAME" \
@@ -77,6 +83,22 @@ getDNSValidationValue () {
   aws acm describe-certificate \
     --certificate-arn "$CERT_ARN" \
     --query "Certificate.DomainValidationOptions[?DomainName=='$DOMAIN_NAME'].ResourceRecord.Value" \
+    --output text
+}
+
+getDbSubnetGroupArn () {
+  local DB_SUBNET_GROUP_NAME="$1"
+
+  aws rds describe-db-subnet-groups \
+    --db-subnet-group-name "$DB_SUBNET_GROUP_NAME" \
+    --query "DBSubnetGroups[*].DBSubnetGroupArn" \
+    --output text
+}
+
+getDatabaseInstanceIdentifier () {
+  aws rds describe-db-instances \
+    --filters "Name=db-instance-id,Values=$DATABASE_INSTANCE_NAME" \
+    --query 'DBInstances[*].[DBInstanceIdentifier]' \
     --output text
 }
 
