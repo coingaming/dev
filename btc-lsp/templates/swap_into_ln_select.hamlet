@@ -1,0 +1,7 @@
+<div .ui.container.center.text-overflow>
+  <div .panel.panel-default>
+    <div .panel-body>
+      $forall (msg, txt) <- items
+        <div .row.margin-bottom>
+          <div .col-xs-12.col-sm-3.col-md-3.col-lg-3>_{msg}
+          <div .col-xs-12.col-sm-9.col-md-9.col-lg-9>#{txt}

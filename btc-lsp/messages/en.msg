@@ -51,8 +51,8 @@ SwapIntoLnFundInvHash: Swap Hash
 SwapIntoLnFundAddress: Swap Address
 SwapIntoLnFundProof: Proof of Swap
 SwapIntoLnRefundAddress: Refund Address
-SwapIntoLnChanCapUser: User Channel Capacity
-SwapIntoLnChanCapLsp: Lsp Channel Capacity
+SwapIntoLnChanCapUser: User Capacity
+SwapIntoLnChanCapLsp: Lsp Capacity
 SwapIntoLnFeeLsp: Lsp Swap Fee
 SwapIntoLnFeeMiner: Channel Mining Fee
 SwapIntoLnStatus: Swap Status
@@ -60,3 +60,9 @@ SwapIntoLnExpiresAt: Expires at
 SwapIntoLnInsertedAt: Inserted at
 SwapIntoLnUpdatedAt: Updated at
 ChannelPrivacy: Channel Privacy
+
+SwapIntoLnWaitingFund: Lsp is wating for the swap being funded, please send bitcoins to the swap address.
+SwapIntoLnFunded: The swap is successfully funded, lsp is waiting for your lightning node being connected.
+SwapIntoLnWaitingChan: Lsp initiated lightning channel opening, waiting for the channel being opened.
+SwapIntoLnSucceeded: Swap succeeded!
+SwapIntoLnExpired: Swap expired!

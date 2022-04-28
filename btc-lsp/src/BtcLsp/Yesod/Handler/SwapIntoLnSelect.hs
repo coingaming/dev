@@ -25,13 +25,13 @@ getSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
-    ( \(swpEnt, usrEnt) -> do
-        let SwapIntoLn {..} = entityVal swpEnt
+    ( \SwapIntoLn.SwapInfo {..} -> do
+        let SwapIntoLn {..} = entityVal swapInfoSwap
         let userPub =
               toHex
                 . coerce
                 . userNodePubKey
-                $ entityVal usrEnt
+                $ entityVal swapInfoUser
         let items =
               [ ( MsgSwapIntoLnUuid,
                   Just
@@ -89,7 +89,7 @@ getSwapIntoLnSelectR uuid = do
                   (_, Nothing) -> []
         defaultLayout $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
-          $(widgetFile "simple_list_group")
+          $(widgetFile "swap_into_ln_select")
     )
     . liftIO
     . run
@@ -100,12 +100,12 @@ postSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
-    ( \(swpEnt, _) -> do
+    ( \swp -> do
         ((formResult, formWidget), formEnctype) <-
           runFormPost $
             renderBootstrap3
               BootstrapBasicForm
-              (aForm swpEnt)
+              (aForm $ SwapIntoLn.swapInfoSwap swp)
         case formResult of
           FormSuccess {} -> do
             App {appMRunner = UnliftIO {}} <- getYesod
