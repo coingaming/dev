@@ -57,6 +57,17 @@ deleteKubernetesCluster () {
   fi
 }
 
+deleteEbsVolumes () {
+  local EBS_VOLUME_IDS=$(aws ec2 describe-volumes \
+    --filters "Name=tag-key,Values=kubernetes.io/cluster/$KUBERNETES_CLUSTER_NAME" \
+    --query 'Volumes[].VolumeId' --output text)
+  
+  for EBS_VOLUME_ID in $EBS_VOLUME_IDS; do
+    echo "==> Deleting \"$EBS_VOLUME_ID\" volume from AWS [EBS]..."
+    aws ec2 delete-volume --volume-id "$EBS_VOLUME_ID"
+  done
+}
+
 deleteManagedCerts () {
   for SERVICE in rtl lsp; do
     local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
@@ -79,6 +90,7 @@ deleteDbInstance && \
 setDomainName && \
 deleteHostedZone && \
 deleteKubernetesCluster && \
+deleteEbsVolumes && \
 deleteManagedCerts
 
 echo "==> Finished destroying lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER!"
