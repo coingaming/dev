@@ -7,9 +7,30 @@ module BtcLsp.Yesod.Data.Widget where
 import BtcLsp.Yesod.Data.Colored
 import BtcLsp.Yesod.Import
 import Colonnade
+import qualified Data.Text as T
+import GHC.Exts (IsList (..))
 import Text.Blaze.Html5.Attributes
 import Yesod.Colonnade
 import Yesod.Form.Bootstrap3
+
+newtype HtmlClassAttr
+  = HtmlClassAttr [Text]
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Semigroup,
+      Monoid
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance IsList HtmlClassAttr where
+  type Item HtmlClassAttr = Text
+  fromList = coerce
+  toList = coerce
 
 bfsAutoFocus :: RenderMessage site msg => msg -> FieldSettings site
 bfsAutoFocus msg =
@@ -29,7 +50,10 @@ makeTableWidget ::
   f a ->
   WidgetFor site ()
 makeTableWidget =
-  encodeCellTable [class_ "table table-striped table-bordered table-condensed text-left align-middle"]
+  encodeCellTable
+    [ class_
+        "table table-striped table-bordered table-condensed text-left align-middle"
+    ]
 
 widgetCol ::
   (Colored b, ToWidget site a) =>
@@ -45,33 +69,67 @@ widgetCol headerLabel renderer =
         Nothing -> []
 
 textCol ::
-  (ToWidget site a2, ToWidget site a1, Colored b) =>
-  a1 ->
-  (Entity b -> a2) ->
-  Colonnade Headed (Entity b) (Cell site)
-textCol headerLabel renderer =
-  headed (Cell [] (toWidget headerLabel)) (\x -> Cell (cellAttributes x) (toWidget $ renderer x))
-  where
-    cellAttributes x =
-      case (color . entityVal) x of
-        Just bsColor -> [class_ $ fromString $ toLower $ show bsColor]
-        Nothing -> []
-
-textColHiddenXs ::
-  ( ToWidget site a2,
-    ToWidget site a1,
+  ( ToWidget site a1,
+    ToWidget site a2,
     Colored b
   ) =>
   a1 ->
-  (Entity b -> a2) ->
-  Colonnade Headed (Entity b) (Cell site)
-textColHiddenXs headerLabel renderer =
-  headed (Cell [class_ "hidden-xs"] (toWidget headerLabel)) (\x -> Cell (cellAttributes x) (toWidget $ renderer x))
+  (b -> a2) ->
+  Colonnade Headed b (Cell site)
+textCol =
+  textColClass mempty
+
+textColClass ::
+  ( ToWidget site a1,
+    ToWidget site a2,
+    Colored b
+  ) =>
+  HtmlClassAttr ->
+  a1 ->
+  (b -> a2) ->
+  Colonnade Headed b (Cell site)
+textColClass classAttr headerLabel renderer =
+  headed
+    (Cell [] (toWidget headerLabel))
+    (\x -> Cell (cellAttributes x) (toWidget $ renderer x))
   where
     cellAttributes x =
-      case (color . entityVal) x of
-        Just bsColor -> [class_ $ fromString $ toLower $ "hidden-xs " ++ show bsColor]
-        Nothing -> [class_ "hidden-xs"]
+      if null xs
+        then mempty
+        else
+          pure
+            . class_
+            . fromString
+            . unpack
+            $ T.intercalate " " xs
+      where
+        xs =
+          coerce classAttr
+            <> maybe mempty (pure . bsColor2Class) (color x)
+
+textColHiddenXs ::
+  ( ToWidget site a1,
+    ToWidget site a2,
+    Colored b
+  ) =>
+  a1 ->
+  (b -> a2) ->
+  Colonnade Headed b (Cell site)
+textColHiddenXs headerLabel renderer =
+  headed
+    (Cell [class_ "hidden-xs"] (toWidget headerLabel))
+    (\x -> Cell (cellAttributes x) (toWidget $ renderer x))
+  where
+    cellAttributes x =
+      case color x of
+        Just bsColor ->
+          [ class_
+              . fromString
+              . toLower
+              $ "hidden-xs " ++ show bsColor
+          ]
+        Nothing ->
+          [class_ "hidden-xs"]
 
 updateCol ::
   Colored b =>

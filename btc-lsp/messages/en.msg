@@ -72,3 +72,10 @@ SwapIntoLnFundedLong: The swap is successfully funded. Lsp is waiting for your l
 SwapIntoLnWaitingChanLong: Lsp initiated lightning channel. Waiting for the channel being opened.
 SwapIntoLnSucceededLong: Swap succeeded!
 SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded to refund on-chain address.
+
+TxId: Txid
+Vout: Vout
+Sat: Sat
+Status: Status
+SwapInfo: Swap Info
+SwapUtxos: Swap UTXOs

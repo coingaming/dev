@@ -12,8 +12,15 @@
               <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
                 _{MsgCopy}
       <hr>
+      <h4>_{MsgSwapInfo}
+      <hr>
       $forall (msg, txt) <- items
         <div .row.margin-bottom.text-overflow>
           <div .col-xs-12.col-sm-3.col-md-3.col-lg-3>
             <strong>_{msg}
           <div .col-xs-12.col-sm-9.col-md-9.col-lg-9>#{txt}
+      $maybe utxoTableWidget <- mUtxoTableWidget
+        <hr>
+        <h4>_{MsgSwapUtxos}
+        <hr>
+        ^{utxoTableWidget}
