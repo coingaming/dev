@@ -197,7 +197,7 @@ createDbSubnetGroup () {
   aws rds create-db-subnet-group \
     --db-subnet-group-name "$SUBNET_GROUP_NAME" \
     --db-subnet-group-description "$SUBNET_GROUP_NAME" \
-    --subnet-ids "$PRIVATE_SUBNETS_ID"
+    --subnet-ids "$PRIVATE_SUBNETS_ID" 1>/dev/null
 }
 
 setupDbSubnetGroup () {
@@ -231,7 +231,7 @@ createDbInstance () {
     --master-username "$DATABASE_USERNAME" \
     --master-user-password "$DATABASE_PASSWORD" \
     --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME" \
-    --vpc-security-group-ids "$SECURITY_GROUP_ID"
+    --vpc-security-group-ids "$SECURITY_GROUP_ID" 1>/dev/null
 
   echo "Waiting until \"$DATABASE_INSTANCE_NAME\" database instance is up and running..."
   aws rds wait db-instance-available \
