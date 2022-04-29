@@ -7,6 +7,7 @@ where
 import Database.Esqueleto.Legacy as X
   ( BaseBackend,
     Entity (..),
+    FullOuterJoin (..),
     InnerJoin (..),
     Key,
     LeftOuterJoin (..),

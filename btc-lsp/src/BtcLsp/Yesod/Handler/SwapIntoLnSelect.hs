@@ -23,6 +23,17 @@ import Yesod.Form.Bootstrap3
 getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 getSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
+  nodeUri <- liftIO $ run getLndNodeUri
+  nodeUriHex <-
+    eitherM
+      (const badMethod)
+      (pure . from @NodeUriHex @Text)
+      . pure
+      $ tryFrom nodeUri
+  nodeUriQr <-
+    maybeM badMethod pure
+      . pure
+      $ toQr nodeUriHex
   maybeM
     notFound
     ( \SwapIntoLn.SwapInfo {..} -> do
@@ -34,7 +45,7 @@ getSwapIntoLnSelectR uuid = do
                     MsgSwapIntoLnWaitingFundLong,
                     Info
                   )
-                SwapFunded ->
+                SwapWaitingPeer ->
                   ( MsgSwapIntoLnFundedShort,
                     MsgSwapIntoLnFundedLong,
                     Info
@@ -68,6 +79,10 @@ getSwapIntoLnSelectR uuid = do
           if null swapInfoUtxo
             then pure Nothing
             else Just <$> newUtxoTableWidget swapInfoUtxo
+        mChanTableWidget <-
+          if null swapInfoChan
+            then pure Nothing
+            else Just <$> newChanTableWidget swapInfoChan
         let items =
               [ ( MsgSwapIntoLnUuid,
                   Just
@@ -143,15 +158,23 @@ newUtxoTableWidget utxos = do
       utxos
   where
     table render =
-      textColClass
-        (HtmlClassAttr ["text-overflow"])
-        (render MsgTxId)
-        ( txIdHex
-            . coerce
-            . swapUtxoTxid
+      textCol
+        (render MsgBlock)
+        ( inspectPlain @Word64
+            . from
+            . blockHeight
             . entityVal
-            . SwapIntoLn.utxoInfoUtxo
+            . SwapIntoLn.utxoInfoBlock
         )
+        <> textColClass
+          (HtmlClassAttr ["text-overflow"])
+          (render MsgTxId)
+          ( txIdHex
+              . coerce
+              . swapUtxoTxid
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
         <> textCol
           (render MsgVout)
           ( inspectPlain @Word32
@@ -173,6 +196,38 @@ newUtxoTableWidget utxos = do
               . swapUtxoStatus
               . entityVal
               . SwapIntoLn.utxoInfoUtxo
+          )
+
+newChanTableWidget :: [Entity LnChan] -> Handler Widget
+newChanTableWidget chans = do
+  master <- getYesod
+  langs <- languages
+  pure $
+    makeTableWidget
+      (table $ renderMessage master langs)
+      chans
+  where
+    table render =
+      textColClass
+        (HtmlClassAttr ["text-overflow"])
+        (render MsgTxId)
+        ( txIdHex
+            . coerce
+            . lnChanFundingTxId
+            . entityVal
+        )
+        <> textCol
+          (render MsgVout)
+          ( inspectPlain @Word32
+              . coerce
+              . lnChanFundingVout
+              . entityVal
+          )
+        <> textCol
+          (render MsgStatus)
+          ( inspectPlain
+              . lnChanStatus
+              . entityVal
           )
 
 postSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html

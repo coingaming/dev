@@ -52,7 +52,7 @@ makeTableWidget ::
 makeTableWidget =
   encodeCellTable
     [ class_
-        "table table-striped table-bordered table-condensed text-left align-middle"
+        "table table-bordered table-condensed text-left align-middle"
     ]
 
 widgetCol ::

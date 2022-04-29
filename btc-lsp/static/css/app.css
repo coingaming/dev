@@ -103,6 +103,10 @@ input[type="checkbox"] .has-error .form-control {
   margin-bottom: 15px;
 }
 
+.small-margin-bottom {
+  margin-bottom: 10px;
+}
+
 p, h1, h2, h3 {
   margin: 0;
 }
