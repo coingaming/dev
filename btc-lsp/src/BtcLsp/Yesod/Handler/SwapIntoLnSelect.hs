@@ -25,13 +25,45 @@ getSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
-    ( \(swpEnt, usrEnt) -> do
-        let SwapIntoLn {..} = entityVal swpEnt
+    ( \SwapIntoLn.SwapInfo {..} -> do
+        let SwapIntoLn {..} = entityVal swapInfoSwap
+        let (msgShort, msgLong, color) =
+              case swapIntoLnStatus of
+                SwapWaitingFund ->
+                  ( MsgSwapIntoLnWaitingFundShort,
+                    MsgSwapIntoLnWaitingFundLong,
+                    Info
+                  )
+                SwapFunded ->
+                  ( MsgSwapIntoLnFundedShort,
+                    MsgSwapIntoLnFundedLong,
+                    Info
+                  )
+                SwapWaitingChan ->
+                  ( MsgSwapIntoLnWaitingChanShort,
+                    MsgSwapIntoLnWaitingChanLong,
+                    Info
+                  )
+                SwapSucceeded ->
+                  ( MsgSwapIntoLnSucceededShort,
+                    MsgSwapIntoLnSucceededLong,
+                    Success
+                  )
+                SwapExpired ->
+                  ( MsgSwapIntoLnExpiredShort,
+                    MsgSwapIntoLnExpiredLong,
+                    Danger
+                  )
         let userPub =
               toHex
                 . coerce
                 . userNodePubKey
-                $ entityVal usrEnt
+                $ entityVal swapInfoUser
+        qrCodeSrc <-
+          maybeM badMethod pure
+            . pure
+            . toQr
+            $ from swapIntoLnFundAddress
         let items =
               [ ( MsgSwapIntoLnUuid,
                   Just
@@ -89,23 +121,25 @@ getSwapIntoLnSelectR uuid = do
                   (_, Nothing) -> []
         defaultLayout $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
-          $(widgetFile "simple_list_group")
+          $(widgetFile "swap_into_ln_select")
     )
     . liftIO
     . run
     $ SwapIntoLn.getByUuid uuid
+  where
+    htmlUuid = $(mkHtmlUuid)
 
 postSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 postSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
-    ( \(swpEnt, _) -> do
+    ( \swp -> do
         ((formResult, formWidget), formEnctype) <-
           runFormPost $
             renderBootstrap3
               BootstrapBasicForm
-              (aForm swpEnt)
+              (aForm $ SwapIntoLn.swapInfoSwap swp)
         case formResult of
           FormSuccess {} -> do
             App {appMRunner = UnliftIO {}} <- getYesod

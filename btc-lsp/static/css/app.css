@@ -62,6 +62,10 @@ input[type="checkbox"] .has-error .form-control {
   border-left-color: #1b809e;
 }
 
+.bg-color-inherit{
+  background-color: inherit;
+}
+
 /* Space things out */
 .bs-docs-section {
   margin-bottom: 60px;
@@ -155,4 +159,8 @@ textarea {
 
 .table > tbody > tr > td {
   vertical-align: middle;
+}
+
+.no-margin-bottom {
+  margin-bottom: 0 !important;
 }
