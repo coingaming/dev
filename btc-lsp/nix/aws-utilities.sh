@@ -7,7 +7,6 @@ export BITCOIN_NETWORK="testnet"
 export CLOUD_PROVIDER="aws"
 export KUBERNETES_CLUSTER_NAME="lsp-$BITCOIN_NETWORK"
 export DATABASE_INSTANCE_NAME="$KUBERNETES_CLUSTER_NAME"
-export IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
 
 isAwsConfigured () {
   for VARNAME in "aws_access_key_id" "aws_secret_access_key" "region"; do
@@ -16,6 +15,10 @@ isAwsConfigured () {
       exit 1;
     fi
   done
+}
+
+disableAwsCliPager () {
+  aws configure set cli_pager ""
 }
 
 eksClusterExists () {
@@ -170,9 +173,9 @@ getElbArn () {
   aws elbv2 describe-load-balancers \
     --query 'LoadBalancers[*].[LoadBalancerArn, VpcId]' \
     --output json | \
-    jq -r '.[] | select(.[1] == "'$VPC_ID'")' | \
+    jq -r '.[] | select(.[1] == "'"$VPC_ID"'")' | \
     jq -s | \
-    jq -r '.[] | select(.[0] | contains("'$SERVICE'")) | .[0]'
+    jq -r '.[] | select(.[0] | contains("'"$SERVICE"'")) | .[0]'
 }
 
 getElbListenerArn () {
@@ -183,5 +186,5 @@ getElbListenerArn () {
     --load-balancer-arn "$ELB_ARN" \
     --query 'Listeners[*].[ListenerArn, Port]' \
     --output json | \
-    jq -r '.[] | select(.[1] == '$LISTENER_PORT') | .[0]'
+    jq -r '.[] | select(.[1] == '"$LISTENER_PORT"') | .[0]'
 }
