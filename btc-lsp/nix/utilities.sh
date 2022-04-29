@@ -6,19 +6,19 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 BUILD_DIR="$THIS_DIR/../build"
 SECRETS_DIR="$BUILD_DIR/secrets"
 
-BITCOIND_PATH="$SECRETS_DIR/bitcoind"
-LND_PATH="$SECRETS_DIR/lnd"
-RTL_PATH="$SECRETS_DIR/rtl"
-LSP_PATH="$SECRETS_DIR/lsp"
-POSTGRES_PATH="$SECRETS_DIR/postgres"
-DATABASE_URI_PATH="$POSTGRES_PATH/dburi.txt"
+export BITCOIND_PATH="$SECRETS_DIR/bitcoind"
+export LND_PATH="$SECRETS_DIR/lnd"
+export RTL_PATH="$SECRETS_DIR/rtl"
+export LSP_PATH="$SECRETS_DIR/lsp"
+export POSTGRES_PATH="$SECRETS_DIR/postgres"
 
 confirmAction () {
   local ASK="$1"
   local ACTION="$2"
+  local CONFIRM
 
   while true; do
-    read -p "$ASK (y/N) ? " CONFIRM
+    read -r -p "$ASK (y/N) ? " CONFIRM
     case "$CONFIRM" in
       [Yy]* ) eval "$ACTION"; break;;
       [Nn]* ) break;;
@@ -29,9 +29,10 @@ confirmAction () {
 
 confirmContinue () {
   local ASK="$1"
+  local CONFIRM
 
   while true; do
-    read -p "$ASK (y/N) ? " CONFIRM
+    read -r -p "$ASK (y/N) ? " CONFIRM
     case "$CONFIRM" in
       [Yy]* ) break;;
       [Nn]* ) exit;;
@@ -54,24 +55,36 @@ isInstalled () {
   fi
 }
 
-setDomainName () {
-  echo "==> Domain name must be set before continuing"
-  read -p "Input your domain name: " "DOMAIN_NAME"
+writeServiceDomainNames () {
+  for SERVICE_NAME in bitcoind lnd rtl lsp; do
+    local SERVICE_DIR="$SECRETS_DIR/$SERVICE_NAME"
+    local SERVICE_DOMAIN_NAME="$SERVICE_NAME.$DOMAIN_NAME"
+    local SERVICE_DOMAIN_NAME_FILEPATH="$SERVICE_DIR/domainname.txt"
+
+    echo "Saving $SERVICE_DOMAIN_NAME to $SERVICE_DOMAIN_NAME_FILEPATH"
+    echo -n "$SERVICE_DOMAIN_NAME" > "$SERVICE_DOMAIN_NAME_FILEPATH"
+  done
 }
 
 writeDomainName () {
-  for SERVICE in bitcoind lnd rtl lsp; do
-    local SERVICE_DIR="$SECRETS_DIR/$SERVICE"
-    local SERVICE_DOMAIN="$SERVICE.$DOMAIN_NAME"
-    local SERVICE_DOMAIN_FILEPATH="$SERVICE_DIR/domainname.txt"
+  local DOMAIN_NAME_FILEPATH="$1"
 
-    if [ ! -f "$SERVICE_DOMAIN_FILEPATH" ]; then
-      mkdir -p "$SERVICE_DIR"
+  echo "==> Domain name must be set before continuing"
+  read -r -p "Input your domain name: " "DOMAIN_NAME"
 
-      echo "Saving $SERVICE_DOMAIN to $SERVICE_DOMAIN_FILEPATH"
-      echo -n "$SERVICE_DOMAIN" > "$SERVICE_DOMAIN_FILEPATH"
-    fi
-  done
+  echo "Saving $DOMAIN_NAME to $DOMAIN_NAME_FILEPATH"
+  echo -n "$DOMAIN_NAME" > "$DOMAIN_NAME_FILEPATH"
+}
+
+setDomainName () {
+  local DOMAIN_NAME_FILEPATH="$BUILD_DIR/domainname.txt"
+
+  if [ -s "$DOMAIN_NAME_FILEPATH" ]; then
+    DOMAIN_NAME=$(cat "$DOMAIN_NAME_FILEPATH")
+  else
+    writeDomainName "$DOMAIN_NAME_FILEPATH"
+    writeServiceDomainNames
+  fi
 }
 
 checkFileExistsNotEmpty () {
