@@ -108,7 +108,7 @@ checkRequiredFiles () {
   checkFileExistsNotEmpty "$LND_PATH/walletpassword.txt" 
   checkFileExistsNotEmpty "$RTL_PATH/multipass.txt"
   checkFileExistsNotEmpty "$POSTGRES_PATH/dbpassword.txt"
-  echo "All files are OK."
+  echo "Required files are OK."
 }
 
 genSecureCreds () {

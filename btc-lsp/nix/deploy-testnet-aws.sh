@@ -339,11 +339,11 @@ confirmAction \
 # Check that required files are generated
 checkRequiredFiles && setDomainName
 
-echo "==> Checking that service domain names are saved"
+echo "==> Checking that service domain names exist and are not empty"
 for SERVICE in bitcoind lnd rtl lsp; do
   checkFileExistsNotEmpty "$SECRETS_DIR/$SERVICE/domainname.txt"
 done
-echo "Domain names are OK."
+echo "Service domain names are OK."
 
 # Disable need for user prompt after running aws commands
 disableAwsCliPager
@@ -361,7 +361,7 @@ echo "Cert arns are OK."
 # Create subnet group and rds postgres instance
 setupDbSubnetGroup && setupDbInstance
 
-echo "==> Checking that db connection details are saved"
+echo "==> Checking that db connection details exist and are not empty"
 checkFileExistsNotEmpty "$POSTGRES_PATH/dburi.txt"
 echo "Connection details are OK."
 
