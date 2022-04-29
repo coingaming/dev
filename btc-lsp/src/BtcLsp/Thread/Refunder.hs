@@ -1,12 +1,11 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Thread.Refunder (apply, SendUtxosResult(..)) where
+module BtcLsp.Thread.Refunder (apply, SendUtxosResult (..)) where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
+import BtcLsp.Math (roundWord64ToMSat)
 import BtcLsp.Storage.Model.SwapUtxo (getUtxosForRefundSql, markRefundedSql)
-import qualified Data.ByteString.Base16 as B16
 import Data.List (groupBy)
 import qualified Data.Map as M
 import LndClient (txIdParser)
@@ -18,10 +17,6 @@ import qualified LndClient.Data.ReleaseOutput as RO
 import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
-import BtcLsp.Math (roundWord64ToMSat)
-
-toHex :: ByteString -> Text
-toHex = decodeUtf8 . B16.encode
 
 data SendUtxoConfig = SendUtxoConfig
   { dustLimit :: MSat,
@@ -44,12 +39,11 @@ data RefundUtxo = RefundUtxo
   }
   deriving stock (Show, Generic)
 
-
-data SendUtxosResult = SendUtxosResult {
-  getGetDecTrx :: Btc.DecodedRawTransaction,
-  getTotalAmt :: MSat,
-  getFee :: MSat
-}
+data SendUtxosResult = SendUtxosResult
+  { getGetDecTrx :: Btc.DecodedRawTransaction,
+    getTotalAmt :: MSat,
+    getFee :: MSat
+  }
 
 instance Out RefundUtxo
 
@@ -64,10 +58,18 @@ sendUtxosWithMinFee ::
   ExceptT Failure m SendUtxosResult
 sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
   when (estimateAmt <= dustLimit cfg) $ throwE $ FailureInternal "Total utxos amount is below dust limit"
-  mapM_ (\refUtxo ->
-    whenJust (getLockId refUtxo) (\lid ->
-      void $ withLndT releaseOutput
-      ($ RO.ReleaseOutputRequest (coerce lid) (Just $ getOutPoint refUtxo)))) utxos
+  mapM_
+    ( \refUtxo ->
+        whenJust
+          (getLockId refUtxo)
+          ( \lid ->
+              void $
+                withLndT
+                  releaseOutput
+                  ($ RO.ReleaseOutputRequest (coerce lid) (Just $ getOutPoint refUtxo))
+          )
+    )
+    utxos
   ePsbt <- withLndT fundPsbt ($ ePsbtReq)
   finPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt ePsbt) "")
   decodedETx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finPsbt)
@@ -93,13 +95,13 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
       let amt' :: Word64 = coerce (totalUtxoAmt - fee)
       let r = roundWord64ToMSat amt'
       let mtpl = FP.TxTemplate (getOutPoint <$> utxos') (M.fromList [(outAddr, r)])
-      FP.FundPsbtRequest {
-        FP.account = "",
-        FP.template = mtpl,
-        FP.minConfs = 2,
-        FP.spendUnconfirmed = False,
-        FP.fee = FP.SatPerVbyte 1
-      }
+      FP.FundPsbtRequest
+        { FP.account = "",
+          FP.template = mtpl,
+          FP.minConfs = 2,
+          FP.spendUnconfirmed = False,
+          FP.fee = FP.SatPerVbyte 1
+        }
 
 sendUtxos ::
   (Env m) => [RefundUtxo] -> OnChainAddress 'Refund -> TxLabel -> ExceptT Failure m SendUtxosResult

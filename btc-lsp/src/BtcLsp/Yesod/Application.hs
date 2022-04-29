@@ -8,29 +8,21 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module BtcLsp.Yesod.Application
-  ( getApplicationDev,
-    appMain,
-    develMain,
-    makeFoundation,
-    makeLogWare,
-
-    -- * for DevelMain
-    getApplicationRepl,
-    shutdownApp,
-
-    -- * for GHCI
-    handler,
-    db,
+  ( appMain,
   )
 where
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
+import qualified BtcLsp.Class.Env as Class
 import BtcLsp.Yesod.Handler.Common
 import BtcLsp.Yesod.Handler.Home
 import BtcLsp.Yesod.Handler.Language
+import BtcLsp.Yesod.Handler.OpenChan
 import BtcLsp.Yesod.Handler.Profile
+import BtcLsp.Yesod.Handler.SwapIntoLnCreate
+import BtcLsp.Yesod.Handler.SwapIntoLnSelect
 import BtcLsp.Yesod.Import
 import Control.Monad.Logger (liftLoc, runLoggingT)
 import Database.Persist.Postgresql
@@ -46,7 +38,6 @@ import Network.Wai.Handler.Warp
   ( Settings,
     defaultSettings,
     defaultShouldDisplayException,
-    getPort,
     runSettings,
     setHost,
     setOnException,
@@ -75,8 +66,8 @@ mkYesodDispatch "App" resourcesApp
 -- performs initialization and returns a foundation datatype value. This is also
 -- the place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-makeFoundation :: AppSettings -> IO App
-makeFoundation appSettings = do
+makeFoundation :: (Class.Env m) => UnliftIO m -> AppSettings -> IO App
+makeFoundation appMRunner appSettings = do
   -- Some basic initializations: HTTP connection manager, logger, and static
   -- subsite.
   appHttpManager <- getGlobalManager
@@ -153,25 +144,9 @@ warpSettings foundation =
         )
         defaultSettings
 
--- | For yesod devel, return the Warp settings and WAI Application.
-getApplicationDev :: IO (Settings, Application)
-getApplicationDev = do
-  settings <- getAppSettings
-  foundation <- makeFoundation settings
-  wsettings <- getDevSettings $ warpSettings foundation
-  app <- makeApplication foundation
-  return (wsettings, app)
-
-getAppSettings :: IO AppSettings
-getAppSettings = loadYamlSettings [configSettingsYml] [] useEnv
-
--- | main function for use by yesod devel
-develMain :: IO ()
-develMain = develMainHelper getApplicationDev
-
 -- | The @main@ function for an executable running this site.
-appMain :: IO ()
-appMain = do
+appMain :: (Class.Env m) => UnliftIO m -> IO ()
+appMain appMRunner = do
   -- Get the settings from all relevant sources
   settings <-
     loadYamlSettingsArgs
@@ -181,36 +156,10 @@ appMain = do
       useEnv
 
   -- Generate the foundation from the settings
-  foundation <- makeFoundation settings
+  foundation <- makeFoundation appMRunner settings
 
   -- Generate a WAI Application from the foundation
   app <- makeApplication foundation
 
   -- Run the application with Warp
   runSettings (warpSettings foundation) app
-
---------------------------------------------------------------
--- Functions for DevelMain.hs (a way to run the app from GHCi)
---------------------------------------------------------------
-getApplicationRepl :: IO (Int, App, Application)
-getApplicationRepl = do
-  settings <- getAppSettings
-  foundation <- makeFoundation settings
-  wsettings <- getDevSettings $ warpSettings foundation
-  app1 <- makeApplication foundation
-  return (getPort wsettings, foundation, app1)
-
-shutdownApp :: App -> IO ()
-shutdownApp _ = return ()
-
----------------------------------------------
--- Functions for use in development with GHCi
----------------------------------------------
-
--- | Run a handler
-handler :: Handler a -> IO a
-handler h = getAppSettings >>= makeFoundation >>= flip unsafeHandler h
-
--- | Run DB queries
-db :: ReaderT SqlBackend Handler a -> IO a
-db = handler . runDB

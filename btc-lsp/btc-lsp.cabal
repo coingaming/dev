@@ -23,18 +23,8 @@ source-repository head
   type: git
   location: https://github.com/githubuser/btc-lsp
 
-flag dev
-  description: Turn on development settings, like auto-reload templates.
-  manual: False
-  default: False
-
 flag ghcid
   manual: True
-  default: False
-
-flag library-only
-  description: Build for use with "yesod devel"
-  manual: False
   default: False
 
 library
@@ -73,6 +63,7 @@ library
       BtcLsp.Storage.Model.SwapUtxo
       BtcLsp.Storage.Model.User
       BtcLsp.Storage.Util
+      BtcLsp.Text
       BtcLsp.Thread.BlockScanner
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
@@ -90,7 +81,10 @@ library
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
       BtcLsp.Yesod.Handler.Language
+      BtcLsp.Yesod.Handler.OpenChan
       BtcLsp.Yesod.Handler.Profile
+      BtcLsp.Yesod.Handler.SwapIntoLnCreate
+      BtcLsp.Yesod.Handler.SwapIntoLnSelect
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
       BtcLsp.Yesod.Model
@@ -131,7 +125,9 @@ library
       TypeOperators
       StandaloneDeriving
       DerivingVia
-  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists
+      ExistentialQuantification
+      InstanceSigs
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -fwarn-tabs -O2
   build-depends:
       GenericPretty
     , SHA
@@ -174,6 +170,7 @@ library
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -191,6 +188,8 @@ library
     , pretty-simple
     , proto-lens
     , proto-lens-runtime
+    , qrcode-core
+    , qrcode-juicypixels
     , resource-pool
     , safe
     , scientific
@@ -223,17 +222,11 @@ library
     , yesod-static ==1.6.*
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
-  if (flag(dev)) || (flag(library-only))
-    ghc-options: -Wall -fwarn-tabs -O0
-    cpp-options: -DDEVELOPMENT
-  else
-    ghc-options: -Wall -fwarn-tabs -O2
   default-language: Haskell2010
 
 executable btc-lsp-exe
   main-is: Main.hs
   other-modules:
-      DevelMain
       Paths_btc_lsp
   hs-source-dirs:
       app
@@ -256,6 +249,8 @@ executable btc-lsp-exe
       TypeOperators
       StandaloneDeriving
       DerivingVia
+      ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -300,6 +295,7 @@ executable btc-lsp-exe
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -317,6 +313,8 @@ executable btc-lsp-exe
     , pretty-simple
     , proto-lens
     , proto-lens-runtime
+    , qrcode-core
+    , qrcode-juicypixels
     , resource-pool
     , safe
     , scientific
@@ -349,8 +347,6 @@ executable btc-lsp-exe
     , yesod-static ==1.6.*
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
-  if flag(library-only)
-    buildable: False
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
@@ -387,6 +383,7 @@ executable btc-lsp-exe
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
@@ -404,7 +401,10 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -469,6 +469,8 @@ executable btc-lsp-integration
       TypeOperators
       StandaloneDeriving
       DerivingVia
+      ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -main-is Integration -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -519,6 +521,7 @@ executable btc-lsp-integration
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -536,6 +539,8 @@ executable btc-lsp-integration
     , pretty-simple
     , proto-lens
     , proto-lens-runtime
+    , qrcode-core
+    , qrcode-juicypixels
     , quickcheck-instances
     , resource-pool
     , safe
@@ -605,6 +610,7 @@ executable btc-lsp-integration
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
@@ -622,7 +628,10 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -650,7 +659,6 @@ executable btc-lsp-integration
 executable btc-lsp-prof
   main-is: Main.hs
   other-modules:
-      DevelMain
       Paths_btc_lsp
   hs-source-dirs:
       app
@@ -673,6 +681,8 @@ executable btc-lsp-prof
       TypeOperators
       StandaloneDeriving
       DerivingVia
+      ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -717,6 +727,7 @@ executable btc-lsp-prof
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -734,6 +745,8 @@ executable btc-lsp-prof
     , pretty-simple
     , proto-lens
     , proto-lens-runtime
+    , qrcode-core
+    , qrcode-juicypixels
     , resource-pool
     , safe
     , scientific
@@ -802,6 +815,7 @@ executable btc-lsp-prof
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
@@ -819,7 +833,10 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model
@@ -882,6 +899,8 @@ test-suite btc-lsp-test
       TypeOperators
       StandaloneDeriving
       DerivingVia
+      ExistentialQuantification
+      InstanceSigs
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -931,6 +950,7 @@ test-suite btc-lsp-test
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
+    , iso8601-time
     , katip <0.8.5
     , lens
     , lnd-client
@@ -948,6 +968,8 @@ test-suite btc-lsp-test
     , pretty-simple
     , proto-lens
     , proto-lens-runtime
+    , qrcode-core
+    , qrcode-juicypixels
     , quickcheck-instances
     , resource-pool
     , safe
@@ -1017,6 +1039,7 @@ test-suite btc-lsp-test
         BtcLsp.Storage.Model.SwapUtxo
         BtcLsp.Storage.Model.User
         BtcLsp.Storage.Util
+        BtcLsp.Text
         BtcLsp.Thread.BlockScanner
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
@@ -1034,7 +1057,10 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
+        BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.Profile
+        BtcLsp.Yesod.Handler.SwapIntoLnCreate
+        BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Model

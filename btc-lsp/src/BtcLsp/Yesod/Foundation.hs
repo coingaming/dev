@@ -11,6 +11,7 @@
 
 module BtcLsp.Yesod.Foundation where
 
+import qualified BtcLsp.Class.Env as Class
 import qualified BtcLsp.Yesod.Data.Language
 import BtcLsp.Yesod.Import.NoFoundation
 import Control.Monad.Logger (LogSource)
@@ -25,18 +26,28 @@ import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 
+-- | NOTE : this type alias is there only because of
+-- poor support of advanced Haskell in yesodroutes
+-- files through Yesod TH.
+--
+-- !!! DO NOT USE DIRECTLY IN SOURCE CODE !!!
+type Uuid'SwapIntoLnTable = Uuid 'SwapIntoLnTable
+
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
 -- access to the data present here.
-data App = App
+data App = forall m.
+  (Class.Env m) =>
+  App
   { appSettings :: AppSettings,
     -- | Settings for static file serving.
     appStatic :: Static,
     -- | Database connection pool.
     appConnPool :: ~ConnectionPool,
     appHttpManager :: Manager,
-    appLogger :: Logger
+    appLogger :: Logger,
+    appMRunner :: UnliftIO m
   }
 
 mkMessage "App" "messages" "en"
@@ -196,6 +207,9 @@ instance Yesod App where
   isAuthorized RobotsR _ = return Authorized
   isAuthorized (StaticR _) _ = return Authorized
   isAuthorized (LanguageR _) _ = return Authorized
+  isAuthorized OpenChanR {} _ = pure Authorized
+  isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
+  isAuthorized SwapIntoLnSelectR {} _ = pure Authorized
   -- the profile route requires that the user is authenticated, so we
   -- delegate to that function
   isAuthorized ProfileR _ = isAuthenticated
@@ -260,6 +274,9 @@ instance YesodBreadcrumbs App where
         LanguageR {} -> MsgNothing
         HomeR -> MsgHomeRBreadcrumb
         AuthR {} -> MsgAuthRBreadcrumb
+        OpenChanR -> MsgOpenChanRBreadcrumb
+        SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
+        SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
         ProfileR -> MsgProfileRBreadcrumb
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
@@ -269,6 +286,9 @@ instance YesodBreadcrumbs App where
         LanguageR {} -> Nothing
         HomeR -> Nothing
         AuthR {} -> Just HomeR
+        OpenChanR -> Just HomeR
+        SwapIntoLnCreateR -> Just HomeR
+        SwapIntoLnSelectR {} -> Just SwapIntoLnCreateR
         ProfileR -> Just HomeR
 
 -- How to run database actions.

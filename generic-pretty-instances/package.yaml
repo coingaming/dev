@@ -31,7 +31,6 @@ dependencies:
 - proto-lens-runtime
 - persistent
 - time
-- signable
 - secp256k1-haskell   >= 0.6 && < 0.7
 - case-insensitive
 

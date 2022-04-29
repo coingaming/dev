@@ -8,12 +8,14 @@ module BtcLsp.Grpc.Data
     SigHeaderName,
     TlsCert (..),
     TlsKey (..),
+    TlsData (..),
     RawRequestBytes (..),
+    Encryption (..),
   )
 where
 
 import BtcLsp.Import.Witch
-import Data.Aeson (FromJSON (..), withText)
+import Data.Aeson (FromJSON (..), withObject, withText, (.:))
 import Text.PrettyPrint.GenericPretty (Out)
 import Text.PrettyPrint.GenericPretty.Instance ()
 import Universum
@@ -72,7 +74,42 @@ newtype TlsKey (rel :: GRel)
       FromJSON
     )
 
+data TlsData (rel :: GRel) = TlsData
+  { tlsCert :: TlsCert rel,
+    tlsKey :: TlsKey rel
+  }
+  deriving stock
+    ( Eq,
+      Ord
+    )
+
+instance FromJSON (TlsData (rel :: GRel)) where
+  parseJSON =
+    withObject
+      "TlsData"
+      $ \x ->
+        TlsData
+          <$> x .: "cert"
+          <*> x .: "key"
+
 instance FromJSON SigHeaderName where
   parseJSON =
     withText "SigHeaderName" $
       pure . SigHeaderName
+
+data Encryption
+  = Encrypted
+  | UnEncrypted
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Enum,
+      Bounded,
+      Generic
+    )
+
+instance Out Encryption
+
+instance FromJSON Encryption

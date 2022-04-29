@@ -38,6 +38,7 @@ USE_TTY=""
 test -t 1 && USE_TTY="-t"
 if [ "$SHELL_KIND" = "maxishell" ]; then
   docker run -i $USE_TTY --rm \
+    --platform "linux/amd64" \
     -v "$THIS_DIR/..:/app" \
     -v "nix-$USER:/nix" \
     -v "nix-home-$USER:/home/$USER" \
@@ -56,6 +57,7 @@ if [ "$SHELL_KIND" = "maxishell" ]; then
     "
 else
   docker run -i $USE_TTY --rm \
+    --platform "linux/amd64" \
     -v "$THIS_DIR/..:/app" \
     -v "nix-$USER:/nix" \
     -v "nix-home-$USER:/home/$USER" \

@@ -1,0 +1,10 @@
+<div .ui.container-fluid.compact.center>
+  <div .panel.panel-default>
+    <div .panel-body>
+      <p .mini>_{MsgOpenChanInstruction}
+      <img .img-responsive.center-block src=#{qrCodeSrc} alt=#{nodeUriHex}>
+      <div .input-group>
+        <input .form-control id=#{htmlUuid} type="text" value=#{nodeUriHex} readonly>
+        <span .input-group-btn>
+          <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+            _{MsgCopy}

@@ -10,8 +10,10 @@ User
   deriving Eq Show Generic
 
 SwapIntoLn
+  uuid (Uuid 'SwapIntoLnTable)
   userId UserId
   fundInvoice (LnInvoice 'Fund)
+  fundInvHash RHash
   fundAddress (OnChainAddress 'Fund)
   fundProof RPreimage Maybe
   refundAddress (OnChainAddress 'Refund)
@@ -23,7 +25,8 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
-  UniqueSwapIntoLnFundInvoice fundInvoice
+  UniqueSwapIntoLnFundInvUuid uuid
+  UniqueSwapIntoLnFundInvHash fundInvHash
   UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic
 

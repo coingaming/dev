@@ -65,6 +65,7 @@ import Data.Time.Clock as X
     secondsToDiffTime,
   )
 import Data.Type.Equality as X (type (==))
+import Data.UUID as X (UUID)
 import Database.Esqueleto.Legacy as X
   ( Entity (..),
   )
@@ -99,6 +100,7 @@ import LndClient as X
     LndError (..),
     MSat (..),
     NodePubKey (..),
+    RHash (..),
     RPreimage (..),
     TxId (..),
     TxKind (..),
@@ -123,6 +125,7 @@ import Text.PrettyPrint.GenericPretty.Import as X
     inspectStrPlain,
   )
 import Text.PrettyPrint.GenericPretty.Instance as X ()
+import Text.Shakespeare.I18N as X (ToMessage (..))
 import Universum as X hiding
   ( atomically,
     bracket,
@@ -142,3 +145,4 @@ import UnliftIO as X
     withRunInIO,
     withUnliftIO,
   )
+import Yesod.Core as X (PathPiece (..), showIntegral)

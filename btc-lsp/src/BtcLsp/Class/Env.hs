@@ -32,9 +32,17 @@ class
   getMsatPerByte :: m (Maybe MSat)
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLndP2PSocketAddress :: m SocketAddress
+  getLndNodeUri :: m NodeUri
   getLspPubKey :: m Lnd.NodePubKey
   getLspLndEnv :: m Lnd.LndEnv
   getChanPrivacy :: m Privacy
+
+  --
+  -- TODO : separate getLspPubKey and getLndP2PSocketAddress
+  -- methods are redundant, remove them.
+  --
+  getLndNodeUri =
+    NodeUri <$> getLspPubKey <*> getLndP2PSocketAddress
   getLspPubKey = do
     var <- getLspPubKeyVar
     mPubKey <- tryReadMVar var

@@ -104,8 +104,14 @@ let mkLspGrpcServerEnv
             { port = P.JSON.natural grpcPort.unPort
             , sig_verify = P.JSON.bool True
             , sig_header_name = P.JSON.string "sig-bin"
-            , tls_cert = P.JSON.string tlsCert
-            , tls_key = P.JSON.string tlsKey
+            , encryption = P.JSON.string (G.unEncryption G.Encryption.Encrypted)
+            , tls =
+                P.JSON.object
+                  ( toMap
+                      { cert = P.JSON.string tlsCert
+                      , key = P.JSON.string tlsKey
+                      }
+                  )
             }
         )
 
@@ -113,7 +119,7 @@ let mkLspGrpcClientEnv
     : P.JSON.Type
     = P.JSON.object
         ( toMap
-            { host = P.JSON.string (G.unOwner G.Owner.Lnd)
+            { host = P.JSON.string (G.unOwner G.Owner.Lsp)
             , port = P.JSON.natural grpcPort.unPort
             , sig_header_name = P.JSON.string "sig-bin"
             , compress_mode = P.JSON.string "Compressed"
