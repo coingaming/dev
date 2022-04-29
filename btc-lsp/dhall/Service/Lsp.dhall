@@ -270,8 +270,8 @@ let mkContainerImage
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.18"
-          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.18"
+          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.26"
+          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.26"
           , RegTest = ../../build/docker-image-btc-lsp.txt as Text ? G.todo
           }
           net
