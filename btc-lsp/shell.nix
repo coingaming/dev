@@ -19,10 +19,10 @@ in
     pkgs.haskellPackages.cabal-plan
     pkgs.haskellPackages.hp2pretty
     pkgs.zlib
-    pkgs.protobuf
-    pkgs.netcat-gnu
-    pkgs.socat
-    pkgs.plantuml
+    nixPkgs.protobuf
+    nixPkgs.netcat-gnu
+    nixPkgs.socat
+    nixPkgs.plantuml
     proto.protoc-haskell-bin
     (pkgs.callPackage kompose-src {})
   ];
