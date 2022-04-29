@@ -1,54 +1,27 @@
-let nixpkgs = import ./nixpkgs21.nix;
+with (import ./project.nix);
+let proto = import ./proto-lens-protoc.nix;
 in
-{
-  pkgs ? import nixpkgs {
-    overlays = import ./overlay.nix {
-      inherit vimBackground vimColorScheme;
-    };
-  },
-  usingDocker ? false,
-  vimBackground ? "light",
-  vimColorScheme ? "PaperColor",
-}:
-with pkgs;
-
-#
-# TODO : nixify all pkgs
-#
-
-let defaultShellHook = ''
-
-      (cd /app/ && git submodule init && git submodule update)
-
-      for PKG in "generic-pretty-instances"; do
-        (cd /app/nix/ && cabal2nix ./../$PKG > ./$PKG-pkg.nix)
-        (cd /app/$PKG && gen-hie > ./hie.yaml)
-      done
-
-    '';
-    dockerShellHook = ''
-
-      stack config set system-ghc --global true
-      SKIP_GHC_CHECK="skip-ghc-check: true"
-      grep -q "$SKIP_GHC_CHECK" ~/.stack/config.yaml \
-        || echo "$SKIP_GHC_CHECK" >> ~/.stack/config.yaml
-
-   '';
-in
-
-stdenv.mkDerivation {
-  name = "haskell-shell";
+{}:
+  (project {}).shellFor {
+  withHoogle = true;
   buildInputs = [
-    haskell-ide
-    secp256k1
-    pkg-config
+    pkgs.haskellPackages.hpack
+    pkgs.haskellPackages.fswatcher
+    pkgs.haskellPackages.cabal-plan
+    pkgs.haskellPackages.hp2pretty
+    pkgs.haskellPackages.hspec-discover
+    pkgs.zlib
+    pkgs.protobuf
+    pkgs.netcat-gnu
+    pkgs.socat
+    # pkgs.plantuml
+    proto.protoc-haskell-bin
   ];
-  TERM="xterm-256color";
-  LC_ALL="C.UTF-8";
-  GIT_SSL_CAINFO="${cacert}/etc/ssl/certs/ca-bundle.crt";
-  NIX_SSL_CERT_FILE="${cacert}/etc/ssl/certs/ca-bundle.crt";
-  shellHook =
-    if usingDocker
-    then dockerShellHook + defaultShellHook
-    else defaultShellHook;
-}
+  tools = {
+    cabal = "3.2.0.0";
+    hlint = "3.2.7";
+    ghcid = "latest";
+    haskell-language-server = "1.6.1.0";
+  };
+  shellHook = '''';
+  }
