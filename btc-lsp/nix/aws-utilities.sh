@@ -19,9 +19,7 @@ isAwsConfigured () {
 }
 
 eksClusterExists () {
-  eksctl get cluster \
-    --name "$KUBERNETES_CLUSTER_NAME" > /dev/null; \
-    echo $?
+  aws eks list-clusters | jq -r '.clusters | contains(["'$KUBERNETES_CLUSTER_NAME'"])'
 }
 
 getVpcId () {

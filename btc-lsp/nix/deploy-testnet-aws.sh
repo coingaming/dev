@@ -93,7 +93,7 @@ createAwsLbController () {
 }
 
 setupKubernetesCluster () {
-  if [ $(eksClusterExists) ]; then
+  if "$(eksClusterExists)"; then
     echo "==> Cluster \"$KUBERNETES_CLUSTER_NAME\" already exists."
   else
     createKubernetesCluster && \

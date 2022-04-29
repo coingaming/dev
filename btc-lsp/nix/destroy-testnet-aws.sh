@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2155
 
 set -e
 
@@ -26,14 +27,32 @@ deleteDbInstance () {
     echo "==> Database instance for \"$DATABASE_INSTANCE_NAME\" does not exist."
   else
     echo "==> Deleting \"$DATABASE_INSTANCE_NAME\" database instance from AWS [RDS]..."
-    aws rds delete-db-instance \
+    (aws rds delete-db-instance \
         --db-instance-identifier "$DATABASE_INSTANCE_NAME" \
         --skip-final-snapshot \
-        --delete-automated-backups
+        --delete-automated-backups)
 
     echo "Waiting until \"$DATABASE_INSTANCE_NAME\" database instance is fully deleted..."
     aws rds wait db-instance-deleted \
         --db-instance-identifier="$DATABASE_INSTANCE_NAME"
+  fi
+}
+
+deleteDNSRecords () {
+  local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
+
+  if [ -z "$HOSTED_ZONE_ID" ]; then
+    echo "==> Hosted zone for \"$DOMAIN_NAME\" does not exist."
+  else
+    local CNAME_RECORDS=$(getDNSRecordsByType "$HOSTED_ZONE_ID" "CNAME")
+
+    for CNAME_RECORD in $(echo "$CNAME_RECORDS" | jq -r -c '.[]'); do
+      local RECORD_NAME=$(echo "$CNAME_RECORD" | jq -r '.Name')
+      local RECORD_VALUE=$(echo "$CNAME_RECORD" | jq -r '.ResourceRecords[].Value')
+
+      echo "==> Deleting $RECORD_NAME CNAME record from AWS [R53]..."
+      changeDNSRecord "$HOSTED_ZONE_ID" "DELETE" "$RECORD_NAME" "$RECORD_VALUE"
+    done
   fi
 }
 
@@ -44,12 +63,12 @@ deleteHostedZone () {
     echo "==> Hosted zone for \"$DOMAIN_NAME\" does not exist."
   else
     echo "==> Deleting \"$DOMAIN_NAME\" hosted zone from AWS [R53]..."
-    aws route53 delete-hosted-zone "$DOMAIN_NAME" --wait
+    aws route53 delete-hosted-zone --id "$HOSTED_ZONE_ID"
   fi
 }
 
 deleteKubernetesCluster () {
-  if [ $(eksClusterExists) ]; then
+  if "$(eksClusterExists)"; then
     echo "==> Deleting \"$KUBERNETES_CLUSTER_NAME\" k8s cluster from AWS [EKS]..."
     eksctl delete cluster "$KUBERNETES_CLUSTER_NAME" --wait
   else
@@ -85,9 +104,10 @@ deleteManagedCerts () {
 
 echo "==> Starting to destroy lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER."
 
-deleteDbSubnetGroup && \
 deleteDbInstance && \
+deleteDbSubnetGroup && \
 setDomainName && \
+deleteDNSRecords && \
 deleteHostedZone && \
 deleteKubernetesCluster && \
 deleteEbsVolumes && \
