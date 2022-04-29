@@ -65,12 +65,12 @@ let mkUser
 let mkPassword
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        merge { MainNet = G.todo, TestNet = G.todo, RegTest = password } net
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = userPassword } net
 
 let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        merge { MainNet = G.todo, TestNet = G.todo, RegTest = host } net
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = databaseHost } net
 
 let mkDatabaseName
     : G.BitcoinNetwork → Text
@@ -84,7 +84,7 @@ let ports
 let mkEnv
     : P.Map.Type Text Text
     = [ { mapKey = env.postgresUser, mapValue = userName }
-      , { mapKey = env.postgresPassword, mapValue = password }
+      , { mapKey = env.postgresPassword, mapValue = userPassword }
       , { mapKey = env.postgresMultipleDatabases, mapValue = databaseName }
       ]
 
