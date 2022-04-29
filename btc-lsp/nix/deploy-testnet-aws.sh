@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2155
 
 set -e
 
@@ -12,7 +13,7 @@ createKubernetesCluster () {
 
   echo "==> Creating \"$KUBERNETES_CLUSTER_NAME\" k8s cluster on AWS [EKS]..."
   echo "Public CIDR range is required! (to access k8s api endpoint after cluster creation)"
-  read -p "Input your public CIDR: " "KUBERNETES_API_ENDPOINT_PUBLIC_ACCESS_CIDR"
+  read -r -p "Input your public CIDR: " "KUBERNETES_API_ENDPOINT_PUBLIC_ACCESS_CIDR"
 
   cat <<EOF | eksctl create cluster -f -
   apiVersion: eksctl.io/v1alpha5
@@ -105,10 +106,14 @@ setupKubernetesCluster () {
 }
 
 createHostedZone () {
+  local CALLER_REFERENCE=$(uuidgen)
+
   echo "==> Creating \"$DOMAIN_NAME\" hosted zone on AWS [R53]..."
   aws route53 create-hosted-zone \
     --name "$DOMAIN_NAME" \
-    --caller-reference "$IDEMPOTENCY_TOKEN"
+    --query "DelegationSet.NameServers" \
+    --caller-reference "$CALLER_REFERENCE" \
+    --output text
 }
 
 setupHostedZone () {
@@ -117,13 +122,20 @@ setupHostedZone () {
   if [ -n "$HOSTED_ZONE_ID" ]; then
     echo "==> Hosted zone for \"$DOMAIN_NAME\" already exists."
   else
-    createHostedZone
+    createHostedZone && \
+    echo "==> Delegate \"$DOMAIN_NAME\" to the nameservers displayed above"
+
+    until nslookup -type=NS "$DOMAIN_NAME" > /dev/null; do
+      echo "Waiting until \"$DOMAIN_NAME\" is delegated to Route53..."
+      sleep 60;
+    done
   fi
 }
 
 createManagedCert () {
   local SERVICE_DOMAIN_NAME="$1"
   local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
+  local IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
 
   echo "==> Creating certificate for \"$SERVICE_DOMAIN_NAME\" on AWS [ACM]..."
   local CERT_ARN=$(aws acm request-certificate \
@@ -228,29 +240,29 @@ createDbInstance () {
 
 writeDbUri () {
   local DATABASE_USERNAME="$1"
-  local DATABASE_PASSWORD="$2"
+  local DATABASE_USER_PASSWORD="$2"
   local DATABASE_NAME="$3"
   local DATABASE_HOST=$(aws rds describe-db-instances \
     --filters "Name=db-instance-id,Values=$DATABASE_INSTANCE_NAME" \
     --query "*[].[Endpoint.Address,Endpoint.Port]" \
     --output json | jq -c -r .[0][0])
-  local DATABASE_URI="postgresql://$DATABASE_USERNAME:$DATABASE_PASSWORD@$DATABASE_HOST/$DATABASE_NAME"
+  local DATABASE_URI="postgresql://$DATABASE_USERNAME:$DATABASE_USER_PASSWORD@$DATABASE_HOST/$DATABASE_NAME"
 
-  echo "Saving database connection details to $DATABASE_URI_PATH"
-  echo -n "$DATABASE_URI" > "$DATABASE_URI_PATH"
+  echo "Saving database connection details to $POSTGRES_PATH/dburi.txt"
+  echo -n "$DATABASE_URI" > "$POSTGRES_PATH/dburi.txt"
 }
 
 setupDbInstance () {
-  local DATABASE_USERNAME="$DATABASE_INSTANCE_NAME-user"
-  local DATABASE_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
-  local DATABASE_NAME="$DATABASE_INSTANCE_NAME-db"
+  local DATABASE_USERNAME="lsp"
+  local DATABASE_USER_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
+  local DATABASE_NAME="$DATABASE_USERNAME"
   local DATABASE_INSTANCE_IDENTIFIER=$(getDatabaseInstanceIdentifier)
 
   if [ -n "$DATABASE_INSTANCE_IDENTIFIER" ]; then
     echo "==> Database instance for \"$DATABASE_INSTANCE_NAME\" already exists."
   else
-    createDbInstance "$DATABASE_USERNAME" "$DATABASE_PASSWORD" "$DATABASE_NAME" && \
-      writeDbUri "$DATABASE_USERNAME" "$DATABASE_PASSWORD" "$DATABASE_NAME"
+    createDbInstance "$DATABASE_USERNAME" "$DATABASE_USER_PASSWORD" "$DATABASE_NAME" && \
+      writeDbUri "$DATABASE_USERNAME" "$DATABASE_USER_PASSWORD" "$DATABASE_NAME"
   fi
 }
 
@@ -325,15 +337,16 @@ confirmAction \
 "cleanBuildDir && genSecureCreds"
 
 # Check that required files are generated
-checkRequiredFiles && \
-  setDomainName && \
-  writeDomainName
+checkRequiredFiles && setDomainName
 
-echo "==> Checking that domain names are saved"
+echo "==> Checking that service domain names are saved"
 for SERVICE in bitcoind lnd rtl lsp; do
   checkFileExistsNotEmpty "$SECRETS_DIR/$SERVICE/domainname.txt"
 done
 echo "Domain names are OK."
+
+# Disable need for user prompt after running aws commands
+disableAwsCliPager
 
 # Create eks cluster, route53 hosted zone and request certs from acm
 setupKubernetesCluster && \
@@ -349,7 +362,7 @@ echo "Cert arns are OK."
 setupDbSubnetGroup && setupDbInstance
 
 echo "==> Checking that db connection details are saved"
-checkFileExistsNotEmpty "$DATABASE_URI_PATH"
+checkFileExistsNotEmpty "$POSTGRES_PATH/dburi.txt"
 echo "Connection details are OK."
 
 confirmContinue "==> Deploy lsp $BITCOIN_NETWORK to $CLOUD_PROVIDER"
