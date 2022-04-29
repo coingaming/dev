@@ -70,7 +70,7 @@ getSwapIntoLnSelectR uuid = do
                 . coerce
                 . userNodePubKey
                 $ entityVal swapInfoUser
-        qrCodeSrc <-
+        fundAddrQr <-
           maybeM badMethod pure
             . pure
             . toQr

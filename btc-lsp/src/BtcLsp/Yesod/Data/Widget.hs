@@ -27,10 +27,31 @@ newtype HtmlClassAttr
     ( Generic
     )
 
+instance Out HtmlClassAttr
+
 instance IsList HtmlClassAttr where
   type Item HtmlClassAttr = Text
   fromList = coerce
   toList = coerce
+
+--
+-- TODO : use bootstrap tabs/panels to provide
+-- basic and advanced view options for users.
+--
+data Layout
+  = BasicLayout
+  | AdvancedLayout
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic,
+      Enum,
+      Bounded
+    )
+
+instance Out Layout
 
 bfsAutoFocus :: RenderMessage site msg => msg -> FieldSettings site
 bfsAutoFocus msg =
