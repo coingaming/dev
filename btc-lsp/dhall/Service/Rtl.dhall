@@ -22,8 +22,6 @@ let image = "heathmont/rtl:9c8d7d6"
 
 let domainName = ../../build/secrets/rtl/domainname.txt as Text ? G.todo
 
-let certArn = ../../build/secrets/rtl/certarn.txt as Text ? G.todo
-
 let securePass = ../../build/secrets/rtl/multipass.txt as Text ? G.todo
 
 let tcpPort
@@ -174,7 +172,9 @@ let mkIngress
     : G.BitcoinNetwork → Optional C.ProviderType → K.Ingress.Type
     = λ(net : G.BitcoinNetwork) →
       λ(cloudProvider : Optional C.ProviderType) →
-        Ingress.mkIngress
+        let certArn = ../../build/secrets/rtl/certarn.txt as Text ? G.todo
+
+        in Ingress.mkIngress
           owner
           (S.mkIngressAnnotations net cloudProvider certArn)
           (mkDomainName net)

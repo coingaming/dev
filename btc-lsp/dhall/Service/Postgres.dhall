@@ -18,9 +18,9 @@ let image = "heathmont/postgres:11-alpine-a2e8bbe"
 
 let userName = "lsp"
 
-let password = G.defaultPass
+let userPassword = G.defaultPass
 
-let host = owner
+let databaseHost = owner
 
 let databaseName = userName
 
@@ -53,7 +53,7 @@ let mkConnStr
           { MainNet = databaseUri
           , TestNet = databaseUri
           , RegTest =
-              "postgresql://${userName}:${password}@${host}/${databaseName}"
+              "postgresql://${userName}:${userPassword}@${databaseHost}/${databaseName}"
           }
           net
 
