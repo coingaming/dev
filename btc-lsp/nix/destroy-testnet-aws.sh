@@ -21,7 +21,7 @@ deleteDbSubnetGroup () {
 }
 
 deleteDbInstance () {
-  local DATABASE_INSTANCE_IDENTIFIER=$(getDatabaseInstanceIdentifier)
+  local DATABASE_INSTANCE_IDENTIFIER=$(getDbInstanceIdentifier)
 
   if [ -z "$DATABASE_INSTANCE_IDENTIFIER" ]; then
     echo "==> Database instance for \"$DATABASE_INSTANCE_NAME\" does not exist."
@@ -67,8 +67,8 @@ deleteHostedZone () {
   fi
 }
 
-deleteKubernetesCluster () {
-  if "$(eksClusterExists)"; then
+deleteCluster () {
+  if "$(clusterExists)"; then
     echo "==> Deleting \"$KUBERNETES_CLUSTER_NAME\" k8s cluster from AWS [EKS]..."
     eksctl delete cluster "$KUBERNETES_CLUSTER_NAME" --wait
   else
@@ -76,7 +76,19 @@ deleteKubernetesCluster () {
   fi
 }
 
-deleteEbsVolumes () {
+deletePolicy () {
+  local POLICY_NAME="AWSLoadBalancerControllerIAMPolicy"
+  local POLICY_ARN=$(getPolicyArn "$POLICY_NAME")
+
+  if [ -z "$POLICY_ARN" ]; then
+    echo "==> Policy \"$POLICY_NAME\" does not exist."
+  else
+    echo "==> Deleting \"$POLICY_NAME\" from AWS [IAM]..."
+    aws iam delete-policy --policy-arn "$POLICY_ARN"
+  fi
+}
+
+deleteVolumes () {
   local EBS_VOLUME_IDS=$(aws ec2 describe-volumes \
     --filters "Name=tag-key,Values=kubernetes.io/cluster/$KUBERNETES_CLUSTER_NAME" \
     --query 'Volumes[].VolumeId' --output text)
@@ -87,10 +99,10 @@ deleteEbsVolumes () {
   done
 }
 
-deleteManagedCerts () {
+deleteCerts () {
   for SERVICE in rtl lsp; do
     local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
-    local CERT_ARN=$(getManagedCertArn "$SERVICE_DOMAIN_NAME")
+    local CERT_ARN=$(getCertArn "$SERVICE_DOMAIN_NAME")
      
     if [ -z "$CERT_ARN" ]; then
       echo "==> Certificate for \"$SERVICE_DOMAIN_NAME\" does not exist."
@@ -109,8 +121,9 @@ deleteDbSubnetGroup && \
 setDomainName && \
 deleteDNSRecords && \
 deleteHostedZone && \
-deleteKubernetesCluster && \
-deleteEbsVolumes && \
-deleteManagedCerts
+deleteCluster && \
+deletePolicy && \
+deleteVolumes && \
+deleteCerts
 
 echo "==> Finished destroying lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER!"

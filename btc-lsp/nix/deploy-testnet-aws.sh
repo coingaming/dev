@@ -8,7 +8,7 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 . "$THIS_DIR/utilities.sh"
 . "$THIS_DIR/aws-utilities.sh"
 
-createKubernetesCluster () {
+createCluster () {
   local AWS_REGION=$(aws configure get region)
 
   echo "==> Creating \"$KUBERNETES_CLUSTER_NAME\" k8s cluster on AWS [EKS]..."
@@ -93,11 +93,11 @@ createAwsLbController () {
     -n kube-system aws-load-balancer-controller
 }
 
-setupKubernetesCluster () {
-  if "$(eksClusterExists)"; then
+setupCluster () {
+  if "$(clusterExists)"; then
     echo "==> Cluster \"$KUBERNETES_CLUSTER_NAME\" already exists."
   else
-    createKubernetesCluster && \
+    createCluster && \
       createIamOpenIdConnectProvider && \
       createAwsLbControllerPolicy && \
       createAwsLbServiceAccount && \
@@ -132,7 +132,7 @@ setupHostedZone () {
   fi
 }
 
-createManagedCert () {
+createCert () {
   local SERVICE_DOMAIN_NAME="$1"
   local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
   local IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
@@ -164,22 +164,22 @@ createManagedCert () {
 writeCertArn () {
   local SERVICE_NAME="$1"
   local SERVICE_DOMAIN_NAME="$2"
-  local CERT_ARN=$(getManagedCertArn "$SERVICE_DOMAIN_NAME")
+  local CERT_ARN=$(getCertArn "$SERVICE_DOMAIN_NAME")
   local SERVICE_CERT_ARN_PATH="$SECRETS_DIR/$SERVICE/certarn.txt"
 
   echo "Saving $CERT_ARN to $SERVICE_CERT_ARN_PATH"
   echo -n "$CERT_ARN" > "$SERVICE_CERT_ARN_PATH"
 }
 
-setupManagedCerts () {
+setupCerts () {
   for SERVICE in rtl lsp; do
     local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
-    local CERT_ARN=$(getManagedCertArn "$SERVICE_DOMAIN_NAME")
+    local CERT_ARN=$(getCertArn "$SERVICE_DOMAIN_NAME")
      
     if [ -n "$CERT_ARN" ]; then
       echo "==> Certificate for \"$SERVICE_DOMAIN_NAME\" already exists."
     else
-      createManagedCert "$SERVICE_DOMAIN_NAME" && writeCertArn "$SERVICE" "$SERVICE_DOMAIN_NAME"
+      createCert "$SERVICE_DOMAIN_NAME" && writeCertArn "$SERVICE" "$SERVICE_DOMAIN_NAME"
     fi
   done
 }
@@ -256,7 +256,7 @@ setupDbInstance () {
   local DATABASE_USERNAME="lsp"
   local DATABASE_USER_PASSWORD=$(cat "$POSTGRES_PATH/dbpassword.txt")
   local DATABASE_NAME="$DATABASE_USERNAME"
-  local DATABASE_INSTANCE_IDENTIFIER=$(getDatabaseInstanceIdentifier)
+  local DATABASE_INSTANCE_IDENTIFIER=$(getDbInstanceIdentifier)
 
   if [ -n "$DATABASE_INSTANCE_IDENTIFIER" ]; then
     echo "==> Database instance for \"$DATABASE_INSTANCE_NAME\" already exists."
@@ -349,9 +349,9 @@ echo "Service domain names are OK."
 disableAwsCliPager
 
 # Create eks cluster, route53 hosted zone and request certs from acm
-setupKubernetesCluster && \
+setupCluster && \
 setupHostedZone && \
-setupManagedCerts
+setupCerts
 
 echo "==> Checking that certificate arns are saved"
 checkFileExistsNotEmpty "$RTL_PATH/certarn.txt"

@@ -21,7 +21,7 @@ disableAwsCliPager () {
   aws configure set cli_pager ""
 }
 
-eksClusterExists () {
+clusterExists () {
   aws eks list-clusters | jq -r '.clusters | contains(["'$KUBERNETES_CLUSTER_NAME'"])'
 }
 
@@ -50,7 +50,7 @@ getHostedZoneId () {
     --output text
 }
 
-getManagedCertArn () {
+getCertArn () {
   local DOMAIN_NAME="$1"
 
   aws acm list-certificates \
@@ -145,7 +145,7 @@ getDbSubnetGroupArn () {
     --output text
 }
 
-getDatabaseInstanceIdentifier () {
+getDbInstanceIdentifier () {
   aws rds describe-db-instances \
     --filters "Name=db-instance-id,Values=$DATABASE_INSTANCE_NAME" \
     --query 'DBInstances[*].[DBInstanceIdentifier]' \
@@ -187,4 +187,13 @@ getElbListenerArn () {
     --query 'Listeners[*].[ListenerArn, Port]' \
     --output json | \
     jq -r '.[] | select(.[1] == '"$LISTENER_PORT"') | .[0]'
+}
+
+getPolicyArn () {
+  local POLICY_NAME="$1"
+
+  aws iam list-policies \
+    --scope Local \
+    --query "Policies[?PolicyName=='"$POLICY_NAME"'].Arn" \
+    --output text
 }
