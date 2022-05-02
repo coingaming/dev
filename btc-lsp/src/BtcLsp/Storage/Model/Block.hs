@@ -8,9 +8,13 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 
-
-createUpdateSql :: (Storage m) =>
-  BlkHeight -> BlkHash -> Maybe BlkPrevHash -> ReaderT Psql.SqlBackend m (Entity Block)
+createUpdateSql ::
+  ( MonadIO m
+  ) =>
+  BlkHeight ->
+  BlkHash ->
+  Maybe BlkPrevHash ->
+  ReaderT Psql.SqlBackend m (Entity Block)
 createUpdateSql height hash prev = do
   ct <- getCurrentTime
   --
@@ -55,7 +59,8 @@ createUpdate ::
   BlkHash ->
   Maybe BlkPrevHash ->
   m (Entity Block)
-createUpdate height hash prev = runSql (createUpdateSql height hash prev)
+createUpdate height hash prev =
+  runSql (createUpdateSql height hash prev)
 
 getLatest :: (Storage m) => m (Maybe (Entity Block))
 getLatest =

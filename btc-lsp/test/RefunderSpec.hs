@@ -74,7 +74,7 @@ refundSucceded swp preTrs = do
 
 spec :: Spec
 spec =
-  focus . itEnv "Refunder Spec" $
+  itEnv "Refunder Spec" $
     do
       runExceptT $ do
         amt <-

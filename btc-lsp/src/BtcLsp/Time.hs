@@ -6,6 +6,7 @@ module BtcLsp.Time
     getPastTime,
     addSeconds,
     subSeconds,
+    swapExpiryLimit,
   )
 where
 
@@ -24,7 +25,8 @@ getFutureTime ss =
 
 getPastTime :: (MonadIO m) => Lnd.Seconds -> m UTCTime
 getPastTime ss =
-  subSeconds ss <$> liftIO getCurrentTime
+  subSeconds ss
+    <$> liftIO getCurrentTime
 
 addSeconds :: Lnd.Seconds -> UTCTime -> UTCTime
 addSeconds =
@@ -42,3 +44,7 @@ subSeconds =
     . secondsToDiffTime
     . (* (-1))
     . via @Word64
+
+swapExpiryLimit :: Lnd.Seconds
+swapExpiryLimit =
+  Lnd.Seconds $ 24 * 60 * 60

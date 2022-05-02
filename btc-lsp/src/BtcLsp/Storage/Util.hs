@@ -43,7 +43,7 @@ lockByRow ::
     Psql.ToBackendKey Psql.SqlBackend a
   ) =>
   Psql.Key a ->
-  Psql.SqlPersistT m (Entity a)
+  Psql.SqlPersistT m a
 lockByRow rowId = do
   void
     ( Psql.rawSql
@@ -55,7 +55,7 @@ lockByRow rowId = do
     )
   maybeM
     (error $ "Impossible missing row " <> Universum.show rowId)
-    (pure . Entity rowId)
+    pure
     $ Psql.get rowId
 
 rollback :: (KatipContext m, Out a) => a -> Psql.SqlPersistT m (Either a b)

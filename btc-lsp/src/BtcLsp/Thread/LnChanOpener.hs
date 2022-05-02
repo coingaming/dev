@@ -31,7 +31,7 @@ apply =
     tasks <-
       mapM
         ( spawnLink
-            . openChan
+            . uncurry openChan
         )
         $ filter
           ( \x ->
@@ -44,52 +44,59 @@ apply =
     sleep $ MicroSecondsDelay 500000
 
 --
--- TODO : do not open channel in case where
--- there is enough liquidity to perform swap.
+-- TODO : Do not open channel in case where
+-- there not is enough liquidity to perform swap.
+-- Maybe also put some limits into amount of
+-- opening chans per user.
 --
-openChan :: (Env m) => (Entity SwapIntoLn, Entity User) -> m ()
-openChan (swapEnt, userEnt) = do
-  let swap = entityVal swapEnt
+openChan ::
+  ( Env m
+  ) =>
+  Entity SwapIntoLn ->
+  Entity User ->
+  m ()
+openChan swapEnt@(Entity swapKey _) userEnt = do
   prv <- getChanPrivacy
-  msatPerByte <- getMsatPerByte
-  res <- runExceptT $ do
-    cp <-
-      withLndT
-        LndKatip.openChannelSync
-        ( $
-            Chan.OpenChannelRequest
-              { Chan.nodePubkey =
-                  userNodePubKey $
-                    entityVal userEnt,
-                Chan.localFundingAmount =
-                  from (swapIntoLnChanCapLsp swap)
-                    + from (swapIntoLnChanCapUser swap),
-                Chan.pushMSat = Nothing,
-                Chan.targetConf = Nothing,
-                Chan.mSatPerByte = msatPerByte,
-                Chan.private = Just $ prv == Private,
-                Chan.minHtlcMsat = Nothing,
-                Chan.remoteCsvDelay = Nothing,
-                Chan.minConfs = Nothing,
-                Chan.spendUnconfirmed = Nothing,
-                Chan.closeAddress = Nothing
-              }
-        )
-    --
-    -- TODO : make it single psql trx
-    --
-    void
-      . lift
-      $ LnChan.createIgnore
-        (entityKey swapEnt)
-        (ChannelPoint.fundingTxId cp)
-        (ChannelPoint.outputIndex cp)
-    void
-      . lift
-      . SwapIntoLn.updateWaitingChan
-      . swapIntoLnFundAddress
-      $ entityVal swapEnt
-  whenLeft res $
-    $(logTM) ErrorS . logStr
-      . ("OpenChan procedure failed: " <>)
-      . inspect
+  rate <- getMsatPerByte
+  runSql $ do
+    swapVal <- lockByRow swapKey
+    if swapIntoLnStatus swapVal /= SwapWaitingPeer
+      then do
+        $(logTM) InfoS . logStr $
+          "OpenChan wrong status " <> inspect swapEnt
+        pure ()
+      else
+        eitherM
+          ( $(logTM) ErrorS . logStr
+              . ("OpenChan procedure failed: " <>)
+              . inspect
+          )
+          ( \cp ->
+              LnChan.createIgnoreSql
+                swapKey
+                (ChannelPoint.fundingTxId cp)
+                (ChannelPoint.outputIndex cp)
+                >> SwapIntoLn.updateWaitingChanSql swapKey
+          )
+          . lift
+          $ withLnd
+            LndKatip.openChannelSync
+            ( $
+                Chan.OpenChannelRequest
+                  { Chan.nodePubkey =
+                      userNodePubKey $
+                        entityVal userEnt,
+                    Chan.localFundingAmount =
+                      from (swapIntoLnChanCapLsp swapVal)
+                        + from (swapIntoLnChanCapUser swapVal),
+                    Chan.pushMSat = Nothing,
+                    Chan.targetConf = Nothing,
+                    Chan.mSatPerByte = rate,
+                    Chan.private = Just $ prv == Private,
+                    Chan.minHtlcMsat = Nothing,
+                    Chan.remoteCsvDelay = Nothing,
+                    Chan.minConfs = Nothing,
+                    Chan.spendUnconfirmed = Nothing,
+                    Chan.closeAddress = Nothing
+                  }
+            )

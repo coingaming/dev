@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Storage.Model.LnChan
-  ( createIgnore,
+  ( createIgnoreSql,
     getByChannelPoint,
     persistChannelUpdates,
     persistOpenedChannels,
@@ -18,26 +18,15 @@ import qualified LndClient.Data.CloseChannel as CloseChannel
 import qualified LndClient.Data.CloseChannel as Lnd
 import qualified LndClient.Data.SubscribeChannelEvents as Lnd
 
-createIgnore ::
-  ( Storage m
+createIgnoreSql ::
+  ( MonadIO m
   ) =>
   SwapIntoLnId ->
   TxId 'Funding ->
   Vout 'Funding ->
-  m (Entity LnChan)
-createIgnore swapId txid vout = runSql $ do
+  ReaderT Psql.SqlBackend m (Entity LnChan)
+createIgnoreSql swapId txid vout = do
   ct <- getCurrentTime
-  Psql.update $ \swap -> do
-    Psql.set
-      swap
-      [ SwapIntoLnStatus
-          Psql.=. Psql.val SwapWaitingChan,
-        SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
-      ]
-    Psql.where_ $
-      swap Psql.^. SwapIntoLnId
-        Psql.==. Psql.val swapId
   Psql.upsertBy
     (UniqueLnChan txid vout)
     LnChan

@@ -37,9 +37,7 @@ createVerify pub nonce = runSql $ do
         zeroRow
         [ UserUpdatedAt Psql.=. Psql.val ct
         ]
-  existingRow <-
-    entityVal
-      <$> lockByRow rowId
+  existingRow <- lockByRow rowId
   if (existingRow == zeroRow)
     || (userLatestNonce existingRow < nonce)
     then
