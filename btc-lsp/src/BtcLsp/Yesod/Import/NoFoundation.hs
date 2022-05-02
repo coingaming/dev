@@ -10,12 +10,16 @@ import BtcLsp.Data.Kind as Import
 import BtcLsp.Data.Type as Import
 import BtcLsp.Import.External as Import
   ( ExceptT (..),
+    IsList,
     NodePubKey (..),
     RPreimage (..),
+    TxId (..),
+    Vout (..),
     coerce,
     eitherM,
     maybeM,
     runExceptT,
+    txIdHex,
   )
 import BtcLsp.Import.Witch as Import
 import BtcLsp.Text as Import

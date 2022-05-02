@@ -4,6 +4,7 @@ module BtcLsp.Text
   ( toHex,
     toQr,
     inspectSat,
+    inspectSatLabel,
     mkHtmlUuid,
   )
 where
@@ -45,10 +46,19 @@ inspectSat ::
     (mrel :: MoneyRelation) ->
   Text
 inspectSat =
-  (<> " sat")
-    . displayRational2
+  displayRational2
     . (/ 100)
     . into @Rational
+
+inspectSatLabel ::
+  Money
+    (owner :: Owner)
+    (btcl :: BitcoinLayer)
+    (mrel :: MoneyRelation) ->
+  Text
+inspectSatLabel =
+  (<> " sat")
+    . inspectSat
 
 displayRational :: Int -> Rational -> Text
 displayRational len rat =

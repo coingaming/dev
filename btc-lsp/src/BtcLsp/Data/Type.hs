@@ -361,7 +361,7 @@ data SwapStatus
     SwapWaitingFund
   | -- | Swap has been funded on-chain,
     -- need to open LN channel now.
-    SwapFunded
+    SwapWaitingPeer
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan

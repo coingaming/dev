@@ -12,10 +12,10 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ./nix.tar.gz
-        key: nix-v4
+        key: cache-v1
         restore-keys: |
-          nix-v3
-          nix-
+          cache-v1
+          cache-
     - name: Restore cache
       run: |
         docker run --rm \

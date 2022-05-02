@@ -4,7 +4,7 @@ module BtcLsp.Storage.Model.SwapUtxo
     markAsUsedForChanFundingSql,
     markRefundedSql,
     getUtxosForRefundSql,
-    getUtxosBySwapIdSql
+    getUtxosBySwapIdSql,
   )
 where
 
@@ -35,7 +35,7 @@ markAsUsedForChanFundingSql ids = do
       ]
     Psql.where_ $ row Psql.^. SwapUtxoId `Psql.in_` Psql.valList ids
 
-markRefundedSql:: (Storage m) => [SwapUtxoId] -> TxId 'Funding -> ReaderT Psql.SqlBackend m ()
+markRefundedSql :: (Storage m) => [SwapUtxoId] -> TxId 'Funding -> ReaderT Psql.SqlBackend m ()
 markRefundedSql ids rTxId = do
   Psql.update $ \row -> do
     Psql.set
@@ -46,15 +46,15 @@ markRefundedSql ids rTxId = do
       ]
     Psql.where_ $ row Psql.^. SwapUtxoId `Psql.in_` Psql.valList ids
 
-
 getUtxosForRefundSql :: (Storage m) => ReaderT Psql.SqlBackend m [(Entity SwapUtxo, Entity SwapIntoLn)]
 getUtxosForRefundSql = do
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` utxo) -> do
       Psql.on ((swap Psql.^. SwapIntoLnId) Psql.==. (utxo Psql.^. SwapUtxoSwapIntoLnId))
       Psql.where_
-        (((swap Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapFunded) Psql.||. (swap Psql.^. SwapIntoLnExpiresAt Psql.>. Psql.now_))
-        Psql.&&. (utxo Psql.^. SwapUtxoStatus Psql.!=. Psql.val SwapUtxoRefunded))
+        ( ((swap Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapWaitingPeer) Psql.||. (swap Psql.^. SwapIntoLnExpiresAt Psql.>. Psql.now_))
+            Psql.&&. (utxo Psql.^. SwapUtxoStatus Psql.!=. Psql.val SwapUtxoRefunded)
+        )
       pure (utxo, swap)
 
 getUtxosBySwapIdSql :: (Storage m) => SwapIntoLnId -> ReaderT Psql.SqlBackend m [Entity SwapUtxo]
@@ -62,7 +62,5 @@ getUtxosBySwapIdSql swapId = do
   Psql.select $
     Psql.from $ \row -> do
       Psql.where_
-        ( row Psql.^. SwapUtxoSwapIntoLnId Psql.==. Psql.val swapId )
+        (row Psql.^. SwapUtxoSwapIntoLnId Psql.==. Psql.val swapId)
       pure row
-
-

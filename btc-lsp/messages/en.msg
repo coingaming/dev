@@ -68,7 +68,16 @@ SwapIntoLnSucceededShort: Step 4/4 - Swap Succeeded
 SwapIntoLnExpiredShort: Swap Expired!
 
 SwapIntoLnWaitingFundLong: Lsp is wating for the swap being funded. Please send bitcoins to the on-chain swap address:
-SwapIntoLnFundedLong: The swap is successfully funded. Lsp is waiting for your lightning node being connected as a peer.
+SwapIntoLnFundedLong: The swap is successfully funded. Lsp is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
 SwapIntoLnWaitingChanLong: Lsp initiated lightning channel. Waiting for the channel being opened.
 SwapIntoLnSucceededLong: Swap succeeded!
 SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded to refund on-chain address.
+
+Block: Block
+TxId: TxId
+Vout: Vout
+Sat: Sat
+Status: Status
+SwapInfo: Swap Info
+SwapUtxos: Swap UTXOs
+SwapChans: Swap Channels
