@@ -7,6 +7,7 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 
 . "$THIS_DIR/utilities.sh"
 . "$THIS_DIR/aws-utilities.sh"
+. "$THIS_DIR/cloudflare-utilities.sh"
 
 createCluster () {
   local AWS_REGION=$(aws configure get region)
@@ -105,10 +106,43 @@ setupCluster () {
   fi
 }
 
+delegateCloudflareDomain () {
+  local DOMAIN_NAME="$1"
+  local NS_RECORDS="$2"
+
+  setCloudflareCreds
+
+  local CLOUDFLARE_HOSTED_ZONE_ID=$(getCloudflareHostedZoneId)
+
+  for NS_RECORD in $NS_RECORDS; do
+    local DNS_RECORD_ID=$(getCloudflareDNSRecordId "$CLOUDFLARE_HOSTED_ZONE_ID" "$DOMAIN_NAME" "$NS_RECORD")
+
+    if [ -n "$DNS_RECORD_ID" ]; then
+      echo "==> NS record \"$NS_RECORD\" for \"$DOMAIN_NAME\" already exists."
+    else
+      echo "==> Adding \"$NS_RECORD\" NS record for \"$DOMAIN_NAME\" in Cloudflare."
+      createCloudflareDNSRecord "$CLOUDFLARE_HOSTED_ZONE_ID" "$DOMAIN_NAME" "$NS_RECORD" 1>/dev/null
+    fi
+  done
+}
+
+delegateDomain () {
+  local DNS_PROVIDER="$1"
+  local DOMAIN_NAME="$2"
+  local NS_RECORDS="$3"
+
+  case "$DNS_PROVIDER" in
+    "cloudflare")
+      delegateCloudflareDomain "$DOMAIN_NAME" "$NS_RECORDS";;
+    *)
+      echo "==> DNS provider \"$DNS_PROVIDER\" is not supported. Please add the NS records displayed below by yourself."
+      echo "$NS_RECORDS";;
+  esac
+}
+
 createHostedZone () {
   local CALLER_REFERENCE=$(uuidgen)
 
-  echo "==> Creating \"$DOMAIN_NAME\" hosted zone on AWS [R53]..."
   aws route53 create-hosted-zone \
     --name "$DOMAIN_NAME" \
     --query "DelegationSet.NameServers" \
@@ -122,12 +156,18 @@ setupHostedZone () {
   if [ -n "$HOSTED_ZONE_ID" ]; then
     echo "==> Hosted zone for \"$DOMAIN_NAME\" already exists."
   else
-    createHostedZone && \
-    echo "==> Delegate \"$DOMAIN_NAME\" to the nameservers displayed above"
+    echo "==> Creating \"$DOMAIN_NAME\" hosted zone on AWS [R53]..."
+    local NS_RECORDS=$(createHostedZone)
+
+    echo "==> If your DNS provider for \"$DOMAIN_NAME\" is not Route53, you must delegate the domain to Route53 before continuing..."
+
+    setDNSProvider && delegateDomain "$DNS_PROVIDER" "$DOMAIN_NAME" "$NS_RECORDS"
+
+    confirmContinue "==> Have you delegated \"$DOMAIN_NAME\" to the Route53 nameservers"
 
     until nslookup -type=NS "$DOMAIN_NAME" > /dev/null; do
-      echo "Waiting until \"$DOMAIN_NAME\" is delegated to Route53..."
-      sleep 60;
+      echo "Waiting until \"$DOMAIN_NAME\" is resolvable by Route53 nameservers..."
+      sleep 30;
     done
   fi
 }
@@ -330,7 +370,7 @@ isInstalled eksctl && \
   isInstalled aws && \
   isAwsConfigured
 
-confirmContinue "==> Start setting up lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER"
+confirmContinue "==> Starting to set up \"$KUBERNETES_CLUSTER_NAME\" on $CLOUD_PROVIDER."
 
 confirmAction \
 "==> Clean up previous build" \
@@ -404,4 +444,4 @@ sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
 # Create dns records in route53 and delete some ports (which should be private!) from elb
 setupDNSRecords && setupElbListeners
 
-echo "==> Setup for lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER has been completed!"
+echo "==> Finished setting up \"$KUBERNETES_CLUSTER_NAME\" on $CLOUD_PROVIDER!"

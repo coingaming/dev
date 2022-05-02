@@ -61,7 +61,9 @@ writeServiceDomainNames () {
     local SERVICE_DOMAIN_NAME="$SERVICE_NAME.$DOMAIN_NAME"
     local SERVICE_DOMAIN_NAME_FILEPATH="$SERVICE_DIR/domainname.txt"
 
-    echo "Saving $SERVICE_DOMAIN_NAME to $SERVICE_DOMAIN_NAME_FILEPATH"
+    mkdir -p "$SERVICE_DIR"
+
+    echo "Saving \"$SERVICE_DOMAIN_NAME\" to $SERVICE_DOMAIN_NAME_FILEPATH"
     echo -n "$SERVICE_DOMAIN_NAME" > "$SERVICE_DOMAIN_NAME_FILEPATH"
   done
 }
@@ -69,10 +71,10 @@ writeServiceDomainNames () {
 writeDomainName () {
   local DOMAIN_NAME_FILEPATH="$1"
 
-  echo "==> Domain name must be set before continuing"
+  echo "==> Domain name must be set before continuing. It will be used to setup publicly available services."
   read -r -p "Input your domain name: " "DOMAIN_NAME"
 
-  echo "Saving $DOMAIN_NAME to $DOMAIN_NAME_FILEPATH"
+  echo "Saving \"$DOMAIN_NAME\" to $DOMAIN_NAME_FILEPATH"
   echo -n "$DOMAIN_NAME" > "$DOMAIN_NAME_FILEPATH"
 }
 
@@ -116,4 +118,23 @@ genSecureCreds () {
   sh "$THIS_DIR/hm-shell-docker.sh" \
     --mini \
     "--run './nix/ns-gen-creds.sh'"
+}
+
+writeDNSProvider () {
+  local DNS_PROVIDER_FILEPATH="$1"
+
+  read -r -p "Input your DNS provider: " "DNS_PROVIDER"
+
+  echo "Saving \"$DNS_PROVIDER\" to $DNS_PROVIDER_FILEPATH"
+  echo -n "$DNS_PROVIDER" > "$DNS_PROVIDER_FILEPATH"
+}
+
+setDNSProvider () {
+  local DNS_PROVIDER_FILEPATH="$BUILD_DIR/dnsprovider.txt"
+
+  if [ -s "$DNS_PROVIDER_FILEPATH" ]; then
+    DNS_PROVIDER=$(cat "$DNS_PROVIDER_FILEPATH")
+  else
+    writeDNSProvider "$DNS_PROVIDER_FILEPATH"
+  fi
 }

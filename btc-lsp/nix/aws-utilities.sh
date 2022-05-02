@@ -50,6 +50,15 @@ getHostedZoneId () {
     --output text
 }
 
+getHostedZoneNameservers () {
+  local DOMAIN_NAME="$1"
+
+  aws route53 list-hosted-zones-by-name \
+    --dns-name "$DOMAIN_NAME" \
+    --query "HostedZones[?Name=='$DOMAIN_NAME.']" \
+    --output json
+}
+
 getCertArn () {
   local DOMAIN_NAME="$1"
 
@@ -194,6 +203,6 @@ getPolicyArn () {
 
   aws iam list-policies \
     --scope Local \
-    --query "Policies[?PolicyName=='"$POLICY_NAME"'].Arn" \
+    --query "Policies[?PolicyName=='$POLICY_NAME'].Arn" \
     --output text
 }

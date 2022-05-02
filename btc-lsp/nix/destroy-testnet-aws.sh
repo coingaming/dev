@@ -7,6 +7,7 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 
 . "$THIS_DIR/utilities.sh"
 . "$THIS_DIR/aws-utilities.sh"
+. "$THIS_DIR/cloudflare-utilities.sh"
 
 deleteDbSubnetGroup () {
   local DB_SUBNET_GROUP_ARN=$(getDbSubnetGroupArn "$KUBERNETES_CLUSTER_NAME")
@@ -15,8 +16,7 @@ deleteDbSubnetGroup () {
     echo "==> Database subnet group for \"$DATABASE_INSTANCE_NAME\" does not exist."
   else
     echo "==> Deleting \"$KUBERNETES_CLUSTER_NAME\" database subnet group from AWS [RDS]..."
-    aws rds delete-db-subnet-group \
-      --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME"
+    aws rds delete-db-subnet-group --db-subnet-group-name "$KUBERNETES_CLUSTER_NAME" 1>/dev/null
   fi
 }
 
@@ -27,15 +27,49 @@ deleteDbInstance () {
     echo "==> Database instance for \"$DATABASE_INSTANCE_NAME\" does not exist."
   else
     echo "==> Deleting \"$DATABASE_INSTANCE_NAME\" database instance from AWS [RDS]..."
-    (aws rds delete-db-instance \
+    aws rds delete-db-instance \
         --db-instance-identifier "$DATABASE_INSTANCE_NAME" \
         --skip-final-snapshot \
-        --delete-automated-backups)
+        --delete-automated-backups 1>/dev/null
 
     echo "Waiting until \"$DATABASE_INSTANCE_NAME\" database instance is fully deleted..."
-    aws rds wait db-instance-deleted \
-        --db-instance-identifier="$DATABASE_INSTANCE_NAME"
+    aws rds wait db-instance-deleted --db-instance-identifier="$DATABASE_INSTANCE_NAME"
   fi
+}
+
+deleteDelegatedCloudflareDomain () {
+  local DOMAIN_NAME="$1"
+  local NS_RECORDS="$2"
+
+  setCloudflareCreds
+
+  local CLOUDFLARE_HOSTED_ZONE_ID=$(getCloudflareHostedZoneId)
+
+  for NS_RECORD in $NS_RECORDS; do
+    local FORMATTED_NS_RECORD=${NS_RECORD%.}
+    local DNS_RECORD_ID=$(getCloudflareDNSRecordId "$CLOUDFLARE_HOSTED_ZONE_ID" "$DOMAIN_NAME" "$FORMATTED_NS_RECORD")
+
+    if [ -z "$DNS_RECORD_ID" ]; then
+      echo "==> NS record \"$FORMATTED_NS_RECORD\" for \"$DOMAIN_NAME\" does not exist."
+    else
+      echo "==> Deleting \"$FORMATTED_NS_RECORD\" NS record for \"$DOMAIN_NAME\" from Cloudflare."
+      deleteCloudflareDNSRecord "$CLOUDFLARE_HOSTED_ZONE_ID" "$DNS_RECORD_ID" 1>/dev/null
+    fi
+  done
+}
+
+deleteDelegatedDomain () {
+  local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
+  local NS_RECORDS=$(getDNSRecordsByType "$HOSTED_ZONE_ID" "NS" | jq -r -c '.[].ResourceRecords[].Value')
+
+  echo "==> If your DNS provider for \"$DOMAIN_NAME\" is not Route53, you must remove the delegated access before continuing..."
+
+  case "$DNS_PROVIDER" in
+    "cloudflare")
+      deleteDelegatedCloudflareDomain "$DOMAIN_NAME" "$NS_RECORDS";;
+    *)
+      echo "==> DNS provider \"$DNS_PROVIDER\" is not supported. Please remove NS records for \"$DOMAIN_NAME\" by yourself.";;
+  esac
 }
 
 deleteDNSRecords () {
@@ -63,7 +97,7 @@ deleteHostedZone () {
     echo "==> Hosted zone for \"$DOMAIN_NAME\" does not exist."
   else
     echo "==> Deleting \"$DOMAIN_NAME\" hosted zone from AWS [R53]..."
-    aws route53 delete-hosted-zone --id "$HOSTED_ZONE_ID"
+    aws route53 delete-hosted-zone --id "$HOSTED_ZONE_ID" 1>/dev/null
   fi
 }
 
@@ -108,17 +142,18 @@ deleteCerts () {
       echo "==> Certificate for \"$SERVICE_DOMAIN_NAME\" does not exist."
     else
       echo "==> Deleting \"$CERT_ARN\" certificate from AWS [ACM]..."
-      aws acm delete-certificate \
-        --certificate-arn "$CERT_ARN"
+      aws acm delete-certificate --certificate-arn "$CERT_ARN"
     fi
   done
 }
 
-echo "==> Starting to destroy lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER."
+echo "==> Starting to teardown \"$KUBERNETES_CLUSTER_NAME\" on $CLOUD_PROVIDER."
 
 deleteDbInstance && \
 deleteDbSubnetGroup && \
 setDomainName && \
+setDNSProvider && \
+deleteDelegatedDomain && \
 deleteDNSRecords && \
 deleteHostedZone && \
 deleteCluster && \
@@ -126,4 +161,4 @@ deletePolicy && \
 deleteVolumes && \
 deleteCerts
 
-echo "==> Finished destroying lsp $BITCOIN_NETWORK on $CLOUD_PROVIDER!"
+echo "==> Finished removing \"$KUBERNETES_CLUSTER_NAME\" from $CLOUD_PROVIDER!"
