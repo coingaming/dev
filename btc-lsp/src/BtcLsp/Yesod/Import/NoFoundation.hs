@@ -12,6 +12,7 @@ import BtcLsp.Import.External as Import
   ( ExceptT (..),
     IsList,
     NodePubKey (..),
+    Pool,
     RPreimage (..),
     TxId (..),
     Vout (..),
