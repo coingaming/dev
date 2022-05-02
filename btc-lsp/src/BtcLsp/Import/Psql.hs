@@ -62,8 +62,7 @@ import Database.Esqueleto.Legacy as X
     (||.),
   )
 import Database.Esqueleto.PostgreSQL as X
-  ( now_,
-    upsertBy,
+  ( upsertBy,
   )
 import Database.Persist as X
   ( LiteralType (..),

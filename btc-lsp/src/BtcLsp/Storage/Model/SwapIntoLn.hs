@@ -2,6 +2,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
     updateFundedSql,
     updateWaitingChan,
+    updateSwapsAboutToExpire,
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
@@ -16,6 +17,7 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
+import qualified LndClient as Lnd
 
 createIgnore ::
   ( Storage m
@@ -50,7 +52,7 @@ createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
           swapIntoLnChanCapLsp = Money 0,
           swapIntoLnFeeLsp = Money 0,
           swapIntoLnFeeMiner = Money 0,
-          swapIntoLnStatus = SwapWaitingFund,
+          swapIntoLnStatus = SwapWaitingFundChain,
           swapIntoLnExpiresAt = expAt,
           swapIntoLnInsertedAt = ct,
           swapIntoLnUpdatedAt = ct
@@ -86,16 +88,24 @@ updateFundedSql sid cap = do
           Psql.==. Psql.val sid
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapWaitingFund
+                     Psql.==. Psql.val SwapWaitingFundChain
                  )
 
-getWaitingFundSql :: (Storage m) => ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
+getWaitingFundSql ::
+  ( Storage m
+  ) =>
+  ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
 getWaitingFundSql = do
+  ct <- getCurrentTime
   Psql.select $
     Psql.from $ \row -> do
       Psql.where_
-        ( (row Psql.^. SwapIntoLnStatus Psql.==. Psql.val SwapWaitingFund)
-            Psql.&&. (row Psql.^. SwapIntoLnExpiresAt Psql.<. Psql.now_)
+        ( ( row Psql.^. SwapIntoLnStatus
+              Psql.==. Psql.val SwapWaitingFundChain
+          )
+            Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
+                         Psql.<. Psql.val ct
+                     )
         )
       pure row
 
@@ -120,6 +130,30 @@ updateWaitingChan addr = runSql $ do
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
                      Psql.==. Psql.val SwapWaitingPeer
+                 )
+
+updateSwapsAboutToExpire :: (Storage m) => m ()
+updateSwapsAboutToExpire = runSql $ do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapExpired,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnStatus
+          `Psql.in_` Psql.valList
+            [ SwapWaitingFundChain,
+              SwapWaitingPeer
+            ]
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
+                     Psql.<. Psql.val
+                       ( addSeconds (Lnd.Seconds 300) ct
+                       )
                  )
 
 updateSettled ::

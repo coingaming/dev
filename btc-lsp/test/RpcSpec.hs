@@ -10,7 +10,7 @@ import BtcLsp.Rpc.ElectrsRpc as Rpc
 import BtcLsp.Rpc.Helper
 import LndClient.Data.NewAddress (NewAddressResponse (NewAddressResponse))
 import qualified LndClient.Data.NewAddress as Lnd
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Silent as Lnd
 import Network.Bitcoin.Mining (generateToAddress)
 import Test.Hspec
 import TestOrphan ()

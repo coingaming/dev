@@ -8,7 +8,6 @@
 module BtcLsp.Data.Type
   ( Nonce,
     newNonce,
-    TableName (..),
     LnInvoice (..),
     LnInvoiceStatus (..),
     LnChanStatus (..),
@@ -168,13 +167,6 @@ data TaskRes
     ( Eq,
       Ord,
       Show
-    )
-
-data TableName
-  = UserTable
-  | LnChanTable
-  deriving stock
-    ( Enum
     )
 
 newtype LnInvoice (mrel :: MoneyRelation)
@@ -358,13 +350,16 @@ data SwapStatus
   = -- | Waiting on-chain funding trx with
     -- given amt from user with
     -- some confirmations.
-    SwapWaitingFund
+    SwapWaitingFundChain
   | -- | Swap has been funded on-chain,
     -- need to open LN channel now.
     SwapWaitingPeer
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan
+  | -- | Waiting funding LN invoice
+    -- to be paid by SwapperIntoLn.
+    SwapWaitingFundLn
   | -- | Final statuses
     SwapSucceeded
   | SwapExpired

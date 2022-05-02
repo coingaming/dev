@@ -7,7 +7,7 @@ module BtcLsp.Math
     swapLnMinFee,
     newSwapCapM,
     newSwapIntoLnMinAmt,
-    roundWord64ToMSat
+    roundWord64ToMSat,
   )
 where
 
@@ -106,4 +106,5 @@ newSwapIntoLnMinAmt minCap =
         else usrFin + minFee
 
 roundWord64ToMSat :: Real a => a -> MSat
-roundWord64ToMSat amt = MSat $ (* 1000) $ fromInteger $ ceiling (toRational amt / 1000)
+roundWord64ToMSat amt =
+  MSat $ (* 1000) $ fromInteger $ ceiling (toRational amt / 1000)

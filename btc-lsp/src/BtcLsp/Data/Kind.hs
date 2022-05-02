@@ -43,9 +43,13 @@ data Owner
 
 data Table
   = SwapIntoLnTable
+  | UserTable
+  | LnChanTable
   deriving stock
     ( Eq,
       Ord,
       Show,
-      Generic
+      Generic,
+      Enum,
+      Bounded
     )

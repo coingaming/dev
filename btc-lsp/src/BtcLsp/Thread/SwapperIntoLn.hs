@@ -20,6 +20,7 @@ import qualified LndClient.RPC.Silent as LndSilent
 apply :: (Env m) => m ()
 apply =
   forever $ do
+    SwapIntoLn.updateSwapsAboutToExpire
     ePeerList <- withLnd LndSilent.listPeers id
     whenLeft ePeerList $
       $(logTM) ErrorS
@@ -29,7 +30,7 @@ apply =
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
-    swaps <- SwapIntoLn.getSwapsToSettle
+    swapsToSettle <- SwapIntoLn.getSwapsToSettle
     tasks <-
       mapM
         ( spawnLink
@@ -41,7 +42,7 @@ apply =
                 (userNodePubKey $ entityVal usr)
                 peerSet
           )
-          swaps
+          swapsToSettle
     mapM_ (liftIO . wait) tasks
     sleep $ MicroSecondsDelay 500000
 

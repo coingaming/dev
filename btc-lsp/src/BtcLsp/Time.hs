@@ -4,6 +4,8 @@ module BtcLsp.Time
   ( getCurrentTime,
     getFutureTime,
     getPastTime,
+    addSeconds,
+    subSeconds,
   )
 where
 

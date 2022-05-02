@@ -4,7 +4,7 @@
     <div .panel-body>
       <div .jumbotron.bg-color-inherit.no-margin-bottom>
         <p .text-center.no-margin-bottom>_{msgLong}
-        $if swapIntoLnStatus == SwapWaitingFund
+        $if swapIntoLnStatus == SwapWaitingFundChain
           <img .img-responsive.center-block.small-margin-bottom src=#{fundAddrQr} alt=#{toText swapIntoLnFundAddress}>
           <div .input-group>
             <input .form-control id=#{htmlUuid} type="text" value=#{toText swapIntoLnFundAddress} readonly>

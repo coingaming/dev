@@ -10,7 +10,6 @@ import Control.Concurrent.Async as X
     asyncThreadId,
     cancel,
     linkOnly,
-    race,
     wait,
     waitAnyCancel,
     waitAnySTM,
@@ -144,6 +143,7 @@ import UnliftIO as X
     askRunInIO,
     bracket,
     finally,
+    race,
     withRunInIO,
     withUnliftIO,
   )

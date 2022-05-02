@@ -1,6 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Thread.Refunder (apply, SendUtxosResult (..)) where
+module BtcLsp.Thread.Refunder
+  ( apply,
+    SendUtxosResult (..),
+  )
+where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
@@ -47,7 +51,14 @@ data SendUtxosResult = SendUtxosResult
 
 instance Out RefundUtxo
 
-newtype TxLabel = TxLabel Text deriving newtype (Show, Eq, Ord, Semigroup)
+newtype TxLabel
+  = TxLabel Text
+  deriving newtype
+    ( Show,
+      Eq,
+      Ord,
+      Semigroup
+    )
 
 sendUtxosWithMinFee ::
   (Env m) =>
@@ -57,7 +68,8 @@ sendUtxosWithMinFee ::
   TxLabel ->
   ExceptT Failure m SendUtxosResult
 sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
-  when (estimateAmt <= dustLimit cfg) $ throwE $ FailureInternal "Total utxos amount is below dust limit"
+  when (estimateAmt <= dustLimit cfg) . throwE $
+    FailureInternal "Total utxos amount is below dust limit"
   mapM_
     ( \refUtxo ->
         whenJust
@@ -104,8 +116,14 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
         }
 
 sendUtxos ::
-  (Env m) => [RefundUtxo] -> OnChainAddress 'Refund -> TxLabel -> ExceptT Failure m SendUtxosResult
-sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
+  ( Env m
+  ) =>
+  [RefundUtxo] ->
+  OnChainAddress 'Refund ->
+  TxLabel ->
+  ExceptT Failure m SendUtxosResult
+sendUtxos =
+  sendUtxosWithMinFee defSendUtxoConfig
 
 processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
 processRefund utxos@(x : _) =
@@ -138,11 +156,18 @@ processRefund _ = pure ()
 
 toOutPointAmt :: SwapUtxo -> RefundUtxo
 toOutPointAmt x =
-  RefundUtxo (OP.OutPoint (coerce $ swapUtxoTxid x) (coerce $ swapUtxoVout x)) (coerce $ swapUtxoAmount x) (swapUtxoLockId x)
+  RefundUtxo
+    ( OP.OutPoint
+        (coerce $ swapUtxoTxid x)
+        (coerce $ swapUtxoVout x)
+    )
+    (coerce $ swapUtxoAmount x)
+    (swapUtxoLockId x)
 
 apply :: (Env m) => m ()
 apply =
   runSql getUtxosForRefundSql
-    <&> groupBy (\a b -> swpId a == swpId b) >>= mapM_ processRefund
+    <&> groupBy (\a b -> swpId a == swpId b)
+    >>= mapM_ processRefund
   where
     swpId = entityKey . snd
