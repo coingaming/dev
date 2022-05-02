@@ -1,0 +1,38 @@
+<div .ui.container.center>
+  <div .panel.panel-#{bsColor2Class color}>
+    <div .panel-heading>_{msgShort}
+    <div .panel-body>
+      <div .jumbotron.bg-color-inherit.no-margin-bottom>
+        <p .text-center.no-margin-bottom>_{msgLong}
+        $if swapIntoLnStatus == SwapWaitingFund
+          <img .img-responsive.center-block.small-margin-bottom src=#{fundAddrQr} alt=#{toText swapIntoLnFundAddress}>
+          <div .input-group>
+            <input .form-control id=#{htmlUuid} type="text" value=#{toText swapIntoLnFundAddress} readonly>
+            <span .input-group-btn>
+              <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+                _{MsgCopy}
+        $if swapIntoLnStatus == SwapWaitingPeer
+          <img .img-responsive.center-block.small-margin-bottom src=#{nodeUriQr} alt=#{nodeUriHex}>
+          <div .input-group>
+            <input .form-control id=#{htmlUuid} type="text" value=#{nodeUriHex} readonly>
+            <span .input-group-btn>
+              <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+                _{MsgCopy}
+      <hr>
+      <h4>_{MsgSwapInfo}
+      <hr>
+      $forall (msg, txt) <- items
+        <div .row.margin-bottom.text-overflow>
+          <div .col-xs-12.col-sm-3.col-md-3.col-lg-3>
+            <strong>_{msg}
+          <div .col-xs-12.col-sm-9.col-md-9.col-lg-9>#{txt}
+      $maybe tab <- mUtxoTableWidget
+        <hr>
+        <h4>_{MsgSwapUtxos}
+        <hr>
+        ^{tab}
+      $maybe tab <- mChanTableWidget
+        <hr>
+        <h4>_{MsgSwapChans}
+        <hr>
+        ^{tab}

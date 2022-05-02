@@ -49,10 +49,6 @@ let env =
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
       , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
       , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
-      , lspYesodPguser = "LSP_YESOD_PGUSER"
-      , lspYesodPgpassword = "LSP_YESOD_PGPASS"
-      , lspYesodPghost = "LSP_YESOD_PGHOST"
-      , lspYesodPgdatabase = "LSP_YESOD_PGDATABASE"
       }
 
 let configMapEnv
@@ -65,8 +61,6 @@ let configMapEnv
       , env.lspLndP2pPort
       , env.lspMinChanCapMsat
       , env.lspMsatPerByte
-      , env.lspYesodPghost
-      , env.lspYesodPgdatabase
       ]
 
 let secretEnv
@@ -75,8 +69,6 @@ let secretEnv
       , env.lspLndEnv
       , env.lspGrpcServerEnv
       , env.lspBitcoindEnv
-      , env.lspYesodPguser
-      , env.lspYesodPgpassword
       ]
 
 let mkLspBitcoindEnv
@@ -167,14 +159,6 @@ let mkEnv
         , { mapKey = env.lspMsatPerByte, mapValue = mkMsatPerByte net }
         , { mapKey = env.lspMinChanCapMsat
           , mapValue = Natural/show minChanSize
-          }
-        , { mapKey = env.lspYesodPguser, mapValue = Postgres.mkUser net }
-        , { mapKey = env.lspYesodPgpassword
-          , mapValue = Postgres.mkPassword net
-          }
-        , { mapKey = env.lspYesodPghost, mapValue = Postgres.mkHost net }
-        , { mapKey = env.lspYesodPgdatabase
-          , mapValue = Postgres.mkDatabaseName net
           }
         ]
 

@@ -65,9 +65,11 @@ import Data.Time.Clock as X
     secondsToDiffTime,
   )
 import Data.Type.Equality as X (type (==))
+import Data.UUID as X (UUID)
 import Database.Esqueleto.Legacy as X
   ( Entity (..),
   )
+import GHC.Exts as X (IsList)
 import Katip as X
   ( ColorStrategy (..),
     Environment (..),
@@ -110,6 +112,7 @@ import LndClient.Util as X
     readTChanTimeout,
     sleep,
     spawnLink,
+    txIdHex,
     withSpawnLink,
   )
 import Network.GRPC.Client as X (CompressMode (..))

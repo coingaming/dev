@@ -5,10 +5,12 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
-    getByRHashHex,
+    getByUuid,
     getByFundAddress,
     getLatestSwapT,
     getWaitingFundSql,
+    UtxoInfo (..),
+    SwapInfo (..),
   )
 where
 
@@ -28,6 +30,7 @@ createIgnore ::
 createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
   runSql $ do
     ct <- getCurrentTime
+    uuid <- newUuid
     --
     -- NOTE : Set initial amount to zero because
     -- we don't know how much user will deposit
@@ -36,7 +39,8 @@ createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
     Psql.upsertBy
       (UniqueSwapIntoLnFundInvHash fundHash)
       SwapIntoLn
-        { swapIntoLnUserId = entityKey userEnt,
+        { swapIntoLnUuid = uuid,
+          swapIntoLnUserId = entityKey userEnt,
           swapIntoLnFundInvoice = fundInv,
           swapIntoLnFundInvHash = fundHash,
           swapIntoLnFundAddress = fundAddr,
@@ -73,7 +77,7 @@ updateFundedSql sid cap = do
         SwapIntoLnFeeLsp
           Psql.=. Psql.val (swapCapFee cap),
         SwapIntoLnStatus
-          Psql.=. Psql.val SwapFunded,
+          Psql.=. Psql.val SwapWaitingPeer,
         SwapIntoLnUpdatedAt
           Psql.=. Psql.val ct
       ]
@@ -115,7 +119,7 @@ updateWaitingChan addr = runSql $ do
           Psql.==. Psql.val addr
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapFunded
+                     Psql.==. Psql.val SwapWaitingPeer
                  )
 
 updateSettled ::
@@ -161,7 +165,7 @@ getFundedSwaps = runSql $
         )
       Psql.where_
         ( swap Psql.^. SwapIntoLnStatus
-            Psql.==. Psql.val SwapFunded
+            Psql.==. Psql.val SwapWaitingPeer
         )
       --
       -- TODO : some sort of exp backoff in case
@@ -210,25 +214,102 @@ getSwapsToSettle =
             --
             pure (swap, user, chan)
 
-getByRHashHex ::
+data UtxoInfo = UtxoInfo
+  { utxoInfoUtxo :: Entity SwapUtxo,
+    utxoInfoBlock :: Entity Block
+  }
+  deriving stock
+    ( Eq,
+      Show
+    )
+
+data SwapInfo = SwapInfo
+  { swapInfoSwap :: Entity SwapIntoLn,
+    swapInfoUser :: Entity User,
+    swapInfoUtxo :: [UtxoInfo],
+    swapInfoChan :: [Entity LnChan]
+  }
+  deriving stock
+    ( Eq,
+      Show
+    )
+
+getByUuid ::
   ( Storage m
   ) =>
-  RHashHex ->
-  m (Maybe (Entity SwapIntoLn, Entity User))
-getByRHashHex hash =
-  runSql . (listToMaybe <$>) $
+  Uuid 'SwapIntoLnTable ->
+  m (Maybe SwapInfo)
+getByUuid uuid =
+  runSql . (prettifyGetByUuid <$>) $
     Psql.select $
-      Psql.from $ \(swap `Psql.InnerJoin` user) -> do
-        Psql.on
-          ( swap Psql.^. SwapIntoLnUserId
-              Psql.==. user Psql.^. UserId
-          )
-        Psql.where_
-          ( swap Psql.^. SwapIntoLnFundInvHash
-              Psql.==. Psql.val (from hash)
-          )
-        Psql.limit 1
-        pure (swap, user)
+      Psql.from $
+        \( mUtxo
+             `Psql.InnerJoin` mBlock
+             `Psql.RightOuterJoin` swap
+             `Psql.LeftOuterJoin` mChan
+             `Psql.InnerJoin` user
+           ) -> do
+            Psql.on
+              ( swap Psql.^. SwapIntoLnUserId
+                  Psql.==. user Psql.^. UserId
+              )
+            Psql.on
+              ( mChan Psql.?. LnChanSwapIntoLnId
+                  Psql.==. Psql.just
+                    ( Psql.just $
+                        swap Psql.^. SwapIntoLnId
+                    )
+              )
+            Psql.on
+              ( mUtxo Psql.?. SwapUtxoSwapIntoLnId
+                  Psql.==. Psql.just (swap Psql.^. SwapIntoLnId)
+              )
+            Psql.on
+              ( mUtxo Psql.?. SwapUtxoBlockId
+                  Psql.==. mBlock Psql.?. BlockId
+              )
+            Psql.where_
+              ( swap Psql.^. SwapIntoLnUuid
+                  Psql.==. Psql.val uuid
+              )
+            pure (mUtxo, mBlock, mChan, swap, user)
+
+prettifyGetByUuid ::
+  [ ( Maybe (Entity SwapUtxo),
+      Maybe (Entity Block),
+      Maybe (Entity LnChan),
+      Entity SwapIntoLn,
+      Entity User
+    )
+  ] ->
+  Maybe SwapInfo
+prettifyGetByUuid = \case
+  [] ->
+    Nothing
+  xs@((_, _, _, swap, user) : _) ->
+    Just
+      SwapInfo
+        { swapInfoSwap = swap,
+          swapInfoUser = user,
+          swapInfoUtxo =
+            ( \(mUtxo, mBlock, _, _, _) ->
+                maybe
+                  mempty
+                  pure
+                  $ UtxoInfo
+                    <$> mUtxo
+                    <*> mBlock
+            )
+              =<< xs,
+          swapInfoChan =
+            ( \(_, _, mChan, _, _) ->
+                maybe
+                  mempty
+                  pure
+                  mChan
+            )
+              =<< xs
+        }
 
 getByFundAddress ::
   ( Storage m

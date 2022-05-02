@@ -17,22 +17,80 @@ import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
+import qualified Data.UUID as UUID
 import Yesod.Form.Bootstrap3
 
-getSwapIntoLnSelectR :: RHashHex -> Handler Html
-getSwapIntoLnSelectR fundInvHash = do
+getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
+getSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
+  nodeUri <- liftIO $ run getLndNodeUri
+  nodeUriHex <-
+    eitherM
+      (const badMethod)
+      (pure . from @NodeUriHex @Text)
+      . pure
+      $ tryFrom nodeUri
+  nodeUriQr <-
+    maybeM badMethod pure
+      . pure
+      $ toQr nodeUriHex
   maybeM
     notFound
-    ( \(swpEnt, usrEnt) -> do
-        let SwapIntoLn {..} = entityVal swpEnt
+    ( \SwapIntoLn.SwapInfo {..} -> do
+        let SwapIntoLn {..} = entityVal swapInfoSwap
+        let (msgShort, msgLong, color) =
+              case swapIntoLnStatus of
+                SwapWaitingFund ->
+                  ( MsgSwapIntoLnWaitingFundShort,
+                    MsgSwapIntoLnWaitingFundLong,
+                    Info
+                  )
+                SwapWaitingPeer ->
+                  ( MsgSwapIntoLnFundedShort,
+                    MsgSwapIntoLnFundedLong,
+                    Info
+                  )
+                SwapWaitingChan ->
+                  ( MsgSwapIntoLnWaitingChanShort,
+                    MsgSwapIntoLnWaitingChanLong,
+                    Info
+                  )
+                SwapSucceeded ->
+                  ( MsgSwapIntoLnSucceededShort,
+                    MsgSwapIntoLnSucceededLong,
+                    Success
+                  )
+                SwapExpired ->
+                  ( MsgSwapIntoLnExpiredShort,
+                    MsgSwapIntoLnExpiredLong,
+                    Danger
+                  )
         let userPub =
               toHex
                 . coerce
                 . userNodePubKey
-                $ entityVal usrEnt
+                $ entityVal swapInfoUser
+        fundAddrQr <-
+          maybeM badMethod pure
+            . pure
+            . toQr
+            $ from swapIntoLnFundAddress
+        mUtxoTableWidget <-
+          if null swapInfoUtxo
+            then pure Nothing
+            else Just <$> newUtxoTableWidget swapInfoUtxo
+        mChanTableWidget <-
+          if null swapInfoChan
+            then pure Nothing
+            else Just <$> newChanTableWidget swapInfoChan
         let items =
-              [ ( MsgSwapIntoLnUserId,
+              [ ( MsgSwapIntoLnUuid,
+                  Just
+                    . UUID.toText
+                    . unUuid
+                    $ swapIntoLnUuid
+                ),
+                ( MsgSwapIntoLnUserId,
                   Just userPub
                 ),
                 ( MsgSwapIntoLnFundInvoice,
@@ -53,16 +111,16 @@ getSwapIntoLnSelectR fundInvHash = do
                   Just $ toText swapIntoLnRefundAddress
                 ),
                 ( MsgSwapIntoLnChanCapUser,
-                  Just $ inspectSat swapIntoLnChanCapUser
+                  Just $ inspectSatLabel swapIntoLnChanCapUser
                 ),
                 ( MsgSwapIntoLnChanCapLsp,
-                  Just $ inspectSat swapIntoLnChanCapLsp
+                  Just $ inspectSatLabel swapIntoLnChanCapLsp
                 ),
                 ( MsgSwapIntoLnFeeLsp,
-                  Just $ inspectSat swapIntoLnFeeLsp
+                  Just $ inspectSatLabel swapIntoLnFeeLsp
                 ),
                 ( MsgSwapIntoLnFeeMiner,
-                  Just $ inspectSat swapIntoLnFeeMiner
+                  Just $ inspectSatLabel swapIntoLnFeeMiner
                 ),
                 ( MsgSwapIntoLnStatus,
                   Just $ inspectPlain swapIntoLnStatus
@@ -81,55 +139,139 @@ getSwapIntoLnSelectR fundInvHash = do
                   (msg, Just txt) -> [(msg, txt)]
                   (_, Nothing) -> []
         defaultLayout $ do
-          setTitleI $ MsgSwapIntoLnSelectRTitle fundInvHash
-          $(widgetFile "simple_list_group")
+          setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
+          $(widgetFile "swap_into_ln_select")
     )
     . liftIO
     . run
-    $ SwapIntoLn.getByRHashHex fundInvHash
+    $ SwapIntoLn.getByUuid uuid
+  where
+    htmlUuid = $(mkHtmlUuid)
 
-postSwapIntoLnSelectR :: RHashHex -> Handler Html
-postSwapIntoLnSelectR fundInvHash = do
+newUtxoTableWidget :: [SwapIntoLn.UtxoInfo] -> Handler Widget
+newUtxoTableWidget utxos = do
+  master <- getYesod
+  langs <- languages
+  pure $
+    makeTableWidget
+      (table $ renderMessage master langs)
+      utxos
+  where
+    table render =
+      textCol
+        (render MsgBlock)
+        ( inspectPlain @Word64
+            . from
+            . blockHeight
+            . entityVal
+            . SwapIntoLn.utxoInfoBlock
+        )
+        <> textColClass
+          (HtmlClassAttr ["text-overflow"])
+          (render MsgTxId)
+          ( txIdHex
+              . coerce
+              . swapUtxoTxid
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+        <> textCol
+          (render MsgVout)
+          ( inspectPlain @Word32
+              . coerce
+              . swapUtxoVout
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+        <> textCol
+          (render MsgSat)
+          ( inspectSat
+              . swapUtxoAmount
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+        <> textCol
+          (render MsgStatus)
+          ( inspectPlain
+              . swapUtxoStatus
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+
+newChanTableWidget :: [Entity LnChan] -> Handler Widget
+newChanTableWidget chans = do
+  master <- getYesod
+  langs <- languages
+  pure $
+    makeTableWidget
+      (table $ renderMessage master langs)
+      chans
+  where
+    table render =
+      textColClass
+        (HtmlClassAttr ["text-overflow"])
+        (render MsgTxId)
+        ( txIdHex
+            . coerce
+            . lnChanFundingTxId
+            . entityVal
+        )
+        <> textCol
+          (render MsgVout)
+          ( inspectPlain @Word32
+              . coerce
+              . lnChanFundingVout
+              . entityVal
+          )
+        <> textCol
+          (render MsgStatus)
+          ( inspectPlain
+              . lnChanStatus
+              . entityVal
+          )
+
+postSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
+postSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
   maybeM
     notFound
-    ( \(swpEnt, _) -> do
+    ( \swp -> do
         ((formResult, formWidget), formEnctype) <-
           runFormPost $
             renderBootstrap3
               BootstrapBasicForm
-              (aForm swpEnt)
+              (aForm $ SwapIntoLn.swapInfoSwap swp)
         case formResult of
           FormSuccess {} -> do
             App {appMRunner = UnliftIO {}} <- getYesod
             --
             -- TODO : !!!
             --
-            renderPage fundInvHash formWidget formEnctype
+            renderPage uuid formWidget formEnctype
           _ ->
-            renderPage fundInvHash formWidget formEnctype
+            renderPage uuid formWidget formEnctype
     )
     . liftIO
     . run
-    $ SwapIntoLn.getByRHashHex fundInvHash
+    $ SwapIntoLn.getByUuid uuid
 
 renderPage ::
-  RHashHex ->
+  Uuid 'SwapIntoLnTable ->
   Widget ->
   Enctype ->
   Handler Html
-renderPage fundInvHash formWidget formEnctype = do
-  let formRoute = SwapIntoLnSelectR fundInvHash
+renderPage uuid formWidget formEnctype = do
+  let formRoute = SwapIntoLnSelectR uuid
   let formMsgSubmit = MsgContinue
   let form = $(widgetFile "simple_form")
   defaultLayout $ do
-    setTitleI $ MsgSwapIntoLnSelectRTitle fundInvHash
+    setTitleI $ MsgSwapIntoLnSelectRTitle uuid
     $(widgetFile "swap_into_ln_create")
 
 aForm :: Entity SwapIntoLn -> AForm Handler (Entity SwapIntoLn)
 aForm (Entity entKey SwapIntoLn {..}) =
   Entity entKey
-    <$> ( SwapIntoLn swapIntoLnUserId
+    <$> ( SwapIntoLn swapIntoLnUuid swapIntoLnUserId
             <$> areq
               fromTextField
               (bfsDisabled MsgSwapIntoLnFundInvoice)
