@@ -16,14 +16,14 @@ jobs:
         restore-keys: |
           nix-v3
           nix-
-    - name: Restore cache
-      run: |
-        docker run --rm \
-          -v nix-$USER:/nix \
-          -v $(pwd):/app \
-          -w /app nixos/nix:2.3.12 \
-          sh -c "tar -xvzf ./nix.tar.gz -C /" \
-        || true
+    #- name: Restore cache
+      #run: |
+        #docker run --rm \
+          #-v nix-$USER:/nix \
+          #-v $(pwd):/app \
+          #-w /app nixos/nix:2.3.12 \
+          #sh -c "tar -xvzf ./nix.tar.gz -C /" \
+        #|| true
     - name: Release all
       run: ./nix/ci-release.sh
     - name: Create github release
@@ -107,10 +107,10 @@ jobs:
         asset_path: ./btc-lsp/build/docker-image-integration.txt
         asset_name: docker-image-integration.txt
         asset_content_type: text/plain
-    - name: Save cache
-      run: |
-        docker run --rm \
-          -v nix-$USER:/nix \
-          -v $(pwd):/app \
-          -w /app nixos/nix:2.3.12 \
-          sh -c "tar -czvf ./nix.tar.gz /nix/*"
+    #- name: Save cache
+    #  run: |
+    #    docker run --rm \
+    #      -v nix-$USER:/nix \
+    #      -v $(pwd):/app \
+    #      -w /app nixos/nix:2.3.12 \
+    #      sh -c "tar -czvf ./nix.tar.gz /nix/*"
