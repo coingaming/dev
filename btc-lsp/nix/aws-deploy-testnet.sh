@@ -175,7 +175,8 @@ setupHostedZone () {
 createCert () {
   local SERVICE_DOMAIN_NAME="$1"
   local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
-  if [ `uname -s` = "Darwin" ]; then
+
+  if [ "$(uname -s)" = "Darwin" ]; then
     local IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
   else
     local IDEMPOTENCY_TOKEN=$(date +%F | md5sum | cut -c1-5)
