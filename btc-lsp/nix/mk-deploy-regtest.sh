@@ -3,7 +3,9 @@
 set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-BUILD_DIR="$THIS_DIR/../build"
+
+. "$THIS_DIR/utilities.sh"
+
 SETUP_MODE="--prebuilt"
 GITHUB_RELEASE="$(cat "$THIS_DIR/../../VERSION" | tr -d '\n')"
 BITCOIN_NETWORK="regtest"
@@ -32,12 +34,8 @@ fi
 echo "==> Setup $BITCOIN_NETWORK kubernetes cluster"
 sh "$THIS_DIR/mk-setup-cluster.sh"
 
-echo "==> Clean up build"
-rm -rf "$BUILD_DIR" && mkdir -p "$BUILD_DIR"
-
-echo "==> Generate creds"
-sh "$THIS_DIR/hm-shell-docker.sh" --mini \
-   "--run './nix/ns-gen-creds.sh'"
+echo "==> Clean up previous build"
+cleanBuildDir
 
 case $SETUP_MODE in
   --source)
