@@ -113,7 +113,7 @@ Example
 
 ## Testnet setup (DigitalOcean)
 
-1. Install and configure doctl:
+1. Install doctl
 
 If you have used nix-env doctl will already be installed, otherwise install it manually.
 
@@ -121,39 +121,25 @@ If you have used nix-env doctl will already be installed, otherwise install it m
 doctl-1.71.1
 ```
 
+2. Configure doctl
+
 Follow the guide below to configure `doctl`.
 
 https://docs.digitalocean.com/reference/doctl/how-to/install/
 
-1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and deploy k8s resources:
+3. Setup Managed Kubernetes, Managed Postgres, DNS records, TLS certificates and deploy k8s resources:
 
 ```sh
-./nix/d-deploy-testnet.sh
+./nix/do-deploy-testnet.sh
 ```
 
-2. Create A-records within your DNS provider for created LoadBalancers and Ingress controller:
-
-
-```
-testnet-bitcoind.yourdomain.com
-testnet-lnd.yourdomain.com
-testnet-rtl.yourdomain.com
-testnet-lsp.yourdomain.com
-```
-
-Get IPs of LoadBalancers:
+## Destroy testnet (DigitalOcean)
 
 ```sh
-kubectl get svc
+./nix/do-destroy-testnet.sh
 ```
 
-Get IP of Ingress:
-
-```sh
-kubectl get ingress
-```
-
-## Testnet setup (AWS)
+## Deploy testnet (AWS)
 
 1. Install aws cli, eksctl and helm:
 
@@ -173,13 +159,13 @@ helm-3.8.2
 aws configure
 ```
 
-4. Setup EKS, RDS, Route53, ACM and deploy k8s resources:
+5. Setup EKS, RDS, Route53, Request certs from ACM and deploy k8s resources:
 
 ```sh
 ./nix/aws-deploy-testnet.sh
 ```
 
-5. Completely remove deployed testnet setup
+## Destroy testnet (AWS)
 
 ```sh
 ./nix/aws-destroy-testnet.sh
@@ -211,7 +197,7 @@ minikube dashboard --profile=btc-lsp
 ./nix/k8s-lazy-init-unlock.sh
 ```
 
-5. Delete all failed Pods
+5. Delete all failed Pods:
 
 ```sh
 kubectl delete pod --all-namespaces --field-selector 'status.phase=Failed'
@@ -257,13 +243,13 @@ Set current context to btc-lsp
 kubectl config use-context btc-lsp
 ```
 
-9. List k8s nodes
+9. List k8s nodes:
 
 ```sh
 kubectl get nodes -o wide
 ```
 
-10. Get current storage class
+10. Get current storage class:
 
 ```sh
 kubectl get storageclass
