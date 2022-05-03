@@ -10,6 +10,7 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient.Data.Channel as Channel
 import qualified LndClient.Data.Channel as Lnd
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
@@ -83,35 +84,45 @@ upsertChannel ::
   Maybe LnChanStatus ->
   Lnd.Channel ->
   ReaderT Psql.SqlBackend m (Entity LnChan)
-upsertChannel ct mSS chan =
-  Psql.upsertBy
-    (UniqueLnChan txid vout)
-    LnChan
-      { lnChanSwapIntoLnId = Nothing,
-        lnChanFundingTxId = txid,
-        lnChanFundingVout = vout,
-        lnChanClosingTxId = Nothing,
-        lnChanExtId = extId,
-        lnChanNumUpdates = upd,
-        lnChanStatus = ss,
-        lnChanInsertedAt = ct,
-        lnChanUpdatedAt = ct,
-        lnChanTotalSatoshisReceived = rcv,
-        lnChanTotalSatoshisSent = sent
-      }
-    [ LnChanExtId
-        Psql.=. Psql.val extId,
-      LnChanStatus
-        Psql.=. Psql.val ss,
-      LnChanNumUpdates
-        Psql.=. Psql.val upd,
-      LnChanTotalSatoshisSent
-        Psql.=. Psql.val sent,
-      LnChanTotalSatoshisReceived
-        Psql.=. Psql.val rcv,
-      LnChanUpdatedAt
-        Psql.=. Psql.val ct
-    ]
+upsertChannel ct mSS chan = do
+  chanEnt <-
+    Psql.upsertBy
+      (UniqueLnChan txid vout)
+      LnChan
+        { lnChanSwapIntoLnId = Nothing,
+          lnChanFundingTxId = txid,
+          lnChanFundingVout = vout,
+          lnChanClosingTxId = Nothing,
+          lnChanExtId = extId,
+          lnChanNumUpdates = upd,
+          lnChanStatus = ss,
+          lnChanInsertedAt = ct,
+          lnChanUpdatedAt = ct,
+          lnChanTotalSatoshisReceived = rcv,
+          lnChanTotalSatoshisSent = sent
+        }
+      [ LnChanExtId
+          Psql.=. Psql.val extId,
+        LnChanStatus
+          Psql.=. Psql.val ss,
+        LnChanNumUpdates
+          Psql.=. Psql.val upd,
+        LnChanTotalSatoshisSent
+          Psql.=. Psql.val sent,
+        LnChanTotalSatoshisReceived
+          Psql.=. Psql.val rcv,
+        LnChanUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+  --
+  -- TODO : add similar handler for chan grpc sub events
+  --
+  whenJust (lnChanSwapIntoLnId $ entityVal chanEnt) $ \chanId ->
+    when (ss == LnChanStatusActive)
+      . SwapIntoLn.withLockedExtantRow chanId
+      . const
+      $ SwapIntoLn.updateWaitingFundLnSql chanId
+  pure chanEnt
   where
     ss =
       fromMaybe

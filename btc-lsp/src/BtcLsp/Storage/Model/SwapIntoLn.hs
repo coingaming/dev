@@ -87,7 +87,10 @@ updateWaitingPeerSql sid cap = do
           Psql.==. Psql.val sid
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapWaitingFundChain
+                     `Psql.in_` Psql.valList
+                       [ SwapWaitingFundChain,
+                         SwapWaitingPeer
+                       ]
                  )
 
 updateWaitingChanSql ::
@@ -316,13 +319,14 @@ prettifyGetByUuid = \case
             )
               =<< xs,
           swapInfoChan =
-            ( \(_, _, mChan, _, _) ->
-                maybe
-                  mempty
-                  pure
-                  mChan
-            )
-              =<< xs
+            nubOrd $
+              ( \(_, _, mChan, _, _) ->
+                  maybe
+                    mempty
+                    pure
+                    mChan
+              )
+                =<< xs
         }
 
 getByFundAddress ::

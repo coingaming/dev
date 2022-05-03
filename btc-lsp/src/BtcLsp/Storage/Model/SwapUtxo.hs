@@ -29,7 +29,10 @@ getFundsBySwapIdSql swapId = do
     Psql.from $ \row -> do
       Psql.where_
         ( ( row Psql.^. SwapUtxoStatus
-              Psql.==. Psql.val SwapUtxoFirstSeen
+              `Psql.in_` Psql.valList
+                [ SwapUtxoFirstSeen,
+                  SwapUtxoUsedForChanFunding
+                ]
           )
             Psql.&&. ( row Psql.^. SwapUtxoSwapIntoLnId
                          Psql.==. Psql.val swapId
