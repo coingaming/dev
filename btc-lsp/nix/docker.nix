@@ -5,7 +5,7 @@ with (import ./haskell.nix);
 let
   btc-lsp = (project {
   }).btc-lsp.components.exes.btc-lsp-exe;
-  btc-lsp-static = pkgs.stdenv.mkDerivation {
+  btc-lsp-static = nixPkgs.stdenv.mkDerivation {
     name = "btc-lsp-static";
     src = ./..;
     dontBuild = true;
@@ -15,7 +15,7 @@ let
       cp -R ./static/ $out/
     '';
   };
-in pkgs.dockerTools.buildImage {
+in nixPkgs.dockerTools.buildImage {
   name = "heathmont/btc-lsp";
   contents = [
     btc-lsp

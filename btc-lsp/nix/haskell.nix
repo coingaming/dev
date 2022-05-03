@@ -30,7 +30,7 @@ in
           ./nix/ns-spawn-test-deps.sh;
         '';
         packages.btc-lsp.components.tests.btc-lsp-test.build-tools = [
-          pkgs.haskellPackages.hspec-discover
+          nixPkgs.haskellPackages.hspec-discover
           nixPkgs.postgresql
           nixPkgs.openssl
           nixPkgs.electrs
