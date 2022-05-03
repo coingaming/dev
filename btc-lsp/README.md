@@ -79,10 +79,10 @@ wget-1.21.3
 
 ### Regtest setup
 
-1. Setup cluster and deploy k8s resources:
+1. Setup minikube cluster and deploy k8s resources:
 
 ```sh
-./nix/k8s-setup.sh
+./nix/mk-deploy-regtest.sh
 ```
 
 2. Forward services to host network:
@@ -128,7 +128,7 @@ https://docs.digitalocean.com/reference/doctl/how-to/install/
 1. Setup LetsEncrypt, Managed Kubernetes, Managed Postgres and deploy k8s resources:
 
 ```sh
-./nix/k8s-setup-testnet.sh digitalocean
+./nix/d-deploy-testnet.sh
 ```
 
 2. Create A-records within your DNS provider for created LoadBalancers and Ingress controller:
@@ -167,16 +167,22 @@ helm-3.8.2
 
 2. Create IAM user with `AdministratorAccess` in AWS Console
 
-3. Configure aws cli (access_key_id, secret_access_key, region)
+3. Configure aws cli `access_key_id`, `secret_access_key`, `region`
 
 ```sh
 aws configure
 ```
 
-4. Setup EKS, RDS, Route53, ACM and deploy K8S resources:
+4. Setup EKS, RDS, Route53, ACM and deploy k8s resources:
 
 ```sh
-./nix/k8s-setup-testnet.sh aws
+./nix/aws-deploy-testnet.sh
+```
+
+5. Completely remove deployed testnet setup
+
+```sh
+./nix/aws-destroy-testnet.sh
 ```
 
 ## Troubleshoot
