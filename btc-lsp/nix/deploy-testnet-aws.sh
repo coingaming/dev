@@ -180,6 +180,7 @@ createCert () {
   echo "==> Creating certificate for \"$SERVICE_DOMAIN_NAME\" on AWS [ACM]..."
   local CERT_ARN=$(aws acm request-certificate \
     --domain-name "$SERVICE_DOMAIN_NAME" \
+    --subject-alternative-names "*.$DOMAIN_NAME" \
     --validation-method DNS \
     --idempotency-token "$IDEMPOTENCY_TOKEN" \
     --query CertificateArn \
@@ -370,7 +371,7 @@ isInstalled eksctl && \
   isInstalled aws && \
   isAwsConfigured
 
-confirmContinue "==> Starting to set up \"$KUBERNETES_CLUSTER_NAME\" on $CLOUD_PROVIDER."
+confirmContinue "==> Start to set up \"$KUBERNETES_CLUSTER_NAME\" on $CLOUD_PROVIDER"
 
 confirmAction \
 "==> Clean up previous build" \
@@ -405,7 +406,7 @@ echo "==> Checking that db connection details exist and are not empty"
 checkFileExistsNotEmpty "$POSTGRES_PATH/dburi.txt"
 echo "Connection details are OK."
 
-confirmContinue "==> Deploy lsp $BITCOIN_NETWORK to $CLOUD_PROVIDER"
+confirmContinue "==> Deploy \"$KUBERNETES_CLUSTER_NAME\" to $CLOUD_PROVIDER"
 
 # Deploy partial env
 echo "==> Partial dhall"
