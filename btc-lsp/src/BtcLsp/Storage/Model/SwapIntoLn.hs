@@ -77,7 +77,7 @@ updateFundedSql sid cap = do
         SwapIntoLnFeeLsp
           Psql.=. Psql.val (swapCapFee cap),
         SwapIntoLnStatus
-          Psql.=. Psql.val SwapFunded,
+          Psql.=. Psql.val SwapWaitingPeer,
         SwapIntoLnUpdatedAt
           Psql.=. Psql.val ct
       ]
@@ -119,7 +119,7 @@ updateWaitingChan addr = runSql $ do
           Psql.==. Psql.val addr
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapFunded
+                     Psql.==. Psql.val SwapWaitingPeer
                  )
 
 updateSettled ::
@@ -165,7 +165,7 @@ getFundedSwaps = runSql $
         )
       Psql.where_
         ( swap Psql.^. SwapIntoLnStatus
-            Psql.==. Psql.val SwapFunded
+            Psql.==. Psql.val SwapWaitingPeer
         )
       --
       -- TODO : some sort of exp backoff in case
@@ -226,7 +226,8 @@ data UtxoInfo = UtxoInfo
 data SwapInfo = SwapInfo
   { swapInfoSwap :: Entity SwapIntoLn,
     swapInfoUser :: Entity User,
-    swapInfoUtxo :: [UtxoInfo]
+    swapInfoUtxo :: [UtxoInfo],
+    swapInfoChan :: [Entity LnChan]
   }
   deriving stock
     ( Eq,
@@ -245,11 +246,19 @@ getByUuid uuid =
         \( mUtxo
              `Psql.InnerJoin` mBlock
              `Psql.RightOuterJoin` swap
+             `Psql.LeftOuterJoin` mChan
              `Psql.InnerJoin` user
            ) -> do
             Psql.on
               ( swap Psql.^. SwapIntoLnUserId
                   Psql.==. user Psql.^. UserId
+              )
+            Psql.on
+              ( mChan Psql.?. LnChanSwapIntoLnId
+                  Psql.==. Psql.just
+                    ( Psql.just $
+                        swap Psql.^. SwapIntoLnId
+                    )
               )
             Psql.on
               ( mUtxo Psql.?. SwapUtxoSwapIntoLnId
@@ -263,11 +272,12 @@ getByUuid uuid =
               ( swap Psql.^. SwapIntoLnUuid
                   Psql.==. Psql.val uuid
               )
-            pure (mUtxo, mBlock, swap, user)
+            pure (mUtxo, mBlock, mChan, swap, user)
 
 prettifyGetByUuid ::
   [ ( Maybe (Entity SwapUtxo),
       Maybe (Entity Block),
+      Maybe (Entity LnChan),
       Entity SwapIntoLn,
       Entity User
     )
@@ -276,19 +286,27 @@ prettifyGetByUuid ::
 prettifyGetByUuid = \case
   [] ->
     Nothing
-  xs@((_, _, swap, user) : _) ->
+  xs@((_, _, _, swap, user) : _) ->
     Just
       SwapInfo
         { swapInfoSwap = swap,
           swapInfoUser = user,
           swapInfoUtxo =
-            ( \(mUtxo, mBlock, _, _) ->
+            ( \(mUtxo, mBlock, _, _, _) ->
                 maybe
                   mempty
                   pure
                   $ UtxoInfo
                     <$> mUtxo
                     <*> mBlock
+            )
+              =<< xs,
+          swapInfoChan =
+            ( \(_, _, mChan, _, _) ->
+                maybe
+                  mempty
+                  pure
+                  mChan
             )
               =<< xs
         }

@@ -35,6 +35,7 @@ apply = do
     then do
       waitForLndSync
       Storage.migrateAll
+      pool <- getSqlPool
       xs <-
         mapM
           spawnLink
@@ -44,7 +45,7 @@ apply = do
             LnChanOpener.apply,
             SwapperIntoLn.apply,
             BlockScanner.apply [Refunder.apply],
-            withUnliftIO Yesod.appMain
+            withUnliftIO $ Yesod.appMain pool
           ]
       liftIO
         . void

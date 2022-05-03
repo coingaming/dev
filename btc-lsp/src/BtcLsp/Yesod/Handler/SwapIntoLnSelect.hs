@@ -23,6 +23,17 @@ import Yesod.Form.Bootstrap3
 getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 getSwapIntoLnSelectR uuid = do
   App {appMRunner = UnliftIO run} <- getYesod
+  nodeUri <- liftIO $ run getLndNodeUri
+  nodeUriHex <-
+    eitherM
+      (const badMethod)
+      (pure . from @NodeUriHex @Text)
+      . pure
+      $ tryFrom nodeUri
+  nodeUriQr <-
+    maybeM badMethod pure
+      . pure
+      $ toQr nodeUriHex
   maybeM
     notFound
     ( \SwapIntoLn.SwapInfo {..} -> do
@@ -34,7 +45,7 @@ getSwapIntoLnSelectR uuid = do
                     MsgSwapIntoLnWaitingFundLong,
                     Info
                   )
-                SwapFunded ->
+                SwapWaitingPeer ->
                   ( MsgSwapIntoLnFundedShort,
                     MsgSwapIntoLnFundedLong,
                     Info
@@ -59,11 +70,19 @@ getSwapIntoLnSelectR uuid = do
                 . coerce
                 . userNodePubKey
                 $ entityVal swapInfoUser
-        qrCodeSrc <-
+        fundAddrQr <-
           maybeM badMethod pure
             . pure
             . toQr
             $ from swapIntoLnFundAddress
+        mUtxoTableWidget <-
+          if null swapInfoUtxo
+            then pure Nothing
+            else Just <$> newUtxoTableWidget swapInfoUtxo
+        mChanTableWidget <-
+          if null swapInfoChan
+            then pure Nothing
+            else Just <$> newChanTableWidget swapInfoChan
         let items =
               [ ( MsgSwapIntoLnUuid,
                   Just
@@ -92,16 +111,16 @@ getSwapIntoLnSelectR uuid = do
                   Just $ toText swapIntoLnRefundAddress
                 ),
                 ( MsgSwapIntoLnChanCapUser,
-                  Just $ inspectSat swapIntoLnChanCapUser
+                  Just $ inspectSatLabel swapIntoLnChanCapUser
                 ),
                 ( MsgSwapIntoLnChanCapLsp,
-                  Just $ inspectSat swapIntoLnChanCapLsp
+                  Just $ inspectSatLabel swapIntoLnChanCapLsp
                 ),
                 ( MsgSwapIntoLnFeeLsp,
-                  Just $ inspectSat swapIntoLnFeeLsp
+                  Just $ inspectSatLabel swapIntoLnFeeLsp
                 ),
                 ( MsgSwapIntoLnFeeMiner,
-                  Just $ inspectSat swapIntoLnFeeMiner
+                  Just $ inspectSatLabel swapIntoLnFeeMiner
                 ),
                 ( MsgSwapIntoLnStatus,
                   Just $ inspectPlain swapIntoLnStatus
@@ -128,6 +147,88 @@ getSwapIntoLnSelectR uuid = do
     $ SwapIntoLn.getByUuid uuid
   where
     htmlUuid = $(mkHtmlUuid)
+
+newUtxoTableWidget :: [SwapIntoLn.UtxoInfo] -> Handler Widget
+newUtxoTableWidget utxos = do
+  master <- getYesod
+  langs <- languages
+  pure $
+    makeTableWidget
+      (table $ renderMessage master langs)
+      utxos
+  where
+    table render =
+      textCol
+        (render MsgBlock)
+        ( inspectPlain @Word64
+            . from
+            . blockHeight
+            . entityVal
+            . SwapIntoLn.utxoInfoBlock
+        )
+        <> textColClass
+          (HtmlClassAttr ["text-overflow"])
+          (render MsgTxId)
+          ( txIdHex
+              . coerce
+              . swapUtxoTxid
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+        <> textCol
+          (render MsgVout)
+          ( inspectPlain @Word32
+              . coerce
+              . swapUtxoVout
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+        <> textCol
+          (render MsgSat)
+          ( inspectSat
+              . swapUtxoAmount
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+        <> textCol
+          (render MsgStatus)
+          ( inspectPlain
+              . swapUtxoStatus
+              . entityVal
+              . SwapIntoLn.utxoInfoUtxo
+          )
+
+newChanTableWidget :: [Entity LnChan] -> Handler Widget
+newChanTableWidget chans = do
+  master <- getYesod
+  langs <- languages
+  pure $
+    makeTableWidget
+      (table $ renderMessage master langs)
+      chans
+  where
+    table render =
+      textColClass
+        (HtmlClassAttr ["text-overflow"])
+        (render MsgTxId)
+        ( txIdHex
+            . coerce
+            . lnChanFundingTxId
+            . entityVal
+        )
+        <> textCol
+          (render MsgVout)
+          ( inspectPlain @Word32
+              . coerce
+              . lnChanFundingVout
+              . entityVal
+          )
+        <> textCol
+          (render MsgStatus)
+          ( inspectPlain
+              . lnChanStatus
+              . entityVal
+          )
 
 postSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 postSwapIntoLnSelectR uuid = do
