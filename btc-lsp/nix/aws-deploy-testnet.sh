@@ -175,7 +175,11 @@ setupHostedZone () {
 createCert () {
   local SERVICE_DOMAIN_NAME="$1"
   local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
-  local IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
+  if [ `uname -s` = "Darwin" ]; then
+    local IDEMPOTENCY_TOKEN=$(date +%F | md5 | cut -c1-5)
+  else
+    local IDEMPOTENCY_TOKEN=$(date +%F | md5sum | cut -c1-5)
+  fi
 
   echo "==> Creating certificate for \"$SERVICE_DOMAIN_NAME\" on AWS [ACM]..."
   local CERT_ARN=$(aws acm request-certificate \
@@ -191,7 +195,7 @@ createCert () {
   until [ -n "$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")" ] ; do
     sleep 1;
   done
-  
+
   local VALIDATION_NAME=$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
   local VALIDATION_VALUE=$(getDNSValidationValue "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
 
@@ -216,7 +220,7 @@ setupCerts () {
   for SERVICE in rtl lsp; do
     local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
     local CERT_ARN=$(getCertArn "$SERVICE_DOMAIN_NAME")
-     
+
     if [ -n "$CERT_ARN" ]; then
       echo "==> Certificate for \"$SERVICE_DOMAIN_NAME\" already exists."
     else
@@ -352,8 +356,8 @@ setupElbListener () {
 
   for SERVICE_PORT in $SERVICE_PORTS; do
     local ELB_LISTENER_ARN=$(getElbListenerArn "$ELB_ARN" "$SERVICE_PORT")
-    
-    if [ -n "$ELB_LISTENER_ARN" ]; then 
+
+    if [ -n "$ELB_LISTENER_ARN" ]; then
       echo "==> Deleting port $SERVICE_PORT from $SERVICE_NAME load balancer..."
       deleteElbListener "$ELB_LISTENER_ARN"
     fi
