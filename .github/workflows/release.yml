@@ -26,9 +26,8 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: /tmp/nix_ci_cache
-        key: nix-vn
-        restore-keys: |
-          nix-vn
+        key: cache-${{ runner.os }}-${{ matrix.configuration }}-${{ github.sha }}
+        restore-keys: cache-${{ runner.os }}-${{ matrix.configuration }}-
     - name: Release all
       run: ./nix/ci-release.sh
     - name: Create github release
