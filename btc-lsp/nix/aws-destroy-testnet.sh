@@ -103,8 +103,12 @@ deleteHostedZone () {
 
 # eksctl leaves dangling Application Load Balancer and because of this CloudFormation fails to delete the stack
 deleteLoadBalancer () {
-  echo "==> Deleting ingress resource from AWS [EKS]..."
-  kubectl delete ingress rtl
+  if kubectl get ingress rtl; then 
+    echo "==> Deleting ingress resource from AWS [EKS]..."
+    kubectl delete ingress rtl
+  else
+    echo "==> Ingress for RTL does not exist."
+  fi
 }
 
 deleteCluster () {

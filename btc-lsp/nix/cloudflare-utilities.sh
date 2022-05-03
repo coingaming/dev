@@ -5,7 +5,7 @@ set -e
 
 setCloudflareCreds () {
   read -r -p "Please input your Cloudflare domain: " "CLOUDFLARE_DOMAIN_NAME"
-  read -r -p "Please input your Cloudflare API key: " "CLOUDFLARE_API_KEY"
+  read -r -s -p "Please input your Cloudflare API key: " "CLOUDFLARE_API_KEY"
   read -r -p "Please input your Cloudflare email: " "CLOUDFLARE_EMAIL"
 }
 

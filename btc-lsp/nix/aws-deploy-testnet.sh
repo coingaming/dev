@@ -374,7 +374,7 @@ isInstalled eksctl && \
   isInstalled aws && \
   isAwsConfigured
 
-confirmContinue "==> Start to set up \"$KUBERNETES_CLUSTER_NAME\" on $CLOUD_PROVIDER"
+confirmContinue "==> Set up \"$KUBERNETES_CLUSTER_NAME\" on $CLOUD_PROVIDER"
 
 confirmAction \
 "==> Clean up previous build" \

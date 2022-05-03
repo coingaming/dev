@@ -111,7 +111,7 @@ Example
 ./nix/k8s-upgrade.sh --regtest --prebuilt lsp bitcoind
 ```
 
-## Testnet setup (DigitalOcean)
+## Deploy testnet (DigitalOcean)
 
 1. Install doctl
 
