@@ -7,7 +7,7 @@ SECRETS_DIR="$ROOT_DIR/build/secrets"
 mkdir -p "$SECRETS_DIR"
 
 genRandomString () {
-  openssl rand -base64 32
+  openssl rand -hex 32
 }
 
 genSecureCred () {
