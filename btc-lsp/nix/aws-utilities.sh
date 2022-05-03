@@ -136,6 +136,17 @@ EOM
     --id "$CHANGE_BATCH_REQUEST_ID"
 }
 
+insertValidationRecord () {
+  local HOSTED_ZONE_ID="$1"
+  local CERT_ARN="$2"
+  local DOMAIN_NAME="$3"
+
+  local VALIDATION_NAME=$(getDNSValidationName "$CERT_ARN" "$DOMAIN_NAME")
+  local VALIDATION_VALUE=$(getDNSValidationValue "$CERT_ARN" "$DOMAIN_NAME")
+
+  changeDNSRecord "$HOSTED_ZONE_ID" "UPSERT" "$VALIDATION_NAME" "$VALIDATION_VALUE"
+}
+
 getDbSubnetGroupArn () {
   local DB_SUBNET_GROUP_NAME="$1"
 

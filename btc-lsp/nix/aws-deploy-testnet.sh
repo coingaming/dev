@@ -185,22 +185,20 @@ createCert () {
   echo "==> Creating certificate for \"$SERVICE_DOMAIN_NAME\" on AWS [ACM]..."
   local CERT_ARN=$(aws acm request-certificate \
     --domain-name "$SERVICE_DOMAIN_NAME" \
-    --subject-alternative-names "*.$DOMAIN_NAME" \
+    --subject-alternative-names "$DOMAIN_NAME" \
     --validation-method DNS \
     --idempotency-token "$IDEMPOTENCY_TOKEN" \
     --query CertificateArn \
     --options CertificateTransparencyLoggingPreference=DISABLED \
     --output text)
 
-  echo "Waiting until dns record appears in ACM..."
+  echo "Waiting until validation record for \"$SERVICE_DOMAIN_NAME\" appears in ACM..."
   until [ -n "$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")" ] ; do
     sleep 1;
   done
 
-  local VALIDATION_NAME=$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
-  local VALIDATION_VALUE=$(getDNSValidationValue "$CERT_ARN" "$SERVICE_DOMAIN_NAME")
-
-  changeDNSRecord "$HOSTED_ZONE_ID" "UPSERT" "$VALIDATION_NAME" "$VALIDATION_VALUE"
+  insertValidationRecord "$HOSTED_ZONE_ID" "$CERT_ARN" "$SERVICE_DOMAIN_NAME"
+  insertValidationRecord "$HOSTED_ZONE_ID" "$CERT_ARN" "$DOMAIN_NAME"
 
   echo "Waiting for certificate to validate..."
   aws acm wait certificate-validated \
