@@ -56,7 +56,7 @@ createAwsLbControllerPolicy () {
   local POLICY_FILEPATH="$THIS_DIR/iam_policy.json"
   local POLICY_URL="https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.1/docs/install/iam_policy.json"
 
-  curl -o "$POLICY_FILEPATH" "$POLICY_URL"
+  curl -s -o "$POLICY_FILEPATH" "$POLICY_URL"
 
   echo "==> Creating policy for AWSLBController on AWS [IAM]..."
   aws iam create-policy \
