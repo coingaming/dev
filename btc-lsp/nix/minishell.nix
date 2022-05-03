@@ -1,7 +1,7 @@
 let
   nixPkgs = (import ./header.nix).nixPkgs;
 in
-stdenv.mkDerivation {
+nixPkgs.stdenv.mkDerivation {
   name = "minishell";
   buildInputs = [
     nixPkgs.nix
