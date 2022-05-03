@@ -12,7 +12,7 @@ nixPkgs.stdenv.mkDerivation {
   ];
   LANG="en_US.UTF-8";
   TERM="xterm-256color";
-  NIX_SSL_CERT_FILE="${cacert}/etc/ssl/certs/ca-bundle.crt";
-  GIT_SSL_CAINFO="${cacert}/etc/ssl/certs/ca-bundle.crt";
+  NIX_SSL_CERT_FILE="${nixPkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+  GIT_SSL_CAINFO="${nixPkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 }
 
