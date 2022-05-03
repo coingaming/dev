@@ -67,4 +67,22 @@ server=1
 rest=1" > "$SERVICE_DIR/bitcoin.conf"
 )
 
+(
+  SERVICE_DIR2="$SHELL_DIR/bitcoind2"
+  echo "==> Generating $SERVICE_DIR2"
+  mkdir -p "$SERVICE_DIR2"
+  echo "
+regtest=1
+daemon=1
+txindex=1
+
+rpcuser=developer
+rpcpassword=developer
+
+zmqpubrawblock=tcp://127.0.0.1:29332
+zmqpubrawtx=tcp://127.0.0.1:29333
+
+server=1
+rest=1" > "$SERVICE_DIR2/bitcoin.conf"
+)
 echo "==> Generated cfgs"

@@ -16,7 +16,7 @@ RUST_LOG=debug electrs \
   --blocks-dir="$BITCOIN_DIR/regtest/blocks" \
   --network=regtest \
   --electrum-rpc-addr="127.0.0.1:60401" \
-  --daemon-rpc-addr="127.0.0.1:18443" \
+  --daemon-rpc-addr="127.0.0.1:20000" \
   --timestamp \
   --verbose \
   > $ELECTRS_DIR/stdout.log 2>&1 & \

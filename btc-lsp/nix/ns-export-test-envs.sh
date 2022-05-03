@@ -8,6 +8,7 @@ LND_LSP_DIR="$SHELL_DIR/lnd-lsp"
 LND_ALICE_DIR="$SHELL_DIR/lnd-alice"
 LND_BOB_DIR="$SHELL_DIR/lnd-bob"
 BTCD_DIR="$SHELL_DIR/bitcoind"
+BTCD2_DIR="$SHELL_DIR/bitcoind2"
 PGDATA="$SHELL_DIR/postgres"
 
 export GODEBUG=x509ignoreCN=0
@@ -17,6 +18,7 @@ export GODEBUG=x509ignoreCN=0
 #
 
 alias bitcoin-cli="bitcoin-cli -rpcwait -datadir=$BTCD_DIR -rpcport=18443"
+alias bitcoin-cli-2="bitcoin-cli -rpcwait -datadir=$BTCD2_DIR -rpcport=21001"
 
 #
 # lnd
@@ -234,6 +236,14 @@ export LSP_ELECTRS_ENV="
 export LSP_BITCOIND_ENV="
 {
   \"host\":\"http://localhost:18443\",
+  \"username\":\"developer\",
+  \"password\":\"developer\"
+}
+"
+
+export LSP_BITCOIND_ENV2="
+{
+  \"host\":\"http://localhost:21001\",
   \"username\":\"developer\",
   \"password\":\"developer\"
 }
