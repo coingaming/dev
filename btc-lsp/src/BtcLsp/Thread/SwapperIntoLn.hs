@@ -52,13 +52,41 @@ settleSwap ::
   Entity User ->
   Entity LnChan ->
   m ()
-settleSwap swapEnt@(Entity swapKey swapVal) userEnt chanEnt = do
-  res <- runExceptT $ do
-    pre <-
-      catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
-        . const
-        $ catchE (sendPaymentT Nothing) . const $
-          do
+settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt =
+  runSql . SwapIntoLn.withLockedExtantRow swapKey $ \swapVal -> do
+    let payReq =
+          from $
+            swapIntoLnFundInvoice swapVal
+    let sendPaymentT extId =
+          SendPayment.paymentPreimage
+            <$> withLndT
+              LndKatip.sendPayment
+              ( $
+                  Lnd.SendPaymentRequest
+                    { Lnd.paymentRequest =
+                        payReq,
+                      Lnd.amt =
+                        from $
+                          swapIntoLnChanCapUser swapVal,
+                      Lnd.outgoingChanId =
+                        extId
+                    }
+              )
+    eitherM
+      ( $(logTM) ErrorS . logStr
+          . ("SettleSwap procedure failed: " <>)
+          . inspect
+      )
+      ( SwapIntoLn.updateSucceededSql swapKey
+      )
+      . lift
+      . runExceptT
+      $ do
+        catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
+          . const
+          . catchE (sendPaymentT Nothing)
+          . const
+          $ do
             inv <-
               withLndT
                 LndKatip.decodePayReq
@@ -86,24 +114,5 @@ settleSwap swapEnt@(Entity swapKey swapVal) userEnt chanEnt = do
                     <> inspectPlain swapEnt
                     <> " and user "
                     <> inspectPlain userEnt
-    lift $
-      SwapIntoLn.updateSettled swapKey pre
-  whenLeft res $
-    $(logTM) ErrorS . logStr
-      . ("SettleSwap procedure failed: " <>)
-      . inspect
-  where
-    payReq =
-      from $
-        swapIntoLnFundInvoice swapVal
-    sendPaymentT extId =
-      SendPayment.paymentPreimage
-        <$> withLndT
-          LndKatip.sendPayment
-          ( $
-              Lnd.SendPaymentRequest
-                { Lnd.paymentRequest = payReq,
-                  Lnd.amt = from $ swapIntoLnChanCapUser swapVal,
-                  Lnd.outgoingChanId = extId
-                }
-          )
+                    <> " and chan "
+                    <> inspectPlain chanEnt

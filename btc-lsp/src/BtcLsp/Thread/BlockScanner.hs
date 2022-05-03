@@ -71,7 +71,7 @@ markFunded utxos =
       debugMsg mCap swapId amt
       whenJust mCap $ \swapCap -> runSql $ do
         SwapUtxo.markAsUsedForChanFundingSql $ entityKey <$> us
-        SwapIntoLn.updateFundedSql swapId swapCap
+        SwapIntoLn.updateWaitingPeerSql swapId swapCap
 
 data Utxo = Utxo
   { utxoValue :: MSat,

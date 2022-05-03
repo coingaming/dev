@@ -58,7 +58,7 @@ openChan ::
 openChan swapEnt@(Entity swapKey _) userEnt = do
   prv <- getChanPrivacy
   rate <- getMsatPerByte
-  runSql . SwapIntoLn.withLockedRow swapKey $ \swapVal ->
+  runSql . SwapIntoLn.withLockedExtantRow swapKey $ \swapVal ->
     if swapIntoLnStatus swapVal /= SwapWaitingPeer
       then do
         $(logTM) InfoS . logStr $

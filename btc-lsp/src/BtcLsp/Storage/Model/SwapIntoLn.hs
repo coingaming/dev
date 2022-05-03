@@ -1,15 +1,14 @@
 module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
-    updateFundedSql,
+    updateWaitingPeerSql,
     updateWaitingChanSql,
-    updateSettled,
+    updateWaitingFundLnSql,
+    updateSucceededSql,
     getFundedSwaps,
     getSwapsToSettle,
     getByUuid,
     getByFundAddress,
-    getLatestSwapT,
-    getWaitingFundSql,
-    withLockedRow,
+    withLockedExtantRow,
     UtxoInfo (..),
     SwapInfo (..),
   )
@@ -61,13 +60,13 @@ createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
           Psql.=. Psql.val ct
       ]
 
-updateFundedSql ::
+updateWaitingPeerSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
   SwapCap ->
   ReaderT Psql.SqlBackend m ()
-updateFundedSql sid cap = do
+updateWaitingPeerSql sid cap = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
@@ -90,19 +89,6 @@ updateFundedSql sid cap = do
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
                      Psql.==. Psql.val SwapWaitingFundChain
                  )
-
-getWaitingFundSql ::
-  ( MonadIO m
-  ) =>
-  ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
-getWaitingFundSql =
-  Psql.select $
-    Psql.from $ \row -> do
-      Psql.where_
-        ( row Psql.^. SwapIntoLnStatus
-            Psql.==. Psql.val SwapWaitingFundChain
-        )
-      pure row
 
 updateWaitingChanSql ::
   ( MonadIO m
@@ -127,13 +113,36 @@ updateWaitingChanSql id0 = do
                      Psql.==. Psql.val SwapWaitingPeer
                  )
 
-updateSettled ::
-  ( Storage m
+updateWaitingFundLnSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateWaitingFundLnSql id0 = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapWaitingFundLn,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val id0
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     Psql.==. Psql.val SwapWaitingChan
+                 )
+
+updateSucceededSql ::
+  ( MonadIO m
   ) =>
   SwapIntoLnId ->
   RPreimage ->
-  m ()
-updateSettled sid rp = runSql $ do
+  ReaderT Psql.SqlBackend m ()
+updateSucceededSql sid rp = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
@@ -150,7 +159,7 @@ updateSettled sid rp = runSql $ do
           Psql.==. Psql.val sid
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapWaitingChan
+                     Psql.==. Psql.val SwapWaitingFundLn
                  )
 
 getFundedSwaps ::
@@ -326,31 +335,13 @@ getByFundAddress =
     . Psql.getBy
     . UniqueSwapIntoLnFundAddress
 
-getLatestSwapT ::
-  ( Storage m
-  ) =>
-  ExceptT Failure m (Entity SwapIntoLn)
-getLatestSwapT =
-  ExceptT
-    . ( maybeToRight
-          (FailureInternal "Missing SwapIntoLn")
-          <$>
-      )
-    . runSql
-    $ listToMaybe
-      <$> Psql.selectList
-        []
-        [ Psql.Desc SwapIntoLnId,
-          Psql.LimitTo 1
-        ]
-
-withLockedRow ::
+withLockedExtantRow ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
   (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
   ReaderT Psql.SqlBackend m ()
-withLockedRow rowId action = do
+withLockedExtantRow rowId action = do
   ct <- getCurrentTime
   let expTime = addSeconds (Lnd.Seconds 300) ct
   let finSS = [SwapSucceeded, SwapExpired]
