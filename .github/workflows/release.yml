@@ -118,3 +118,4 @@ jobs:
         mkdir -p /tmp/nix_ci_cache
         sudo chown -R $USER:$USER /tmp/nix_ci_cache
         nix copy --no-check-sigs --to file:///tmp/nix_ci_cache --all
+        du -sh /tmp/nix_ci_cache

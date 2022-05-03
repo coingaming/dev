@@ -10,8 +10,8 @@ pwd
 ls -la
 
 echo "btc-lsp ==> Binaries build"
-nix-build btc-lsp/nix/docker.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.tar.gz"
-#nix-build btc-lsp/nix/docker-image-electrs.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-electrs.tar.gz"
+#nix-build btc-lsp/nix/docker.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.tar.gz"
+nix-build btc-lsp/nix/docker-image-electrs.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-electrs.tar.gz"
 #nix-build btc-lsp/nix/docker-integration.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-integration.tar.gz"
 
 #echo "btc-lsp ==> Docker btc-lsp image verification"
