@@ -31,8 +31,9 @@ else
   done
 fi
 
-echo "==> Setup $BITCOIN_NETWORK kubernetes cluster"
-sh "$THIS_DIR/mk-setup-cluster.sh"
+confirmAction \
+"==> Setup minikube cluster" \
+"sh $THIS_DIR/mk-setup-cluster.sh"
 
 echo "==> Clean up previous build"
 cleanBuildDir
