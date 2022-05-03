@@ -9,13 +9,13 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/cache@v2
-      with:
-        path: ./nix.tar.gz
-        key: nix-v4
-        restore-keys: |
-          nix-v3
-          nix-
+   # - uses: actions/cache@v2
+      #with:
+        #path: ./nix.tar.gz
+        #key: nix-v4
+        #restore-keys: |
+          #nix-v3
+          #nix-
     #- name: Restore cache
       #run: |
         #docker run --rm \
