@@ -78,7 +78,10 @@ markRefundedSql ids rTxId = do
 getUtxosForRefundSql ::
   ( Storage m
   ) =>
-  ReaderT Psql.SqlBackend m [(Entity SwapUtxo, Entity SwapIntoLn)]
+  ReaderT
+    Psql.SqlBackend
+    m
+    [(Entity SwapUtxo, Entity SwapIntoLn)]
 getUtxosForRefundSql =
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` utxo) -> do
@@ -87,11 +90,23 @@ getUtxosForRefundSql =
             Psql.==. (utxo Psql.^. SwapUtxoSwapIntoLnId)
         )
       Psql.where_
-        ( ( swap Psql.^. SwapIntoLnStatus
-              Psql.==. Psql.val SwapExpired
+        ( ( ( swap Psql.^. SwapIntoLnStatus
+                Psql.==. Psql.val SwapExpired
+            )
+              Psql.&&. ( utxo Psql.^. SwapUtxoStatus
+                           `Psql.in_` Psql.valList
+                             [ SwapUtxoFirstSeen,
+                               SwapUtxoUsedForChanFunding
+                             ]
+                       )
           )
-            Psql.&&. ( utxo Psql.^. SwapUtxoStatus
-                         Psql.!=. Psql.val SwapUtxoRefunded
+            Psql.||. ( ( swap Psql.^. SwapIntoLnStatus
+                           Psql.==. Psql.val SwapSucceeded
+                       )
+                         Psql.&&. ( utxo Psql.^. SwapUtxoStatus
+                                      Psql.==. Psql.val
+                                        SwapUtxoFirstSeen
+                                  )
                      )
         )
       pure (utxo, swap)

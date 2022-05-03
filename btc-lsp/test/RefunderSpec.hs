@@ -75,47 +75,37 @@ refundSucceded swp preTrs = do
 spec :: Spec
 spec =
   itEnv "Refunder Spec" $
-    do
-      runExceptT $ do
-        amt <-
-          lift getSwapIntoLnMinAmt
-        -- mCap <-
-        --   lift $ newSwapCapM amt
-        -- cap <-
-        --   except $
-        --     maybeToRight
-        --       (FailureInternal "failed to get cap")
-        --       mCap
-        swp <-
-          createDummySwap "refunder test"
-            . Just
-            =<< getFutureTime (Lnd.Seconds 200)
-        -- lift . runSql $
-        --   updateFundedSql (entityKey swp) cap
-        void $
-          withLndT
-            Lnd.sendCoins
-            ( $
-                SendCoins.SendCoinsRequest
-                  { SendCoins.addr =
-                      from
-                        . swapIntoLnFundAddress
-                        . entityVal
-                        $ swp,
-                    SendCoins.amount =
-                      from amt
-                  }
-            )
-        void putLatestBlockToDB
-        lift $ mine 4 LndLsp
-        pure swp
+    runExceptT
+      ( do
+          amt <-
+            lift getSwapIntoLnMinAmt
+          swp <-
+            createDummySwap "refunder test"
+              . Just
+              =<< getFutureTime (Lnd.Seconds 800)
+          void $
+            withLndT
+              Lnd.sendCoins
+              ( $
+                  SendCoins.SendCoinsRequest
+                    { SendCoins.addr =
+                        from
+                          . swapIntoLnFundAddress
+                          . entityVal
+                          $ swp,
+                      SendCoins.amount =
+                        from amt
+                    }
+              )
+          void putLatestBlockToDB
+          lift $ mine 4 LndLsp
+          pure swp
+      )
       >>= \case
         Right swp ->
-          withSpawnLink Main.apply
-            . const
-            $ do
-              x <- waitCond 10 (refundSucceded swp) []
-              liftIO $ shouldBe x True
+          withSpawnLink Main.apply . const $ do
+            x <- waitCond 10 (refundSucceded swp) []
+            liftIO $ shouldBe x True
         Left e ->
           liftIO
             . expectationFailure

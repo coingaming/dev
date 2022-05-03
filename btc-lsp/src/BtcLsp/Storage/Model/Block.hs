@@ -1,6 +1,5 @@
 module BtcLsp.Storage.Model.Block
-  ( createUpdate,
-    createUpdateSql,
+  ( createUpdateSql,
     getLatest,
   )
 where
@@ -51,16 +50,6 @@ createUpdateSql height hash prev = do
     [ BlockStatus Psql.=. Psql.val BlkConfirmed,
       BlockUpdatedAt Psql.=. Psql.val ct
     ]
-
-createUpdate ::
-  ( Storage m
-  ) =>
-  BlkHeight ->
-  BlkHash ->
-  Maybe BlkPrevHash ->
-  m (Entity Block)
-createUpdate height hash prev =
-  runSql (createUpdateSql height hash prev)
 
 getLatest :: (Storage m) => m (Maybe (Entity Block))
 getLatest =
