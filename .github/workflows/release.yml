@@ -9,21 +9,26 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v2
-   # - uses: actions/cache@v2
-      #with:
-        #path: ./nix.tar.gz
-        #key: nix-v4
-        #restore-keys: |
-          #nix-v3
-          #nix-
-    #- name: Restore cache
-      #run: |
-        #docker run --rm \
-          #-v nix-$USER:/nix \
-          #-v $(pwd):/app \
-          #-w /app nixos/nix:2.3.12 \
-          #sh -c "tar -xvzf ./nix.tar.gz -C /" \
-        #|| true
+    - uses: cachix/install-nix-action@v15
+      with:
+        nix_path: nixpkgs=channel:nixos-21.11
+        extra_nix_config: |
+          system-features = kvm
+          http2 = false
+          require-sigs = false
+          sandbox = false
+          cores = 2
+          max-jobs = 4
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          substituters = https://cache.nixos.org file:///tmp/nix_ci_cache https://hydra.iohk.io
+          trusted-substituters = file:///tmp/nix_ci_cache
+          trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+    - uses: actions/cache@v2
+      with:
+        path: /tmp/nix_ci_cache
+        key: nix-vn
+        restore-keys: |
+          nix-vn
     - name: Release all
       run: ./nix/ci-release.sh
     - name: Create github release
@@ -107,10 +112,7 @@ jobs:
         asset_path: ./btc-lsp/build/docker-image-integration.txt
         asset_name: docker-image-integration.txt
         asset_content_type: text/plain
-    #- name: Save cache
-    #  run: |
-    #    docker run --rm \
-    #      -v nix-$USER:/nix \
-    #      -v $(pwd):/app \
-    #      -w /app nixos/nix:2.3.12 \
-    #      sh -c "tar -czvf ./nix.tar.gz /nix/*"
+    - name: Save cache
+      run: |
+        mkdir -p /tmp/nix_ci_cache
+        nix copy --no-check-sigs --to file:///tmp/nix_ci_cache --all

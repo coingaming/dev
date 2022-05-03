@@ -3,14 +3,13 @@
 set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-BTC_LSP_NIX_DIR="$THIS_DIR/../btc-lsp/nix"
-BTC_LSP_BUILD_DIR="$THIS_DIR/../btc-lsp/build"
+BTC_LSP_BUILD_DIR="$THIS_DIR/build"
+mkdir -p "$THIS_DIR/build"
 
 echo "btc-lsp ==> Binaries build"
-sh "$BTC_LSP_NIX_DIR/hm-release.sh" --github
-
-echo "btc-lsp ==> Chown"
-sudo chown -R $USER:$USER "$BTC_LSP_BUILD_DIR"
+nix-build docker.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.tar.gz"
+nix-build docker-image-electrs.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-electrs.tar.gz"
+nix-build docker-integration.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-integration.tar.gz"
 
 echo "btc-lsp ==> Docker btc-lsp image verification"
 docker load -q -i \
@@ -32,6 +31,3 @@ docker load -q -i \
   | awk '{print $NF}' \
   | tr -d '\n' \
   > "$BTC_LSP_BUILD_DIR/docker-image-integration.txt"
-
-echo "btc-lsp ==> Chown"
-sudo chown -R $USER:$USER "$BTC_LSP_BUILD_DIR"
