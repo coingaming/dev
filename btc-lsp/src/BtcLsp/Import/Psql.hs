@@ -31,6 +31,7 @@ import Database.Esqueleto.Legacy as X
     limit,
     max_,
     min_,
+    notIn,
     nothing,
     on,
     orderBy,

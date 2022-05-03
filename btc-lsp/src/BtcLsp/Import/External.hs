@@ -63,6 +63,7 @@ import Data.Time.Clock as X
     diffUTCTime,
     secondsToDiffTime,
   )
+import Data.Tuple.Extra as X (uncurry3)
 import Data.Type.Equality as X (type (==))
 import Data.UUID as X (UUID)
 import Database.Esqueleto.Legacy as X

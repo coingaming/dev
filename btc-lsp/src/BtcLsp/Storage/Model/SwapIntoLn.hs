@@ -2,7 +2,6 @@ module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnore,
     updateFundedSql,
     updateWaitingChanSql,
-    updateSwapsAboutToExpire,
     updateSettled,
     getFundedSwaps,
     getSwapsToSettle,
@@ -10,6 +9,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getByFundAddress,
     getLatestSwapT,
     getWaitingFundSql,
+    withLockedRow,
     UtxoInfo (..),
     SwapInfo (..),
   )
@@ -95,17 +95,12 @@ getWaitingFundSql ::
   ( MonadIO m
   ) =>
   ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
-getWaitingFundSql = do
-  ct <- getCurrentTime
+getWaitingFundSql =
   Psql.select $
     Psql.from $ \row -> do
       Psql.where_
-        ( ( row Psql.^. SwapIntoLnStatus
-              Psql.==. Psql.val SwapWaitingFundChain
-          )
-            Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
-                         Psql.<. Psql.val ct
-                     )
+        ( row Psql.^. SwapIntoLnStatus
+            Psql.==. Psql.val SwapWaitingFundChain
         )
       pure row
 
@@ -130,30 +125,6 @@ updateWaitingChanSql id0 = do
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
                      Psql.==. Psql.val SwapWaitingPeer
-                 )
-
-updateSwapsAboutToExpire :: (Storage m) => m ()
-updateSwapsAboutToExpire = runSql $ do
-  ct <- getCurrentTime
-  Psql.update $ \row -> do
-    Psql.set
-      row
-      [ SwapIntoLnStatus
-          Psql.=. Psql.val SwapExpired,
-        SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
-      ]
-    Psql.where_ $
-      ( row Psql.^. SwapIntoLnStatus
-          `Psql.in_` Psql.valList
-            [ SwapWaitingFundChain,
-              SwapWaitingPeer
-            ]
-      )
-        Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
-                     Psql.<. Psql.val
-                       ( addSeconds (Lnd.Seconds 300) ct
-                       )
                  )
 
 updateSettled ::
@@ -372,3 +343,37 @@ getLatestSwapT =
         [ Psql.Desc SwapIntoLnId,
           Psql.LimitTo 1
         ]
+
+withLockedRow ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
+  ReaderT Psql.SqlBackend m ()
+withLockedRow rowId action = do
+  ct <- getCurrentTime
+  let expTime = addSeconds (Lnd.Seconds 300) ct
+  let finSS = [SwapSucceeded, SwapExpired]
+  swapVal <- lockByRow rowId
+  if (swapIntoLnExpiresAt swapVal < expTime)
+    && notElem (swapIntoLnStatus swapVal) finSS
+    then Psql.update $ \row -> do
+      Psql.set
+        row
+        [ SwapIntoLnStatus
+            Psql.=. Psql.val SwapExpired,
+          SwapIntoLnUpdatedAt
+            Psql.=. Psql.val ct
+        ]
+      Psql.where_
+        ( ( row Psql.^. SwapIntoLnId
+              Psql.==. Psql.val rowId
+          )
+            Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
+                         Psql.<. Psql.val expTime
+                     )
+            Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                         `Psql.notIn` Psql.valList finSS
+                     )
+        )
+    else action swapVal

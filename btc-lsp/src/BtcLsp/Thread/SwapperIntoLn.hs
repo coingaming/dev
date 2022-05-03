@@ -20,7 +20,6 @@ import qualified LndClient.RPC.Silent as LndSilent
 apply :: (Env m) => m ()
 apply =
   forever $ do
-    SwapIntoLn.updateSwapsAboutToExpire
     ePeerList <- withLnd LndSilent.listPeers id
     whenLeft ePeerList $
       $(logTM) ErrorS
@@ -34,7 +33,7 @@ apply =
     tasks <-
       mapM
         ( spawnLink
-            . settleSwap
+            . uncurry3 settleSwap
         )
         $ filter
           ( \(_, usr, _) ->
@@ -49,9 +48,11 @@ apply =
 settleSwap ::
   ( Env m
   ) =>
-  (Entity SwapIntoLn, Entity User, Entity LnChan) ->
+  Entity SwapIntoLn ->
+  Entity User ->
+  Entity LnChan ->
   m ()
-settleSwap (swapEnt, userEnt, chanEnt) = do
+settleSwap swapEnt@(Entity swapKey swapVal) userEnt chanEnt = do
   res <- runExceptT $ do
     pre <-
       catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
@@ -85,19 +86,16 @@ settleSwap (swapEnt, userEnt, chanEnt) = do
                     <> inspectPlain swapEnt
                     <> " and user "
                     <> inspectPlain userEnt
-
     lift $
-      SwapIntoLn.updateSettled (entityKey swapEnt) pre
+      SwapIntoLn.updateSettled swapKey pre
   whenLeft res $
     $(logTM) ErrorS . logStr
       . ("SettleSwap procedure failed: " <>)
       . inspect
   where
-    swap =
-      entityVal swapEnt
     payReq =
       from $
-        swapIntoLnFundInvoice swap
+        swapIntoLnFundInvoice swapVal
     sendPaymentT extId =
       SendPayment.paymentPreimage
         <$> withLndT
@@ -105,7 +103,7 @@ settleSwap (swapEnt, userEnt, chanEnt) = do
           ( $
               Lnd.SendPaymentRequest
                 { Lnd.paymentRequest = payReq,
-                  Lnd.amt = from $ swapIntoLnChanCapUser swap,
+                  Lnd.amt = from $ swapIntoLnChanCapUser swapVal,
                   Lnd.outgoingChanId = extId
                 }
           )

@@ -69,6 +69,13 @@ persistOpenedChannels cs = do
     . forM cs
     $ upsertChannel ct Nothing
 
+--
+-- TODO : do not update in case where
+-- channel data has not been changed,
+-- this way we can detect how long channel
+-- is active or inactive. Use LnChanNumUpdates
+-- as activity indicator.
+--
 upsertChannel ::
   ( MonadIO m
   ) =>
