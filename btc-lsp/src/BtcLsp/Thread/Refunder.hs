@@ -34,7 +34,7 @@ data SendUtxoConfig = SendUtxoConfig
 defSendUtxoConfig :: SendUtxoConfig
 defSendUtxoConfig =
   SendUtxoConfig
-    { dustLimit = MSat $ 20000 * 1000,
+    { dustLimit = MSat $ 10000 * 1000,
       estimateFee = MSat $ 500 * 1000,
       satPerVbyte = 1
     }
@@ -71,8 +71,13 @@ sendUtxosWithMinFee ::
   TxLabel ->
   ExceptT Failure m SendUtxosResult
 sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
-  when (estimateAmt <= dustLimit cfg) . throwE $
-    FailureInternal "Total utxos amount is below dust limit"
+  let dust = dustLimit cfg
+  when (estimateAmt < dust) . throwE $
+    FailureInternal $
+      "Total utxos amount "
+        <> inspectPlain estimateAmt
+        <> " is below dust limit "
+        <> inspectPlain dust
   mapM_
     ( \refUtxo ->
         whenJust

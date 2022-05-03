@@ -37,7 +37,6 @@ refundSucceded swp preTrs = do
       lift
         . runSql
         $ getUtxosBySwapIdSql (entityKey swp)
-    putStrLn $ inspect utxos
     refIds <-
       sequence $
         ( except
@@ -82,7 +81,7 @@ spec =
           swp <-
             createDummySwap "refunder test"
               . Just
-              =<< getFutureTime (Lnd.Seconds 800)
+              =<< getFutureTime (Lnd.Seconds 5)
           void $
             withLndT
               Lnd.sendCoins

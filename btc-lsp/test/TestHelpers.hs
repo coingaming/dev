@@ -108,7 +108,14 @@ putLatestBlockToDB = do
         (from <$> Btc.vPrevBlock blk)
   pure (blk, k)
 
-waitCond :: (Env m, LndTest m TestOwner) => Integer -> (a -> m (Bool, a)) -> a -> m Bool
+waitCond ::
+  ( Env m,
+    LndTest m TestOwner
+  ) =>
+  Integer ->
+  (a -> m (Bool, a)) ->
+  a ->
+  m Bool
 waitCond times condition st = do
   (cond, newSt) <- condition st
   if cond

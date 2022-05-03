@@ -343,7 +343,7 @@ withLockedExtantRow ::
   ReaderT Psql.SqlBackend m ()
 withLockedExtantRow rowId action = do
   ct <- getCurrentTime
-  let expTime = addSeconds (Lnd.Seconds 300) ct
+  let expTime = addSeconds (Lnd.Seconds 3600) ct
   let finSS = [SwapSucceeded, SwapExpired]
   swapVal <- lockByRow rowId
   if (swapIntoLnExpiresAt swapVal < expTime)

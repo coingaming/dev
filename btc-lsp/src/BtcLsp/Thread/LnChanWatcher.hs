@@ -14,7 +14,7 @@ import BtcLsp.Storage.Model.LnChan
   )
 import LndClient
 import LndClient.Data.ListChannels
-import qualified LndClient.RPC.Silent as Lnd
+import qualified LndClient.RPC.Silent as LndSilent
 import UnliftIO.Concurrent
   ( ThreadId,
     forkFinally,
@@ -38,7 +38,7 @@ syncChannelList ::
   m ()
 syncChannelList lnd = do
   res <-
-    Lnd.listChannels
+    LndSilent.listChannels
       lnd
       (ListChannelsRequest False False False False Nothing)
   case res of
@@ -60,7 +60,7 @@ watchChannelEvents lnd =
   where
     act run = do
       void $
-        Lnd.subscribeChannelEvents
+        LndSilent.subscribeChannelEvents
           (void . run . persistChannelUpdates)
           lnd
       act run
@@ -78,7 +78,7 @@ applySub =
     lnd <- getLspLndEnv
     withRunInIO $ \run -> do
       void $
-        Lnd.subscribeChannelEvents
+        LndSilent.subscribeChannelEvents
           (void . run . persistChannelUpdates)
           lnd
     sleep . MicroSecondsDelay $ 5 * 1000000
