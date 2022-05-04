@@ -2,7 +2,7 @@
 
 module BtcLsp.Storage.Model.LnChan
   ( createIgnoreSql,
-    getByChannelPoint,
+    getByChannelPointSql,
     persistChannelUpdates,
     persistOpenedChannels,
   )
@@ -47,16 +47,15 @@ createIgnoreSql swapId txid vout = do
       LnChanUpdatedAt Psql.=. Psql.val ct
     ]
 
-getByChannelPoint ::
+getByChannelPointSql ::
   ( Storage m
   ) =>
   TxId 'Funding ->
   Vout 'Funding ->
-  m (Maybe (Entity LnChan))
-getByChannelPoint txid vout =
-  runSql
-    . Psql.getBy
-    $ UniqueLnChan txid vout
+  ReaderT Psql.SqlBackend m (Maybe (Entity LnChan))
+getByChannelPointSql txid =
+  Psql.getBy
+    . UniqueLnChan txid
 
 persistOpenedChannels ::
   ( Storage m,
@@ -69,6 +68,18 @@ persistOpenedChannels cs = do
   runSql
     . forM cs
     $ upsertChannel ct Nothing
+
+lazyUpdateSwapStatus ::
+  ( MonadIO m
+  ) =>
+  Entity LnChan ->
+  ReaderT Psql.SqlBackend m ()
+lazyUpdateSwapStatus (Entity _ chanVal) = do
+  whenJust (lnChanSwapIntoLnId chanVal) $ \swapKey ->
+    when (lnChanStatus chanVal == LnChanStatusActive)
+      . SwapIntoLn.withLockedExtantRowSql swapKey
+      . const
+      $ SwapIntoLn.updateWaitingFundLnSql swapKey
 
 --
 -- TODO : do not update in case where
@@ -114,14 +125,7 @@ upsertChannel ct mSS chan = do
         LnChanUpdatedAt
           Psql.=. Psql.val ct
       ]
-  --
-  -- TODO : add similar handler for chan grpc sub events
-  --
-  whenJust (lnChanSwapIntoLnId $ entityVal chanEnt) $ \chanId ->
-    when (ss == LnChanStatusActive)
-      . SwapIntoLn.withLockedExtantRow chanId
-      . const
-      $ SwapIntoLn.updateWaitingFundLnSql chanId
+  lazyUpdateSwapStatus chanEnt
   pure chanEnt
   where
     ss =
@@ -146,27 +150,30 @@ upsertChannelPoint ::
   LnChanStatus ->
   Lnd.ChannelPoint ->
   ReaderT Psql.SqlBackend m (Entity LnChan)
-upsertChannelPoint ct ss (Lnd.ChannelPoint txid vout) =
-  Psql.upsertBy
-    (UniqueLnChan txid vout)
-    LnChan
-      { lnChanSwapIntoLnId = Nothing,
-        lnChanFundingTxId = txid,
-        lnChanFundingVout = vout,
-        lnChanExtId = Nothing,
-        lnChanClosingTxId = Nothing,
-        lnChanNumUpdates = 0,
-        lnChanStatus = ss,
-        lnChanInsertedAt = ct,
-        lnChanUpdatedAt = ct,
-        lnChanTotalSatoshisReceived = MSat 0,
-        lnChanTotalSatoshisSent = MSat 0
-      }
-    [ LnChanStatus
-        Psql.=. Psql.val ss,
-      LnChanUpdatedAt
-        Psql.=. Psql.val ct
-    ]
+upsertChannelPoint ct ss (Lnd.ChannelPoint txid vout) = do
+  chanEnt <-
+    Psql.upsertBy
+      (UniqueLnChan txid vout)
+      LnChan
+        { lnChanSwapIntoLnId = Nothing,
+          lnChanFundingTxId = txid,
+          lnChanFundingVout = vout,
+          lnChanExtId = Nothing,
+          lnChanClosingTxId = Nothing,
+          lnChanNumUpdates = 0,
+          lnChanStatus = ss,
+          lnChanInsertedAt = ct,
+          lnChanUpdatedAt = ct,
+          lnChanTotalSatoshisReceived = MSat 0,
+          lnChanTotalSatoshisSent = MSat 0
+        }
+      [ LnChanStatus
+          Psql.=. Psql.val ss,
+        LnChanUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+  lazyUpdateSwapStatus chanEnt
+  pure chanEnt
 
 closedChannelUpsert ::
   ( MonadIO m

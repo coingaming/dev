@@ -21,7 +21,7 @@ import qualified LndClient.Data.FundPsbt as FP
 import qualified LndClient.Data.OutPoint as OP
 import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.Data.ReleaseOutput as RO
-import LndClient.RPC.Katip
+import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
 
@@ -85,21 +85,21 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
           ( \lid ->
               void $
                 withLndT
-                  releaseOutput
+                  Lnd.releaseOutput
                   ($ RO.ReleaseOutputRequest (coerce lid) (Just $ getOutPoint refUtxo))
           )
     )
     utxos
-  ePsbt <- withLndT fundPsbt ($ ePsbtReq)
-  finPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt ePsbt) "")
+  ePsbt <- withLndT Lnd.fundPsbt ($ ePsbtReq)
+  finPsbt <- withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt ePsbt) "")
   decodedETx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finPsbt)
   let fee = MSat $ fromInteger (satPerVbyte cfg * 1000 * Btc.decVsize decodedETx)
   void $ releaseUtxosPsbtLocks (FP.lockedUtxos ePsbt)
   let rPsbtReq = fundPsbtReq utxos addr fee
-  rPsbt <- withLndT fundPsbt ($ rPsbtReq)
-  finRPsbt <- withLndT finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt rPsbt) "")
+  rPsbt <- withLndT Lnd.fundPsbt ($ rPsbtReq)
+  finRPsbt <- withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt rPsbt) "")
   decodedFTx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finRPsbt)
-  ptRes <- withLndT publishTransaction ($ PT.PublishTransactionRequest (FNP.rawFinalTx finRPsbt) txLabel)
+  ptRes <- withLndT Lnd.publishTransaction ($ PT.PublishTransactionRequest (FNP.rawFinalTx finRPsbt) txLabel)
   if null $ PT.publishError ptRes
     then pure $ SendUtxosResult decodedFTx totalUtxoAmt fee
     else throwE $ FailureInternal "Failed to publish refund transaction"
@@ -108,7 +108,7 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
     estimateAmt = totalUtxoAmt - estimateFee cfg
     totalUtxoAmt = sum $ getAmt <$> utxos
     releaseUtxosPsbtLocks lutxos =
-      mapM_ (\r -> withLndT releaseOutput ($ toROR r)) lutxos
+      mapM_ (\r -> withLndT Lnd.releaseOutput ($ toROR r)) lutxos
       where
         toROR (FP.UtxoLease id' op _) = RO.ReleaseOutputRequest id' (Just op)
     fundPsbtReq utxos' outAddr fee = do

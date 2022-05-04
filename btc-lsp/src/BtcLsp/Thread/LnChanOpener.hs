@@ -18,7 +18,8 @@ import qualified LndClient.RPC.Silent as LndSilent
 apply :: (Env m) => m ()
 apply =
   forever $ do
-    ePeerList <- withLnd LndSilent.listPeers id
+    ePeerList <-
+      withLnd LndSilent.listPeers id
     whenLeft ePeerList $
       $(logTM) ErrorS
         . logStr
@@ -27,7 +28,8 @@ apply =
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
-    swaps <- SwapIntoLn.getFundedSwaps
+    swaps <-
+      runSql SwapIntoLn.getSwapsWaitingPeerSql
     tasks <-
       mapM
         ( spawnLink
@@ -58,7 +60,7 @@ openChan ::
 openChan swapEnt@(Entity swapKey _) userEnt = do
   prv <- getChanPrivacy
   rate <- getMsatPerByte
-  runSql . SwapIntoLn.withLockedExtantRow swapKey $ \swapVal ->
+  runSql . SwapIntoLn.withLockedExtantRowSql swapKey $ \swapVal ->
     if swapIntoLnStatus swapVal /= SwapWaitingPeer
       then do
         $(logTM) InfoS . logStr $

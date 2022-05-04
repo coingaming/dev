@@ -48,7 +48,7 @@ lockByRow rowId = do
   void
     ( Psql.rawSql
         "SELECT pg_advisory_xact_lock(?,?)"
-        [ Psql.PersistInt64 $ fromIntegral $ fromEnum $ getTable rowId,
+        [ Psql.PersistInt64 . from . fromEnum $ getTable rowId,
           Psql.PersistInt64 $ Psql.fromSqlKey rowId
         ] ::
         (MonadIO m) => Psql.SqlPersistT m [VoidSQL]
@@ -58,18 +58,28 @@ lockByRow rowId = do
     pure
     $ Psql.get rowId
 
-rollback :: (KatipContext m, Out a) => a -> Psql.SqlPersistT m (Either a b)
+rollback ::
+  ( KatipContext m,
+    Out a
+  ) =>
+  a ->
+  Psql.SqlPersistT m (Either a b)
 rollback e = do
   Psql.transactionUndo
   $(logTM) DebugS . logStr $ "Rollback " <> inspect e
   pure $ Left e
 
-commit :: (KatipContext m, Out b) => b -> Psql.SqlPersistT m (Either a b)
+commit ::
+  ( KatipContext m,
+    Out b
+  ) =>
+  b ->
+  Psql.SqlPersistT m (Either a b)
 commit x = do
   $(logTM) DebugS . logStr $ "Commit " <> inspect x
   pure $ Right x
 
-cleanDb :: MonadIO m => Psql.SqlPersistT m ()
+cleanDb :: (MonadIO m) => Psql.SqlPersistT m ()
 cleanDb =
   Psql.rawExecute
     ( "DROP SCHEMA IF EXISTS public CASCADE;"

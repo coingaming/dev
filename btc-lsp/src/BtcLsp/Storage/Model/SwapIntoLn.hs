@@ -1,25 +1,25 @@
 module BtcLsp.Storage.Model.SwapIntoLn
-  ( createIgnore,
+  ( createIgnoreSql,
     updateWaitingPeerSql,
     updateWaitingChanSql,
     updateWaitingFundLnSql,
     updateSucceededSql,
-    getFundedSwaps,
-    getSwapsToSettle,
-    getByUuid,
-    getByFundAddress,
-    withLockedExtantRow,
+    getSwapsWaitingPeerSql,
+    getSwapsWaitingLnFundSql,
+    getByUuidSql,
+    getByFundAddressSql,
+    withLockedExtantRowSql,
     UtxoInfo (..),
     SwapInfo (..),
   )
 where
 
-import BtcLsp.Import
+import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient as Lnd
 
-createIgnore ::
-  ( Storage m
+createIgnoreSql ::
+  ( MonadIO m
   ) =>
   Entity User ->
   LnInvoice 'Fund ->
@@ -27,38 +27,37 @@ createIgnore ::
   OnChainAddress 'Fund ->
   OnChainAddress 'Refund ->
   UTCTime ->
-  m (Entity SwapIntoLn)
-createIgnore userEnt fundInv fundHash fundAddr refundAddr expAt =
-  runSql $ do
-    ct <- getCurrentTime
-    uuid <- newUuid
-    --
-    -- NOTE : Set initial amount to zero because
-    -- we don't know how much user will deposit
-    -- into on-chain address.
-    --
-    Psql.upsertBy
-      (UniqueSwapIntoLnFundInvHash fundHash)
-      SwapIntoLn
-        { swapIntoLnUuid = uuid,
-          swapIntoLnUserId = entityKey userEnt,
-          swapIntoLnFundInvoice = fundInv,
-          swapIntoLnFundInvHash = fundHash,
-          swapIntoLnFundAddress = fundAddr,
-          swapIntoLnFundProof = Nothing,
-          swapIntoLnRefundAddress = refundAddr,
-          swapIntoLnChanCapUser = Money 0,
-          swapIntoLnChanCapLsp = Money 0,
-          swapIntoLnFeeLsp = Money 0,
-          swapIntoLnFeeMiner = Money 0,
-          swapIntoLnStatus = SwapWaitingFundChain,
-          swapIntoLnExpiresAt = expAt,
-          swapIntoLnInsertedAt = ct,
-          swapIntoLnUpdatedAt = ct
-        }
-      [ SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
-      ]
+  ReaderT Psql.SqlBackend m (Entity SwapIntoLn)
+createIgnoreSql userEnt fundInv fundHash fundAddr refundAddr expAt = do
+  ct <- getCurrentTime
+  uuid <- newUuid
+  --
+  -- NOTE : Set initial amount to zero because
+  -- we don't know how much user will deposit
+  -- into on-chain address.
+  --
+  Psql.upsertBy
+    (UniqueSwapIntoLnFundInvHash fundHash)
+    SwapIntoLn
+      { swapIntoLnUuid = uuid,
+        swapIntoLnUserId = entityKey userEnt,
+        swapIntoLnFundInvoice = fundInv,
+        swapIntoLnFundInvHash = fundHash,
+        swapIntoLnFundAddress = fundAddr,
+        swapIntoLnFundProof = Nothing,
+        swapIntoLnRefundAddress = refundAddr,
+        swapIntoLnChanCapUser = Money 0,
+        swapIntoLnChanCapLsp = Money 0,
+        swapIntoLnFeeLsp = Money 0,
+        swapIntoLnFeeMiner = Money 0,
+        swapIntoLnStatus = SwapWaitingFundChain,
+        swapIntoLnExpiresAt = expAt,
+        swapIntoLnInsertedAt = ct,
+        swapIntoLnUpdatedAt = ct
+      }
+    [ SwapIntoLnUpdatedAt
+        Psql.=. Psql.val ct
+    ]
 
 updateWaitingPeerSql ::
   ( MonadIO m
@@ -165,15 +164,17 @@ updateSucceededSql sid rp = do
                      Psql.==. Psql.val SwapWaitingFundLn
                  )
 
-getFundedSwaps ::
-  ( Storage m
+getSwapsWaitingPeerSql ::
+  ( MonadIO m
   ) =>
-  m
+  ReaderT
+    Psql.SqlBackend
+    m
     [ ( Entity SwapIntoLn,
         Entity User
       )
     ]
-getFundedSwaps = runSql $
+getSwapsWaitingPeerSql =
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` user) -> do
       Psql.on
@@ -191,45 +192,46 @@ getFundedSwaps = runSql $
       --
       pure (swap, user)
 
-getSwapsToSettle ::
-  ( Storage m
+getSwapsWaitingLnFundSql ::
+  ( MonadIO m
   ) =>
-  m
+  ReaderT
+    Psql.SqlBackend
+    m
     [ ( Entity SwapIntoLn,
         Entity User,
         Entity LnChan
       )
     ]
-getSwapsToSettle =
-  runSql $
-    Psql.select $
-      Psql.from $
-        \( swap
-             `Psql.InnerJoin` user
-             `Psql.InnerJoin` chan
-           ) -> do
-            Psql.on
-              ( Psql.just (swap Psql.^. SwapIntoLnId)
-                  Psql.==. chan Psql.^. LnChanSwapIntoLnId
+getSwapsWaitingLnFundSql =
+  Psql.select $
+    Psql.from $
+      \( swap
+           `Psql.InnerJoin` user
+           `Psql.InnerJoin` chan
+         ) -> do
+          Psql.on
+            ( Psql.just (swap Psql.^. SwapIntoLnId)
+                Psql.==. chan Psql.^. LnChanSwapIntoLnId
+            )
+          Psql.on
+            ( swap Psql.^. SwapIntoLnUserId
+                Psql.==. user Psql.^. UserId
+            )
+          Psql.where_
+            ( ( chan Psql.^. LnChanStatus
+                  Psql.==. Psql.val LnChanStatusActive
               )
-            Psql.on
-              ( swap Psql.^. SwapIntoLnUserId
-                  Psql.==. user Psql.^. UserId
-              )
-            Psql.where_
-              ( ( chan Psql.^. LnChanStatus
-                    Psql.==. Psql.val LnChanStatusActive
-                )
-                  Psql.&&. ( swap Psql.^. SwapIntoLnStatus
-                               Psql.==. Psql.val SwapWaitingChan
-                           )
-              )
-            --
-            -- TODO : some sort of exp backoff in case
-            -- where user node is offline for a long time.
-            -- Maybe limits, some proper retries etc.
-            --
-            pure (swap, user, chan)
+                Psql.&&. ( swap Psql.^. SwapIntoLnStatus
+                             Psql.==. Psql.val SwapWaitingFundLn
+                         )
+            )
+          --
+          -- TODO : some sort of exp backoff in case
+          -- where user node is offline for a long time.
+          -- Maybe limits, some proper retries etc.
+          --
+          pure (swap, user, chan)
 
 data UtxoInfo = UtxoInfo
   { utxoInfoUtxo :: Entity SwapUtxo,
@@ -251,13 +253,13 @@ data SwapInfo = SwapInfo
       Show
     )
 
-getByUuid ::
-  ( Storage m
+getByUuidSql ::
+  ( MonadIO m
   ) =>
   Uuid 'SwapIntoLnTable ->
-  m (Maybe SwapInfo)
-getByUuid uuid =
-  runSql . (prettifyGetByUuid <$>) $
+  ReaderT Psql.SqlBackend m (Maybe SwapInfo)
+getByUuidSql uuid =
+  (prettifyGetByUuid <$>) $
     Psql.select $
       Psql.from $
         \( mUtxo
@@ -329,23 +331,22 @@ prettifyGetByUuid = \case
                 =<< xs
         }
 
-getByFundAddress ::
-  ( Storage m
+getByFundAddressSql ::
+  ( MonadIO m
   ) =>
   OnChainAddress 'Fund ->
-  m (Maybe (Entity SwapIntoLn))
-getByFundAddress =
-  runSql
-    . Psql.getBy
+  ReaderT Psql.SqlBackend m (Maybe (Entity SwapIntoLn))
+getByFundAddressSql =
+  Psql.getBy
     . UniqueSwapIntoLnFundAddress
 
-withLockedExtantRow ::
+withLockedExtantRowSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
   (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
   ReaderT Psql.SqlBackend m ()
-withLockedExtantRow rowId action = do
+withLockedExtantRowSql rowId action = do
   ct <- getCurrentTime
   let expTime = addSeconds (Lnd.Seconds 3600) ct
   let finSS = [SwapSucceeded, SwapExpired]

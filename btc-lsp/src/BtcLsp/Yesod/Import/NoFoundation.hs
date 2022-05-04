@@ -6,6 +6,7 @@ module BtcLsp.Yesod.Import.NoFoundation
 where
 
 import BtcLsp.Class.Env as Import hiding (Env)
+import BtcLsp.Class.Storage as Import
 import BtcLsp.Data.Kind as Import
 import BtcLsp.Data.Type as Import
 import BtcLsp.Import.External as Import

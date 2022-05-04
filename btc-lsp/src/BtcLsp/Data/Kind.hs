@@ -42,8 +42,10 @@ data Owner
     )
 
 data Table
-  = SwapIntoLnTable
-  | UserTable
+  = UserTable
+  | SwapIntoLnTable
+  | SwapUtxoTable
+  | BlockTable
   | LnChanTable
   deriving stock
     ( Eq,

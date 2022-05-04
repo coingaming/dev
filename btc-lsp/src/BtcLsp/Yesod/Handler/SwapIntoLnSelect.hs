@@ -149,7 +149,8 @@ getSwapIntoLnSelectR uuid = do
     )
     . liftIO
     . run
-    $ SwapIntoLn.getByUuid uuid
+    . runSql
+    $ SwapIntoLn.getByUuidSql uuid
   where
     htmlUuid = $(mkHtmlUuid)
 
@@ -258,7 +259,8 @@ postSwapIntoLnSelectR uuid = do
     )
     . liftIO
     . run
-    $ SwapIntoLn.getByUuid uuid
+    . runSql
+    $ SwapIntoLn.getByUuidSql uuid
 
 renderPage ::
   Uuid 'SwapIntoLnTable ->

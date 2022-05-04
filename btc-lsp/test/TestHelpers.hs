@@ -11,7 +11,7 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.Block as Block
-import qualified BtcLsp.Storage.Model.SwapIntoLn as SWP
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified Database.Persist as Psql
 import qualified LndClient as Lnd
 import qualified LndClient.Data.AddInvoice as Lnd
@@ -78,8 +78,8 @@ createDummySwap key mExpAt = do
       (getFutureTime (Lnd.Seconds 3600))
       pure
       $ pure mExpAt
-  lift $
-    SWP.createIgnore
+  lift . runSql $
+    SwapIntoLn.createIgnoreSql
       usr
       (from $ Lnd.paymentRequest payReq)
       (Lnd.rHash payReq)

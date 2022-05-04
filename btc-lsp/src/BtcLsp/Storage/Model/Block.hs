@@ -1,10 +1,10 @@
 module BtcLsp.Storage.Model.Block
   ( createUpdateSql,
-    getLatest,
+    getLatestSql,
   )
 where
 
-import BtcLsp.Import
+import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 
 createUpdateSql ::
@@ -21,6 +21,10 @@ createUpdateSql height hash prev = do
   -- in case where multiple instances of scanner
   -- are running (as lsp cluster).
   -- Any possible race conditions?
+  --
+  -- TODO : this should be replaced with more advanced
+  -- reorg logic.
+  --
   Psql.update $ \row -> do
     Psql.set
       row
@@ -51,13 +55,15 @@ createUpdateSql height hash prev = do
       BlockUpdatedAt Psql.=. Psql.val ct
     ]
 
-getLatest :: (Storage m) => m (Maybe (Entity Block))
-getLatest =
-  runSql $
-    listToMaybe
-      <$> Psql.selectList
-        [ BlockStatus `Psql.persistEq` BlkConfirmed
-        ]
-        [ Psql.Desc BlockHeight,
-          Psql.LimitTo 1
-        ]
+getLatestSql ::
+  ( MonadIO m
+  ) =>
+  ReaderT Psql.SqlBackend m (Maybe (Entity Block))
+getLatestSql =
+  listToMaybe
+    <$> Psql.selectList
+      [ BlockStatus `Psql.persistEq` BlkConfirmed
+      ]
+      [ Psql.Desc BlockHeight,
+        Psql.LimitTo 1
+      ]

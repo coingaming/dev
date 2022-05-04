@@ -94,8 +94,8 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
     lift
       . getFutureTime
       $ Lnd.expiry fundInvLnd
-  lift $
-    SwapIntoLn.createIgnore
+  lift . runSql $
+    SwapIntoLn.createIgnoreSql
       userEnt
       fundInv
       (Lnd.paymentHash fundInvLnd)

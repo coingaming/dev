@@ -73,7 +73,7 @@ markFunded utxos =
       debugMsg mCap swapId amt
       whenJust mCap $ \swapCap ->
         runSql
-          . SwapIntoLn.withLockedExtantRow swapId
+          . SwapIntoLn.withLockedExtantRowSql swapId
           . const
           $ do
             SwapUtxo.markAsUsedForChanFundingSql $
@@ -194,20 +194,26 @@ persistBlockT blk utxos = do
     tryFromT $
       Btc.vBlkHeight blk
   lift . runSql $ do
-    b <-
-      Block.createUpdateSql
-        height
-        (from $ Btc.vBlockHash blk)
-        (from <$> Btc.vPrevBlock blk)
+    blockId <-
+      entityKey
+        <$> Block.createUpdateSql
+          height
+          (from $ Btc.vBlockHash blk)
+          (from <$> Btc.vPrevBlock blk)
     ct <-
       getCurrentTime
+    --
+    -- TODO : putMany is doing implicit update,
+    -- upserting all fields. Maybe we don't want this.
+    --
+    void $ lockByRow blockId
     SwapUtxo.createManySql $
-      toSwapUtxo ct b <$> utxos
+      toSwapUtxo ct blockId <$> utxos
   where
     toSwapUtxo now blkId (Utxo value' n' txid' swpId' lockId') = do
       SwapUtxo
         { swapUtxoSwapIntoLnId = swpId',
-          swapUtxoBlockId = entityKey blkId,
+          swapUtxoBlockId = blkId,
           swapUtxoTxid = txid',
           swapUtxoVout = n',
           swapUtxoAmount = from value',
@@ -223,7 +229,7 @@ scan ::
   ) =>
   ExceptT Failure m [Utxo]
 scan = do
-  mBlk <- lift Block.getLatest
+  mBlk <- lift $ runSql Block.getLatestSql
   cHeight <- tryFromT =<< withBtcT Btc.getBlockCount id
   case mBlk of
     Nothing -> do
@@ -301,5 +307,6 @@ maybeSwap ::
   Btc.Address ->
   m (Maybe (Entity SwapIntoLn))
 maybeSwap =
-  SwapIntoLn.getByFundAddress
+  runSql
+    . SwapIntoLn.getByFundAddressSql
     . from
