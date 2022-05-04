@@ -1,6 +1,5 @@
 module BtcLsp.Storage.Model.Block
-  ( createUpdate,
-    createUpdateSql,
+  ( createUpdateSql,
     getLatest,
   )
 where
@@ -8,9 +7,13 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 
-
-createUpdateSql :: (Storage m) =>
-  BlkHeight -> BlkHash -> Maybe BlkPrevHash -> ReaderT Psql.SqlBackend m (Entity Block)
+createUpdateSql ::
+  ( MonadIO m
+  ) =>
+  BlkHeight ->
+  BlkHash ->
+  Maybe BlkPrevHash ->
+  ReaderT Psql.SqlBackend m (Entity Block)
 createUpdateSql height hash prev = do
   ct <- getCurrentTime
   --
@@ -47,15 +50,6 @@ createUpdateSql height hash prev = do
     [ BlockStatus Psql.=. Psql.val BlkConfirmed,
       BlockUpdatedAt Psql.=. Psql.val ct
     ]
-
-createUpdate ::
-  ( Storage m
-  ) =>
-  BlkHeight ->
-  BlkHash ->
-  Maybe BlkPrevHash ->
-  m (Entity Block)
-createUpdate height hash prev = runSql (createUpdateSql height hash prev)
 
 getLatest :: (Storage m) => m (Maybe (Entity Block))
 getLatest =

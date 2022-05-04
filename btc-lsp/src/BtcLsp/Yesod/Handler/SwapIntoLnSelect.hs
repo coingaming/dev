@@ -40,9 +40,9 @@ getSwapIntoLnSelectR uuid = do
         let SwapIntoLn {..} = entityVal swapInfoSwap
         let (msgShort, msgLong, color) =
               case swapIntoLnStatus of
-                SwapWaitingFund ->
-                  ( MsgSwapIntoLnWaitingFundShort,
-                    MsgSwapIntoLnWaitingFundLong,
+                SwapWaitingFundChain ->
+                  ( MsgSwapIntoLnWaitingFundChainShort,
+                    MsgSwapIntoLnWaitingFundChainLong,
                     Info
                   )
                 SwapWaitingPeer ->
@@ -53,6 +53,11 @@ getSwapIntoLnSelectR uuid = do
                 SwapWaitingChan ->
                   ( MsgSwapIntoLnWaitingChanShort,
                     MsgSwapIntoLnWaitingChanLong,
+                    Info
+                  )
+                SwapWaitingFundLn ->
+                  ( MsgSwapIntoLnWaitingFundLnShort,
+                    MsgSwapIntoLnWaitingFundLnLong,
                     Info
                   )
                 SwapSucceeded ->

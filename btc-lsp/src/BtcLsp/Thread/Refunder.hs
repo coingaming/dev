@@ -1,11 +1,18 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Thread.Refunder (apply, SendUtxosResult (..)) where
+module BtcLsp.Thread.Refunder
+  ( apply,
+    SendUtxosResult (..),
+  )
+where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
 import BtcLsp.Math (roundWord64ToMSat)
-import BtcLsp.Storage.Model.SwapUtxo (getUtxosForRefundSql, markRefundedSql)
+import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
+  ( getUtxosForRefundSql,
+    markRefundedSql,
+  )
 import Data.List (groupBy)
 import qualified Data.Map as M
 import LndClient (txIdParser)
@@ -27,7 +34,7 @@ data SendUtxoConfig = SendUtxoConfig
 defSendUtxoConfig :: SendUtxoConfig
 defSendUtxoConfig =
   SendUtxoConfig
-    { dustLimit = MSat $ 20000 * 1000,
+    { dustLimit = MSat $ 10000 * 1000,
       estimateFee = MSat $ 500 * 1000,
       satPerVbyte = 1
     }
@@ -47,7 +54,14 @@ data SendUtxosResult = SendUtxosResult
 
 instance Out RefundUtxo
 
-newtype TxLabel = TxLabel Text deriving newtype (Show, Eq, Ord, Semigroup)
+newtype TxLabel
+  = TxLabel Text
+  deriving newtype
+    ( Show,
+      Eq,
+      Ord,
+      Semigroup
+    )
 
 sendUtxosWithMinFee ::
   (Env m) =>
@@ -57,7 +71,13 @@ sendUtxosWithMinFee ::
   TxLabel ->
   ExceptT Failure m SendUtxosResult
 sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
-  when (estimateAmt <= dustLimit cfg) $ throwE $ FailureInternal "Total utxos amount is below dust limit"
+  let dust = dustLimit cfg
+  when (estimateAmt < dust) . throwE $
+    FailureInternal $
+      "Total utxos amount "
+        <> inspectPlain estimateAmt
+        <> " is below dust limit "
+        <> inspectPlain dust
   mapM_
     ( \refUtxo ->
         whenJust
@@ -104,45 +124,84 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
         }
 
 sendUtxos ::
-  (Env m) => [RefundUtxo] -> OnChainAddress 'Refund -> TxLabel -> ExceptT Failure m SendUtxosResult
-sendUtxos = sendUtxosWithMinFee defSendUtxoConfig
+  ( Env m
+  ) =>
+  [RefundUtxo] ->
+  OnChainAddress 'Refund ->
+  TxLabel ->
+  ExceptT Failure m SendUtxosResult
+sendUtxos =
+  sendUtxosWithMinFee defSendUtxoConfig
 
-processRefund :: Env m => [(Entity SwapUtxo, Entity SwapIntoLn)] -> m ()
-processRefund utxos@(x : _) =
-  let refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
-      utxos' = toOutPointAmt . entityVal . fst <$> utxos
-   in do
-        $(logTM) DebugS . logStr $ "Start refunding utxos:" <> inspect utxos' <> " to address:" <> inspect refAddr
-        r <- runExceptT $ sendUtxos utxos' (coerce refAddr) (TxLabel "refund to " <> coerce refAddr)
-        whenLeft r $ \e ->
-          $(logTM) ErrorS . logStr $
-            "Failed to refund utxos:"
-              <> inspect utxos'
-              <> " to address:"
-              <> inspect refAddr
-              <> " with error:"
-              <> inspect e
-        whenRight r $ \(SendUtxosResult rtx total fee) -> do
-          $(logTM) DebugS . logStr $
-            "Successfully refunded utxos: " <> inspect utxos' <> " to address:" <> inspect refAddr
-              <> " on chain rawTx:"
-              <> inspect rtx
-              <> " amount: "
-              <> inspect total
-              <> " with fee:"
-              <> inspect fee
-          case txIdParser $ Btc.unTransactionID $ Btc.decTxId rtx of
-            Right rtxid -> void $ runSql $ markRefundedSql (entityKey . fst <$> utxos) (from rtxid)
-            Left e -> $(logTM) ErrorS . logStr $ "Failed to convert txid:" <> inspect e
-processRefund _ = pure ()
+processRefund ::
+  ( Env m
+  ) =>
+  [(Entity SwapUtxo, Entity SwapIntoLn)] ->
+  m ()
+processRefund [] = pure ()
+processRefund utxos@(x : _) = do
+  $(logTM) DebugS . logStr $
+    "Start refunding utxos:"
+      <> inspect utxos'
+      <> " to address:"
+      <> inspect refAddr
+  eitherM
+    ( \e ->
+        $(logTM) ErrorS . logStr $
+          "Failed to refund utxos:"
+            <> inspect utxos'
+            <> " to address:"
+            <> inspect refAddr
+            <> " with error:"
+            <> inspect e
+    )
+    ( \(SendUtxosResult rtx total fee) -> do
+        $(logTM) DebugS . logStr $
+          "Successfully refunded utxos: "
+            <> inspect utxos'
+            <> " to address:"
+            <> inspect refAddr
+            <> " on chain rawTx:"
+            <> inspect rtx
+            <> " amount: "
+            <> inspect total
+            <> " with fee:"
+            <> inspect fee
+        case txIdParser
+          . Btc.unTransactionID
+          $ Btc.decTxId rtx of
+          Right rtxid ->
+            runSql $
+              SwapUtxo.markRefundedSql
+                (entityKey . fst <$> utxos)
+                (from rtxid)
+          Left e ->
+            $(logTM) ErrorS . logStr $
+              "Failed to convert txid:" <> inspect e
+    )
+    . runExceptT
+    $ sendUtxos
+      utxos'
+      (coerce refAddr)
+      (TxLabel "refund to " <> coerce refAddr)
+  where
+    refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
+    utxos' = toOutPointAmt . entityVal . fst <$> utxos
 
 toOutPointAmt :: SwapUtxo -> RefundUtxo
 toOutPointAmt x =
-  RefundUtxo (OP.OutPoint (coerce $ swapUtxoTxid x) (coerce $ swapUtxoVout x)) (coerce $ swapUtxoAmount x) (swapUtxoLockId x)
+  RefundUtxo
+    ( OP.OutPoint
+        (coerce $ swapUtxoTxid x)
+        (coerce $ swapUtxoVout x)
+    )
+    (coerce $ swapUtxoAmount x)
+    (swapUtxoLockId x)
 
 apply :: (Env m) => m ()
 apply =
-  runSql getUtxosForRefundSql
-    <&> groupBy (\a b -> swpId a == swpId b) >>= mapM_ processRefund
+  runSql SwapUtxo.getUtxosForRefundSql
+    <&> groupBy (\a b -> swpId a == swpId b)
+    >>= mapM_ processRefund
   where
     swpId = entityKey . snd

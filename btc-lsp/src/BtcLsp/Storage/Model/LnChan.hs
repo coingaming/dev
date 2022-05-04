@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Storage.Model.LnChan
-  ( createIgnore,
+  ( createIgnoreSql,
     getByChannelPoint,
     persistChannelUpdates,
     persistOpenedChannels,
@@ -10,6 +10,7 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient.Data.Channel as Channel
 import qualified LndClient.Data.Channel as Lnd
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
@@ -18,26 +19,15 @@ import qualified LndClient.Data.CloseChannel as CloseChannel
 import qualified LndClient.Data.CloseChannel as Lnd
 import qualified LndClient.Data.SubscribeChannelEvents as Lnd
 
-createIgnore ::
-  ( Storage m
+createIgnoreSql ::
+  ( MonadIO m
   ) =>
   SwapIntoLnId ->
   TxId 'Funding ->
   Vout 'Funding ->
-  m (Entity LnChan)
-createIgnore swapId txid vout = runSql $ do
+  ReaderT Psql.SqlBackend m (Entity LnChan)
+createIgnoreSql swapId txid vout = do
   ct <- getCurrentTime
-  Psql.update $ \swap -> do
-    Psql.set
-      swap
-      [ SwapIntoLnStatus
-          Psql.=. Psql.val SwapWaitingChan,
-        SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
-      ]
-    Psql.where_ $
-      swap Psql.^. SwapIntoLnId
-        Psql.==. Psql.val swapId
   Psql.upsertBy
     (UniqueLnChan txid vout)
     LnChan
@@ -80,6 +70,13 @@ persistOpenedChannels cs = do
     . forM cs
     $ upsertChannel ct Nothing
 
+--
+-- TODO : do not update in case where
+-- channel data has not been changed,
+-- this way we can detect how long channel
+-- is active or inactive. Use LnChanNumUpdates
+-- as activity indicator.
+--
 upsertChannel ::
   ( MonadIO m
   ) =>
@@ -87,35 +84,45 @@ upsertChannel ::
   Maybe LnChanStatus ->
   Lnd.Channel ->
   ReaderT Psql.SqlBackend m (Entity LnChan)
-upsertChannel ct mSS chan =
-  Psql.upsertBy
-    (UniqueLnChan txid vout)
-    LnChan
-      { lnChanSwapIntoLnId = Nothing,
-        lnChanFundingTxId = txid,
-        lnChanFundingVout = vout,
-        lnChanClosingTxId = Nothing,
-        lnChanExtId = extId,
-        lnChanNumUpdates = upd,
-        lnChanStatus = ss,
-        lnChanInsertedAt = ct,
-        lnChanUpdatedAt = ct,
-        lnChanTotalSatoshisReceived = rcv,
-        lnChanTotalSatoshisSent = sent
-      }
-    [ LnChanExtId
-        Psql.=. Psql.val extId,
-      LnChanStatus
-        Psql.=. Psql.val ss,
-      LnChanNumUpdates
-        Psql.=. Psql.val upd,
-      LnChanTotalSatoshisSent
-        Psql.=. Psql.val sent,
-      LnChanTotalSatoshisReceived
-        Psql.=. Psql.val rcv,
-      LnChanUpdatedAt
-        Psql.=. Psql.val ct
-    ]
+upsertChannel ct mSS chan = do
+  chanEnt <-
+    Psql.upsertBy
+      (UniqueLnChan txid vout)
+      LnChan
+        { lnChanSwapIntoLnId = Nothing,
+          lnChanFundingTxId = txid,
+          lnChanFundingVout = vout,
+          lnChanClosingTxId = Nothing,
+          lnChanExtId = extId,
+          lnChanNumUpdates = upd,
+          lnChanStatus = ss,
+          lnChanInsertedAt = ct,
+          lnChanUpdatedAt = ct,
+          lnChanTotalSatoshisReceived = rcv,
+          lnChanTotalSatoshisSent = sent
+        }
+      [ LnChanExtId
+          Psql.=. Psql.val extId,
+        LnChanStatus
+          Psql.=. Psql.val ss,
+        LnChanNumUpdates
+          Psql.=. Psql.val upd,
+        LnChanTotalSatoshisSent
+          Psql.=. Psql.val sent,
+        LnChanTotalSatoshisReceived
+          Psql.=. Psql.val rcv,
+        LnChanUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+  --
+  -- TODO : add similar handler for chan grpc sub events
+  --
+  whenJust (lnChanSwapIntoLnId $ entityVal chanEnt) $ \chanId ->
+    when (ss == LnChanStatusActive)
+      . SwapIntoLn.withLockedExtantRow chanId
+      . const
+      $ SwapIntoLn.updateWaitingFundLnSql chanId
+  pure chanEnt
   where
     ss =
       fromMaybe

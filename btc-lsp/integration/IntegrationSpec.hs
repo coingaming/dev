@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
 module IntegrationSpec
@@ -14,10 +13,10 @@ import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.NewAddress as Lnd
+import qualified LndClient.Data.SendCoins as Lnd
 import LndClient.LndTest (mine)
 import qualified LndClient.LndTest as LndTest
-import qualified LndClient.RPC.Katip as Lnd
-import qualified LndClient.Data.SendCoins as Lnd
+import qualified LndClient.RPC.Silent as Lnd
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
