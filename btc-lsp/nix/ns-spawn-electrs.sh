@@ -15,7 +15,7 @@ electrs \
   --daemon-dir="$BITCOIN_DIR" \
   --network=regtest \
   --electrum-rpc-addr="127.0.0.1:60401" \
-  --daemon-rpc-addr="127.0.0.1:20000" \
+  --daemon-rpc-addr="127.0.0.1:18443" \
   --timestamp \
   > $ELECTRS_DIR/stdout.log 2>&1 & \
   echo "$!" > "$ELECTRS_DIR/electrs.pid"
