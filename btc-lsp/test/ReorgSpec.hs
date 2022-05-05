@@ -37,8 +37,7 @@ spec = T.itEnv "Reorg is not working test" $ do
       let blk2 = unsafeHead $ entityVal <$> blkList2
       blockHash2 <- withBtcT Btc.getBlockHash ($ blockCount)
       liftIO ((coerce $ blockHash blk2 :: Text) `shouldNotBe` blockHash2)
-      return ()
-    liftIO $ True `shouldBe` True
+    return ()
 
 unsafeHead :: [Block] -> Block
 unsafeHead blkList = do
