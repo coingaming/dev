@@ -38,11 +38,11 @@ failure ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "failure" a) =>
   Lens.Family2.LensLike' f s a
 failure = Data.ProtoLens.Field.field @"failure"
-input ::
+generic ::
   forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "input" a) =>
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "generic" a) =>
   Lens.Family2.LensLike' f s a
-input = Data.ProtoLens.Field.field @"input"
+generic = Data.ProtoLens.Field.field @"generic"
 internal ::
   forall f s a.
   (Prelude.Functor f,
@@ -121,6 +121,12 @@ maybe'swapLnMinFee ::
   Lens.Family2.LensLike' f s a
 maybe'swapLnMinFee
   = Data.ProtoLens.Field.field @"maybe'swapLnMinFee"
+specific ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "specific" a) =>
+  Lens.Family2.LensLike' f s a
+specific = Data.ProtoLens.Field.field @"specific"
 success ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "success" a) =>
@@ -162,12 +168,12 @@ swapLnMinFee ::
    Data.ProtoLens.Field.HasField s "swapLnMinFee" a) =>
   Lens.Family2.LensLike' f s a
 swapLnMinFee = Data.ProtoLens.Field.field @"swapLnMinFee"
-vec'input ::
+vec'generic ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'input" a) =>
+   Data.ProtoLens.Field.HasField s "vec'generic" a) =>
   Lens.Family2.LensLike' f s a
-vec'input = Data.ProtoLens.Field.field @"vec'input"
+vec'generic = Data.ProtoLens.Field.field @"vec'generic"
 vec'internal ::
   forall f s a.
   (Prelude.Functor f,
@@ -180,3 +186,9 @@ vec'lspLnNodes ::
    Data.ProtoLens.Field.HasField s "vec'lspLnNodes" a) =>
   Lens.Family2.LensLike' f s a
 vec'lspLnNodes = Data.ProtoLens.Field.field @"vec'lspLnNodes"
+vec'specific ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'specific" a) =>
+  Lens.Family2.LensLike' f s a
+vec'specific = Data.ProtoLens.Field.field @"vec'specific"

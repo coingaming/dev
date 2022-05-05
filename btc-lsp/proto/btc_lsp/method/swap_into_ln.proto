@@ -30,8 +30,15 @@ message Response {
   }
 
   message Failure {
-    repeated .BtcLsp.Data.HighLevel.InputFailure input = 1;
-    repeated InternalFailure internal = 2;
+    repeated .BtcLsp.Data.HighLevel.InputFailure generic = 1;
+    repeated InputFailure specific = 2;
+    repeated InternalFailure internal = 3;
+
+    enum InputFailure {
+      NON_ZERO_AMT_FUND_LN_INVOICE = 0;
+      TOO_LOW_EXPIRY_FUND_LN_INVOICE = 1;
+      SIGNATURE_NOT_GENUINE_FUND_LN_INVOICE = 2;
+    }
 
     message InternalFailure {
 

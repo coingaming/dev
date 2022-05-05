@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
@@ -14,8 +15,6 @@ module BtcLsp.Data.Type
     Money (..),
     FeeRate (..),
     OnChainAddress (..),
-    FieldIndex (..),
-    ReversedFieldLocation (..),
     Seconds (..),
     LogFormat (..),
     MicroSeconds (..),
@@ -57,7 +56,6 @@ import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
-import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
@@ -105,25 +103,6 @@ utcTimeToMicros x =
 epoch :: UTCTime
 epoch =
   posixSecondsToUTCTime 0
-
-newtype FieldIndex
-  = FieldIndex Word32
-  deriving newtype
-    ( Show
-    )
-  deriving stock
-    ( TH.Lift
-    )
-
-newtype ReversedFieldLocation
-  = ReversedFieldLocation [FieldIndex]
-  deriving newtype
-    ( Semigroup,
-      Show
-    )
-  deriving stock
-    ( TH.Lift
-    )
 
 data LogFormat
   = Bracket

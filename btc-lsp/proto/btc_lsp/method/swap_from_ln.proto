@@ -23,8 +23,13 @@ message Response {
   }
 
   message Failure {
-    repeated .BtcLsp.Data.HighLevel.InputFailure input = 1;
-    repeated InternalFailure internal = 2;
+    repeated .BtcLsp.Data.HighLevel.InputFailure generic = 1;
+    repeated InputFailure specific = 2;
+    repeated InternalFailure internal = 3;
+
+    enum InputFailure {
+      DEFAULT = 0;
+    }
 
     message InternalFailure {
 

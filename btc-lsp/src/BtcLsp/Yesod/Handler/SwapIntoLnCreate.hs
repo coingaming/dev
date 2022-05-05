@@ -1,6 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -12,6 +13,7 @@ where
 
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
+import BtcLsp.Grpc.Combinator
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
 import BtcLsp.Storage.Model
 import BtcLsp.Storage.Model.User as User
@@ -19,6 +21,8 @@ import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Proto.BtcLsp.Data.HighLevel as Proto
+import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 import Yesod.Form.Bootstrap3
 
 data SwapRequest = SwapRequest
@@ -56,12 +60,23 @@ postSwapIntoLnCreateR = do
       App {appMRunner = UnliftIO run} <- getYesod
       eSwap <- liftIO . run . runExceptT $ do
         fundInvLnd <-
-          withLndT
+          withLndServerT
             Lnd.decodePayReq
             ($ from fundInv)
         userEnt <-
-          ExceptT $
-            newNonce
+          withExceptT
+            ( const $
+                newGenFailure
+                  Proto.VERIFICATION_FAILED
+                  $( mkFieldLocation
+                       @SwapIntoLn.Request
+                       [ "ctx",
+                         "nonce"
+                       ]
+                   )
+            )
+            . ExceptT
+            $ newNonce
               >>= runSql
                 . User.createVerifySql
                   (Lnd.destination fundInvLnd)
