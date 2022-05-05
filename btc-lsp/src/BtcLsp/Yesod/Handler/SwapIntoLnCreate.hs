@@ -62,7 +62,9 @@ postSwapIntoLnCreateR = do
         userEnt <-
           ExceptT $
             newNonce
-              >>= User.createVerify (Lnd.destination fundInvLnd)
+              >>= runSql
+                . User.createVerifySql
+                  (Lnd.destination fundInvLnd)
         Server.swapIntoLnT
           userEnt
           fundInv

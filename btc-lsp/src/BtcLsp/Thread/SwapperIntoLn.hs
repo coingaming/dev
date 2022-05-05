@@ -29,7 +29,8 @@ apply =
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
-    swapsToSettle <- SwapIntoLn.getSwapsToSettle
+    swapsToSettle <-
+      runSql SwapIntoLn.getSwapsWaitingLnFundSql
     tasks <-
       mapM
         ( spawnLink
@@ -53,7 +54,7 @@ settleSwap ::
   Entity LnChan ->
   m ()
 settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt =
-  runSql . SwapIntoLn.withLockedExtantRow swapKey $ \swapVal -> do
+  runSql . SwapIntoLn.withLockedExtantRowSql swapKey $ \swapVal -> do
     let payReq =
           from $
             swapIntoLnFundInvoice swapVal

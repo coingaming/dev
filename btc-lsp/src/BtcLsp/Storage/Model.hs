@@ -39,6 +39,9 @@ instance HasTable LnChan where
 instance HasTable SwapIntoLn where
   getTable = const SwapIntoLnTable
 
+instance HasTable Block where
+  getTable = const BlockTable
+
 instance Out (Psql.BackendKey Psql.SqlBackend)
 
 deriving stock instance Generic (Psql.Key User)

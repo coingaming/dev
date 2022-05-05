@@ -8,11 +8,11 @@ module BtcLsp.Storage.Model.SwapUtxo
   )
 where
 
-import BtcLsp.Import
+import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 
 createManySql ::
-  ( Storage m
+  ( MonadIO m
   ) =>
   [SwapUtxo] ->
   ReaderT Psql.SqlBackend m ()
@@ -20,7 +20,7 @@ createManySql =
   Psql.putMany
 
 getFundsBySwapIdSql ::
-  ( Storage m
+  ( MonadIO m
   ) =>
   SwapIntoLnId ->
   ReaderT Psql.SqlBackend m [Entity SwapUtxo]
@@ -41,7 +41,7 @@ getFundsBySwapIdSql swapId = do
       pure row
 
 markAsUsedForChanFundingSql ::
-  ( Storage m
+  ( MonadIO m
   ) =>
   [SwapUtxoId] ->
   ReaderT Psql.SqlBackend m ()
@@ -60,7 +60,7 @@ markAsUsedForChanFundingSql ids = do
         `Psql.in_` Psql.valList ids
 
 markRefundedSql ::
-  ( Storage m
+  ( MonadIO m
   ) =>
   [SwapUtxoId] ->
   TxId 'Funding ->
@@ -79,7 +79,7 @@ markRefundedSql ids rTxId = do
         `Psql.in_` Psql.valList ids
 
 getUtxosForRefundSql ::
-  ( Storage m
+  ( MonadIO m
   ) =>
   ReaderT
     Psql.SqlBackend
@@ -115,7 +115,7 @@ getUtxosForRefundSql =
       pure (utxo, swap)
 
 getUtxosBySwapIdSql ::
-  ( Storage m
+  ( MonadIO m
   ) =>
   SwapIntoLnId ->
   ReaderT Psql.SqlBackend m [Entity SwapUtxo]

@@ -787,7 +787,7 @@ instance Psql.PersistFieldSql (Uuid tab) where
 instance ToMessage (Uuid tab) where
   toMessage =
     (<> "...")
-      . T.take 7
+      . T.take 5
       . UUID.toText
       . unUuid
 
