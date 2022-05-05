@@ -44,7 +44,7 @@ unsafeHead :: [Block] -> Block
 unsafeHead blkList = do
   case blkList of
     [blk] -> blk
-    _ -> error "fail"
+    _ -> error "There is no blocks in a list"
 
 waitTillNodesSynchronized :: (MonadReader (TestEnv o) m, Env m) => m (Either Failure ())
 waitTillNodesSynchronized = runExceptT $ do

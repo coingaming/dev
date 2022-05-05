@@ -6,3 +6,5 @@ cradle:
       component: exe:btc-lsp-exe
     - path: "./test"
       component: test:btc-lsp-test
+    - path: "./integration"
+      component: exe:btc-lsp-integration

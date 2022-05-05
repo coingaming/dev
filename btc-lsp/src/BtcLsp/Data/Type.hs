@@ -8,7 +8,6 @@
 module BtcLsp.Data.Type
   ( Nonce,
     newNonce,
-    TableName (..),
     LnInvoice (..),
     LnInvoiceStatus (..),
     LnChanStatus (..),
@@ -40,6 +39,10 @@ module BtcLsp.Data.Type
     NodeUri (..),
     NodeUriHex (..),
     UtxoLockId (..),
+    RHashHex (..),
+    Uuid,
+    unUuid,
+    newUuid,
   )
 where
 
@@ -48,9 +51,12 @@ import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Data.ByteString.Base16 as B16
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
+import qualified Data.UUID as UUID
+import qualified Data.UUID.V4 as UUID
 import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
@@ -163,20 +169,14 @@ data TaskRes
       Show
     )
 
-data TableName
-  = UserTable
-  | LnChanTable
-  deriving stock
-    ( Enum
-    )
-
 newtype LnInvoice (mrel :: MoneyRelation)
   = LnInvoice Lnd.PaymentRequest
   deriving newtype
     ( Eq,
       Show,
       Psql.PersistField,
-      Psql.PersistFieldSql
+      Psql.PersistFieldSql,
+      PathPiece
     )
   deriving stock
     ( Generic
@@ -233,8 +233,9 @@ newtype
   Money
     (owner :: Owner)
     (btcl :: BitcoinLayer)
-    (mrel :: MoneyRelation)
-  = Money MSat
+    (mrel :: MoneyRelation) = Money
+  { unMoney :: MSat
+  }
   deriving newtype
     ( Eq,
       Ord,
@@ -322,6 +323,8 @@ newtype OnChainAddress (mrel :: MoneyRelation)
     ( Eq,
       Ord,
       Show,
+      Read,
+      PathPiece,
       Psql.PersistField,
       Psql.PersistFieldSql
     )
@@ -347,22 +350,19 @@ data SwapStatus
   = -- | Waiting on-chain funding trx with
     -- given amt from user with
     -- some confirmations.
-    SwapWaitingFund
+    SwapWaitingFundChain
   | -- | Swap has been funded on-chain,
     -- need to open LN channel now.
-    SwapFunded
+    SwapWaitingPeer
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan
-  | -- | Swap has been funded with insufficient
-    -- non-dust amt, but funding invoice has
-    -- been expired. Then lsp is doing refund
-    -- into given refund on-chain address and
-    -- waiting for some confirmations.
-    SwapWaitingRefund
+  | -- | Waiting funding LN invoice
+    -- to be paid by SwapperIntoLn.
+    SwapWaitingFundLn
   | -- | Final statuses
-    SwapRefunded
-  | SwapSucceeded
+    SwapSucceeded
+  | SwapExpired
   deriving stock
     ( Eq,
       Ord,
@@ -374,6 +374,17 @@ data SwapStatus
     )
 
 instance Out SwapStatus
+
+instance PathPiece SwapStatus where
+  fromPathPiece :: Text -> Maybe SwapStatus
+  fromPathPiece =
+    readMaybe
+      . unpack
+      . T.toTitle
+  toPathPiece :: SwapStatus -> Text
+  toPathPiece =
+    T.toLower
+      . Universum.show
 
 data Timing
   = Permanent
@@ -591,6 +602,8 @@ data Privacy
       Ord,
       Show,
       Read,
+      Enum,
+      Bounded,
       Generic
     )
 
@@ -669,6 +682,122 @@ instance TryFrom NodeUri NodeUriHex where
       sock = nodeUriSocketAddress src
       host = socketAddressHost sock
       port = socketAddressPort sock
+
+newtype RHashHex = RHashHex
+  { unRHashHex :: Text
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      PathPiece
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out RHashHex
+
+instance From RHashHex Text
+
+instance From Text RHashHex
+
+instance From RHash RHashHex where
+  from =
+    --
+    -- NOTE : decodeUtf8 in general is unsafe
+    -- but here we know that it will not fail
+    -- because of B16
+    --
+    RHashHex
+      . decodeUtf8
+      . B16.encode
+      . coerce
+
+instance From RHashHex RHash where
+  from =
+    --
+    -- NOTE : this is not RFC 4648-compliant,
+    -- using only for the practical purposes
+    --
+    RHash
+      . B16.decodeLenient
+      . encodeUtf8
+      . unRHashHex
+
+newtype Uuid (tab :: Table) = Uuid
+  { unUuid' :: UUID
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read
+    )
+  deriving stock (Generic)
+
+unUuid :: Uuid tab -> UUID
+unUuid =
+  unUuid'
+
+instance Out (Uuid tab) where
+  docPrec x =
+    docPrec x
+      . UUID.toText
+      . unUuid
+  doc =
+    docPrec 0
+
+newUuid :: (MonadIO m) => m (Uuid tab)
+newUuid =
+  liftIO $
+    Uuid <$> UUID.nextRandom
+
+--
+-- NOTE :  we're taking advantage of
+-- PostgreSQL understanding UUID values
+--
+instance Psql.PersistField (Uuid tab) where
+  toPersistValue =
+    Psql.PersistLiteral_ Psql.Escaped
+      . UUID.toASCIIBytes
+      . unUuid
+  fromPersistValue = \case
+    Psql.PersistLiteral_ Psql.Escaped x ->
+      maybe
+        ( Left $
+            "Failed to deserialize a UUID, got literal: "
+              <> inspectPlain x
+        )
+        ( Right
+            . Uuid
+        )
+        $ UUID.fromASCIIBytes x
+    failure ->
+      Left $
+        "Failed to deserialize a UUID, got: "
+          <> inspectPlain failure
+
+instance Psql.PersistFieldSql (Uuid tab) where
+  sqlType =
+    const $
+      Psql.SqlOther "uuid"
+
+instance ToMessage (Uuid tab) where
+  toMessage =
+    (<> "...")
+      . T.take 5
+      . UUID.toText
+      . unUuid
+
+instance PathPiece (Uuid tab) where
+  fromPathPiece =
+    (Uuid <$>)
+      . UUID.fromText
+  toPathPiece =
+    UUID.toText
+      . unUuid
 
 Psql.derivePersistField "LnInvoiceStatus"
 Psql.derivePersistField "LnChanStatus"

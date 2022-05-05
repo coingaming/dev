@@ -6,6 +6,8 @@ let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
 
+let Ingress = ../Kubernetes/Ingress.dhall
+
 let Deployment = ../Kubernetes/Deployment.dhall
 
 let Bitcoind = ./Bitcoind.dhall
@@ -15,6 +17,8 @@ let Lnd = ./Lnd.dhall
 let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
+
+let domain = ../../build/secrets/lsp/domain.txt as Text ? G.todo
 
 let tlsCert = ../../build/secrets/lsp/tls.cert as Text ? G.todo
 
@@ -36,6 +40,10 @@ let grpcPort
     : G.Port
     = { unPort = 8443 }
 
+let yesodPort
+    : G.Port
+    = { unPort = 3000 }
+
 let env =
       { lspLogEnv = "LSP_LOG_ENV"
       , lspLogFormat = "LSP_LOG_FORMAT"
@@ -49,10 +57,8 @@ let env =
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
       , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
       , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
-      , lspYesodPguser = "LSP_YESOD_PGUSER"
-      , lspYesodPgpassword = "LSP_YESOD_PGPASS"
-      , lspYesodPghost = "LSP_YESOD_PGHOST"
-      , lspYesodPgdatabase = "LSP_YESOD_PGDATABASE"
+      , lspYesodHost = "LSP_YESOD_HOST"
+      , lspYesodPort = "LSP_YESOD_PORT"
       }
 
 let configMapEnv
@@ -65,8 +71,8 @@ let configMapEnv
       , env.lspLndP2pPort
       , env.lspMinChanCapMsat
       , env.lspMsatPerByte
-      , env.lspYesodPghost
-      , env.lspYesodPgdatabase
+      , env.lspYesodHost
+      , env.lspYesodPort
       ]
 
 let secretEnv
@@ -75,8 +81,6 @@ let secretEnv
       , env.lspLndEnv
       , env.lspGrpcServerEnv
       , env.lspBitcoindEnv
-      , env.lspYesodPguser
-      , env.lspYesodPgpassword
       ]
 
 let mkLspBitcoindEnv
@@ -104,8 +108,14 @@ let mkLspGrpcServerEnv
             { port = P.JSON.natural grpcPort.unPort
             , sig_verify = P.JSON.bool True
             , sig_header_name = P.JSON.string "sig-bin"
-            , tls_cert = P.JSON.string tlsCert
-            , tls_key = P.JSON.string tlsKey
+            , encryption = P.JSON.string (G.unEncryption G.Encryption.Encrypted)
+            , tls =
+                P.JSON.object
+                  ( toMap
+                      { cert = P.JSON.string tlsCert
+                      , key = P.JSON.string tlsKey
+                      }
+                  )
             }
         )
 
@@ -113,7 +123,7 @@ let mkLspGrpcClientEnv
     : P.JSON.Type
     = P.JSON.object
         ( toMap
-            { host = P.JSON.string (G.unOwner G.Owner.Lnd)
+            { host = P.JSON.string (G.unOwner G.Owner.Lsp)
             , port = P.JSON.natural grpcPort.unPort
             , sig_header_name = P.JSON.string "sig-bin"
             , compress_mode = P.JSON.string "Compressed"
@@ -143,7 +153,12 @@ let mkLndEnv
 
 let ports
     : List Natural
-    = G.unPorts [ grpcPort ]
+    = G.unPorts [ grpcPort, yesodPort ]
+
+let mkDomain
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
 
 let mkEnv
     : G.BitcoinNetwork → P.Map.Type Text Text
@@ -168,14 +183,8 @@ let mkEnv
         , { mapKey = env.lspMinChanCapMsat
           , mapValue = Natural/show minChanSize
           }
-        , { mapKey = env.lspYesodPguser, mapValue = Postgres.mkUser net }
-        , { mapKey = env.lspYesodPgpassword
-          , mapValue = Postgres.mkPassword net
-          }
-        , { mapKey = env.lspYesodPghost, mapValue = Postgres.mkHost net }
-        , { mapKey = env.lspYesodPgdatabase
-          , mapValue = Postgres.mkDatabaseName net
-          }
+        , { mapKey = env.lspYesodHost, mapValue = "*" }
+        , { mapKey = env.lspYesodPort, mapValue = G.unPort yesodPort }
         ]
 
 let mkSetupEnv
@@ -235,6 +244,15 @@ let mkService
           (mkServiceType net)
           (Service.mkPorts ports)
 
+let mkIngress
+    : G.BitcoinNetwork → K.Ingress.Type
+    = λ(net : G.BitcoinNetwork) →
+        Ingress.mkIngress
+          owner
+          (mkDomain net)
+          yesodPort.unPort
+          (None (List K.IngressTLS.Type))
+
 let mkContainerImage
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
@@ -275,6 +293,7 @@ in  { mkEnv
     , grpcPort
     , secretEnv
     , mkService
+    , mkIngress
     , mkDeployment
     , mkLspGrpcClientEnv
     , mkLspBitcoindEnv

@@ -26,7 +26,7 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
-import qualified BtcLsp.Storage.Model.LnChan as LnChan (getByChannelPoint)
+import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8 hiding (filter, length)
@@ -38,7 +38,7 @@ import qualified LndClient.Data.GetInfo as GetInfo
 import qualified LndClient.Data.SignMessage as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Silent as Lnd
 import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
@@ -370,7 +370,7 @@ waitForChannelStatus _ _ expectedStatus 0 =
     "waiting for channel " <> inspectStr expectedStatus <> " tries exceeded"
 waitForChannelStatus txid vout expectedStatus tries = do
   let loop = waitForChannelStatus txid vout expectedStatus (tries - 1)
-  dbChannel <- LnChan.getByChannelPoint txid vout
+  dbChannel <- runSql $ LnChan.getByChannelPointSql txid vout
   liftIO $ delay 1000000
   case dbChannel of
     Just db -> do

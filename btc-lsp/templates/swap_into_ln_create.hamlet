@@ -1,0 +1,4 @@
+<div .ui.container-fluid.compact.center>
+  <div .panel.panel-default>
+    <div .panel-body>
+      ^{form}

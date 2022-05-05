@@ -7,11 +7,13 @@ User
   insertedAt UTCTime
   updatedAt UTCTime
   UniqueUser nodePubKey
-  deriving Eq Show Generic
+  deriving Eq Ord Show Generic
 
 SwapIntoLn
+  uuid (Uuid 'SwapIntoLnTable)
   userId UserId
   fundInvoice (LnInvoice 'Fund)
+  fundInvHash RHash
   fundAddress (OnChainAddress 'Fund)
   fundProof RPreimage Maybe
   refundAddress (OnChainAddress 'Refund)
@@ -23,7 +25,8 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
-  UniqueSwapIntoLnFundInvoice fundInvoice
+  UniqueSwapIntoLnFundInvUuid uuid
+  UniqueSwapIntoLnFundInvHash fundInvHash
   UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic
 
@@ -39,7 +42,7 @@ SwapUtxo
   insertedAt UTCTime
   updatedAt UTCTime
   UniqueSwapUtxo txid vout
-  deriving Eq Show Generic
+  deriving Eq Ord Show Generic
 
 Block
   height BlkHeight
@@ -55,7 +58,7 @@ Block
   insertedAt UTCTime
   updatedAt UTCTime
   UniqueBlock hash
-  deriving Eq Show Generic
+  deriving Eq Ord Show Generic
 
 LnChan
   swapIntoLnId SwapIntoLnId Maybe
@@ -75,4 +78,4 @@ LnChan
   insertedAt UTCTime
   updatedAt UTCTime
   UniqueLnChan fundingTxId fundingVout
-  deriving Eq Show Generic
+  deriving Eq Ord Show Generic

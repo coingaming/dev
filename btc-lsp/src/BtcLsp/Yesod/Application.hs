@@ -21,14 +21,11 @@ import BtcLsp.Yesod.Handler.Home
 import BtcLsp.Yesod.Handler.Language
 import BtcLsp.Yesod.Handler.OpenChan
 import BtcLsp.Yesod.Handler.Profile
+import BtcLsp.Yesod.Handler.SwapIntoLnCreate
+import BtcLsp.Yesod.Handler.SwapIntoLnSelect
 import BtcLsp.Yesod.Import
 import Control.Monad.Logger (liftLoc, runLoggingT)
-import Database.Persist.Postgresql
-  ( createPostgresqlPool,
-    pgConnStr,
-    pgPoolSize,
-    runSqlPool,
-  )
+import Database.Persist.Postgresql (runSqlPool)
 import Language.Haskell.TH.Syntax (qLocation)
 import Network.HTTP.Client.TLS (getGlobalManager)
 import Network.Wai (Middleware)
@@ -64,8 +61,14 @@ mkYesodDispatch "App" resourcesApp
 -- performs initialization and returns a foundation datatype value. This is also
 -- the place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-makeFoundation :: (Class.Env m) => UnliftIO m -> AppSettings -> IO App
-makeFoundation appMRunner appSettings = do
+makeFoundation ::
+  ( Class.Env m
+  ) =>
+  Pool SqlBackend ->
+  UnliftIO m ->
+  AppSettings ->
+  IO App
+makeFoundation sqlPool appMRunner appSettings = do
   -- Some basic initializations: HTTP connection manager, logger, and static
   -- subsite.
   appHttpManager <- getGlobalManager
@@ -86,18 +89,14 @@ makeFoundation appMRunner appSettings = do
       tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
       logFunc = messageLoggerSource tempFoundation appLogger
 
-  -- Create the database connection pool
-  pool <-
-    flip runLoggingT logFunc $
-      createPostgresqlPool
-        (pgConnStr $ appDatabaseConf appSettings)
-        (pgPoolSize $ appDatabaseConf appSettings)
-
   -- Perform database migration using our application's logging settings.
-  runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+  --
+  -- TODO : move all models to one file (main models)
+  --
+  runLoggingT (runSqlPool (runMigration migrateAll) sqlPool) logFunc
 
   -- Return the foundation
-  return $ mkFoundation pool
+  return $ mkFoundation sqlPool
 
 -- | Convert our foundation to a WAI Application by calling @toWaiAppPlain@ and
 -- applying some additional middlewares.
@@ -143,8 +142,13 @@ warpSettings foundation =
         defaultSettings
 
 -- | The @main@ function for an executable running this site.
-appMain :: (Class.Env m) => UnliftIO m -> IO ()
-appMain appMRunner = do
+appMain ::
+  ( Class.Env m
+  ) =>
+  Pool SqlBackend ->
+  UnliftIO m ->
+  IO ()
+appMain sqlPool appMRunner = do
   -- Get the settings from all relevant sources
   settings <-
     loadYamlSettingsArgs
@@ -154,7 +158,7 @@ appMain appMRunner = do
       useEnv
 
   -- Generate the foundation from the settings
-  foundation <- makeFoundation appMRunner settings
+  foundation <- makeFoundation sqlPool appMRunner settings
 
   -- Generate a WAI Application from the foundation
   app <- makeApplication foundation

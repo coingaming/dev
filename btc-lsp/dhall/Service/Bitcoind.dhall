@@ -249,6 +249,7 @@ let mkContainer
         K.Container::{
         , name
         , image = Some image
+        , args = Some [ "-fallbackfee=0.0002" ]
         , env = Some mkContainerEnv
         , ports = Some (Deployment.mkContainerPorts (mkPorts net))
         , volumeMounts = Some

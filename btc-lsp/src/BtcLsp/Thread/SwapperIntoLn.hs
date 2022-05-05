@@ -29,11 +29,12 @@ apply =
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
-    swaps <- SwapIntoLn.getSwapsToSettle
+    swapsToSettle <-
+      runSql SwapIntoLn.getSwapsWaitingLnFundSql
     tasks <-
       mapM
         ( spawnLink
-            . settleSwap
+            . uncurry3 settleSwap
         )
         $ filter
           ( \(_, usr, _) ->
@@ -41,22 +42,52 @@ apply =
                 (userNodePubKey $ entityVal usr)
                 peerSet
           )
-          swaps
+          swapsToSettle
     mapM_ (liftIO . wait) tasks
     sleep $ MicroSecondsDelay 500000
 
 settleSwap ::
   ( Env m
   ) =>
-  (Entity SwapIntoLn, Entity User, Entity LnChan) ->
+  Entity SwapIntoLn ->
+  Entity User ->
+  Entity LnChan ->
   m ()
-settleSwap (swapEnt, userEnt, chanEnt) = do
-  res <- runExceptT $ do
-    pre <-
-      catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
-        . const
-        $ catchE (sendPaymentT Nothing) . const $
-          do
+settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt =
+  runSql . SwapIntoLn.withLockedExtantRowSql swapKey $ \swapVal -> do
+    let payReq =
+          from $
+            swapIntoLnFundInvoice swapVal
+    let sendPaymentT extId =
+          SendPayment.paymentPreimage
+            <$> withLndT
+              LndKatip.sendPayment
+              ( $
+                  Lnd.SendPaymentRequest
+                    { Lnd.paymentRequest =
+                        payReq,
+                      Lnd.amt =
+                        from $
+                          swapIntoLnChanCapUser swapVal,
+                      Lnd.outgoingChanId =
+                        extId
+                    }
+              )
+    eitherM
+      ( $(logTM) ErrorS . logStr
+          . ("SettleSwap procedure failed: " <>)
+          . inspect
+      )
+      ( SwapIntoLn.updateSucceededSql swapKey
+      )
+      . lift
+      . runExceptT
+      $ do
+        catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
+          . const
+          . catchE (sendPaymentT Nothing)
+          . const
+          $ do
             inv <-
               withLndT
                 LndKatip.decodePayReq
@@ -84,27 +115,5 @@ settleSwap (swapEnt, userEnt, chanEnt) = do
                     <> inspectPlain swapEnt
                     <> " and user "
                     <> inspectPlain userEnt
-
-    lift $
-      SwapIntoLn.updateSettled (entityKey swapEnt) pre
-  whenLeft res $
-    $(logTM) ErrorS . logStr
-      . ("SettleSwap procedure failed: " <>)
-      . inspect
-  where
-    swap =
-      entityVal swapEnt
-    payReq =
-      from $
-        swapIntoLnFundInvoice swap
-    sendPaymentT extId =
-      SendPayment.paymentPreimage
-        <$> withLndT
-          LndKatip.sendPayment
-          ( $
-              Lnd.SendPaymentRequest
-                { Lnd.paymentRequest = payReq,
-                  Lnd.amt = from $ swapIntoLnChanCapUser swap,
-                  Lnd.outgoingChanId = extId
-                }
-          )
+                    <> " and chan "
+                    <> inspectPlain chanEnt

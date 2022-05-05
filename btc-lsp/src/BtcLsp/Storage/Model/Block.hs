@@ -1,17 +1,20 @@
 module BtcLsp.Storage.Model.Block
-  ( createUpdate,
-    createUpdateSql,
-    getLatest,
-    getBlock
+  ( createUpdateSql,
+    getLatestSql,
+    getBlock,
   )
 where
 
-import BtcLsp.Import
+import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 
-
-createUpdateSql :: (Storage m) =>
-  BlkHeight -> BlkHash -> Maybe BlkPrevHash -> ReaderT Psql.SqlBackend m (Entity Block)
+createUpdateSql ::
+  ( MonadIO m
+  ) =>
+  BlkHeight ->
+  BlkHash ->
+  Maybe BlkPrevHash ->
+  ReaderT Psql.SqlBackend m (Entity Block)
 createUpdateSql height hash prev = do
   ct <- getCurrentTime
   --
@@ -19,6 +22,10 @@ createUpdateSql height hash prev = do
   -- in case where multiple instances of scanner
   -- are running (as lsp cluster).
   -- Any possible race conditions?
+  --
+  -- TODO : this should be replaced with more advanced
+  -- reorg logic.
+  --
   Psql.update $ \row -> do
     Psql.set
       row
@@ -49,27 +56,20 @@ createUpdateSql height hash prev = do
       BlockUpdatedAt Psql.=. Psql.val ct
     ]
 
-createUpdate ::
-  ( Storage m
+getLatestSql ::
+  ( MonadIO m
   ) =>
-  BlkHeight ->
-  BlkHash ->
-  Maybe BlkPrevHash ->
-  m (Entity Block)
-createUpdate height hash prev = runSql (createUpdateSql height hash prev)
+  ReaderT Psql.SqlBackend m (Maybe (Entity Block))
+getLatestSql =
+  listToMaybe
+    <$> Psql.selectList
+      [ BlockStatus `Psql.persistEq` BlkConfirmed
+      ]
+      [ Psql.Desc BlockHeight,
+        Psql.LimitTo 1
+      ]
 
-getLatest :: (Storage m) => m (Maybe (Entity Block))
-getLatest =
-  runSql $
-    listToMaybe
-      <$> Psql.selectList
-        [ BlockStatus `Psql.persistEq` BlkConfirmed
-        ]
-        [ Psql.Desc BlockHeight,
-          Psql.LimitTo 1
-        ]
-
-getBlock :: (Storage m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
+getBlock :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
 getBlock blkHeight = do
   Psql.select $
     Psql.from $ \row -> do

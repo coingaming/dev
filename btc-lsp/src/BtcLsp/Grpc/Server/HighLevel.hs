@@ -2,6 +2,7 @@
 
 module BtcLsp.Grpc.Server.HighLevel
   ( swapIntoLn,
+    swapIntoLnT,
     getCfg,
   )
 where
@@ -9,6 +10,7 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Math as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import qualified BtcLsp.Time as Time
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
@@ -36,28 +38,11 @@ swapIntoLn userEnt req = do
       withLndT
         Lnd.decodePayReq
         ($ from fundInv)
-    --
-    -- TODO : proper input failure
-    --
-    when (Lnd.numMsat fundInvLnd /= MSat 0)
-      . throwE
-      $ FailureInput [defMessage]
-    fundAddr <-
-      from
-        <$> withLndT
-          Lnd.newAddress
-          ( $
-              Lnd.NewAddressRequest
-                { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-                  Lnd.account = Nothing
-                }
-          )
-    expAt <-
-      lift
-        . getFutureTime
-        $ Lnd.expiry fundInvLnd
-    lift $
-      SwapIntoLn.createIgnore userEnt fundInv fundAddr refundAddr expAt
+    swapIntoLnT
+      userEnt
+      fundInv
+      fundInvLnd
+      refundAddr
   pure $ case res of
     Left e ->
       failResE e
@@ -73,6 +58,50 @@ swapIntoLn userEnt req = do
                          + from (swapIntoLnFeeLsp swap)
                      )
              )
+
+swapIntoLnT ::
+  ( Env m
+  ) =>
+  Entity User ->
+  LnInvoice 'Fund ->
+  Lnd.PayReq ->
+  OnChainAddress 'Refund ->
+  ExceptT Failure m (Entity SwapIntoLn)
+swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
+  --
+  -- TODO : proper corresponding input failure
+  -- for every bad input case.
+  --
+  when
+    ( Lnd.numMsat fundInvLnd /= MSat 0
+        || Lnd.expiry fundInvLnd < Time.swapExpiryLimit
+        || Lnd.destination fundInvLnd
+          /= userNodePubKey (entityVal userEnt)
+    )
+    . throwE
+    $ FailureInput [defMessage]
+  fundAddr <-
+    from
+      <$> withLndT
+        Lnd.newAddress
+        ( $
+            Lnd.NewAddressRequest
+              { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                Lnd.account = Nothing
+              }
+        )
+  expAt <-
+    lift
+      . getFutureTime
+      $ Lnd.expiry fundInvLnd
+  lift . runSql $
+    SwapIntoLn.createIgnoreSql
+      userEnt
+      fundInv
+      (Lnd.paymentHash fundInvLnd)
+      fundAddr
+      refundAddr
+      expAt
 
 getCfg ::
   ( Env m

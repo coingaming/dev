@@ -10,7 +10,7 @@ SHELL_DIR="$BUILD_DIR/shell"
   echo "==> Generating $SERVICE_DIR"
   mkdir -p "$SERVICE_DIR/db"
   echo 'auth="developer:developer"
-verbose=4' > "$SERVICE_DIR/electrs.toml"
+log_filters = "INFO"' > "$SERVICE_DIR/electrs.toml"
 )
 
 (

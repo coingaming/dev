@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-deprecations #-}
+
 module LnChanWatcherSpec
   ( spec,
   )
@@ -51,7 +52,8 @@ queryChannel ::
   Lnd.ChannelPoint ->
   m (Maybe (Entity LnChan))
 queryChannel (Lnd.ChannelPoint txid vout) =
-  LnChan.getByChannelPoint txid vout
+  runSql $
+    LnChan.getByChannelPointSql txid vout
 
 tryTimes :: MonadUnliftIO m => Int -> Int -> m (Maybe a) -> m (Maybe a)
 tryTimes times delaySec tryFn = go times

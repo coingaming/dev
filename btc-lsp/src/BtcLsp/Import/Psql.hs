@@ -7,6 +7,7 @@ where
 import Database.Esqueleto.Legacy as X
   ( BaseBackend,
     Entity (..),
+    FullOuterJoin (..),
     InnerJoin (..),
     Key,
     LeftOuterJoin (..),
@@ -30,6 +31,7 @@ import Database.Esqueleto.Legacy as X
     limit,
     max_,
     min_,
+    notIn,
     nothing,
     on,
     orderBy,
@@ -50,22 +52,22 @@ import Database.Esqueleto.Legacy as X
     where_,
     (!=.),
     (&&.),
-    (||.),
     (+=.),
     (<.),
-    (>.),
     (=.),
     (==.),
+    (>.),
     (>=.),
     (?.),
     (^.),
+    (||.),
   )
 import Database.Esqueleto.PostgreSQL as X
-  ( now_,
-    upsertBy,
+  ( upsertBy,
   )
 import Database.Persist as X
-  ( SelectOpt (..),
+  ( LiteralType (..),
+    SelectOpt (..),
     selectList,
   )
 import qualified Database.Persist as P

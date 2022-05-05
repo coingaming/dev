@@ -151,8 +151,8 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
           $(logTM)
             ErrorS
             "WARNING!!! SIGNATURE VERIFICATION DISABLED!!!"
-      ExceptT $
-        User.createVerify pub nonce
+      ExceptT . runSql $
+        User.createVerifySql pub nonce
     case userE of
       Right user -> do
         res <- setGrpcCtx =<< handler user req

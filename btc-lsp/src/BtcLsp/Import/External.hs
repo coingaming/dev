@@ -10,7 +10,6 @@ import Control.Concurrent.Async as X
     asyncThreadId,
     cancel,
     linkOnly,
-    race,
     wait,
     waitAnyCancel,
     waitAnySTM,
@@ -64,10 +63,13 @@ import Data.Time.Clock as X
     diffUTCTime,
     secondsToDiffTime,
   )
+import Data.Tuple.Extra as X (uncurry3)
 import Data.Type.Equality as X (type (==))
+import Data.UUID as X (UUID)
 import Database.Esqueleto.Legacy as X
   ( Entity (..),
   )
+import GHC.Exts as X (IsList)
 import Katip as X
   ( ColorStrategy (..),
     Environment (..),
@@ -99,6 +101,7 @@ import LndClient as X
     LndError (..),
     MSat (..),
     NodePubKey (..),
+    RHash (..),
     RPreimage (..),
     TxId (..),
     TxKind (..),
@@ -109,6 +112,7 @@ import LndClient.Util as X
     readTChanTimeout,
     sleep,
     spawnLink,
+    txIdHex,
     withSpawnLink,
   )
 import Network.GRPC.Client as X (CompressMode (..))
@@ -123,6 +127,7 @@ import Text.PrettyPrint.GenericPretty.Import as X
     inspectStrPlain,
   )
 import Text.PrettyPrint.GenericPretty.Instance as X ()
+import Text.Shakespeare.I18N as X (ToMessage (..))
 import Universum as X hiding
   ( atomically,
     bracket,
@@ -139,7 +144,8 @@ import UnliftIO as X
     askRunInIO,
     bracket,
     finally,
+    race,
     withRunInIO,
     withUnliftIO,
   )
-import Yesod.Core as X (showIntegral)
+import Yesod.Core as X (PathPiece (..), showIntegral)

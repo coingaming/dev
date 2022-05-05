@@ -154,8 +154,6 @@ export LSP_GRPC_CLIENT_ENV="
 {
   \"host\":\"127.0.0.1\",
   \"port\":8444,
-  \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-  \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
   \"sig_header_name\":\"sig-bin\",
   \"compress_mode\":\"Compressed\"
 }
@@ -168,8 +166,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"yolo_btc-lsp\",
 #   \"port\":443,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\",
 #   \"compress_mode\":\"Compressed\"
 # }
@@ -184,8 +180,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"127.0.0.1\",
 #   \"port\":8081,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\"
 # }
 # "
@@ -196,8 +190,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"btc-lsp\",
 #   \"port\":30443,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\",
 #   \"compress_mode\":\"Compressed\"
 # }
@@ -209,8 +201,6 @@ export LSP_GRPC_CLIENT_ENV="
 # {
 #   \"host\":\"testnet-lsp.coins.io\",
 #   \"port\":8443,
-#   \"prv_key\":\"$LSP_AGENT_PRIVATE_KEY_PEM\",
-#   \"pub_key\":\"$LSP_PARTNER_PUBLIC_KEY_PEM\",
 #   \"sig_header_name\":\"sig-bin\",
 #   \"compress_mode\":\"Compressed\"
 # }
@@ -221,8 +211,11 @@ export LSP_GRPC_SERVER_ENV="
   \"port\":8444,
   \"sig_verify\":true,
   \"sig_header_name\":\"sig-bin\",
-  \"tls_cert\":\"$GRPC_TLS_CERT\",
-  \"tls_key\":\"$GRPC_TLS_KEY\"
+  \"encryption\":\"Encrypted\",
+  \"tls\":{
+    \"cert\":\"$GRPC_TLS_CERT\",
+    \"key\":\"$GRPC_TLS_KEY\"
+  }
 }
 "
 

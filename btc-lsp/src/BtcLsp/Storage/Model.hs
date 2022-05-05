@@ -30,11 +30,17 @@ share
   [mkPersist sqlSettings, mkMigrate "migrateAuto"]
   $(persistFileWith lowerCaseSettings "config/model")
 
-instance HasTableName User where
-  getTableName = const UserTable
+instance HasTable User where
+  getTable = const UserTable
 
-instance HasTableName LnChan where
-  getTableName = const LnChanTable
+instance HasTable LnChan where
+  getTable = const LnChanTable
+
+instance HasTable SwapIntoLn where
+  getTable = const SwapIntoLnTable
+
+instance HasTable Block where
+  getTable = const BlockTable
 
 instance Out (Psql.BackendKey Psql.SqlBackend)
 
@@ -61,3 +67,9 @@ deriving stock instance Generic (Psql.Key Block)
 instance Out (Psql.Key Block)
 
 instance Out Block
+
+deriving stock instance Generic (Psql.Key SwapUtxo)
+
+instance Out (Psql.Key SwapUtxo)
+
+instance Out SwapUtxo

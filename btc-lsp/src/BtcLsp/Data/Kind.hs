@@ -2,6 +2,7 @@ module BtcLsp.Data.Kind
   ( MoneyRelation (..),
     BitcoinLayer (..),
     Owner (..),
+    Table (..),
   )
 where
 
@@ -38,4 +39,19 @@ data Owner
       Ord,
       Show,
       Generic
+    )
+
+data Table
+  = UserTable
+  | SwapIntoLnTable
+  | SwapUtxoTable
+  | BlockTable
+  | LnChanTable
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic,
+      Enum,
+      Bounded
     )

@@ -9,16 +9,14 @@ echo "==> starting electrs..."
 
 mkdir -p "$ELECTRS_DIR/db"
 
-RUST_LOG=debug electrs \
+electrs \
   --conf="$ELECTRS_DIR/electrs.toml" \
   --db-dir="$ELECTRS_DIR/db" \
   --daemon-dir="$BITCOIN_DIR" \
-  --blocks-dir="$BITCOIN_DIR/regtest/blocks" \
   --network=regtest \
   --electrum-rpc-addr="127.0.0.1:60401" \
   --daemon-rpc-addr="127.0.0.1:20000" \
   --timestamp \
-  --verbose \
   > $ELECTRS_DIR/stdout.log 2>&1 & \
   echo "$!" > "$ELECTRS_DIR/electrs.pid"
 
