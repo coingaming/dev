@@ -83,3 +83,7 @@ Status: Status
 SwapInfo: Swap Info
 SwapUtxos: Swap UTXOs
 SwapChans: Swap Channels
+
+FailureDefault: Something went wrong. Please check the input data and try again.
+FailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
+FailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.

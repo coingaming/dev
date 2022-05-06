@@ -19,10 +19,12 @@ import BtcLsp.Storage.Model
 import BtcLsp.Storage.Model.User as User
 import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
+import Lens.Micro
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
+import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Yesod.Form.Bootstrap3
 
 data SwapRequest = SwapRequest
@@ -87,7 +89,7 @@ postSwapIntoLnCreateR = do
           $ swapRequestRefund req
       case eSwap of
         Left e -> do
-          setMessageI . MsgFailure $ inspectPlain e
+          setMessageI $ explainFailure e
           renderPage formWidget formEnctype
         Right swapEnt ->
           redirect
@@ -96,6 +98,26 @@ postSwapIntoLnCreateR = do
             $ entityVal swapEnt
     _ ->
       renderPage formWidget formEnctype
+
+explainFailure :: SwapIntoLn.Response -> AppMessage
+explainFailure res =
+  maybe
+    MsgFailureDefault
+    ( \case
+        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT ->
+          MsgFailureFundLnInvoiceHasNonZeroAmt
+        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON ->
+          MsgFailureFundLnInvoiceExpiresTooSoon
+        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE ->
+          MsgFailureDefault
+        SwapIntoLn.Response'Failure'InputFailure'Unrecognized {} ->
+          MsgFailureDefault
+    )
+    $ res
+      ^? SwapIntoLn.maybe'failure
+        . _Just
+        . SwapIntoLn.specific
+      >>= listToMaybe
 
 renderPage :: Widget -> Enctype -> Handler Html
 renderPage formWidget formEnctype = do
