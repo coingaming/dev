@@ -8,6 +8,7 @@ where
 import BtcLsp.Class.Storage
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
+import BtcLsp.Grpc.Combinator
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
@@ -102,6 +103,22 @@ class
     ExceptT Failure m b
   withLndT method =
     ExceptT . withLnd method
+  withLndServerT ::
+    ( GrpcRes res failure specific internal
+    ) =>
+    (Lnd.LndEnv -> a) ->
+    (a -> m (Either Lnd.LndError b)) ->
+    ExceptT res m b
+  withLndServerT method =
+    withExceptT
+      ( const $
+          defMessage
+            & field @"failure"
+              .~ ( defMessage
+                     & field @"internal" .~ [defMessage]
+                 )
+      )
+      . withLndT method
   withElectrs ::
     (ElectrsEnv -> a) ->
     (a -> m (Either RpcError b)) ->
