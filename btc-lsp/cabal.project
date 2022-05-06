@@ -43,8 +43,8 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/coingaming/src.git
-  tag: d5b0b1114d97d8b65bc808a95d148dfab42865f2
-  --sha256: 08qghjm61n990ykqdqpybwnl7xcz5l6j21630lm4msc5nxyhinaj
+  tag: b1f2ccf142685255c091302db0957f3e2d772301
+  --sha256: 0kpzh29vik269paa664jpy8ggvnxqa7ygy41flv0w04m7b5k9lz9
   subdir: network-bitcoin
 
 source-repository-package

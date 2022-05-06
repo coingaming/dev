@@ -438,6 +438,7 @@ executable btc-lsp-integration
       Main
       MathSpec
       RefunderSpec
+      ReorgSpec
       RpcSpec
       ServerSpec
       Spec
@@ -869,6 +870,7 @@ test-suite btc-lsp-test
       LnChanWatcherSpec
       MathSpec
       RefunderSpec
+      ReorgSpec
       RpcSpec
       ServerSpec
       Spec

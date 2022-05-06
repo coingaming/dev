@@ -1,6 +1,7 @@
 module BtcLsp.Storage.Model.Block
   ( createUpdateSql,
     getLatestSql,
+    getBlock,
   )
 where
 
@@ -67,3 +68,11 @@ getLatestSql =
       [ Psql.Desc BlockHeight,
         Psql.LimitTo 1
       ]
+
+getBlock :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
+getBlock blkHeight = do
+  Psql.select $
+    Psql.from $ \row -> do
+      Psql.where_
+        (row Psql.^. BlockHeight Psql.==. Psql.val blkHeight)
+      pure row

@@ -14,6 +14,7 @@ module Network.Bitcoin.Net ( Client
                            , AddNodeCommand(..)
                            , addNode
                            , disconnectNode
+                           , setNetworkActive
                            ) where
 
 import           Control.Monad
@@ -91,3 +92,6 @@ addNode client url com = unNil <$> callApi client "addnode" [tj url, tj com]
 
 disconnectNode :: Client -> Maybe Text -> Maybe Int -> IO ()
 disconnectNode client url nodeId = unNil <$> callApi client "disconnectnode" [tj url, tj nodeId]
+
+setNetworkActive :: Client -> Bool -> IO Bool
+setNetworkActive client state = callApi client "setnetworkactive" [tj state]
