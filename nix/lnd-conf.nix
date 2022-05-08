@@ -4,8 +4,7 @@
 , dataDir ? "./tmp"
 , macaroonDir
 , name
-}:
-{ writeText
+, writeText
 , writeShellScriptBin
 , symlinkJoin
 , runCommand
@@ -68,26 +67,29 @@ let
   '';
   setup = writeShellScriptBin "setup" ''
     mkdir -p "${workDir}"
+    ls -la
     cp -f ${lndconf} ${workDir}/lnd.conf
     cp -f ${tlscert}/* ${workDir}/
     mkdir -p ${workDir}/data/chain/bitcoin/regtest
-    cp ${macaroonDir}/*macaroon* ${workDir}/data/chain/bitcoin/regtest
+    cp --no-preserve=mode,ownership ${macaroonDir}/*macaroon* ${workDir}/data/chain/bitcoin/regtest
   '';
   start = writeShellScriptBin "start" ''
     echo $$ > ${workDir}/lnd.pid
-    exec ${lnd}/bin/lnd --lnddir='${workDir}' --bitcoin.defaultchanconfs=1 > '${workDir}/stdout.log' &
+    ${lnd}/bin/lnd --lnddir='${workDir}' --bitcoin.defaultchanconfs=1 > '${workDir}/stdout.log' &
+    echo "Lnd ${name} started"
   '';
   stop = writeShellScriptBin "stop" ''
     lnd_pid=`cat ${workDir}/lnd.pid`
     timeout 5 ${cli}/bin/lncli stop
     kill -9 "$lnd_pid"
   '';
-in
-symlinkJoin {
-  name = name;
-  paths = [ start stop setup cli ];
-  postBuild = ''
-    echo "Symlinks scripts created in $out/bin"
-    echo "Datadir ${workDir}"
+  up = writeShellScriptBin "up" ''
+    ${setup}/bin/setup
+    ${start}/bin/start
   '';
+  down = writeShellScriptBin "down" ''
+    ${stop}/bin/stop
+  '';
+in {
+  inherit up down;
 }

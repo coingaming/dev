@@ -4,8 +4,7 @@
 , rpcport ? 18433
 , rpcuser ? "developer"
 , rpcpassword ? "developer"
-} : {
-  lib
+, lib
 , runCommand
 , writeText
 , symlinkJoin
@@ -54,8 +53,7 @@ let
     export PATH="${lib.makeBinPath [cli]}"
     bitcoin-cli createwallet "testwallet"
     bitcoin-cli generatetoaddress 1 "$(bitcoin-cli getnewaddress)"
-    bitcoin-cli getblockchaininfo
-  '';
+    bitcoin-cli getblockchaininfo '';
   stop = writeShellScriptBin "stop" ''
     echo "Stop"
     bitcoin_pid=`cat ${workDir}/regtest/bitcoind.pid`
@@ -70,12 +68,13 @@ let
   cli = writeShellScriptBin "bitcoin-cli" ''
     ${bitcoind}/bin/bitcoin-cli -rpcwait -datadir='${workDir}' "$@"
   '';
-in
-symlinkJoin {
-  name = name;
-  paths = [start stop setup cli init];
-  postBuild = ''
-    echo "Symlinks scripts created in $out/bin"
-    echo "Datadir ${workDir}"
+  up = writeShellScriptBin "up" ''
+    ${setup}/bin/setup
+    ${start}/bin/start
+    ${init}/bin/init
   '';
-}
+  down = writeShellScriptBin "down" ''
+    ${stop}/bin/stop
+  '';
+in
+{inherit up down;}
