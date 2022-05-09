@@ -12,7 +12,6 @@ Copy: copy
 HomeRBreadcrumb: Home
 AuthRBreadcrumb: Login
 SignoutRBreadcrumb: Signout
-ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
 OpenChanRBreadcrumb: Channel
 SwapIntoLnCreateRBreadcrumb: Swap
@@ -20,19 +19,15 @@ SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
 
 HomeRTitle: Welcome | LSP
 SignoutRTitle: Logout | LSP
-ProfileRTitle usr@YesodUser: #{usr} | LSP
 OpenChanRTitle: Open Channel | LSP
 SwapIntoLnCreateRTitle: Swap | LSP
 SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Swap | LSP
 
 Home: Home
-Profile: Profile
 Login: Login
 Logout: Logout
 Iso639v1: en
 Iso3166v1: gb
-
-ProfilePageGreet usr@YesodUser: You are logged in as #{usr}
 
 Name: Name
 Password: Password

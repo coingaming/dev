@@ -82,12 +82,10 @@ library
       BtcLsp.Yesod.Handler.Home
       BtcLsp.Yesod.Handler.Language
       BtcLsp.Yesod.Handler.OpenChan
-      BtcLsp.Yesod.Handler.Profile
       BtcLsp.Yesod.Handler.SwapIntoLnCreate
       BtcLsp.Yesod.Handler.SwapIntoLnSelect
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
-      BtcLsp.Yesod.Model
       BtcLsp.Yesod.Settings
       BtcLsp.Yesod.Settings.StaticFiles
       Proto.BtcLsp
@@ -404,12 +402,10 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
-        BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
-        BtcLsp.Yesod.Model
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
         Proto.BtcLsp
@@ -633,12 +629,10 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
-        BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
-        BtcLsp.Yesod.Model
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
         Proto.BtcLsp
@@ -839,12 +833,10 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
-        BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
-        BtcLsp.Yesod.Model
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
         Proto.BtcLsp
@@ -1065,12 +1057,10 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
         BtcLsp.Yesod.Handler.OpenChan
-        BtcLsp.Yesod.Handler.Profile
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
-        BtcLsp.Yesod.Model
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
         Proto.BtcLsp

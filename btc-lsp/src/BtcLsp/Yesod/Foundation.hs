@@ -22,6 +22,7 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth.Dummy
+import qualified Yesod.Auth.Message as Auth
 import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
@@ -143,14 +144,6 @@ instance Yesod App where
                   menuItemActiveCallback = mcurrentRoute == Just HomeR,
                   menuItemNoReferrer = False
                 },
-            NavbarLeft $
-              MenuItem
-                { menuItemLabel = MsgProfile,
-                  menuItemRoute = ProfileR,
-                  menuItemAccessCallback = isJust muser,
-                  menuItemActiveCallback = mcurrentRoute == Just ProfileR,
-                  menuItemNoReferrer = False
-                },
             NavbarRight $
               MenuItem
                 { menuItemLabel = MsgLogin,
@@ -210,9 +203,6 @@ instance Yesod App where
   isAuthorized OpenChanR {} _ = pure Authorized
   isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
   isAuthorized SwapIntoLnSelectR {} _ = pure Authorized
-  -- the profile route requires that the user is authenticated, so we
-  -- delegate to that function
-  isAuthorized ProfileR _ = isAuthenticated
 
   -- This function creates static content files in the static folder
   -- and names them based on a hash of their content. This allows
@@ -277,7 +267,6 @@ instance YesodBreadcrumbs App where
         OpenChanR -> MsgOpenChanRBreadcrumb
         SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
         SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
-        ProfileR -> MsgProfileRBreadcrumb
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
         StaticR {} -> Nothing
@@ -289,7 +278,6 @@ instance YesodBreadcrumbs App where
         OpenChanR -> Just HomeR
         SwapIntoLnCreateR -> Just HomeR
         SwapIntoLnSelectR {} -> Just SwapIntoLnCreateR
-        ProfileR -> Just HomeR
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -304,11 +292,11 @@ instance YesodPersistRunner App where
   getDBRunner = defaultGetDBRunner appConnPool
 
 instance YesodAuth App where
-  type AuthId App = YesodUserId
+  type AuthId App = UserId
 
   -- Where to send a user after successful login
   loginDest :: App -> Route App
-  loginDest _ = ProfileR
+  loginDest _ = HomeR
 
   -- Where to send a user after logout
   logoutDest :: App -> Route App
@@ -319,22 +307,14 @@ instance YesodAuth App where
   redirectToReferer _ = True
 
   authenticate ::
-    (MonadHandler m, HandlerSite m ~ App) =>
+    ( MonadHandler m,
+      HandlerSite m ~ App
+    ) =>
     Creds App ->
     m (AuthenticationResult App)
-  authenticate creds = liftHandler $
-    runDB $ do
-      x <- getBy $ UniqueYesodUser $ credsIdent creds
-      case x of
-        Just (Entity uid _) -> return $ Authenticated uid
-        Nothing ->
-          Authenticated
-            <$> insert
-              YesodUser
-                { yesodUserIdent = credsIdent creds,
-                  yesodUserName = Nothing,
-                  yesodUserPassword = Nothing
-                }
+  authenticate _ =
+    liftHandler $
+      pure $ UserError Auth.AuthError
 
   -- You can add other plugins like Google Email, email or OAuth here
   authPlugins :: App -> [AuthPlugin App]
