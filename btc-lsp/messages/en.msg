@@ -17,11 +17,11 @@ OpenChanRBreadcrumb: Channel
 SwapIntoLnCreateRBreadcrumb: Swap
 SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
 
-HomeRTitle: Welcome | LSP
-SignoutRTitle: Logout | LSP
-OpenChanRTitle: Open Channel | LSP
-SwapIntoLnCreateRTitle: Swap | LSP
-SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Swap | LSP
+HomeRTitle: Welcome | Lsp
+SignoutRTitle: Logout | Lsp
+OpenChanRTitle: Open Channel | Lsp
+SwapIntoLnCreateRTitle: Swap | Lsp
+SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Swap | Lsp
 
 Home: Home
 Login: Login
@@ -56,13 +56,15 @@ SwapIntoLnInsertedAt: Inserted at
 SwapIntoLnUpdatedAt: Updated at
 ChannelPrivacy: Channel Privacy
 
-SwapIntoLnWaitingFundChainShort: Step 1/4 - Swap Funding
-SwapIntoLnFundedShort: Step 2/4 - Peer Connection
-SwapIntoLnWaitingChanShort: Step 3/4 - Channel Opening
-SwapIntoLnWaitingFundLnShort: Step 3/4 - Lightning Funding
-SwapIntoLnSucceededShort: Step 4/4 - Swap Succeeded
+SwapIntoLnInfoShort: Step 1/5 - Swap Info
+SwapIntoLnWaitingFundChainShort: Step 2/5 - Swap Funding
+SwapIntoLnFundedShort: Step 3/5 - Peer Connection
+SwapIntoLnWaitingChanShort: Step 4/5 - Channel Opening
+SwapIntoLnWaitingFundLnShort: Step 4/5 - Lightning Funding
+SwapIntoLnSucceededShort: Step 5/5 - Swap Succeeded
 SwapIntoLnExpiredShort: Swap Expired!
 
+SwapIntoLnInfoLong: To create a balanced inbound channel, provide a lightning invoice with a zero requested amount and an expiration time of at least one week. Also Lsp needs on-chain emergency refund address.
 SwapIntoLnWaitingFundChainLong: Lsp is wating for the swap being funded. Please send bitcoins to the on-chain swap address:
 SwapIntoLnFundedLong: The swap is successfully funded. Lsp is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
 SwapIntoLnWaitingChanLong: Lsp initiated lightning channel. Waiting for the channel being opened.

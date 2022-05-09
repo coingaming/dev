@@ -47,7 +47,7 @@ getSwapIntoLnCreateR = do
       renderBootstrap3
         BootstrapBasicForm
         aForm
-  renderPage formWidget formEnctype
+  renderPage Info formWidget formEnctype
 
 postSwapIntoLnCreateR :: Handler Html
 postSwapIntoLnCreateR = do
@@ -90,14 +90,14 @@ postSwapIntoLnCreateR = do
       case eSwap of
         Left e -> do
           setMessageI $ explainFailure e
-          renderPage formWidget formEnctype
+          renderPage Danger formWidget formEnctype
         Right swapEnt ->
           redirect
             . SwapIntoLnSelectR
             . swapIntoLnUuid
             $ entityVal swapEnt
     _ ->
-      renderPage formWidget formEnctype
+      renderPage Danger formWidget formEnctype
 
 explainFailure :: SwapIntoLn.Response -> AppMessage
 explainFailure res =
@@ -119,8 +119,8 @@ explainFailure res =
         . SwapIntoLn.specific
       >>= listToMaybe
 
-renderPage :: Widget -> Enctype -> Handler Html
-renderPage formWidget formEnctype = do
+renderPage :: BootstrapColor -> Widget -> Enctype -> Handler Html
+renderPage color formWidget formEnctype = do
   let formRoute = SwapIntoLnCreateR
   let formMsgSubmit = MsgContinue
   let form = $(widgetFile "simple_form")
