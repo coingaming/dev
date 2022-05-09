@@ -14,7 +14,7 @@ AuthRBreadcrumb: Login
 SignoutRBreadcrumb: Signout
 ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
-OpenChanRBreadcrumb: Open Channel
+OpenChanRBreadcrumb: Channel
 SwapIntoLnCreateRBreadcrumb: Swap
 SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
 
@@ -40,7 +40,7 @@ Password: Password
 HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
 
-OpenChan: Open Channel
+OpenChan: Channel
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
 Swap: Swap

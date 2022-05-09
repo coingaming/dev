@@ -158,6 +158,7 @@ library
     , fast-logger >=2.2 && <3.1
     , file-embed
     , foreign-store
+    , format-numbers
     , generic-pretty-instances
     , hex-text
     , hjsmin >=0.1 && <0.3
@@ -283,6 +284,7 @@ executable btc-lsp-exe
     , fast-logger >=2.2 && <3.1
     , file-embed
     , foreign-store
+    , format-numbers
     , generic-pretty-instances
     , hex-text
     , hjsmin >=0.1 && <0.3
@@ -505,6 +507,7 @@ executable btc-lsp-integration
     , fast-logger >=2.2 && <3.1
     , file-embed
     , foreign-store
+    , format-numbers
     , generic-arbitrary
     , generic-pretty-instances
     , hex-text
@@ -716,6 +719,7 @@ executable btc-lsp-prof
     , fast-logger >=2.2 && <3.1
     , file-embed
     , foreign-store
+    , format-numbers
     , generic-pretty-instances
     , hex-text
     , hjsmin >=0.1 && <0.3
@@ -936,6 +940,7 @@ test-suite btc-lsp-test
     , fast-logger >=2.2 && <3.1
     , file-embed
     , foreign-store
+    , format-numbers
     , generic-arbitrary
     , generic-pretty-instances
     , hex-text

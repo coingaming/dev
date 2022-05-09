@@ -263,5 +263,8 @@ newNamedListWidget ::
   Maybe Widget
 newNamedListWidget _ [] =
   Nothing
-newNamedListWidget title rows =
+newNamedListWidget title rawRows =
   Just $(widgetFile "named_list")
+  where
+    idxRows :: [(Natural, [(AppMessage, Text)])]
+    idxRows = zip [0 ..] rawRows
