@@ -56,7 +56,6 @@ in {
     ${lndAlice.up}/bin/up
     ${lndBob.up}/bin/up
     echo "Starting tests"
-    ${btcLspTest}/bin/btc-lsp-test
     echo "Down in progress"
 
     ${lndLsp.down}/bin/down

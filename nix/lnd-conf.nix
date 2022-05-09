@@ -76,10 +76,12 @@ let
   start = writeShellScriptBin "start" ''
     echo $$ > ${workDir}/lnd.pid
     ${lnd}/bin/lnd --lnddir='${workDir}' --bitcoin.defaultchanconfs=1 > '${workDir}/stdout.log' &
+    echo "$!" > ${workDir}/lnd.pid
     echo "Lnd ${name} started"
   '';
   stop = writeShellScriptBin "stop" ''
     lnd_pid=`cat ${workDir}/lnd.pid`
+    echo "Stoping lnd ${name} $lnd_pid"
     timeout 5 ${cli}/bin/lncli stop
     kill -9 "$lnd_pid"
   '';
