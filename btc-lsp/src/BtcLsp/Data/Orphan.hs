@@ -62,8 +62,6 @@ instance From Word64 Lnd.Seconds
 
 instance From Lnd.Seconds Word64
 
-deriving newtype instance Ord Lnd.Seconds
-
 deriving stock instance Generic Btc.Block
 
 deriving newtype instance PathPiece Lnd.PaymentRequest

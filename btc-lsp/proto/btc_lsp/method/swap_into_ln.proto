@@ -35,9 +35,9 @@ message Response {
     repeated InternalFailure internal = 3;
 
     enum InputFailure {
-      NON_ZERO_AMT_FUND_LN_INVOICE = 0;
-      TOO_LOW_EXPIRY_FUND_LN_INVOICE = 1;
-      SIGNATURE_NOT_GENUINE_FUND_LN_INVOICE = 2;
+      FUND_LN_INVOICE_HAS_NON_ZERO_AMT = 0;
+      FUND_LN_INVOICE_EXPIRES_TOO_SOON = 1;
+      FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE = 2;
     }
 
     message InternalFailure {

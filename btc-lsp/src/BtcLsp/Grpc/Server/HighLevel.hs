@@ -85,17 +85,17 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
   when
     (Lnd.numMsat fundInvLnd /= MSat 0)
     $ throwSpec
-      SwapIntoLn.Response'Failure'NON_ZERO_AMT_FUND_LN_INVOICE
+      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
   when
     (Lnd.expiry fundInvLnd < Time.swapExpiryLimit)
     $ throwSpec
-      SwapIntoLn.Response'Failure'TOO_LOW_EXPIRY_FUND_LN_INVOICE
+      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
   when
     ( Lnd.destination fundInvLnd
         /= userNodePubKey (entityVal userEnt)
     )
     $ throwSpec
-      SwapIntoLn.Response'Failure'SIGNATURE_NOT_GENUINE_FUND_LN_INVOICE
+      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
   fundAddr <-
     from
       <$> withLndServerT
@@ -106,18 +106,15 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
                 Lnd.account = Nothing
               }
         )
-  expAt <-
-    lift
-      . getFutureTime
-      $ Lnd.expiry fundInvLnd
-  lift . runSql $
-    SwapIntoLn.createIgnoreSql
+  lift
+    . runSql
+    . SwapIntoLn.createIgnoreSql
       userEnt
       fundInv
       (Lnd.paymentHash fundInvLnd)
       fundAddr
       refundAddr
-      expAt
+    $ Lnd.expiresAt fundInvLnd
 
 getCfg ::
   ( Env m

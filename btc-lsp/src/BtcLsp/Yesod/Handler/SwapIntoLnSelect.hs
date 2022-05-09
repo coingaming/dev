@@ -143,6 +143,8 @@ getSwapIntoLnSelectR uuid = do
                 >>= \case
                   (msg, Just txt) -> [(msg, txt)]
                   (_, Nothing) -> []
+        let swapInfoWidget =
+              newNamedListWidget MsgSwapInfo [items]
         defaultLayout $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
           $(widgetFile "swap_into_ln_select")
@@ -154,6 +156,16 @@ getSwapIntoLnSelectR uuid = do
   where
     htmlUuid = $(mkHtmlUuid)
 
+newNamedListWidget ::
+  AppMessage ->
+  [[(AppMessage, Text)]] ->
+  Widget
+newNamedListWidget title rows =
+  $(widgetFile "named_list")
+
+--
+-- TODO : use newNamedListWidget instead!!!
+--
 newUtxoTableWidget :: [SwapIntoLn.UtxoInfo] -> Handler Widget
 newUtxoTableWidget utxos = do
   master <- getYesod
