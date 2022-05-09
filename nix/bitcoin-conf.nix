@@ -69,6 +69,7 @@ let
     ${bitcoind}/bin/bitcoin-cli -rpcwait -datadir='${workDir}' "$@"
   '';
   up = writeShellScriptBin "up" ''
+    pwd
     ${setup}/bin/setup
     ${start}/bin/start
     ${init}/bin/init

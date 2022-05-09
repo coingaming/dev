@@ -50,17 +50,38 @@ in {
     echo $?
   '';
   btc-lsp-test =  nixPkgs.runCommand "btc-lsp-test" {} ''
+    set -euo pipefail
     ${bitcoindConf.up}/bin/up
-
     ${lndLsp.up}/bin/up
     ${lndAlice.up}/bin/up
     ${lndBob.up}/bin/up
-    echo "Starting tests"
-    echo "Down in progress"
+
+    ${btcLspTest}/bin/btc-lsp-test && true
+    pwd
+    ls -la
+    echo "end"
 
     ${lndLsp.down}/bin/down
     ${lndAlice.down}/bin/down
     ${lndBob.down}/bin/down
     ${bitcoindConf.down}/bin/down
+
+    echo "end"
+    touch $out; exit 1
   '';
 }
+
+
+#
+    #${lndAlice.up}/bin/up
+    #${lndBob.up}/bin/up
+#    echo "Starting tests"
+#    ls -la
+#    ${nixPkgs.ps}/bin/ps aux | grep lnd
+#${btcLspTest}/bin/btc-lsp-test
+#    echo "Down in progress"
+
+#${lndLsp.down}/bin/down
+#    ${lndAlice.down}/bin/down
+#    ${lndBob.down}/bin/down
+#    ${bitcoindConf.down}/bin/down

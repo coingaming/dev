@@ -9,6 +9,7 @@
 , symlinkJoin
 , runCommand
 , openssl
+, ps
 , lnd
 }:
 let
@@ -20,7 +21,7 @@ let
     bitcoin.node=bitcoind
 
     [Bitcoind]
-    bitcoind.dir=${workDir}/bitcoind_regtest
+    bitcoind.dir=${workDir}/bitcoind_alice
     bitcoind.rpchost=127.0.0.1
     bitcoind.rpcuser=developer
     bitcoind.rpcpass=developer
@@ -36,7 +37,7 @@ let
     listen=0.0.0.0:${toString port}
     rpclisten=localhost:${toString rpcport}
     restlisten=0.0.0.0:${toString restport}
-    debuglevel=warn,PEER=warn
+    debuglevel=debug,PEER=debug
   '';
   serviceName = "lnd-${name}";
   workDir = "${dataDir}/${serviceName}";
@@ -67,17 +68,17 @@ let
   '';
   setup = writeShellScriptBin "setup" ''
     mkdir -p "${workDir}"
-    ls -la
     cp -f ${lndconf} ${workDir}/lnd.conf
     cp -f ${tlscert}/* ${workDir}/
     mkdir -p ${workDir}/data/chain/bitcoin/regtest
     cp --no-preserve=mode,ownership ${macaroonDir}/*macaroon* ${workDir}/data/chain/bitcoin/regtest
   '';
   start = writeShellScriptBin "start" ''
-    echo $$ > ${workDir}/lnd.pid
-    ${lnd}/bin/lnd --lnddir='${workDir}' --bitcoin.defaultchanconfs=1 > '${workDir}/stdout.log' &
+    ${lnd}/bin/lnd --lnddir=${workDir} --bitcoin.defaultchanconfs=1  > ${workDir}/stdout.log 2>&1 &
+    ${ps}/bin/ps aux | grep lnd
     echo "$!" > ${workDir}/lnd.pid
-    echo "Lnd ${name} started"
+    disown $(cat ${workDir}/lnd.pid)
+    echo "Lnd ${name} started $!"
   '';
   stop = writeShellScriptBin "stop" ''
     lnd_pid=`cat ${workDir}/lnd.pid`
