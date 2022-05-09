@@ -18,14 +18,9 @@
             <span .input-group-btn>
               <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
                 _{MsgCopy}
-      ^{swapInfoWidget}
-      $maybe tab <- mUtxoTableWidget
-        <hr>
-        <h4>_{MsgSwapUtxos}
-        <hr>
-        ^{tab}
-      $maybe tab <- mChanTableWidget
-        <hr>
-        <h4>_{MsgSwapChans}
-        <hr>
-        ^{tab}
+      $maybe swapWidget <- mSwapWidget
+        ^{swapWidget}
+      $maybe utxoWidget <- mUtxoWidget
+        ^{utxoWidget}
+      $maybe chanWidget <- mChanWidget
+        ^{chanWidget}
