@@ -78,7 +78,7 @@ in {
     ${electrsAlice.up}/bin/up
     ${postgres.up}/bin/up
 
-    ${btcLspTest}/bin/btc-lsp-test && true
+    ${btcLspTest}/bin/btc-lsp-test --match "/Refunder/Refunder Spec/"
 
     ${postgres.down}/bin/down
     ${electrsAlice.down}/bin/down

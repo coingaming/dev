@@ -3,7 +3,8 @@
   lspCerts,
   runCommand,
   openssl,
-  writeText
+  writeText,
+  lib
 }: let
   serviceName = "btc-lsp";
   tlscerts = runCommand "lsp-tls-certs" {
@@ -22,14 +23,20 @@
     mv ./btc_lsp_tls_key.pem $out/key.pem
     mv ./btc_lsp_tls_cert.pem $out/cert.pem
   '';
-  lndEnv = {lndPort, cert} : ''
+  lndEnv = {lndPort, cert, mnemonic, aezeed} : ''
     {
     \"lnd_wallet_password\":\"developer\",
     \"lnd_tls_cert\":\"$(cat "${cert}/tls.cert" | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')\",
     \"lnd_hex_macaroon\":\"0201036c6e6402f801030a10f65286e21207df41cc77be0175cbb2871201301a160a0761646472657373120472656164120577726974651a130a04696e666f120472656164120577726974651a170a08696e766f69636573120472656164120577726974651a210a086d616361726f6f6e120867656e6572617465120472656164120577726974651a160a076d657373616765120472656164120577726974651a170a086f6666636861696e120472656164120577726974651a160a076f6e636861696e120472656164120577726974651a140a057065657273120472656164120577726974651a180a067369676e6572120867656e6572617465120472656164000006202eba3f3acaa7a7b974fdccc7a10060ede5b4801a85661c58166b062412e92e8a\",
     \"lnd_host\":\"127.0.0.1\",
     \"lnd_port\":${toString lndPort},
-    \"lnd_cipher_seed_mnemonic\":[
+    \"lnd_cipher_seed_mnemonic\":[${mnemonic}]
+    ${lib.optionalString aezeed '',\"lnd_aezeed_passphrase\":\"developer\"''}
+  }
+  '';
+lspLndEnv = lndEnv {
+  aezeed = true;
+  lndPort=10010;cert=lspCerts;mnemonic=''
                   \"absent\",
                   \"dilemma\",
                   \"mango\",
@@ -54,12 +61,35 @@
                   \"number\",
                   \"wealth\",
                   \"thunder\"
-                  ],
-    \"lnd_aezeed_passphrase\":\"developer\"
-  }
-  '';
-lspLndEnv = lndEnv {lndPort=10010;cert=lspCerts;};
-aliceLndEnv = lndEnv {lndPort=10011;cert=aliceCerts;};
+'';};
+aliceLndEnv = lndEnv {
+  aezeed = false;
+  lndPort=10011;cert=aliceCerts;mnemonic=''
+               \"absent\",
+               \"betray\",
+               \"direct\",
+               \"scheme\",
+               \"sunset\",
+               \"mechanic\",
+               \"exhaust\",
+               \"suggest\",
+               \"boy\",
+               \"arena\",
+               \"sketch\",
+               \"bone\",
+               \"news\",
+               \"south\",
+               \"way\",
+               \"survey\",
+               \"clip\",
+               \"dutch\",
+               \"depart\",
+               \"green\",
+               \"furnace\",
+               \"wire\",
+               \"wave\",
+               \"fall\"
+'';};
 in writeText "export-lsp-env" ''
   export GODEBUG=x509ignoreCN=0
   export LSP_LND_ENV="${lspLndEnv}"
