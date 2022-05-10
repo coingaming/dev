@@ -16,7 +16,7 @@ import TestOrphan ()
 import TestWithLndLsp as T
 
 spec :: Spec
-spec = T.itEnv "Reorg is not working test" $ do
+spec = T.xitEnv "Reorg is not working test" $ do
     _ <- runExceptT $ do
       void $ withBtcT Btc.setNetworkActive ($ False)
       _ <- BlockScanner.scan

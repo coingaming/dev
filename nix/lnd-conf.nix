@@ -94,5 +94,5 @@ let
     ${stop}/bin/stop
   '';
 in {
-  inherit up down;
+  inherit up down tlscert;
 }

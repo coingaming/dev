@@ -6,30 +6,31 @@ let
   ln = import ./nix/lnd-conf.nix;
   electrs = import ./nix/electrs-conf.nix;
   pg = import ./nix/postgres-conf.nix;
+  lsp = import ./nix/lsp-conf.nix;
   bitcoindConf = nixPkgs.callPackage bc {
     name="alice";
     dataDir=".";
   };
   lndLsp = nixPkgs.callPackage ln {
-    port = 9735;
-    rpcport = 10009;
-    restport = 8080;
+    port = 9736;
+    rpcport = 10010;
+    restport = 8081;
     dataDir = ".";
     name = "lsp";
     macaroonDir = "${prjSrc}/btc-lsp/test/Macaroon/";
   };
   lndAlice = nixPkgs.callPackage ln {
-    port = 9736;
-    rpcport = 10010;
-    restport = 8081;
+    port = 9737;
+    rpcport = 10011;
+    restport = 8082;
     dataDir = ".";
     name = "alice";
     macaroonDir = "${prjSrc}/btc-lsp/test/Macaroon/";
   };
   lndBob = nixPkgs.callPackage ln {
-    port = 9737;
-    rpcport = 10011;
-    restport = 8082;
+    port = 9738;
+    rpcport = 10012;
+    restport = 8083;
     dataDir = ".";
     name = "bob";
     macaroonDir = "${prjSrc}/btc-lsp/test/Macaroon/";
@@ -42,6 +43,10 @@ let
   postgres = nixPkgs.callPackage pg {
     dataDir = ".";
     name = "postgres_data";
+  };
+  lspEnv = nixPkgs.callPackage lsp {
+    aliceCerts = lndAlice.tlscert;
+    lspCerts = lndLsp.tlscert;
   };
   networkBitcoinTest = p.network-bitcoin.components.tests.network-bitcoin-tests;
   genericPrettyInstancesTest = p.generic-pretty-instances.components.tests.generic-pretty-instances-test;
@@ -60,10 +65,12 @@ in {
     ${genericPrettyInstancesTest}/bin/generic-pretty-instances-test > $out
     echo $?
   '';
-  btc-lsp-test =  nixPkgs.runCommand "btc-lsp-test" {
+  btc-lsp-test =  nixPkgs.runCommand "btc-lsp-test" ({
     buildInputs=[nixPkgs.ps];
-  } ''
+  }) ''
     set -euo pipefail
+    source ${lspEnv}
+    env
     ${bitcoindConf.up}/bin/up
     ${lndLsp.up}/bin/up
     ${lndAlice.up}/bin/up
@@ -71,11 +78,7 @@ in {
     ${electrsAlice.up}/bin/up
     ${postgres.up}/bin/up
 
-    ps aux | grep electrs
     ${btcLspTest}/bin/btc-lsp-test && true
-    pwd
-    ls -la
-    echo "end"
 
     ${postgres.down}/bin/down
     ${electrsAlice.down}/bin/down
@@ -84,22 +87,6 @@ in {
     ${lndBob.down}/bin/down
     ${bitcoindConf.down}/bin/down
 
-    echo "end"
     touch $out; exit 1
   '';
 }
-
-
-#
-    #${lndAlice.up}/bin/up
-    #${lndBob.up}/bin/up
-#    echo "Starting tests"
-#    ls -la
-#    ${nixPkgs.ps}/bin/ps aux | grep lnd
-#${btcLspTest}/bin/btc-lsp-test
-#    echo "Down in progress"
-
-#${lndLsp.down}/bin/down
-#    ${lndAlice.down}/bin/down
-#    ${lndBob.down}/bin/down
-#    ${bitcoindConf.down}/bin/down
