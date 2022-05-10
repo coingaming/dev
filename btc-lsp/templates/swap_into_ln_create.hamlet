@@ -1,7 +1,0 @@
-<div .ui.container.center>
-  <div .panel.panel-#{bsColor2Class color}>
-    <div .panel-heading>_{MsgSwapIntoLnInfoShort}
-    <div .panel-body.large-margin-bottom>
-      <div .jumbotron.bg-color-inherit.no-margin-bottom>
-        <p .text-center.no-margin-bottom>_{MsgSwapIntoLnInfoLong}
-      ^{form}

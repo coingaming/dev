@@ -1,26 +1,20 @@
-<div .ui.container.center>
-  <div .panel.panel-#{bsColor2Class color}>
-    <div .panel-heading>_{msgShort}
-    <div .panel-body>
-      <div .jumbotron.bg-color-inherit.no-margin-bottom>
-        <p .text-center.no-margin-bottom>_{msgLong}
-        $if swapIntoLnStatus == SwapWaitingFundChain
-          <img .img-responsive.center-block.small-margin-bottom src=#{fundAddrQr} alt=#{toText swapIntoLnFundAddress}>
-          <div .input-group>
-            <input .form-control id=#{htmlUuid} type="text" value=#{toText swapIntoLnFundAddress} readonly>
-            <span .input-group-btn>
-              <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
-                _{MsgCopy}
-        $if swapIntoLnStatus == SwapWaitingPeer
-          <img .img-responsive.center-block.small-margin-bottom src=#{nodeUriQr} alt=#{nodeUriHex}>
-          <div .input-group>
-            <input .form-control id=#{htmlUuid} type="text" value=#{nodeUriHex} readonly>
-            <span .input-group-btn>
-              <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
-                _{MsgCopy}
-      $maybe swapWidget <- mSwapWidget
-        ^{swapWidget}
-      $maybe utxoWidget <- mUtxoWidget
-        ^{utxoWidget}
-      $maybe chanWidget <- mChanWidget
-        ^{chanWidget}
+$if swapIntoLnStatus == SwapWaitingFundChain
+  <img .img-responsive.center-block.small-margin-bottom src=#{fundAddrQr} alt=#{toText swapIntoLnFundAddress}>
+  <div .input-group.extra-large-margin-bottom>
+    <input .form-control id=#{htmlUuid} type="text" value=#{toText swapIntoLnFundAddress} readonly>
+    <span .input-group-btn>
+      <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+        _{MsgCopy}
+$if swapIntoLnStatus == SwapWaitingPeer
+  <img .img-responsive.center-block.small-margin-bottom src=#{nodeUriQr} alt=#{nodeUriHex}>
+  <div .input-group.extra-large-margin-bottom>
+    <input .form-control id=#{htmlUuid} type="text" value=#{nodeUriHex} readonly>
+    <span .input-group-btn>
+      <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+        _{MsgCopy}
+$maybe swapWidget <- mSwapWidget
+  ^{swapWidget}
+$maybe utxoWidget <- mUtxoWidget
+  ^{utxoWidget}
+$maybe chanWidget <- mChanWidget
+  ^{chanWidget}

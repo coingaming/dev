@@ -1,13 +1,6 @@
-<div .ui.container.center>
-  <div .panel.panel-info>
-    <div .panel-heading>_{MsgOpenChan}
-    <div .panel-body.large-margin-bottom>
-      <div .jumbotron.bg-color-inherit.no-margin-bottom>
-        <p .text-center.no-margin-bottom>_{MsgOpenChanInstruction}
-      <div .ui.container-fluid>
-        <img .img-responsive.center-block.margin-bottom src=#{qrCodeSrc} alt=#{nodeUriHex}>
-        <div .input-group>
-          <input .form-control id=#{htmlUuid} type="text" value=#{nodeUriHex} readonly>
-          <span .input-group-btn>
-            <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
-              _{MsgCopy}
+<img .img-responsive.center-block.margin-bottom src=#{qrCodeSrc} alt=#{nodeUriHex}>
+<div .input-group>
+  <input .form-control id=#{htmlUuid} type="text" value=#{nodeUriHex} readonly>
+  <span .input-group-btn>
+    <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
+      _{MsgCopy}
