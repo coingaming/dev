@@ -21,7 +21,7 @@
 
             <ul .nav.navbar-nav.navbar-right>
                 $forall langCode <- BtcLsp.Yesod.Data.Language.codeList
-                  <li>
+                  <li :mLang == Just (toPathPiece langCode):.active>
                     <a href="@{LanguageR langCode}">
                       <span class="flag-icon flag-icon-#{renderMessage master [toPathPiece langCode] MsgIso3166v1}">
                 $forall MenuItem label route _ isActive noReferrer <- navbarRightFilteredMenuItems

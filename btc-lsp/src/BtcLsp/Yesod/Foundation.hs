@@ -127,8 +127,6 @@ instance Yesod App where
   defaultLayout widget = do
     master <- getYesod
     mmsg <- getMessage
-
-    muser <- maybeAuthPair
     mcurrentRoute <- getCurrentRoute
 
     -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
@@ -144,21 +142,29 @@ instance Yesod App where
                   menuItemActiveCallback = mcurrentRoute == Just HomeR,
                   menuItemNoReferrer = False
                 },
-            NavbarRight $
+            NavbarLeft $
               MenuItem
-                { menuItemLabel = MsgLogin,
-                  menuItemRoute = AuthR LoginR,
-                  menuItemAccessCallback = isNothing muser,
-                  menuItemActiveCallback = mcurrentRoute == Just (AuthR LoginR),
-                  menuItemNoReferrer = True
+                { menuItemLabel = MsgOpenChan,
+                  menuItemRoute = OpenChanR,
+                  menuItemAccessCallback = True,
+                  menuItemActiveCallback = mcurrentRoute == Just OpenChanR,
+                  menuItemNoReferrer = False
                 },
-            NavbarRight $
+            NavbarLeft $
               MenuItem
-                { menuItemLabel = MsgLogout,
-                  menuItemRoute = AuthR LogoutR,
-                  menuItemAccessCallback = isJust muser,
-                  menuItemActiveCallback = False,
-                  menuItemNoReferrer = True
+                { menuItemLabel = MsgSwap,
+                  menuItemRoute = SwapIntoLnCreateR,
+                  menuItemAccessCallback = True,
+                  menuItemActiveCallback =
+                    maybe
+                      False
+                      ( \case
+                          SwapIntoLnCreateR -> True
+                          SwapIntoLnSelectR {} -> True
+                          _ -> False
+                      )
+                      mcurrentRoute,
+                  menuItemNoReferrer = False
                 }
           ]
 
@@ -174,6 +180,7 @@ instance Yesod App where
     -- value passed to hamletToRepHtml cannot be a widget, this allows
     -- you to use normal widget features in default-layout.
 
+    mLang <- lookupSession "_LANG"
     pc <- widgetToPageContent $ do
       addStylesheet $ StaticR css_bootstrap_css
       addStylesheet $ StaticR css_app_css
