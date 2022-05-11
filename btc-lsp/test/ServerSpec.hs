@@ -16,7 +16,7 @@ import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
 import qualified LndClient.LndTest as LndTest
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto

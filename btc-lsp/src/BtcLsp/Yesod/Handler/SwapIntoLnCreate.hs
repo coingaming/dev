@@ -1,6 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -12,13 +13,18 @@ where
 
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
+import BtcLsp.Grpc.Combinator
 import qualified BtcLsp.Grpc.Server.HighLevel as Server
 import BtcLsp.Storage.Model
 import BtcLsp.Storage.Model.User as User
 import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
+import Lens.Micro
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Proto.BtcLsp.Data.HighLevel as Proto
+import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
+import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Yesod.Form.Bootstrap3
 
 data SwapRequest = SwapRequest
@@ -41,7 +47,7 @@ getSwapIntoLnCreateR = do
       renderBootstrap3
         BootstrapBasicForm
         aForm
-  renderPage formWidget formEnctype
+  renderPage Info formWidget formEnctype
 
 postSwapIntoLnCreateR :: Handler Html
 postSwapIntoLnCreateR = do
@@ -56,13 +62,26 @@ postSwapIntoLnCreateR = do
       App {appMRunner = UnliftIO run} <- getYesod
       eSwap <- liftIO . run . runExceptT $ do
         fundInvLnd <-
-          withLndT
+          withLndServerT
             Lnd.decodePayReq
             ($ from fundInv)
         userEnt <-
-          ExceptT $
-            newNonce
-              >>= User.createVerify (Lnd.destination fundInvLnd)
+          withExceptT
+            ( const $
+                newGenFailure
+                  Proto.VERIFICATION_FAILED
+                  $( mkFieldLocation
+                       @SwapIntoLn.Request
+                       [ "ctx",
+                         "nonce"
+                       ]
+                   )
+            )
+            . ExceptT
+            $ newNonce
+              >>= runSql
+                . User.createVerifySql
+                  (Lnd.destination fundInvLnd)
         Server.swapIntoLnT
           userEnt
           fundInv
@@ -70,24 +89,47 @@ postSwapIntoLnCreateR = do
           $ swapRequestRefund req
       case eSwap of
         Left e -> do
-          setMessageI . MsgFailure $ inspectPlain e
-          renderPage formWidget formEnctype
+          setMessageI $ explainFailure e
+          renderPage Danger formWidget formEnctype
         Right swapEnt ->
           redirect
             . SwapIntoLnSelectR
             . swapIntoLnUuid
             $ entityVal swapEnt
     _ ->
-      renderPage formWidget formEnctype
+      renderPage Danger formWidget formEnctype
 
-renderPage :: Widget -> Enctype -> Handler Html
-renderPage formWidget formEnctype = do
+explainFailure :: SwapIntoLn.Response -> AppMessage
+explainFailure res =
+  maybe
+    MsgFailureDefault
+    ( \case
+        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT ->
+          MsgFailureFundLnInvoiceHasNonZeroAmt
+        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON ->
+          MsgFailureFundLnInvoiceExpiresTooSoon
+        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE ->
+          MsgFailureDefault
+        SwapIntoLn.Response'Failure'InputFailure'Unrecognized {} ->
+          MsgFailureDefault
+    )
+    $ res
+      ^? SwapIntoLn.maybe'failure
+        . _Just
+        . SwapIntoLn.specific
+      >>= listToMaybe
+
+renderPage :: BootstrapColor -> Widget -> Enctype -> Handler Html
+renderPage color formWidget formEnctype = do
   let formRoute = SwapIntoLnCreateR
   let formMsgSubmit = MsgContinue
-  let form = $(widgetFile "simple_form")
-  defaultLayout $ do
-    setTitleI MsgSwapIntoLnCreateRTitle
-    $(widgetFile "swap_into_ln_create")
+  panelLayout
+    color
+    MsgSwapIntoLnInfoShort
+    MsgSwapIntoLnInfoLong
+    $ do
+      setTitleI MsgSwapIntoLnCreateRTitle
+      $(widgetFile "simple_form")
 
 aForm :: AForm Handler SwapRequest
 aForm =

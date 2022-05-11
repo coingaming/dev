@@ -1,12 +1,12 @@
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Storage.Model.User
-  ( createVerify,
+  ( createVerifySql,
   )
 where
 
 import BtcLsp.Data.Orphan ()
-import BtcLsp.Import
+import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 
 --
@@ -15,13 +15,13 @@ import qualified BtcLsp.Import.Psql as Psql
 -- Plus this combinator enables all kinds of
 -- possibilities for deadlocks.
 --
-createVerify ::
-  ( Storage m
+createVerifySql ::
+  ( MonadIO m
   ) =>
   NodePubKey ->
   Nonce ->
-  m (Either Failure (Entity User))
-createVerify pub nonce = runSql $ do
+  ReaderT Psql.SqlBackend m (Either Failure (Entity User))
+createVerifySql pub nonce = do
   ct <- getCurrentTime
   let zeroRow =
         User
@@ -37,9 +37,7 @@ createVerify pub nonce = runSql $ do
         zeroRow
         [ UserUpdatedAt Psql.=. Psql.val ct
         ]
-  existingRow <-
-    entityVal
-      <$> lockByRow rowId
+  existingRow <- lockByRow rowId
   if (existingRow == zeroRow)
     || (userLatestNonce existingRow < nonce)
     then

@@ -1,11 +1,11 @@
 let
   header = (import ./header.nix);
-  pkgs = header.pkgs;
+  pkgs = header.nixPkgs;
   electrs = pkgs.electrs;
   entrypoint = pkgs.writeShellScriptBin "entrypoint" ''
     echo "auth='$BITCOIND_USER:$BITCOIND_PASSWORD'" \
       >> /.electrs/electrs.toml && \
-    echo "verbose=4" \
+    echo "log_filters = 'INFO'" \
       >> /.electrs/electrs.toml && \
     ${electrs}/bin/electrs \
       --conf="/.electrs/electrs.toml" \
@@ -15,8 +15,7 @@ let
       --daemon-rpc-addr="$DAEMON_RPC_ADDR" \
       --wait-duration-secs="$WAIT_DURATION_SECS" \
       --jsonrpc-import \
-      --timestamp \
-      --verbose
+      --timestamp
   '';
 in
   pkgs.dockerTools.buildImage {

@@ -10,9 +10,9 @@ import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import LndClient.LndTest (mine)
 import qualified Network.Bitcoin as Btc
 import Test.Hspec
+import TestHelpers
 import TestOrphan ()
 import TestWithLndLsp
-import TestHelpers
 
 spec :: Spec
 spec = do
@@ -22,7 +22,11 @@ spec = do
     res <- runExceptT $ do
       wbal <- withBtcT Btc.getBalance id
       let amt = wbal / 10
-      trAddr <- from . swapIntoLnFundAddress . entityVal <$> createDummySwap "one block"
+      trAddr <-
+        from
+          . swapIntoLnFundAddress
+          . entityVal
+          <$> createDummySwap "one block" Nothing
       void $
         withBtcT
           Btc.sendToAddress
@@ -47,7 +51,11 @@ spec = do
     res <- runExceptT $ do
       wbal <- withBtcT Btc.getBalance id
       let amt = wbal / 10
-      trAddr <- from . swapIntoLnFundAddress . entityVal <$> createDummySwap "two blocks"
+      trAddr <-
+        from
+          . swapIntoLnFundAddress
+          . entityVal
+          <$> createDummySwap "two blocks" Nothing
       void $
         withBtcT
           Btc.sendToAddress

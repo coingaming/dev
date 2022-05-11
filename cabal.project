@@ -1,11 +1,20 @@
-packages: *.cabal
+packages:
+  btc-lsp/
+  network-bitcoin/
+  generic-pretty-instances/
+
+index-state: 2022-04-06T00:00:00Z
 
 allow-newer: yesod-colonnade:base,
              lnd-client:base64-bytestring,
              qrcode-juicypixels:base64-bytestring
 
-package witch
-  flags: +remove-time
+source-repository-package
+  type: git
+  location: https://github.com/coingaming/signable.git
+  tag: 403a04f9d29181fcc627abb359f31140d6400bfb
+  --sha256: 0p6ck18ap0w518iaq8r09maxz7j23d8ykaskg5sshcb0hcdwpbqf
+  subdir: haskell
 
 source-repository-package
   type: git
@@ -32,20 +41,6 @@ source-repository-package
   location: https://github.com/21it/witch.git
   --sha256: 17dvcqj29883sysx5qcgjbi3smn1c9kjaj807a9a2vj24fg2jwja
   tag: ee0259bc5eb46d9c47d1c15473ff3e7d8212dc43
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/src.git
-  tag: bd13f5e66383aa56366bb075d19ae38e737aa9cd
-  --sha256: 0dyp954h1qhrrylzvdr31i3rgn5s8hkj8r8aaf3wkzjc6jrll41z
-  subdir: generic-pretty-instances
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/src.git
-  tag: b1f2ccf142685255c091302db0957f3e2d772301
-  --sha256: 0kpzh29vik269paa664jpy8ggvnxqa7ygy41flv0w04m7b5k9lz9
-  subdir: network-bitcoin
 
 source-repository-package
   type: git

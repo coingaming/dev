@@ -1,22 +1,15 @@
-{-# LANGUAGE DeriveLift #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Data.Type
   ( Nonce,
     newNonce,
-    TableName (..),
     LnInvoice (..),
     LnInvoiceStatus (..),
     LnChanStatus (..),
     Money (..),
     FeeRate (..),
     OnChainAddress (..),
-    FieldIndex (..),
-    ReversedFieldLocation (..),
     Seconds (..),
     LogFormat (..),
     MicroSeconds (..),
@@ -58,7 +51,6 @@ import qualified Data.Time.Clock as Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
-import qualified Language.Haskell.TH.Syntax as TH
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
@@ -107,25 +99,6 @@ epoch :: UTCTime
 epoch =
   posixSecondsToUTCTime 0
 
-newtype FieldIndex
-  = FieldIndex Word32
-  deriving newtype
-    ( Show
-    )
-  deriving stock
-    ( TH.Lift
-    )
-
-newtype ReversedFieldLocation
-  = ReversedFieldLocation [FieldIndex]
-  deriving newtype
-    ( Semigroup,
-      Show
-    )
-  deriving stock
-    ( TH.Lift
-    )
-
 data LogFormat
   = Bracket
   | JSON
@@ -168,13 +141,6 @@ data TaskRes
     ( Eq,
       Ord,
       Show
-    )
-
-data TableName
-  = UserTable
-  | LnChanTable
-  deriving stock
-    ( Enum
     )
 
 newtype LnInvoice (mrel :: MoneyRelation)
@@ -358,13 +324,16 @@ data SwapStatus
   = -- | Waiting on-chain funding trx with
     -- given amt from user with
     -- some confirmations.
-    SwapWaitingFund
+    SwapWaitingFundChain
   | -- | Swap has been funded on-chain,
     -- need to open LN channel now.
     SwapWaitingPeer
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan
+  | -- | Waiting funding LN invoice
+    -- to be paid by SwapperIntoLn.
+    SwapWaitingFundLn
   | -- | Final statuses
     SwapSucceeded
   | SwapExpired
@@ -792,7 +761,7 @@ instance Psql.PersistFieldSql (Uuid tab) where
 instance ToMessage (Uuid tab) where
   toMessage =
     (<> "...")
-      . T.take 7
+      . T.take 5
       . UUID.toText
       . unUuid
 

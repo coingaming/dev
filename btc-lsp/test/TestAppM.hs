@@ -16,6 +16,8 @@ module TestAppM
     getGCEnv,
     withLndTestT,
     setGrpcCtxT,
+    withBtc2,
+    withBtc2T,
   )
 where
 
@@ -24,7 +26,7 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
-import qualified BtcLsp.Storage.Model.LnChan as LnChan (getByChannelPoint)
+import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8 hiding (filter, length)
@@ -36,7 +38,7 @@ import qualified LndClient.Data.GetInfo as GetInfo
 import qualified LndClient.Data.SignMessage as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Silent as Lnd
 import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
@@ -63,6 +65,7 @@ proxyOwner = Proxy
 data TestEnv (owner :: TestOwner) = TestEnv
   { testEnvLsp :: Env.Env,
     testEnvBtc :: Btc.Client,
+    testEnvBtc2 :: Btc.Client,
     testEnvLndLsp :: LndTest.TestEnv,
     testEnvLndAlice :: LndTest.TestEnv,
     testEnvKatipNS :: Namespace,
@@ -182,6 +185,22 @@ withTestEnv action =
 
 -- where
 --   sub = SubscribeInvoicesRequest (Just $ Lnd.AddIndex 1) Nothing
+withBtc2 ::
+  (MonadReader (TestEnv owner) m, MonadIO m) =>
+  (Client -> t) ->
+  (t -> IO b) ->
+  m (Either a b)
+withBtc2 method args = do
+  env <- asks testEnvBtc2
+  liftIO $ Right <$> args (method env)
+
+withBtc2T ::
+  (MonadReader (TestEnv owner) m, MonadIO m) =>
+  (Client -> t) ->
+  (t -> IO a) ->
+  ExceptT e m a
+withBtc2T method =
+  ExceptT . withBtc2 method
 
 withLndTestT ::
   ( LndTest m owner
@@ -204,6 +223,12 @@ withTestEnv' action = do
       (unpack . bitcoindEnvHost $ rawConfigBtcEnv lspRc)
       (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv lspRc)
       (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv lspRc)
+  btcEnv2 <- readBtcEnv2
+  btcClient2 <-
+    Btc.getClient
+      (unpack . bitcoindEnvHost $ btcEnv2)
+      (encodeUtf8 . bitcoindEnvUsername $ btcEnv2)
+      (encodeUtf8 . bitcoindEnvPassword $ btcEnv2)
   let aliceRc =
         lspRc
           { rawConfigLndEnv = lndAliceEnv
@@ -227,6 +252,7 @@ withTestEnv' action = do
                     TestEnv
                       { testEnvLsp = lspAppEnv,
                         testEnvBtc = btcClient,
+                        testEnvBtc2 = btcClient2,
                         testEnvLndLsp = lspTestEnv,
                         testEnvLndAlice = aliceTestEnv,
                         testEnvKatipNS = katipNS,
@@ -247,7 +273,6 @@ withTestEnv' action = do
                       }
   where
     getP2PAddr host port = pack host <> ":" <> pack (show port)
-
 
 signT ::
   Lnd.LndEnv ->
@@ -320,6 +345,19 @@ readLndAliceEnv =
     parser x =
       first E.UnreadError $ eitherDecodeStrict $ C8.pack x
 
+readBtcEnv2 :: IO BitcoindEnv
+readBtcEnv2 = do
+  E.parse
+    (E.header "BitcoindEnv")
+    $ E.var
+      (parser <=< E.nonempty)
+      "LSP_BITCOIND_ENV2"
+      (E.keep <> E.help "")
+  where
+    parser :: String -> Either E.Error BitcoindEnv
+    parser x =
+      first E.UnreadError $ eitherDecodeStrict $ C8.pack x
+
 waitForChannelStatus ::
   (I.Env m) =>
   TxId 'Funding ->
@@ -332,7 +370,7 @@ waitForChannelStatus _ _ expectedStatus 0 =
     "waiting for channel " <> inspectStr expectedStatus <> " tries exceeded"
 waitForChannelStatus txid vout expectedStatus tries = do
   let loop = waitForChannelStatus txid vout expectedStatus (tries - 1)
-  dbChannel <- LnChan.getByChannelPoint txid vout
+  dbChannel <- runSql $ LnChan.getByChannelPointSql txid vout
   liftIO $ delay 1000000
   case dbChannel of
     Just db -> do

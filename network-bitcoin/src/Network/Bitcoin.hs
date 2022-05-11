@@ -54,6 +54,7 @@ module Network.Bitcoin
     , AddNodeCommand(..)
     , addNode
     , disconnectNode
+    , setNetworkActive
     -- * Raw Transaction Operations
     , RawTransaction
     , getRawTransaction

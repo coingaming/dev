@@ -1,3 +1,4 @@
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Grpc.Server.HighLevel
@@ -10,6 +11,7 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Math as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import qualified BtcLsp.Time as Time
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
@@ -28,13 +30,23 @@ swapIntoLn ::
 swapIntoLn userEnt req = do
   res <- runExceptT $ do
     fundInv <-
-      fromReqT $
-        req ^. SwapIntoLn.maybe'fundLnInvoice
+      fromReqT
+        $( mkFieldLocation
+             @SwapIntoLn.Request
+             [ "fund_ln_invoice"
+             ]
+         )
+        $ req ^. SwapIntoLn.maybe'fundLnInvoice
     refundAddr <-
-      fromReqT $
-        req ^. SwapIntoLn.maybe'refundOnChainAddress
+      fromReqT
+        $( mkFieldLocation
+             @SwapIntoLn.Request
+             [ "refund_on_chain_address"
+             ]
+         )
+        $ req ^. SwapIntoLn.maybe'refundOnChainAddress
     fundInvLnd <-
-      withLndT
+      withLndServerT
         Lnd.decodePayReq
         ($ from fundInv)
     swapIntoLnT
@@ -43,8 +55,7 @@ swapIntoLn userEnt req = do
       fundInvLnd
       refundAddr
   pure $ case res of
-    Left e ->
-      failResE e
+    Left e -> e
     Right (Entity _ swap) ->
       defMessage
         & SwapIntoLn.success
@@ -65,21 +76,29 @@ swapIntoLnT ::
   LnInvoice 'Fund ->
   Lnd.PayReq ->
   OnChainAddress 'Refund ->
-  ExceptT Failure m (Entity SwapIntoLn)
+  ExceptT SwapIntoLn.Response m (Entity SwapIntoLn)
 swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
   --
-  -- TODO : proper input failure
+  -- TODO : Do not fail immediately, but collect
+  -- all the input failures.
   --
   when
-    ( Lnd.numMsat fundInvLnd /= MSat 0
-        || Lnd.destination fundInvLnd
-          /= userNodePubKey (entityVal userEnt)
+    (Lnd.numMsat fundInvLnd /= MSat 0)
+    $ throwSpec
+      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+  when
+    (Lnd.expiry fundInvLnd < Time.swapExpiryLimit)
+    $ throwSpec
+      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+  when
+    ( Lnd.destination fundInvLnd
+        /= userNodePubKey (entityVal userEnt)
     )
-    . throwE
-    $ FailureInput [defMessage]
+    $ throwSpec
+      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
   fundAddr <-
     from
-      <$> withLndT
+      <$> withLndServerT
         Lnd.newAddress
         ( $
             Lnd.NewAddressRequest
@@ -87,18 +106,15 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
                 Lnd.account = Nothing
               }
         )
-  expAt <-
-    lift
-      . getFutureTime
-      $ Lnd.expiry fundInvLnd
-  lift $
-    SwapIntoLn.createIgnore
+  lift
+    . runSql
+    . SwapIntoLn.createIgnoreSql
       userEnt
       fundInv
       (Lnd.paymentHash fundInvLnd)
       fundAddr
       refundAddr
-      expAt
+    $ Lnd.expiresAt fundInvLnd
 
 getCfg ::
   ( Env m

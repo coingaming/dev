@@ -10,12 +10,12 @@ module BtcLsp.Storage.Util
 where
 
 import BtcLsp.Class.Storage
-import BtcLsp.Data.Type
+import BtcLsp.Data.Kind
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Universum
 
--- this ugly fake type is here just to
+-- | This ugly fake type is here just to
 -- make Haskell type system compatible
 -- with weird Postgres semantics
 -- for pg_advisory_xact_lock
@@ -28,7 +28,7 @@ instance Psql.RawSql VoidSQL where
   rawSqlProcessRow [Psql.PersistNull] = Right VoidSQL
   rawSqlProcessRow _ = Left "Unexpected VoidSQL expr"
 
-lockByTable :: (MonadIO m) => TableName -> Psql.SqlPersistT m ()
+lockByTable :: (MonadIO m) => Table -> Psql.SqlPersistT m ()
 lockByTable x =
   void
     ( Psql.rawSql
@@ -39,37 +39,47 @@ lockByTable x =
 
 lockByRow ::
   ( MonadIO m,
-    HasTableName a,
+    HasTable a,
     Psql.ToBackendKey Psql.SqlBackend a
   ) =>
   Psql.Key a ->
-  Psql.SqlPersistT m (Entity a)
+  Psql.SqlPersistT m a
 lockByRow rowId = do
   void
     ( Psql.rawSql
         "SELECT pg_advisory_xact_lock(?,?)"
-        [ Psql.PersistInt64 $ fromIntegral $ fromEnum $ getTableName rowId,
+        [ Psql.PersistInt64 . from . fromEnum $ getTable rowId,
           Psql.PersistInt64 $ Psql.fromSqlKey rowId
         ] ::
         (MonadIO m) => Psql.SqlPersistT m [VoidSQL]
     )
   maybeM
     (error $ "Impossible missing row " <> Universum.show rowId)
-    (pure . Entity rowId)
+    pure
     $ Psql.get rowId
 
-rollback :: (KatipContext m, Out a) => a -> Psql.SqlPersistT m (Either a b)
+rollback ::
+  ( KatipContext m,
+    Out a
+  ) =>
+  a ->
+  Psql.SqlPersistT m (Either a b)
 rollback e = do
   Psql.transactionUndo
   $(logTM) DebugS . logStr $ "Rollback " <> inspect e
   pure $ Left e
 
-commit :: (KatipContext m, Out b) => b -> Psql.SqlPersistT m (Either a b)
+commit ::
+  ( KatipContext m,
+    Out b
+  ) =>
+  b ->
+  Psql.SqlPersistT m (Either a b)
 commit x = do
   $(logTM) DebugS . logStr $ "Commit " <> inspect x
   pure $ Right x
 
-cleanDb :: MonadIO m => Psql.SqlPersistT m ()
+cleanDb :: (MonadIO m) => Psql.SqlPersistT m ()
 cleanDb =
   Psql.rawExecute
     ( "DROP SCHEMA IF EXISTS public CASCADE;"

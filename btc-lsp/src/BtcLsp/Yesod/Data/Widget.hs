@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module BtcLsp.Yesod.Data.Widget where
@@ -9,7 +10,10 @@ import BtcLsp.Yesod.Import
 import Colonnade
 import qualified Data.Text as T
 import GHC.Exts (IsList (..))
-import Text.Blaze.Html5.Attributes
+import Text.Blaze.Html5.Attributes hiding
+  ( rows,
+    title,
+  )
 import Yesod.Colonnade
 import Yesod.Form.Bootstrap3
 
@@ -252,3 +256,15 @@ toText ::
   Text
 toText =
   from
+
+newNamedListWidget ::
+  AppMessage ->
+  [[(AppMessage, Text)]] ->
+  Maybe Widget
+newNamedListWidget _ [] =
+  Nothing
+newNamedListWidget title rawRows =
+  Just $(widgetFile "named_list")
+  where
+    idxRows :: [(Natural, [(AppMessage, Text)])]
+    idxRows = zip [0 ..] rawRows

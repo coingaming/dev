@@ -10,6 +10,8 @@ let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
 
+let Ingress = ../Kubernetes/Ingress.dhall
+
 let Deployment = ../Kubernetes/Deployment.dhall
 
 let Bitcoind = ./Bitcoind.dhall
@@ -36,6 +38,10 @@ let grpcPort
     : G.Port
     = { unPort = 8443 }
 
+let yesodPort
+    : G.Port
+    = { unPort = 3000 }
+
 let env =
       { lspLogEnv = "LSP_LOG_ENV"
       , lspLogFormat = "LSP_LOG_FORMAT"
@@ -49,6 +55,8 @@ let env =
       , lspBitcoindEnv = "LSP_BITCOIND_ENV"
       , lspMinChanCapMsat = "LSP_MIN_CHAN_CAP_MSAT"
       , lspMsatPerByte = "LSP_MSAT_PER_BYTE"
+      , lspYesodHost = "LSP_YESOD_HOST"
+      , lspYesodPort = "LSP_YESOD_PORT"
       }
 
 let configMapEnv
@@ -61,6 +69,8 @@ let configMapEnv
       , env.lspLndP2pPort
       , env.lspMinChanCapMsat
       , env.lspMsatPerByte
+      , env.lspYesodHost
+      , env.lspYesodPort
       ]
 
 let secretEnv
@@ -135,7 +145,12 @@ let mkLndEnv
 
 let ports
     : List Natural
-    = G.unPorts [ grpcPort ]
+    = G.unPorts [ grpcPort, yesodPort ]
+
+let mkDomain
+    : G.BitcoinNetwork → Text
+    = λ(net : G.BitcoinNetwork) →
+        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
 
 let mkEnv
     : G.BitcoinNetwork → P.Map.Type Text Text
@@ -160,6 +175,8 @@ let mkEnv
         , { mapKey = env.lspMinChanCapMsat
           , mapValue = Natural/show minChanSize
           }
+        , { mapKey = env.lspYesodHost, mapValue = "*" }
+        , { mapKey = env.lspYesodPort, mapValue = G.unPort yesodPort }
         ]
 
 let mkSetupEnv
@@ -250,6 +267,15 @@ let mkService
           (mkServiceType net)
           (Service.mkPorts ports)
 
+let mkIngress
+    : G.BitcoinNetwork → K.Ingress.Type
+    = λ(net : G.BitcoinNetwork) →
+        Ingress.mkIngress
+          owner
+          (mkDomain net)
+          yesodPort.unPort
+          (None (List K.IngressTLS.Type))
+
 let mkContainerImage
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
@@ -290,6 +316,7 @@ in  { mkEnv
     , grpcPort
     , secretEnv
     , mkService
+    , mkIngress
     , mkDeployment
     , mkLspGrpcClientEnv
     , mkLspBitcoindEnv

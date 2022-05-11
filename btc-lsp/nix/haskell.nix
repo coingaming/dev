@@ -1,11 +1,11 @@
 let
   header = (import ./header.nix);
   pkgs = header.pkgs;
-  lnd = import ./lnd.nix { inherit pkgs; };
-  bitcoin = import ./bitcoin.nix { inherit pkgs; };
+  nixPkgs = header.nixPkgs;
 in
   {
     pkgs = pkgs;
+    nixPkgs = nixPkgs;
     project = {
       profile ? false,
     }: pkgs.haskell-nix.project {
@@ -14,7 +14,7 @@ in
         name = "btc-lsp";
         src = ../.;
       };
-      compiler-nix-name = "ghc8107";
+      compiler-nix-name = header.compiler-nix-name;
       modules = [{
         enableLibraryProfiling = profile;
         packages.classy-prelude-yesod.components.library.doHaddock = false;
@@ -30,20 +30,20 @@ in
           ./nix/ns-spawn-test-deps.sh;
         '';
         packages.btc-lsp.components.tests.btc-lsp-test.build-tools = [
-          pkgs.haskellPackages.hspec-discover
-          pkgs.postgresql
-          pkgs.openssl
-          pkgs.electrs
-          bitcoin
-          lnd
+          nixPkgs.haskellPackages.hspec-discover
+          nixPkgs.postgresql
+          nixPkgs.openssl
+          nixPkgs.electrs
+          nixPkgs.bitcoin
+          nixPkgs.lnd
         ];
         packages.btc-lsp.components.exes.btc-lsp-integration.build-tools = [
-          pkgs.haskellPackages.hspec-discover
-          pkgs.postgresql
-          pkgs.openssl
-          pkgs.bitcoin
-          pkgs.electrs
-          lnd
+          nixPkgs.haskellPackages.hspec-discover
+          nixPkgs.postgresql
+          nixPkgs.openssl
+          nixPkgs.bitcoin
+          nixPkgs.electrs
+          nixPkgs.lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''
           ./nix/ns-shutdown-test-deps.sh

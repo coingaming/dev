@@ -14,6 +14,7 @@ in  { apiVersion = "v1"
     , kind = "List"
     , items =
       [ K.Resource.Service (Lsp.mkService network cloudProvider)
+      , K.Resource.Ingress (Lsp.mkIngress network)
       , K.Resource.Deployment (Lsp.mkDeployment network)
       ]
     }

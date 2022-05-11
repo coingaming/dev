@@ -42,10 +42,16 @@ data Owner
     )
 
 data Table
-  = SwapIntoLnTable
+  = UserTable
+  | SwapIntoLnTable
+  | SwapUtxoTable
+  | BlockTable
+  | LnChanTable
   deriving stock
     ( Eq,
       Ord,
       Show,
-      Generic
+      Generic,
+      Enum,
+      Bounded
     )

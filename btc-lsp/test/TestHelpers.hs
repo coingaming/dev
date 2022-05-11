@@ -1,16 +1,23 @@
 {-# LANGUAGE TypeApplications #-}
 
-module TestHelpers (genAddress, createDummySwap, getLatestBlock, putLatestBlockToDB, waitCond) where
+module TestHelpers
+  ( genAddress,
+    createDummySwap,
+    getLatestBlock,
+    putLatestBlockToDB,
+    waitCond,
+  )
+where
 
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.Block as Block
-import qualified BtcLsp.Storage.Model.SwapIntoLn as SWP
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified Database.Persist as Psql
 import qualified LndClient as Lnd
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
-import qualified LndClient.RPC.Katip as Lnd
+import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
 import TestOrphan ()
 import TestWithLndLsp
@@ -57,15 +64,22 @@ insertFakeUser key = do
           }
   runSql $ Psql.insertEntity u
 
-createDummySwap :: ByteString -> ExceptT Failure (TestAppM 'LndLsp IO) (Entity SwapIntoLn)
-createDummySwap key = do
+createDummySwap ::
+  ByteString ->
+  Maybe UTCTime ->
+  ExceptT Failure (TestAppM 'LndLsp IO) (Entity SwapIntoLn)
+createDummySwap key mExpAt = do
   usr <- lift $ insertFakeUser key
   fundAddr <- genAddress LndLsp
   refundAddr <- genAddress LndAlice
   payReq <- genPaymentReq
-  expAt <- lift $ getFutureTime (Lnd.Seconds 3600)
-  lift $
-    SWP.createIgnore
+  expAt <-
+    maybeM
+      (getFutureTime (Lnd.Seconds 3600))
+      pure
+      $ pure mExpAt
+  lift . runSql $
+    SwapIntoLn.createIgnoreSql
       usr
       (from $ Lnd.paymentRequest payReq)
       (Lnd.rHash payReq)
@@ -81,12 +95,27 @@ getLatestBlock = do
 
 putLatestBlockToDB :: ExceptT Failure (TestAppM 'LndLsp IO) (Btc.BlockVerbose, Entity Block)
 putLatestBlockToDB = do
-  blk <- getLatestBlock
-  height <- tryFromT $ Btc.vBlkHeight blk
-  k <- lift $ runSql $ Block.createUpdateSql height (from $ Btc.vBlockHash blk) (from <$> Btc.vPrevBlock blk)
+  blk <-
+    getLatestBlock
+  height <-
+    tryFromT $
+      Btc.vBlkHeight blk
+  k <-
+    lift . runSql $
+      Block.createUpdateSql
+        height
+        (from $ Btc.vBlockHash blk)
+        (from <$> Btc.vPrevBlock blk)
   pure (blk, k)
 
-waitCond :: (Env m, LndTest m TestOwner) => Integer -> (a -> m (Bool, a)) -> a -> m Bool
+waitCond ::
+  ( Env m,
+    LndTest m TestOwner
+  ) =>
+  Integer ->
+  (a -> m (Bool, a)) ->
+  a ->
+  m Bool
 waitCond times condition st = do
   (cond, newSt) <- condition st
   if cond
