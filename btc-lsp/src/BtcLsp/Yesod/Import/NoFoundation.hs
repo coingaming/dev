@@ -23,6 +23,7 @@ import BtcLsp.Import.External as Import
     maybeM,
     runExceptT,
     txIdHex,
+    whenJust,
     withExceptT,
   )
 import BtcLsp.Import.Witch as Import

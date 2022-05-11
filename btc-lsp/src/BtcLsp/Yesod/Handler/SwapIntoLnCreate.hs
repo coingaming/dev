@@ -123,10 +123,13 @@ renderPage :: BootstrapColor -> Widget -> Enctype -> Handler Html
 renderPage color formWidget formEnctype = do
   let formRoute = SwapIntoLnCreateR
   let formMsgSubmit = MsgContinue
-  let form = $(widgetFile "simple_form")
-  defaultLayout $ do
-    setTitleI MsgSwapIntoLnCreateRTitle
-    $(widgetFile "swap_into_ln_create")
+  panelLayout
+    color
+    MsgSwapIntoLnInfoShort
+    MsgSwapIntoLnInfoLong
+    $ do
+      setTitleI MsgSwapIntoLnCreateRTitle
+      $(widgetFile "simple_form")
 
 aForm :: AForm Handler SwapRequest
 aForm =

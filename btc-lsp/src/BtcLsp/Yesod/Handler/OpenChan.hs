@@ -24,7 +24,7 @@ getOpenChanR = do
     maybeM badMethod pure
       . pure
       $ toQr nodeUriHex
-  defaultLayout $ do
+  panelLayout Info MsgOpenChan MsgOpenChanInstruction $ do
     setTitleI MsgOpenChanRTitle
     $(widgetFile "open_chan")
   where

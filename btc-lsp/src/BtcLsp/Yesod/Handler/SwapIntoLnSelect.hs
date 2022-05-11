@@ -72,7 +72,7 @@ getSwapIntoLnSelectR uuid = do
         let mSwapWidget = newSwapWidget swapInfo
         let mUtxoWidget = newUtxoWidget swapInfoUtxo
         let mChanWidget = newChanWidget swapInfoChan
-        defaultLayout $ do
+        panelLayout color msgShort msgLong $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
           $(widgetFile "swap_into_ln_select")
     )
