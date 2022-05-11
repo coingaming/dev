@@ -150,6 +150,7 @@ instance Yesod App where
   isAuthorized OpenChanR {} _ = pure Authorized
   isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
   isAuthorized SwapIntoLnSelectR {} _ = pure Authorized
+  isAuthorized AboutR _ = pure Authorized
 
   -- This function creates static content files in the static folder
   -- and names them based on a hash of their content. This allows
@@ -214,6 +215,7 @@ instance YesodBreadcrumbs App where
         OpenChanR -> MsgOpenChanRBreadcrumb
         SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
         SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
+        AboutR -> MsgAboutRBreadcrumb
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
         StaticR {} -> Nothing
@@ -225,6 +227,7 @@ instance YesodBreadcrumbs App where
         OpenChanR -> Just HomeR
         SwapIntoLnCreateR -> Just HomeR
         SwapIntoLnSelectR {} -> Just SwapIntoLnCreateR
+        AboutR -> Just HomeR
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -344,6 +347,14 @@ newLayout mpcfg widget = do
                         _ -> False
                     )
                     mcurrentRoute,
+                menuItemNoReferrer = False
+              },
+          NavbarLeft $
+            MenuItem
+              { menuItemLabel = MsgAbout,
+                menuItemRoute = AboutR,
+                menuItemAccessCallback = True,
+                menuItemActiveCallback = mcurrentRoute == Just AboutR,
                 menuItemNoReferrer = False
               }
         ]

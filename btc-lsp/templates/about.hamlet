@@ -1,0 +1,16 @@
+<div .ui.container>
+  <div .panel.panel-default>
+    <div .panel-heading>_{MsgAboutGeneralInfo}
+    <div .panel-body.large-font>
+      <p .text-center.lead-padding>_{MsgAbout0}
+    <ul .list-group.large-font>
+      <li .list-group-item.lead-padding>
+        <a href="@{OpenChanR}">_{MsgAbout1}
+        _{MsgAbout2}
+        <strong>_{MsgAbout3}
+        _{MsgAbout4}
+      <li .list-group-item.lead-padding>
+        <a href="@{SwapIntoLnCreateR}">_{MsgAbout5}
+        _{MsgAbout6}
+        <strong>_{MsgAbout7}
+        _{MsgAbout8}

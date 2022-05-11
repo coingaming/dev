@@ -16,6 +16,7 @@ where
 -- Don't forget to add new modules to your cabal file!
 
 import qualified BtcLsp.Class.Env as Class
+import BtcLsp.Yesod.Handler.About
 import BtcLsp.Yesod.Handler.Common
 import BtcLsp.Yesod.Handler.Home
 import BtcLsp.Yesod.Handler.Language

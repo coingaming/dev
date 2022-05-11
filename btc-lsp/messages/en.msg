@@ -16,12 +16,14 @@ CreateRBreadcrumb: New
 OpenChanRBreadcrumb: Channel
 SwapIntoLnCreateRBreadcrumb: Swap
 SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
+AboutRBreadcrumb: About
 
 HomeRTitle: Welcome | LSP
 SignoutRTitle: Logout | LSP
 OpenChanRTitle: Channel | LSP
 SwapIntoLnCreateRTitle: Swap | LSP
 SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Swap | LSP
+AboutRTitle: About | LSP
 
 Home: Home
 Login: Login
@@ -36,11 +38,11 @@ HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
 
 Chan: Channel
-OpenOutgoingChanToLsp: Outgoing channel to LSP
+OpenOutboundChanToLsp: Outbound channel to LSP
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
 Swap: Swap
-SwapIncomingFromLsp: Incoming swap from LSP
+SwapInboundFromLsp: Inbound swap from LSP
 SwapIntoLnUuid: Swap Uuid
 SwapIntoLnUserId: User Pub Key
 SwapIntoLnFundInvoice: Swap Invoice
@@ -86,3 +88,17 @@ SwapChans: Swap Channels
 FailureDefault: Something went wrong. Please check the input data and try again.
 FailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
 FailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
+
+About: About
+AboutLsp: About LSP
+AboutGeneralInfo: General Info
+AboutSwapIntoLn: Balanced Swap
+About0: LSP provides number of commercial infrastructural services for the lightning network nodes:
+About1: Outbound channel to LSP
+About2: gives the ability to
+About3: send
+About4: lightning network payments. In this case LSP works exactly like any other well-connected lightning node, providing payments routing for a regular lightning network fee without any other additional fees.
+About5: Inbound swap from LSP
+About6: gives ability to both
+About7: send and receive
+About8: lightning network payments. In this case LSP is providing inbound liquidity for the customer, but takes additional one-time fee during the channel opening.

@@ -11,6 +11,29 @@ dl {
   word-break: break-all;
 }
 
+.panel-heading {
+  font-size: 16px;
+}
+
+.large-font {
+  font-size: 18px;
+}
+
+.lead-padding {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.lead {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  color: inherit;
+}
+
 .form-control:focus,
 input:focus {
   -webkit-box-shadow: none !important;

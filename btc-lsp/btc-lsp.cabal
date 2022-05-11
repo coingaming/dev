@@ -78,6 +78,7 @@ library
       BtcLsp.Yesod.Data.Language
       BtcLsp.Yesod.Data.Widget
       BtcLsp.Yesod.Foundation
+      BtcLsp.Yesod.Handler.About
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
       BtcLsp.Yesod.Handler.Language
@@ -398,6 +399,7 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
@@ -625,6 +627,7 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
@@ -829,6 +832,7 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
@@ -1053,6 +1057,7 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
