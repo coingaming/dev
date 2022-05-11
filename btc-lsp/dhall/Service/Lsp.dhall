@@ -219,7 +219,7 @@ let mkServiceAnnotations
                         , { mapKey =
                               "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"
                           , mapValue =
-                                ../../build/secrets/lsp/certarn.txt as Text
+                                ../../build/certarn.txt as Text
                               ? G.todo
                           }
                         , { mapKey =

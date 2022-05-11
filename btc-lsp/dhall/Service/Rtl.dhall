@@ -172,7 +172,7 @@ let mkIngress
     : G.BitcoinNetwork → Optional C.ProviderType → K.Ingress.Type
     = λ(net : G.BitcoinNetwork) →
       λ(cloudProvider : Optional C.ProviderType) →
-        let certArn = ../../build/secrets/rtl/certarn.txt as Text ? G.todo
+        let certArn = ../../build/certarn.txt as Text ? G.todo
 
         in Ingress.mkIngress
           owner

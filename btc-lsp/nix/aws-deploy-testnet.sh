@@ -173,7 +173,6 @@ setupHostedZone () {
 }
 
 createCert () {
-  local SERVICE_DOMAIN_NAME="$1"
   local HOSTED_ZONE_ID=$(getHostedZoneId "$DOMAIN_NAME")
 
   if [ "$(uname -s)" = "Darwin" ]; then
@@ -182,50 +181,43 @@ createCert () {
     local IDEMPOTENCY_TOKEN=$(date +%F | md5sum | cut -c1-5)
   fi
 
-  echo "==> Creating certificate for \"$SERVICE_DOMAIN_NAME\" on AWS [ACM]..."
+  echo "==> Creating certificate for \"$DOMAIN_NAME\" on AWS [ACM]..."
   local CERT_ARN=$(aws acm request-certificate \
-    --domain-name "$SERVICE_DOMAIN_NAME" \
-    --subject-alternative-names "$DOMAIN_NAME" \
+    --domain-name "$DOMAIN_NAME" \
+    --subject-alternative-names "*.$DOMAIN_NAME" \
     --validation-method DNS \
     --idempotency-token "$IDEMPOTENCY_TOKEN" \
     --query CertificateArn \
-    --options CertificateTransparencyLoggingPreference=DISABLED \
     --output text)
 
-  echo "Waiting until validation record for \"$SERVICE_DOMAIN_NAME\" appears in ACM..."
-  until [ -n "$(getDNSValidationName "$CERT_ARN" "$SERVICE_DOMAIN_NAME")" ] ; do
+  echo "Waiting until validation record for \"$DOMAIN_NAME\" appears in ACM..."
+  until [ -n "$(getDNSValidationName "$CERT_ARN" "$DOMAIN_NAME")" ] ; do
     sleep 1;
   done
 
-  insertValidationRecord "$HOSTED_ZONE_ID" "$CERT_ARN" "$SERVICE_DOMAIN_NAME"
   insertValidationRecord "$HOSTED_ZONE_ID" "$CERT_ARN" "$DOMAIN_NAME"
+  insertValidationRecord "$HOSTED_ZONE_ID" "$CERT_ARN" "*.$DOMAIN_NAME"
 
   echo "Waiting for certificate to validate..."
-  aws acm wait certificate-validated \
-    --certificate-arn "$CERT_ARN"
+  aws acm wait certificate-validated --certificate-arn "$CERT_ARN"
 }
 
 writeCertArn () {
-  local SERVICE_NAME="$1"
-  local SERVICE_DOMAIN_NAME="$2"
-  local CERT_ARN=$(getCertArn "$SERVICE_DOMAIN_NAME")
-  local SERVICE_CERT_ARN_PATH="$SECRETS_DIR/$SERVICE/certarn.txt"
+  local CERT_ARN=$(getCertArn "$DOMAIN_NAME")
+  local CERT_ARN_PATH="$SECRETS_DIR/certarn.txt"
 
-  echo "Saving $CERT_ARN to $SERVICE_CERT_ARN_PATH"
-  echo -n "$CERT_ARN" > "$SERVICE_CERT_ARN_PATH"
+  echo "Saving $CERT_ARN to $CERT_ARN_PATH"
+  echo -n "$CERT_ARN" > "$CERT_ARN_PATH"
 }
 
-setupCerts () {
-  for SERVICE in rtl lsp; do
-    local SERVICE_DOMAIN_NAME=$(cat "$SECRETS_DIR/$SERVICE/domainname.txt")
-    local CERT_ARN=$(getCertArn "$SERVICE_DOMAIN_NAME")
+setupCert () {
+  local CERT_ARN=$(getCertArn "$DOMAIN_NAME")
 
-    if [ -n "$CERT_ARN" ]; then
-      echo "==> Certificate for \"$SERVICE_DOMAIN_NAME\" already exists."
-    else
-      createCert "$SERVICE_DOMAIN_NAME" && writeCertArn "$SERVICE" "$SERVICE_DOMAIN_NAME"
-    fi
-  done
+  if [ -n "$CERT_ARN" ]; then
+    echo "==> Certificate for \"$DOMAIN_NAME\" already exists."
+  else
+    createCert && writeCertArn
+  fi
 }
 
 createDbSubnetGroup () {
@@ -395,7 +387,7 @@ disableAwsCliPager
 # Create eks cluster, route53 hosted zone and request certs from acm
 setupCluster && \
 setupHostedZone && \
-setupCerts
+setupCert
 
 echo "==> Checking that certificate arns are saved"
 checkFileExistsNotEmpty "$RTL_PATH/certarn.txt"

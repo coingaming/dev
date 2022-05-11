@@ -1,3 +1,4 @@
+.DS_Store
 .cabal-sandbox
 .ghc.environment*
 .stack-work
@@ -7,3 +8,4 @@ dist-newstyle
 dist/
 stack.yaml.lock
 result*
+build*
