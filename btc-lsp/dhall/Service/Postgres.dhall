@@ -2,6 +2,8 @@ let P = ../Prelude/Import.dhall
 
 let G = ../Global.dhall
 
+let S = ../Service.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
@@ -16,13 +18,13 @@ let image = "heathmont/postgres:11-alpine-a2e8bbe"
 
 let userName = "lsp"
 
-let password = G.defaultPass
+let userPassword = G.defaultPass
 
-let host = owner
+let databaseHost = owner
 
 let databaseName = userName
 
-let connStr = ../../build/secrets/postgres/conn.txt as Text ? G.todo
+let databaseUri = ../../build/secrets/postgres/dburi.txt as Text ? G.todo
 
 let tcpPort
     : G.Port
@@ -48,10 +50,10 @@ let mkConnStr
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = connStr
-          , TestNet = connStr
+          { MainNet = databaseUri
+          , TestNet = databaseUri
           , RegTest =
-              "postgresql://${userName}:${password}@${host}/${databaseName}"
+              "postgresql://${userName}:${userPassword}@${databaseHost}/${databaseName}"
           }
           net
 
@@ -63,12 +65,12 @@ let mkUser
 let mkPassword
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        merge { MainNet = G.todo, TestNet = G.todo, RegTest = password } net
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = userPassword } net
 
 let mkHost
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        merge { MainNet = G.todo, TestNet = G.todo, RegTest = host } net
+        merge { MainNet = G.todo, TestNet = G.todo, RegTest = databaseHost } net
 
 let mkDatabaseName
     : G.BitcoinNetwork → Text
@@ -82,7 +84,7 @@ let ports
 let mkEnv
     : P.Map.Type Text Text
     = [ { mapKey = env.postgresUser, mapValue = userName }
-      , { mapKey = env.postgresPassword, mapValue = password }
+      , { mapKey = env.postgresPassword, mapValue = userPassword }
       , { mapKey = env.postgresMultipleDatabases, mapValue = databaseName }
       ]
 
@@ -103,12 +105,12 @@ let mkSetupEnv
             . "$THIS_DIR/export-${ownerText}-env.sh"
 
             (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+              kubectl create configmap ${ownerText} \${S.concatSetupEnv
                                                          configMapEnv}
             ) || true
 
             (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+              kubectl create secret generic ${ownerText} \${S.concatSetupEnv
                                                               secretEnv}
             ) || true
             ''
@@ -128,7 +130,7 @@ let mkService
     = λ(net : G.BitcoinNetwork) →
         Service.mkService
           owner
-          (None (List { mapKey : Text, mapValue : Text }))
+          (None (P.Map.Type Text Text))
           (mkServiceType net)
           (Service.mkPorts ports)
 

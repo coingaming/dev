@@ -2,6 +2,8 @@ let P = ../Prelude/Import.dhall
 
 let G = ../Global.dhall
 
+let S = ../Service.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
@@ -65,12 +67,12 @@ let mkSetupEnv
             echo "==> Setting up env for ${ownerText}"
 
             (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+              kubectl create configmap ${ownerText} \${S.concatSetupEnv
                                                          configMapEnv}
             ) || true
 
             (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+              kubectl create secret generic ${ownerText} \${S.concatSetupEnv
                                                               secretEnv}
             ) || true
             ''
@@ -86,8 +88,8 @@ let mkServiceType
           net
 
 let mkServiceAnnotations
-    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
-    = λ(net : G.BitcoinNetwork) → None (List { mapKey : Text, mapValue : Text })
+    : G.BitcoinNetwork → Optional (P.Map.Type Text Text)
+    = λ(net : G.BitcoinNetwork) → None (P.Map.Type Text Text)
 
 let mkService
     : G.BitcoinNetwork → K.Service.Type

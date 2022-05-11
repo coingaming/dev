@@ -12,7 +12,7 @@ let proto = import ./nix/proto-lens-protoc.nix;
       else [];
 in
 (project { inherit profile; }).shellFor {
-  withHoogle = true;
+  withHoogle = false;
   buildInputs = [
     pkgs.haskellPackages.hpack
     pkgs.haskellPackages.fswatcher
@@ -24,13 +24,13 @@ in
     nixPkgs.socat
     nixPkgs.plantuml
     proto.protoc-haskell-bin
-    (pkgs.callPackage kompose-src {})
-  ] ++ ideBuildInputs;
+    #(pkgs.callPackage kompose-src {})
+  ];# ++ ideBuildInputs;
   tools = {
     cabal = "3.2.0.0";
     hlint = "3.2.7";
     ghcid = "latest";
-    haskell-language-server = "1.7.0.0";
+    haskell-language-server = "latest";
   };
   shellHook =
     if withShellHook

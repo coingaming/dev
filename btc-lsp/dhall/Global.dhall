@@ -77,46 +77,6 @@ let toLowerCase
     : Text → Text
     = λ(x : Text) → P.Text.lowerASCII x
 
-let mkEnvVar
-    : Text → Text
-    = λ(name : Text) → "\$${name}"
-
-let concatExportEnv
-    : P.Map.Type Text Text → Text
-    = λ(env : P.Map.Type Text Text) →
-        P.List.foldLeft
-          (P.Map.Entry Text Text)
-          env
-          Text
-          ( λ(acc : Text) →
-            λ(x : P.Map.Entry Text Text) →
-              acc ++ "\n" ++ "export " ++ x.mapKey ++ "=" ++ x.mapValue
-          )
-          ''
-          #!/bin/sh
-
-          set -e
-          ''
-
-let concatSetupEnv
-    : List Text → Text
-    = λ(env : List Text) →
-        P.List.foldLeft
-          Text
-          env
-          Text
-          ( λ(acc : Text) →
-            λ(x : Text) →
-                  acc
-              ++  "\n"
-              ++  "  --from-literal="
-              ++  toLowerCase x
-              ++  "="
-              ++  "\"${mkEnvVar x}\""
-              ++  " \\"
-          )
-          ""
-
 let defaultPass
     : Text
     = "developer"
@@ -137,9 +97,7 @@ in  { BitcoinNetwork
     , unPorts
     , Owner
     , unOwner
+    , toLowerCase
     , defaultPass
     , todo
-    , toLowerCase
-    , concatExportEnv
-    , concatSetupEnv
     }

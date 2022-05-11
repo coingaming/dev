@@ -2,6 +2,10 @@ let P = ../Prelude/Import.dhall
 
 let G = ../Global.dhall
 
+let C = ../CloudProvider.dhall
+
+let S = ../Service.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
@@ -14,7 +18,7 @@ let Bitcoind = ./Bitcoind.dhall
 
 let image = "lightninglabs/lnd:v0.14.2-beta"
 
-let domain = ../../build/secrets/lnd/domain.txt as Text ? G.todo
+let domainName = ../../build/secrets/lnd/domainname.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/lnd/walletpassword.txt as Text ? G.todo
 
@@ -74,12 +78,12 @@ let mkWalletPass
           }
           net
 
-let mkDomain
+let mkDomainName
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = domain
-          , TestNet = domain
+          { MainNet = domainName
+          , TestNet = domainName
           , RegTest = G.unOwner G.Owner.Lnd
           }
           net
@@ -163,12 +167,12 @@ let mkSetupEnv
             . "$THIS_DIR/export-${G.unOwner G.Owner.Lnd}-env.sh"
 
             (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+              kubectl create configmap ${ownerText} \${S.concatSetupEnv
                                                          configMapEnv}
             ) || true
 
             (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+              kubectl create secret generic ${ownerText} \${S.concatSetupEnv
                                                               secretEnv}
             ) || true
             ''
@@ -184,28 +188,39 @@ let mkServiceType
           net
 
 let mkServiceAnnotations
-    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    : G.BitcoinNetwork →
+      Optional C.ProviderType →
+        Optional (P.Map.Type Text Text)
     = λ(net : G.BitcoinNetwork) →
-        merge
-          { MainNet =
-              Service.mkAnnotations
-                Service.CloudProvider.Aws
-                (G.unOwner G.Owner.Lnd)
-          , TestNet =
-              Service.mkAnnotations
-                Service.CloudProvider.DigitalOcean
-                (G.unOwner G.Owner.Lnd)
-          , RegTest = None (List { mapKey : Text, mapValue : Text })
-          }
-          net
+      λ(cloudProvider : Optional C.ProviderType) →
+        let annotations =
+              P.Optional.concatMap
+                C.ProviderType
+                (P.Map.Type Text Text)
+                ( λ(cloudProvider : C.ProviderType) →
+                    merge
+                      { Aws = None (P.Map.Type Text Text)
+                      , DigitalOcean = Some
+                        [ { mapKey =
+                              "kubernetes.digitalocean.com/load-balancer-id"
+                          , mapValue = "${G.unOwner G.Owner.Lnd}-lb"
+                          }
+                        ]
+                      }
+                      cloudProvider
+                )
+                cloudProvider
+
+        in  S.mkServiceAnnotations net annotations cloudProvider
 
 let mkService
-    : G.BitcoinNetwork → G.Owner → K.Service.Type
+    : G.BitcoinNetwork → G.Owner → Optional C.ProviderType → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
       λ(owner : G.Owner) →
+      λ(cloudProvider : Optional C.ProviderType) →
         Service.mkService
           (G.unOwner owner)
-          (mkServiceAnnotations net)
+          (mkServiceAnnotations net cloudProvider)
           (mkServiceType net)
           (Service.mkPorts ports)
 
@@ -278,7 +293,7 @@ in  { mkTlsCert
     , grpcPort
     , p2pPort
     , restPort
-    , mkDomain
+    , mkDomainName
     , mkHexMacaroon
     , mkEnv
     , mkSetupEnv
