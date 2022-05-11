@@ -10,6 +10,14 @@ let
   bitcoindConf = nixPkgs.callPackage bc {
     name="alice";
     dataDir=".";
+    port=18444;
+    rpcport=18443;
+  };
+  bitcoindConf2 = nixPkgs.callPackage bc {
+    name="bob";
+    dataDir=".";
+    port=21000;
+    rpcport=21001;
   };
   lndLsp = nixPkgs.callPackage ln {
     port = 9736;
@@ -78,10 +86,13 @@ in {
     ${lndAlice.up}/bin/up
     ${lndBob.up}/bin/up
     ${electrsAlice.up}/bin/up
+    ${bitcoindConf2.up}/bin/up
+    ${bitcoindConf.cli}/bin/bitcoin-cli addnode "127.0.0.1:21000" "add"
     ${postgres.up}/bin/up
 
     ${lspEnv.setup}/bin/setup
-    ${btcLspTest}/bin/btc-lsp-test --match "/Refunder/Refunder Spec/"
+    sleep 10
+    ${btcLspTest}/bin/btc-lsp-test
 
     ${postgres.down}/bin/down
     ${electrsAlice.down}/bin/down
@@ -89,6 +100,7 @@ in {
     ${lndAlice.down}/bin/down
     ${lndBob.down}/bin/down
     ${bitcoindConf.down}/bin/down
+    ${bitcoindConf2.down}/bin/down
 
     touch $out; exit 1
   '';

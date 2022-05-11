@@ -18,7 +18,7 @@ let
   workDir = "${dataDir}/${serviceName}";
   setup = writeShellScriptBin "setup" ''
     mkdir -p "${workDir}/db"
-    cp -f ${electrstoml} ${workDir}/electrst.toml
+    cp -f ${electrstoml} ${workDir}/electrs.toml
   '';
   start = writeShellScriptBin "start" ''
     ${electrs}/bin/electrs \
@@ -31,6 +31,7 @@ let
     --timestamp \
     > ${workDir}/stdout.log 2>&1 &
     echo "$!" > "${workDir}/electrs.pid"
+    echo "Started electrs"
   '';
   stop = writeShellScriptBin "stop" ''
     electrs_pid=`cat ${workDir}/electrs.pid`

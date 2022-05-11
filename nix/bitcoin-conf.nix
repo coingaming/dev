@@ -1,7 +1,8 @@
 {
   name
 , dataDir
-, rpcport ? 18433
+, rpcport
+, port
 , rpcuser ? "developer"
 , rpcpassword ? "developer"
 , lib
@@ -46,7 +47,7 @@ let
   workDir = "${dataDir}/bitcoind_${name}";
   start = writeShellScriptBin "start" ''
     echo "Start"
-    ${bitcoind}/bin/bitcoind -daemonwait -datadir='${workDir}' &
+    ${bitcoind}/bin/bitcoind -daemonwait -port=${toString port} -rpcport=${toString rpcport} -datadir='${workDir}' &
   '';
   init = writeShellScriptBin "init" ''
     echo "init"
@@ -66,7 +67,7 @@ let
     cp -f ${bitcoinconf} "${workDir}/bitcoin.conf"
   '';
   cli = writeShellScriptBin "bitcoin-cli" ''
-    ${bitcoind}/bin/bitcoin-cli -rpcwait -datadir='${workDir}' "$@"
+    ${bitcoind}/bin/bitcoin-cli -rpcwait -datadir='${workDir}' -rpcport=${toString rpcport} "$@"
   '';
   up = writeShellScriptBin "up" ''
     pwd
@@ -78,4 +79,4 @@ let
     ${stop}/bin/stop
   '';
 in
-{inherit up down;}
+{inherit up down cli;}
