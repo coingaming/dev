@@ -10,11 +10,11 @@
         <div .row>
           <div .col-xs-12.col-sm-8.col-md-6.col-lg-4.col-sm-offset-2.col-md-offset-3.col-lg-offset-4>
             <a href="@{OpenChanR}" .btn.btn-primary.btn-lg.col-xs-12>
-              _{MsgOpenChan}
+              _{MsgOpenOutgoingChanToLsp}
         <div .row>
           <div .col-xs-12.col-sm-8.col-md-6.col-lg-4.col-sm-offset-2.col-md-offset-3.col-lg-offset-4>
             <a href="@{SwapIntoLnCreateR}" .btn.btn-primary.btn-lg.col-xs-12>
-              _{MsgSwap}
+              _{MsgSwapIncomingFromLsp}
     <footer .footer>
       <div .container.text-center>
         <p .text-muted>

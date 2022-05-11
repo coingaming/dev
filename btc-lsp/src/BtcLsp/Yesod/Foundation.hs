@@ -324,7 +324,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgOpenChan,
+              { menuItemLabel = MsgChan,
                 menuItemRoute = OpenChanR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback = mcurrentRoute == Just OpenChanR,
