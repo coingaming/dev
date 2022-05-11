@@ -1,9 +1,12 @@
 {
   aliceCerts,
   lspCerts,
+  prjSrc,
+  dataDir,
   runCommand,
   openssl,
   writeText,
+  writeScriptBin,
   lib
 }: let
   serviceName = "btc-lsp";
@@ -90,7 +93,11 @@ aliceLndEnv = lndEnv {
                \"wave\",
                \"fall\"
 '';};
-in writeText "export-lsp-env" ''
+setup = writeScriptBin "setup" ''
+  cp --no-preserve=mode,ownership -R ${prjSrc}/btc-lsp/config/ ${dataDir}/
+  cp --no-preserve=mode,ownership -R ${prjSrc}/btc-lsp/static/ ${dataDir}/
+'';
+exportEnvFile = writeText "export-lsp-env" ''
   export GODEBUG=x509ignoreCN=0
   export LSP_LND_ENV="${lspLndEnv}"
   export LND_ALICE_ENV="${aliceLndEnv}"
@@ -144,4 +151,7 @@ in writeText "export-lsp-env" ''
     \"password\":\"developer\"
   }
   "
-''
+'';
+in {
+  inherit exportEnvFile setup;
+}

@@ -47,6 +47,8 @@ let
   lspEnv = nixPkgs.callPackage lsp {
     aliceCerts = lndAlice.tlscert;
     lspCerts = lndLsp.tlscert;
+    dataDir = ".";
+    inherit prjSrc;
   };
   networkBitcoinTest = p.network-bitcoin.components.tests.network-bitcoin-tests;
   genericPrettyInstancesTest = p.generic-pretty-instances.components.tests.generic-pretty-instances-test;
@@ -69,7 +71,7 @@ in {
     buildInputs=[nixPkgs.ps];
   }) ''
     set -euo pipefail
-    source ${lspEnv}
+    source ${lspEnv.exportEnvFile}
     env
     ${bitcoindConf.up}/bin/up
     ${lndLsp.up}/bin/up
@@ -78,6 +80,7 @@ in {
     ${electrsAlice.up}/bin/up
     ${postgres.up}/bin/up
 
+    ${lspEnv.setup}/bin/setup
     ${btcLspTest}/bin/btc-lsp-test --match "/Refunder/Refunder Spec/"
 
     ${postgres.down}/bin/down
