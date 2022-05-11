@@ -43,7 +43,6 @@ import Database.Esqueleto.Legacy as X
     select,
     selectFirst,
     set,
-    subList_select,
     transactionUndo,
     unValue,
     update,

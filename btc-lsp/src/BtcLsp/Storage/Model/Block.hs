@@ -10,8 +10,6 @@ where
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 
---import qualified Database.Esqueleto as Psql
-
 createUpdateSql ::
   ( MonadIO m
   ) =>
