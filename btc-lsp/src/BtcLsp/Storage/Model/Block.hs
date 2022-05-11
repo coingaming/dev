@@ -2,12 +2,15 @@ module BtcLsp.Storage.Model.Block
   ( createUpdateSql,
     getLatestSql,
     getBlockByHeightSql,
+    getOrphanBlocksHigherSql,
     makeOrphanBlocksHigherSql,
   )
 where
 
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
+
+--import qualified Database.Esqueleto as Psql
 
 createUpdateSql ::
   ( MonadIO m
@@ -76,6 +79,18 @@ getBlockByHeightSql blkHeight = do
     Psql.from $ \row -> do
       Psql.where_ $
         (row Psql.^. BlockHeight Psql.==. Psql.val blkHeight)
+          Psql.&&. ( row Psql.^. BlockStatus
+                       Psql.==. Psql.val BlkConfirmed
+                   )
+      pure row
+
+
+getOrphanBlocksHigherSql :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
+getOrphanBlocksHigherSql blkHeight = do
+  Psql.select $
+    Psql.from $ \row -> do
+      Psql.where_ $
+        (row Psql.^. BlockHeight Psql.>. Psql.val blkHeight)
           Psql.&&. ( row Psql.^. BlockStatus
                        Psql.==. Psql.val BlkConfirmed
                    )

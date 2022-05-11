@@ -240,20 +240,18 @@ scan = do
           <> inspect cHeight
       scanOneBlock cHeight
     Just lBlk -> do
-      reorgDetected <- checkReorg
+      reorgDetected <- detectReorg
       case reorgDetected of
         Right () -> do
-          $(logTM) DebugS . logStr $ ("===============================================" :: Text)
-          $(logTM) DebugS . logStr $ ("Reorg not detected" :: Text)
-          $(logTM) DebugS . logStr $ ("===============================================" :: Text)
           let known = from . blockHeight $ entityVal lBlk
           step [] (1 + known) $ from cHeight
         Left height -> do
-          $(logTM) DebugS . logStr $ ("+++++++++++++++++++++++++++++++++++++++++++++++" :: Text)
-          $(logTM) DebugS . logStr $ ("Reorg detected, height: " <> show height :: Text)
-          $(logTM) DebugS . logStr $ ("+++++++++++++++++++++++++++++++++++++++++++++++" :: Text)
+          $(logTM) DebugS . logStr $ ("Reorg detected from height: " <> show height :: Text)
           bHeight <- tryFromT height
-          _ <- lift $ runSql (Block.makeOrphanBlocksHigherSql bHeight)
+          _ <- lift $ runSql $ do
+            blks <- Block.getOrphanBlocksHigherSql bHeight
+            Block.makeOrphanBlocksHigherSql bHeight
+            SwapUtxo.markOrphanBlocksSql (entityKey <$> blks)
           step [] (1 + coerce bHeight) $ from cHeight
   where
     step acc cur end =
@@ -269,8 +267,8 @@ scan = do
               <> inspect (length acc)
           utxos <- scanOneBlock (BlkHeight cur)
           step (acc <> utxos) (cur + 1) end
-    checkReorg :: (Env m) => ExceptT Failure m (Either Btc.BlockHeight ())
-    checkReorg = do
+    detectReorg :: (Env m) => ExceptT Failure m (Either Btc.BlockHeight ())
+    detectReorg = do
       cHeight <- withBtcT Btc.getBlockCount id
       cReorgHeight <- checkReorgHeight cHeight
       if cReorgHeight == cHeight

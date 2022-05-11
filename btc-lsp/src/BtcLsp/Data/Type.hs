@@ -584,6 +584,7 @@ data SwapUtxoStatus
   = SwapUtxoUsedForChanFunding
   | SwapUtxoRefunded
   | SwapUtxoFirstSeen
+  | SwapUtxoOrphan
   deriving stock
     ( Eq,
       Ord,
