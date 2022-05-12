@@ -5,8 +5,6 @@ Copy: copy
 Iso3166v1: gb
 
 HomeRBreadcrumb: Home
-AuthRBreadcrumb: Login
-SignoutRBreadcrumb: Signout
 OpenChanRBreadcrumb: Outbound
 SwapIntoLnCreateRBreadcrumb: Balanced
 SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}

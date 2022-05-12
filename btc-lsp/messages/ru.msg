@@ -5,8 +5,6 @@ Copy: копировать
 Iso3166v1: ru
 
 HomeRBreadcrumb: Главная
-AuthRBreadcrumb: Войти
-SignoutRBreadcrumb: Выйти
 OpenChanRBreadcrumb: Открыть Канал
 
 HomeRTitle: Добро пожаловать | ЛСП
