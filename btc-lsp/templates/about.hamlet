@@ -1,14 +1,33 @@
 <div .container.about>
-  <h3 .text-center>_{MsgAboutGeneralInfo}
-  <p>_{MsgAbout0}
+  <h3 .text-center.lead-padding>_{MsgAboutGeneralInfo}
+  <p>_{MsgAboutGen0}
   <ul>
     <li>
-      <a href="@{OpenChanR}">_{MsgAbout1}
-      _{MsgAbout2}
-      <strong>_{MsgAbout3}
-      _{MsgAbout4}
+      <a href="@{OpenChanR}">_{MsgAboutGen1}
+      _{MsgAboutGen2}
+      <strong>_{MsgAboutGen3}
+      _{MsgAboutGen4}
     <li>
-      <a href="@{SwapIntoLnCreateR}">_{MsgAbout5}
-      _{MsgAbout6}
-      <strong>_{MsgAbout7}
-      _{MsgAbout8}
+      <a href="@{SwapIntoLnCreateR}">_{MsgAboutGen5}
+      _{MsgAboutGen6}
+      <strong>_{MsgAboutGen7}
+      _{MsgAboutGen8}
+  <h3 .text-center.lead-padding>_{MsgSwapBalancedChanWithLsp}
+  <p>_{MsgAboutSwap0}
+  <ul>
+    <li>
+      <strong>_{MsgAboutSwap1}
+      _{MsgAboutSwap2}
+    <li>
+      <strong>_{MsgAboutSwap3}
+      _{MsgAboutSwap4}
+    <li>
+      <strong>_{MsgAboutSwap5}
+      _{MsgAboutSwap6}
+  <p>_{MsgAboutSwap7}
+  <ul>
+    <li>_{MsgAboutSwap8}
+    <li>_{MsgAboutSwap9}
+    <li>_{MsgAboutSwap10}
+    <li>_{MsgAboutSwap11}
+  <p>_{MsgAboutSwap12}

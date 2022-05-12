@@ -327,7 +327,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgChan,
+              { menuItemLabel = MsgOutbound,
                 menuItemRoute = OpenChanR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback = mcurrentRoute == Just OpenChanR,
@@ -335,7 +335,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgSwap,
+              { menuItemLabel = MsgBalanced,
                 menuItemRoute = SwapIntoLnCreateR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback =
