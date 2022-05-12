@@ -1,3 +1,5 @@
+let P = ../Prelude/Import.dhall
+
 let K = ./Import.dhall
 
 let mkTls
@@ -7,15 +9,23 @@ let mkTls
         K.IngressTLS::{ hosts = Some [ host ], secretName = Some secret }
 
 let mkIngress
-    : Text → Text → Natural → Optional (List K.IngressTLS.Type) → K.Ingress.Type
+    : Text →
+      Optional (P.Map.Type Text Text) →
+      Text →
+      Natural →
+      Optional Text →
+      Optional (List K.IngressTLS.Type) →
+        K.Ingress.Type
     = λ(name : Text) →
+      λ(annotations : Optional (P.Map.Type Text Text)) →
       λ(host : Text) →
       λ(port : Natural) →
+      λ(ingressClassName : Optional Text) →
       λ(tls : Optional (List K.IngressTLS.Type)) →
         K.Ingress::{
-        , metadata = K.ObjectMeta::{ name = Some name }
+        , metadata = K.ObjectMeta::{ name = Some name, annotations }
         , spec = Some K.IngressSpec::{
-          , ingressClassName = Some "nginx"
+          , ingressClassName
           , tls
           , rules = Some
             [ K.IngressRule::{
@@ -41,4 +51,4 @@ let mkIngress
           }
         }
 
-in  { mkIngress, mkTls }
+in  { mkTls, mkIngress }

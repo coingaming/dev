@@ -4,12 +4,12 @@
 , dataDir ? "./tmp"
 , macaroonDir
 , name
-}:
-{ writeText
+, writeText
 , writeShellScriptBin
 , symlinkJoin
 , runCommand
 , openssl
+, ps
 , lnd
 }:
 let
@@ -21,7 +21,7 @@ let
     bitcoin.node=bitcoind
 
     [Bitcoind]
-    bitcoind.dir=${workDir}/bitcoind_regtest
+    bitcoind.dir=${workDir}/bitcoind_alice
     bitcoind.rpchost=127.0.0.1
     bitcoind.rpcuser=developer
     bitcoind.rpcpass=developer
@@ -37,7 +37,7 @@ let
     listen=0.0.0.0:${toString port}
     rpclisten=localhost:${toString rpcport}
     restlisten=0.0.0.0:${toString restport}
-    debuglevel=warn,PEER=warn
+    debuglevel=debug,PEER=debug
   '';
   serviceName = "lnd-${name}";
   workDir = "${dataDir}/${serviceName}";
@@ -71,23 +71,28 @@ let
     cp -f ${lndconf} ${workDir}/lnd.conf
     cp -f ${tlscert}/* ${workDir}/
     mkdir -p ${workDir}/data/chain/bitcoin/regtest
-    cp ${macaroonDir}/*macaroon* ${workDir}/data/chain/bitcoin/regtest
+    cp --no-preserve=mode,ownership ${macaroonDir}/*macaroon* ${workDir}/data/chain/bitcoin/regtest
   '';
   start = writeShellScriptBin "start" ''
-    echo $$ > ${workDir}/lnd.pid
-    exec ${lnd}/bin/lnd --lnddir='${workDir}' --bitcoin.defaultchanconfs=1 > '${workDir}/stdout.log' &
+    ${lnd}/bin/lnd --lnddir=${workDir} --bitcoin.defaultchanconfs=1  > ${workDir}/stdout.log 2>&1 &
+    ${ps}/bin/ps aux | grep lnd
+    echo "$!" > ${workDir}/lnd.pid
+    disown $(cat ${workDir}/lnd.pid)
+    echo "Lnd ${name} started $!"
   '';
   stop = writeShellScriptBin "stop" ''
     lnd_pid=`cat ${workDir}/lnd.pid`
+    echo "Stoping lnd ${name} $lnd_pid"
     timeout 5 ${cli}/bin/lncli stop
     kill -9 "$lnd_pid"
   '';
-in
-symlinkJoin {
-  name = name;
-  paths = [ start stop setup cli ];
-  postBuild = ''
-    echo "Symlinks scripts created in $out/bin"
-    echo "Datadir ${workDir}"
+  up = writeShellScriptBin "up" ''
+    ${setup}/bin/setup
+    ${start}/bin/start
   '';
+  down = writeShellScriptBin "down" ''
+    ${stop}/bin/stop
+  '';
+in {
+  inherit up down tlscert;
 }

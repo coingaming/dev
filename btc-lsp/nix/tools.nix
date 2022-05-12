@@ -8,6 +8,7 @@ with pkgs;
 {
   inherit awscli2
           eksctl
+          kubernetes-helm
           kubectl
           wget
           minikube

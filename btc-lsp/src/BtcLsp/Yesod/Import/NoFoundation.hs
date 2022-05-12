@@ -12,6 +12,7 @@ import BtcLsp.Data.Type as Import
 import BtcLsp.Import.External as Import
   ( ExceptT (..),
     IsList,
+    Natural,
     NodePubKey (..),
     Pool,
     RPreimage (..),
@@ -22,10 +23,12 @@ import BtcLsp.Import.External as Import
     maybeM,
     runExceptT,
     txIdHex,
+    whenJust,
+    withExceptT,
   )
 import BtcLsp.Import.Witch as Import
+import BtcLsp.Storage.Model as Import
 import BtcLsp.Text as Import
-import BtcLsp.Yesod.Model as Import
 import BtcLsp.Yesod.Settings as Import
 import BtcLsp.Yesod.Settings.StaticFiles as Import
 import ClassyPrelude.Yesod as Import

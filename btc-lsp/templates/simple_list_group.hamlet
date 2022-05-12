@@ -1,7 +1,0 @@
-<div .ui.container-fluid.compact.center.text-overflow>
-  <ul .list-group>
-    $forall (msg, txt) <- items
-      <li .list-group-item>
-        <dl>
-          <dt>_{msg}
-          <dd>#{txt}

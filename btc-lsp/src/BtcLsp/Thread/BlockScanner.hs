@@ -75,13 +75,13 @@ markFunded utxos =
       whenJust mCap $ \swapCap ->
         runSql
           . SwapIntoLn.withLockedExtantRowSql swapId
-          . const
-          $ do
-            SwapUtxo.markAsUsedForChanFundingSql $
-              entityKey <$> us
-            SwapIntoLn.updateWaitingPeerSql
-              swapId
-              swapCap
+          $ \swp ->
+            when (swapIntoLnStatus swp < SwapWaitingChan) $ do
+              SwapUtxo.markAsUsedForChanFundingSql $
+                entityKey <$> us
+              SwapIntoLn.updateWaitingPeerSql
+                swapId
+                swapCap
 
 data Utxo = Utxo
   { utxoValue :: MSat,

@@ -51,11 +51,11 @@ fundOnChainAddress ::
   Lens.Family2.LensLike' f s a
 fundOnChainAddress
   = Data.ProtoLens.Field.field @"fundOnChainAddress"
-input ::
+generic ::
   forall f s a.
-  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "input" a) =>
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "generic" a) =>
   Lens.Family2.LensLike' f s a
-input = Data.ProtoLens.Field.field @"input"
+generic = Data.ProtoLens.Field.field @"generic"
 internal ::
   forall f s a.
   (Prelude.Functor f,
@@ -127,20 +127,32 @@ refundOnChainAddress ::
   Lens.Family2.LensLike' f s a
 refundOnChainAddress
   = Data.ProtoLens.Field.field @"refundOnChainAddress"
+specific ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "specific" a) =>
+  Lens.Family2.LensLike' f s a
+specific = Data.ProtoLens.Field.field @"specific"
 success ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "success" a) =>
   Lens.Family2.LensLike' f s a
 success = Data.ProtoLens.Field.field @"success"
-vec'input ::
+vec'generic ::
   forall f s a.
   (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "vec'input" a) =>
+   Data.ProtoLens.Field.HasField s "vec'generic" a) =>
   Lens.Family2.LensLike' f s a
-vec'input = Data.ProtoLens.Field.field @"vec'input"
+vec'generic = Data.ProtoLens.Field.field @"vec'generic"
 vec'internal ::
   forall f s a.
   (Prelude.Functor f,
    Data.ProtoLens.Field.HasField s "vec'internal" a) =>
   Lens.Family2.LensLike' f s a
 vec'internal = Data.ProtoLens.Field.field @"vec'internal"
+vec'specific ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "vec'specific" a) =>
+  Lens.Family2.LensLike' f s a
+vec'specific = Data.ProtoLens.Field.field @"vec'specific"

@@ -12,6 +12,7 @@
 module BtcLsp.Yesod.Foundation where
 
 import qualified BtcLsp.Class.Env as Class
+import BtcLsp.Yesod.Data.BootstrapColor
 import qualified BtcLsp.Yesod.Data.Language
 import BtcLsp.Yesod.Import.NoFoundation
 import Control.Monad.Logger (LogSource)
@@ -22,6 +23,7 @@ import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet (hamletFile)
 import Text.Jasmine (minifym)
 import Yesod.Auth.Dummy
+import qualified Yesod.Auth.Message as Auth
 import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
@@ -123,70 +125,8 @@ instance Yesod App where
   --   defaultYesodMiddleware
 
   defaultLayout :: Widget -> Handler Html
-  defaultLayout widget = do
-    master <- getYesod
-    mmsg <- getMessage
-
-    muser <- maybeAuthPair
-    mcurrentRoute <- getCurrentRoute
-
-    -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
-    (title, parents) <- breadcrumbs
-
-    -- Define the menu items of the header.
-    let menuItems =
-          [ NavbarLeft $
-              MenuItem
-                { menuItemLabel = MsgHome,
-                  menuItemRoute = HomeR,
-                  menuItemAccessCallback = True,
-                  menuItemActiveCallback = mcurrentRoute == Just HomeR,
-                  menuItemNoReferrer = False
-                },
-            NavbarLeft $
-              MenuItem
-                { menuItemLabel = MsgProfile,
-                  menuItemRoute = ProfileR,
-                  menuItemAccessCallback = isJust muser,
-                  menuItemActiveCallback = mcurrentRoute == Just ProfileR,
-                  menuItemNoReferrer = False
-                },
-            NavbarRight $
-              MenuItem
-                { menuItemLabel = MsgLogin,
-                  menuItemRoute = AuthR LoginR,
-                  menuItemAccessCallback = isNothing muser,
-                  menuItemActiveCallback = mcurrentRoute == Just (AuthR LoginR),
-                  menuItemNoReferrer = True
-                },
-            NavbarRight $
-              MenuItem
-                { menuItemLabel = MsgLogout,
-                  menuItemRoute = AuthR LogoutR,
-                  menuItemAccessCallback = isJust muser,
-                  menuItemActiveCallback = False,
-                  menuItemNoReferrer = True
-                }
-          ]
-
-    let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
-    let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
-
-    let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
-    let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
-
-    -- We break up the default layout into two components:
-    -- default-layout is the contents of the body tag, and
-    -- default-layout-wrapper is the entire page. Since the final
-    -- value passed to hamletToRepHtml cannot be a widget, this allows
-    -- you to use normal widget features in default-layout.
-
-    pc <- widgetToPageContent $ do
-      addStylesheet $ StaticR css_bootstrap_css
-      addStylesheet $ StaticR css_app_css
-      --  generated from @Settings/StaticFiles.hs@
-      $(widgetFile "default-layout")
-    withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+  defaultLayout =
+    newLayout Nothing
 
   -- The page to be redirected to when authentication is required.
   authRoute ::
@@ -210,9 +150,6 @@ instance Yesod App where
   isAuthorized OpenChanR {} _ = pure Authorized
   isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
   isAuthorized SwapIntoLnSelectR {} _ = pure Authorized
-  -- the profile route requires that the user is authenticated, so we
-  -- delegate to that function
-  isAuthorized ProfileR _ = isAuthenticated
 
   -- This function creates static content files in the static folder
   -- and names them based on a hash of their content. This allows
@@ -277,7 +214,6 @@ instance YesodBreadcrumbs App where
         OpenChanR -> MsgOpenChanRBreadcrumb
         SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
         SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
-        ProfileR -> MsgProfileRBreadcrumb
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
         StaticR {} -> Nothing
@@ -289,7 +225,6 @@ instance YesodBreadcrumbs App where
         OpenChanR -> Just HomeR
         SwapIntoLnCreateR -> Just HomeR
         SwapIntoLnSelectR {} -> Just SwapIntoLnCreateR
-        ProfileR -> Just HomeR
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -304,11 +239,11 @@ instance YesodPersistRunner App where
   getDBRunner = defaultGetDBRunner appConnPool
 
 instance YesodAuth App where
-  type AuthId App = YesodUserId
+  type AuthId App = UserId
 
   -- Where to send a user after successful login
   loginDest :: App -> Route App
-  loginDest _ = ProfileR
+  loginDest _ = HomeR
 
   -- Where to send a user after logout
   logoutDest :: App -> Route App
@@ -319,22 +254,14 @@ instance YesodAuth App where
   redirectToReferer _ = True
 
   authenticate ::
-    (MonadHandler m, HandlerSite m ~ App) =>
+    ( MonadHandler m,
+      HandlerSite m ~ App
+    ) =>
     Creds App ->
     m (AuthenticationResult App)
-  authenticate creds = liftHandler $
-    runDB $ do
-      x <- getBy $ UniqueYesodUser $ credsIdent creds
-      case x of
-        Just (Entity uid _) -> return $ Authenticated uid
-        Nothing ->
-          Authenticated
-            <$> insert
-              YesodUser
-                { yesodUserIdent = credsIdent creds,
-                  yesodUserName = Nothing,
-                  yesodUserPassword = Nothing
-                }
+  authenticate _ =
+    liftHandler $
+      pure $ UserError Auth.AuthError
 
   -- You can add other plugins like Google Email, email or OAuth here
   authPlugins :: App -> [AuthPlugin App]
@@ -369,6 +296,92 @@ instance HasHttpManager App where
 
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
+
+data PanelConfig = PanelConfig
+  { panelConfigColor :: BootstrapColor,
+    panelConfigMsgShort :: AppMessage,
+    panelConfigMsgLong :: AppMessage
+  }
+
+newLayout :: Maybe PanelConfig -> Widget -> Handler Html
+newLayout mpcfg widget = do
+  master <- getYesod
+  mmsg <- getMessage
+  mcurrentRoute <- getCurrentRoute
+
+  -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
+  (title, parents) <- breadcrumbs
+
+  -- Define the menu items of the header.
+  let menuItems =
+        [ NavbarLeft $
+            MenuItem
+              { menuItemLabel = MsgHome,
+                menuItemRoute = HomeR,
+                menuItemAccessCallback = True,
+                menuItemActiveCallback = mcurrentRoute == Just HomeR,
+                menuItemNoReferrer = False
+              },
+          NavbarLeft $
+            MenuItem
+              { menuItemLabel = MsgOpenChan,
+                menuItemRoute = OpenChanR,
+                menuItemAccessCallback = True,
+                menuItemActiveCallback = mcurrentRoute == Just OpenChanR,
+                menuItemNoReferrer = False
+              },
+          NavbarLeft $
+            MenuItem
+              { menuItemLabel = MsgSwap,
+                menuItemRoute = SwapIntoLnCreateR,
+                menuItemAccessCallback = True,
+                menuItemActiveCallback =
+                  maybe
+                    False
+                    ( \case
+                        SwapIntoLnCreateR -> True
+                        SwapIntoLnSelectR {} -> True
+                        _ -> False
+                    )
+                    mcurrentRoute,
+                menuItemNoReferrer = False
+              }
+        ]
+
+  let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
+  let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
+
+  let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
+  let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
+
+  -- We break up the default layout into two components:
+  -- default-layout is the contents of the body tag, and
+  -- default-layout-wrapper is the entire page. Since the final
+  -- value passed to hamletToRepHtml cannot be a widget, this allows
+  -- you to use normal widget features in default-layout.
+
+  mLang <- lookupSession "_LANG"
+  pc <- widgetToPageContent $ do
+    addStylesheet $ StaticR css_bootstrap_css
+    addStylesheet $ StaticR css_app_css
+    --  generated from @Settings/StaticFiles.hs@
+    $(widgetFile "default-layout")
+
+  withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+
+panelLayout ::
+  BootstrapColor ->
+  AppMessage ->
+  AppMessage ->
+  Widget ->
+  Handler Html
+panelLayout color msgShort msgLong =
+  newLayout . Just $
+    PanelConfig
+      { panelConfigColor = color,
+        panelConfigMsgShort = msgShort,
+        panelConfigMsgLong = msgLong
+      }
 
 -- Note: Some functionality previously present in the scaffolding has been
 -- moved to documentation in the Wiki. Following are some hopefully helpful

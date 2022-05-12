@@ -6,6 +6,8 @@
 module Proto.BtcLsp.Method.SwapIntoLn (
         Request(), Response(), Response'Either(..), _Response'Success',
         _Response'Failure', Response'Failure(),
+        Response'Failure'InputFailure(..), Response'Failure'InputFailure(),
+        Response'Failure'InputFailure'UnrecognizedValue,
         Response'Failure'InternalFailure(), Response'Success()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
@@ -369,11 +371,16 @@ instance Data.ProtoLens.Message Response where
       \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\175\SOH\n\
       \\aSuccess\DC2\\\n\
       \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2F\n\
-      \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\175\SOH\n\
-      \\aFailure\DC29\n\
-      \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2V\n\
-      \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-      \\SIInternalFailureB\b\n\
+      \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\147\ETX\n\
+      \\aFailure\DC2=\n\
+      \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
+      \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
+      \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
+      \\SIInternalFailure\"\136\SOH\n\
+      \\fInputFailure\DC2$\n\
+      \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
+      \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
+      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STXB\b\n\
       \\ACKeither"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -541,12 +548,15 @@ _Response'Failure'
               _otherwise -> Prelude.Nothing)
 {- | Fields :
      
-         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.input' @:: Lens' Response'Failure [Proto.BtcLsp.Data.HighLevel.InputFailure]@
-         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.vec'input' @:: Lens' Response'Failure (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure)@
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.generic' @:: Lens' Response'Failure [Proto.BtcLsp.Data.HighLevel.InputFailure]@
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.vec'generic' @:: Lens' Response'Failure (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure)@
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.specific' @:: Lens' Response'Failure [Response'Failure'InputFailure]@
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.vec'specific' @:: Lens' Response'Failure (Data.Vector.Vector Response'Failure'InputFailure)@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.internal' @:: Lens' Response'Failure [Response'Failure'InternalFailure]@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.vec'internal' @:: Lens' Response'Failure (Data.Vector.Vector Response'Failure'InternalFailure)@ -}
 data Response'Failure
-  = Response'Failure'_constructor {_Response'Failure'input :: !(Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure),
+  = Response'Failure'_constructor {_Response'Failure'generic :: !(Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure),
+                                   _Response'Failure'specific :: !(Data.Vector.Vector Response'Failure'InputFailure),
                                    _Response'Failure'internal :: !(Data.Vector.Vector Response'Failure'InternalFailure),
                                    _Response'Failure'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
@@ -557,21 +567,37 @@ instance Prelude.Show Response'Failure where
         (Prelude.showString
            (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
 instance Text.PrettyPrint.GenericPretty.Out Response'Failure
-instance Data.ProtoLens.Field.HasField Response'Failure "input" [Proto.BtcLsp.Data.HighLevel.InputFailure] where
+instance Data.ProtoLens.Field.HasField Response'Failure "generic" [Proto.BtcLsp.Data.HighLevel.InputFailure] where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Response'Failure'input
-           (\ x__ y__ -> x__ {_Response'Failure'input = y__}))
+           _Response'Failure'generic
+           (\ x__ y__ -> x__ {_Response'Failure'generic = y__}))
         (Lens.Family2.Unchecked.lens
            Data.Vector.Generic.toList
            (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField Response'Failure "vec'input" (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure) where
+instance Data.ProtoLens.Field.HasField Response'Failure "vec'generic" (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
-           _Response'Failure'input
-           (\ x__ y__ -> x__ {_Response'Failure'input = y__}))
+           _Response'Failure'generic
+           (\ x__ y__ -> x__ {_Response'Failure'generic = y__}))
+        Prelude.id
+instance Data.ProtoLens.Field.HasField Response'Failure "specific" [Response'Failure'InputFailure] where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Response'Failure'specific
+           (\ x__ y__ -> x__ {_Response'Failure'specific = y__}))
+        (Lens.Family2.Unchecked.lens
+           Data.Vector.Generic.toList
+           (\ _ y__ -> Data.Vector.Generic.fromList y__))
+instance Data.ProtoLens.Field.HasField Response'Failure "vec'specific" (Data.Vector.Vector Response'Failure'InputFailure) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Response'Failure'specific
+           (\ x__ y__ -> x__ {_Response'Failure'specific = y__}))
         Prelude.id
 instance Data.ProtoLens.Field.HasField Response'Failure "internal" [Response'Failure'InternalFailure] where
   fieldOf _
@@ -594,20 +620,33 @@ instance Data.ProtoLens.Message Response'Failure where
     = Data.Text.pack "BtcLsp.Method.SwapIntoLn.Response.Failure"
   packedMessageDescriptor _
     = "\n\
-      \\aFailure\DC29\n\
-      \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2V\n\
-      \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-      \\SIInternalFailure"
+      \\aFailure\DC2=\n\
+      \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
+      \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
+      \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
+      \\SIInternalFailure\"\136\SOH\n\
+      \\fInputFailure\DC2$\n\
+      \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
+      \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
+      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
-        input__field_descriptor
+        generic__field_descriptor
           = Data.ProtoLens.FieldDescriptor
-              "input"
+              "generic"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
                  Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.InputFailure)
               (Data.ProtoLens.RepeatedField
-                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"input")) ::
+                 Data.ProtoLens.Unpacked (Data.ProtoLens.Field.field @"generic")) ::
+              Data.ProtoLens.FieldDescriptor Response'Failure
+        specific__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "specific"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Response'Failure'InputFailure)
+              (Data.ProtoLens.RepeatedField
+                 Data.ProtoLens.Packed (Data.ProtoLens.Field.field @"specific")) ::
               Data.ProtoLens.FieldDescriptor Response'Failure
         internal__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -620,15 +659,17 @@ instance Data.ProtoLens.Message Response'Failure where
               Data.ProtoLens.FieldDescriptor Response'Failure
       in
         Data.Map.fromList
-          [(Data.ProtoLens.Tag 1, input__field_descriptor),
-           (Data.ProtoLens.Tag 2, internal__field_descriptor)]
+          [(Data.ProtoLens.Tag 1, generic__field_descriptor),
+           (Data.ProtoLens.Tag 2, specific__field_descriptor),
+           (Data.ProtoLens.Tag 3, internal__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Response'Failure'_unknownFields
         (\ x__ y__ -> x__ {_Response'Failure'_unknownFields = y__})
   defMessage
     = Response'Failure'_constructor
-        {_Response'Failure'input = Data.Vector.Generic.empty,
+        {_Response'Failure'generic = Data.Vector.Generic.empty,
+         _Response'Failure'specific = Data.Vector.Generic.empty,
          _Response'Failure'internal = Data.Vector.Generic.empty,
          _Response'Failure'_unknownFields = []}
   parseMessage
@@ -637,15 +678,20 @@ instance Data.ProtoLens.Message Response'Failure where
           Response'Failure
           -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.BtcLsp.Data.HighLevel.InputFailure
              -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Response'Failure'InternalFailure
-                -> Data.ProtoLens.Encoding.Bytes.Parser Response'Failure
-        loop x mutable'input mutable'internal
+                -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Response'Failure'InputFailure
+                   -> Data.ProtoLens.Encoding.Bytes.Parser Response'Failure
+        loop x mutable'generic mutable'internal mutable'specific
           = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
                if end then
-                   do frozen'input <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                        (Data.ProtoLens.Encoding.Growing.unsafeFreeze mutable'input)
+                   do frozen'generic <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                          (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                             mutable'generic)
                       frozen'internal <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
                                            (Data.ProtoLens.Encoding.Growing.unsafeFreeze
                                               mutable'internal)
+                      frozen'specific <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                           (Data.ProtoLens.Encoding.Growing.unsafeFreeze
+                                              mutable'specific)
                       (let missing = []
                        in
                          if Prelude.null missing then
@@ -659,9 +705,12 @@ instance Data.ProtoLens.Message Response'Failure where
                         (Lens.Family2.over
                            Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t)
                            (Lens.Family2.set
-                              (Data.ProtoLens.Field.field @"vec'input") frozen'input
+                              (Data.ProtoLens.Field.field @"vec'generic") frozen'generic
                               (Lens.Family2.set
-                                 (Data.ProtoLens.Field.field @"vec'internal") frozen'internal x)))
+                                 (Data.ProtoLens.Field.field @"vec'internal") frozen'internal
+                                 (Lens.Family2.set
+                                    (Data.ProtoLens.Field.field @"vec'specific") frozen'specific
+                                    x))))
                else
                    do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
                       case tag of
@@ -671,11 +720,46 @@ instance Data.ProtoLens.Message Response'Failure where
                                             Data.ProtoLens.Encoding.Bytes.isolate
                                               (Prelude.fromIntegral len)
                                               Data.ProtoLens.parseMessage)
-                                        "input"
+                                        "generic"
                                 v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                       (Data.ProtoLens.Encoding.Growing.append mutable'input y)
-                                loop x v mutable'internal
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'generic y)
+                                loop x v mutable'internal mutable'specific
+                        16
+                          -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                        (Prelude.fmap
+                                           Prelude.toEnum
+                                           (Prelude.fmap
+                                              Prelude.fromIntegral
+                                              Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                        "specific"
+                                v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                       (Data.ProtoLens.Encoding.Growing.append mutable'specific y)
+                                loop x mutable'generic mutable'internal v
                         18
+                          -> do y <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                        Data.ProtoLens.Encoding.Bytes.isolate
+                                          (Prelude.fromIntegral len)
+                                          ((let
+                                              ploop qs
+                                                = do packedEnd <- Data.ProtoLens.Encoding.Bytes.atEnd
+                                                     if packedEnd then
+                                                         Prelude.return qs
+                                                     else
+                                                         do !q <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                                                    (Prelude.fmap
+                                                                       Prelude.toEnum
+                                                                       (Prelude.fmap
+                                                                          Prelude.fromIntegral
+                                                                          Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                                                    "specific"
+                                                            qs' <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                                                     (Data.ProtoLens.Encoding.Growing.append
+                                                                        qs q)
+                                                            ploop qs'
+                                            in ploop)
+                                             mutable'specific)
+                                loop x mutable'generic mutable'internal y
+                        26
                           -> do !y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                         (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
                                             Data.ProtoLens.Encoding.Bytes.isolate
@@ -684,21 +768,25 @@ instance Data.ProtoLens.Message Response'Failure where
                                         "internal"
                                 v <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
                                        (Data.ProtoLens.Encoding.Growing.append mutable'internal y)
-                                loop x mutable'input v
+                                loop x mutable'generic v mutable'specific
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
                                 loop
                                   (Lens.Family2.over
                                      Data.ProtoLens.unknownFields (\ !t -> (:) y t) x)
-                                  mutable'input mutable'internal
+                                  mutable'generic mutable'internal mutable'specific
       in
         (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do mutable'input <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
-                                 Data.ProtoLens.Encoding.Growing.new
+          (do mutable'generic <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                   Data.ProtoLens.Encoding.Growing.new
               mutable'internal <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
                                     Data.ProtoLens.Encoding.Growing.new
-              loop Data.ProtoLens.defMessage mutable'input mutable'internal)
+              mutable'specific <- Data.ProtoLens.Encoding.Parser.Unsafe.unsafeLiftIO
+                                    Data.ProtoLens.Encoding.Growing.new
+              loop
+                Data.ProtoLens.defMessage mutable'generic mutable'internal
+                mutable'specific)
           "Failure"
   buildMessage
     = \ _x
@@ -714,31 +802,152 @@ instance Data.ProtoLens.Message Response'Failure where
                                       (Prelude.fromIntegral (Data.ByteString.length bs)))
                                    (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                            Data.ProtoLens.encodeMessage _v))
-                (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'input") _x))
+                (Lens.Family2.view (Data.ProtoLens.Field.field @"vec'generic") _x))
              ((Data.Monoid.<>)
-                (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
-                   (\ _v
-                      -> (Data.Monoid.<>)
-                           (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
-                           ((Prelude..)
-                              (\ bs
-                                 -> (Data.Monoid.<>)
-                                      (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                         (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                              Data.ProtoLens.encodeMessage _v))
-                   (Lens.Family2.view
-                      (Data.ProtoLens.Field.field @"vec'internal") _x))
-                (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                   (Lens.Family2.view Data.ProtoLens.unknownFields _x)))
+                (let
+                   p = Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"vec'specific") _x
+                 in
+                   if Data.Vector.Generic.null p then
+                       Data.Monoid.mempty
+                   else
+                       (Data.Monoid.<>)
+                         (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                         ((\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                            (Data.ProtoLens.Encoding.Bytes.runBuilder
+                               (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                                  ((Prelude..)
+                                     ((Prelude..)
+                                        Data.ProtoLens.Encoding.Bytes.putVarInt
+                                        Prelude.fromIntegral)
+                                     Prelude.fromEnum)
+                                  p))))
+                ((Data.Monoid.<>)
+                   (Data.ProtoLens.Encoding.Bytes.foldMapBuilder
+                      (\ _v
+                         -> (Data.Monoid.<>)
+                              (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                              ((Prelude..)
+                                 (\ bs
+                                    -> (Data.Monoid.<>)
+                                         (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                                 Data.ProtoLens.encodeMessage _v))
+                      (Lens.Family2.view
+                         (Data.ProtoLens.Field.field @"vec'internal") _x))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData Response'Failure where
   rnf
     = \ x__
         -> Control.DeepSeq.deepseq
              (_Response'Failure'_unknownFields x__)
              (Control.DeepSeq.deepseq
-                (_Response'Failure'input x__)
-                (Control.DeepSeq.deepseq (_Response'Failure'internal x__) ()))
+                (_Response'Failure'generic x__)
+                (Control.DeepSeq.deepseq
+                   (_Response'Failure'specific x__)
+                   (Control.DeepSeq.deepseq (_Response'Failure'internal x__) ())))
+newtype Response'Failure'InputFailure'UnrecognizedValue
+  = Response'Failure'InputFailure'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq,
+                  Prelude.Ord,
+                  Prelude.Show,
+                  GHC.Generics.Generic)
+instance Text.PrettyPrint.GenericPretty.Out Response'Failure'InputFailure'UnrecognizedValue
+data Response'Failure'InputFailure
+  = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT |
+    Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON |
+    Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE |
+    Response'Failure'InputFailure'Unrecognized !Response'Failure'InputFailure'UnrecognizedValue
+  deriving stock (Prelude.Show,
+                  Prelude.Eq,
+                  Prelude.Ord,
+                  GHC.Generics.Generic)
+instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
+  maybeToEnum 0
+    = Prelude.Just Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+  maybeToEnum 1
+    = Prelude.Just Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+  maybeToEnum 2
+    = Prelude.Just
+        Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  maybeToEnum k
+    = Prelude.Just
+        (Response'Failure'InputFailure'Unrecognized
+           (Response'Failure'InputFailure'UnrecognizedValue
+              (Prelude.fromIntegral k)))
+  showEnum Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+    = "FUND_LN_INVOICE_HAS_NON_ZERO_AMT"
+  showEnum Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+    = "FUND_LN_INVOICE_EXPIRES_TOO_SOON"
+  showEnum Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    = "FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE"
+  showEnum
+    (Response'Failure'InputFailure'Unrecognized (Response'Failure'InputFailure'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "FUND_LN_INVOICE_HAS_NON_ZERO_AMT"
+    = Prelude.Just Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+    | (Prelude.==) k "FUND_LN_INVOICE_EXPIRES_TOO_SOON"
+    = Prelude.Just Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+    | (Prelude.==) k "FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE"
+    = Prelude.Just
+        Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded Response'Failure'InputFailure where
+  minBound = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+  maxBound
+    = Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+instance Prelude.Enum Response'Failure'InputFailure where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum InputFailure: "
+              (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT = 0
+  fromEnum Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON = 1
+  fromEnum Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    = 2
+  fromEnum
+    (Response'Failure'InputFailure'Unrecognized (Response'Failure'InputFailure'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    = Prelude.error
+        "Response'Failure'InputFailure.succ: bad argument Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE. This value would be out of bounds."
+  succ Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+    = Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+  succ Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+    = Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  succ (Response'Failure'InputFailure'Unrecognized _)
+    = Prelude.error
+        "Response'Failure'InputFailure.succ: bad argument: unrecognized value"
+  pred Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+    = Prelude.error
+        "Response'Failure'InputFailure.pred: bad argument Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT. This value would be out of bounds."
+  pred Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+    = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+  pred Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    = Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+  pred (Response'Failure'InputFailure'Unrecognized _)
+    = Prelude.error
+        "Response'Failure'InputFailure.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault Response'Failure'InputFailure where
+  fieldDefault = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+instance Control.DeepSeq.NFData Response'Failure'InputFailure where
+  rnf x__ = Prelude.seq x__ ()
+instance Text.PrettyPrint.GenericPretty.Out Response'Failure'InputFailure
 {- | Fields :
       -}
 data Response'Failure'InternalFailure
@@ -996,20 +1205,26 @@ packedFileDescriptor
     \\aRequest\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2L\n\
     \\SIfund_ln_invoice\CAN\STX \SOH(\v2$.BtcLsp.Data.HighLevel.FundLnInvoiceR\rfundLnInvoice\DC2b\n\
-    \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\"\182\EOT\n\
+    \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\"\154\ACK\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
     \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.SuccessH\NULR\asuccess\DC2F\n\
     \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\175\SOH\n\
     \\aSuccess\DC2\\\n\
     \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2F\n\
-    \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\175\SOH\n\
-    \\aFailure\DC29\n\
-    \\ENQinput\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ENQinput\DC2V\n\
-    \\binternal\CAN\STX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-    \\SIInternalFailureB\b\n\
-    \\ACKeitherJ\204\b\n\
-    \\ACK\DC2\EOT\NUL\NUL'\SOH\n\
+    \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\147\ETX\n\
+    \\aFailure\DC2=\n\
+    \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
+    \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
+    \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
+    \\SIInternalFailure\"\136\SOH\n\
+    \\fInputFailure\DC2$\n\
+    \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
+    \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
+    \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STXB\b\n\
+    \\ACKeitherJ\218\n\
+    \\n\
+    \\ACK\DC2\EOT\NUL\NUL.\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1052,7 +1267,7 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\rHI\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\DLE\NUL'\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\DLE\NUL.\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\SOH\SOH\DC2\ETX\DLE\b\DLE\n\
@@ -1108,31 +1323,63 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\FS67\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\US\STX&\ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\US\STX-\ETX\n\
     \\f\n\
     \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\US\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX \EOT;\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX \EOT=\n\
     \\SO\n\
     \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX \EOT\f\n\
     \\SO\n\
     \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX \r0\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX 16\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX 18\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX 9:\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX ;<\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX!\EOT*\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX!\EOT'\n\
     \\SO\n\
     \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX!\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX!\r\FS\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX!\r\EM\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX!\GS%\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX!\SUB\"\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX!()\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX!%&\n\
+    \\r\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX\"\EOT*\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT#\EOT%\ENQ\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX\"\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX#\f\ESCb\ACKproto3"
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX\"\r\FS\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX\"\GS%\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX\"()\n\
+    \\SO\n\
+    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT$\EOT(\ENQ\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX$\t\NAK\n\
+    \\SI\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\DC2\ETX%\ACK+\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX%\ACK&\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX%)*\n\
+    \\SI\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\DC2\ETX&\ACK+\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\SOH\DC2\ETX&\ACK&\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\STX\DC2\ETX&)*\n\
+    \\SI\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\DC2\ETX'\ACK3\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\SOH\DC2\ETX'\ACK.\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\STX\DC2\ETX'12\n\
+    \\SO\n\
+    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT*\EOT,\ENQ\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX*\f\ESCb\ACKproto3"

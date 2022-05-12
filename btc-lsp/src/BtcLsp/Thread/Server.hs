@@ -16,7 +16,6 @@ import qualified BtcLsp.Storage.Model.User as User
 import qualified Crypto.Secp256k1 as C
 import qualified Data.ByteString as BS
 import Data.ProtoLens.Field
-import Data.ProtoLens.Message
 import Lens.Micro
 import Network.GRPC.HTTP2.ProtoLens (RPC (..))
 import Network.GRPC.Server
@@ -25,6 +24,7 @@ import Proto.BtcLsp (Service)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
+import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 import qualified Universum
 
 apply :: (Env m) => m ()
@@ -32,17 +32,6 @@ apply = do
   env <- getGsEnv
   withUnliftIO $ \run ->
     runServer env $ handlers run
-
-type ContextMsg req res failure internal =
-  ( HasField req "maybe'ctx" (Maybe Proto.Ctx),
-    HasField res "ctx" Proto.Ctx,
-    HasField res "failure" failure,
-    HasField failure "input" [Proto.InputFailure],
-    HasField failure "internal" [internal],
-    Message res,
-    Message failure,
-    Message internal
-  )
 
 handlers ::
   forall m.
@@ -62,7 +51,8 @@ handlers run gsEnv body =
   ]
   where
     runHandler ::
-      ( ContextMsg req res failure internal,
+      ( GrpcReq req,
+        GrpcRes res failure specific internal,
         Out req,
         Out res
       ) =>
@@ -114,7 +104,8 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
           <> inspectPlain (C.getMsg msg)
 
 withMiddleware ::
-  ( ContextMsg req res failure internal,
+  ( GrpcReq req,
+    GrpcRes res failure specific internal,
     Env m,
     Out req,
     Out res
@@ -129,30 +120,68 @@ withMiddleware ::
 withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
   run $ do
     userE <- runExceptT $ do
+      --
+      -- NOTE : Here request type is hardcoded,
+      -- because it's impossible to use generic "req"
+      -- type with TH. Hardcoding request type is not ideal,
+      -- because theoretically other requests could have
+      -- other location of context stuff,
+      -- but not really in this case.
+      --
       nonce <-
-        fromReqT $
-          req
+        fromReqT
+          $( mkFieldLocation
+               @SwapIntoLn.Request
+               [ "ctx",
+                 "nonce"
+               ]
+           )
+          $ req
             ^? field @"maybe'ctx"
               . _Just
               . Proto.maybe'nonce
               . _Just
       pub <-
-        fromReqT $
-          req
+        fromReqT
+          $( mkFieldLocation
+               @SwapIntoLn.Request
+               [ "ctx",
+                 "ln_pub_key"
+               ]
+           )
+          $ req
             ^? field @"maybe'ctx"
               . _Just
               . Proto.maybe'lnPubKey
               . _Just
       if gsEnvSigVerify gsEnv
         then
-          except $
-            verifySigE gsEnv waiReq pub body
+          except
+            . first
+              ( const $
+                  newGenFailure
+                    Proto.VERIFICATION_FAILED
+                    mempty
+              )
+            $ verifySigE gsEnv waiReq pub body
         else
           $(logTM)
             ErrorS
             "WARNING!!! SIGNATURE VERIFICATION DISABLED!!!"
-      ExceptT . runSql $
-        User.createVerifySql pub nonce
+      withExceptT
+        ( const $
+            newGenFailure
+              Proto.VERIFICATION_FAILED
+              $( mkFieldLocation
+                   @SwapIntoLn.Request
+                   [ "ctx",
+                     "nonce"
+                   ]
+               )
+        )
+        . ExceptT
+        . runSql
+        $ User.createVerifySql pub nonce
     case userE of
       Right user -> do
         res <- setGrpcCtx =<< handler user req
@@ -160,7 +189,7 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
         pure res
       Left e -> do
         $(logTM) DebugS . logStr $ debugMsg e
-        pure $ failResE e
+        pure e
   where
     debugMsg :: (Out a) => a -> Text
     debugMsg x =

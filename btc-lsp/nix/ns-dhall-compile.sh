@@ -6,13 +6,12 @@ THIS_DIR="$(dirname "$(realpath "$0")")"
 ROOT_DIR="$THIS_DIR/.."
 BUILD_DIR="$ROOT_DIR/build"
 BITCOIN_NETWORK="${1:-regtest}"
+CLOUD_PROVIDER="${2:-digitalocean}"
 
 KUBERNETES_BUILD_DIR="$ROOT_DIR/build/k8s"
 SCRIPTS_BUILD_DIR="$ROOT_DIR/build/scripts"
 
 mkdir -p "$KUBERNETES_BUILD_DIR" "$SCRIPTS_BUILD_DIR"
-
-echo "==> Compiling dhall for $BITCOIN_NETWORK environment"
 
 dhall_to_yaml() {
   FILE_PATH="$1"
@@ -52,9 +51,19 @@ dhall_to_sh() {
   echo "Compiled $RESULT_SH"
 }
 
-for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/k8s.*.dhall; do
-  dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
-done
+if [ "$BITCOIN_NETWORK" = "regtest" ]; then
+  echo "==> Compiling dhall for $BITCOIN_NETWORK environment"
+
+  for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/k8s.*.dhall; do
+    dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
+  done
+else
+  echo "==> Compiling dhall for $BITCOIN_NETWORK environment, $CLOUD_PROVIDER cloud"
+
+  for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/$CLOUD_PROVIDER/k8s.*.dhall; do
+    dhall_to_yaml "$x" "$KUBERNETES_BUILD_DIR"
+  done
+fi
 
 for x in $ROOT_DIR/dhall/$BITCOIN_NETWORK/scripts/*.dhall; do
   dhall_to_sh "$x" "$SCRIPTS_BUILD_DIR"

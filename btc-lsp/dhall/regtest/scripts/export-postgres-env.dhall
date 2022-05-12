@@ -1,5 +1,5 @@
-let G = ../../Global.dhall
+let S = ../../Service.dhall
 
 let Postgres = ../../Service/Postgres.dhall
 
-in  G.concatExportEnv Postgres.mkEnv
+in  S.concatExportEnv Postgres.mkEnv

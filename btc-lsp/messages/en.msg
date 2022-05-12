@@ -12,27 +12,22 @@ Copy: copy
 HomeRBreadcrumb: Home
 AuthRBreadcrumb: Login
 SignoutRBreadcrumb: Signout
-ProfileRBreadcrumb: Profile
 CreateRBreadcrumb: New
-OpenChanRBreadcrumb: Open Channel
+OpenChanRBreadcrumb: Channel
 SwapIntoLnCreateRBreadcrumb: Swap
 SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
 
-HomeRTitle: Welcome | LSP
-SignoutRTitle: Logout | LSP
-ProfileRTitle usr@YesodUser: #{usr} | LSP
-OpenChanRTitle: Open Channel | LSP
-SwapIntoLnCreateRTitle: Swap | LSP
-SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Swap | LSP
+HomeRTitle: Welcome | Lsp
+SignoutRTitle: Logout | Lsp
+OpenChanRTitle: Open Channel | Lsp
+SwapIntoLnCreateRTitle: Swap | Lsp
+SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Swap | Lsp
 
 Home: Home
-Profile: Profile
 Login: Login
 Logout: Logout
 Iso639v1: en
 Iso3166v1: gb
-
-ProfilePageGreet usr@YesodUser: You are logged in as #{usr}
 
 Name: Name
 Password: Password
@@ -40,7 +35,7 @@ Password: Password
 HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
 
-OpenChan: Open Channel
+OpenChan: Channel
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
 Swap: Swap
@@ -61,13 +56,15 @@ SwapIntoLnInsertedAt: Inserted at
 SwapIntoLnUpdatedAt: Updated at
 ChannelPrivacy: Channel Privacy
 
-SwapIntoLnWaitingFundChainShort: Step 1/4 - Swap Funding
-SwapIntoLnFundedShort: Step 2/4 - Peer Connection
-SwapIntoLnWaitingChanShort: Step 3/4 - Channel Opening
-SwapIntoLnWaitingFundLnShort: Step 3/4 - Lightning Funding
-SwapIntoLnSucceededShort: Step 4/4 - Swap Succeeded
+SwapIntoLnInfoShort: Step 1/5 - Swap Info
+SwapIntoLnWaitingFundChainShort: Step 2/5 - Swap Funding
+SwapIntoLnFundedShort: Step 3/5 - Peer Connection
+SwapIntoLnWaitingChanShort: Step 4/5 - Channel Opening
+SwapIntoLnWaitingFundLnShort: Step 4/5 - Lightning Funding
+SwapIntoLnSucceededShort: Step 5/5 - Swap Succeeded
 SwapIntoLnExpiredShort: Swap Expired!
 
+SwapIntoLnInfoLong: To create a balanced inbound channel, provide a lightning invoice with a zero requested amount and an expiration time of at least one week. Also Lsp needs on-chain emergency refund address.
 SwapIntoLnWaitingFundChainLong: Lsp is wating for the swap being funded. Please send bitcoins to the on-chain swap address:
 SwapIntoLnFundedLong: The swap is successfully funded. Lsp is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
 SwapIntoLnWaitingChanLong: Lsp initiated lightning channel. Waiting for the channel being opened.
@@ -83,3 +80,7 @@ Status: Status
 SwapInfo: Swap Info
 SwapUtxos: Swap UTXOs
 SwapChans: Swap Channels
+
+FailureDefault: Something went wrong. Please check the input data and try again.
+FailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
+FailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
