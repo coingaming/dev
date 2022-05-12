@@ -92,7 +92,7 @@ in {
 
     ${lspEnv.setup}/bin/setup
     sleep 10
-    ${btcLspTest}/bin/btc-lsp-test
+    ${btcLspTest}/bin/btc-lsp-test > $out
 
     ${postgres.down}/bin/down
     ${electrsAlice.down}/bin/down
