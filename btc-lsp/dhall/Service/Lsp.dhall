@@ -2,6 +2,10 @@ let P = ../Prelude/Import.dhall
 
 let G = ../Global.dhall
 
+let C = ../CloudProvider.dhall
+
+let S = ../Service.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
@@ -17,12 +21,6 @@ let Lnd = ./Lnd.dhall
 let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
-
-let domain = ../../build/secrets/lsp/domain.txt as Text ? G.todo
-
-let tlsCert = ../../build/secrets/lsp/tls.cert as Text ? G.todo
-
-let tlsKey = ../../build/secrets/lsp/tls.key as Text ? G.todo
 
 let logEnv = "test"
 
@@ -108,14 +106,8 @@ let mkLspGrpcServerEnv
             { port = P.JSON.natural grpcPort.unPort
             , sig_verify = P.JSON.bool True
             , sig_header_name = P.JSON.string "sig-bin"
-            , encryption = P.JSON.string (G.unEncryption G.Encryption.Encrypted)
-            , tls =
-                P.JSON.object
-                  ( toMap
-                      { cert = P.JSON.string tlsCert
-                      , key = P.JSON.string tlsKey
-                      }
-                  )
+            , encryption =
+                P.JSON.string (G.unEncryption G.Encryption.UnEncrypted)
             }
         )
 
@@ -168,7 +160,7 @@ let mkEnv
         , { mapKey = env.lspLogVerbosity, mapValue = logVerbosity }
         , { mapKey = env.lspLogSeverity, mapValue = logSeverity }
         , { mapKey = env.lspLndP2pPort, mapValue = G.unPort Lnd.p2pPort }
-        , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomain net }
+        , { mapKey = env.lspLndP2pHost, mapValue = Lnd.mkDomainName net }
         , { mapKey = env.lspLibpqConnStr, mapValue = Postgres.mkConnStr net }
         , { mapKey = env.lspGrpcServerEnv
           , mapValue = "'${P.JSON.render mkLspGrpcServerEnv}'"
@@ -204,12 +196,12 @@ let mkSetupEnv
             echo "==> Setting up env for ${ownerText}"
 
             (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+              kubectl create configmap ${ownerText} \${S.concatSetupEnv
                                                          configMapEnv}
             ) || true
 
             (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+              kubectl create secret generic ${ownerText} \${S.concatSetupEnv
                                                               secretEnv}
             ) || true
             ''
@@ -225,22 +217,53 @@ let mkServiceType
           net
 
 let mkServiceAnnotations
-    : G.BitcoinNetwork → Optional (List { mapKey : Text, mapValue : Text })
+    : G.BitcoinNetwork →
+      Optional C.ProviderType →
+        Optional (P.Map.Type Text Text)
     = λ(net : G.BitcoinNetwork) →
-        merge
-          { MainNet = Service.mkAnnotations Service.CloudProvider.Aws owner
-          , TestNet =
-              Service.mkAnnotations Service.CloudProvider.DigitalOcean owner
-          , RegTest = None (List { mapKey : Text, mapValue : Text })
-          }
-          net
+      λ(cloudProvider : Optional C.ProviderType) →
+        let annotations =
+              P.Optional.concatMap
+                C.ProviderType
+                (P.Map.Type Text Text)
+                ( λ(cloudProvider : C.ProviderType) →
+                    merge
+                      { Aws = Some
+                        [ { mapKey =
+                              "service.beta.kubernetes.io/aws-load-balancer-proxy-protocol"
+                          , mapValue = "*"
+                          }
+                        , { mapKey =
+                              "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"
+                          , mapValue =
+                                ../../build/certarn.txt as Text
+                              ? G.todo
+                          }
+                        , { mapKey =
+                              "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"
+                          , mapValue = Natural/show grpcPort.unPort
+                          }
+                        ]
+                      , DigitalOcean = Some
+                        [ { mapKey =
+                              "kubernetes.digitalocean.com/load-balancer-id"
+                          , mapValue = "${owner}-lb"
+                          }
+                        ]
+                      }
+                      cloudProvider
+                )
+                cloudProvider
+
+        in  S.mkServiceAnnotations net annotations cloudProvider
 
 let mkService
-    : G.BitcoinNetwork → K.Service.Type
+    : G.BitcoinNetwork → Optional C.ProviderType → K.Service.Type
     = λ(net : G.BitcoinNetwork) →
+      λ(cloudProvider : Optional C.ProviderType) →
         Service.mkService
           owner
-          (mkServiceAnnotations net)
+          (mkServiceAnnotations net cloudProvider)
           (mkServiceType net)
           (Service.mkPorts ports)
 
@@ -257,8 +280,8 @@ let mkContainerImage
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
         merge
-          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.18"
-          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.18"
+          { MainNet = "ghcr.io/coingaming/btc-lsp:v0.1.27"
+          , TestNet = "ghcr.io/coingaming/btc-lsp:v0.1.27"
           , RegTest = ../../build/docker-image-btc-lsp.txt as Text ? G.todo
           }
           net

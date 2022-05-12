@@ -1,5 +1,7 @@
 let G = ../Global.dhall
 
+let C = ../CloudProvider.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Lsp = ../Service/Lsp.dhall

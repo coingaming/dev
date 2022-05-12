@@ -21,7 +21,7 @@
 
             <ul .nav.navbar-nav.navbar-right>
                 $forall langCode <- BtcLsp.Yesod.Data.Language.codeList
-                  <li>
+                  <li :mLang == Just (toPathPiece langCode):.active>
                     <a href="@{LanguageR langCode}">
                       <span class="flag-icon flag-icon-#{renderMessage master [toPathPiece langCode] MsgIso3166v1}">
                 $forall MenuItem label route _ isActive noReferrer <- navbarRightFilteredMenuItems
@@ -39,9 +39,20 @@
           <li .active>#{title}
     $if (Just HomeR /= mcurrentRoute)
       $maybe msg <- mmsg
-        <div .alert.alert-info #message>#{msg}
+        <div .alert.alert-danger #message>#{msg}
 
-^{widget}
+$case mpcfg
+  $of Just pcfg
+    <div .ui.container.center>
+      <div .panel.panel-#{bsColor2Class (panelConfigColor pcfg)}>
+        <div .panel-heading>_{panelConfigMsgShort pcfg}
+        <div .panel-body.large-margin-bottom>
+          <div .jumbotron.bg-color-inherit.no-margin-bottom>
+            <p .text-center.no-margin-bottom>_{panelConfigMsgLong pcfg}
+          <div .ui.container-fluid>
+            ^{widget}
+  $of Nothing
+    ^{widget}
 
 <!-- Footer -->
 $if (Just HomeR /= mcurrentRoute)

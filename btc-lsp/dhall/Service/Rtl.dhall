@@ -2,6 +2,10 @@ let P = ../Prelude/Import.dhall
 
 let G = ../Global.dhall
 
+let C = ../CloudProvider.dhall
+
+let S = ../Service.dhall
+
 let K = ../Kubernetes/Import.dhall
 
 let Service = ../Kubernetes/Service.dhall
@@ -16,9 +20,7 @@ let owner = G.unOwner G.Owner.Rtl
 
 let image = "heathmont/rtl:9c8d7d6"
 
-let domain = ../../build/secrets/rtl/domain.txt as Text ? G.todo
-
-let tlsSecretName = "${owner}-tls"
+let domainName = ../../build/secrets/rtl/domainname.txt as Text ? G.todo
 
 let securePass = ../../build/secrets/rtl/multipass.txt as Text ? G.todo
 
@@ -54,10 +56,12 @@ let mkMultiPass
           }
           net
 
-let mkDomain
+let mkDomainName
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
+        merge
+          { MainNet = domainName, TestNet = domainName, RegTest = owner }
+          net
 
 let mkRtlConfigNodesJson
     : List G.Owner → P.JSON.Type
@@ -129,27 +133,19 @@ let mkSetupEnv
             set -e
 
             THIS_DIR="$(dirname "$(realpath "$0")")"
-            TLS_CERT_PATH="$THIS_DIR/../secrets/${ownerText}/tls.cert"
-            TLS_KEY_PATH="$THIS_DIR/../secrets/${ownerText}/tls.key"
 
             . "$THIS_DIR/export-${ownerText}-env.sh"
 
             echo "==> Setting up env for ${ownerText}"
 
             (
-              kubectl create configmap ${ownerText} \${G.concatSetupEnv
+              kubectl create configmap ${ownerText} \${S.concatSetupEnv
                                                          configMapEnv}
             ) || true
 
             (
-              kubectl create secret generic ${ownerText} \${G.concatSetupEnv
+              kubectl create secret generic ${ownerText} \${S.concatSetupEnv
                                                               secretEnv}
-            ) || true
-
-            (
-              kubectl create secret tls ${tlsSecretName} \
-              --cert="$TLS_CERT_PATH" \
-              --key="$TLS_KEY_PATH"
             ) || true
             ''
 
@@ -168,31 +164,23 @@ let mkService
     = λ(net : G.BitcoinNetwork) →
         Service.mkService
           owner
-          (None (List { mapKey : Text, mapValue : Text }))
+          (None (P.Map.Type Text Text))
           (mkServiceType net)
           (Service.mkPorts ports)
 
-let mkTls
-    : G.BitcoinNetwork → Optional K.IngressTLS.Type
-    = λ(net : G.BitcoinNetwork) →
-        let tls = Some (Ingress.mkTls (mkDomain net) tlsSecretName)
-
-        in  merge
-              { MainNet = tls, TestNet = tls, RegTest = None K.IngressTLS.Type }
-              net
-
 let mkIngress
-    : G.BitcoinNetwork → K.Ingress.Type
+    : G.BitcoinNetwork → Optional C.ProviderType → K.Ingress.Type
     = λ(net : G.BitcoinNetwork) →
-        let tls
-            : Optional (List K.IngressTLS.Type)
-            = P.Optional.map
-                K.IngressTLS.Type
-                (List K.IngressTLS.Type)
-                (λ(tls : K.IngressTLS.Type) → [ tls ])
-                (mkTls net)
+      λ(cloudProvider : Optional C.ProviderType) →
+        let certArn = ../../build/certarn.txt as Text ? G.todo
 
-        in  Ingress.mkIngress owner (mkDomain net) tcpPort.unPort tls
+        in Ingress.mkIngress
+          owner
+          (S.mkIngressAnnotations net cloudProvider certArn)
+          (mkDomainName net)
+          tcpPort.unPort
+          (S.mkIngressClassName cloudProvider)
+          (None (List K.IngressTLS.Type))
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv
