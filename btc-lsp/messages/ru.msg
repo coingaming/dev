@@ -2,6 +2,7 @@ Nothing:
 Proxy txt@Text: #{txt}
 Continue: Продолжить
 Copy: копировать
+Iso3166v1: ru
 
 HomeRBreadcrumb: Главная
 AuthRBreadcrumb: Войти
@@ -9,13 +10,9 @@ SignoutRBreadcrumb: Выйти
 OpenChanRBreadcrumb: Открыть Канал
 
 HomeRTitle: Добро пожаловать | ЛСП
-SignoutRTitle: Выйти | ЛСП
 OpenChanRTitle: Открыть Канал | ЛСП
 
 Home: Главная
-Iso639v1: ru
-Iso3166v1: ru
-
 HomeBigHeader: БТК ЛСП
 HomeSmallHeader: Сервис Провайдер Лайтнинг Сети
 

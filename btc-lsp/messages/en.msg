@@ -2,6 +2,7 @@ Nothing:
 Proxy txt@Text: #{txt}
 Continue: Continue
 Copy: copy
+Iso3166v1: gb
 
 HomeRBreadcrumb: Home
 AuthRBreadcrumb: Login
@@ -12,16 +13,12 @@ SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
 AboutRBreadcrumb: About
 
 HomeRTitle: Welcome | LSP
-SignoutRTitle: Logout | LSP
 OpenChanRTitle: Outbound | LSP
 SwapIntoLnCreateRTitle: Balanced | LSP
 SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Balanced | LSP
 AboutRTitle: About | LSP
 
 Home: Home
-Iso639v1: en
-Iso3166v1: gb
-
 HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
 
