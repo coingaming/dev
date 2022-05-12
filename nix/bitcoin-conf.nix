@@ -1,11 +1,11 @@
 {
   name
 , dataDir
-, rpcport ? 18433
+, rpcport
+, port
 , rpcuser ? "developer"
 , rpcpassword ? "developer"
-} : {
-  lib
+, lib
 , runCommand
 , writeText
 , symlinkJoin
@@ -47,15 +47,14 @@ let
   workDir = "${dataDir}/bitcoind_${name}";
   start = writeShellScriptBin "start" ''
     echo "Start"
-    ${bitcoind}/bin/bitcoind -daemonwait -datadir='${workDir}' &
+    ${bitcoind}/bin/bitcoind -daemonwait -port=${toString port} -rpcport=${toString rpcport} -datadir='${workDir}' &
   '';
   init = writeShellScriptBin "init" ''
     echo "init"
     export PATH="${lib.makeBinPath [cli]}"
     bitcoin-cli createwallet "testwallet"
     bitcoin-cli generatetoaddress 1 "$(bitcoin-cli getnewaddress)"
-    bitcoin-cli getblockchaininfo
-  '';
+    bitcoin-cli getblockchaininfo '';
   stop = writeShellScriptBin "stop" ''
     echo "Stop"
     bitcoin_pid=`cat ${workDir}/regtest/bitcoind.pid`
@@ -68,14 +67,16 @@ let
     cp -f ${bitcoinconf} "${workDir}/bitcoin.conf"
   '';
   cli = writeShellScriptBin "bitcoin-cli" ''
-    ${bitcoind}/bin/bitcoin-cli -rpcwait -datadir='${workDir}' "$@"
+    ${bitcoind}/bin/bitcoin-cli -rpcwait -datadir='${workDir}' -rpcport=${toString rpcport} "$@"
+  '';
+  up = writeShellScriptBin "up" ''
+    pwd
+    ${setup}/bin/setup
+    ${start}/bin/start
+    ${init}/bin/init
+  '';
+  down = writeShellScriptBin "down" ''
+    ${stop}/bin/stop
   '';
 in
-symlinkJoin {
-  name = name;
-  paths = [start stop setup cli init];
-  postBuild = ''
-    echo "Symlinks scripts created in $out/bin"
-    echo "Datadir ${workDir}"
-  '';
-}
+{inherit up down cli;}
