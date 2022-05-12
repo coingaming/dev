@@ -2,7 +2,7 @@ module BtcLsp.Storage.Model.Block
   ( createUpdateSql,
     getLatestSql,
     getBlockByHeightSql,
-    getOrphanBlocksHigherSql,
+    getBlocksHigherSql,
     makeOrphanBlocksHigherSql,
   )
 where
@@ -83,8 +83,8 @@ getBlockByHeightSql blkHeight = do
       pure row
 
 
-getOrphanBlocksHigherSql :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
-getOrphanBlocksHigherSql blkHeight = do
+getBlocksHigherSql :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
+getBlocksHigherSql blkHeight = do
   Psql.select $
     Psql.from $ \row -> do
       Psql.where_ $

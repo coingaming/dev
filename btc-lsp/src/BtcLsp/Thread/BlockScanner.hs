@@ -242,16 +242,20 @@ scan = do
     Just lBlk -> do
       reorgDetected <- detectReorg
       case reorgDetected of
-        Right () -> do
+        Nothing -> do
           let known = from . blockHeight $ entityVal lBlk
           step [] (1 + known) $ from cHeight
-        Left height -> do
+        Just height -> do
+          $(logTM) DebugS . logStr $ ("========================================================" <> show height :: Text)
           $(logTM) DebugS . logStr $ ("Reorg detected from height: " <> show height :: Text)
+          $(logTM) DebugS . logStr $ ("========================================================" <> show height :: Text)
           bHeight <- tryFromT height
-          _ <- lift $ runSql $ do
-            blks <- Block.getOrphanBlocksHigherSql bHeight
-            Block.makeOrphanBlocksHigherSql bHeight
-            SwapUtxo.markOrphanBlocksSql (entityKey <$> blks)
+          void $
+            lift $
+              runSql $ do
+                blks <- Block.getBlocksHigherSql bHeight
+                Block.makeOrphanBlocksHigherSql bHeight
+                SwapUtxo.markOrphanBlocksSql (entityKey <$> blks)
           step [] (1 + coerce bHeight) $ from cHeight
   where
     step acc cur end =
@@ -267,13 +271,13 @@ scan = do
               <> inspect (length acc)
           utxos <- scanOneBlock (BlkHeight cur)
           step (acc <> utxos) (cur + 1) end
-    detectReorg :: (Env m) => ExceptT Failure m (Either Btc.BlockHeight ())
+    detectReorg :: (Env m) => ExceptT Failure m (Maybe Btc.BlockHeight)
     detectReorg = do
       cHeight <- withBtcT Btc.getBlockCount id
       cReorgHeight <- checkReorgHeight cHeight
       if cReorgHeight == cHeight
-        then return $ Right ()
-        else return $ Left cReorgHeight
+        then return Nothing
+        else return $ Just cReorgHeight
     checkReorgHeight :: (Env m) => Btc.BlockHeight -> ExceptT Failure m Btc.BlockHeight
     checkReorgHeight bHeight = do
       res <- compareHash bHeight
@@ -287,6 +291,27 @@ scan = do
       case mBlkList of
         [blk] -> return (coerce (blockHash (entityVal blk)) == cHash)
         _ -> return False
+
+
+
+
+--    detectReorg :: (Env m) => ExceptT Failure m (Maybe Btc.BlockHeight)
+--    detectReorg = do
+--      cHeight <- withBtcT Btc.getBlockCount id
+--      cReorgHeight <- checkReorgHeight cHeight
+--      pure $ if cReorgHeight == cHeight then Nothing else Just cReorgHeight
+--    checkReorgHeight :: (Env m) => Btc.BlockHeight -> ExceptT Failure m Btc.BlockHeight
+--    checkReorgHeight bHeight = do
+--      res <- compareHash bHeight
+--      case res of
+--        Just True -> pure bHeight
+--        Just False -> checkReorgHeight (bHeight - 1)
+--        Nothing -> checkReorgHeight (bHeight - 1)
+--    compareHash :: (Env m) => Btc.BlockHeight -> ExceptT Failure m (Maybe Bool)
+--    compareHash height = do
+--      cHash <- withBtcT Btc.getBlockHash ($ height)
+--      let mBlkList = lift $ runSql $ Block.getBlockByHeightSql (BlkHeight $ fromIntegral height)
+--      (== cHash) <<$>> (coerce . blockHash . entityVal <<$>> listToMaybe <$> mBlkList)
 
 scanOneBlock ::
   ( Env m
