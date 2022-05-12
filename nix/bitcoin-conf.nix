@@ -17,7 +17,6 @@
 let
   bitcoinconf = writeText "bitcoin.conf" ''
     regtest=1
-    daemon=1
     txindex=1
 
     rpcuser=${rpcuser}
@@ -47,7 +46,7 @@ let
   workDir = "${dataDir}/bitcoind_${name}";
   start = writeShellScriptBin "start" ''
     echo "Start"
-    ${bitcoind}/bin/bitcoind -daemonwait -port=${toString port} -rpcport=${toString rpcport} -datadir='${workDir}' &
+    ${bitcoind}/bin/bitcoind -port=${toString port} -rpcport=${toString rpcport} -datadir='${workDir}' > ${workDir}/stdout.log 2>&1 &
   '';
   init = writeShellScriptBin "init" ''
     echo "init"
