@@ -101,7 +101,6 @@ in {
     ${lndBob.down}/bin/down
     ${bitcoindConf.down}/bin/down
     ${bitcoindConf2.down}/bin/down
-
-    touch $out; exit 1
+    touch $out
   '';
 }
