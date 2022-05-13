@@ -9,7 +9,6 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
-import qualified BtcLsp.Rpc.Helper as Rpc
 import qualified BtcLsp.Thread.Main as Main
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -176,9 +175,6 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
           LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
         sleep $ MicroSecondsDelay 5000000
         lift $ mine 6 LndLsp
-        lb <- withBtcT Btc.getBlockCount id
-        natLB <- tryFromT lb
-        void $ Rpc.waitTillLastBlockProcessedT natLB
         sleep $ MicroSecondsDelay 5000000
         lift $ mine 6 LndLsp
         withLndT
