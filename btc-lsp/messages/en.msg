@@ -97,3 +97,32 @@ AboutSwap9: After the swap has been successfully funded on-chain, user's lightni
 AboutSwap10: When user's lightning node is connected, LSP initiates channel opening with it.
 AboutSwap11: After the channel is opened, LSP sends user's funds over lightning network using initial swap invoice. User's lightning node needs to be online to receive the payment.
 AboutSwap12: After the successful swap, user's lightning node has a balanced payment channel with LSP's node and is able to both send and receive lightning payments. If something goes wrong and balanced channel is not able to be opened, user's bitcoins are refunded to provided emergency on-chain refund address.
+AboutMathGen0: Balanced channel mathematics
+AboutMathGen1: User is able to swap on-chain bitcoins into new balanced lightning channel with LSP. For example, if user sends
+AboutMathGen2: X
+AboutMathGen3: bitcoins to on-chain swap address, then after the swap user's lightning node will have
+AboutMathGen4: X - LSP_FEE
+AboutMathGen5: bitcoins of outgoing liquidity,
+AboutMathGen6: X - LSP_FEE - COMMITMENT_FEE
+AboutMathGen7: bitcoins of incoming liquidity and
+AboutMathGen8: 2 * (X - LSP_FEE)
+AboutMathGen9: bitcoins of total liquidity in the new lightning channel.
+AboutMathMinMax0: The minimal acceptable amount
+AboutMathMinMax1: X
+AboutMathMinMax2: for the swap is
+AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
+AboutMathMinMax4: and the maximum is
+AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}.
+AboutMathLspFee0: The value of the
+AboutMathLspFee1: LSP_FEE
+AboutMathLspFee2: depends on initial amount of
+AboutMathLspFee3: X
+AboutMathLspFee4: bitcoins which user sent to the on-chain swap address. LSP takes
+AboutMathLspFee5 feeRate@FeeRate: #{feeRate}
+AboutMathLspFee6: of
+AboutMathLspFee7: X
+AboutMathLspFee8: as a fee, but not less than
+AboutMathLspFee9 minFee@Money'Lsp'OnChain'Gain: #{minFee}.
+AboutMathCommFee0: The value of the
+AboutMathCommFee1: COMMITMENT_FEE
+AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at a particular moment. In any case it is a small percentage of the total capacity of the channel and is always processed by the LSP's lightning node.

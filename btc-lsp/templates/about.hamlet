@@ -12,6 +12,40 @@
       _{MsgAboutGen6}
       <strong>_{MsgAboutGen7}
       _{MsgAboutGen8}
+  <h3 .text-center.lead-padding>_{MsgAboutMathGen0}
+  <p>
+    _{MsgAboutMathGen1}
+    <code>_{MsgAboutMathGen2}
+    _{MsgAboutMathGen3}
+    <code>_{MsgAboutMathGen4}
+    _{MsgAboutMathGen5}
+    <code>_{MsgAboutMathGen6}
+    _{MsgAboutMathGen7}
+    <code>_{MsgAboutMathGen8}
+    _{MsgAboutMathGen9}
+  <ul>
+    <li>
+      _{MsgAboutMathMinMax0}
+      <code>_{MsgAboutMathMinMax1}
+      _{MsgAboutMathMinMax2}
+      <strong>_{MsgAboutMathMinMax3 minAmt}
+      _{MsgAboutMathMinMax4}
+      <strong>_{MsgAboutMathMinMax5 Math.swapLnMaxAmt}
+    <li>
+      _{MsgAboutMathLspFee0}
+      <code>_{MsgAboutMathLspFee1}
+      _{MsgAboutMathLspFee2}
+      <code>_{MsgAboutMathLspFee3}
+      _{MsgAboutMathLspFee4}
+      <strong>_{MsgAboutMathLspFee5 Math.swapLnFeeRate}
+      _{MsgAboutMathLspFee6}
+      <code>_{MsgAboutMathLspFee7}
+      _{MsgAboutMathLspFee8}
+      <strong>_{MsgAboutMathLspFee9 Math.swapLnMinFee}
+    <li>
+      _{MsgAboutMathCommFee0}
+      <code>_{MsgAboutMathCommFee1}
+      _{MsgAboutMathCommFee2}
   <h3 .text-center.lead-padding>_{MsgSwapBalancedChanWithLsp}
   <p>_{MsgAboutSwap0}
   <ul>

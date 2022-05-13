@@ -37,6 +37,8 @@ module BtcLsp.Data.Type
     Uuid,
     unUuid,
     newUuid,
+    inspectSat,
+    inspectSatLabel,
   )
 where
 
@@ -44,6 +46,7 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Text as T
 import qualified Data.ByteString.Base16 as B16
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -263,6 +266,13 @@ instance From (Money owner btcl mrel) Rational where
   from =
     via @(Ratio Natural)
 
+instance ToMessage (Money owner btcl mrel) where
+  toMessage =
+    (<> " satoshi")
+      . T.displayRational 1
+      . (/ 1000)
+      . from
+
 newtype FeeRate
   = FeeRate (Ratio Word64)
   deriving newtype
@@ -290,6 +300,13 @@ instance TryFrom Rational FeeRate where
 instance From FeeRate Rational where
   from =
     via @(Ratio Word64)
+
+instance ToMessage FeeRate where
+  toMessage =
+    (<> "%")
+      . T.displayRational 1
+      . (* 100)
+      . from
 
 newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text
@@ -727,6 +744,27 @@ newUuid :: (MonadIO m) => m (Uuid tab)
 newUuid =
   liftIO $
     Uuid <$> UUID.nextRandom
+
+inspectSat ::
+  Money
+    (owner :: Owner)
+    (btcl :: BitcoinLayer)
+    (mrel :: MoneyRelation) ->
+  Text
+inspectSat =
+  T.displayRational 1
+    . (/ 1000)
+    . into @Rational
+
+inspectSatLabel ::
+  Money
+    (owner :: Owner)
+    (btcl :: BitcoinLayer)
+    (mrel :: MoneyRelation) ->
+  Text
+inspectSatLabel =
+  (<> " sat")
+    . inspectSat
 
 --
 -- NOTE :  we're taking advantage of

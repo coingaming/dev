@@ -28,12 +28,16 @@ import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 
--- | NOTE : this type alias is there only because of
--- poor support of advanced Haskell in yesodroutes
+-- | NOTE : this type aliases are there only because of
+-- poor support of advanced Haskell in yesodroutes and i18n
 -- files through Yesod TH.
 --
 -- !!! DO NOT USE DIRECTLY IN SOURCE CODE !!!
 type Uuid'SwapIntoLnTable = Uuid 'SwapIntoLnTable
+
+type Money'Lsp'OnChain'Gain = Money 'Lsp 'OnChain 'Gain
+
+type Money'Usr'OnChain'Fund = Money 'Usr 'OnChain 'Fund
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -210,8 +214,8 @@ instance YesodBreadcrumbs App where
         FaviconR -> MsgNothing
         RobotsR -> MsgNothing
         LanguageR {} -> MsgNothing
+        AuthR {} -> MsgNothing
         HomeR -> MsgHomeRBreadcrumb
-        AuthR {} -> MsgAuthRBreadcrumb
         OpenChanR -> MsgOpenChanRBreadcrumb
         SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
         SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
