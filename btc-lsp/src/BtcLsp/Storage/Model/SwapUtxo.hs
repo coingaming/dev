@@ -136,7 +136,7 @@ markOrphanBlocksSql ids = do
     Psql.set
       row
       [ SwapUtxoStatus
-          Psql.=. Psql.val SwapUtxoUsedForChanFunding,
+          Psql.=. Psql.val SwapUtxoOrphan,
         SwapUtxoUpdatedAt
           Psql.=. Psql.val ct
       ]

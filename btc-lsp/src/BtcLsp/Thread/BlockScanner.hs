@@ -246,9 +246,7 @@ scan = do
           let known = from . blockHeight $ entityVal lBlk
           step [] (1 + known) $ from cHeight
         Just height -> do
-          $(logTM) DebugS . logStr $ ("========================================================" <> show height :: Text)
-          $(logTM) DebugS . logStr $ ("Reorg detected from height: " <> show height :: Text)
-          $(logTM) DebugS . logStr $ ("========================================================" <> show height :: Text)
+          $(logTM) WarningS . logStr $ ("Reorg detected from height: " <> show height :: Text)
           bHeight <- tryFromT height
           void $
             lift $
