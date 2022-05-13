@@ -28,6 +28,8 @@ jobs:
         path: /tmp/nix_ci_cache
         key: cache-${{ runner.os }}-${{ matrix.configuration }}-${{ github.sha }}
         restore-keys: cache-${{ runner.os }}-${{ matrix.configuration }}-
+    - name: Test all
+      run: nix-build --option sandbox false --show-trace --pure ./test.nix
     - name: Release all
       run: ./nix/ci-release.sh
     - name: Create github release

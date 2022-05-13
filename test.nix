@@ -89,18 +89,8 @@ in {
     ${bitcoindConf2.up}/bin/up
     ${bitcoindConf.cli}/bin/bitcoin-cli addnode "127.0.0.1:21000" "add"
     ${postgres.up}/bin/up
-
     ${lspEnv.setup}/bin/setup
     sleep 10
-    ${btcLspTest}/bin/btc-lsp-test > $out
-
-    ${postgres.down}/bin/down
-    ${electrsAlice.down}/bin/down
-    ${lndLsp.down}/bin/down
-    ${lndAlice.down}/bin/down
-    ${lndBob.down}/bin/down
-    ${bitcoindConf.down}/bin/down
-    ${bitcoindConf2.down}/bin/down
-    touch $out
+    ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out
   '';
 }
