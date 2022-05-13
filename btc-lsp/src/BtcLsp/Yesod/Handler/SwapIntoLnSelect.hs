@@ -114,16 +114,16 @@ newSwapWidget swapInfo =
           Just $ toText swapIntoLnRefundAddress
         ),
         ( MsgSwapIntoLnChanCapUser,
-          Just $ inspectSatLabel swapIntoLnChanCapUser
+          Just $ toMessage swapIntoLnChanCapUser
         ),
         ( MsgSwapIntoLnChanCapLsp,
-          Just $ inspectSatLabel swapIntoLnChanCapLsp
+          Just $ toMessage swapIntoLnChanCapLsp
         ),
         ( MsgSwapIntoLnFeeLsp,
-          Just $ inspectSatLabel swapIntoLnFeeLsp
+          Just $ toMessage swapIntoLnFeeLsp
         ),
         ( MsgSwapIntoLnFeeMiner,
-          Just $ inspectSatLabel swapIntoLnFeeMiner
+          Just $ toMessage swapIntoLnFeeMiner
         ),
         ( MsgSwapIntoLnStatus,
           Just $ inspectPlain swapIntoLnStatus
@@ -170,7 +170,7 @@ newUtxoWidget utxos =
                 inspectPlain @Word32 $ coerce swapUtxoVout
               ),
               ( MsgSat,
-                inspectSat swapUtxoAmount
+                toMessage swapUtxoAmount
               ),
               ( MsgStatus,
                 inspectPlain swapUtxoStatus

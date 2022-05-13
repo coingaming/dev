@@ -37,8 +37,6 @@ module BtcLsp.Data.Type
     Uuid,
     unUuid,
     newUuid,
-    inspectSat,
-    inspectSatLabel,
   )
 where
 
@@ -744,27 +742,6 @@ newUuid :: (MonadIO m) => m (Uuid tab)
 newUuid =
   liftIO $
     Uuid <$> UUID.nextRandom
-
-inspectSat ::
-  Money
-    (owner :: Owner)
-    (btcl :: BitcoinLayer)
-    (mrel :: MoneyRelation) ->
-  Text
-inspectSat =
-  T.displayRational 1
-    . (/ 1000)
-    . into @Rational
-
-inspectSatLabel ::
-  Money
-    (owner :: Owner)
-    (btcl :: BitcoinLayer)
-    (mrel :: MoneyRelation) ->
-  Text
-inspectSatLabel =
-  (<> " sat")
-    . inspectSat
 
 --
 -- NOTE :  we're taking advantage of
