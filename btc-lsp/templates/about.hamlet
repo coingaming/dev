@@ -1,17 +1,17 @@
 <div .container.about>
-  <h3 .text-center.lead-padding>_{MsgAboutGeneralInfo}
-  <p>_{MsgAboutGen0}
+  <h3 .text-center.lead-padding>_{MsgAboutGen0}
+  <p>_{MsgAboutGen1}
   <ul>
     <li>
-      <a href="@{OpenChanR}">_{MsgAboutGen1}
-      _{MsgAboutGen2}
-      <strong>_{MsgAboutGen3}
-      _{MsgAboutGen4}
+      <a href="@{OpenChanR}">_{MsgAboutGen2}
+      _{MsgAboutGen3}
+      <strong>_{MsgAboutGen4}
+      _{MsgAboutGen5}
     <li>
-      <a href="@{SwapIntoLnCreateR}">_{MsgAboutGen5}
-      _{MsgAboutGen6}
-      <strong>_{MsgAboutGen7}
-      _{MsgAboutGen8}
+      <a href="@{SwapIntoLnCreateR}">_{MsgAboutGen6}
+      _{MsgAboutGen7}
+      <strong>_{MsgAboutGen8}
+      _{MsgAboutGen9}
   <h3 .text-center.lead-padding>_{MsgAboutMathGen0}
   <p>
     _{MsgAboutMathGen1}
@@ -46,22 +46,22 @@
       _{MsgAboutMathCommFee0}
       <code>_{MsgAboutMathCommFee1}
       _{MsgAboutMathCommFee2}
-  <h3 .text-center.lead-padding>_{MsgSwapBalancedChanWithLsp}
-  <p>_{MsgAboutSwap0}
+  <h3 .text-center.lead-padding>_{MsgAboutSwap0}
+  <p>_{MsgAboutSwap1}
   <ul>
     <li>
-      <strong>_{MsgAboutSwap1}
-      _{MsgAboutSwap2}
+      <strong>_{MsgAboutSwap2}
+      _{MsgAboutSwap3}
     <li>
-      <strong>_{MsgAboutSwap3}
-      _{MsgAboutSwap4}
+      <strong>_{MsgAboutSwap4}
+      _{MsgAboutSwap5}
     <li>
-      <strong>_{MsgAboutSwap5}
-      _{MsgAboutSwap6}
-  <p>_{MsgAboutSwap7}
+      <strong>_{MsgAboutSwap6}
+      _{MsgAboutSwap7}
+  <p>_{MsgAboutSwap8}
   <ul>
-    <li>_{MsgAboutSwap8}
     <li>_{MsgAboutSwap9}
     <li>_{MsgAboutSwap10}
     <li>_{MsgAboutSwap11}
-  <p>_{MsgAboutSwap12}
+    <li>_{MsgAboutSwap12}
+  <p>_{MsgAboutSwap13}
