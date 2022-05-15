@@ -24,7 +24,7 @@ let
     ${electrs}/bin/electrs \
     --conf="${workDir}/electrs.toml" \
     --db-dir="${workDir}/db" \
-    --daemon-dir="${workDir}/${bitcoinDir}" \
+    --daemon-dir="${bitcoinDir}" \
     --network=regtest \
     --electrum-rpc-addr="127.0.0.1:60401" \
     --daemon-rpc-addr="127.0.0.1:18443" \

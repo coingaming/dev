@@ -78,4 +78,7 @@ let
     ${stop}/bin/stop
   '';
 in
-{inherit up down cli;}
+{
+  bitcoinDir = workDir;
+  inherit up down cli;
+}

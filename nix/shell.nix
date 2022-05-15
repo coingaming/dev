@@ -1,21 +1,23 @@
 with (import ./project.nix);
-let proto = import ./proto-lens-protoc.nix;
+let
+  proto = import ./proto-lens-protoc.nix;
+  deps = import ./test-deps.nix {dataDir = "./build";};
 in
-{}:
   (project {}).shellFor {
   withHoogle = true;
   buildInputs = [
-    pkgs.haskellPackages.hpack
-    pkgs.haskellPackages.fswatcher
-    pkgs.haskellPackages.cabal-plan
-    pkgs.haskellPackages.hp2pretty
-    pkgs.haskellPackages.hspec-discover
-    pkgs.zlib
-    pkgs.protobuf
-    pkgs.netcat-gnu
-    pkgs.socat
-    # pkgs.plantuml
+    nixPkgs.haskellPackages.hpack
+    nixPkgs.haskellPackages.fswatcher
+    nixPkgs.haskellPackages.cabal-plan
+    nixPkgs.haskellPackages.hp2pretty
+    nixPkgs.haskellPackages.hspec-discover
+    nixPkgs.zlib
+    nixPkgs.protobuf
+    nixPkgs.netcat-gnu
+    nixPkgs.socat
     proto.protoc-haskell-bin
+    deps.startAll
+    deps.stopAll
   ];
   tools = {
     cabal = "3.2.0.0";
@@ -23,5 +25,5 @@ in
     ghcid = "latest";
     haskell-language-server = "1.6.1.0";
   };
-  shellHook = '''';
-  }
+
+}
