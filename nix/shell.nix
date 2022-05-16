@@ -23,7 +23,7 @@ in
     cabal = "3.2.0.0";
     hlint = "3.2.7";
     ghcid = "latest";
-    haskell-language-server = "1.6.1.0";
+    haskell-language-server = "1.7.0.0";
   };
 
 }

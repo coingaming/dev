@@ -1,0 +1,673 @@
+cradle:
+  cabal:
+    - path: "btc-lsp/src"
+      component: "lib:btc-lsp"
+
+    - path: "btc-lsp/src/Main.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Class/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Class/Storage.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Data/AppM.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Kind.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Orphan.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Type.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Client/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Client/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Combinator.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Data.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Orphan.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Server/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Server/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Sig.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Import.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Import/External.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Import/Psql.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Import/Witch.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Math.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Client.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/ElectrsRpc.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Helper.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/RpcRequest.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/RpcResponse.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Migration.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/Block.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/LnChan.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/SwapIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/SwapUtxo.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/User.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Util.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Text.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/BlockScanner.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/LnChanOpener.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/LnChanWatcher.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Main.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Refunder.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Server.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/SwapperIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Time.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Application.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/BootstrapColor.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Colored.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Language.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Widget.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Foundation.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Common.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Home.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Language.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/OpenChan.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/SwapIntoLnCreate.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/SwapIntoLnSelect.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Import.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Import/NoFoundation.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Settings.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Settings/StaticFiles.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/HighLevel_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/LowLevel_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/GetCfg.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/GetCfg_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapFromLn.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapFromLn_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapIntoLn_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Proto/BtcLsp_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-exe"
+
+    - path: "btc-lsp/src/Integration.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Class/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Class/Storage.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Data/AppM.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Kind.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Orphan.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Type.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Client/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Client/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Combinator.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Data.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Orphan.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Server/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Server/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Sig.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Import.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Import/External.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Import/Psql.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Import/Witch.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Math.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Client.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/ElectrsRpc.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Helper.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/RpcRequest.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/RpcResponse.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Migration.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/Block.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/LnChan.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/SwapIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/SwapUtxo.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/User.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Util.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Text.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/BlockScanner.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/LnChanOpener.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/LnChanWatcher.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Main.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Refunder.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Server.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/SwapperIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Time.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Application.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/BootstrapColor.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Colored.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Language.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Widget.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Foundation.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Common.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Home.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Language.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/OpenChan.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/SwapIntoLnCreate.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/SwapIntoLnSelect.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Import.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Import/NoFoundation.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Settings.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Settings/StaticFiles.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/HighLevel_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/LowLevel_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/GetCfg.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/GetCfg_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapFromLn.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapFromLn_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapIntoLn_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Proto/BtcLsp_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-integration"
+
+    - path: "btc-lsp/src/Main.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Class/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Class/Storage.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Data/AppM.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Kind.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Orphan.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Data/Type.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Client/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Client/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Combinator.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Data.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Orphan.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Server/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Server/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Grpc/Sig.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Import.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Import/External.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Import/Psql.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Import/Witch.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Math.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Client.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/ElectrsRpc.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Env.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/Helper.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/RpcRequest.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Rpc/RpcResponse.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Migration.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/Block.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/LnChan.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/SwapIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/SwapUtxo.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Model/User.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Storage/Util.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Text.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/BlockScanner.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/LnChanOpener.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/LnChanWatcher.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Main.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Refunder.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/Server.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Thread/SwapperIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Time.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Application.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/BootstrapColor.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Colored.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Language.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Data/Widget.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Foundation.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Common.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Home.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/Language.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/OpenChan.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/SwapIntoLnCreate.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Handler/SwapIntoLnSelect.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Import.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Import/NoFoundation.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Settings.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/BtcLsp/Yesod/Settings/StaticFiles.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/HighLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/HighLevel_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/LowLevel.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Data/LowLevel_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/GetCfg.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/GetCfg_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapFromLn.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapFromLn_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapIntoLn.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp/Method/SwapIntoLn_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/src/Proto/BtcLsp_Fields.hs"
+      component: "btc-lsp:exe:btc-lsp-prof"
+
+    - path: "btc-lsp/test"
+      component: "btc-lsp:test:btc-lsp-test"
+
+    - path: "btc-lsp/src"
+      component: "btc-lsp:test:btc-lsp-test"
+
+    - path: "generic-pretty-instances/src"
+      component: "lib:generic-pretty-instances"
+
+    - path: "generic-pretty-instances/src"
+      component: "generic-pretty-instances:test:generic-pretty-instances-test"
+
+    - path: "generic-pretty-instances/test"
+      component: "generic-pretty-instances:test:generic-pretty-instances-test"
+
+    - path: "network-bitcoin/src"
+      component: "lib:network-bitcoin"
+
+    - path: "network-bitcoin/src/Test"
+      component: "network-bitcoin:test:network-bitcoin-tests"
