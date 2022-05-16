@@ -3,6 +3,8 @@ Proxy txt@Text: #{txt}
 Continue: Continue
 Copy: copy
 Iso3166v1: gb
+Satoshi: satoshi
+SatoshiAmt msat@MSat: #{toMessage msat} satoshi
 
 HomeRBreadcrumb: Home
 OpenChanRBreadcrumb: Outbound
@@ -98,8 +100,9 @@ AboutMathMinMax0: The minimal acceptable amount
 AboutMathMinMax1: X
 AboutMathMinMax2: for the swap is
 AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
-AboutMathMinMax4: and the maximum is
-AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}.
+AboutMathMinMax4: satoshi and the maximum is
+AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}
+AboutMathMinMax6: satoshi.
 AboutMathLspFee0: The value of the
 AboutMathLspFee1: LSP_FEE
 AboutMathLspFee2: depends on initial amount of
@@ -109,7 +112,8 @@ AboutMathLspFee5 feeRate@FeeRate: #{feeRate}
 AboutMathLspFee6: of
 AboutMathLspFee7: X
 AboutMathLspFee8: as a fee, but not less than
-AboutMathLspFee9 minFee@Money'Lsp'OnChain'Gain: #{minFee}.
+AboutMathLspFee9 minFee@Money'Lsp'OnChain'Gain: #{minFee}
+AboutMathLspFee10: satoshi.
 AboutMathCommFee0: The value of the
 AboutMathCommFee1: COMMITMENT_FEE
 AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at a particular moment. It is a small percentage of the total capacity of the channel and is always processed by the LSP side, so it never affects user's lightning balance.

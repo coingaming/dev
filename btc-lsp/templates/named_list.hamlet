@@ -5,8 +5,8 @@
 $forall (idx, row) <- idxRows
   $if idx /= 0
     <hr>
-  $forall (msg, txt) <- row
+  $forall (key, val) <- row
     <div .row.margin-bottom.text-overflow>
       <div .col-xs-12.col-sm-3.col-md-3.col-lg-3>
-        <strong>_{msg}
-      <div .col-xs-12.col-sm-9.col-md-9.col-lg-9>#{txt}
+        <strong>_{key}
+      <div .col-xs-12.col-sm-9.col-md-9.col-lg-9>_{val}

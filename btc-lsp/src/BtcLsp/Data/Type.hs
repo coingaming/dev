@@ -266,8 +266,7 @@ instance From (Money owner btcl mrel) Rational where
 
 instance ToMessage (Money owner btcl mrel) where
   toMessage =
-    (<> " satoshi")
-      . T.displayRational 1
+    T.displayRational 1
       . (/ 1000)
       . from
 

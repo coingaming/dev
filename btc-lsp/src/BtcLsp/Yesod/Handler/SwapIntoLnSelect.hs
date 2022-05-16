@@ -83,59 +83,89 @@ getSwapIntoLnSelectR uuid = do
   where
     htmlUuid = $(mkHtmlUuid)
 
-newSwapWidget :: SwapIntoLn.SwapInfo -> Maybe Widget
+newSwapWidget ::
+  SwapIntoLn.SwapInfo ->
+  Maybe Widget
 newSwapWidget swapInfo =
   newNamedListWidget MsgSwapInfo
     . singleton
     $ [ ( MsgSwapIntoLnUuid,
           Just
+            . MsgProxy
             . UUID.toText
             . unUuid
             $ swapIntoLnUuid
         ),
         ( MsgSwapIntoLnUserId,
-          Just userPub
+          Just $
+            MsgProxy userPub
         ),
         ( MsgSwapIntoLnFundInvoice,
-          Just $ toText swapIntoLnFundInvoice
+          Just
+            . MsgProxy
+            $ toText swapIntoLnFundInvoice
         ),
         ( MsgSwapIntoLnFundInvHash,
-          Just . toText $
-            into @RHashHex swapIntoLnFundInvHash
+          Just
+            . MsgProxy
+            . toText
+            $ into @RHashHex swapIntoLnFundInvHash
         ),
         ( MsgSwapIntoLnFundAddress,
-          Just $ toText swapIntoLnFundAddress
+          Just
+            . MsgProxy
+            $ toText swapIntoLnFundAddress
         ),
         ( MsgSwapIntoLnFundProof,
-          toHex . coerce
+          MsgProxy
+            . toHex
+            . coerce
             <$> swapIntoLnFundProof
         ),
         ( MsgSwapIntoLnRefundAddress,
-          Just $ toText swapIntoLnRefundAddress
+          Just
+            . MsgProxy
+            $ toText swapIntoLnRefundAddress
         ),
         ( MsgSwapIntoLnChanCapUser,
-          Just $ toMessage swapIntoLnChanCapUser
+          Just
+            . MsgSatoshiAmt
+            $ from swapIntoLnChanCapUser
         ),
         ( MsgSwapIntoLnChanCapLsp,
-          Just $ toMessage swapIntoLnChanCapLsp
+          Just
+            . MsgSatoshiAmt
+            $ from swapIntoLnChanCapLsp
         ),
         ( MsgSwapIntoLnFeeLsp,
-          Just $ toMessage swapIntoLnFeeLsp
+          Just
+            . MsgSatoshiAmt
+            $ from swapIntoLnFeeLsp
         ),
         ( MsgSwapIntoLnFeeMiner,
-          Just $ toMessage swapIntoLnFeeMiner
+          Just
+            . MsgSatoshiAmt
+            $ from swapIntoLnFeeMiner
         ),
         ( MsgSwapIntoLnStatus,
-          Just $ inspectPlain swapIntoLnStatus
+          Just
+            . MsgProxy
+            $ inspectPlain swapIntoLnStatus
         ),
         ( MsgSwapIntoLnExpiresAt,
-          Just $ toPathPiece swapIntoLnExpiresAt
+          Just
+            . MsgProxy
+            $ toPathPiece swapIntoLnExpiresAt
         ),
         ( MsgSwapIntoLnInsertedAt,
-          Just $ toPathPiece swapIntoLnInsertedAt
+          Just
+            . MsgProxy
+            $ toPathPiece swapIntoLnInsertedAt
         ),
         ( MsgSwapIntoLnUpdatedAt,
-          Just $ toPathPiece swapIntoLnUpdatedAt
+          Just
+            . MsgProxy
+            $ toPathPiece swapIntoLnUpdatedAt
         )
       ]
       >>= \case
@@ -161,19 +191,27 @@ newUtxoWidget utxos =
             Block {..} =
               entityVal $ SwapIntoLn.utxoInfoBlock row
          in [ ( MsgBlock,
-                inspectPlain @Word64 $ from blockHeight
+                MsgProxy
+                  . inspectPlain @Word64
+                  $ from blockHeight
               ),
               ( MsgTxId,
-                txIdHex $ coerce swapUtxoTxid
+                MsgProxy
+                  . txIdHex
+                  $ coerce swapUtxoTxid
               ),
               ( MsgVout,
-                inspectPlain @Word32 $ coerce swapUtxoVout
+                MsgProxy
+                  . inspectPlain @Word32
+                  $ coerce swapUtxoVout
               ),
               ( MsgSat,
-                toMessage swapUtxoAmount
+                MsgSatoshiAmt $
+                  from swapUtxoAmount
               ),
               ( MsgStatus,
-                inspectPlain swapUtxoStatus
+                MsgProxy $
+                  inspectPlain swapUtxoStatus
               )
             ]
     )
@@ -185,13 +223,18 @@ newChanWidget chans =
     ( \row ->
         let LnChan {..} = entityVal row
          in [ ( MsgTxId,
-                txIdHex $ coerce lnChanFundingTxId
+                MsgProxy
+                  . txIdHex
+                  $ coerce lnChanFundingTxId
               ),
               ( MsgVout,
-                inspectPlain @Word32 $ coerce lnChanFundingVout
+                MsgProxy
+                  . inspectPlain @Word32
+                  $ coerce lnChanFundingVout
               ),
               ( MsgStatus,
-                inspectPlain lnChanStatus
+                MsgProxy $
+                  inspectPlain lnChanStatus
               )
             ]
     )

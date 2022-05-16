@@ -259,12 +259,12 @@ toText =
 
 newNamedListWidget ::
   AppMessage ->
-  [[(AppMessage, Text)]] ->
+  [[(AppMessage, AppMessage)]] ->
   Maybe Widget
 newNamedListWidget _ [] =
   Nothing
 newNamedListWidget title rawRows =
   Just $(widgetFile "named_list")
   where
-    idxRows :: [(Natural, [(AppMessage, Text)])]
+    idxRows :: [(Natural, [(AppMessage, AppMessage)])]
     idxRows = zip [0 ..] rawRows

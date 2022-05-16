@@ -12,6 +12,7 @@ import BtcLsp.Data.Type as Import
 import BtcLsp.Import.External as Import
   ( ExceptT (..),
     IsList,
+    MSat (..),
     Natural,
     NodePubKey (..),
     Pool,

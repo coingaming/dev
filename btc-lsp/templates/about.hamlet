@@ -31,6 +31,7 @@
       <strong>_{MsgAboutMathMinMax3 minAmt}
       _{MsgAboutMathMinMax4}
       <strong>_{MsgAboutMathMinMax5 Math.swapLnMaxAmt}
+      _{MsgAboutMathMinMax6}
     <li>
       _{MsgAboutMathLspFee0}
       <code>_{MsgAboutMathLspFee1}
@@ -42,6 +43,7 @@
       <code>_{MsgAboutMathLspFee7}
       _{MsgAboutMathLspFee8}
       <strong>_{MsgAboutMathLspFee9 Math.swapLnMinFee}
+      _{MsgAboutMathLspFee10}
     <li>
       _{MsgAboutMathCommFee0}
       <code>_{MsgAboutMathCommFee1}

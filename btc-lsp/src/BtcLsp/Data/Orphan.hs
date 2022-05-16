@@ -5,6 +5,7 @@ module BtcLsp.Data.Orphan () where
 
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Text as T
 import qualified Data.Time.ISO8601 as Time
 import qualified LndClient as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
@@ -118,3 +119,10 @@ instance PathPiece UTCTime where
   toPathPiece =
     pack
       . Time.formatISO8601
+
+instance ToMessage MSat where
+  toMessage =
+    T.displayRational 1
+      . (/ 1000)
+      . via @Integer
+      . into @Word64
