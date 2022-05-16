@@ -35,8 +35,9 @@ SwapIntoLnFundInvHash: Swap Hash
 SwapIntoLnFundAddress: Swap Address
 SwapIntoLnFundProof: Proof of Swap
 SwapIntoLnRefundAddress: Refund Address
-SwapIntoLnChanCapUser: User Capacity
-SwapIntoLnChanCapLsp: LSP Capacity
+SwapIntoLnChanCapUser: User LN Capacity
+SwapIntoLnChanCapLsp: LSP LN Capacity
+SwapIntoLnChanCapTotal: Total LN Capacity
 SwapIntoLnFeeLsp: LSP Swap Fee
 SwapIntoLnFeeMiner: Channel Mining Fee
 SwapIntoLnStatus: Swap Status
@@ -117,6 +118,12 @@ AboutMathLspFee10: satoshi.
 AboutMathCommFee0: The value of the
 AboutMathCommFee1: COMMITMENT_FEE
 AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at a particular moment. It is a small percentage of the total capacity of the channel and is always processed by the LSP side, so it never affects user's lightning balance.
+AboutExamples: Balanced Channel Examples
+AboutExamplesUserOnChainFunding: User On-Chain Funding
+AboutExamplesLspSwapFee: LSP Swap Fee
+AboutExamplesUserLightningCap: User Lightning Capacity
+AboutExamplesLspLightningCap: LSP Lightning Capacity
+AboutExamplesTotalLightningCap: Total Lightning Capacity
 AboutSwap0: Balanced Channel Flow
 AboutSwap1: Creation of balanced channel with LSP is implemented through on-chain to lightning swap. On the first step user provides to LSP swap data:
 AboutSwap2: Swap Invoice

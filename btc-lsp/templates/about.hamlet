@@ -48,6 +48,9 @@
       _{MsgAboutMathCommFee0}
       <code>_{MsgAboutMathCommFee1}
       _{MsgAboutMathCommFee2}
+  <h3 .text-center.lead-padding>_{MsgAboutExamples}
+  $maybe examplesWidget <- mExamplesWidget
+    <div .about-widget>^{examplesWidget}
   <h3 .text-center.lead-padding>_{MsgAboutSwap0}
   <p>_{MsgAboutSwap1}
   <ul>

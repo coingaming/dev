@@ -257,13 +257,26 @@ toText ::
 toText =
   from
 
+newListWidget ::
+  [[(AppMessage, AppMessage)]] ->
+  Maybe Widget
+newListWidget =
+  newGenListWidget Nothing
+
 newNamedListWidget ::
   AppMessage ->
   [[(AppMessage, AppMessage)]] ->
   Maybe Widget
-newNamedListWidget _ [] =
+newNamedListWidget title =
+  newGenListWidget $ Just title
+
+newGenListWidget ::
+  Maybe AppMessage ->
+  [[(AppMessage, AppMessage)]] ->
+  Maybe Widget
+newGenListWidget _ [] =
   Nothing
-newNamedListWidget title rawRows =
+newGenListWidget mTitle rawRows =
   Just $(widgetFile "named_list")
   where
     idxRows :: [(Natural, [(AppMessage, AppMessage)])]

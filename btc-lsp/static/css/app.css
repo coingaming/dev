@@ -208,17 +208,18 @@ textarea {
 }
 
 .about > p,
-.about > ul {
+.about > ul,
+.about > .about-widget {
   margin-top: 15px;
   margin-bottom: 15px;
   padding-right: 5px;
 }
 
-.about > p {
+.about > p,
+.about > .about-widget {
   padding-left: 10px;
 }
 
 .about > ul > li {
   margin-bottom: 5px;
 }
-
