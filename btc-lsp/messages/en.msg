@@ -78,53 +78,53 @@ FailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Plea
 About: About
 AboutLsp: About LSP
 AboutGen0: General Info
-AboutGen1: LSP provides number of commercial infrastructural services for the lightning network nodes and users:
+AboutGen1: LSP provides a number of infrastructural services for lightning network nodes and users:
 AboutGen2: Outbound channel to LSP
-AboutGen3: gives the ability to
+AboutGen3: provides the ability to
 AboutGen4: send
-AboutGen5: lightning network payments. In this case LSP works exactly like any other well-connected lightning node, providing payments routing for a regular lightning network fee without any other additional fees.
+AboutGen5: lightning network payments. In this case, LSP works exactly like any other highly available and well-connected lightning node, providing payment routing and charging a regular lightning network fee with no additional fees.
 AboutGen6: Balanced channel with LSP
-AboutGen7: gives ability to both
+AboutGen7: provides the ability to
 AboutGen8: send and receive
-AboutGen9: lightning network payments. In this case LSP also provides inbound liquidity for the user, but takes additional one-time fee for it.
+AboutGen9: lightning network payments. In this case, LSP also provides incoming liquidity for the user, but charges an additional one-time fee for it.
 AboutMathGen0: Balanced Channel Math
-AboutMathGen1: User is able to swap on-chain bitcoins into new balanced lightning channel with LSP. For example, if user sends
+AboutMathGen1: The user is able to swap on-chain bitcoins into a balanced lightning channel with LSP. For example, the user sends
 AboutMathGen2: X
-AboutMathGen3: bitcoins to on-chain swap address, then after the swap user's lightning node will have
+AboutMathGen3: bitcoins to the on-chain swap address. After the swap, the user's lightning node will have
 AboutMathGen4: X - LSP_FEE
 AboutMathGen5: bitcoins of outgoing liquidity,
 AboutMathGen6: X - LSP_FEE - COMMITMENT_FEE
-AboutMathGen7: bitcoins of incoming liquidity and
+AboutMathGen7: bitcoins of incoming liquidity and the new lightning channel will have
 AboutMathGen8: 2 * (X - LSP_FEE)
-AboutMathGen9: bitcoins of total liquidity in the new lightning channel.
-AboutMathMinMax0: The minimal acceptable amount
+AboutMathGen9: bitcoins of total liquidity.
+AboutMathMinMax0: The minimum acceptable amount
 AboutMathMinMax1: X
 AboutMathMinMax2: for the swap is
 AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
 AboutMathMinMax4: satoshi and the maximum is
 AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}
 AboutMathMinMax6: satoshi.
-AboutMathLspFee0: The value of the
+AboutMathLspFee0: The value of
 AboutMathLspFee1: LSP_FEE
-AboutMathLspFee2: depends on initial amount of
+AboutMathLspFee2: depends on the initial amount of
 AboutMathLspFee3: X
-AboutMathLspFee4: bitcoins which user sent to the on-chain swap address. LSP takes
+AboutMathLspFee4: bitcoins that the user sent to the on-chain swap address. LSP charges
 AboutMathLspFee5 feeRate@FeeRate: #{feeRate}
 AboutMathLspFee6: of
 AboutMathLspFee7: X
 AboutMathLspFee8: as a fee, but not less than
 AboutMathLspFee9 minFee@Money'Lsp'OnChain'Gain: #{minFee}
 AboutMathLspFee10: satoshi.
-AboutMathCommFee0: The value of the
+AboutMathCommFee0: The value of
 AboutMathCommFee1: COMMITMENT_FEE
-AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at a particular moment. It is a small percentage of the total capacity of the channel and is always processed by the LSP side, so it never affects user's lightning balance.
+AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at any given time. It is a small percentage of the total channel capacity and is always processed by the LSP, so it never affects user's lightning balance.
 AboutExamples: Balanced Channel Examples
-AboutExamplesUserOnChainFunding: User On-Chain Funding
+AboutExamplesUserOnChainFunding: User's On-Chain Funding
 AboutExamplesLspSwapFee: LSP Swap Fee
-AboutExamplesUserOutgoingCap: User Outgoing Capacity
-AboutExamplesUserIncomingCap: User Incoming Capacity *
+AboutExamplesUserOutgoingCap: User's Outgoing Capacity
+AboutExamplesUserIncomingCap: User's Incoming Capacity *
 AboutExamplesTotalChanCap: Total Channel Capacity
-AboutExamplesAsterisk: * Exact incoming capacity value provided by LSP is a bit lower, because LSP handles lightning channel commintment fee which can vary. Commitment fee value depends on the state of the bitcoin network at a particular moment.
+AboutExamplesAsterisk: * The exact value of the input capacity provided to the user by LSP is a bit lower, because LSP handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
 AboutSwap0: Balanced Channel Flow
 AboutSwap1: Creation of balanced channel with LSP is implemented through on-chain to lightning swap. On the first step user provides to LSP swap data:
 AboutSwap2: Swap Invoice
