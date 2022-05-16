@@ -261,23 +261,28 @@ newListWidget ::
   [[(AppMessage, AppMessage)]] ->
   Maybe Widget
 newListWidget =
-  newGenListWidget Nothing
+  newGenListWidget Nothing $ 1 % 2
 
 newNamedListWidget ::
   AppMessage ->
   [[(AppMessage, AppMessage)]] ->
   Maybe Widget
 newNamedListWidget title =
-  newGenListWidget $ Just title
+  newGenListWidget (Just title) $ 1 % 4
 
 newGenListWidget ::
   Maybe AppMessage ->
+  Rational ->
   [[(AppMessage, AppMessage)]] ->
   Maybe Widget
-newGenListWidget _ [] =
+newGenListWidget _ _ [] =
   Nothing
-newGenListWidget mTitle rawRows =
+newGenListWidget mTitle colProp rawRows =
   Just $(widgetFile "named_list")
   where
     idxRows :: [(Natural, [(AppMessage, AppMessage)])]
     idxRows = zip [0 ..] rawRows
+    c1 :: Integer
+    c1 = round $ 12 * colProp
+    c2 :: Integer
+    c2 = 12 - c1

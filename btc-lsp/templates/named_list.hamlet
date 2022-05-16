@@ -8,7 +8,7 @@ $forall (idx, row) <- idxRows
     <hr>
   $forall (key, val) <- row
     <div .row.margin-bottom>
-      <div .col-xs-12.col-sm-3.col-md-3.col-lg-3>
+      <div .col-xs-12.col-sm-#{c1}.col-md-#{c1}.col-lg-#{c1}>
         <strong>_{key}
-      <div .col-xs-12.col-sm-9.col-md-9.col-lg-9.text-overflow>
+      <div .col-xs-12.col-sm-#{c2}.col-md-#{c2}.col-lg-#{c2}.text-overflow>
         _{val}

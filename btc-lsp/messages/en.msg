@@ -121,9 +121,10 @@ AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at a
 AboutExamples: Balanced Channel Examples
 AboutExamplesUserOnChainFunding: User On-Chain Funding
 AboutExamplesLspSwapFee: LSP Swap Fee
-AboutExamplesUserLightningCap: User Lightning Capacity
-AboutExamplesLspLightningCap: LSP Lightning Capacity
-AboutExamplesTotalLightningCap: Total Lightning Capacity
+AboutExamplesUserOutgoingCap: User Outgoing Capacity
+AboutExamplesUserIncomingCap: User Incoming Capacity *
+AboutExamplesTotalChanCap: Total Channel Capacity
+AboutExamplesAsterisk: * Exact incoming capacity value provided by LSP is a bit lower, because LSP handles lightning channel commintment fee which can vary. Commitment fee value depends on the state of the bitcoin network at a particular moment.
 AboutSwap0: Balanced Channel Flow
 AboutSwap1: Creation of balanced channel with LSP is implemented through on-chain to lightning swap. On the first step user provides to LSP swap data:
 AboutSwap2: Swap Invoice

@@ -48,15 +48,15 @@ newExamplesWidget minAmt = do
               MsgSatoshiAmt $
                 from swapCapFee
             ),
-            ( MsgAboutExamplesUserLightningCap,
+            ( MsgAboutExamplesUserOutgoingCap,
               MsgSatoshiAmt $
                 from swapCapUsr
             ),
-            ( MsgAboutExamplesLspLightningCap,
+            ( MsgAboutExamplesUserIncomingCap,
               MsgSatoshiAmt $
                 from swapCapLsp
             ),
-            ( MsgAboutExamplesTotalLightningCap,
+            ( MsgAboutExamplesTotalChanCap,
               MsgSatoshiAmt $
                 from swapCapUsr
                   + from swapCapLsp
