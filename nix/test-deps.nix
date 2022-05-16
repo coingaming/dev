@@ -63,7 +63,6 @@ in
   envFile = lspEnv.exportEnvFile;
   startAll = nixPkgs.writeShellScriptBin "start-test-deps" ''
     set -euo pipefail
-    source ${lspEnv.exportEnvFile}
     ${bitcoindConf.up}/bin/up
     ${lndLsp.up}/bin/up
     ${lndAlice.up}/bin/up

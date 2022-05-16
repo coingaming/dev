@@ -15,13 +15,11 @@ in {
     ${deps.bitcoindConf.down}/bin/down
   '';
   generic-pretty-instances-test = nixPkgs.runCommand "generic-pretty-instances-test" {} ''
-    echo "run generic test"
     ${genericPrettyInstancesTest}/bin/generic-pretty-instances-test 2>&1 | tee $out
   '';
   btc-lsp-test =  nixPkgs.runCommand "btc-lsp-test" ({
     buildInputs=[nixPkgs.ps];
   }) ''
-    set -euo pipefail
     ${deps.startAll}/bin/start-test-deps
     source ${deps.envFile}
     ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out
