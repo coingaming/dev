@@ -117,25 +117,25 @@ AboutMathLspFee9 minFee@Money'Lsp'OnChain'Gain: #{minFee}
 AboutMathLspFee10: satoshi.
 AboutMathCommFee0: The value of
 AboutMathCommFee1: COMMITMENT_FEE
-AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at any given time. It is a small percentage of the total channel capacity and is always processed by the LSP, so it never affects user's lightning balance.
+AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at any given time. It is a small percentage of the total channel capacity and is always processed by the LSP, so it never affects user's outgoing lightning balance.
 AboutExamples: Balanced Channel Examples
-AboutExamplesUserOnChainFunding: User's On-Chain Funding
+AboutExamplesUserOnChainFunding: User's On-Chain Swap Funds
 AboutExamplesLspSwapFee: LSP Swap Fee
 AboutExamplesUserOutgoingCap: User's Outgoing Capacity
 AboutExamplesUserIncomingCap: User's Incoming Capacity *
 AboutExamplesTotalChanCap: Total Channel Capacity
-AboutExamplesAsterisk: * The exact value of the input capacity provided to the user by LSP is a bit lower, because LSP handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
+AboutExamplesAsterisk: * The actual value of the input capacity provided to the user by LSP is slightly less than the theoretical value, because LSP handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
 AboutSwap0: Balanced Channel Flow
-AboutSwap1: Creation of balanced channel with LSP is implemented through on-chain to lightning swap. On the first step user provides to LSP swap data:
+AboutSwap1: The creation of a balanced channel with LSP is implemented through on-chain to lightning swap. On the first step, the user provides LSP swap data:
 AboutSwap2: Swap Invoice
-AboutSwap3: - lightning invoice created by user's lightning node. This invoice is used to push swap liquidity to the user's side of the payment channel after channel is opened. LSP does not have any information how big the swap is gonna be, so provided invoice should be zero-amount only. LSP also does not have any information about user's node availability during the swap period, so expiration time of the invoice should be at least one week.
+AboutSwap3: - lightning invoice created by user's lightning node. This invoice is used to push swap liquidity to the user side of the payment channel after the channel is opened. LSP does not have any information about the swap size beforehand, so provided invoice must be zero-amount only. LSP also does not have any information about user's node availability during the swap period, so the expiration time of the invoice must be at least one week.
 AboutSwap4: Refund Address
-AboutSwap5: - emergency on-chain refund address, which is used by LSP for on-chain refunds in cases where bitcoins were send to the swap on-chain address, but swap has been already succeeded or expired.
+AboutSwap5: - emergency on-chain refund address, which is used by LSP for on-chain refunds in cases where bitcoins were sent to the on-chain swap address, but the swap has already succeeded or expired.
 AboutSwap6: Channel Privacy
-AboutSwap7: - user can specify should new balanced channel with LSP be public or private.
-AboutSwap8: On the next steps user needs to fund the swap on-chain, and receive balanced channel with incoming and outgoing liquidity on the lightning network:
-AboutSwap9: User or somebody else sends bitcoins to on-chain swap address provided by LSP.
-AboutSwap10: After the swap has been successfully funded on-chain, user's lightning node needs to connect to LSP lightning node as a peer. LSP will provide corresponding URI and QR code.
-AboutSwap11: When user's lightning node is connected, LSP initiates channel opening with it.
-AboutSwap12: After the channel is opened, LSP sends user's funds over lightning network using initial swap invoice. User's lightning node needs to be online to receive the payment.
-AboutSwap13: After the successful swap, user's lightning node has a balanced payment channel with LSP's node and is able to both send and receive lightning payments. If something goes wrong and balanced channel is not able to be opened, user's bitcoins are refunded to provided emergency on-chain refund address.
+AboutSwap7: - the user can specify whether the new lightning channel should be public or private.
+AboutSwap8: On the next steps user needs to fund the on-chain swap address and receive a balanced channel with incoming and outgoing liquidity on the lightning network:
+AboutSwap9: The user or somebody else sends bitcoins to the on-chain swap address provided by LSP.
+AboutSwap10: After the swap has been successfully funded on-chain, the user's lightning node must connect to the LSP lightning node as a peer. LSP will provide the corresponding connection URI and QR code.
+AboutSwap11: When the user's lightning node is connected, the LSP starts to open the channel with it.
+AboutSwap12: Once the channel is opened, LSP sends the user's funds through the lightning network using the initial swap invoice. The user's lightning node must be online to receive the payment.
+AboutSwap13: After the successful swap, the user's lightning node has a balanced payment channel with the LSP's node and can send and receive lightning payments. If something goes wrong and the balanced channel cannot be opened, the user's bitcoins are refunded to the emergency on-chain refund address provided by the user.
