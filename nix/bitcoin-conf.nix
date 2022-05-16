@@ -59,6 +59,7 @@ let
     bitcoin_pid=`cat ${workDir}/regtest/bitcoind.pid`
     timeout 5 ${cli}/bin/bitcoin-cli stop
     kill -9 "$bitcoin_pid"
+    rm -rf ${workDir}
   '';
   setup = writeShellScriptBin "setup" ''
     echo "Setup"
