@@ -27,7 +27,7 @@ import BtcLsp.Yesod.Import
 import Control.Monad.Logger (liftLoc)
 import Language.Haskell.TH.Syntax (qLocation)
 import Network.HTTP.Client.TLS (getGlobalManager)
-import Network.Wai (Middleware)
+import Network.Wai (Middleware, pathInfo)
 import Network.Wai.Handler.Warp
   ( Settings,
     defaultSettings,
@@ -39,7 +39,7 @@ import Network.Wai.Handler.Warp
   )
 import Network.Wai.Middleware.RequestLogger
   ( Destination (Logger),
-    IPAddrSource (..),
+    DetailedSettings (..),
     OutputFormat (..),
     destination,
     mkRequestLogger,
@@ -103,16 +103,27 @@ makeLogWare foundation =
   mkRequestLogger
     def
       { outputFormat =
-          if appDetailedRequestLogging $ appSettings foundation
-            then Detailed True
-            else
-              Apache
-                ( if appIpFromHeader $ appSettings foundation
-                    then FromFallback
-                    else FromSocket
-                ),
-        destination = Logger $ loggerSet $ appLogger foundation
+          DetailedWithSettings $
+            def
+              { useColors = True,
+                mFilterRequests = Just reqFilter
+              },
+        destination =
+          Logger
+            . loggerSet
+            $ appLogger foundation
       }
+  where
+    reqFilter req =
+      const $
+        case pathInfo req of
+          [] -> False
+          x : _ ->
+            x
+              `notElem` [ "static",
+                          "favicon.ico",
+                          "robots.txt"
+                        ]
 
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings
