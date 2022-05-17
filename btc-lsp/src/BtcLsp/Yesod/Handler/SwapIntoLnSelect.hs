@@ -87,7 +87,7 @@ newSwapWidget ::
   SwapIntoLn.SwapInfo ->
   Maybe Widget
 newSwapWidget swapInfo =
-  newNamedListWidget MsgSwapInfo
+  newNamedListWidget MsgSwapIntoLnHeaderInfo
     . singleton
     $ [ ( MsgSwapIntoLnUuid,
           Just
@@ -129,43 +129,39 @@ newSwapWidget swapInfo =
         ),
         ( MsgSwapIntoLnChanCapUser,
           Just
-            . MsgSatoshiAmt
+            . MsgSatoshi
             $ from swapIntoLnChanCapUser
         ),
         ( MsgSwapIntoLnChanCapLsp,
           Just
-            . MsgSatoshiAmt
+            . MsgSatoshi
             $ from swapIntoLnChanCapLsp
         ),
         ( MsgSwapIntoLnFeeLsp,
           Just
-            . MsgSatoshiAmt
+            . MsgSatoshi
             $ from swapIntoLnFeeLsp
         ),
         ( MsgSwapIntoLnFeeMiner,
           Just
-            . MsgSatoshiAmt
+            . MsgSatoshi
             $ from swapIntoLnFeeMiner
         ),
-        ( MsgSwapIntoLnStatus,
-          Just
-            . MsgProxy
-            $ inspectPlain swapIntoLnStatus
+        ( MsgStatus,
+          Just $
+            swapStatusMsg swapIntoLnStatus
         ),
-        ( MsgSwapIntoLnExpiresAt,
-          Just
-            . MsgProxy
-            $ toPathPiece swapIntoLnExpiresAt
+        ( MsgExpiresAt,
+          Just $
+            MsgUtcTime swapIntoLnExpiresAt
         ),
-        ( MsgSwapIntoLnInsertedAt,
-          Just
-            . MsgProxy
-            $ toPathPiece swapIntoLnInsertedAt
+        ( MsgInsertedAt,
+          Just $
+            MsgUtcTime swapIntoLnInsertedAt
         ),
-        ( MsgSwapIntoLnUpdatedAt,
-          Just
-            . MsgProxy
-            $ toPathPiece swapIntoLnUpdatedAt
+        ( MsgUpdatedAt,
+          Just $
+            MsgUtcTime swapIntoLnUpdatedAt
         )
       ]
       >>= \case
@@ -184,7 +180,7 @@ newSwapWidget swapInfo =
 
 newUtxoWidget :: [SwapIntoLn.UtxoInfo] -> Maybe Widget
 newUtxoWidget utxos =
-  newNamedListWidget MsgSwapUtxos $
+  newNamedListWidget MsgSwapIntoLnHeaderUtxos $
     ( \row ->
         let SwapUtxo {..} =
               entityVal $ SwapIntoLn.utxoInfoUtxo row
@@ -205,13 +201,12 @@ newUtxoWidget utxos =
                   . inspectPlain @Word32
                   $ coerce swapUtxoVout
               ),
-              ( MsgSat,
-                MsgSatoshiAmt $
+              ( MsgAmount,
+                MsgSatoshi $
                   from swapUtxoAmount
               ),
               ( MsgStatus,
-                MsgProxy $
-                  inspectPlain swapUtxoStatus
+                swapUtxoStatusMsg swapUtxoStatus
               )
             ]
     )
@@ -219,7 +214,7 @@ newUtxoWidget utxos =
 
 newChanWidget :: [Entity LnChan] -> Maybe Widget
 newChanWidget chans =
-  newNamedListWidget MsgSwapChans $
+  newNamedListWidget MsgSwapIntoLnHeaderChans $
     ( \row ->
         let LnChan {..} = entityVal row
          in [ ( MsgTxId,
@@ -233,9 +228,34 @@ newChanWidget chans =
                   $ coerce lnChanFundingVout
               ),
               ( MsgStatus,
-                MsgProxy $
-                  inspectPlain lnChanStatus
+                lnChanStatusMsg lnChanStatus
               )
             ]
     )
       <$> chans
+
+swapStatusMsg :: SwapStatus -> AppMessage
+swapStatusMsg = \case
+  SwapWaitingFundChain -> MsgSwapWaitingFundChain
+  SwapWaitingPeer -> MsgSwapWaitingPeer
+  SwapWaitingChan -> MsgSwapWaitingChan
+  SwapWaitingFundLn -> MsgSwapWaitingFundLn
+  SwapSucceeded -> MsgSwapSucceeded
+  SwapExpired -> MsgSwapExpired
+
+swapUtxoStatusMsg :: SwapUtxoStatus -> AppMessage
+swapUtxoStatusMsg = \case
+  SwapUtxoUsedForChanFunding -> MsgSwapUtxoUsedForChanFunding
+  SwapUtxoRefunded -> MsgSwapUtxoRefunded
+  SwapUtxoFirstSeen -> MsgSwapUtxoFirstSeen
+  SwapUtxoOrphan -> MsgSwapUtxoOrphan
+
+lnChanStatusMsg :: LnChanStatus -> AppMessage
+lnChanStatusMsg = \case
+  LnChanStatusPendingOpen -> MsgLnChanStatusPendingOpen
+  LnChanStatusOpened -> MsgLnChanStatusOpened
+  LnChanStatusActive -> MsgLnChanStatusActive
+  LnChanStatusFullyResolved -> MsgLnChanStatusFullyResolved
+  LnChanStatusInactive -> MsgLnChanStatusInactive
+  LnChanStatusPendingClose -> MsgLnChanStatusPendingClose
+  LnChanStatusClosed -> MsgLnChanStatusClosed

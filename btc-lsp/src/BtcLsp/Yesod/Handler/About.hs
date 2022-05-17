@@ -41,23 +41,23 @@ newExamplesWidget minAmt = do
     . newListWidget
     $ ( \(fundAmt, Math.SwapCap {..}) ->
           [ ( MsgAboutExamplesUserOnChainFunding,
-              MsgSatoshiAmt $
+              MsgSatoshi $
                 from fundAmt
             ),
             ( MsgAboutExamplesLspSwapFee,
-              MsgSatoshiAmt $
+              MsgSatoshi $
                 from swapCapFee
             ),
             ( MsgAboutExamplesUserOutgoingCap,
-              MsgSatoshiAmt $
+              MsgSatoshi $
                 from swapCapUsr
             ),
             ( MsgAboutExamplesUserIncomingCap,
-              MsgSatoshiAmt $
+              MsgSatoshi $
                 from swapCapLsp
             ),
             ( MsgAboutExamplesTotalChanCap,
-              MsgSatoshiAmt $
+              MsgSatoshi $
                 from swapCapUsr
                   + from swapCapLsp
             )

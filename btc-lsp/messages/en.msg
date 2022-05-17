@@ -1,16 +1,65 @@
+#
+# Untranslatable
+#
+
 Nothing:
 Proxy txt@Text: #{txt}
-Continue: Continue
-Copy: copy
-Iso3166v1: gb
-Satoshi: satoshi
-SatoshiAmt msat@MSat: #{toMessage msat} satoshi
+UtcTime utc@UTCTime: #{formatAsLogTime utc} UTC
 
-HomeRBreadcrumb: Home
-OpenChanRBreadcrumb: Outbound
-SwapIntoLnCreateRBreadcrumb: Balanced
-SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
-AboutRBreadcrumb: About
+#
+# General
+#
+
+Iso3166v1: gb
+Copy: copy
+Continue: Continue
+Amount: Amount
+Satoshi msat@MSat: #{toMessage msat} satoshi
+Status: Status
+ExpiresAt: Expires at
+InsertedAt: Inserted at
+UpdatedAt: Updated at
+ChannelPrivacy: Channel Privacy
+Block: Block
+TxId: Transaction Id
+Vout: Output Index
+InputFailure: Something went wrong. Please check the input data and try again.
+
+#
+# SwapStatus
+#
+
+SwapWaitingFundChain: Waiting for funding
+SwapWaitingPeer: Waiting for the peer
+SwapWaitingChan: Waiting for the channel
+SwapWaitingFundLn: Paying the swap invoice
+SwapSucceeded: Succeeded
+SwapExpired: Expired
+
+#
+# SwapUtxoStatus
+#
+
+SwapUtxoUsedForChanFunding: Funded the swap
+SwapUtxoRefunded: Refunded
+SwapUtxoFirstSeen: Unspent
+SwapUtxoOrphan: Orphan
+
+#
+# LnChanStatus
+#
+
+LnChanStatusPendingOpen: Opening
+LnChanStatusOpened: Opened
+LnChanStatusActive: Active
+LnChanStatusFullyResolved: Fully Resolved
+LnChanStatusInactive: Inactive
+LnChanStatusPendingClose: Closing
+LnChanStatusClosed: Closed
+
+#
+# Page title
+#
 
 HomeRTitle: Welcome | LSP
 OpenChanRTitle: Outbound | LSP
@@ -18,33 +67,66 @@ SwapIntoLnCreateRTitle: Balanced | LSP
 SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Balanced | LSP
 AboutRTitle: About | LSP
 
-Home: Home
+#
+# Page short link
+#
+
+HomeRLinkShort: Home
+OpenChanRLinkShort: Outbound
+SwapIntoLnCreateRLinkShort: Balanced
+SwapIntoLnSelectRLinkShort swp@Uuid'SwapIntoLnTable: #{swp}
+AboutRLinkShort: About
+
+#
+# Page long link
+#
+
+HomeRLinkLong: Home
+OpenChanRLinkLong: Outbound channel to LSP
+SwapIntoLnCreateRLinkLong: Balanced channel with LSP
+SwapIntoLnSelectRLinkLong swp@Uuid'SwapIntoLnTable: #{swp}
+AboutRLinkLong: About LSP
+
+#
+# HomeR
+#
+
 HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
 
-Outbound: Outbound
-OpenOutboundChanToLsp: Outbound channel to LSP
+#
+# OpenChanR
+#
+
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
-Balanced: Balanced
-SwapBalancedChanWithLsp: Balanced channel with LSP
+#
+# SwapIntoLnCreateR
+#
+
+SwapIntoLnFailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
+SwapIntoLnFailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
+
+#
+# SwapIntoLnSelectR
+#
+
+SwapIntoLnHeaderInfo: Swap Info
+SwapIntoLnHeaderUtxos: Swap Coins
+SwapIntoLnHeaderChans: Swap Channels
+
 SwapIntoLnUuid: Swap Uuid
 SwapIntoLnUserId: User Pub Key
 SwapIntoLnFundInvoice: Swap Invoice
-SwapIntoLnFundInvHash: Swap Hash
-SwapIntoLnFundAddress: Swap Address
-SwapIntoLnFundProof: Proof of Swap
-SwapIntoLnRefundAddress: Refund Address
-SwapIntoLnChanCapUser: User LN Capacity
-SwapIntoLnChanCapLsp: LSP LN Capacity
-SwapIntoLnChanCapTotal: Total LN Capacity
+SwapIntoLnFundInvHash: Swap Invoice Hash
+SwapIntoLnFundAddress: Swap Fund Address
+SwapIntoLnFundProof: Swap Invoice Preimage
+SwapIntoLnRefundAddress: Swap Refund Address
+SwapIntoLnChanCapUser: User's Outgoing Capacity
+SwapIntoLnChanCapLsp: User's Incoming Capacity
+SwapIntoLnChanCapTotal: Total Channel Capacity
 SwapIntoLnFeeLsp: LSP Swap Fee
 SwapIntoLnFeeMiner: Channel Mining Fee
-SwapIntoLnStatus: Swap Status
-SwapIntoLnExpiresAt: Expires at
-SwapIntoLnInsertedAt: Inserted at
-SwapIntoLnUpdatedAt: Updated at
-ChannelPrivacy: Channel Privacy
 
 SwapIntoLnInfoShort: Step 1/5 - Swap Info
 SwapIntoLnWaitingFundChainShort: Step 2/5 - Swap Funding
@@ -62,21 +144,10 @@ SwapIntoLnWaitingFundLnLong: Lightning channel has been opened. Now LSP is settl
 SwapIntoLnSucceededLong: Swap succeeded!
 SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded to refund on-chain address.
 
-Block: Block
-TxId: TxId
-Vout: Vout
-Sat: Sat
-Status: Status
-SwapInfo: Swap Info
-SwapUtxos: Swap UTXOs
-SwapChans: Swap Channels
+#
+# About
+#
 
-FailureDefault: Something went wrong. Please check the input data and try again.
-FailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
-FailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
-
-About: About
-AboutLsp: About LSP
 AboutGen0: General Info
 AboutGen1: LSP provides a number of infrastructural services for lightning network nodes and users:
 AboutGen2: Outbound channel to LSP
