@@ -7,6 +7,7 @@ SHELL_DIR="$THIS_DIR/../build/shell"
 
 (
   kill -0 `cat $SHELL_DIR/bitcoind/regtest/bitcoind.pid` && \
+  kill -0 `cat $SHELL_DIR/bitcoind2/regtest/bitcoind.pid` && \
   kill -0 `cat $SHELL_DIR/lnd-lsp/lnd.pid` && \
   kill -0 `cat $SHELL_DIR/lnd-alice/lnd.pid` && \
   kill -0 `cat $SHELL_DIR/lnd-bob/lnd.pid` && \
