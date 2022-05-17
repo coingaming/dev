@@ -44,6 +44,7 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Text as T
 import qualified Data.ByteString.Base16 as B16
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -263,6 +264,12 @@ instance From (Money owner btcl mrel) Rational where
   from =
     via @(Ratio Natural)
 
+instance ToMessage (Money owner btcl mrel) where
+  toMessage =
+    T.displayRational 1
+      . (/ 1000)
+      . from
+
 newtype FeeRate
   = FeeRate (Ratio Word64)
   deriving newtype
@@ -290,6 +297,13 @@ instance TryFrom Rational FeeRate where
 instance From FeeRate Rational where
   from =
     via @(Ratio Word64)
+
+instance ToMessage FeeRate where
+  toMessage =
+    (<> "%")
+      . T.displayRational 1
+      . (* 100)
+      . from
 
 newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text

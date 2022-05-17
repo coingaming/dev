@@ -47,7 +47,7 @@ $case mpcfg
       <div .panel.panel-#{bsColor2Class (panelConfigColor pcfg)}>
         <div .panel-heading>_{panelConfigMsgShort pcfg}
         <div .panel-body.large-margin-bottom>
-          <div .jumbotron.bg-color-inherit.no-margin-bottom>
+          <div .lead.no-margin-bottom>
             <p .text-center.no-margin-bottom>_{panelConfigMsgLong pcfg}
           <div .ui.container-fluid>
             ^{widget}

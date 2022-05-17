@@ -11,6 +11,25 @@ dl {
   word-break: break-all;
 }
 
+.panel-heading {
+  font-size: 16px;
+}
+
+.lead-padding {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.lead {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  color: inherit;
+}
+
 .form-control:focus,
 input:focus {
   -webkit-box-shadow: none !important;
@@ -99,6 +118,10 @@ input[type="checkbox"] .has-error .form-control {
   margin-top: 38px;
 }
 
+.large-padding-top {
+  padding-top: 30px;
+}
+
 .margin-bottom {
   margin-bottom: 15px;
 }
@@ -181,4 +204,26 @@ textarea {
 .table-bordered > thead > tr > th,
 .table-bordered > thead > tr > td {
   border-bottom-width: 1px;
+}
+
+.about {
+  max-width: 650px;
+  font-size: 18px;
+}
+
+.about > p,
+.about > ul,
+.about > .about-widget {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  padding-right: 5px;
+}
+
+.about > p,
+.about > .about-widget {
+  padding-left: 10px;
+}
+
+.about > ul > li {
+  margin-bottom: 5px;
 }

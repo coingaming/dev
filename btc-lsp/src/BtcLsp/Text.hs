@@ -1,16 +1,11 @@
-{-# LANGUAGE TypeApplications #-}
-
 module BtcLsp.Text
   ( toHex,
     toQr,
-    inspectSat,
-    inspectSatLabel,
+    displayRational,
     mkHtmlUuid,
   )
 where
 
-import BtcLsp.Data.Kind
-import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified Codec.QRCode as QR
   ( ErrorLevel (L),
@@ -39,27 +34,6 @@ toQr =
       (QR.defaultQRCodeOptions QR.L)
       QR.Iso8859_1OrUtf8WithoutECI
 
-inspectSat ::
-  Money
-    (owner :: Owner)
-    (btcl :: BitcoinLayer)
-    (mrel :: MoneyRelation) ->
-  Text
-inspectSat =
-  displayRational1
-    . (/ 1000)
-    . into @Rational
-
-inspectSatLabel ::
-  Money
-    (owner :: Owner)
-    (btcl :: BitcoinLayer)
-    (mrel :: MoneyRelation) ->
-  Text
-inspectSatLabel =
-  (<> " sat")
-    . inspectSat
-
 displayRational :: Int -> Rational -> Text
 displayRational len =
   F.prettyF
@@ -68,10 +42,6 @@ displayRational len =
         F.pc_thousandsSep = Just ',',
         F.pc_decimalSep = '.'
       }
-
-displayRational1 :: Rational -> Text
-displayRational1 =
-  displayRational 1
 
 mkHtmlUuid :: TH.Q TH.Exp
 mkHtmlUuid =

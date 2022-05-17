@@ -257,14 +257,32 @@ toText ::
 toText =
   from
 
+newListWidget ::
+  [[(AppMessage, AppMessage)]] ->
+  Maybe Widget
+newListWidget =
+  newGenListWidget Nothing $ 1 % 2
+
 newNamedListWidget ::
   AppMessage ->
-  [[(AppMessage, Text)]] ->
+  [[(AppMessage, AppMessage)]] ->
   Maybe Widget
-newNamedListWidget _ [] =
+newNamedListWidget title =
+  newGenListWidget (Just title) $ 1 % 4
+
+newGenListWidget ::
+  Maybe AppMessage ->
+  Rational ->
+  [[(AppMessage, AppMessage)]] ->
+  Maybe Widget
+newGenListWidget _ _ [] =
   Nothing
-newNamedListWidget title rawRows =
+newGenListWidget mTitle colProp rawRows =
   Just $(widgetFile "named_list")
   where
-    idxRows :: [(Natural, [(AppMessage, Text)])]
+    idxRows :: [(Natural, [(AppMessage, AppMessage)])]
     idxRows = zip [0 ..] rawRows
+    c1 :: Integer
+    c1 = round $ 12 * colProp
+    c2 :: Integer
+    c2 = 12 - c1
