@@ -11,6 +11,7 @@ in
     nixPkgs.haskellPackages.cabal-plan
     nixPkgs.haskellPackages.hp2pretty
     nixPkgs.haskellPackages.hspec-discover
+    nixPkgs.haskellPackages.implicit-hie
     nixPkgs.zlib
     nixPkgs.protobuf
     nixPkgs.netcat-gnu
@@ -25,5 +26,7 @@ in
     ghcid = "latest";
     haskell-language-server = "1.7.0.0";
   };
-
+  shellHook = ''
+    gen-hie > hie.yaml
+  '';
 }
