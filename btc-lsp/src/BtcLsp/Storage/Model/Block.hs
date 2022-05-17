@@ -1,7 +1,9 @@
 module BtcLsp.Storage.Model.Block
   ( createUpdateSql,
     getLatestSql,
-    getBlock,
+    getBlockByHeightSql,
+    getBlocksHigherSql,
+    makeOrphanBlocksHigherSql,
   )
 where
 
@@ -69,10 +71,42 @@ getLatestSql =
         Psql.LimitTo 1
       ]
 
-getBlock :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
-getBlock blkHeight = do
+getBlockByHeightSql :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
+getBlockByHeightSql blkHeight = do
   Psql.select $
     Psql.from $ \row -> do
-      Psql.where_
+      Psql.where_ $
         (row Psql.^. BlockHeight Psql.==. Psql.val blkHeight)
+          Psql.&&. ( row Psql.^. BlockStatus
+                       Psql.==. Psql.val BlkConfirmed
+                   )
       pure row
+
+
+getBlocksHigherSql :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m [Entity Block]
+getBlocksHigherSql blkHeight = do
+  Psql.select $
+    Psql.from $ \row -> do
+      Psql.where_ $
+        (row Psql.^. BlockHeight Psql.>. Psql.val blkHeight)
+          Psql.&&. ( row Psql.^. BlockStatus
+                       Psql.==. Psql.val BlkConfirmed
+                   )
+      pure row
+
+makeOrphanBlocksHigherSql :: (MonadIO m) => BlkHeight -> ReaderT Psql.SqlBackend m ()
+makeOrphanBlocksHigherSql height = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ BlockStatus Psql.=. Psql.val BlkOrphan,
+        BlockUpdatedAt Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. BlockHeight
+          Psql.>. Psql.val height
+      )
+        Psql.&&. ( row Psql.^. BlockStatus
+                     Psql.==. Psql.val BlkConfirmed
+                 )
