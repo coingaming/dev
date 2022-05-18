@@ -10,7 +10,7 @@
 /language/#BtcLsp.Yesod.Data.Language.Code LanguageR GET
 
 / HomeR GET
-/open-channel OpenChanR GET
-/swap-into-ln/create SwapIntoLnCreateR GET POST
-/swap-into-ln/select/#Uuid'SwapIntoLnTable SwapIntoLnSelectR GET
+/outbound OpenChanR GET
+/balanced/create SwapIntoLnCreateR GET POST
+/balanced/select/#Uuid'SwapIntoLnTable SwapIntoLnSelectR GET
 /about AboutR GET

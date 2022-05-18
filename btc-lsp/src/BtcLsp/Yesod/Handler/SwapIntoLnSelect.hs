@@ -93,7 +93,56 @@ newSwapWidget ::
 newSwapWidget swapInfo =
   newNamedListWidget MsgSwapIntoLnHeaderInfo
     . singleton
-    $ [ ( MsgSwapIntoLnUuid,
+    $ [ ( MsgSwapIntoLnTotalOnChainReceived,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (/= SwapUtxoOrphan) swapInfo
+        ),
+        ( MsgSwapIntoLnTotalOnChainSwapped,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (== SwapUtxoUsedForChanFunding) swapInfo
+        ),
+        ( MsgSwapIntoLnTotalOnChainRefunded,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (== SwapUtxoRefunded) swapInfo
+        ),
+        ( MsgSwapIntoLnFeeLsp,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnFeeLsp
+        ),
+        ( MsgSwapIntoLnChanCapUser,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnChanCapUser
+        ),
+        ( MsgSwapIntoLnChanCapLsp,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnChanCapLsp
+        ),
+        ( MsgSwapIntoLnChanCapTotal,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnChanCapUser
+              + from swapIntoLnChanCapLsp
+        ),
+        ( MsgSwapIntoLnFeeMiner,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnFeeMiner
+        ),
+        ( MsgStatus,
+          Just $
+            swapStatusMsg swapIntoLnStatus
+        ),
+        ( MsgExpiresAt,
+          Just $
+            MsgUtcTime swapIntoLnExpiresAt
+        ),
+        ( MsgSwapIntoLnUuid,
           Just
             . MsgProxy
             . UUID.toText
@@ -131,34 +180,6 @@ newSwapWidget swapInfo =
             . MsgProxy
             $ toText swapIntoLnRefundAddress
         ),
-        ( MsgSwapIntoLnChanCapUser,
-          Just
-            . MsgSatoshi
-            $ from swapIntoLnChanCapUser
-        ),
-        ( MsgSwapIntoLnChanCapLsp,
-          Just
-            . MsgSatoshi
-            $ from swapIntoLnChanCapLsp
-        ),
-        ( MsgSwapIntoLnFeeLsp,
-          Just
-            . MsgSatoshi
-            $ from swapIntoLnFeeLsp
-        ),
-        ( MsgSwapIntoLnFeeMiner,
-          Just
-            . MsgSatoshi
-            $ from swapIntoLnFeeMiner
-        ),
-        ( MsgStatus,
-          Just $
-            swapStatusMsg swapIntoLnStatus
-        ),
-        ( MsgExpiresAt,
-          Just $
-            MsgUtcTime swapIntoLnExpiresAt
-        ),
         ( MsgInsertedAt,
           Just $
             MsgUtcTime swapIntoLnInsertedAt
@@ -182,6 +203,18 @@ newSwapWidget swapInfo =
         . entityVal
         $ SwapIntoLn.swapInfoUser swapInfo
 
+totalOnChainAmt ::
+  (SwapUtxoStatus -> Bool) ->
+  SwapIntoLn.SwapInfo ->
+  MSat
+totalOnChainAmt only =
+  from
+    . sum
+    . fmap swapUtxoAmount
+    . filter (only . swapUtxoStatus)
+    . fmap (entityVal . SwapIntoLn.utxoInfoUtxo)
+    . SwapIntoLn.swapInfoUtxo
+
 newUtxoWidget :: [SwapIntoLn.UtxoInfo] -> Maybe Widget
 newUtxoWidget utxos =
   newNamedListWidget MsgSwapIntoLnHeaderUtxos $
@@ -195,6 +228,13 @@ newUtxoWidget utxos =
                   . inspectPlain @Word64
                   $ from blockHeight
               ),
+              ( MsgAmount,
+                MsgSatoshi $
+                  from swapUtxoAmount
+              ),
+              ( MsgStatus,
+                swapUtxoStatusMsg swapUtxoStatus
+              ),
               ( MsgTxId,
                 MsgProxy
                   . txIdHex
@@ -204,13 +244,6 @@ newUtxoWidget utxos =
                 MsgProxy
                   . inspectPlain @Word32
                   $ coerce swapUtxoVout
-              ),
-              ( MsgAmount,
-                MsgSatoshi $
-                  from swapUtxoAmount
-              ),
-              ( MsgStatus,
-                swapUtxoStatusMsg swapUtxoStatus
               ),
               ( MsgInsertedAt,
                 MsgUtcTime swapUtxoInsertedAt
@@ -227,7 +260,10 @@ newChanWidget chans =
   newNamedListWidget MsgSwapIntoLnHeaderChans $
     ( \row ->
         let LnChan {..} = entityVal row
-         in [ ( MsgTxId,
+         in [ ( MsgStatus,
+                lnChanStatusMsg lnChanStatus
+              ),
+              ( MsgTxId,
                 MsgProxy
                   . txIdHex
                   $ coerce lnChanFundingTxId
@@ -236,9 +272,6 @@ newChanWidget chans =
                 MsgProxy
                   . inspectPlain @Word32
                   $ coerce lnChanFundingVout
-              ),
-              ( MsgStatus,
-                lnChanStatusMsg lnChanStatus
               ),
               ( MsgInsertedAt,
                 MsgUtcTime lnChanInsertedAt

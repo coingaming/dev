@@ -115,6 +115,14 @@ SwapIntoLnHeaderInfo: Swap Info
 SwapIntoLnHeaderUtxos: Swap Coins
 SwapIntoLnHeaderChans: Swap Channels
 
+SwapIntoLnTotalOnChainReceived: Total On-Chain Received
+SwapIntoLnTotalOnChainSwapped: Total On-Chain Swapped
+SwapIntoLnTotalOnChainRefunded: Total On-Chain Refunded
+SwapIntoLnFeeLsp: LSP Service Fee
+SwapIntoLnChanCapUser: User's Outgoing Capacity
+SwapIntoLnChanCapLsp: User's Incoming Capacity *
+SwapIntoLnChanCapTotal: Total Channel Capacity
+SwapIntoLnFeeMiner: Channel Mining Fee
 SwapIntoLnUuid: Swap Uuid
 SwapIntoLnUserId: User Pub Key
 SwapIntoLnFundInvoice: Swap Invoice
@@ -122,11 +130,6 @@ SwapIntoLnFundInvHash: Swap Invoice Hash
 SwapIntoLnFundAddress: Swap Fund Address
 SwapIntoLnFundProof: Swap Invoice Preimage
 SwapIntoLnRefundAddress: Swap Refund Address
-SwapIntoLnChanCapUser: User's Outgoing Capacity
-SwapIntoLnChanCapLsp: User's Incoming Capacity *
-SwapIntoLnChanCapTotal: Total Channel Capacity
-SwapIntoLnFeeLsp: LSP Swap Fee
-SwapIntoLnFeeMiner: Channel Mining Fee
 
 SwapIntoLnInfoShort: Step 1/5 - Swap Info
 SwapIntoLnWaitingFundChainShort: Step 2/5 - Swap Funding
