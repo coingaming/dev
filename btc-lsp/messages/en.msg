@@ -158,6 +158,9 @@ AboutGen6: Balanced channel with LSP
 AboutGen7: provides the ability to
 AboutGen8: send and receive
 AboutGen9: lightning network payments. In this case, LSP also provides incoming liquidity for the user, but charges an additional one-time fee for it.
+AboutGen10: The LSP software is open source. The source code can be found on github:
+AboutGen11: https://github.com/coingaming/src
+AboutGen12: Pull requests and other contributions are welcome!
 AboutMathGen0: Balanced Channel Math
 AboutMathGen1: The user is able to swap on-chain bitcoins into a balanced lightning channel with LSP. For example, the user sends
 AboutMathGen2: X
@@ -210,3 +213,5 @@ AboutSwap10: After the swap has been successfully funded on-chain, the user's li
 AboutSwap11: When the user's lightning node is connected, the LSP starts to open the channel with it.
 AboutSwap12: Once the channel is opened, LSP sends the user's funds through the lightning network using the initial swap invoice. The user's lightning node must be online to receive the payment.
 AboutSwap13: After the successful swap, the user's lightning node has a balanced payment channel with the LSP's node and can send and receive lightning payments. If something goes wrong and the balanced channel cannot be opened, the user's bitcoins are refunded to the emergency on-chain refund address provided by the user.
+AboutDisclaimer0: Disclaimer
+AboutDisclaimer1: The lightning network is an experimental technology. Using Lightning Network in general and LSP in particular can lead to the loss of funds. The LSP software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
