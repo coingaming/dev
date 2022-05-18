@@ -123,7 +123,7 @@ SwapIntoLnFundAddress: Swap Fund Address
 SwapIntoLnFundProof: Swap Invoice Preimage
 SwapIntoLnRefundAddress: Swap Refund Address
 SwapIntoLnChanCapUser: User's Outgoing Capacity
-SwapIntoLnChanCapLsp: User's Incoming Capacity
+SwapIntoLnChanCapLsp: User's Incoming Capacity *
 SwapIntoLnChanCapTotal: Total Channel Capacity
 SwapIntoLnFeeLsp: LSP Swap Fee
 SwapIntoLnFeeMiner: Channel Mining Fee
@@ -137,7 +137,7 @@ SwapIntoLnSucceededShort: Step 5/5 - Swap Succeeded
 SwapIntoLnExpiredShort: Swap Expired!
 
 SwapIntoLnInfoLong: To request a balanced channel with LSP, provide a lightning invoice with a zero requested amount and an expiration time of at least one week. LSP also needs emergency on-chain refund address.
-SwapIntoLnWaitingFundChainLong: LSP is wating for the swap being funded. Please send bitcoins to the on-chain swap address:
+SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: LSP is waiting for the swap to be funded. Please send between #{minAmt} and #{maxAmt} satoshi to the on-chain swap address:
 SwapIntoLnFundedLong: The swap is successfully funded. LSP is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
 SwapIntoLnWaitingChanLong: LSP initiated lightning channel. Waiting for the channel being opened.
 SwapIntoLnWaitingFundLnLong: Lightning channel has been opened. Now LSP is settling swap lightning invoice.

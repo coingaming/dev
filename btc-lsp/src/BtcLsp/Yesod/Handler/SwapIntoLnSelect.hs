@@ -8,6 +8,7 @@ module BtcLsp.Yesod.Handler.SwapIntoLnSelect
 where
 
 import BtcLsp.Data.Type
+import qualified BtcLsp.Math as Math
 import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget
@@ -31,12 +32,15 @@ getSwapIntoLnSelectR uuid = do
   maybeM
     notFound
     ( \swapInfo@SwapIntoLn.SwapInfo {..} -> do
+        minAmt <- liftIO $ run getSwapIntoLnMinAmt
         let SwapIntoLn {..} = entityVal swapInfoSwap
         let (msgShort, msgLong, color) =
               case swapIntoLnStatus of
                 SwapWaitingFundChain ->
                   ( MsgSwapIntoLnWaitingFundChainShort,
-                    MsgSwapIntoLnWaitingFundChainLong,
+                    MsgSwapIntoLnWaitingFundChainLong
+                      minAmt
+                      Math.swapLnMaxAmt,
                     Info
                   )
                 SwapWaitingPeer ->

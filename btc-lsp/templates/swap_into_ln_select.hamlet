@@ -14,6 +14,7 @@ $if swapIntoLnStatus == SwapWaitingPeer
         _{MsgCopy}
 $maybe swapWidget <- mSwapWidget
   ^{swapWidget}
+  <p .text-muted.padding-top>_{MsgAboutExamplesAsterisk}
 $maybe utxoWidget <- mUtxoWidget
   ^{utxoWidget}
 $maybe chanWidget <- mChanWidget
