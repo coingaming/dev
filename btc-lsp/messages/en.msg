@@ -145,6 +145,13 @@ SwapIntoLnSucceededLong: Swap succeeded!
 SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded to refund on-chain address.
 
 #
+# Disclaimer
+#
+
+Disclaimer0: By continuing to use the LSP, you agree to the service
+Disclaimer1: terms and conditions
+
+#
 # About
 #
 

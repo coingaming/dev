@@ -376,6 +376,7 @@ newLayout mpcfg widget = do
   -- you to use normal widget features in default-layout.
 
   mLang <- lookupSession "_LANG"
+  let disclaimer = $(widgetFile "disclaimer")
   pc <- widgetToPageContent $ do
     addStylesheet $ StaticR css_bootstrap_css
     addStylesheet $ StaticR css_app_css

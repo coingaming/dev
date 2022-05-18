@@ -115,16 +115,16 @@ newSwapWidget swapInfo =
             . toText
             $ into @RHashHex swapIntoLnFundInvHash
         ),
-        ( MsgSwapIntoLnFundAddress,
-          Just
-            . MsgProxy
-            $ toText swapIntoLnFundAddress
-        ),
         ( MsgSwapIntoLnFundProof,
           MsgProxy
             . toHex
             . coerce
             <$> swapIntoLnFundProof
+        ),
+        ( MsgSwapIntoLnFundAddress,
+          Just
+            . MsgProxy
+            $ toText swapIntoLnFundAddress
         ),
         ( MsgSwapIntoLnRefundAddress,
           Just
@@ -211,6 +211,12 @@ newUtxoWidget utxos =
               ),
               ( MsgStatus,
                 swapUtxoStatusMsg swapUtxoStatus
+              ),
+              ( MsgInsertedAt,
+                MsgUtcTime swapUtxoInsertedAt
+              ),
+              ( MsgUpdatedAt,
+                MsgUtcTime swapUtxoUpdatedAt
               )
             ]
     )
@@ -233,6 +239,12 @@ newChanWidget chans =
               ),
               ( MsgStatus,
                 lnChanStatusMsg lnChanStatus
+              ),
+              ( MsgInsertedAt,
+                MsgUtcTime lnChanInsertedAt
+              ),
+              ( MsgUpdatedAt,
+                MsgUtcTime lnChanUpdatedAt
               )
             ]
     )
