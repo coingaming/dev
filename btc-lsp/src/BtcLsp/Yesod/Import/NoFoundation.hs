@@ -21,6 +21,7 @@ import BtcLsp.Import.External as Import
     Vout (..),
     coerce,
     eitherM,
+    formatAsLogTime,
     maybeM,
     runExceptT,
     txIdHex,

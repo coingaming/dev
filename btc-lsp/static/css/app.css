@@ -118,6 +118,10 @@ input[type="checkbox"] .has-error .form-control {
   margin-top: 38px;
 }
 
+.padding-top {
+  padding-top: 12px;
+}
+
 .large-padding-top {
   padding-top: 30px;
 }

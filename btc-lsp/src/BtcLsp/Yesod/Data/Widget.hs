@@ -268,7 +268,7 @@ newNamedListWidget ::
   [[(AppMessage, AppMessage)]] ->
   Maybe Widget
 newNamedListWidget title =
-  newGenListWidget (Just title) $ 1 % 4
+  newGenListWidget (Just title) $ 1 % 3
 
 newGenListWidget ::
   Maybe AppMessage ->

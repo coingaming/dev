@@ -215,11 +215,11 @@ instance YesodBreadcrumbs App where
         RobotsR -> MsgNothing
         LanguageR {} -> MsgNothing
         AuthR {} -> MsgNothing
-        HomeR -> MsgHomeRBreadcrumb
-        OpenChanR -> MsgOpenChanRBreadcrumb
-        SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
-        SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
-        AboutR -> MsgAboutRBreadcrumb
+        HomeR -> MsgHomeRLinkShort
+        OpenChanR -> MsgOpenChanRLinkShort
+        SwapIntoLnCreateR -> MsgSwapIntoLnCreateRLinkShort
+        SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRLinkShort x
+        AboutR -> MsgAboutRLinkShort
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
         StaticR {} -> Nothing
@@ -323,7 +323,7 @@ newLayout mpcfg widget = do
   let menuItems =
         [ NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgHome,
+              { menuItemLabel = MsgHomeRLinkShort,
                 menuItemRoute = HomeR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback = mcurrentRoute == Just HomeR,
@@ -331,7 +331,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgOutbound,
+              { menuItemLabel = MsgOpenChanRLinkShort,
                 menuItemRoute = OpenChanR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback = mcurrentRoute == Just OpenChanR,
@@ -339,7 +339,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgBalanced,
+              { menuItemLabel = MsgSwapIntoLnCreateRLinkShort,
                 menuItemRoute = SwapIntoLnCreateR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback =
@@ -355,7 +355,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgAbout,
+              { menuItemLabel = MsgAboutRLinkShort,
                 menuItemRoute = AboutR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback = mcurrentRoute == Just AboutR,
@@ -376,6 +376,7 @@ newLayout mpcfg widget = do
   -- you to use normal widget features in default-layout.
 
   mLang <- lookupSession "_LANG"
+  let disclaimer = $(widgetFile "disclaimer")
   pc <- widgetToPageContent $ do
     addStylesheet $ StaticR css_bootstrap_css
     addStylesheet $ StaticR css_app_css

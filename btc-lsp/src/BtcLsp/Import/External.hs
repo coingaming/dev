@@ -96,6 +96,9 @@ import Katip as X
     runKatipContextT,
     sl,
   )
+import Katip.Format.Time as X
+  ( formatAsLogTime,
+  )
 import LndClient as X
   ( ChanId (..),
     LndError (..),

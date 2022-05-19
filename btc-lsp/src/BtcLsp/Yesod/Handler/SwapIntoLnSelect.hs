@@ -8,6 +8,7 @@ module BtcLsp.Yesod.Handler.SwapIntoLnSelect
 where
 
 import BtcLsp.Data.Type
+import qualified BtcLsp.Math as Math
 import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget
@@ -31,12 +32,15 @@ getSwapIntoLnSelectR uuid = do
   maybeM
     notFound
     ( \swapInfo@SwapIntoLn.SwapInfo {..} -> do
+        minAmt <- liftIO $ run getSwapIntoLnMinAmt
         let SwapIntoLn {..} = entityVal swapInfoSwap
         let (msgShort, msgLong, color) =
               case swapIntoLnStatus of
                 SwapWaitingFundChain ->
                   ( MsgSwapIntoLnWaitingFundChainShort,
-                    MsgSwapIntoLnWaitingFundChainLong,
+                    MsgSwapIntoLnWaitingFundChainLong
+                      minAmt
+                      Math.swapLnMaxAmt,
                     Info
                   )
                 SwapWaitingPeer ->
@@ -87,9 +91,58 @@ newSwapWidget ::
   SwapIntoLn.SwapInfo ->
   Maybe Widget
 newSwapWidget swapInfo =
-  newNamedListWidget MsgSwapInfo
+  newNamedListWidget MsgSwapIntoLnHeaderInfo
     . singleton
-    $ [ ( MsgSwapIntoLnUuid,
+    $ [ ( MsgSwapIntoLnTotalOnChainReceived,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (/= SwapUtxoOrphan) swapInfo
+        ),
+        ( MsgSwapIntoLnTotalOnChainSwapped,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (== SwapUtxoUsedForChanFunding) swapInfo
+        ),
+        ( MsgSwapIntoLnTotalOnChainRefunded,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (== SwapUtxoRefunded) swapInfo
+        ),
+        ( MsgSwapIntoLnFeeLsp,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnFeeLsp
+        ),
+        ( MsgSwapIntoLnChanCapUser,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnChanCapUser
+        ),
+        ( MsgSwapIntoLnChanCapLsp,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnChanCapLsp
+        ),
+        ( MsgSwapIntoLnChanCapTotal,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnChanCapUser
+              + from swapIntoLnChanCapLsp
+        ),
+        ( MsgSwapIntoLnFeeMiner,
+          Just
+            . MsgSatoshi
+            $ from swapIntoLnFeeMiner
+        ),
+        ( MsgStatus,
+          Just $
+            swapStatusMsg swapIntoLnStatus
+        ),
+        ( MsgExpiresAt,
+          Just $
+            MsgUtcTime swapIntoLnExpiresAt
+        ),
+        ( MsgSwapIntoLnUuid,
           Just
             . MsgProxy
             . UUID.toText
@@ -111,61 +164,29 @@ newSwapWidget swapInfo =
             . toText
             $ into @RHashHex swapIntoLnFundInvHash
         ),
-        ( MsgSwapIntoLnFundAddress,
-          Just
-            . MsgProxy
-            $ toText swapIntoLnFundAddress
-        ),
         ( MsgSwapIntoLnFundProof,
           MsgProxy
             . toHex
             . coerce
             <$> swapIntoLnFundProof
         ),
+        ( MsgSwapIntoLnFundAddress,
+          Just
+            . MsgProxy
+            $ toText swapIntoLnFundAddress
+        ),
         ( MsgSwapIntoLnRefundAddress,
           Just
             . MsgProxy
             $ toText swapIntoLnRefundAddress
         ),
-        ( MsgSwapIntoLnChanCapUser,
-          Just
-            . MsgSatoshiAmt
-            $ from swapIntoLnChanCapUser
+        ( MsgInsertedAt,
+          Just $
+            MsgUtcTime swapIntoLnInsertedAt
         ),
-        ( MsgSwapIntoLnChanCapLsp,
-          Just
-            . MsgSatoshiAmt
-            $ from swapIntoLnChanCapLsp
-        ),
-        ( MsgSwapIntoLnFeeLsp,
-          Just
-            . MsgSatoshiAmt
-            $ from swapIntoLnFeeLsp
-        ),
-        ( MsgSwapIntoLnFeeMiner,
-          Just
-            . MsgSatoshiAmt
-            $ from swapIntoLnFeeMiner
-        ),
-        ( MsgSwapIntoLnStatus,
-          Just
-            . MsgProxy
-            $ inspectPlain swapIntoLnStatus
-        ),
-        ( MsgSwapIntoLnExpiresAt,
-          Just
-            . MsgProxy
-            $ toPathPiece swapIntoLnExpiresAt
-        ),
-        ( MsgSwapIntoLnInsertedAt,
-          Just
-            . MsgProxy
-            $ toPathPiece swapIntoLnInsertedAt
-        ),
-        ( MsgSwapIntoLnUpdatedAt,
-          Just
-            . MsgProxy
-            $ toPathPiece swapIntoLnUpdatedAt
+        ( MsgUpdatedAt,
+          Just $
+            MsgUtcTime swapIntoLnUpdatedAt
         )
       ]
       >>= \case
@@ -182,9 +203,21 @@ newSwapWidget swapInfo =
         . entityVal
         $ SwapIntoLn.swapInfoUser swapInfo
 
+totalOnChainAmt ::
+  (SwapUtxoStatus -> Bool) ->
+  SwapIntoLn.SwapInfo ->
+  MSat
+totalOnChainAmt only =
+  from
+    . sum
+    . fmap swapUtxoAmount
+    . filter (only . swapUtxoStatus)
+    . fmap (entityVal . SwapIntoLn.utxoInfoUtxo)
+    . SwapIntoLn.swapInfoUtxo
+
 newUtxoWidget :: [SwapIntoLn.UtxoInfo] -> Maybe Widget
 newUtxoWidget utxos =
-  newNamedListWidget MsgSwapUtxos $
+  newNamedListWidget MsgSwapIntoLnHeaderUtxos $
     ( \row ->
         let SwapUtxo {..} =
               entityVal $ SwapIntoLn.utxoInfoUtxo row
@@ -194,6 +227,13 @@ newUtxoWidget utxos =
                 MsgProxy
                   . inspectPlain @Word64
                   $ from blockHeight
+              ),
+              ( MsgAmount,
+                MsgSatoshi $
+                  from swapUtxoAmount
+              ),
+              ( MsgStatus,
+                swapUtxoStatusMsg swapUtxoStatus
               ),
               ( MsgTxId,
                 MsgProxy
@@ -205,13 +245,11 @@ newUtxoWidget utxos =
                   . inspectPlain @Word32
                   $ coerce swapUtxoVout
               ),
-              ( MsgSat,
-                MsgSatoshiAmt $
-                  from swapUtxoAmount
+              ( MsgInsertedAt,
+                MsgUtcTime swapUtxoInsertedAt
               ),
-              ( MsgStatus,
-                MsgProxy $
-                  inspectPlain swapUtxoStatus
+              ( MsgUpdatedAt,
+                MsgUtcTime swapUtxoUpdatedAt
               )
             ]
     )
@@ -219,10 +257,13 @@ newUtxoWidget utxos =
 
 newChanWidget :: [Entity LnChan] -> Maybe Widget
 newChanWidget chans =
-  newNamedListWidget MsgSwapChans $
+  newNamedListWidget MsgSwapIntoLnHeaderChans $
     ( \row ->
         let LnChan {..} = entityVal row
-         in [ ( MsgTxId,
+         in [ ( MsgStatus,
+                lnChanStatusMsg lnChanStatus
+              ),
+              ( MsgTxId,
                 MsgProxy
                   . txIdHex
                   $ coerce lnChanFundingTxId
@@ -232,10 +273,38 @@ newChanWidget chans =
                   . inspectPlain @Word32
                   $ coerce lnChanFundingVout
               ),
-              ( MsgStatus,
-                MsgProxy $
-                  inspectPlain lnChanStatus
+              ( MsgInsertedAt,
+                MsgUtcTime lnChanInsertedAt
+              ),
+              ( MsgUpdatedAt,
+                MsgUtcTime lnChanUpdatedAt
               )
             ]
     )
       <$> chans
+
+swapStatusMsg :: SwapStatus -> AppMessage
+swapStatusMsg = \case
+  SwapWaitingFundChain -> MsgSwapWaitingFundChain
+  SwapWaitingPeer -> MsgSwapWaitingPeer
+  SwapWaitingChan -> MsgSwapWaitingChan
+  SwapWaitingFundLn -> MsgSwapWaitingFundLn
+  SwapSucceeded -> MsgSwapSucceeded
+  SwapExpired -> MsgSwapExpired
+
+swapUtxoStatusMsg :: SwapUtxoStatus -> AppMessage
+swapUtxoStatusMsg = \case
+  SwapUtxoUsedForChanFunding -> MsgSwapUtxoUsedForChanFunding
+  SwapUtxoRefunded -> MsgSwapUtxoRefunded
+  SwapUtxoFirstSeen -> MsgSwapUtxoFirstSeen
+  SwapUtxoOrphan -> MsgSwapUtxoOrphan
+
+lnChanStatusMsg :: LnChanStatus -> AppMessage
+lnChanStatusMsg = \case
+  LnChanStatusPendingOpen -> MsgLnChanStatusPendingOpen
+  LnChanStatusOpened -> MsgLnChanStatusOpened
+  LnChanStatusActive -> MsgLnChanStatusActive
+  LnChanStatusFullyResolved -> MsgLnChanStatusFullyResolved
+  LnChanStatusInactive -> MsgLnChanStatusInactive
+  LnChanStatusPendingClose -> MsgLnChanStatusPendingClose
+  LnChanStatusClosed -> MsgLnChanStatusClosed

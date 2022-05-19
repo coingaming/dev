@@ -102,16 +102,16 @@ postSwapIntoLnCreateR = do
 explainFailure :: SwapIntoLn.Response -> AppMessage
 explainFailure res =
   maybe
-    MsgFailureDefault
+    MsgInputFailure
     ( \case
         SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT ->
-          MsgFailureFundLnInvoiceHasNonZeroAmt
+          MsgSwapIntoLnFailureFundLnInvoiceHasNonZeroAmt
         SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON ->
-          MsgFailureFundLnInvoiceExpiresTooSoon
+          MsgSwapIntoLnFailureFundLnInvoiceExpiresTooSoon
         SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE ->
-          MsgFailureDefault
+          MsgInputFailure
         SwapIntoLn.Response'Failure'InputFailure'Unrecognized {} ->
-          MsgFailureDefault
+          MsgInputFailure
     )
     $ res
       ^? SwapIntoLn.maybe'failure

@@ -1,16 +1,65 @@
+#
+# Untranslatable
+#
+
 Nothing:
 Proxy txt@Text: #{txt}
-Continue: Continue
-Copy: copy
-Iso3166v1: gb
-Satoshi: satoshi
-SatoshiAmt msat@MSat: #{toMessage msat} satoshi
+UtcTime utc@UTCTime: #{formatAsLogTime utc} UTC
 
-HomeRBreadcrumb: Home
-OpenChanRBreadcrumb: Outbound
-SwapIntoLnCreateRBreadcrumb: Balanced
-SwapIntoLnSelectRBreadcrumb swp@Uuid'SwapIntoLnTable: #{swp}
-AboutRBreadcrumb: About
+#
+# General
+#
+
+Iso3166v1: gb
+Copy: copy
+Continue: Continue
+Amount: Amount
+Satoshi msat@MSat: #{toMessage msat} satoshi
+Status: Status
+ExpiresAt: Expires at
+InsertedAt: Inserted at
+UpdatedAt: Updated at
+ChannelPrivacy: Channel Privacy
+Block: Block
+TxId: Transaction Id
+Vout: Output Index
+InputFailure: Something went wrong. Please check the input data and try again.
+
+#
+# SwapStatus
+#
+
+SwapWaitingFundChain: Waiting for funding
+SwapWaitingPeer: Waiting for the peer
+SwapWaitingChan: Waiting for the channel
+SwapWaitingFundLn: Paying the swap invoice
+SwapSucceeded: Succeeded
+SwapExpired: Expired
+
+#
+# SwapUtxoStatus
+#
+
+SwapUtxoUsedForChanFunding: Funded the swap
+SwapUtxoRefunded: Refunded
+SwapUtxoFirstSeen: Unspent
+SwapUtxoOrphan: Orphan
+
+#
+# LnChanStatus
+#
+
+LnChanStatusPendingOpen: Opening
+LnChanStatusOpened: Opened
+LnChanStatusActive: Active
+LnChanStatusFullyResolved: Fully Resolved
+LnChanStatusInactive: Inactive
+LnChanStatusPendingClose: Closing
+LnChanStatusClosed: Closed
+
+#
+# Page title
+#
 
 HomeRTitle: Welcome | LSP
 OpenChanRTitle: Outbound | LSP
@@ -18,33 +67,69 @@ SwapIntoLnCreateRTitle: Balanced | LSP
 SwapIntoLnSelectRTitle swp@Uuid'SwapIntoLnTable: #{swp} | Balanced | LSP
 AboutRTitle: About | LSP
 
-Home: Home
+#
+# Page short link
+#
+
+HomeRLinkShort: Home
+OpenChanRLinkShort: Outbound
+SwapIntoLnCreateRLinkShort: Balanced
+SwapIntoLnSelectRLinkShort swp@Uuid'SwapIntoLnTable: #{swp}
+AboutRLinkShort: About
+
+#
+# Page long link
+#
+
+HomeRLinkLong: Home
+OpenChanRLinkLong: Outbound channel to LSP
+SwapIntoLnCreateRLinkLong: Balanced channel with LSP
+SwapIntoLnSelectRLinkLong swp@Uuid'SwapIntoLnTable: #{swp}
+AboutRLinkLong: About LSP
+
+#
+# HomeR
+#
+
 HomeBigHeader: BTC LSP
 HomeSmallHeader: Lightning Network Service Provider
 
-Outbound: Outbound
-OpenOutboundChanToLsp: Outbound channel to LSP
+#
+# OpenChanR
+#
+
 OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
 
-Balanced: Balanced
-SwapBalancedChanWithLsp: Balanced channel with LSP
+#
+# SwapIntoLnCreateR
+#
+
+SwapIntoLnFailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
+SwapIntoLnFailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
+
+#
+# SwapIntoLnSelectR
+#
+
+SwapIntoLnHeaderInfo: Swap Info
+SwapIntoLnHeaderUtxos: Swap Coins
+SwapIntoLnHeaderChans: Swap Channels
+
+SwapIntoLnTotalOnChainReceived: Total On-Chain Received
+SwapIntoLnTotalOnChainSwapped: Total On-Chain Swapped
+SwapIntoLnTotalOnChainRefunded: Total On-Chain Refunded
+SwapIntoLnFeeLsp: LSP Service Fee
+SwapIntoLnChanCapUser: User's Outgoing Capacity
+SwapIntoLnChanCapLsp: User's Incoming Capacity *
+SwapIntoLnChanCapTotal: Total Channel Capacity
+SwapIntoLnFeeMiner: Channel Mining Fee
 SwapIntoLnUuid: Swap Uuid
 SwapIntoLnUserId: User Pub Key
 SwapIntoLnFundInvoice: Swap Invoice
-SwapIntoLnFundInvHash: Swap Hash
-SwapIntoLnFundAddress: Swap Address
-SwapIntoLnFundProof: Proof of Swap
-SwapIntoLnRefundAddress: Refund Address
-SwapIntoLnChanCapUser: User LN Capacity
-SwapIntoLnChanCapLsp: LSP LN Capacity
-SwapIntoLnChanCapTotal: Total LN Capacity
-SwapIntoLnFeeLsp: LSP Swap Fee
-SwapIntoLnFeeMiner: Channel Mining Fee
-SwapIntoLnStatus: Swap Status
-SwapIntoLnExpiresAt: Expires at
-SwapIntoLnInsertedAt: Inserted at
-SwapIntoLnUpdatedAt: Updated at
-ChannelPrivacy: Channel Privacy
+SwapIntoLnFundInvHash: Swap Invoice Hash
+SwapIntoLnFundAddress: Swap Fund Address
+SwapIntoLnFundProof: Swap Invoice Preimage
+SwapIntoLnRefundAddress: Swap Refund Address
 
 SwapIntoLnInfoShort: Step 1/5 - Swap Info
 SwapIntoLnWaitingFundChainShort: Step 2/5 - Swap Funding
@@ -55,28 +140,24 @@ SwapIntoLnSucceededShort: Step 5/5 - Swap Succeeded
 SwapIntoLnExpiredShort: Swap Expired!
 
 SwapIntoLnInfoLong: To request a balanced channel with LSP, provide a lightning invoice with a zero requested amount and an expiration time of at least one week. LSP also needs emergency on-chain refund address.
-SwapIntoLnWaitingFundChainLong: LSP is wating for the swap being funded. Please send bitcoins to the on-chain swap address:
+SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: LSP is waiting for the swap to be funded. Please send between #{minAmt} and #{maxAmt} satoshi to the on-chain swap address:
 SwapIntoLnFundedLong: The swap is successfully funded. LSP is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
 SwapIntoLnWaitingChanLong: LSP initiated lightning channel. Waiting for the channel being opened.
 SwapIntoLnWaitingFundLnLong: Lightning channel has been opened. Now LSP is settling swap lightning invoice.
 SwapIntoLnSucceededLong: Swap succeeded!
 SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded to refund on-chain address.
 
-Block: Block
-TxId: TxId
-Vout: Vout
-Sat: Sat
-Status: Status
-SwapInfo: Swap Info
-SwapUtxos: Swap UTXOs
-SwapChans: Swap Channels
+#
+# Disclaimer
+#
 
-FailureDefault: Something went wrong. Please check the input data and try again.
-FailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
-FailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
+Disclaimer0: By continuing to use the LSP, you agree to the service
+Disclaimer1: terms and conditions
 
-About: About
-AboutLsp: About LSP
+#
+# About
+#
+
 AboutGen0: General Info
 AboutGen1: LSP provides a number of infrastructural services for lightning network nodes and users:
 AboutGen2: Outbound channel to LSP
@@ -87,6 +168,9 @@ AboutGen6: Balanced channel with LSP
 AboutGen7: provides the ability to
 AboutGen8: send and receive
 AboutGen9: lightning network payments. In this case, LSP also provides incoming liquidity for the user, but charges an additional one-time fee for it.
+AboutGen10: The LSP software is open source. The source code can be found on github:
+AboutGen11: https://github.com/coingaming/src
+AboutGen12: Pull requests and other contributions are welcome!
 AboutMathGen0: Balanced Channel Math
 AboutMathGen1: The user is able to swap on-chain bitcoins into a balanced lightning channel with LSP. For example, the user sends
 AboutMathGen2: X
@@ -139,3 +223,5 @@ AboutSwap10: After the swap has been successfully funded on-chain, the user's li
 AboutSwap11: When the user's lightning node is connected, the LSP starts to open the channel with it.
 AboutSwap12: Once the channel is opened, LSP sends the user's funds through the lightning network using the initial swap invoice. The user's lightning node must be online to receive the payment.
 AboutSwap13: After the successful swap, the user's lightning node has a balanced payment channel with the LSP's node and can send and receive lightning payments. If something goes wrong and the balanced channel cannot be opened, the user's bitcoins are refunded to the emergency on-chain refund address provided by the user.
+AboutDisclaimer0: Disclaimer
+AboutDisclaimer1: The lightning network is an experimental technology. Using Lightning Network in general and LSP in particular can lead to the loss of funds. The LSP software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.

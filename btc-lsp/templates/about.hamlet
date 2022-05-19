@@ -12,6 +12,10 @@
       _{MsgAboutGen7}
       <strong>_{MsgAboutGen8}
       _{MsgAboutGen9}
+  <p>
+    _{MsgAboutGen10}
+    <a href="_{MsgAboutGen11}">_{MsgAboutGen11}</a>.
+    _{MsgAboutGen12}
   <h3 .text-center.lead-padding>_{MsgAboutMathGen0}
   <p>
     _{MsgAboutMathGen1}
@@ -71,3 +75,5 @@
     <li>_{MsgAboutSwap11}
     <li>_{MsgAboutSwap12}
   <p>_{MsgAboutSwap13}
+  <h3 .text-center.lead-padding>_{MsgAboutDisclaimer0}
+  <p>_{MsgAboutDisclaimer1}
