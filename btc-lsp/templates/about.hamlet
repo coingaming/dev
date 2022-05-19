@@ -55,7 +55,7 @@
   $maybe examplesWidget <- mExamplesWidget
     <h3 .text-center.lead-padding>_{MsgAboutExamples}
     <div .about-widget>^{examplesWidget}
-    <p .text-muted.large-padding-top>_{MsgAboutExamplesAsterisk}
+    <p .text-muted.large-padding-top>_{MsgDisclaimerCommitmentFee}
   <h3 .text-center.lead-padding>_{MsgAboutSwap0}
   <p>_{MsgAboutSwap1}
   <ul>

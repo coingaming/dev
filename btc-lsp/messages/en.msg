@@ -151,8 +151,9 @@ SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded
 # Disclaimer
 #
 
-Disclaimer0: By continuing to use the LSP, you agree to the service
-Disclaimer1: terms and conditions
+DisclaimerTos0: By continuing to use the LSP, you agree to the service
+DisclaimerTos1: terms and conditions
+DisclaimerCommitmentFee: * The actual value of the input capacity provided to the user by LSP is slightly less than the theoretical value, because LSP handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
 
 #
 # About
@@ -208,7 +209,6 @@ AboutExamplesLspSwapFee: LSP Swap Fee
 AboutExamplesUserOutgoingCap: User's Outgoing Capacity
 AboutExamplesUserIncomingCap: User's Incoming Capacity *
 AboutExamplesTotalChanCap: Total Channel Capacity
-AboutExamplesAsterisk: * The actual value of the input capacity provided to the user by LSP is slightly less than the theoretical value, because LSP handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
 AboutSwap0: Balanced Channel Flow
 AboutSwap1: The creation of a balanced channel with LSP is implemented through on-chain to lightning swap. On the first step, the user provides LSP swap data:
 AboutSwap2: Swap Invoice
