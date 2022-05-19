@@ -9,7 +9,7 @@ module BtcLsp.Grpc.Server.HighLevel
 where
 
 import BtcLsp.Import
-import qualified BtcLsp.Math as Math
+import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Time as Time
 import qualified LndClient.Data.NewAddress as Lnd

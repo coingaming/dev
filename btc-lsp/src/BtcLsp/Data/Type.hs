@@ -37,6 +37,7 @@ module BtcLsp.Data.Type
     Uuid,
     unUuid,
     newUuid,
+    Vbyte (..),
   )
 where
 
@@ -743,6 +744,20 @@ newUuid :: (MonadIO m) => m (Uuid tab)
 newUuid =
   liftIO $
     Uuid <$> UUID.nextRandom
+
+newtype Vbyte = Vbyte
+  { unVbyte :: Ratio Natural
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out Vbyte
 
 --
 -- NOTE :  we're taking advantage of

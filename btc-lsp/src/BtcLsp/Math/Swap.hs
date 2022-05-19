@@ -1,13 +1,12 @@
 {-# LANGUAGE TypeApplications #-}
 
-module BtcLsp.Math
+module BtcLsp.Math.Swap
   ( SwapCap (..),
     swapLnMaxAmt,
     swapLnFeeRate,
     swapLnMinFee,
     newSwapCapM,
     newSwapIntoLnMinAmt,
-    roundWord64ToMSat,
   )
 where
 
@@ -104,7 +103,3 @@ newSwapIntoLnMinAmt minCap =
       if usrPerc - usrFin >= minFee
         then usrPerc
         else usrFin + minFee
-
-roundWord64ToMSat :: Real a => a -> MSat
-roundWord64ToMSat amt =
-  MSat $ (* 1000) $ fromInteger $ ceiling (toRational amt / 1000)

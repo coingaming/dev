@@ -126,3 +126,9 @@ instance ToMessage MSat where
       . (/ 1000)
       . via @Integer
       . into @Word64
+
+instance Out (Ratio Natural) where
+  docPrec x =
+    docPrec x . into @Rational
+  doc =
+    docPrec 0

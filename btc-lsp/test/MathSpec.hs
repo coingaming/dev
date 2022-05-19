@@ -4,7 +4,7 @@ module MathSpec
 where
 
 import BtcLsp.Import
-import qualified BtcLsp.Math as Math
+import qualified BtcLsp.Math.Swap as Math
 import Test.Hspec
 import TestOrphan ()
 import TestWithLndLsp

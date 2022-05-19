@@ -8,7 +8,7 @@ module BtcLsp.Yesod.Handler.SwapIntoLnSelect
 where
 
 import BtcLsp.Data.Type
-import qualified BtcLsp.Math as Math
+import qualified BtcLsp.Math.Swap as Math
 import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget

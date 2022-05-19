@@ -8,7 +8,7 @@ where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
-import BtcLsp.Math (roundWord64ToMSat)
+import BtcLsp.Math.OnChain (roundWord64ToMSat)
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
   ( getUtxosForRefundSql,
     markRefundedSql,
