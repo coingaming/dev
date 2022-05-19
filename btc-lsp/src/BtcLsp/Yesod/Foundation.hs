@@ -28,12 +28,16 @@ import Yesod.Core.Types (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Default.Util (addStaticContentExternal)
 
--- | NOTE : this type alias is there only because of
--- poor support of advanced Haskell in yesodroutes
+-- | NOTE : this type aliases are there only because of
+-- poor support of advanced Haskell in yesodroutes and i18n
 -- files through Yesod TH.
 --
 -- !!! DO NOT USE DIRECTLY IN SOURCE CODE !!!
 type Uuid'SwapIntoLnTable = Uuid 'SwapIntoLnTable
+
+type Money'Lsp'OnChain'Gain = Money 'Lsp 'OnChain 'Gain
+
+type Money'Usr'OnChain'Fund = Money 'Usr 'OnChain 'Fund
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -150,6 +154,7 @@ instance Yesod App where
   isAuthorized OpenChanR {} _ = pure Authorized
   isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
   isAuthorized SwapIntoLnSelectR {} _ = pure Authorized
+  isAuthorized AboutR _ = pure Authorized
 
   -- This function creates static content files in the static folder
   -- and names them based on a hash of their content. This allows
@@ -209,11 +214,12 @@ instance YesodBreadcrumbs App where
         FaviconR -> MsgNothing
         RobotsR -> MsgNothing
         LanguageR {} -> MsgNothing
-        HomeR -> MsgHomeRBreadcrumb
-        AuthR {} -> MsgAuthRBreadcrumb
-        OpenChanR -> MsgOpenChanRBreadcrumb
-        SwapIntoLnCreateR -> MsgSwapIntoLnCreateRBreadcrumb
-        SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRBreadcrumb x
+        AuthR {} -> MsgNothing
+        HomeR -> MsgHomeRLinkShort
+        OpenChanR -> MsgOpenChanRLinkShort
+        SwapIntoLnCreateR -> MsgSwapIntoLnCreateRLinkShort
+        SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRLinkShort x
+        AboutR -> MsgAboutRLinkShort
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
         StaticR {} -> Nothing
@@ -225,6 +231,7 @@ instance YesodBreadcrumbs App where
         OpenChanR -> Just HomeR
         SwapIntoLnCreateR -> Just HomeR
         SwapIntoLnSelectR {} -> Just SwapIntoLnCreateR
+        AboutR -> Just HomeR
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -316,7 +323,7 @@ newLayout mpcfg widget = do
   let menuItems =
         [ NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgHome,
+              { menuItemLabel = MsgHomeRLinkShort,
                 menuItemRoute = HomeR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback = mcurrentRoute == Just HomeR,
@@ -324,7 +331,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgOpenChan,
+              { menuItemLabel = MsgOpenChanRLinkShort,
                 menuItemRoute = OpenChanR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback = mcurrentRoute == Just OpenChanR,
@@ -332,7 +339,7 @@ newLayout mpcfg widget = do
               },
           NavbarLeft $
             MenuItem
-              { menuItemLabel = MsgSwap,
+              { menuItemLabel = MsgSwapIntoLnCreateRLinkShort,
                 menuItemRoute = SwapIntoLnCreateR,
                 menuItemAccessCallback = True,
                 menuItemActiveCallback =
@@ -344,6 +351,14 @@ newLayout mpcfg widget = do
                         _ -> False
                     )
                     mcurrentRoute,
+                menuItemNoReferrer = False
+              },
+          NavbarLeft $
+            MenuItem
+              { menuItemLabel = MsgAboutRLinkShort,
+                menuItemRoute = AboutR,
+                menuItemAccessCallback = True,
+                menuItemActiveCallback = mcurrentRoute == Just AboutR,
                 menuItemNoReferrer = False
               }
         ]
@@ -361,6 +376,7 @@ newLayout mpcfg widget = do
   -- you to use normal widget features in default-layout.
 
   mLang <- lookupSession "_LANG"
+  let disclaimer = $(widgetFile "disclaimer")
   pc <- widgetToPageContent $ do
     addStylesheet $ StaticR css_bootstrap_css
     addStylesheet $ StaticR css_app_css

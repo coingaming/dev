@@ -2,7 +2,9 @@ packages: *.cabal
 
 allow-newer: yesod-colonnade:base,
              lnd-client:base64-bytestring,
-             qrcode-juicypixels:base64-bytestring
+             qrcode-juicypixels:base64-bytestring,
+             wai-app-static:wai-extra,
+             yesod-static:wai-extra
 
 package witch
   flags: +remove-time

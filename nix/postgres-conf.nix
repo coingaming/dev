@@ -24,7 +24,8 @@ let
     ${postgresql}/bin/createdb -h localhost lsp-test
   '';
   start = writeShellScriptBin "start" ''
-    ${postgresql}/bin/pg_ctl -D ${workDir} -l ${workDir}/postgres.log start
+    ${postgresql}/bin/postgres -D ${workDir} > ${workDir}/postgres.log 2>&1 &
+    while ! ${postgresql}/bin/pg_isready -h 127.0.0.1; do sleep 1; done;
   '';
   stop = writeShellScriptBin "stop" ''
     timeout 5 ${postgresql}/bin/pg_ctl -D ${workDir} stop

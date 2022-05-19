@@ -9,3 +9,4 @@ dist/
 stack.yaml.lock
 result*
 build*
+hie.yaml

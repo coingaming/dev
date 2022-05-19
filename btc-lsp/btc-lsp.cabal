@@ -78,6 +78,7 @@ library
       BtcLsp.Yesod.Data.Language
       BtcLsp.Yesod.Data.Widget
       BtcLsp.Yesod.Foundation
+      BtcLsp.Yesod.Handler.About
       BtcLsp.Yesod.Handler.Common
       BtcLsp.Yesod.Handler.Home
       BtcLsp.Yesod.Handler.Language
@@ -206,7 +207,7 @@ library
     , uuid
     , vector
     , wai
-    , wai-extra ==3.0.*
+    , wai-extra ==3.1.*
     , wai-logger >=2.2 && <2.4
     , warp >=3.0 && <3.4
     , warp-grpc
@@ -332,7 +333,7 @@ executable btc-lsp-exe
     , uuid
     , vector
     , wai
-    , wai-extra ==3.0.*
+    , wai-extra ==3.1.*
     , wai-logger >=2.2 && <2.4
     , warp >=3.0 && <3.4
     , warp-grpc
@@ -398,6 +399,7 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
@@ -510,7 +512,6 @@ executable btc-lsp-integration
     , hspec
     , hspec-discover
     , hspec-expectations
-    , hspec-wai
     , http-client
     , http-client-tls ==0.3.*
     , http-conduit ==2.3.*
@@ -558,7 +559,7 @@ executable btc-lsp-integration
     , uuid
     , vector
     , wai
-    , wai-extra ==3.0.*
+    , wai-extra ==3.1.*
     , wai-logger >=2.2 && <2.4
     , warp >=3.0 && <3.4
     , warp-grpc
@@ -624,6 +625,7 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
@@ -762,7 +764,7 @@ executable btc-lsp-prof
     , uuid
     , vector
     , wai
-    , wai-extra ==3.0.*
+    , wai-extra ==3.1.*
     , wai-logger >=2.2 && <2.4
     , warp >=3.0 && <3.4
     , warp-grpc
@@ -828,6 +830,7 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
@@ -985,7 +988,7 @@ test-suite btc-lsp-test
     , uuid
     , vector
     , wai
-    , wai-extra ==3.0.*
+    , wai-extra ==3.1.*
     , wai-logger >=2.2 && <2.4
     , warp >=3.0 && <3.4
     , warp-grpc
@@ -1051,6 +1054,7 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Data.Language
         BtcLsp.Yesod.Data.Widget
         BtcLsp.Yesod.Foundation
+        BtcLsp.Yesod.Handler.About
         BtcLsp.Yesod.Handler.Common
         BtcLsp.Yesod.Handler.Home
         BtcLsp.Yesod.Handler.Language
