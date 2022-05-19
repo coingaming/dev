@@ -83,6 +83,13 @@ markFunded utxos =
                 swapId
                 swapCap
 
+markRefundedIfNeeded :: (Env m) => BlkHash -> [Utxo] -> m ()
+markRefundedIfNeeded hash utxos = do
+  blks <- runSql $ Block.getBlockByHashSql hash
+  case blks of
+    [blk] -> sequence_ (runSql . SwapUtxo.putRefundBlockIdIfNeeded (entityKey blk) <$> (utxoId <$> utxos))
+    _ -> return ()
+
 data Utxo = Utxo
   { utxoValue :: MSat,
     utxoN :: Vout 'Funding,
@@ -220,6 +227,7 @@ persistBlockT blk utxos = do
           swapUtxoAmount = from value',
           swapUtxoStatus = SwapUtxoFirstSeen,
           swapUtxoRefundTxId = Nothing,
+          swapUtxoRefundBlockId = Nothing,
           swapUtxoLockId = lockId',
           swapUtxoInsertedAt = now,
           swapUtxoUpdatedAt = now
@@ -303,6 +311,7 @@ scanOneBlock height = do
   utxos <- lift $ extractRelatedUtxoFromBlock blk
   lockedUtxos <- lockUtxos utxos
   persistBlockT blk lockedUtxos
+  _ <- lift $ markRefundedIfNeeded (from hash) utxos
   pure utxos
 
 calcLockId :: Utxo -> ByteString
