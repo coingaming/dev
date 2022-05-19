@@ -31,8 +31,8 @@ getFundsBySwapIdSql swapId = do
       Psql.where_
         ( ( row Psql.^. SwapUtxoStatus
               `Psql.in_` Psql.valList
-                [ SwapUtxoFirstSeen,
-                  SwapUtxoUsedForChanFunding
+                [ SwapUtxoUnspent,
+                  SwapUtxoSpentChan
                 ]
           )
             Psql.&&. ( row Psql.^. SwapUtxoSwapIntoLnId
@@ -52,7 +52,7 @@ markAsUsedForChanFundingSql ids = do
     Psql.set
       row
       [ SwapUtxoStatus
-          Psql.=. Psql.val SwapUtxoUsedForChanFunding,
+          Psql.=. Psql.val SwapUtxoSpentChan,
         SwapUtxoUpdatedAt
           Psql.=. Psql.val ct
       ]
@@ -71,7 +71,7 @@ markRefundedSql ids rTxId = do
   Psql.update $ \row -> do
     Psql.set
       row
-      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoRefunded,
+      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoSpentRefund,
         SwapUtxoRefundTxId Psql.=. Psql.val (Just rTxId),
         SwapUtxoUpdatedAt Psql.=. Psql.val ct
       ]
@@ -99,8 +99,8 @@ getUtxosForRefundSql =
             )
               Psql.&&. ( utxo Psql.^. SwapUtxoStatus
                            `Psql.in_` Psql.valList
-                             [ SwapUtxoFirstSeen,
-                               SwapUtxoUsedForChanFunding
+                             [ SwapUtxoUnspent,
+                               SwapUtxoSpentChan
                              ]
                        )
           )
@@ -109,7 +109,7 @@ getUtxosForRefundSql =
                        )
                          Psql.&&. ( utxo Psql.^. SwapUtxoStatus
                                       Psql.==. Psql.val
-                                        SwapUtxoFirstSeen
+                                        SwapUtxoUnspent
                                   )
                      )
         )

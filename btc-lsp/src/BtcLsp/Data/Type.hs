@@ -569,9 +569,10 @@ data BlkStatus
 instance Out BlkStatus
 
 data SwapUtxoStatus
-  = SwapUtxoUsedForChanFunding
-  | SwapUtxoRefunded
-  | SwapUtxoFirstSeen
+  = SwapUtxoUnspent
+  | SwapUtxoUnspentDust
+  | SwapUtxoSpentChan
+  | SwapUtxoSpentRefund
   | SwapUtxoOrphan
   deriving stock
     ( Eq,

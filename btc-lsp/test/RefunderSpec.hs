@@ -59,7 +59,7 @@ refundSucceded swp preTrs = do
           not $
             null utxos
               && all
-                ( (== SwapUtxoRefunded)
+                ( (== SwapUtxoSpentRefund)
                     . swapUtxoStatus
                     . entityVal
                 )

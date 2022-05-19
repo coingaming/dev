@@ -101,12 +101,12 @@ newSwapWidget swapInfo =
         ( MsgSwapIntoLnTotalOnChainSwapped,
           Just
             . MsgSatoshi
-            $ totalOnChainAmt (== SwapUtxoUsedForChanFunding) swapInfo
+            $ totalOnChainAmt (== SwapUtxoSpentChan) swapInfo
         ),
         ( MsgSwapIntoLnTotalOnChainRefunded,
           Just
             . MsgSatoshi
-            $ totalOnChainAmt (== SwapUtxoRefunded) swapInfo
+            $ totalOnChainAmt (== SwapUtxoSpentRefund) swapInfo
         ),
         ( MsgSwapIntoLnFeeLsp,
           Just
@@ -294,9 +294,10 @@ swapStatusMsg = \case
 
 swapUtxoStatusMsg :: SwapUtxoStatus -> AppMessage
 swapUtxoStatusMsg = \case
-  SwapUtxoUsedForChanFunding -> MsgSwapUtxoUsedForChanFunding
-  SwapUtxoRefunded -> MsgSwapUtxoRefunded
-  SwapUtxoFirstSeen -> MsgSwapUtxoFirstSeen
+  SwapUtxoUnspent -> MsgSwapUtxoUnspent
+  SwapUtxoUnspentDust -> MsgSwapUtxoUnspentDust
+  SwapUtxoSpentChan -> MsgSwapUtxoSpentChan
+  SwapUtxoSpentRefund -> MsgSwapUtxoSpentRefund
   SwapUtxoOrphan -> MsgSwapUtxoOrphan
 
 lnChanStatusMsg :: LnChanStatus -> AppMessage

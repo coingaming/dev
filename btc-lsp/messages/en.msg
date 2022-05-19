@@ -40,9 +40,10 @@ SwapExpired: Expired
 # SwapUtxoStatus
 #
 
-SwapUtxoUsedForChanFunding: Funded the swap
-SwapUtxoRefunded: Refunded
-SwapUtxoFirstSeen: Unspent
+SwapUtxoUnspent: Unspent
+SwapUtxoUnspentDust: Unspent dust
+SwapUtxoSpentChan: Funded the swap
+SwapUtxoSpentRefund: Refunded
 SwapUtxoOrphan: Orphan
 
 #
