@@ -11,6 +11,7 @@ where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
+import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
@@ -53,7 +54,7 @@ markFunded utxos =
     debugMsg mCap sid amt =
       $(logTM) DebugS . logStr $
         maybe
-          ( "Not enought funds for "
+          ( "Not enough funds for "
               <> inspect sid
               <> " with amt: "
               <> inspect amt
@@ -68,7 +69,7 @@ markFunded utxos =
           )
           mCap
     maybeFundSwap swapId = do
-      us <- runSql $ SwapUtxo.getFundsBySwapIdSql swapId
+      us <- runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swapId
       let amt = sum $ swapUtxoAmount . entityVal <$> us
       mCap <- newSwapCapM amt
       debugMsg mCap swapId amt
@@ -77,11 +78,21 @@ markFunded utxos =
           . SwapIntoLn.withLockedExtantRowSql swapId
           $ \swp ->
             when (swapIntoLnStatus swp < SwapWaitingChan) $ do
-              SwapUtxo.markAsUsedForChanFundingSql $
-                entityKey <$> us
-              SwapIntoLn.updateWaitingPeerSql
-                swapId
-                swapCap
+              qty <-
+                SwapUtxo.updateUnspentChanReserveSql $
+                  entityKey <$> us
+              if qty /= from (length us)
+                then do
+                  $(logTM) ErrorS . logStr $
+                    "Funding update of the Swap "
+                      <> inspect swp
+                      <> " failed for UTXOs "
+                      <> inspect us
+                  Psql.transactionUndo
+                else
+                  SwapIntoLn.updateWaitingPeerSql
+                    swapId
+                    swapCap
 
 data Utxo = Utxo
   { utxoValue :: MSat,
@@ -94,6 +105,7 @@ data Utxo = Utxo
 
 --
 -- TODO: presist log of unsupported transactions
+--
 
 mapVout ::
   ( Env m
@@ -203,11 +215,8 @@ persistBlockT blk utxos = do
           (from <$> Btc.vPrevBlock blk)
     ct <-
       getCurrentTime
-    --
-    -- TODO : putMany is doing implicit update,
-    -- upserting all fields. Maybe we don't want this.
-    --
-    void $ lockByRow blockId
+    void $
+      lockByRow blockId
     SwapUtxo.createManySql $
       toSwapUtxo ct blockId <$> utxos
   where

@@ -296,6 +296,7 @@ swapUtxoStatusMsg :: SwapUtxoStatus -> AppMessage
 swapUtxoStatusMsg = \case
   SwapUtxoUnspent -> MsgSwapUtxoUnspent
   SwapUtxoUnspentDust -> MsgSwapUtxoUnspentDust
+  SwapUtxoUnspentChanReserve -> MsgSwapUtxoUnspentChanReserve
   SwapUtxoSpentChan -> MsgSwapUtxoSpentChan
   SwapUtxoSpentRefund -> MsgSwapUtxoSpentRefund
   SwapUtxoOrphan -> MsgSwapUtxoOrphan

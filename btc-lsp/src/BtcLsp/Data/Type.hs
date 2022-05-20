@@ -38,6 +38,7 @@ module BtcLsp.Data.Type
     unUuid,
     newUuid,
     Vbyte (..),
+    RowQty (..),
   )
 where
 
@@ -572,6 +573,7 @@ instance Out BlkStatus
 data SwapUtxoStatus
   = SwapUtxoUnspent
   | SwapUtxoUnspentDust
+  | SwapUtxoUnspentChanReserve
   | SwapUtxoSpentChan
   | SwapUtxoSpentRefund
   | SwapUtxoOrphan
@@ -758,6 +760,28 @@ newtype Vbyte = Vbyte
     )
 
 instance Out Vbyte
+
+newtype RowQty = RowQty
+  { unRowQty :: Int64
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out RowQty
+
+instance From RowQty Int64
+
+instance From Int64 RowQty
+
+instance From Int RowQty where
+  from =
+    via @Int64
 
 --
 -- NOTE :  we're taking advantage of

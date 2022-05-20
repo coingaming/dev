@@ -42,7 +42,8 @@ SwapExpired: Expired
 
 SwapUtxoUnspent: Unspent
 SwapUtxoUnspentDust: Unspent dust
-SwapUtxoSpentChan: Funded the swap
+SwapUtxoUnspentChanReserve: Reserved for the swap
+SwapUtxoSpentChan: Spent for the swap
 SwapUtxoSpentRefund: Refunded
 SwapUtxoOrphan: Orphan
 
