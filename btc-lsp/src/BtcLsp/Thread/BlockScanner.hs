@@ -95,9 +95,9 @@ markFunded utxos =
                     swapCap
 
 data Utxo = Utxo
-  { utxoValue :: MSat,
-    utxoN :: Vout 'Funding,
-    utxoId :: TxId 'Funding,
+  { utxoAmt :: MSat,
+    utxoVout :: Vout 'Funding,
+    utxoTxId :: TxId 'Funding,
     utxoSwapId :: SwapIntoLnId,
     utxoLockId :: Maybe UtxoLockId
   }
@@ -106,18 +106,17 @@ data Utxo = Utxo
 --
 -- TODO: presist log of unsupported transactions
 --
-
 mapVout ::
   ( Env m
   ) =>
   Btc.TransactionID ->
   Btc.TxOut ->
   m (Maybe Utxo)
-mapVout txid (Btc.TxOut val num (Btc.StandardScriptPubKeyV22 _ _ _ addr)) =
-  handleAddr addr val num txid
-mapVout txid txout@(Btc.TxOut val num (Btc.StandardScriptPubKey _ _ _ _ addrsV)) =
+mapVout txid (Btc.TxOut amt vout (Btc.StandardScriptPubKeyV22 _ _ _ addr)) =
+  handleAddr addr amt vout txid
+mapVout txid txout@(Btc.TxOut amt vout (Btc.StandardScriptPubKey _ _ _ _ addrsV)) =
   case V.toList addrsV of
-    [addr] -> handleAddr addr val num txid
+    [addr] -> handleAddr addr amt vout txid
     _ -> do
       $(logTM) ErrorS . logStr $
         "Unsupported address vector in txid: "
@@ -136,13 +135,13 @@ handleAddr ::
   Integer ->
   Btc.TransactionID ->
   m (Maybe Utxo)
-handleAddr addr val num txid = do
+handleAddr addr amt vout txid = do
   mswp <- maybeSwap addr
   case mswp of
     Just swp ->
       newUtxo
-        (trySat2MSat val)
-        (tryFrom num)
+        (trySat2MSat amt)
+        (tryFrom vout)
         (txIdParser $ Btc.unTransactionID txid)
         swp
     Nothing ->
@@ -156,15 +155,15 @@ newUtxo ::
   Either LndError ByteString ->
   Entity SwapIntoLn ->
   m (Maybe Utxo)
-newUtxo (Right val) (Right n) (Right txid) swp =
+newUtxo (Right amt) (Right n) (Right txid) swp =
   pure . Just $
-    Utxo val n (from txid) (entityKey swp) Nothing
-newUtxo val num txid swp = do
+    Utxo amt n (from txid) (entityKey swp) Nothing
+newUtxo amt vout txid swp = do
   $(logTM) ErrorS . logStr $
-    "TryFrom overflow error val: "
-      <> Universum.show val
-      <> " num: "
-      <> Universum.show num
+    "TryFrom overflow error amt: "
+      <> Universum.show amt
+      <> " vout: "
+      <> Universum.show vout
       <> " txid: "
       <> inspect txid
       <> " and swap: "
@@ -262,7 +261,7 @@ scan = do
               runSql $ do
                 blks <- Block.getBlocksHigherSql bHeight
                 Block.makeOrphanBlocksHigherSql bHeight
-                SwapUtxo.markOrphanBlocksSql (entityKey <$> blks)
+                SwapUtxo.updateOrphanSql (entityKey <$> blks)
           step [] (1 + coerce bHeight) $ from cHeight
   where
     step acc cur end =
@@ -321,8 +320,8 @@ calcLockId u =
     . SHA.sha256
     $ txb <> txvout
   where
-    txb :: L.ByteString = L.fromStrict $ coerce $ utxoId u
-    txvout :: L.ByteString = show $ utxoN u
+    txb :: L.ByteString = L.fromStrict $ coerce $ utxoTxId u
+    txvout :: L.ByteString = show $ utxoVout u
 
 lockUtxo :: Env m => Utxo -> ExceptT Failure m Utxo
 lockUtxo u = do
@@ -336,7 +335,7 @@ lockUtxo u = do
       }
   where
     expS :: Word64 = 3600 * 24 * 365 * 10
-    outP = OP.OutPoint (coerce $ utxoId u) (coerce $ utxoN u)
+    outP = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
     lockId = calcLockId u
 
 lockUtxos :: (Env m) => [Utxo] -> ExceptT Failure m [Utxo]

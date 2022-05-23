@@ -11,7 +11,7 @@ import BtcLsp.Import
 import BtcLsp.Math.OnChain (roundWord64ToMSat)
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
   ( getUtxosForRefundSql,
-    markRefundedSql,
+    updateRefundedSql,
   )
 import Data.List (groupBy)
 import qualified Data.Map as M
@@ -172,7 +172,7 @@ processRefund utxos@(x : _) = do
           $ Btc.decTxId rtx of
           Right rtxid ->
             runSql $
-              SwapUtxo.markRefundedSql
+              SwapUtxo.updateRefundedSql
                 (entityKey . fst <$> utxos)
                 (from rtxid)
           Left e ->

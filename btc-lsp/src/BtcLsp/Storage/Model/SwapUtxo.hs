@@ -2,8 +2,8 @@ module BtcLsp.Storage.Model.SwapUtxo
   ( createManySql,
     getSpendableUtxosBySwapIdSql,
     updateUnspentChanReserveSql,
-    markRefundedSql,
-    markOrphanBlocksSql,
+    updateRefundedSql,
+    updateOrphanSql,
     getUtxosForRefundSql,
     getUtxosBySwapIdSql,
   )
@@ -71,13 +71,13 @@ updateUnspentChanReserveSql ids = do
                        ]
                  )
 
-markRefundedSql ::
+updateRefundedSql ::
   ( MonadIO m
   ) =>
   [SwapUtxoId] ->
   TxId 'Funding ->
   ReaderT Psql.SqlBackend m ()
-markRefundedSql ids rTxId = do
+updateRefundedSql ids rTxId = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
@@ -147,8 +147,12 @@ getUtxosBySwapIdSql swapId = do
         )
       pure row
 
-markOrphanBlocksSql :: (MonadIO m) => [BlockId] -> ReaderT Psql.SqlBackend m ()
-markOrphanBlocksSql ids = do
+updateOrphanSql ::
+  ( MonadIO m
+  ) =>
+  [BlockId] ->
+  ReaderT Psql.SqlBackend m ()
+updateOrphanSql ids = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set

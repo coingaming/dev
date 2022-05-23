@@ -40,7 +40,7 @@ spec = do
           . BlockScanner.trySat2MSat
           $ amt * 2
       utxos <- BlockScanner.scan
-      let (gotAmt :: MSat) = sum $ BlockScanner.utxoValue <$> utxos
+      let (gotAmt :: MSat) = sum $ BlockScanner.utxoAmt <$> utxos
       pure (expectedAmt == gotAmt)
     liftIO $ shouldBe res (Right True)
   itEnv "Block scanner works with 2 blocks" $ do
@@ -69,6 +69,6 @@ spec = do
           . BlockScanner.trySat2MSat
           $ amt * 2
       utxos <- BlockScanner.scan
-      let gotAmt = sum $ BlockScanner.utxoValue <$> utxos
+      let gotAmt = sum $ BlockScanner.utxoAmt <$> utxos
       pure (expectedAmt == gotAmt)
     liftIO $ shouldBe res (Right True)
