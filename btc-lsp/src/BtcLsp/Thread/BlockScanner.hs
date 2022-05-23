@@ -5,13 +5,13 @@ module BtcLsp.Thread.BlockScanner
   ( apply,
     scan,
     Utxo (..),
-    trySat2MSat,
   )
 where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
@@ -39,13 +39,13 @@ apply afterScan =
           . inspect
       )
       ( \us ->
-          unless (null us) (markFunded us >> sequence_ afterScan)
+          unless (null us) (maybeFunded us >> sequence_ afterScan)
       )
       $ runExceptT scan
     sleep $ MicroSecondsDelay 1000000
 
-markFunded :: (Env m) => [Utxo] -> m ()
-markFunded utxos =
+maybeFunded :: (Env m) => [Utxo] -> m ()
+maybeFunded utxos =
   mapM_ maybeFundSwap swapIds
   where
     swapIds =
@@ -56,15 +56,15 @@ markFunded utxos =
         maybe
           ( "Not enough funds for "
               <> inspect sid
-              <> " with amt: "
+              <> " with amt = "
               <> inspect amt
           )
           ( \cap ->
               "Marking funded "
                 <> inspect sid
-                <> " with amt: "
+                <> " with amt = "
                 <> inspect amt
-                <> " and cap: "
+                <> " and cap = "
                 <> inspect cap
           )
           mCap
@@ -119,9 +119,9 @@ mapVout txid txout@(Btc.TxOut amt vout (Btc.StandardScriptPubKey _ _ _ _ addrsV)
     [addr] -> handleAddr addr amt vout txid
     _ -> do
       $(logTM) ErrorS . logStr $
-        "Unsupported address vector in txid: "
+        "Unsupported address vector in txid = "
           <> inspect txid
-          <> " and txout: "
+          <> " and txout = "
           <> Universum.show txout
       pure Nothing
 mapVout _ _ =
@@ -140,7 +140,7 @@ handleAddr addr amt vout txid = do
   case mswp of
     Just swp ->
       newUtxo
-        (trySat2MSat amt)
+        (Math.trySatToMsat amt)
         (tryFrom vout)
         (txIdParser $ Btc.unTransactionID txid)
         swp
@@ -150,7 +150,7 @@ handleAddr addr amt vout txid = do
 newUtxo ::
   ( Env m
   ) =>
-  Either (TryFromException Btc.BTC MSat) MSat ->
+  Either Failure MSat ->
   Either (TryFromException Integer (Vout 'Funding)) (Vout 'Funding) ->
   Either LndError ByteString ->
   Entity SwapIntoLn ->
@@ -160,13 +160,13 @@ newUtxo (Right amt) (Right n) (Right txid) swp =
     Utxo amt n (from txid) (entityKey swp) Nothing
 newUtxo amt vout txid swp = do
   $(logTM) ErrorS . logStr $
-    "TryFrom overflow error amt: "
+    "TryFrom overflow error amt = "
       <> Universum.show amt
-      <> " vout: "
+      <> " vout = "
       <> Universum.show vout
-      <> " txid: "
+      <> " txid = "
       <> inspect txid
-      <> " and swap: "
+      <> " and swap = "
       <> inspect swp
   pure Nothing
 
@@ -186,14 +186,6 @@ extractRelatedUtxoFromBlock blk =
           $ Btc.decVout trx
       pure $
         catMaybes utxos <> acc
-
-trySat2MSat ::
-  Btc.BTC ->
-  Either (TryFromException Btc.BTC MSat) MSat
-trySat2MSat =
-  from @Word64
-    `composeTryRhs` tryFrom @Integer
-      `composeTryLhs` fmap (* 1000) from
 
 persistBlockT ::
   ( Storage m
@@ -217,21 +209,27 @@ persistBlockT blk utxos = do
     void $
       lockByRow blockId
     SwapUtxo.createManySql $
-      toSwapUtxo ct blockId <$> utxos
+      newSwapUtxo ct blockId <$> utxos
+
+newSwapUtxo :: UTCTime -> BlockId -> Utxo -> SwapUtxo
+newSwapUtxo ct blkId utxo = do
+  SwapUtxo
+    { swapUtxoSwapIntoLnId = utxoSwapId utxo,
+      swapUtxoBlockId = blkId,
+      swapUtxoTxid = utxoTxId utxo,
+      swapUtxoVout = utxoVout utxo,
+      swapUtxoAmount = from amt,
+      swapUtxoStatus =
+        if amt >= Math.trxDustLimit
+          then SwapUtxoUnspent
+          else SwapUtxoUnspentDust,
+      swapUtxoRefundTxId = Nothing,
+      swapUtxoLockId = utxoLockId utxo,
+      swapUtxoInsertedAt = ct,
+      swapUtxoUpdatedAt = ct
+    }
   where
-    toSwapUtxo now blkId (Utxo value' n' txid' swpId' lockId') = do
-      SwapUtxo
-        { swapUtxoSwapIntoLnId = swpId',
-          swapUtxoBlockId = blkId,
-          swapUtxoTxid = txid',
-          swapUtxoVout = n',
-          swapUtxoAmount = from value',
-          swapUtxoStatus = SwapUtxoUnspent,
-          swapUtxoRefundTxId = Nothing,
-          swapUtxoLockId = lockId',
-          swapUtxoInsertedAt = now,
-          swapUtxoUpdatedAt = now
-        }
+    amt = utxoAmt utxo
 
 scan ::
   ( Env m
@@ -243,7 +241,7 @@ scan = do
   case mBlk of
     Nothing -> do
       $(logTM) DebugS . logStr $
-        "Found no blocks, scanning height: "
+        "Found no blocks, scanning height = "
           <> inspect cHeight
       scanOneBlock cHeight
     Just lBlk -> do
@@ -254,7 +252,7 @@ scan = do
           scannerStep [] (1 + known) $ from cHeight
         Just height -> do
           $(logTM) WarningS . logStr $
-            "Reorg detected from height: "
+            "Reorg detected from height = "
               <> inspect height
           bHeight <- tryFromT height
           lift . runSql $ do

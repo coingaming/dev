@@ -4,6 +4,7 @@ module BlockScannerSpec
 where
 
 import BtcLsp.Import
+import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import LndClient.LndTest (mine)
 import qualified Network.Bitcoin as Btc
@@ -37,7 +38,7 @@ spec = do
       expectedAmt <-
         except
           . first (const (FailureInternal "expectedAmt overflow"))
-          . BlockScanner.trySat2MSat
+          . Math.trySatToMsat
           $ amt * 2
       utxos <- BlockScanner.scan
       let (gotAmt :: MSat) = sum $ BlockScanner.utxoAmt <$> utxos
@@ -66,9 +67,43 @@ spec = do
       lift $ mine 1 LndLsp
       expectedAmt <-
         except . first (const (FailureInternal "expectedAmt overflow"))
-          . BlockScanner.trySat2MSat
+          . Math.trySatToMsat
           $ amt * 2
       utxos <- BlockScanner.scan
       let gotAmt = sum $ BlockScanner.utxoAmt <$> utxos
       pure (expectedAmt == gotAmt)
     liftIO $ shouldBe res (Right True)
+  itEnv "Block scanner detects dust" $ do
+    sleep $ MicroSecondsDelay 500000
+    mine 100 LndLsp
+    res <- runExceptT $ do
+      let amtDustLim = Math.trxDustLimit
+      let amtDust = amtDustLim - 2000
+      let amtNonDust = amtDustLim + 3000
+      trAddr <-
+        from
+          . swapIntoLnFundAddress
+          . entityVal
+          <$> createDummySwap "dust test" Nothing
+      satsToSend <-
+        mapM
+          Math.tryMsatToSatT
+          [amtDustLim, amtDust, amtNonDust]
+      mapM_
+        ( \amt ->
+            withBtcT
+              Btc.sendToAddress
+              (\h -> h trAddr amt Nothing Nothing)
+        )
+        satsToSend
+      lift $
+        mine 1 LndLsp
+      utxos <-
+        BlockScanner.scan
+      let amtTotal = amtDustLim + amtDust + amtNonDust
+      let amtScan = sum $ BlockScanner.utxoAmt <$> utxos
+      liftIO $ amtScan `shouldBe` amtTotal
+    --
+    -- TODO : check dust in database
+    --
+    liftIO $ res `shouldSatisfy` isRight
