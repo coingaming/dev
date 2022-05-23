@@ -28,7 +28,7 @@ import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
-import Universum (show)
+import qualified Universum
 
 apply :: (Env m) => [m ()] -> m ()
 apply afterScan =
@@ -38,8 +38,8 @@ apply afterScan =
           . logStr
           . inspect
       )
-      ( \u ->
-          unless (null u) (markFunded u >> sequence_ afterScan)
+      ( \us ->
+          unless (null us) (markFunded us >> sequence_ afterScan)
       )
       $ runExceptT scan
     sleep $ MicroSecondsDelay 1000000
@@ -240,7 +240,6 @@ scan ::
 scan = do
   mBlk <- lift $ runSql Block.getLatestSql
   cHeight <- tryFromT =<< withBtcT Btc.getBlockCount id
-
   case mBlk of
     Nothing -> do
       $(logTM) DebugS . logStr $
@@ -252,52 +251,86 @@ scan = do
       case reorgDetected of
         Nothing -> do
           let known = from . blockHeight $ entityVal lBlk
-          step [] (1 + known) $ from cHeight
+          scannerStep [] (1 + known) $ from cHeight
         Just height -> do
-          $(logTM) WarningS . logStr $ ("Reorg detected from height: " <> show height :: Text)
+          $(logTM) WarningS . logStr $
+            "Reorg detected from height: "
+              <> inspect height
           bHeight <- tryFromT height
-          void $
-            lift $
-              runSql $ do
-                blks <- Block.getBlocksHigherSql bHeight
-                Block.makeOrphanBlocksHigherSql bHeight
-                SwapUtxo.updateOrphanSql (entityKey <$> blks)
-          step [] (1 + coerce bHeight) $ from cHeight
-  where
-    step acc cur end =
-      if cur > end
-        then pure acc
-        else do
-          $(logTM) DebugS . logStr $
-            "Scanner step cur:"
-              <> inspect cur
-              <> " end: "
-              <> inspect end
-              <> " got utxos: "
-              <> inspect (length acc)
-          utxos <- scanOneBlock (BlkHeight cur)
-          step (acc <> utxos) (cur + 1) end
-    detectReorg :: (Env m) => ExceptT Failure m (Maybe Btc.BlockHeight)
-    detectReorg = do
-      mBlk <- lift $ runSql Block.getLatestSql
-      case mBlk of
-        Nothing -> pure Nothing
-        Just blk -> do
-          let cHeight :: Btc.BlockHeight = from $ blockHeight $ entityVal blk
-          cReorgHeight <- checkReorgHeight cHeight
-          pure $ if cReorgHeight == cHeight then Nothing else Just cReorgHeight
-    checkReorgHeight :: (Env m) => Btc.BlockHeight -> ExceptT Failure m Btc.BlockHeight
-    checkReorgHeight bHeight = do
-      res <- compareHash bHeight
-      case res of
-        Just True -> pure bHeight
-        Just False -> checkReorgHeight (bHeight - 1)
-        Nothing -> pure bHeight
-    compareHash :: (Env m) => Btc.BlockHeight -> ExceptT Failure m (Maybe Bool)
-    compareHash height = do
-      cHash <- withBtcT Btc.getBlockHash ($ height)
-      let mBlkList = lift $ runSql $ Block.getBlockByHeightSql (BlkHeight $ fromIntegral height)
-      (== cHash) <<$>> (coerce . blockHash . entityVal <<$>> listToMaybe <$> mBlkList)
+          lift . runSql $ do
+            blks <- Block.getBlocksHigherSql bHeight
+            Block.updateOrphanHigherSql bHeight
+            SwapUtxo.updateOrphanSql (entityKey <$> blks)
+          scannerStep [] (1 + coerce bHeight) $ from cHeight
+
+scannerStep ::
+  ( Env m
+  ) =>
+  [Utxo] ->
+  Word64 ->
+  Word64 ->
+  ExceptT Failure m [Utxo]
+scannerStep acc cur end =
+  if cur > end
+    then pure acc
+    else do
+      $(logTM) DebugS . logStr $
+        "Scanner step cur = "
+          <> inspect cur
+          <> " end = "
+          <> inspect end
+          <> " got utxos qty = "
+          <> inspect (length acc)
+      utxos <- scanOneBlock (BlkHeight cur)
+      scannerStep (acc <> utxos) (cur + 1) end
+
+detectReorg ::
+  ( Env m
+  ) =>
+  ExceptT Failure m (Maybe Btc.BlockHeight)
+detectReorg = do
+  mBlk <- lift $ runSql Block.getLatestSql
+  case mBlk of
+    Nothing -> pure Nothing
+    Just blk -> do
+      let cHeight = from . blockHeight $ entityVal blk
+      cReorgHeight <- checkReorgHeight cHeight
+      pure $
+        if cReorgHeight == cHeight
+          then Nothing
+          else Just cReorgHeight
+
+checkReorgHeight ::
+  ( Env m
+  ) =>
+  Btc.BlockHeight ->
+  ExceptT Failure m Btc.BlockHeight
+checkReorgHeight bHeight = do
+  res <- compareHash bHeight
+  case res of
+    Just True -> pure bHeight
+    Just False -> checkReorgHeight (bHeight - 1)
+    Nothing -> pure bHeight
+
+compareHash ::
+  ( Env m
+  ) =>
+  Btc.BlockHeight ->
+  ExceptT Failure m (Maybe Bool)
+compareHash height = do
+  cHash <- withBtcT Btc.getBlockHash ($ height)
+  lift
+    . ( (== cHash)
+          . coerce
+          . blockHash
+          . entityVal
+          <<$>>
+      )
+    . (listToMaybe <$>)
+    . runSql
+    . Block.getBlockByHeightSql
+    . BlkHeight
+    $ fromIntegral height
 
 scanOneBlock ::
   ( Env m
@@ -307,36 +340,46 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  $(logTM) DebugS . logStr $ "Got new block " <> inspect hash
+  $(logTM) DebugS . logStr $
+    "Got new block with height = "
+      <> inspect height
+      <> " and hash = "
+      <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk
   lockedUtxos <- lockUtxos utxos
   persistBlockT blk lockedUtxos
   pure utxos
 
-calcLockId :: Utxo -> ByteString
-calcLockId u =
-  L.toStrict
+newLockId :: Utxo -> UtxoLockId
+newLockId u =
+  UtxoLockId
+    . L.toStrict
     . SHA.bytestringDigest
     . SHA.sha256
-    $ txb <> txvout
+    $ txid <> ":" <> vout
   where
-    txb :: L.ByteString = L.fromStrict $ coerce $ utxoTxId u
-    txvout :: L.ByteString = show $ utxoVout u
+    txid = L.fromStrict . coerce $ utxoTxId u
+    vout = Universum.show $ utxoVout u
 
-lockUtxo :: Env m => Utxo -> ExceptT Failure m Utxo
+--
+-- TODO : Verify that it's possible to lock already locked UTXO.
+-- It's corner case where UTXO has been locked but storage
+-- procedure later failed.
+--
+lockUtxo :: (Env m) => Utxo -> ExceptT Failure m Utxo
 lockUtxo u = do
   void $
     withLndT
       leaseOutput
-      ($ LO.LeaseOutputRequest (calcLockId u) (Just outP) expS)
+      ($ LO.LeaseOutputRequest (coerce lockId) (Just outP) expS)
   pure
     u
-      { utxoLockId = Just $ coerce lockId
+      { utxoLockId = Just lockId
       }
   where
     expS :: Word64 = 3600 * 24 * 365 * 10
     outP = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
-    lockId = calcLockId u
+    lockId = newLockId u
 
 lockUtxos :: (Env m) => [Utxo] -> ExceptT Failure m [Utxo]
 lockUtxos =
