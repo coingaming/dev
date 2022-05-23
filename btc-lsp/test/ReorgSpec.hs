@@ -11,35 +11,35 @@ import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified Network.Bitcoin as Btc
 import Test.Hspec
-import TestAppM
 import TestOrphan ()
-import TestWithLndLsp as T
+import TestWithLndLsp
 
 spec :: Spec
-spec = T.itEnv "Reorg test" $ do
-  _ <- runExceptT $ do
-    void $ withBtcT Btc.setNetworkActive ($ False)
-    _ <- BlockScanner.scan
+spec = do
+  itEnv "Reorg test" $ do
+    _ <- runExceptT $ do
+      void $ withBtcT Btc.setNetworkActive ($ False)
+      _ <- BlockScanner.scan
 
-    void $ withBtcT Btc.generate (\h -> h 5 Nothing)
-    void $ withBtc2T Btc.generate (\h -> h 10 Nothing)
-    blockCount <- withBtcT Btc.getBlockCount id
-    _ <- BlockScanner.scan
-    blkList1 <- lift . runSql $ Block.getBlockByHeightSql (BlkHeight $ fromIntegral blockCount)
-    print blkList1
-    let blk1 = unsafeHead $ entityVal <$> blkList1
-    blockHash1 <- withBtcT Btc.getBlockHash ($ blockCount)
-    liftIO ((coerce $ blockHash blk1 :: Text) `shouldBe` blockHash1)
+      void $ withBtcT Btc.generate (\h -> h 5 Nothing)
+      void $ withBtc2T Btc.generate (\h -> h 10 Nothing)
+      blockCount <- withBtcT Btc.getBlockCount id
+      _ <- BlockScanner.scan
+      blkList1 <- lift . runSql $ Block.getBlockByHeightSql (BlkHeight $ fromIntegral blockCount)
+      print blkList1
+      let blk1 = unsafeHead $ entityVal <$> blkList1
+      blockHash1 <- withBtcT Btc.getBlockHash ($ blockCount)
+      liftIO ((coerce $ blockHash blk1 :: Text) `shouldBe` blockHash1)
 
-    void $ withBtcT Btc.setNetworkActive ($ True)
-    _ <- lift waitTillNodesSynchronized
-    _ <- BlockScanner.scan
-    blkList2 <- lift . runSql $ Block.getBlockByHeightSql (BlkHeight $ fromIntegral blockCount)
-    print blkList2
-    let blk2 = unsafeHead $ entityVal <$> blkList2
-    blockHash2 <- withBtcT Btc.getBlockHash ($ blockCount)
-    liftIO ((coerce $ blockHash blk2 :: Text) `shouldBe` blockHash2)
-  return ()
+      void $ withBtcT Btc.setNetworkActive ($ True)
+      _ <- lift waitTillNodesSynchronized
+      _ <- BlockScanner.scan
+      blkList2 <- lift . runSql $ Block.getBlockByHeightSql (BlkHeight $ fromIntegral blockCount)
+      print blkList2
+      let blk2 = unsafeHead $ entityVal <$> blkList2
+      blockHash2 <- withBtcT Btc.getBlockHash ($ blockCount)
+      liftIO ((coerce $ blockHash blk2 :: Text) `shouldBe` blockHash2)
+    return ()
 
 unsafeHead :: [Block] -> Block
 unsafeHead blkList = do

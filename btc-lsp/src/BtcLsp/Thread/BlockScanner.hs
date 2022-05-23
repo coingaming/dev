@@ -87,7 +87,7 @@ markRefundedIfNeeded :: (Env m) => BlkHash -> [Utxo] -> m ()
 markRefundedIfNeeded hash utxos = do
   blks <- runSql $ Block.getBlockByHashSql hash
   case blks of
-    [blk] -> sequence_ (runSql . SwapUtxo.putRefundBlockIdIfNeeded (entityKey blk) <$> (utxoId <$> utxos))
+    [blk] -> sequence_ (runSql . SwapUtxo.putRefundBlockIdIfNeededSql (entityKey blk) <$> (utxoId <$> utxos))
     _ -> return ()
 
 data Utxo = Utxo
@@ -261,6 +261,7 @@ scan = do
               runSql $ do
                 blks <- Block.getBlocksHigherSql bHeight
                 Block.makeOrphanBlocksHigherSql bHeight
+                SwapUtxo.revertRefundedDueToReorgSql (entityKey <$> blks)
                 SwapUtxo.markOrphanBlocksSql (entityKey <$> blks)
           step [] (1 + coerce bHeight) $ from cHeight
   where
