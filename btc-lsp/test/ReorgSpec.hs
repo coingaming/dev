@@ -40,6 +40,11 @@ spec = do
       blockHash2 <- withBtcT Btc.getBlockHash ($ blockCount)
       liftIO ((coerce $ blockHash blk2 :: Text) `shouldBe` blockHash2)
     return ()
+  focus $ itEnv "Reorg with channel test" $ do
+    _ <- runExceptT $ do
+      t <- withBtcT Btc.getBlockTemplate ($ "test")
+      print t
+    return ()
 
 unsafeHead :: [Block] -> Block
 unsafeHead blkList = do
