@@ -257,8 +257,8 @@ instance FromJSON BlockTemplate where
     parseJSON _ = mzero
 
 -- | Returns data needed to construct a block to work on.
-getBlockTemplate :: Client -> IO BlockTemplate
-getBlockTemplate client = callApi client "getblocktemplate" [ tj "{\"rules\": [\"segwit\"]}" ]
+getBlockTemplate :: Client -> HexString -> IO BlockTemplate
+getBlockTemplate client data_ = callApi client "getblocktemplate" [ tj data_ ]
 
 -- | Unfortunately, the submitblock API call returns null on success, and
 --   the string "rejected" on failure.
