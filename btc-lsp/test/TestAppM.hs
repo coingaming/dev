@@ -11,7 +11,9 @@ module TestAppM
     assertChannelState,
     module ReExport,
     itEnv,
+    itEnvT,
     xitEnv,
+    xitEnvT,
     withTestEnv,
     getGCEnv,
     withLndTestT,
@@ -321,6 +323,22 @@ itEnv testName expr =
         (sl "TestName" testName)
         expr
 
+itEnvT ::
+  ( Show e
+  ) =>
+  String ->
+  ExceptT e (TestAppM owner IO) () ->
+  SpecWith (Arg (IO ()))
+itEnvT testName expr =
+  it testName $
+    withTestEnv $
+      katipAddContext
+        (sl "TestName" testName)
+        ( do
+            res <- runExceptT expr
+            liftIO $ res `shouldSatisfy` isRight
+        )
+
 xitEnv ::
   String ->
   TestAppM owner IO () ->
@@ -331,6 +349,22 @@ xitEnv testName expr =
       katipAddContext
         (sl "TestName" testName)
         expr
+
+xitEnvT ::
+  ( Show e
+  ) =>
+  String ->
+  ExceptT e (TestAppM owner IO) () ->
+  SpecWith (Arg (IO ()))
+xitEnvT testName expr =
+  xit testName $
+    withTestEnv $
+      katipAddContext
+        (sl "TestName" testName)
+        ( do
+            res <- runExceptT expr
+            liftIO $ res `shouldSatisfy` isRight
+        )
 
 readLndAliceEnv :: IO LndEnv
 readLndAliceEnv =

@@ -41,13 +41,13 @@ spec = do
                 swapCapFee = 2009000
               }
           )
-  focus . it "trySatToMsat" $
+  it "trySatToMsat" $
     mapM_
       ( \(sat, msat) ->
           Math.trySatToMsat sat `shouldBe` Right msat
       )
       satMsat
-  focus . it "tryMsatToSat" $
+  it "tryMsatToSat" $
     mapM_
       ( \(sat, msat) ->
           Math.tryMsatToSat msat `shouldBe` Right sat
