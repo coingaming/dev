@@ -258,7 +258,7 @@ instance FromJSON BlockTemplate where
 
 -- | Returns data needed to construct a block to work on.
 getBlockTemplate :: Client -> IO BlockTemplate
-getBlockTemplate client = callApi client "getblocktemplate" []
+getBlockTemplate client = callApi client "getblocktemplate" [ "{\"rules\": [\"segwit\"]}" ]
 
 -- | Unfortunately, the submitblock API call returns null on success, and
 --   the string "rejected" on failure.
