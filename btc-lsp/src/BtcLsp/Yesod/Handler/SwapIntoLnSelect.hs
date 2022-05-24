@@ -98,15 +98,33 @@ newSwapWidget swapInfo =
             . MsgSatoshi
             $ totalOnChainAmt (/= SwapUtxoOrphan) swapInfo
         ),
+        ( MsgSwapIntoLnTotalOnChainReserved,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt
+              ( `elem`
+                  [ SwapUtxoUnspentChanReserve,
+                    SwapUtxoSpentChan
+                  ]
+              )
+              swapInfo
+        ),
         ( MsgSwapIntoLnTotalOnChainSwapped,
           Just
             . MsgSatoshi
-            $ totalOnChainAmt (== SwapUtxoSpentChan) swapInfo
+            $ totalOnChainAmt
+              (== SwapUtxoSpentChanSwapped)
+              swapInfo
         ),
         ( MsgSwapIntoLnTotalOnChainRefunded,
           Just
             . MsgSatoshi
             $ totalOnChainAmt (== SwapUtxoSpentRefund) swapInfo
+        ),
+        ( MsgSwapIntoLnTotalOnChainDust,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (== SwapUtxoUnspentDust) swapInfo
         ),
         ( MsgSwapIntoLnFeeLsp,
           Just
@@ -298,6 +316,7 @@ swapUtxoStatusMsg = \case
   SwapUtxoUnspentDust -> MsgSwapUtxoUnspentDust
   SwapUtxoUnspentChanReserve -> MsgSwapUtxoUnspentChanReserve
   SwapUtxoSpentChan -> MsgSwapUtxoSpentChan
+  SwapUtxoSpentChanSwapped -> MsgSwapUtxoSpentChanSwapped
   SwapUtxoSpentRefund -> MsgSwapUtxoSpentRefund
   SwapUtxoOrphan -> MsgSwapUtxoOrphan
 

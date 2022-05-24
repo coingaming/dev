@@ -8,6 +8,7 @@
 module BtcLsp.Yesod.Handler.About where
 
 import qualified BtcLsp.Class.Env
+import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Math.Swap as Math
 import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import

@@ -7,6 +7,7 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Set as Set
 import qualified LndClient.Data.PayReq as PayReq
 import qualified LndClient.Data.Payment as Payment
@@ -78,7 +79,9 @@ settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt =
           . ("SettleSwap procedure failed: " <>)
           . inspect
       )
-      ( SwapIntoLn.updateSucceededSql swapKey
+      ( \x -> do
+          SwapIntoLn.updateSucceededSql swapKey x
+          SwapUtxo.updateSpentChanSwappedSql swapKey
       )
       . lift
       . runExceptT

@@ -41,9 +41,10 @@ SwapExpired: Expired
 #
 
 SwapUtxoUnspent: Unspent
-SwapUtxoUnspentDust: Unspent dust
+SwapUtxoUnspentDust: Dust
 SwapUtxoUnspentChanReserve: Reserved for the swap
-SwapUtxoSpentChan: Spent for the swap
+SwapUtxoSpentChan: Spent for the channel
+SwapUtxoSpentChanSwapped: Spent for the swap
 SwapUtxoSpentRefund: Refunded
 SwapUtxoOrphan: Orphan
 
@@ -118,8 +119,10 @@ SwapIntoLnHeaderUtxos: Swap Coins
 SwapIntoLnHeaderChans: Swap Channels
 
 SwapIntoLnTotalOnChainReceived: Total On-Chain Received
+SwapIntoLnTotalOnChainReserved: Total On-Chain Reserved
 SwapIntoLnTotalOnChainSwapped: Total On-Chain Swapped
 SwapIntoLnTotalOnChainRefunded: Total On-Chain Refunded
+SwapIntoLnTotalOnChainDust: Total On-Chain Dust
 SwapIntoLnFeeLsp: LSP Service Fee
 SwapIntoLnChanCapUser: User's Outgoing Capacity
 SwapIntoLnChanCapLsp: User's Incoming Capacity *
@@ -190,7 +193,9 @@ AboutMathMinMax2: for the swap is
 AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
 AboutMathMinMax4: satoshi and the maximum is
 AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}
-AboutMathMinMax6: satoshi.
+AboutMathMinMax6: satoshi. All UTXOs less than
+AboutMathMinMax7 dustLimit@MSat: #{dustLimit}
+AboutMathMinMax8: satoshi are considered dust and will be ignored.
 AboutMathLspFee0: The value of
 AboutMathLspFee1: LSP_FEE
 AboutMathLspFee2: depends on the initial amount of

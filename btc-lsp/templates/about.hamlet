@@ -36,6 +36,8 @@
       _{MsgAboutMathMinMax4}
       <strong>_{MsgAboutMathMinMax5 Math.swapLnMaxAmt}
       _{MsgAboutMathMinMax6}
+      <strong>_{MsgAboutMathMinMax7 Math.trxDustLimit}
+      _{MsgAboutMathMinMax8}
     <li>
       _{MsgAboutMathLspFee0}
       <code>_{MsgAboutMathLspFee1}

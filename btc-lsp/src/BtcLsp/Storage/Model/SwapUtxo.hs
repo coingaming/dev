@@ -2,6 +2,8 @@ module BtcLsp.Storage.Model.SwapUtxo
   ( createManySql,
     getSpendableUtxosBySwapIdSql,
     updateUnspentChanReserveSql,
+    updateSpentChanSql,
+    updateSpentChanSwappedSql,
     updateRefundedSql,
     updateOrphanSql,
     getUtxosForRefundSql,
@@ -68,6 +70,52 @@ updateUnspentChanReserveSql ids = do
                      `Psql.in_` Psql.valList
                        [ SwapUtxoUnspent,
                          SwapUtxoUnspentChanReserve
+                       ]
+                 )
+
+updateSpentChanSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateSpentChanSql id0 = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoSpentChan,
+        SwapUtxoUpdatedAt Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapUtxoSwapIntoLnId
+          Psql.==. Psql.val id0
+      )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     `Psql.in_` Psql.valList
+                       [ SwapUtxoUnspentChanReserve
+                       ]
+                 )
+
+updateSpentChanSwappedSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateSpentChanSwappedSql id0 = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoSpentChanSwapped,
+        SwapUtxoUpdatedAt Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapUtxoSwapIntoLnId
+          Psql.==. Psql.val id0
+      )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     `Psql.in_` Psql.valList
+                       [ SwapUtxoSpentChan
                        ]
                  )
 

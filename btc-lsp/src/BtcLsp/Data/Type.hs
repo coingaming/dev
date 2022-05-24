@@ -575,6 +575,7 @@ data SwapUtxoStatus
   | SwapUtxoUnspentDust
   | SwapUtxoUnspentChanReserve
   | SwapUtxoSpentChan
+  | SwapUtxoSpentChanSwapped
   | SwapUtxoSpentRefund
   | SwapUtxoOrphan
   deriving stock
