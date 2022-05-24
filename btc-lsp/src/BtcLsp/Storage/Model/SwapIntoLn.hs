@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnoreSql,
     updateWaitingPeerSql,
@@ -9,6 +11,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getByUuidSql,
     getByFundAddressSql,
     withLockedExtantRowSql,
+    withLockedExpiredRowSql,
     UtxoInfo (..),
     SwapInfo (..),
   )
@@ -373,3 +376,21 @@ withLockedExtantRowSql rowId action = do
                      )
         )
     else action swapVal
+
+withLockedExpiredRowSql ::
+  ( MonadIO m,
+    KatipContext m
+  ) =>
+  SwapIntoLnId ->
+  (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
+  ReaderT Psql.SqlBackend m ()
+withLockedExpiredRowSql rowId action = do
+  rowVal <- lockByRow rowId
+  if swapIntoLnStatus rowVal == SwapExpired
+    then action rowVal
+    else
+      $(logTM) ErrorS . logStr $
+        "Expected SwapExpired status for "
+          <> inspect rowId
+          <> " but got "
+          <> inspect rowVal

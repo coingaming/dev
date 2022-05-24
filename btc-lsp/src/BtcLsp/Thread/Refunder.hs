@@ -9,6 +9,8 @@ where
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
 import BtcLsp.Math.OnChain (roundWord64ToMSat)
+import qualified BtcLsp.Math.OnChain as Math
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
   ( getUtxosForRefundSql,
     updateRefundedSql,
@@ -26,16 +28,14 @@ import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
 
 data SendUtxoConfig = SendUtxoConfig
-  { dustLimit :: MSat,
-    estimateFee :: MSat,
+  { estimateFee :: MSat,
     satPerVbyte :: Integer
   }
 
 defSendUtxoConfig :: SendUtxoConfig
 defSendUtxoConfig =
   SendUtxoConfig
-    { dustLimit = MSat $ 10000 * 1000,
-      estimateFee = MSat $ 500 * 1000,
+    { estimateFee = MSat $ 500 * 1000,
       satPerVbyte = 1
     }
 
@@ -71,13 +71,12 @@ sendUtxosWithMinFee ::
   TxLabel ->
   ExceptT Failure m SendUtxosResult
 sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
-  let dust = dustLimit cfg
-  when (estimateAmt < dust) . throwE $
+  when (estimateAmt < Math.trxDustLimit) . throwE $
     FailureInternal $
       "Total utxos amount "
         <> inspectPlain estimateAmt
         <> " is below dust limit "
-        <> inspectPlain dust
+        <> inspectPlain Math.trxDustLimit
   mapM_
     ( \refUtxo ->
         whenJust
@@ -139,51 +138,55 @@ processRefund ::
   [(Entity SwapUtxo, Entity SwapIntoLn)] ->
   m ()
 processRefund [] = pure ()
-processRefund utxos@(x : _) = do
-  $(logTM) DebugS . logStr $
-    "Start refunding utxos:"
-      <> inspect utxos'
-      <> " to address:"
-      <> inspect refAddr
-  eitherM
-    ( \e ->
-        $(logTM) ErrorS . logStr $
-          "Failed to refund utxos:"
-            <> inspect utxos'
-            <> " to address:"
-            <> inspect refAddr
-            <> " with error:"
-            <> inspect e
-    )
-    ( \(SendUtxosResult rtx total fee) -> do
-        $(logTM) DebugS . logStr $
-          "Successfully refunded utxos: "
-            <> inspect utxos'
-            <> " to address:"
-            <> inspect refAddr
-            <> " on chain rawTx:"
-            <> inspect rtx
-            <> " amount: "
-            <> inspect total
-            <> " with fee:"
-            <> inspect fee
-        case txIdParser
-          . Btc.unTransactionID
-          $ Btc.decTxId rtx of
-          Right rtxid ->
-            runSql $
-              SwapUtxo.updateRefundedSql
-                (entityKey . fst <$> utxos)
-                (from rtxid)
-          Left e ->
+processRefund utxos@(x : _) =
+  runSql
+    . SwapIntoLn.withLockedExpiredRowSql (entityKey $ snd x)
+    . const
+    $ do
+      $(logTM) DebugS . logStr $
+        "Start refunding utxos:"
+          <> inspect utxos'
+          <> " to address:"
+          <> inspect refAddr
+      eitherM
+        ( \e ->
             $(logTM) ErrorS . logStr $
-              "Failed to convert txid:" <> inspect e
-    )
-    . runExceptT
-    $ sendUtxos
-      utxos'
-      (coerce refAddr)
-      (TxLabel "refund to " <> coerce refAddr)
+              "Failed to refund utxos:"
+                <> inspect utxos'
+                <> " to address:"
+                <> inspect refAddr
+                <> " with error:"
+                <> inspect e
+        )
+        ( \(SendUtxosResult rtx total fee) -> do
+            $(logTM) DebugS . logStr $
+              "Successfully refunded utxos: "
+                <> inspect utxos'
+                <> " to address:"
+                <> inspect refAddr
+                <> " on chain rawTx:"
+                <> inspect rtx
+                <> " amount: "
+                <> inspect total
+                <> " with fee:"
+                <> inspect fee
+            case txIdParser
+              . Btc.unTransactionID
+              $ Btc.decTxId rtx of
+              Right rtxid ->
+                SwapUtxo.updateRefundedSql
+                  (entityKey . fst <$> utxos)
+                  (from rtxid)
+              Left e ->
+                $(logTM) ErrorS . logStr $
+                  "Failed to convert txid:" <> inspect e
+        )
+        . lift
+        . runExceptT
+        $ sendUtxos
+          utxos'
+          (coerce refAddr)
+          (TxLabel "refund to " <> coerce refAddr)
   where
     refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
     utxos' = toOutPointAmt . entityVal . fst <$> utxos
