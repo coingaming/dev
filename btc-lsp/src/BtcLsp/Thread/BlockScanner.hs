@@ -188,7 +188,7 @@ extractRelatedUtxoFromBlock blk =
         catMaybes utxos <> acc
 
 persistBlockT ::
-  ( Storage m
+  ( Storage m, Env m
   ) =>
   Btc.BlockVerbose ->
   [Utxo] ->
@@ -210,6 +210,7 @@ persistBlockT blk utxos = do
       lockByRow blockId
     SwapUtxo.createManySql $
       newSwapUtxo ct blockId <$> utxos
+    mapM_ (SwapUtxo.updateRefundBlockIdSql blockId) (utxoTxId <$> utxos)
 
 newSwapUtxo :: UTCTime -> BlockId -> Utxo -> SwapUtxo
 newSwapUtxo ct blkId utxo = do
@@ -224,6 +225,7 @@ newSwapUtxo ct blkId utxo = do
           then SwapUtxoUnspent
           else SwapUtxoUnspentDust,
       swapUtxoRefundTxId = Nothing,
+      swapUtxoRefundBlockId = Nothing,
       swapUtxoLockId = utxoLockId utxo,
       swapUtxoInsertedAt = ct,
       swapUtxoUpdatedAt = ct
@@ -258,6 +260,7 @@ scan = do
           lift . runSql $ do
             blks <- Block.getBlocksHigherSql bHeight
             Block.updateOrphanHigherSql bHeight
+            SwapUtxo.revertRefundedSql (entityKey <$> blks)
             SwapUtxo.updateOrphanSql (entityKey <$> blks)
           scannerStep [] (1 + coerce bHeight) $ from cHeight
 
