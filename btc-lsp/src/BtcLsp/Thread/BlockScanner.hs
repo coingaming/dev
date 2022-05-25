@@ -265,7 +265,6 @@ scan = do
           lift . runSql $ do
             blks <- Block.getBlocksHigherSql bHeight
             Block.updateOrphanHigherSql bHeight
-            SwapUtxo.updateOrphanSql (entityKey <$> blks)
             SwapUtxo.revertRefundedDueToReorgSql (entityKey <$> blks)
             SwapUtxo.updateOrphanSql (entityKey <$> blks)
           scannerStep [] (1 + coerce bHeight) $ from cHeight
