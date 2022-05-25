@@ -2,7 +2,6 @@ module BtcLsp.Storage.Model.Block
   ( createUpdateSql,
     getLatestSql,
     getBlockByHeightSql,
-    getBlockByHashSql,
     getBlocksHigherSql,
     updateOrphanHigherSql,
   )
@@ -88,20 +87,6 @@ getBlockByHeightSql blkHeight = do
                        Psql.==. Psql.val BlkConfirmed
                    )
       pure row
-
-getBlockByHashSql :: (MonadIO m) => BlkHash -> ReaderT Psql.SqlBackend m (Maybe (Entity Block))
-getBlockByHashSql blkHash = do
-  listToMaybe
-    <$> ( Psql.select $
-            Psql.from $ \row -> do
-              Psql.where_ $
-                (row Psql.^. BlockHash Psql.==. Psql.val blkHash)
-                  Psql.&&. ( row Psql.^. BlockStatus
-                               Psql.==. Psql.val BlkConfirmed
-                           )
-              Psql.limit 1
-              pure row
-        )
 
 getBlocksHigherSql ::
   ( MonadIO m
