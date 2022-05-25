@@ -9,7 +9,7 @@ module BtcLsp.Storage.Model.SwapUtxo
     getUtxosForRefundSql,
     getUtxosBySwapIdSql,
     updateRefundBlockIdSql,
-    revertRefundedDueToReorgSql,
+    revertRefundedSql,
   )
 where
 
@@ -231,17 +231,24 @@ updateOrphanSql ids = do
       row Psql.^. SwapUtxoBlockId
         `Psql.in_` Psql.valList ids
 
-revertRefundedDueToReorgSql :: (MonadIO m) => [BlockId] -> ReaderT Psql.SqlBackend m ()
-revertRefundedDueToReorgSql ids = do
+revertRefundedSql :: (MonadIO m) => [BlockId] -> ReaderT Psql.SqlBackend m ()
+revertRefundedSql ids = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
       row
       [ SwapUtxoStatus
           Psql.=. Psql.val SwapUtxoUnspent,
+        SwapUtxoRefundTxId
+          Psql.=. Psql.val Nothing,
+        SwapUtxoRefundBlockId
+          Psql.=. Psql.val Nothing,
         SwapUtxoUpdatedAt
           Psql.=. Psql.val ct
       ]
     Psql.where_ $
       row Psql.^. SwapUtxoRefundBlockId
         `Psql.in_` Psql.valList (Just <$> ids)
+      Psql.&&. ( row Psql.^. SwapUtxoStatus
+                   Psql.==. Psql.val SwapUtxoSpentRefund
+               )

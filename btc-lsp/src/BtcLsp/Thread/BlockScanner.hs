@@ -192,9 +192,8 @@ persistBlockT ::
   ) =>
   Btc.BlockVerbose ->
   [Utxo] ->
-  Btc.BlockHash ->
   ExceptT Failure m ()
-persistBlockT blk utxos hash = do
+persistBlockT blk utxos = do
   height <-
     tryFromT $
       Btc.vBlkHeight blk
@@ -211,11 +210,7 @@ persistBlockT blk utxos hash = do
       lockByRow blockId
     SwapUtxo.createManySql $
       newSwapUtxo ct blockId <$> utxos
-    void markRefunded
-  where
-    markRefunded = do
-      blks <- Block.getBlockByHashSql (from hash)
-      whenJust blks (\blk0 -> sequence_ (SwapUtxo.updateRefundBlockIdSql (entityKey blk0) <$> (utxoTxId <$> utxos)))
+    mapM_ (SwapUtxo.updateRefundBlockIdSql blockId) (utxoTxId <$> utxos)
 
 newSwapUtxo :: UTCTime -> BlockId -> Utxo -> SwapUtxo
 newSwapUtxo ct blkId utxo = do
@@ -265,7 +260,7 @@ scan = do
           lift . runSql $ do
             blks <- Block.getBlocksHigherSql bHeight
             Block.updateOrphanHigherSql bHeight
-            SwapUtxo.revertRefundedDueToReorgSql (entityKey <$> blks)
+            SwapUtxo.revertRefundedSql (entityKey <$> blks)
             SwapUtxo.updateOrphanSql (entityKey <$> blks)
           scannerStep [] (1 + coerce bHeight) $ from cHeight
 
@@ -353,7 +348,7 @@ scanOneBlock height = do
       <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk
   lockedUtxos <- lockUtxos utxos
-  persistBlockT blk lockedUtxos hash
+  persistBlockT blk lockedUtxos
   pure utxos
 
 newLockId :: Utxo -> UtxoLockId
