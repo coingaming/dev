@@ -83,13 +83,6 @@ markFunded utxos =
                 swapId
                 swapCap
 
-markRefundedIfNeeded :: (Env m) => BlkHash -> [Utxo] -> m ()
-markRefundedIfNeeded hash utxos = do
-  blks <- runSql $ Block.getBlockByHashSql hash
-  case blks of
-    [blk] -> sequence_ (runSql . SwapUtxo.putRefundBlockIdIfNeededSql (entityKey blk) <$> (utxoId <$> utxos))
-    _ -> return ()
-
 data Utxo = Utxo
   { utxoValue :: MSat,
     utxoN :: Vout 'Funding,
@@ -192,12 +185,13 @@ trySat2MSat =
       `composeTryLhs` fmap (* 1000) from
 
 persistBlockT ::
-  ( Storage m
+  ( Storage m, Env m
   ) =>
   Btc.BlockVerbose ->
   [Utxo] ->
+  Btc.BlockHash ->
   ExceptT Failure m ()
-persistBlockT blk utxos = do
+persistBlockT blk utxos hash = do
   height <-
     tryFromT $
       Btc.vBlkHeight blk
@@ -217,6 +211,7 @@ persistBlockT blk utxos = do
     void $ lockByRow blockId
     SwapUtxo.createManySql $
       toSwapUtxo ct blockId <$> utxos
+    void markRefunded
   where
     toSwapUtxo now blkId (Utxo value' n' txid' swpId' lockId') = do
       SwapUtxo
@@ -232,6 +227,9 @@ persistBlockT blk utxos = do
           swapUtxoInsertedAt = now,
           swapUtxoUpdatedAt = now
         }
+    markRefunded = do
+      blks <- Block.getBlockByHashSql (from hash)
+      whenJust blks (\blk0 -> sequence_ (SwapUtxo.updateRefundBlockIdSql (entityKey blk0) <$> (utxoId <$> utxos)))
 
 scan ::
   ( Env m
@@ -311,8 +309,7 @@ scanOneBlock height = do
   $(logTM) DebugS . logStr $ "Got new block " <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk
   lockedUtxos <- lockUtxos utxos
-  persistBlockT blk lockedUtxos
-  _ <- lift $ markRefundedIfNeeded (from hash) utxos
+  persistBlockT blk lockedUtxos hash
   pure utxos
 
 calcLockId :: Utxo -> ByteString

@@ -6,7 +6,7 @@ module BtcLsp.Storage.Model.SwapUtxo
     markOrphanBlocksSql,
     getUtxosForRefundSql,
     getUtxosBySwapIdSql,
-    putRefundBlockIdIfNeededSql,
+    updateRefundBlockIdSql,
     revertRefundedDueToReorgSql,
   )
 where
@@ -131,8 +131,8 @@ getUtxosBySwapIdSql swapId = do
         )
       pure row
 
-putRefundBlockIdIfNeededSql :: (MonadIO m) => BlockId -> TxId 'Funding -> ReaderT Psql.SqlBackend m ()
-putRefundBlockIdIfNeededSql blkId txId = do
+updateRefundBlockIdSql :: (MonadIO m) => BlockId -> TxId 'Funding -> ReaderT Psql.SqlBackend m ()
+updateRefundBlockIdSql blkId txId = do
   Psql.update $ \row -> do
     Psql.set
       row
@@ -142,6 +142,9 @@ putRefundBlockIdIfNeededSql blkId txId = do
     Psql.where_ $
       row Psql.^. SwapUtxoRefundTxId
         Psql.==. Psql.val (Just txId)
+      Psql.&&. ( row Psql.^. SwapUtxoStatus
+                   Psql.==. Psql.val SwapUtxoRefunded
+               )
 
 markOrphanBlocksSql :: (MonadIO m) => [BlockId] -> ReaderT Psql.SqlBackend m ()
 markOrphanBlocksSql ids = do
