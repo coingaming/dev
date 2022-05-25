@@ -16,6 +16,9 @@ module BtcLsp.Data.Type
     TaskRes (..),
     Timing (..),
     SwapStatus (..),
+    swapStatusChain,
+    swapStatusLn,
+    swapStatusFinal,
     Failure (..),
     tryFailureE,
     tryFailureT,
@@ -364,6 +367,24 @@ data SwapStatus
     )
 
 instance Out SwapStatus
+
+swapStatusChain :: [SwapStatus]
+swapStatusChain =
+  [ SwapWaitingFundChain,
+    SwapWaitingPeer
+  ]
+
+swapStatusLn :: [SwapStatus]
+swapStatusLn =
+  [ SwapWaitingChan,
+    SwapWaitingFundLn
+  ]
+
+swapStatusFinal :: [SwapStatus]
+swapStatusFinal =
+  [ SwapSucceeded,
+    SwapExpired
+  ]
 
 instance PathPiece SwapStatus where
   fromPathPiece :: Text -> Maybe SwapStatus

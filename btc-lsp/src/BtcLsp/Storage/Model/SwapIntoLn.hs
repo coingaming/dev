@@ -12,8 +12,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getSwapsAboutToExpirySql,
     getByUuidSql,
     getByFundAddressSql,
-    withLockedExtantRowSql,
-    withLockedExpiredRowSql,
+    withLockedRowSql,
     UtxoInfo (..),
     SwapInfo (..),
   )
@@ -410,54 +409,15 @@ getByFundAddressSql =
   Psql.getBy
     . UniqueSwapIntoLnFundAddress
 
-withLockedExtantRowSql ::
+withLockedRowSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
-  (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
-  ReaderT Psql.SqlBackend m ()
-withLockedExtantRowSql rowId action = do
-  ct <- getCurrentTime
-  let expTime = addSeconds (Lnd.Seconds 3600) ct
-  let finSS = [SwapSucceeded, SwapExpired]
-  swapVal <- lockByRow rowId
-  if (swapIntoLnExpiresAt swapVal < expTime)
-    && notElem (swapIntoLnStatus swapVal) finSS
-    then Psql.update $ \row -> do
-      Psql.set
-        row
-        [ SwapIntoLnStatus
-            Psql.=. Psql.val SwapExpired,
-          SwapIntoLnUpdatedAt
-            Psql.=. Psql.val ct
-        ]
-      Psql.where_
-        ( ( row Psql.^. SwapIntoLnId
-              Psql.==. Psql.val rowId
-          )
-            Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
-                         Psql.<. Psql.val expTime
-                     )
-            Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                         `Psql.notIn` Psql.valList finSS
-                     )
-        )
-    else action swapVal
-
-withLockedExpiredRowSql ::
-  ( MonadIO m,
-    KatipContext m
-  ) =>
-  SwapIntoLnId ->
-  (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
-  ReaderT Psql.SqlBackend m ()
-withLockedExpiredRowSql rowId action = do
+  (SwapStatus -> Bool) ->
+  (SwapIntoLn -> ReaderT Psql.SqlBackend m a) ->
+  ReaderT Psql.SqlBackend m (Either (Entity SwapIntoLn) a)
+withLockedRowSql rowId pre action = do
   rowVal <- lockByRow rowId
-  if swapIntoLnStatus rowVal == SwapExpired
-    then action rowVal
-    else
-      $(logTM) ErrorS . logStr $
-        "Expected SwapExpired status for "
-          <> inspect rowId
-          <> " but got "
-          <> inspect rowVal
+  if pre $ swapIntoLnStatus rowVal
+    then Right <$> action rowVal
+    else pure . Left $ Entity rowId rowVal

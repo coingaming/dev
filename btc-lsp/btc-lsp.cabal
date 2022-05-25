@@ -450,6 +450,7 @@ executable btc-lsp-integration
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp
+      TypeSpec
       Paths_btc_lsp
   hs-source-dirs:
       integration
@@ -884,6 +885,7 @@ test-suite btc-lsp-test
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp
+      TypeSpec
       Paths_btc_lsp
   hs-source-dirs:
       test

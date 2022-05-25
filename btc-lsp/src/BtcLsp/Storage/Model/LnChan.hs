@@ -77,7 +77,8 @@ lazyUpdateSwapStatus ::
 lazyUpdateSwapStatus (Entity _ chanVal) = do
   whenJust (lnChanSwapIntoLnId chanVal) $ \swapKey ->
     when (lnChanStatus chanVal == LnChanStatusActive)
-      . SwapIntoLn.withLockedExtantRowSql swapKey
+      . void
+      . SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingChan)
       . const
       $ SwapIntoLn.updateWaitingFundLnSql swapKey
 

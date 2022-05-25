@@ -148,9 +148,11 @@ processRefund ::
   [(Entity SwapUtxo, Entity SwapIntoLn)] ->
   m ()
 processRefund [] = pure ()
-processRefund utxos@(x : _) =
-  runSql
-    . SwapIntoLn.withLockedExpiredRowSql (entityKey $ snd x)
+processRefund utxos@(x : _) = do
+  res <- runSql
+    . SwapIntoLn.withLockedRowSql
+      (entityKey $ snd x)
+      (`elem` swapStatusFinal)
     . const
     $ do
       $(logTM) DebugS . logStr $
@@ -197,6 +199,11 @@ processRefund utxos@(x : _) =
           utxos'
           (coerce refAddr)
           (TxLabel "refund to " <> coerce refAddr)
+  whenLeft res $
+    $(logTM) ErrorS
+      . logStr
+      . ("No refund due to wrong status " <>)
+      . inspect
   where
     refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
     utxos' = toOutPointAmt . entityVal . fst <$> utxos

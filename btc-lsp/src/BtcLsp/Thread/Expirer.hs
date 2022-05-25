@@ -27,6 +27,15 @@ updateExpiredSwapSql ::
   ) =>
   SwapIntoLnId ->
   ReaderT Psql.SqlBackend m ()
-updateExpiredSwapSql swapKey = do
-  SwapIntoLn.withLockedExtantRowSql swapKey . const $ do
-    SwapIntoLn.updateExpiredSql swapKey
+updateExpiredSwapSql rowId = do
+  res <-
+    SwapIntoLn.withLockedRowSql
+      rowId
+      (`elem` swapStatusChain)
+      . const
+      $ SwapIntoLn.updateExpiredSql rowId
+  whenLeft res $
+    $(logTM) ErrorS
+      . logStr
+      . ("Expiry update failed for the swap " <>)
+      . inspect

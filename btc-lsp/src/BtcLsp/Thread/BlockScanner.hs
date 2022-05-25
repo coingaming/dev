@@ -73,9 +73,11 @@ maybeFunded utxos =
       let amt = sum $ swapUtxoAmount . entityVal <$> us
       mCap <- newSwapCapM amt
       debugMsg mCap swapId amt
-      whenJust mCap $ \swapCap ->
-        runSql
-          . SwapIntoLn.withLockedExtantRowSql swapId
+      whenJust mCap $ \swapCap -> do
+        res <- runSql
+          . SwapIntoLn.withLockedRowSql
+            swapId
+            (`elem` swapStatusChain)
           $ \swp ->
             when (swapIntoLnStatus swp < SwapWaitingChan) $ do
               qty <-
@@ -93,6 +95,11 @@ maybeFunded utxos =
                   SwapIntoLn.updateWaitingPeerSql
                     swapId
                     swapCap
+        whenLeft res $
+          $(logTM) ErrorS
+            . logStr
+            . ("Funding failed due to wrong status " <>)
+            . inspect
 
 data Utxo = Utxo
   { utxoAmt :: MSat,

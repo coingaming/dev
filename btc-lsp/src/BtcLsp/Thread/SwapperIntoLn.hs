@@ -54,69 +54,76 @@ settleSwap ::
   Entity User ->
   Entity LnChan ->
   m ()
-settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt =
-  runSql . SwapIntoLn.withLockedExtantRowSql swapKey $ \swapVal -> do
-    let payReq =
-          from $
-            swapIntoLnFundInvoice swapVal
-    let sendPaymentT extId =
-          SendPayment.paymentPreimage
-            <$> withLndT
-              LndKatip.sendPayment
-              ( $
-                  Lnd.SendPaymentRequest
-                    { Lnd.paymentRequest =
-                        payReq,
-                      Lnd.amt =
-                        from $
-                          swapIntoLnChanCapUser swapVal,
-                      Lnd.outgoingChanId =
-                        extId
-                    }
-              )
-    eitherM
-      ( $(logTM) ErrorS . logStr
-          . ("SettleSwap procedure failed: " <>)
-          . inspect
-      )
-      ( \x -> do
-          SwapIntoLn.updateSucceededSql swapKey x
-          SwapUtxo.updateSpentChanSwappedSql swapKey
-      )
-      . lift
-      . runExceptT
-      $ do
-        catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
-          . const
-          . catchE (sendPaymentT Nothing)
-          . const
-          $ do
-            inv <-
-              withLndT
-                LndKatip.decodePayReq
-                ($ payReq)
-            pay <-
-              withLndT
-                LndKatip.trackPaymentSync
+settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt = do
+  res <- runSql
+    . SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingFundLn)
+    $ \swapVal -> do
+      let payReq =
+            from $
+              swapIntoLnFundInvoice swapVal
+      let sendPaymentT extId =
+            SendPayment.paymentPreimage
+              <$> withLndT
+                LndKatip.sendPayment
                 ( $
-                    TrackPayment.TrackPaymentRequest
-                      { TrackPayment.paymentHash =
-                          PayReq.paymentHash inv,
-                        TrackPayment.noInflightUpdates =
-                          False
+                    Lnd.SendPaymentRequest
+                      { Lnd.paymentRequest =
+                          payReq,
+                        Lnd.amt =
+                          from $
+                            swapIntoLnChanCapUser swapVal,
+                        Lnd.outgoingChanId =
+                          extId
                       }
                 )
-            if Payment.state pay == Payment.SUCCEEDED
-              then
-                pure $
-                  Payment.paymentPreimage pay
-              else
-                throwE . FailureInternal $
-                  "Wrong payment "
-                    <> inspectPlain pay
-                    <> " for swap "
-                    <> inspectPlain swapEnt
-                    <> " and user "
-                    <> inspectPlain userEnt
-                    <> " and chan "
-                    <> inspectPlain chanEnt
+      eitherM
+        ( $(logTM) ErrorS . logStr
+            . ("SettleSwap procedure failed: " <>)
+            . inspect
+        )
+        ( \x -> do
+            SwapIntoLn.updateSucceededSql swapKey x
+            SwapUtxo.updateSpentChanSwappedSql swapKey
+        )
+        . lift
+        . runExceptT
+        $ do
+          catchE (sendPaymentT . lnChanExtId $ entityVal chanEnt)
+            . const
+            . catchE (sendPaymentT Nothing)
+            . const
+            $ do
+              inv <-
+                withLndT
+                  LndKatip.decodePayReq
+                  ($ payReq)
+              pay <-
+                withLndT
+                  LndKatip.trackPaymentSync
+                  ( $
+                      TrackPayment.TrackPaymentRequest
+                        { TrackPayment.paymentHash =
+                            PayReq.paymentHash inv,
+                          TrackPayment.noInflightUpdates =
+                            False
+                        }
+                  )
+              if Payment.state pay == Payment.SUCCEEDED
+                then
+                  pure $
+                    Payment.paymentPreimage pay
+                else
+                  throwE . FailureInternal $
+                    "Wrong payment "
+                      <> inspectPlain pay
+                      <> " for swap "
+                      <> inspectPlain swapEnt
+                      <> " and user "
+                      <> inspectPlain userEnt
+                      <> " and chan "
+                      <> inspectPlain chanEnt
+  whenLeft res $
+    $(logTM) ErrorS
+      . logStr
+      . ("Swap failed due to wrong status " <>)
+      . inspect
