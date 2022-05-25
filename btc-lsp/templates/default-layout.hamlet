@@ -51,7 +51,7 @@ $case mpcfg
             <p .text-center.no-margin-bottom>_{panelConfigMsgLong pcfg}
           <div .ui.container-fluid>
             ^{widget}
-            ^{disclaimer}
+            ^{disclaimerTos}
   $of Nothing
     ^{widget}
 

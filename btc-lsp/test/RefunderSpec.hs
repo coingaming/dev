@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module RefunderSpec
   ( spec,
   )
@@ -59,7 +57,7 @@ refundSucceded swp preTrs = do
           not $
             null utxos
               && all
-                ( (== SwapUtxoRefunded)
+                ( (== SwapUtxoSpentRefund)
                     . swapUtxoStatus
                     . entityVal
                 )

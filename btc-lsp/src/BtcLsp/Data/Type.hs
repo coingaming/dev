@@ -37,6 +37,8 @@ module BtcLsp.Data.Type
     Uuid,
     unUuid,
     newUuid,
+    Vbyte (..),
+    RowQty (..),
   )
 where
 
@@ -569,9 +571,12 @@ data BlkStatus
 instance Out BlkStatus
 
 data SwapUtxoStatus
-  = SwapUtxoUsedForChanFunding
-  | SwapUtxoRefunded
-  | SwapUtxoFirstSeen
+  = SwapUtxoUnspent
+  | SwapUtxoUnspentDust
+  | SwapUtxoUnspentChanReserve
+  | SwapUtxoSpentChan
+  | SwapUtxoSpentChanSwapped
+  | SwapUtxoSpentRefund
   | SwapUtxoOrphan
   deriving stock
     ( Eq,
@@ -742,6 +747,42 @@ newUuid :: (MonadIO m) => m (Uuid tab)
 newUuid =
   liftIO $
     Uuid <$> UUID.nextRandom
+
+newtype Vbyte = Vbyte
+  { unVbyte :: Ratio Natural
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out Vbyte
+
+newtype RowQty = RowQty
+  { unRowQty :: Int64
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out RowQty
+
+instance From RowQty Int64
+
+instance From Int64 RowQty
+
+instance From Int RowQty where
+  from =
+    via @Int64
 
 --
 -- NOTE :  we're taking advantage of

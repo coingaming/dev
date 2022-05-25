@@ -56,6 +56,7 @@ debuglevel=warn,PEER=warn" > "$SERVICE_DIR/lnd.conf"
 regtest=1
 daemon=1
 txindex=1
+mintxfee=0.00000001
 
 rpcuser=developer
 rpcpassword=developer

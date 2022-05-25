@@ -8,7 +8,7 @@ module BtcLsp.Yesod.Handler.SwapIntoLnSelect
 where
 
 import BtcLsp.Data.Type
-import qualified BtcLsp.Math as Math
+import qualified BtcLsp.Math.Swap as Math
 import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget
@@ -98,15 +98,33 @@ newSwapWidget swapInfo =
             . MsgSatoshi
             $ totalOnChainAmt (/= SwapUtxoOrphan) swapInfo
         ),
+        ( MsgSwapIntoLnTotalOnChainReserved,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt
+              ( `elem`
+                  [ SwapUtxoUnspentChanReserve,
+                    SwapUtxoSpentChan
+                  ]
+              )
+              swapInfo
+        ),
         ( MsgSwapIntoLnTotalOnChainSwapped,
           Just
             . MsgSatoshi
-            $ totalOnChainAmt (== SwapUtxoUsedForChanFunding) swapInfo
+            $ totalOnChainAmt
+              (== SwapUtxoSpentChanSwapped)
+              swapInfo
         ),
         ( MsgSwapIntoLnTotalOnChainRefunded,
           Just
             . MsgSatoshi
-            $ totalOnChainAmt (== SwapUtxoRefunded) swapInfo
+            $ totalOnChainAmt (== SwapUtxoSpentRefund) swapInfo
+        ),
+        ( MsgSwapIntoLnTotalOnChainDust,
+          Just
+            . MsgSatoshi
+            $ totalOnChainAmt (== SwapUtxoUnspentDust) swapInfo
         ),
         ( MsgSwapIntoLnFeeLsp,
           Just
@@ -294,9 +312,12 @@ swapStatusMsg = \case
 
 swapUtxoStatusMsg :: SwapUtxoStatus -> AppMessage
 swapUtxoStatusMsg = \case
-  SwapUtxoUsedForChanFunding -> MsgSwapUtxoUsedForChanFunding
-  SwapUtxoRefunded -> MsgSwapUtxoRefunded
-  SwapUtxoFirstSeen -> MsgSwapUtxoFirstSeen
+  SwapUtxoUnspent -> MsgSwapUtxoUnspent
+  SwapUtxoUnspentDust -> MsgSwapUtxoUnspentDust
+  SwapUtxoUnspentChanReserve -> MsgSwapUtxoUnspentChanReserve
+  SwapUtxoSpentChan -> MsgSwapUtxoSpentChan
+  SwapUtxoSpentChanSwapped -> MsgSwapUtxoSpentChanSwapped
+  SwapUtxoSpentRefund -> MsgSwapUtxoSpentRefund
   SwapUtxoOrphan -> MsgSwapUtxoOrphan
 
 lnChanStatusMsg :: LnChanStatus -> AppMessage

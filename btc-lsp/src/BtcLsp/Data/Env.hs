@@ -16,7 +16,7 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Server.LowLevel
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
-import qualified BtcLsp.Math as Math
+import qualified BtcLsp.Math.Swap as Math
 import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
 import qualified Data.Aeson as A (decode)
