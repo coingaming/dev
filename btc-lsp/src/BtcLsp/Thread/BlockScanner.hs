@@ -30,21 +30,21 @@ import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
 import qualified Universum
 
-apply :: (Env m) => [m ()] -> m ()
-apply afterScan =
+apply :: (Env m) => m ()
+apply =
   forever $ do
     eitherM
       ( $(logTM) ErrorS
           . logStr
           . inspect
       )
-      ( \us ->
-          unless (null us) (maybeFunded us >> sequence_ afterScan)
-      )
+      maybeFunded
       $ runExceptT scan
     sleep $ MicroSecondsDelay 1000000
 
 maybeFunded :: (Env m) => [Utxo] -> m ()
+maybeFunded [] =
+  pure ()
 maybeFunded utxos =
   mapM_ maybeFundSwap swapIds
   where

@@ -27,6 +27,16 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
 
+apply :: (Env m) => m ()
+apply =
+  forever $
+    runSql SwapUtxo.getUtxosForRefundSql
+      <&> groupBy (\a b -> swpId a == swpId b)
+      >>= mapM_ processRefund
+      >> sleep (MicroSecondsDelay 1000000)
+  where
+    swpId = entityKey . snd
+
 data SendUtxoConfig = SendUtxoConfig
   { estimateFee :: MSat,
     satPerVbyte :: Integer
@@ -200,11 +210,3 @@ toOutPointAmt x =
     )
     (coerce $ swapUtxoAmount x)
     (swapUtxoLockId x)
-
-apply :: (Env m) => m ()
-apply =
-  runSql SwapUtxo.getUtxosForRefundSql
-    <&> groupBy (\a b -> swpId a == swpId b)
-    >>= mapM_ processRefund
-  where
-    swpId = entityKey . snd

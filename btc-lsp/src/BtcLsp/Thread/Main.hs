@@ -11,6 +11,7 @@ import BtcLsp.Data.AppM (runApp)
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Migration as Storage
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
+import qualified BtcLsp.Thread.Expirer as Expirer
 import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 import qualified BtcLsp.Thread.Refunder as Refunder
@@ -44,7 +45,9 @@ apply = do
             LnChanWatcher.applyPoll,
             LnChanOpener.apply,
             SwapperIntoLn.apply,
-            BlockScanner.apply [Refunder.apply],
+            BlockScanner.apply,
+            Refunder.apply,
+            Expirer.apply,
             withUnliftIO $ Yesod.appMain pool
           ]
       liftIO
@@ -52,7 +55,8 @@ apply = do
         $ waitAnyCancel xs
     else
       $(logTM) ErrorS . logStr $
-        "Can not unlock wallet, got " <> inspect unlocked
+        "Can not unlock wallet, got "
+          <> inspect unlocked
   $(logTM) ErrorS "Terminate program"
 
 waitForBitcoindSync :: (Env m) => m ()
