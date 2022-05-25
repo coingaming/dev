@@ -1,9 +1,11 @@
 module BtcLsp.Storage.Model.SwapUtxo
   ( createManySql,
-    getFundsBySwapIdSql,
-    markAsUsedForChanFundingSql,
-    markRefundedSql,
-    markOrphanBlocksSql,
+    getSpendableUtxosBySwapIdSql,
+    updateUnspentChanReserveSql,
+    updateSpentChanSql,
+    updateSpentChanSwappedSql,
+    updateRefundedSql,
+    updateOrphanSql,
     getUtxosForRefundSql,
     getUtxosBySwapIdSql,
     updateRefundBlockIdSql,
@@ -19,67 +21,131 @@ createManySql ::
   ) =>
   [SwapUtxo] ->
   ReaderT Psql.SqlBackend m ()
-createManySql =
-  Psql.putMany
+createManySql us =
+  Psql.upsertManyWhere
+    us
+    [Psql.copyField SwapUtxoUpdatedAt]
+    mempty
+    mempty
 
-getFundsBySwapIdSql ::
+getSpendableUtxosBySwapIdSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
   ReaderT Psql.SqlBackend m [Entity SwapUtxo]
-getFundsBySwapIdSql swapId = do
+getSpendableUtxosBySwapIdSql swapId = do
   Psql.select $
     Psql.from $ \row -> do
       Psql.where_
-        ( ( row Psql.^. SwapUtxoStatus
-              `Psql.in_` Psql.valList
-                [ SwapUtxoFirstSeen,
-                  SwapUtxoUsedForChanFunding
-                ]
+        ( ( row Psql.^. SwapUtxoSwapIntoLnId
+              Psql.==. Psql.val swapId
           )
-            Psql.&&. ( row Psql.^. SwapUtxoSwapIntoLnId
-                         Psql.==. Psql.val swapId
+            Psql.&&. ( row Psql.^. SwapUtxoStatus
+                         `Psql.in_` Psql.valList
+                           [ SwapUtxoUnspent,
+                             SwapUtxoUnspentChanReserve
+                           ]
                      )
         )
       pure row
 
-markAsUsedForChanFundingSql ::
+updateUnspentChanReserveSql ::
   ( MonadIO m
   ) =>
   [SwapUtxoId] ->
-  ReaderT Psql.SqlBackend m ()
-markAsUsedForChanFundingSql ids = do
+  ReaderT Psql.SqlBackend m RowQty
+updateUnspentChanReserveSql ids = do
   ct <- getCurrentTime
-  Psql.update $ \row -> do
+  from <<$>> Psql.updateCount $ \row -> do
     Psql.set
       row
       [ SwapUtxoStatus
-          Psql.=. Psql.val SwapUtxoUsedForChanFunding,
+          Psql.=. Psql.val SwapUtxoUnspentChanReserve,
         SwapUtxoUpdatedAt
           Psql.=. Psql.val ct
       ]
     Psql.where_ $
-      row Psql.^. SwapUtxoId
-        `Psql.in_` Psql.valList ids
+      ( row Psql.^. SwapUtxoId
+          `Psql.in_` Psql.valList ids
+      )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     `Psql.in_` Psql.valList
+                       [ SwapUtxoUnspent,
+                         SwapUtxoUnspentChanReserve
+                       ]
+                 )
 
-markRefundedSql ::
+updateSpentChanSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateSpentChanSql id0 = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoSpentChan,
+        SwapUtxoUpdatedAt Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapUtxoSwapIntoLnId
+          Psql.==. Psql.val id0
+      )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     `Psql.in_` Psql.valList
+                       [ SwapUtxoUnspentChanReserve
+                       ]
+                 )
+
+updateSpentChanSwappedSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateSpentChanSwappedSql id0 = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoSpentChanSwapped,
+        SwapUtxoUpdatedAt Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapUtxoSwapIntoLnId
+          Psql.==. Psql.val id0
+      )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     `Psql.in_` Psql.valList
+                       [ SwapUtxoSpentChan
+                       ]
+                 )
+
+updateRefundedSql ::
   ( MonadIO m
   ) =>
   [SwapUtxoId] ->
   TxId 'Funding ->
   ReaderT Psql.SqlBackend m ()
-markRefundedSql ids rTxId = do
+updateRefundedSql ids rTxId = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
       row
-      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoRefunded,
+      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoSpentRefund,
         SwapUtxoRefundTxId Psql.=. Psql.val (Just rTxId),
         SwapUtxoUpdatedAt Psql.=. Psql.val ct
       ]
     Psql.where_ $
-      row Psql.^. SwapUtxoId
-        `Psql.in_` Psql.valList ids
+      ( row Psql.^. SwapUtxoId
+          `Psql.in_` Psql.valList ids
+      )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     `Psql.in_` Psql.valList
+                       [ SwapUtxoUnspent,
+                         SwapUtxoUnspentChanReserve
+                       ]
+                 )
 
 getUtxosForRefundSql ::
   ( MonadIO m
@@ -101,8 +167,8 @@ getUtxosForRefundSql =
             )
               Psql.&&. ( utxo Psql.^. SwapUtxoStatus
                            `Psql.in_` Psql.valList
-                             [ SwapUtxoFirstSeen,
-                               SwapUtxoUsedForChanFunding
+                             [ SwapUtxoUnspent,
+                               SwapUtxoUnspentChanReserve
                              ]
                        )
           )
@@ -111,7 +177,7 @@ getUtxosForRefundSql =
                        )
                          Psql.&&. ( utxo Psql.^. SwapUtxoStatus
                                       Psql.==. Psql.val
-                                        SwapUtxoFirstSeen
+                                        SwapUtxoUnspent
                                   )
                      )
         )
@@ -143,11 +209,15 @@ updateRefundBlockIdSql blkId txId = do
       row Psql.^. SwapUtxoRefundTxId
         Psql.==. Psql.val (Just txId)
       Psql.&&. ( row Psql.^. SwapUtxoStatus
-                   Psql.==. Psql.val SwapUtxoRefunded
+                   Psql.==. Psql.val SwapUtxoSpentRefund
                )
 
-markOrphanBlocksSql :: (MonadIO m) => [BlockId] -> ReaderT Psql.SqlBackend m ()
-markOrphanBlocksSql ids = do
+updateOrphanSql ::
+  ( MonadIO m
+  ) =>
+  [BlockId] ->
+  ReaderT Psql.SqlBackend m ()
+updateOrphanSql ids = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
@@ -168,7 +238,7 @@ revertRefundedDueToReorgSql ids = do
     Psql.set
       row
       [ SwapUtxoStatus
-          Psql.=. Psql.val SwapUtxoFirstSeen,
+          Psql.=. Psql.val SwapUtxoUnspent,
         SwapUtxoUpdatedAt
           Psql.=. Psql.val ct
       ]

@@ -35,7 +35,6 @@ import Database.Esqueleto.Legacy as X
     nothing,
     on,
     orderBy,
-    putMany,
     rawExecute,
     rawSql,
     runMigration,
@@ -76,7 +75,9 @@ import Database.Persist.Class as X
   )
 import Database.Persist.Postgresql as X
   ( ConnectionString,
+    copyField,
     createPostgresqlPool,
+    upsertManyWhere,
   )
 import Database.Persist.Sql as X
   ( fromSqlKey,

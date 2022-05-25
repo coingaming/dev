@@ -40,9 +40,12 @@ SwapExpired: Expired
 # SwapUtxoStatus
 #
 
-SwapUtxoUsedForChanFunding: Funded the swap
-SwapUtxoRefunded: Refunded
-SwapUtxoFirstSeen: Unspent
+SwapUtxoUnspent: Unspent
+SwapUtxoUnspentDust: Dust
+SwapUtxoUnspentChanReserve: Reserved for the swap
+SwapUtxoSpentChan: Spent for the channel
+SwapUtxoSpentChanSwapped: Spent for the swap
+SwapUtxoSpentRefund: Refunded
 SwapUtxoOrphan: Orphan
 
 #
@@ -116,8 +119,10 @@ SwapIntoLnHeaderUtxos: Swap Coins
 SwapIntoLnHeaderChans: Swap Channels
 
 SwapIntoLnTotalOnChainReceived: Total On-Chain Received
+SwapIntoLnTotalOnChainReserved: Total On-Chain Reserved
 SwapIntoLnTotalOnChainSwapped: Total On-Chain Swapped
 SwapIntoLnTotalOnChainRefunded: Total On-Chain Refunded
+SwapIntoLnTotalOnChainDust: Total On-Chain Dust
 SwapIntoLnFeeLsp: LSP Service Fee
 SwapIntoLnChanCapUser: User's Outgoing Capacity
 SwapIntoLnChanCapLsp: User's Incoming Capacity *
@@ -151,8 +156,9 @@ SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded
 # Disclaimer
 #
 
-Disclaimer0: By continuing to use the LSP, you agree to the service
-Disclaimer1: terms and conditions
+DisclaimerTos0: By continuing to use the LSP, you agree to the service
+DisclaimerTos1: terms and conditions
+DisclaimerCommitmentFee: * The actual value of the input capacity provided to the user by LSP is slightly less than the theoretical value, because LSP handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
 
 #
 # About
@@ -187,7 +193,9 @@ AboutMathMinMax2: for the swap is
 AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
 AboutMathMinMax4: satoshi and the maximum is
 AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}
-AboutMathMinMax6: satoshi.
+AboutMathMinMax6: satoshi. All UTXOs less than
+AboutMathMinMax7 dustLimit@MSat: #{dustLimit}
+AboutMathMinMax8: satoshi are considered dust and will be ignored.
 AboutMathLspFee0: The value of
 AboutMathLspFee1: LSP_FEE
 AboutMathLspFee2: depends on the initial amount of
@@ -208,7 +216,6 @@ AboutExamplesLspSwapFee: LSP Swap Fee
 AboutExamplesUserOutgoingCap: User's Outgoing Capacity
 AboutExamplesUserIncomingCap: User's Incoming Capacity *
 AboutExamplesTotalChanCap: Total Channel Capacity
-AboutExamplesAsterisk: * The actual value of the input capacity provided to the user by LSP is slightly less than the theoretical value, because LSP handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
 AboutSwap0: Balanced Channel Flow
 AboutSwap1: The creation of a balanced channel with LSP is implemented through on-chain to lightning swap. On the first step, the user provides LSP swap data:
 AboutSwap2: Swap Invoice

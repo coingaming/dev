@@ -4,7 +4,9 @@ module MathSpec
 where
 
 import BtcLsp.Import
-import qualified BtcLsp.Math as Math
+import qualified BtcLsp.Math.OnChain as Math
+import qualified BtcLsp.Math.Swap as Math
+import qualified Network.Bitcoin as Btc
 import Test.Hspec
 import TestOrphan ()
 import TestWithLndLsp
@@ -39,3 +41,22 @@ spec = do
                 swapCapFee = 2009000
               }
           )
+  it "trySatToMsat" $
+    mapM_
+      ( \(sat, msat) ->
+          Math.trySatToMsat sat `shouldBe` Right msat
+      )
+      satMsat
+  it "tryMsatToSat" $
+    mapM_
+      ( \(sat, msat) ->
+          Math.tryMsatToSat msat `shouldBe` Right sat
+      )
+      satMsat
+  where
+    satMsat :: [(Btc.BTC, MSat)]
+    satMsat =
+      [ (0.00000001, MSat 1000),
+        (0.00000101, MSat 101000),
+        (1.00000101, MSat 100000101000)
+      ]

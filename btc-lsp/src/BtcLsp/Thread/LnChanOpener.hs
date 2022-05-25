@@ -8,6 +8,7 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Set as Set
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.OpenChannel as Chan
@@ -78,6 +79,7 @@ openChan swapEnt@(Entity swapKey _) userEnt = do
                 (ChannelPoint.fundingTxId cp)
                 (ChannelPoint.outputIndex cp)
                 >> SwapIntoLn.updateWaitingChanSql swapKey
+                >> SwapUtxo.updateSpentChanSql swapKey
           )
           . lift
           $ withLnd

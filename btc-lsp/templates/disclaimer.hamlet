@@ -1,3 +1,0 @@
-<p .text-muted.large-padding-top.text-center>
-  _{MsgDisclaimer0}
-  <a href="@{AboutR}">_{MsgDisclaimer1}</a>.

@@ -48,7 +48,8 @@ library
       BtcLsp.Import.External
       BtcLsp.Import.Psql
       BtcLsp.Import.Witch
-      BtcLsp.Math
+      BtcLsp.Math.OnChain
+      BtcLsp.Math.Swap
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
@@ -369,7 +370,8 @@ executable btc-lsp-exe
         BtcLsp.Import.External
         BtcLsp.Import.Psql
         BtcLsp.Import.Witch
-        BtcLsp.Math
+        BtcLsp.Math.OnChain
+        BtcLsp.Math.Swap
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -595,7 +597,8 @@ executable btc-lsp-integration
         BtcLsp.Import.External
         BtcLsp.Import.Psql
         BtcLsp.Import.Witch
-        BtcLsp.Math
+        BtcLsp.Math.OnChain
+        BtcLsp.Math.Swap
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -800,7 +803,8 @@ executable btc-lsp-prof
         BtcLsp.Import.External
         BtcLsp.Import.Psql
         BtcLsp.Import.Witch
-        BtcLsp.Math
+        BtcLsp.Math.OnChain
+        BtcLsp.Math.Swap
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -1024,7 +1028,8 @@ test-suite btc-lsp-test
         BtcLsp.Import.External
         BtcLsp.Import.Psql
         BtcLsp.Import.Witch
-        BtcLsp.Math
+        BtcLsp.Math.OnChain
+        BtcLsp.Math.Swap
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
