@@ -24,19 +24,27 @@ import qualified Network.Bitcoin.BlockChain as Btc
 
 main :: IO ()
 main = do
+  putStrLn ("Lsp is starting!" :: Text)
+  putStrLn ("Reading lsp raw environment..." :: Text)
   cfg <- readRawConfig
+  putStrLn ("Creating lsp runtime environment..." :: Text)
   withEnv cfg $
     \env -> runApp env apply
 
 apply :: (Env m) => m ()
 apply = do
+  $(logTM) InfoS "Waiting for bitcoind..."
   waitForBitcoindSync
+  $(logTM) InfoS "Waiting for lnd unlock..."
   unlocked <- withLnd Lnd.lazyUnlockWallet id
   if isRight unlocked
     then do
+      $(logTM) InfoS "Waiting for lnd sync..."
       waitForLndSync
+      $(logTM) InfoS "Running postgres migrations..."
       Storage.migrateAll
       pool <- getSqlPool
+      $(logTM) InfoS "Spawning lsp threads..."
       xs <-
         mapM
           spawnLink
@@ -50,6 +58,7 @@ apply = do
             Expirer.apply,
             withUnliftIO $ Yesod.appMain pool
           ]
+      $(logTM) InfoS "Lsp is running!"
       liftIO
         . void
         $ waitAnyCancel xs
@@ -57,7 +66,7 @@ apply = do
       $(logTM) ErrorS . logStr $
         "Can not unlock wallet, got "
           <> inspect unlocked
-  $(logTM) ErrorS "Terminate program"
+  $(logTM) ErrorS "Lsp terminates!"
 
 waitForBitcoindSync :: (Env m) => m ()
 waitForBitcoindSync =

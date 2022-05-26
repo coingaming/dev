@@ -95,44 +95,41 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                               )
                      )
             )
-  itEnv "Server SwapIntoLn" $
-    withSpawnLink Main.apply . const $ do
+  itEnv "Server SwapIntoLn" $ do
+    res <- withSpawnLink Main.apply . const . runExceptT $ do
+      lift Main.waitForSync
       -- Let app spawn
-      Main.waitForSync
       sleep $ MicroSecondsDelay 500000
-      --
-      -- TODO : implement withGCEnv!!!
-      --
-      gcEnv <- getGCEnv
-      res0 <- runExceptT $ do
-        fundInv <-
-          from . Lnd.paymentRequest
-            <$> withLndTestT
-              LndAlice
-              Lnd.addInvoice
-              ( $
-                  Lnd.AddInvoiceRequest
-                    { Lnd.valueMsat = MSat 0,
-                      Lnd.memo = Nothing,
-                      Lnd.expiry = Nothing
-                    }
-              )
-        refundAddr <-
-          from
-            <$> withLndTestT
-              LndAlice
-              Lnd.newAddress
-              --
-              -- TODO : maybe pass LndEnv as the last argument
-              -- to the methods (not the first like right now)
-              -- to avoid this style of withLndT?
-              --
-              ( $
-                  Lnd.NewAddressRequest
-                    { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-                      Lnd.account = Nothing
-                    }
-              )
+      gcEnv <- lift getGCEnv
+      fundInv <-
+        from . Lnd.paymentRequest
+          <$> withLndTestT
+            LndAlice
+            Lnd.addInvoice
+            ( $
+                Lnd.AddInvoiceRequest
+                  { Lnd.valueMsat = MSat 0,
+                    Lnd.memo = Nothing,
+                    Lnd.expiry = Nothing
+                  }
+            )
+      refundAddr <-
+        from
+          <$> withLndTestT
+            LndAlice
+            Lnd.newAddress
+            --
+            -- TODO : maybe pass LndEnv as the last argument
+            -- to the methods (not the first like right now)
+            -- to avoid this style of withLndT?
+            --
+            ( $
+                Lnd.NewAddressRequest
+                  { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                    Lnd.account = Nothing
+                  }
+            )
+      res0 <-
         Client.swapIntoLnT
           gcEnv
             { gcEnvCompressMode = compressMode
@@ -150,33 +147,28 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       --
       liftIO $
         res0
-          `shouldSatisfy` ( \case
-                              Left {} ->
-                                False
-                              Right msg ->
-                                isJust $
-                                  msg ^. SwapIntoLn.maybe'success
+          `shouldSatisfy` ( \msg ->
+                              isJust $
+                                msg ^. SwapIntoLn.maybe'success
                           )
-
-      res1 <- runExceptT $ do
-        resp <- except res0
-        let fundAddr =
-              resp
-                ^. ( SwapIntoLn.success
-                       . SwapIntoLn.fundOnChainAddress
-                       . SwapIntoLn.val
-                       . SwapIntoLn.val
-                   )
-        void $
-          withBtcT
-            Btc.sendToAddress
-            (\h -> h fundAddr 0.01 Nothing Nothing)
-        lift $
-          LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
-        sleep $ MicroSecondsDelay 5000000
-        lift $ mine 6 LndLsp
-        sleep $ MicroSecondsDelay 5000000
-        lift $ mine 6 LndLsp
+      let fundAddr =
+            res0
+              ^. ( SwapIntoLn.success
+                     . SwapIntoLn.fundOnChainAddress
+                     . SwapIntoLn.val
+                     . SwapIntoLn.val
+                 )
+      void $
+        withBtcT
+          Btc.sendToAddress
+          (\h -> h fundAddr 0.01 Nothing Nothing)
+      lift $
+        LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
+      sleep $ MicroSecondsDelay 5000000
+      lift $ mine 6 LndLsp
+      sleep $ MicroSecondsDelay 5000000
+      lift $ mine 6 LndLsp
+      res1 <-
         withLndT
           Lnd.listChannels
           ( $
@@ -193,9 +185,6 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
           )
       liftIO $
         res1
-          `shouldSatisfy` ( \case
-                              Right [_] ->
-                                True
-                              _ ->
-                                False
-                          )
+          `shouldSatisfy` ((== 1) . length)
+    liftIO $
+      res `shouldSatisfy` isRight
