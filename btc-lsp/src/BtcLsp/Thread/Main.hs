@@ -18,16 +18,28 @@ import qualified BtcLsp.Thread.Refunder as Refunder
 import qualified BtcLsp.Thread.Server as Server
 import qualified BtcLsp.Thread.SwapperIntoLn as SwapperIntoLn
 import qualified BtcLsp.Yesod.Application as Yesod
+import Katip
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
 
 main :: IO ()
 main = do
-  putStrLn ("Lsp is starting!" :: Text)
-  putStrLn ("Reading lsp raw environment..." :: Text)
-  cfg <- readRawConfig
-  putStrLn ("Creating lsp runtime environment..." :: Text)
+  startupScribe <-
+    mkHandleScribe ColorIfTerminal stdout (permitItem InfoS) V2
+  let startupLogEnv =
+        registerScribe
+          "stdout"
+          startupScribe
+          defaultScribeSettings
+          =<< initLogEnv "BtcLsp" "startup"
+  cfg <- bracket startupLogEnv closeScribes $ \le ->
+    runKatipContextT le (mempty :: LogContexts) mempty $ do
+      $(logTM) InfoS "Lsp is starting!"
+      $(logTM) InfoS "Reading lsp raw environment..."
+      cfg <- liftIO readRawConfig
+      $(logTM) InfoS "Creating lsp runtime environment..."
+      pure cfg
   withEnv cfg $
     \env -> runApp env apply
 
