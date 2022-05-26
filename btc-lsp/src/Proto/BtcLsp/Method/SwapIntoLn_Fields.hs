@@ -120,6 +120,11 @@ minFundMoney ::
    Data.ProtoLens.Field.HasField s "minFundMoney" a) =>
   Lens.Family2.LensLike' f s a
 minFundMoney = Data.ProtoLens.Field.field @"minFundMoney"
+privacy ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "privacy" a) =>
+  Lens.Family2.LensLike' f s a
+privacy = Data.ProtoLens.Field.field @"privacy"
 refundOnChainAddress ::
   forall f s a.
   (Prelude.Functor f,

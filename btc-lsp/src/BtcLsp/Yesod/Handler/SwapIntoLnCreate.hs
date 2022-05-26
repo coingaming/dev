@@ -86,7 +86,8 @@ postSwapIntoLnCreateR = do
           userEnt
           fundInv
           fundInvLnd
-          $ swapRequestRefund req
+          (swapRequestRefund req)
+          (swapRequestPrivacy req)
       case eSwap of
         Left e -> do
           setMessageI $ explainFailure e
