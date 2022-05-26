@@ -194,7 +194,7 @@ extractRelatedUtxoFromBlock blk =
 
 persistBlockT ::
   ( Storage m,
-    KatipContext m
+    Env m
   ) =>
   Btc.BlockVerbose ->
   [Utxo] ->
@@ -215,8 +215,16 @@ persistBlockT blk utxos = do
     res <-
       Block.withLockedRowSql blockId (== BlkConfirmed)
         . const
-        . SwapUtxo.createManySql
-        $ newSwapUtxo ct blockId <$> utxos
+        $ do
+          SwapUtxo.createManySql $
+            newSwapUtxo ct blockId <$> utxos
+          --
+          -- TODO : Fix this!!! mapM_ is redundant
+          -- and utxo list might be wrong!!!
+          --
+          mapM_
+            (SwapUtxo.updateRefundBlockIdSql blockId)
+            (utxoTxId <$> utxos)
     whenLeft res $
       $(logTM) ErrorS
         . logStr
@@ -236,6 +244,7 @@ newSwapUtxo ct blkId utxo = do
           then SwapUtxoUnspent
           else SwapUtxoUnspentDust,
       swapUtxoRefundTxId = Nothing,
+      swapUtxoRefundBlockId = Nothing,
       swapUtxoLockId = utxoLockId utxo,
       swapUtxoInsertedAt = ct,
       swapUtxoUpdatedAt = ct
@@ -270,6 +279,7 @@ scan = do
           lift . runSql $ do
             blks <- Block.getBlocksHigherSql bHeight
             Block.updateOrphanHigherSql bHeight
+            SwapUtxo.revertRefundedSql (entityKey <$> blks)
             SwapUtxo.updateOrphanSql (entityKey <$> blks)
           scannerStep [] (1 + coerce bHeight) $ from cHeight
 
