@@ -40,66 +40,65 @@ apply =
       )
       maybeFunded
       $ runExceptT scan
-    sleep $ MicroSecondsDelay 1000000
+    sleep $
+      MicroSecondsDelay 1000000
 
 maybeFunded :: (Env m) => [Utxo] -> m ()
 maybeFunded [] =
   pure ()
 maybeFunded utxos =
-  mapM_ maybeFundSwap swapIds
-  where
-    swapIds =
-      nubOrd $
-        utxoSwapId <$> utxos
-    debugMsg mCap sid amt =
+  mapM_ maybeFundSwap
+    . nubOrd
+    $ utxoSwapId <$> utxos
+
+maybeFundSwap :: (Env m) => SwapIntoLnId -> m ()
+maybeFundSwap swapId = do
+  res <- runSql
+    . SwapIntoLn.withLockedRowSql
+      swapId
+      (`elem` swapStatusChain)
+    $ \swp -> do
+      us <- SwapUtxo.getSpendableUtxosBySwapIdSql swapId
+      let amt = sum $ swapUtxoAmount . entityVal <$> us
+      mCap <- lift $ newSwapCapM amt
       $(logTM) DebugS . logStr $
         maybe
           ( "Not enough funds for "
-              <> inspect sid
+              <> inspect swapId
               <> " with amt = "
               <> inspect amt
           )
           ( \cap ->
               "Marking funded "
-                <> inspect sid
+                <> inspect swapId
                 <> " with amt = "
                 <> inspect amt
                 <> " and cap = "
                 <> inspect cap
           )
           mCap
-    maybeFundSwap swapId = do
-      us <- runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swapId
-      let amt = sum $ swapUtxoAmount . entityVal <$> us
-      mCap <- newSwapCapM amt
-      debugMsg mCap swapId amt
       whenJust mCap $ \swapCap -> do
-        res <- runSql
-          . SwapIntoLn.withLockedRowSql
-            swapId
-            (`elem` swapStatusChain)
-          $ \swp ->
-            when (swapIntoLnStatus swp < SwapWaitingChan) $ do
-              qty <-
-                SwapUtxo.updateUnspentChanReserveSql $
-                  entityKey <$> us
-              if qty /= from (length us)
-                then do
-                  $(logTM) ErrorS . logStr $
-                    "Funding update of the Swap "
-                      <> inspect swp
-                      <> " failed for UTXOs "
-                      <> inspect us
-                  Psql.transactionUndo
-                else
-                  SwapIntoLn.updateWaitingPeerSql
-                    swapId
-                    swapCap
-        whenLeft res $
-          $(logTM) ErrorS
-            . logStr
-            . ("Funding failed due to wrong status " <>)
-            . inspect
+        when (swapIntoLnStatus swp < SwapWaitingChan) $ do
+          qty <-
+            SwapUtxo.updateUnspentChanReserveSql $
+              entityKey <$> us
+          if qty /= from (length us)
+            then do
+              $(logTM) ErrorS . logStr $
+                "Funding update "
+                  <> inspect swp
+                  <> " failed for UTXOs "
+                  <> inspect us
+              Psql.transactionUndo
+            else
+              SwapIntoLn.updateWaitingPeerSql
+                swapId
+                swapCap
+  whenLeft res $
+    $(logTM) ErrorS
+      . logStr
+      . ("Funding failed due to wrong status " <>)
+      . inspect
 
 data Utxo = Utxo
   { utxoAmt :: MSat,
