@@ -83,12 +83,12 @@ maybeFundSwap swapId = do
             entityKey <$> us
         if qty /= from (length us)
           then do
+            Psql.transactionUndo
             $(logTM) ErrorS . logStr $
               "Funding update "
                 <> inspect swapVal
                 <> " failed for UTXOs "
                 <> inspect us
-            Psql.transactionUndo
           else
             SwapIntoLn.updateWaitingPeerSql
               swapId

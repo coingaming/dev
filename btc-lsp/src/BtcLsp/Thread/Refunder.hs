@@ -8,6 +8,7 @@ where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
+import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Math.OnChain (roundWord64ToMSat)
 import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
@@ -157,14 +158,15 @@ processRefund utxos@(x : _) = do
     $ do
       $(logTM) DebugS . logStr $
         "Start refunding utxos:"
-          <> inspect utxos'
+          <> inspect refUtxos
           <> " to address:"
           <> inspect refAddr
       eitherM
-        ( \e ->
+        ( \e -> do
+            Psql.transactionUndo
             $(logTM) ErrorS . logStr $
               "Failed to refund utxos:"
-                <> inspect utxos'
+                <> inspect refUtxos
                 <> " to address:"
                 <> inspect refAddr
                 <> " with error:"
@@ -173,7 +175,7 @@ processRefund utxos@(x : _) = do
         ( \(SendUtxosResult rtx total fee) -> do
             $(logTM) DebugS . logStr $
               "Successfully refunded utxos: "
-                <> inspect utxos'
+                <> inspect refUtxos
                 <> " to address:"
                 <> inspect refAddr
                 <> " on chain rawTx:"
@@ -189,14 +191,15 @@ processRefund utxos@(x : _) = do
                 SwapUtxo.updateRefundedSql
                   (entityKey . fst <$> utxos)
                   (from rtxid)
-              Left e ->
+              Left e -> do
+                Psql.transactionUndo
                 $(logTM) ErrorS . logStr $
                   "Failed to convert txid:" <> inspect e
         )
         . lift
         . runExceptT
         $ sendUtxos
-          utxos'
+          refUtxos
           (coerce refAddr)
           (TxLabel "refund to " <> coerce refAddr)
   whenLeft res $
@@ -206,7 +209,7 @@ processRefund utxos@(x : _) = do
       . inspect
   where
     refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
-    utxos' = toOutPointAmt . entityVal . fst <$> utxos
+    refUtxos = toOutPointAmt . entityVal . fst <$> utxos
 
 toOutPointAmt :: SwapUtxo -> RefundUtxo
 toOutPointAmt x =

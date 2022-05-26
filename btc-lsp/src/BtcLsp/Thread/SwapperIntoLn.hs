@@ -6,6 +6,7 @@ module BtcLsp.Thread.SwapperIntoLn
 where
 
 import BtcLsp.Import
+import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Set as Set
@@ -77,9 +78,10 @@ settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt = do
                       }
                 )
       eitherM
-        ( $(logTM) ErrorS . logStr
-            . ("SettleSwap procedure failed: " <>)
-            . inspect
+        ( \e -> do
+            Psql.transactionUndo
+            $(logTM) ErrorS . logStr $
+              "SettleSwap procedure failed: " <> inspect e
         )
         ( \x -> do
             SwapIntoLn.updateSucceededSql swapKey x
