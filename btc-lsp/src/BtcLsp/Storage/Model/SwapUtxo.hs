@@ -197,7 +197,12 @@ getUtxosBySwapIdSql swapId = do
         )
       pure row
 
-updateRefundBlockIdSql :: (MonadIO m) => BlockId -> TxId 'Funding -> ReaderT Psql.SqlBackend m ()
+updateRefundBlockIdSql ::
+  ( MonadIO m
+  ) =>
+  BlockId ->
+  TxId 'Funding ->
+  ReaderT Psql.SqlBackend m ()
 updateRefundBlockIdSql blkId txId = do
   Psql.update $ \row -> do
     Psql.set
@@ -208,9 +213,9 @@ updateRefundBlockIdSql blkId txId = do
     Psql.where_ $
       row Psql.^. SwapUtxoRefundTxId
         Psql.==. Psql.val (Just txId)
-      Psql.&&. ( row Psql.^. SwapUtxoStatus
-                   Psql.==. Psql.val SwapUtxoSpentRefund
-               )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     Psql.==. Psql.val SwapUtxoSpentRefund
+                 )
 
 updateOrphanSql ::
   ( MonadIO m
@@ -249,6 +254,6 @@ revertRefundedSql ids = do
     Psql.where_ $
       row Psql.^. SwapUtxoRefundBlockId
         `Psql.in_` Psql.valList (Just <$> ids)
-      Psql.&&. ( row Psql.^. SwapUtxoStatus
-                   Psql.==. Psql.val SwapUtxoSpentRefund
-               )
+        Psql.&&. ( row Psql.^. SwapUtxoStatus
+                     Psql.==. Psql.val SwapUtxoSpentRefund
+                 )

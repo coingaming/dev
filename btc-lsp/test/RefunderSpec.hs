@@ -19,7 +19,6 @@ import Test.Hspec
 import TestHelpers
 import TestOrphan ()
 import TestWithLndLsp
-import Universum (show)
 
 allIn :: Eq a => [a] -> [a] -> Bool
 allIn ax bx =
@@ -54,14 +53,13 @@ refundSucceded swp preTrs = do
     let foundTrs = (from <$> trsInBlock) <> preTrs
     let allRefundTxsOnChain = allIn (nubOrd refIds) foundTrs
     let utxosMakedRefunded =
-          not $
-            null utxos
-              && all
-                ( (== SwapUtxoSpentRefund)
-                    . swapUtxoStatus
-                    . entityVal
-                )
-                utxos
+          notNull utxos
+            && all
+              ( (== SwapUtxoSpentRefund)
+                  . swapUtxoStatus
+                  . entityVal
+              )
+              utxos
     pure
       ( allRefundTxsOnChain && utxosMakedRefunded,
         foundTrs
@@ -71,39 +69,29 @@ refundSucceded swp preTrs = do
 
 spec :: Spec
 spec =
-  itEnv "Refunder Spec" $
-    runExceptT
-      ( do
-          amt <-
-            lift getSwapIntoLnMinAmt
-          swp <-
-            createDummySwap "refunder test"
-              . Just
-              =<< getFutureTime (Lnd.Seconds 5)
-          void $
-            withLndT
-              Lnd.sendCoins
-              ( $
-                  SendCoins.SendCoinsRequest
-                    { SendCoins.addr =
-                        from
-                          . swapIntoLnFundAddress
-                          . entityVal
-                          $ swp,
-                      SendCoins.amount =
-                        from amt
-                    }
-              )
-          void putLatestBlockToDB
-          lift $ mine 4 LndLsp
-          pure swp
-      )
-      >>= \case
-        Right swp ->
-          withSpawnLink Main.apply . const $ do
-            x <- waitCond 10 (refundSucceded swp) []
-            liftIO $ shouldBe x True
-        Left e ->
-          liftIO
-            . expectationFailure
-            $ show e
+  itEnvT "Refunder Spec" $ do
+    amt <-
+      lift getSwapIntoLnMinAmt
+    swp <-
+      createDummySwap "refunder test"
+        . Just
+        =<< getFutureTime (Lnd.Seconds 5)
+    void $
+      withLndT
+        Lnd.sendCoins
+        ( $
+            SendCoins.SendCoinsRequest
+              { SendCoins.addr =
+                  from
+                    . swapIntoLnFundAddress
+                    . entityVal
+                    $ swp,
+                SendCoins.amount =
+                  from amt
+              }
+        )
+    void putLatestBlockToDB
+    lift $ mine 4 LndLsp
+    lift . withSpawnLink Main.apply . const $ do
+      x <- waitCond 10 (refundSucceded swp) []
+      liftIO $ x `shouldBe` True

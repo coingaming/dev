@@ -8,6 +8,7 @@ where
 
 import BtcLsp.Import
 import BtcLsp.Storage.Migration (migrateAll)
+import qualified BtcLsp.Storage.Util as Util
 import Test.Hspec
 import TestAppM as ReExport hiding (itEnv, xitEnv)
 import qualified TestAppM
@@ -33,5 +34,5 @@ mainTestSetup =
     action :: TestAppM 'LndLsp IO ()
     action = do
       --unScheduleAll
-      runSql cleanDb
+      runSql Util.cleanDb
       migrateAll
