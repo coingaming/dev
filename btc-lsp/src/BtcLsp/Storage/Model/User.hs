@@ -8,6 +8,7 @@ where
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Util as Util
 
 --
 -- NOTE : We will not create withVerifiedNonce
@@ -37,7 +38,7 @@ createVerifySql pub nonce = do
         zeroRow
         [ UserUpdatedAt Psql.=. Psql.val ct
         ]
-  existingRow <- lockByRow rowId
+  existingRow <- Util.lockByRow rowId
   if (existingRow == zeroRow)
     || (userLatestNonce existingRow < nonce)
     then

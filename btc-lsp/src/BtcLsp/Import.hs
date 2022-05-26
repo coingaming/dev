@@ -14,6 +14,5 @@ import BtcLsp.Grpc.Orphan as X ()
 import BtcLsp.Import.External as X
 import BtcLsp.Math.Swap as X (SwapCap (..), newSwapCapM)
 import BtcLsp.Storage.Model as X hiding (Key (..))
-import BtcLsp.Storage.Util as X
 import BtcLsp.Text as X
 import BtcLsp.Time as X

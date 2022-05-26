@@ -1,10 +1,6 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module BtcLsp.Storage.Util
   ( lockByTable,
     lockByRow,
-    rollback,
-    commit,
     cleanDb,
   )
 where
@@ -57,27 +53,6 @@ lockByRow rowId = do
     (error $ "Impossible missing row " <> Universum.show rowId)
     pure
     $ Psql.get rowId
-
-rollback ::
-  ( KatipContext m,
-    Out a
-  ) =>
-  a ->
-  Psql.SqlPersistT m (Either a b)
-rollback e = do
-  Psql.transactionUndo
-  $(logTM) DebugS . logStr $ "Rollback " <> inspect e
-  pure $ Left e
-
-commit ::
-  ( KatipContext m,
-    Out b
-  ) =>
-  b ->
-  Psql.SqlPersistT m (Either a b)
-commit x = do
-  $(logTM) DebugS . logStr $ "Commit " <> inspect x
-  pure $ Right x
 
 cleanDb :: (MonadIO m) => Psql.SqlPersistT m ()
 cleanDb =

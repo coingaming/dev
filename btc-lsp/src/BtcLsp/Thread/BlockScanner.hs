@@ -57,7 +57,7 @@ maybeFundSwap swapId = do
     . SwapIntoLn.withLockedRowSql
       swapId
       (`elem` swapStatusChain)
-    $ \swp -> do
+    $ \swapVal -> do
       us <- SwapUtxo.getSpendableUtxosBySwapIdSql swapId
       let amt = sum $ swapUtxoAmount . entityVal <$> us
       mCap <- lift $ newSwapCapM amt
@@ -78,22 +78,21 @@ maybeFundSwap swapId = do
           )
           mCap
       whenJust mCap $ \swapCap -> do
-        when (swapIntoLnStatus swp < SwapWaitingChan) $ do
-          qty <-
-            SwapUtxo.updateUnspentChanReserveSql $
-              entityKey <$> us
-          if qty /= from (length us)
-            then do
-              $(logTM) ErrorS . logStr $
-                "Funding update "
-                  <> inspect swp
-                  <> " failed for UTXOs "
-                  <> inspect us
-              Psql.transactionUndo
-            else
-              SwapIntoLn.updateWaitingPeerSql
-                swapId
-                swapCap
+        qty <-
+          SwapUtxo.updateUnspentChanReserveSql $
+            entityKey <$> us
+        if qty /= from (length us)
+          then do
+            $(logTM) ErrorS . logStr $
+              "Funding update "
+                <> inspect swapVal
+                <> " failed for UTXOs "
+                <> inspect us
+            Psql.transactionUndo
+          else
+            SwapIntoLn.updateWaitingPeerSql
+              swapId
+              swapCap
   whenLeft res $
     $(logTM) ErrorS
       . logStr
@@ -194,7 +193,8 @@ extractRelatedUtxoFromBlock blk =
         catMaybes utxos <> acc
 
 persistBlockT ::
-  ( Storage m
+  ( Storage m,
+    KatipContext m
   ) =>
   Btc.BlockVerbose ->
   [Utxo] ->
@@ -212,10 +212,16 @@ persistBlockT blk utxos = do
           (from <$> Btc.vPrevBlock blk)
     ct <-
       getCurrentTime
-    void $
-      lockByRow blockId
-    SwapUtxo.createManySql $
-      newSwapUtxo ct blockId <$> utxos
+    res <-
+      Block.withLockedRowSql blockId (== BlkConfirmed)
+        . const
+        . SwapUtxo.createManySql
+        $ newSwapUtxo ct blockId <$> utxos
+    whenLeft res $
+      $(logTM) ErrorS
+        . logStr
+        . ("UTXOs are not persisted for the block " <>)
+        . inspect
 
 newSwapUtxo :: UTCTime -> BlockId -> Utxo -> SwapUtxo
 newSwapUtxo ct blkId utxo = do

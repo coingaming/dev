@@ -20,6 +20,7 @@ where
 
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Util as Util
 import qualified LndClient as Lnd
 
 createIgnoreSql ::
@@ -417,7 +418,7 @@ withLockedRowSql ::
   (SwapIntoLn -> ReaderT Psql.SqlBackend m a) ->
   ReaderT Psql.SqlBackend m (Either (Entity SwapIntoLn) a)
 withLockedRowSql rowId pre action = do
-  rowVal <- lockByRow rowId
+  rowVal <- Util.lockByRow rowId
   if pre $ swapIntoLnStatus rowVal
     then Right <$> action rowVal
     else pure . Left $ Entity rowId rowVal
