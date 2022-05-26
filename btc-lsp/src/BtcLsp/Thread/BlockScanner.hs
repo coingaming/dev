@@ -266,7 +266,7 @@ scan = do
           <> inspect cHeight
       scanOneBlock cHeight
     Just lBlk -> do
-      reorgDetected <- detectReorg
+      reorgDetected <- detectReorg lBlk
       case reorgDetected of
         Nothing -> do
           let known = from . blockHeight $ entityVal lBlk
@@ -276,11 +276,22 @@ scan = do
             "Reorg detected from height = "
               <> inspect height
           bHeight <- tryFromT height
-          lift . runSql $ do
-            blks <- Block.getBlocksHigherSql bHeight
-            Block.updateOrphanHigherSql bHeight
-            SwapUtxo.revertRefundedSql (entityKey <$> blks)
-            SwapUtxo.updateOrphanSql (entityKey <$> blks)
+          withExceptT
+            ( FailureInternal
+                . ("Block scanner failed due to bad status " <>)
+                . inspectPlain
+            )
+            . ExceptT
+            . runSql
+            . Block.withLockedRowSql
+              (entityKey lBlk)
+              (== BlkConfirmed)
+            . const
+            $ do
+              blks <- Block.getBlocksHigherSql bHeight
+              Block.updateOrphanHigherSql bHeight
+              SwapUtxo.revertRefundedSql (entityKey <$> blks)
+              SwapUtxo.updateOrphanSql (entityKey <$> blks)
           scannerStep [] (1 + coerce bHeight) $ from cHeight
 
 scannerStep ::
@@ -307,18 +318,17 @@ scannerStep acc cur end =
 detectReorg ::
   ( Env m
   ) =>
+  Entity Block ->
   ExceptT Failure m (Maybe Btc.BlockHeight)
-detectReorg = do
-  mBlk <- lift $ runSql Block.getLatestSql
-  case mBlk of
-    Nothing -> pure Nothing
-    Just blk -> do
-      let cHeight = from . blockHeight $ entityVal blk
-      cReorgHeight <- checkReorgHeight cHeight
-      pure $
-        if cReorgHeight == cHeight
-          then Nothing
-          else Just cReorgHeight
+detectReorg blk = do
+  cReorgHeight <- checkReorgHeight cHeight
+  pure $
+    if cReorgHeight == cHeight
+      then Nothing
+      else Just cReorgHeight
+  where
+    cHeight =
+      from . blockHeight $ entityVal blk
 
 checkReorgHeight ::
   ( Env m
