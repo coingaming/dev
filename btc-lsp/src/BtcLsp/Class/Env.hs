@@ -36,7 +36,6 @@ class
   getLndNodeUri :: m NodeUri
   getLspPubKey :: m Lnd.NodePubKey
   getLspLndEnv :: m Lnd.LndEnv
-  getChanPrivacy :: m Privacy
 
   --
   -- TODO : separate getLspPubKey and getLndP2PSocketAddress

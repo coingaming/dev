@@ -27,7 +27,6 @@ import qualified Env as E
     Mod,
     Var,
     auto,
-    def,
     header,
     help,
     keep,
@@ -53,7 +52,6 @@ data Env = Env
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
     envSwapIntoLnMinAmt :: Money 'Usr 'OnChain 'Fund,
-    envChanPrivacy :: Privacy,
     envMsatPerByte :: Maybe MSat,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
@@ -77,7 +75,6 @@ data RawConfig = RawConfig
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
     rawConfigMinChanCap :: Money 'Chan 'Ln 'Fund,
-    rawConfigChanPrivacy :: Privacy,
     rawConfigMsatPerByte :: Maybe MSat,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
@@ -111,7 +108,6 @@ readRawConfig =
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LND_P2P_PORT" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_CHAN_CAP_MSAT" opts
-      <*> E.var (E.auto <=< E.nonempty) "LSP_CHAN_PRIVACY" (opts <> E.def Public)
       <*> optional (E.var (E.auto <=< E.nonempty) "LSP_MSAT_PER_BYTE" opts)
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
@@ -186,7 +182,6 @@ withEnv rc this = do
                 envSwapIntoLnMinAmt =
                   Math.newSwapIntoLnMinAmt $
                     rawConfigMinChanCap rc,
-                envChanPrivacy = rawConfigChanPrivacy rc,
                 envMsatPerByte = rawConfigMsatPerByte rc,
                 envLndPubKey = pubKeyVar,
                 -- Grpc

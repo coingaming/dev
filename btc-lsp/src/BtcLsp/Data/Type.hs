@@ -589,8 +589,8 @@ data SwapUtxoStatus
 instance Out SwapUtxoStatus
 
 data Privacy
-  = Private
-  | Public
+  = Public
+  | Private
   deriving stock
     ( Eq,
       Ord,

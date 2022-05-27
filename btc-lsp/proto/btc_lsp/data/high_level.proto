@@ -115,6 +115,6 @@ enum InputFailureKind {
 }
 
 enum Privacy {
-  PRIVATE = 0;
-  PUBLIC = 1;
+  PUBLIC = 0;
+  PRIVATE = 1;
 }

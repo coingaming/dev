@@ -2049,32 +2049,32 @@ newtype Privacy'UnrecognizedValue
                   GHC.Generics.Generic)
 instance Text.PrettyPrint.GenericPretty.Out Privacy'UnrecognizedValue
 data Privacy
-  = PRIVATE |
-    PUBLIC |
+  = PUBLIC |
+    PRIVATE |
     Privacy'Unrecognized !Privacy'UnrecognizedValue
   deriving stock (Prelude.Show,
                   Prelude.Eq,
                   Prelude.Ord,
                   GHC.Generics.Generic)
 instance Data.ProtoLens.MessageEnum Privacy where
-  maybeToEnum 0 = Prelude.Just PRIVATE
-  maybeToEnum 1 = Prelude.Just PUBLIC
+  maybeToEnum 0 = Prelude.Just PUBLIC
+  maybeToEnum 1 = Prelude.Just PRIVATE
   maybeToEnum k
     = Prelude.Just
         (Privacy'Unrecognized
            (Privacy'UnrecognizedValue (Prelude.fromIntegral k)))
-  showEnum PRIVATE = "PRIVATE"
   showEnum PUBLIC = "PUBLIC"
+  showEnum PRIVATE = "PRIVATE"
   showEnum (Privacy'Unrecognized (Privacy'UnrecognizedValue k))
     = Prelude.show k
   readEnum k
-    | (Prelude.==) k "PRIVATE" = Prelude.Just PRIVATE
     | (Prelude.==) k "PUBLIC" = Prelude.Just PUBLIC
+    | (Prelude.==) k "PRIVATE" = Prelude.Just PRIVATE
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded Privacy where
-  minBound = PRIVATE
-  maxBound = PUBLIC
+  minBound = PUBLIC
+  maxBound = PRIVATE
 instance Prelude.Enum Privacy where
   toEnum k__
     = Prelude.maybe
@@ -2082,20 +2082,20 @@ instance Prelude.Enum Privacy where
            ((Prelude.++)
               "toEnum: unknown value for enum Privacy: " (Prelude.show k__)))
         Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum PRIVATE = 0
-  fromEnum PUBLIC = 1
+  fromEnum PUBLIC = 0
+  fromEnum PRIVATE = 1
   fromEnum (Privacy'Unrecognized (Privacy'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ PUBLIC
+  succ PRIVATE
     = Prelude.error
-        "Privacy.succ: bad argument PUBLIC. This value would be out of bounds."
-  succ PRIVATE = PUBLIC
+        "Privacy.succ: bad argument PRIVATE. This value would be out of bounds."
+  succ PUBLIC = PRIVATE
   succ (Privacy'Unrecognized _)
     = Prelude.error "Privacy.succ: bad argument: unrecognized value"
-  pred PRIVATE
+  pred PUBLIC
     = Prelude.error
-        "Privacy.pred: bad argument PRIVATE. This value would be out of bounds."
-  pred PUBLIC = PRIVATE
+        "Privacy.pred: bad argument PUBLIC. This value would be out of bounds."
+  pred PRIVATE = PUBLIC
   pred (Privacy'Unrecognized _)
     = Prelude.error "Privacy.pred: bad argument: unrecognized value"
   enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
@@ -2103,7 +2103,7 @@ instance Prelude.Enum Privacy where
   enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
   enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
 instance Data.ProtoLens.FieldDefault Privacy where
-  fieldDefault = PRIVATE
+  fieldDefault = PUBLIC
 instance Control.DeepSeq.NFData Privacy where
   rnf x__ = Prelude.seq x__ ()
 instance Text.PrettyPrint.GenericPretty.Out Privacy
@@ -2514,10 +2514,10 @@ packedFileDescriptor
     \\tNOT_FOUND\DLE\SOH\DC2\DC2\n\
     \\SOPARSING_FAILED\DLE\STX\DC2\ETB\n\
     \\DC3VERIFICATION_FAILED\DLE\ETX*\"\n\
-    \\aPrivacy\DC2\v\n\
-    \\aPRIVATE\DLE\NUL\DC2\n\
+    \\aPrivacy\DC2\n\
     \\n\
-    \\ACKPUBLIC\DLE\SOHJ\204\ETB\n\
+    \\ACKPUBLIC\DLE\NUL\DC2\v\n\
+    \\aPRIVATE\DLE\SOHJ\204\ETB\n\
     \\ACK\DC2\EOT\NUL\NULw\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
@@ -2886,14 +2886,14 @@ packedFileDescriptor
     \\n\
     \\ETX\ENQ\SOH\SOH\DC2\ETXt\ENQ\f\n\
     \\v\n\
-    \\EOT\ENQ\SOH\STX\NUL\DC2\ETXu\STX\SO\n\
+    \\EOT\ENQ\SOH\STX\NUL\DC2\ETXu\STX\r\n\
     \\f\n\
-    \\ENQ\ENQ\SOH\STX\NUL\SOH\DC2\ETXu\STX\t\n\
+    \\ENQ\ENQ\SOH\STX\NUL\SOH\DC2\ETXu\STX\b\n\
     \\f\n\
-    \\ENQ\ENQ\SOH\STX\NUL\STX\DC2\ETXu\f\r\n\
+    \\ENQ\ENQ\SOH\STX\NUL\STX\DC2\ETXu\v\f\n\
     \\v\n\
-    \\EOT\ENQ\SOH\STX\SOH\DC2\ETXv\STX\r\n\
+    \\EOT\ENQ\SOH\STX\SOH\DC2\ETXv\STX\SO\n\
     \\f\n\
-    \\ENQ\ENQ\SOH\STX\SOH\SOH\DC2\ETXv\STX\b\n\
+    \\ENQ\ENQ\SOH\STX\SOH\SOH\DC2\ETXv\STX\t\n\
     \\f\n\
-    \\ENQ\ENQ\SOH\STX\SOH\STX\DC2\ETXv\v\fb\ACKproto3"
+    \\ENQ\ENQ\SOH\STX\SOH\STX\DC2\ETXv\f\rb\ACKproto3"

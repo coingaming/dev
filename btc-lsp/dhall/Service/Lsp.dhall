@@ -22,6 +22,10 @@ let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
+let domain = G.unOwner G.Owner.Lsp
+
+let cloudProvider = Some C.ProviderType.DigitalOcean
+
 let logEnv = "test"
 
 let logFormat = "Bracket"
@@ -235,9 +239,7 @@ let mkServiceAnnotations
                           }
                         , { mapKey =
                               "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"
-                          , mapValue =
-                                ../../build/certarn.txt as Text
-                              ? G.todo
+                          , mapValue = ../../build/certarn.txt as Text ? G.todo
                           }
                         , { mapKey =
                               "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"
@@ -270,11 +272,15 @@ let mkService
 let mkIngress
     : G.BitcoinNetwork → K.Ingress.Type
     = λ(net : G.BitcoinNetwork) →
-        Ingress.mkIngress
-          owner
-          (mkDomain net)
-          yesodPort.unPort
-          (None (List K.IngressTLS.Type))
+        let certArn = ../../build/certarn.txt as Text ? G.todo
+
+        in  Ingress.mkIngress
+              owner
+              (S.mkIngressAnnotations net cloudProvider certArn)
+              (mkDomain net)
+              yesodPort.unPort
+              (S.mkIngressClassName cloudProvider)
+              (None (List K.IngressTLS.Type))
 
 let mkContainerImage
     : G.BitcoinNetwork → Text
