@@ -5,13 +5,14 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateWaitingPeerSql,
     updateWaitingChanSql,
     updateWaitingFundLnSql,
+    updateExpiredSql,
     updateSucceededSql,
     getSwapsWaitingPeerSql,
     getSwapsWaitingLnFundSql,
+    getSwapsAboutToExpirySql,
     getByUuidSql,
     getByFundAddressSql,
-    withLockedExtantRowSql,
-    withLockedExpiredRowSql,
+    withLockedRowSql,
     UtxoInfo (..),
     SwapInfo (..),
   )
@@ -19,6 +20,7 @@ where
 
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Util as Util
 import qualified LndClient as Lnd
 
 createIgnoreSql ::
@@ -143,6 +145,40 @@ updateWaitingFundLnSql id0 = do
                      Psql.==. Psql.val SwapWaitingChan
                  )
 
+updateExpiredSql ::
+  ( MonadIO m,
+    KatipContext m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateExpiredSql rowId = do
+  ct <- getCurrentTime
+  qty <- Psql.updateCount $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapExpired,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val rowId
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     `Psql.in_` Psql.valList
+                       [ SwapWaitingFundChain,
+                         SwapWaitingPeer
+                       ]
+                 )
+  when (qty /= 1)
+    . $(logTM) ErrorS
+    . logStr
+    $ "Wrong expiry update result "
+      <> inspect qty
+      <> " for the swap "
+      <> inspect rowId
+
 updateSucceededSql ::
   ( MonadIO m
   ) =>
@@ -237,6 +273,37 @@ getSwapsWaitingLnFundSql =
           -- Maybe limits, some proper retries etc.
           --
           pure (swap, user, chan)
+
+getSwapsAboutToExpirySql ::
+  ( MonadIO m
+  ) =>
+  ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
+getSwapsAboutToExpirySql = do
+  nearExpTime <-
+    addSeconds (Lnd.Seconds 3600) <$> getCurrentTime
+  Psql.select $
+    Psql.from $ \row -> do
+      Psql.where_
+        ( ( row Psql.^. SwapIntoLnStatus
+              `Psql.in_` Psql.valList
+                --
+                -- TODO : somehow handle corner case
+                -- where channel is opening or already
+                -- opened and waiting for the swap,
+                -- but swap invoice has been expired.
+                -- Maybe ask user for the new invoice in
+                -- this case? Or maybe we can use keysend
+                -- feature?
+                --
+                [ SwapWaitingFundChain,
+                  SwapWaitingPeer
+                ]
+          )
+            Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
+                         Psql.<. Psql.val nearExpTime
+                     )
+        )
+      pure row
 
 data UtxoInfo = UtxoInfo
   { utxoInfoUtxo :: Entity SwapUtxo,
@@ -345,54 +412,15 @@ getByFundAddressSql =
   Psql.getBy
     . UniqueSwapIntoLnFundAddress
 
-withLockedExtantRowSql ::
+withLockedRowSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
-  (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
-  ReaderT Psql.SqlBackend m ()
-withLockedExtantRowSql rowId action = do
-  ct <- getCurrentTime
-  let expTime = addSeconds (Lnd.Seconds 3600) ct
-  let finSS = [SwapSucceeded, SwapExpired]
-  swapVal <- lockByRow rowId
-  if (swapIntoLnExpiresAt swapVal < expTime)
-    && notElem (swapIntoLnStatus swapVal) finSS
-    then Psql.update $ \row -> do
-      Psql.set
-        row
-        [ SwapIntoLnStatus
-            Psql.=. Psql.val SwapExpired,
-          SwapIntoLnUpdatedAt
-            Psql.=. Psql.val ct
-        ]
-      Psql.where_
-        ( ( row Psql.^. SwapIntoLnId
-              Psql.==. Psql.val rowId
-          )
-            Psql.&&. ( row Psql.^. SwapIntoLnExpiresAt
-                         Psql.<. Psql.val expTime
-                     )
-            Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                         `Psql.notIn` Psql.valList finSS
-                     )
-        )
-    else action swapVal
-
-withLockedExpiredRowSql ::
-  ( MonadIO m,
-    KatipContext m
-  ) =>
-  SwapIntoLnId ->
-  (SwapIntoLn -> ReaderT Psql.SqlBackend m ()) ->
-  ReaderT Psql.SqlBackend m ()
-withLockedExpiredRowSql rowId action = do
-  rowVal <- lockByRow rowId
-  if swapIntoLnStatus rowVal == SwapExpired
-    then action rowVal
-    else
-      $(logTM) ErrorS . logStr $
-        "Expected SwapExpired status for "
-          <> inspect rowId
-          <> " but got "
-          <> inspect rowVal
+  (SwapStatus -> Bool) ->
+  (SwapIntoLn -> ReaderT Psql.SqlBackend m a) ->
+  ReaderT Psql.SqlBackend m (Either (Entity SwapIntoLn) a)
+withLockedRowSql rowId pre action = do
+  rowVal <- Util.lockByRow rowId
+  if pre $ swapIntoLnStatus rowVal
+    then Right <$> action rowVal
+    else pure . Left $ Entity rowId rowVal

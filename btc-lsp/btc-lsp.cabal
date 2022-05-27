@@ -66,6 +66,7 @@ library
       BtcLsp.Storage.Util
       BtcLsp.Text
       BtcLsp.Thread.BlockScanner
+      BtcLsp.Thread.Expirer
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
@@ -388,6 +389,7 @@ executable btc-lsp-exe
         BtcLsp.Storage.Util
         BtcLsp.Text
         BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.Expirer
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
@@ -448,6 +450,7 @@ executable btc-lsp-integration
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp
+      TypeSpec
       Paths_btc_lsp
   hs-source-dirs:
       integration
@@ -615,6 +618,7 @@ executable btc-lsp-integration
         BtcLsp.Storage.Util
         BtcLsp.Text
         BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.Expirer
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
@@ -821,6 +825,7 @@ executable btc-lsp-prof
         BtcLsp.Storage.Util
         BtcLsp.Text
         BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.Expirer
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
@@ -880,6 +885,7 @@ test-suite btc-lsp-test
       TestOrphan
       TestWithLndAlice
       TestWithLndLsp
+      TypeSpec
       Paths_btc_lsp
   hs-source-dirs:
       test
@@ -1046,6 +1052,7 @@ test-suite btc-lsp-test
         BtcLsp.Storage.Util
         BtcLsp.Text
         BtcLsp.Thread.BlockScanner
+        BtcLsp.Thread.Expirer
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main

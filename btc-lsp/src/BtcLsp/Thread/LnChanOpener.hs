@@ -58,47 +58,48 @@ openChan ::
   Entity SwapIntoLn ->
   Entity User ->
   m ()
-openChan swapEnt@(Entity swapKey _) userEnt = do
+openChan (Entity swapKey _) userEnt = do
   rate <- getMsatPerByte
-  runSql . SwapIntoLn.withLockedExtantRowSql swapKey $ \swapVal ->
-    if swapIntoLnStatus swapVal /= SwapWaitingPeer
-      then do
-        $(logTM) InfoS . logStr $
-          "OpenChan wrong status " <> inspect swapEnt
-        pure ()
-      else
-        eitherM
-          ( $(logTM) ErrorS . logStr
-              . ("OpenChan procedure failed: " <>)
-              . inspect
+  res <- runSql
+    . SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingPeer)
+    $ \swapVal ->
+      eitherM
+        ( $(logTM) ErrorS . logStr
+            . ("OpenChan procedure failed: " <>)
+            . inspect
+        )
+        ( \cp ->
+            LnChan.createIgnoreSql
+              swapKey
+              (ChannelPoint.fundingTxId cp)
+              (ChannelPoint.outputIndex cp)
+              >> SwapIntoLn.updateWaitingChanSql swapKey
+              >> SwapUtxo.updateSpentChanSql swapKey
+        )
+        . lift
+        $ withLnd
+          LndKatip.openChannelSync
+          ( $
+              Chan.OpenChannelRequest
+                { Chan.nodePubkey =
+                    userNodePubKey $
+                      entityVal userEnt,
+                  Chan.localFundingAmount =
+                    from (swapIntoLnChanCapLsp swapVal)
+                      + from (swapIntoLnChanCapUser swapVal),
+                  Chan.pushMSat = Nothing,
+                  Chan.targetConf = Nothing,
+                  Chan.mSatPerByte = rate,
+                  Chan.private = Just $ swapIntoLnPrivacy swapVal == Private,
+                  Chan.minHtlcMsat = Nothing,
+                  Chan.remoteCsvDelay = Nothing,
+                  Chan.minConfs = Nothing,
+                  Chan.spendUnconfirmed = Nothing,
+                  Chan.closeAddress = Nothing
+                }
           )
-          ( \cp ->
-              LnChan.createIgnoreSql
-                swapKey
-                (ChannelPoint.fundingTxId cp)
-                (ChannelPoint.outputIndex cp)
-                >> SwapIntoLn.updateWaitingChanSql swapKey
-                >> SwapUtxo.updateSpentChanSql swapKey
-          )
-          . lift
-          $ withLnd
-            LndKatip.openChannelSync
-            ( $
-                Chan.OpenChannelRequest
-                  { Chan.nodePubkey =
-                      userNodePubKey $
-                        entityVal userEnt,
-                    Chan.localFundingAmount =
-                      from (swapIntoLnChanCapLsp swapVal)
-                        + from (swapIntoLnChanCapUser swapVal),
-                    Chan.pushMSat = Nothing,
-                    Chan.targetConf = Nothing,
-                    Chan.mSatPerByte = rate,
-                    Chan.private = Just $ swapIntoLnPrivacy swapVal == Private,
-                    Chan.minHtlcMsat = Nothing,
-                    Chan.remoteCsvDelay = Nothing,
-                    Chan.minConfs = Nothing,
-                    Chan.spendUnconfirmed = Nothing,
-                    Chan.closeAddress = Nothing
-                  }
-            )
+  whenLeft res $
+    $(logTM) ErrorS
+      . logStr
+      . ("Channel opening failed due to wrong status " <>)
+      . inspect

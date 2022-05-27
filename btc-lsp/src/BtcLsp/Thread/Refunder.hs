@@ -8,6 +8,7 @@ where
 
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
+import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Math.OnChain (roundWord64ToMSat)
 import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
@@ -26,6 +27,16 @@ import qualified LndClient.Data.ReleaseOutput as RO
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
+
+apply :: (Env m) => m ()
+apply =
+  forever $
+    runSql SwapUtxo.getUtxosForRefundSql
+      <&> groupBy (\a b -> swpId a == swpId b)
+      >>= mapM_ processRefund
+      >> sleep (MicroSecondsDelay 1000000)
+  where
+    swpId = entityKey . snd
 
 data SendUtxoConfig = SendUtxoConfig
   { estimateFee :: MSat,
@@ -138,21 +149,24 @@ processRefund ::
   [(Entity SwapUtxo, Entity SwapIntoLn)] ->
   m ()
 processRefund [] = pure ()
-processRefund utxos@(x : _) =
-  runSql
-    . SwapIntoLn.withLockedExpiredRowSql (entityKey $ snd x)
+processRefund utxos@(x : _) = do
+  res <- runSql
+    . SwapIntoLn.withLockedRowSql
+      (entityKey $ snd x)
+      (`elem` swapStatusFinal)
     . const
     $ do
       $(logTM) DebugS . logStr $
         "Start refunding utxos:"
-          <> inspect utxos'
+          <> inspect refUtxos
           <> " to address:"
           <> inspect refAddr
       eitherM
-        ( \e ->
+        ( \e -> do
+            Psql.transactionUndo
             $(logTM) ErrorS . logStr $
               "Failed to refund utxos:"
-                <> inspect utxos'
+                <> inspect refUtxos
                 <> " to address:"
                 <> inspect refAddr
                 <> " with error:"
@@ -161,7 +175,7 @@ processRefund utxos@(x : _) =
         ( \(SendUtxosResult rtx total fee) -> do
             $(logTM) DebugS . logStr $
               "Successfully refunded utxos: "
-                <> inspect utxos'
+                <> inspect refUtxos
                 <> " to address:"
                 <> inspect refAddr
                 <> " on chain rawTx:"
@@ -177,19 +191,25 @@ processRefund utxos@(x : _) =
                 SwapUtxo.updateRefundedSql
                   (entityKey . fst <$> utxos)
                   (from rtxid)
-              Left e ->
+              Left e -> do
+                Psql.transactionUndo
                 $(logTM) ErrorS . logStr $
                   "Failed to convert txid:" <> inspect e
         )
         . lift
         . runExceptT
         $ sendUtxos
-          utxos'
+          refUtxos
           (coerce refAddr)
           (TxLabel "refund to " <> coerce refAddr)
+  whenLeft res $
+    $(logTM) ErrorS
+      . logStr
+      . ("No refund due to wrong status " <>)
+      . inspect
   where
     refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
-    utxos' = toOutPointAmt . entityVal . fst <$> utxos
+    refUtxos = toOutPointAmt . entityVal . fst <$> utxos
 
 toOutPointAmt :: SwapUtxo -> RefundUtxo
 toOutPointAmt x =
@@ -200,11 +220,3 @@ toOutPointAmt x =
     )
     (coerce $ swapUtxoAmount x)
     (swapUtxoLockId x)
-
-apply :: (Env m) => m ()
-apply =
-  runSql SwapUtxo.getUtxosForRefundSql
-    <&> groupBy (\a b -> swpId a == swpId b)
-    >>= mapM_ processRefund
-  where
-    swpId = entityKey . snd

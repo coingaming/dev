@@ -30,69 +30,74 @@ import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
 import qualified Universum
 
-apply :: (Env m) => [m ()] -> m ()
-apply afterScan =
+apply :: (Env m) => m ()
+apply =
   forever $ do
     eitherM
       ( $(logTM) ErrorS
           . logStr
           . inspect
       )
-      ( \us ->
-          unless (null us) (maybeFunded us >> sequence_ afterScan)
-      )
+      maybeFunded
       $ runExceptT scan
-    sleep $ MicroSecondsDelay 1000000
+    sleep $
+      MicroSecondsDelay 1000000
 
 maybeFunded :: (Env m) => [Utxo] -> m ()
+maybeFunded [] =
+  pure ()
 maybeFunded utxos =
-  mapM_ maybeFundSwap swapIds
-  where
-    swapIds =
-      nubOrd $
-        utxoSwapId <$> utxos
-    debugMsg mCap sid amt =
+  mapM_ maybeFundSwap
+    . nubOrd
+    $ utxoSwapId <$> utxos
+
+maybeFundSwap :: (Env m) => SwapIntoLnId -> m ()
+maybeFundSwap swapId = do
+  res <- runSql
+    . SwapIntoLn.withLockedRowSql
+      swapId
+      (`elem` swapStatusChain)
+    $ \swapVal -> do
+      us <- SwapUtxo.getSpendableUtxosBySwapIdSql swapId
+      let amt = sum $ swapUtxoAmount . entityVal <$> us
+      mCap <- lift $ newSwapCapM amt
       $(logTM) DebugS . logStr $
         maybe
           ( "Not enough funds for "
-              <> inspect sid
+              <> inspect swapId
               <> " with amt = "
               <> inspect amt
           )
           ( \cap ->
               "Marking funded "
-                <> inspect sid
+                <> inspect swapId
                 <> " with amt = "
                 <> inspect amt
                 <> " and cap = "
                 <> inspect cap
           )
           mCap
-    maybeFundSwap swapId = do
-      us <- runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swapId
-      let amt = sum $ swapUtxoAmount . entityVal <$> us
-      mCap <- newSwapCapM amt
-      debugMsg mCap swapId amt
-      whenJust mCap $ \swapCap ->
-        runSql
-          . SwapIntoLn.withLockedExtantRowSql swapId
-          $ \swp ->
-            when (swapIntoLnStatus swp < SwapWaitingChan) $ do
-              qty <-
-                SwapUtxo.updateUnspentChanReserveSql $
-                  entityKey <$> us
-              if qty /= from (length us)
-                then do
-                  $(logTM) ErrorS . logStr $
-                    "Funding update of the Swap "
-                      <> inspect swp
-                      <> " failed for UTXOs "
-                      <> inspect us
-                  Psql.transactionUndo
-                else
-                  SwapIntoLn.updateWaitingPeerSql
-                    swapId
-                    swapCap
+      whenJust mCap $ \swapCap -> do
+        qty <-
+          SwapUtxo.updateUnspentChanReserveSql $
+            entityKey <$> us
+        if qty /= from (length us)
+          then do
+            Psql.transactionUndo
+            $(logTM) ErrorS . logStr $
+              "Funding update "
+                <> inspect swapVal
+                <> " failed for UTXOs "
+                <> inspect us
+          else
+            SwapIntoLn.updateWaitingPeerSql
+              swapId
+              swapCap
+  whenLeft res $
+    $(logTM) ErrorS
+      . logStr
+      . ("Funding failed due to wrong status " <>)
+      . inspect
 
 data Utxo = Utxo
   { utxoAmt :: MSat,
@@ -188,7 +193,8 @@ extractRelatedUtxoFromBlock blk =
         catMaybes utxos <> acc
 
 persistBlockT ::
-  ( Storage m, Env m
+  ( Storage m,
+    Env m
   ) =>
   Btc.BlockVerbose ->
   [Utxo] ->
@@ -206,11 +212,24 @@ persistBlockT blk utxos = do
           (from <$> Btc.vPrevBlock blk)
     ct <-
       getCurrentTime
-    void $
-      lockByRow blockId
-    SwapUtxo.createManySql $
-      newSwapUtxo ct blockId <$> utxos
-    mapM_ (SwapUtxo.updateRefundBlockIdSql blockId) (utxoTxId <$> utxos)
+    res <-
+      Block.withLockedRowSql blockId (== BlkConfirmed)
+        . const
+        $ do
+          SwapUtxo.createManySql $
+            newSwapUtxo ct blockId <$> utxos
+          --
+          -- TODO : Fix this!!! mapM_ is redundant
+          -- and utxo list might be wrong!!!
+          --
+          mapM_
+            (SwapUtxo.updateRefundBlockIdSql blockId)
+            (utxoTxId <$> utxos)
+    whenLeft res $
+      $(logTM) ErrorS
+        . logStr
+        . ("UTXOs are not persisted for the block " <>)
+        . inspect
 
 newSwapUtxo :: UTCTime -> BlockId -> Utxo -> SwapUtxo
 newSwapUtxo ct blkId utxo = do
@@ -247,7 +266,7 @@ scan = do
           <> inspect cHeight
       scanOneBlock cHeight
     Just lBlk -> do
-      reorgDetected <- detectReorg
+      reorgDetected <- detectReorg lBlk
       case reorgDetected of
         Nothing -> do
           let known = from . blockHeight $ entityVal lBlk
@@ -257,11 +276,22 @@ scan = do
             "Reorg detected from height = "
               <> inspect height
           bHeight <- tryFromT height
-          lift . runSql $ do
-            blks <- Block.getBlocksHigherSql bHeight
-            Block.updateOrphanHigherSql bHeight
-            SwapUtxo.revertRefundedSql (entityKey <$> blks)
-            SwapUtxo.updateOrphanSql (entityKey <$> blks)
+          withExceptT
+            ( FailureInternal
+                . ("Block scanner failed due to bad status " <>)
+                . inspectPlain
+            )
+            . ExceptT
+            . runSql
+            . Block.withLockedRowSql
+              (entityKey lBlk)
+              (== BlkConfirmed)
+            . const
+            $ do
+              blks <- Block.getBlocksHigherSql bHeight
+              Block.updateOrphanHigherSql bHeight
+              SwapUtxo.revertRefundedSql (entityKey <$> blks)
+              SwapUtxo.updateOrphanSql (entityKey <$> blks)
           scannerStep [] (1 + coerce bHeight) $ from cHeight
 
 scannerStep ::
@@ -288,18 +318,17 @@ scannerStep acc cur end =
 detectReorg ::
   ( Env m
   ) =>
+  Entity Block ->
   ExceptT Failure m (Maybe Btc.BlockHeight)
-detectReorg = do
-  mBlk <- lift $ runSql Block.getLatestSql
-  case mBlk of
-    Nothing -> pure Nothing
-    Just blk -> do
-      let cHeight = from . blockHeight $ entityVal blk
-      cReorgHeight <- checkReorgHeight cHeight
-      pure $
-        if cReorgHeight == cHeight
-          then Nothing
-          else Just cReorgHeight
+detectReorg blk = do
+  cReorgHeight <- checkReorgHeight cHeight
+  pure $
+    if cReorgHeight == cHeight
+      then Nothing
+      else Just cReorgHeight
+  where
+    cHeight =
+      from . blockHeight $ entityVal blk
 
 checkReorgHeight ::
   ( Env m

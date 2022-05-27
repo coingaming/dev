@@ -4,11 +4,13 @@ module BtcLsp.Storage.Model.Block
     getBlockByHeightSql,
     getBlocksHigherSql,
     updateOrphanHigherSql,
+    withLockedRowSql,
   )
 where
 
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Storage.Util as Util
 
 createUpdateSql ::
   ( MonadIO m
@@ -125,3 +127,16 @@ updateOrphanHigherSql height = do
         Psql.&&. ( row Psql.^. BlockStatus
                      Psql.==. Psql.val BlkConfirmed
                  )
+
+withLockedRowSql ::
+  ( MonadIO m
+  ) =>
+  BlockId ->
+  (BlkStatus -> Bool) ->
+  (Block -> ReaderT Psql.SqlBackend m a) ->
+  ReaderT Psql.SqlBackend m (Either (Entity Block) a)
+withLockedRowSql rowId pre action = do
+  rowVal <- Util.lockByRow rowId
+  if pre $ blockStatus rowVal
+    then Right <$> action rowVal
+    else pure . Left $ Entity rowId rowVal
