@@ -248,13 +248,12 @@ persistChannelUpdates (Lnd.ChannelEventUpdate channelEvent _) = do
           Lnd.ChannelPoint txid vout
 
 persistOpenedChannels ::
-  ( Storage m,
-    Traversable t
+  ( Storage m
   ) =>
-  t Lnd.Channel ->
-  m (t (Entity LnChan))
+  [Lnd.Channel] ->
+  m [Entity LnChan]
 persistOpenedChannels cs = do
   ct <- getCurrentTime
   runSql
-    . forM cs
+    . forM (sortOn Channel.channelPoint cs)
     $ upsertChannelSql ct Nothing

@@ -116,6 +116,5 @@ spec =
       res <- newEmptyMVar
       (_, thndl) <- forkThread $ testThread res
       takeMVar thndl
-      r <- sequence <$> takeMVar res
-      let k = and <$> r
-      liftIO $ shouldBe k (Just True)
+      r <- takeMVar res
+      liftIO $ r `shouldSatisfy` all (== Just True)
