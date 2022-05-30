@@ -20,8 +20,8 @@ where
 
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Util as Util
-import qualified LndClient as Lnd
 
 createIgnoreSql ::
   ( MonadIO m
@@ -277,8 +277,7 @@ getSwapsAboutToExpirySql ::
   ) =>
   ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
 getSwapsAboutToExpirySql = do
-  nearExpTime <-
-    addSeconds (Lnd.Seconds 3600) <$> getCurrentTime
+  nearExpTime <- getFutureTime Math.swapExpiryLimitInternal
   Psql.select $
     Psql.from $ \row -> do
       Psql.where_

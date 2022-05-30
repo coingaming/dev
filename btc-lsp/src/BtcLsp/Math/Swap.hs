@@ -2,6 +2,8 @@
 
 module BtcLsp.Math.Swap
   ( SwapCap (..),
+    swapExpiryLimitInput,
+    swapExpiryLimitInternal,
     swapLnMaxAmt,
     swapLnFeeRate,
     swapLnMinFee,
@@ -14,6 +16,7 @@ import BtcLsp.Class.Env
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Import.External
+import qualified LndClient as Lnd
 
 data SwapCap = SwapCap
   { swapCapUsr :: Money 'Usr 'Ln 'Fund,
@@ -28,6 +31,14 @@ data SwapCap = SwapCap
     )
 
 instance Out SwapCap
+
+swapExpiryLimitInput :: Lnd.Seconds
+swapExpiryLimitInput =
+  Lnd.Seconds $ (7 * 24 - 1) * 3600
+
+swapExpiryLimitInternal :: Lnd.Seconds
+swapExpiryLimitInternal =
+  Lnd.Seconds 3600
 
 swapLnMaxAmt :: Money 'Usr btcl 'Fund
 swapLnMaxAmt =

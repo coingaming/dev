@@ -48,7 +48,10 @@ genPaymentReq =
         Lnd.AddInvoiceRequest
           { Lnd.valueMsat = MSat 0,
             Lnd.memo = Nothing,
-            Lnd.expiry = Nothing
+            Lnd.expiry =
+              Just
+                . Lnd.Seconds
+                $ 7 * 24 * 3600
           }
     )
 
