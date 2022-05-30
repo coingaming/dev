@@ -70,7 +70,7 @@ openChan (Entity swapKey _) userEnt = do
             . inspect
         )
         ( \cp ->
-            LnChan.createIgnoreSql
+            LnChan.createUpdateSql
               swapKey
               (ChannelPoint.fundingTxId cp)
               (ChannelPoint.outputIndex cp)

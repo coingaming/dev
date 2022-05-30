@@ -71,12 +71,13 @@ LnChan
   -- If channel is not used for a long time, then
   -- it should be closed because it's not efficient
   -- allocation of liquidity. We can track channel usage
-  -- with combination of numUpdates and updatedAt.
-  numUpdates Word64
+  -- with combination of totalSatoshisSent,
+  -- totalSatoshisReceived and transactedAt.
   totalSatoshisSent MSat
   totalSatoshisReceived MSat
   status LnChanStatus
   insertedAt UTCTime
   updatedAt UTCTime
+  transactedAt UTCTime
   UniqueLnChan fundingTxId fundingVout
   deriving Eq Ord Show Generic

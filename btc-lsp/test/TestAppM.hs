@@ -20,6 +20,7 @@ module TestAppM
     setGrpcCtxT,
     withBtc2,
     withBtc2T,
+    forkThread,
   )
 where
 
@@ -45,6 +46,10 @@ import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
+import UnliftIO.Concurrent
+  ( ThreadId,
+    forkFinally,
+  )
 import Prelude (show)
 
 data TestOwner
@@ -456,3 +461,13 @@ setGrpcCtxT owner message = do
                & Proto.lnPubKey
                  .~ from @Lnd.NodePubKey @Proto.LnPubKey pubKey
            )
+
+forkThread ::
+  ( MonadUnliftIO m
+  ) =>
+  m () ->
+  m (ThreadId, MVar ())
+forkThread proc = do
+  handle <- newEmptyMVar
+  tid <- forkFinally proc (const $ putMVar handle ())
+  return (tid, handle)

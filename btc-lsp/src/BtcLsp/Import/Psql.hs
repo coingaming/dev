@@ -20,6 +20,7 @@ import Database.Esqueleto.Legacy as X
     SqlPersistT,
     SqlType (..),
     ToBackendKey,
+    Unique,
     asc,
     deleteKey,
     desc,

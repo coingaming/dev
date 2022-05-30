@@ -7,8 +7,7 @@ where
 
 import BtcLsp.Import hiding (newEmptyMVar, putMVar, takeMVar)
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
-import BtcLsp.Thread.LnChanWatcher (forkThread, watchChannelEvents)
-import qualified BtcLsp.Thread.Server as Server
+import qualified BtcLsp.Thread.Main as Main
 import LndClient
 import qualified LndClient.Data.ChannelPoint as Lnd
 import qualified LndClient.Data.CloseChannel as Lnd
@@ -112,9 +111,7 @@ testThread result = do
 spec :: Spec
 spec =
   itEnv "Watch channel" $ do
-    withSpawnLink Server.apply . const $ do
-      lnd <- testLndEnv . testEnvLndLsp <$> ask
-      _ <- watchChannelEvents lnd
+    withSpawnLink Main.apply . const $ do
       res <- newEmptyMVar
       (_, thndl) <- forkThread $ testThread res
       takeMVar thndl
