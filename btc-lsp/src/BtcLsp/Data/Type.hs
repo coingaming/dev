@@ -610,8 +610,8 @@ data SwapUtxoStatus
 instance Out SwapUtxoStatus
 
 data Privacy
-  = Private
-  | Public
+  = Public
+  | Private
   deriving stock
     ( Eq,
       Ord,
@@ -855,4 +855,5 @@ Psql.derivePersistField "LnChanStatus"
 Psql.derivePersistField "SwapStatus"
 Psql.derivePersistField "BlkStatus"
 Psql.derivePersistField "SwapUtxoStatus"
+Psql.derivePersistField "Privacy"
 Psql.derivePersistField "UtxoLockId"

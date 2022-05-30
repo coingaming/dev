@@ -8,8 +8,9 @@ module Proto.BtcLsp.Data.HighLevel (
         FundLnInvoice(), FundMoney(), FundOnChainAddress(), InputFailure(),
         InputFailureKind(..), InputFailureKind(),
         InputFailureKind'UnrecognizedValue, LnHost(), LnPeer(), LnPort(),
-        LnPubKey(), LocalBalance(), Nonce(), RefundMoney(),
-        RefundOnChainAddress(), RemoteBalance()
+        LnPubKey(), LocalBalance(), Nonce(), Privacy(..), Privacy(),
+        Privacy'UnrecognizedValue, RefundMoney(), RefundOnChainAddress(),
+        RemoteBalance()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -2040,6 +2041,72 @@ instance Control.DeepSeq.NFData Nonce where
         -> Control.DeepSeq.deepseq
              (_Nonce'_unknownFields x__)
              (Control.DeepSeq.deepseq (_Nonce'val x__) ())
+newtype Privacy'UnrecognizedValue
+  = Privacy'UnrecognizedValue Data.Int.Int32
+  deriving stock (Prelude.Eq,
+                  Prelude.Ord,
+                  Prelude.Show,
+                  GHC.Generics.Generic)
+instance Text.PrettyPrint.GenericPretty.Out Privacy'UnrecognizedValue
+data Privacy
+  = PUBLIC |
+    PRIVATE |
+    Privacy'Unrecognized !Privacy'UnrecognizedValue
+  deriving stock (Prelude.Show,
+                  Prelude.Eq,
+                  Prelude.Ord,
+                  GHC.Generics.Generic)
+instance Data.ProtoLens.MessageEnum Privacy where
+  maybeToEnum 0 = Prelude.Just PUBLIC
+  maybeToEnum 1 = Prelude.Just PRIVATE
+  maybeToEnum k
+    = Prelude.Just
+        (Privacy'Unrecognized
+           (Privacy'UnrecognizedValue (Prelude.fromIntegral k)))
+  showEnum PUBLIC = "PUBLIC"
+  showEnum PRIVATE = "PRIVATE"
+  showEnum (Privacy'Unrecognized (Privacy'UnrecognizedValue k))
+    = Prelude.show k
+  readEnum k
+    | (Prelude.==) k "PUBLIC" = Prelude.Just PUBLIC
+    | (Prelude.==) k "PRIVATE" = Prelude.Just PRIVATE
+    | Prelude.otherwise
+    = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
+instance Prelude.Bounded Privacy where
+  minBound = PUBLIC
+  maxBound = PRIVATE
+instance Prelude.Enum Privacy where
+  toEnum k__
+    = Prelude.maybe
+        (Prelude.error
+           ((Prelude.++)
+              "toEnum: unknown value for enum Privacy: " (Prelude.show k__)))
+        Prelude.id (Data.ProtoLens.maybeToEnum k__)
+  fromEnum PUBLIC = 0
+  fromEnum PRIVATE = 1
+  fromEnum (Privacy'Unrecognized (Privacy'UnrecognizedValue k))
+    = Prelude.fromIntegral k
+  succ PRIVATE
+    = Prelude.error
+        "Privacy.succ: bad argument PRIVATE. This value would be out of bounds."
+  succ PUBLIC = PRIVATE
+  succ (Privacy'Unrecognized _)
+    = Prelude.error "Privacy.succ: bad argument: unrecognized value"
+  pred PUBLIC
+    = Prelude.error
+        "Privacy.pred: bad argument PUBLIC. This value would be out of bounds."
+  pred PRIVATE = PUBLIC
+  pred (Privacy'Unrecognized _)
+    = Prelude.error "Privacy.pred: bad argument: unrecognized value"
+  enumFrom = Data.ProtoLens.Message.Enum.messageEnumFrom
+  enumFromTo = Data.ProtoLens.Message.Enum.messageEnumFromTo
+  enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
+  enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
+instance Data.ProtoLens.FieldDefault Privacy where
+  fieldDefault = PUBLIC
+instance Control.DeepSeq.NFData Privacy where
+  rnf x__ = Prelude.seq x__ ()
+instance Text.PrettyPrint.GenericPretty.Out Privacy
 {- | Fields :
      
          * 'Proto.BtcLsp.Data.HighLevel_Fields.val' @:: Lens' RefundMoney Proto.BtcLsp.Data.LowLevel.Msat@
@@ -2446,8 +2513,12 @@ packedFileDescriptor
     \\bREQUIRED\DLE\NUL\DC2\r\n\
     \\tNOT_FOUND\DLE\SOH\DC2\DC2\n\
     \\SOPARSING_FAILED\DLE\STX\DC2\ETB\n\
-    \\DC3VERIFICATION_FAILED\DLE\ETXJ\226\SYN\n\
-    \\ACK\DC2\EOT\NUL\NULr\SOH\n\
+    \\DC3VERIFICATION_FAILED\DLE\ETX*\"\n\
+    \\aPrivacy\DC2\n\
+    \\n\
+    \\ACKPUBLIC\DLE\NUL\DC2\v\n\
+    \\aPRIVATE\DLE\SOHJ\204\ETB\n\
+    \\ACK\DC2\EOT\NUL\NULw\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \P\n\
@@ -2807,4 +2878,22 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\ENQ\NUL\STX\ETX\SOH\DC2\ETXq\STX\NAK\n\
     \\f\n\
-    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETXq\CAN\EMb\ACKproto3"
+    \\ENQ\ENQ\NUL\STX\ETX\STX\DC2\ETXq\CAN\EM\n\
+    \\n\
+    \\n\
+    \\STX\ENQ\SOH\DC2\EOTt\NULw\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\ENQ\SOH\SOH\DC2\ETXt\ENQ\f\n\
+    \\v\n\
+    \\EOT\ENQ\SOH\STX\NUL\DC2\ETXu\STX\r\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\NUL\SOH\DC2\ETXu\STX\b\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\NUL\STX\DC2\ETXu\v\f\n\
+    \\v\n\
+    \\EOT\ENQ\SOH\STX\SOH\DC2\ETXv\STX\SO\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\SOH\SOH\DC2\ETXv\STX\t\n\
+    \\f\n\
+    \\ENQ\ENQ\SOH\STX\SOH\STX\DC2\ETXv\f\rb\ACKproto3"

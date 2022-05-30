@@ -93,6 +93,12 @@ instance From Proto.FundOnChainAddress (OnChainAddress 'Fund) where
 instance From (OnChainAddress 'Fund) Proto.FundOnChainAddress where
   from = intoProto
 
+instance From Proto.Privacy Privacy where
+  from = toEnum . fromEnum
+
+instance From Privacy Proto.Privacy where
+  from = toEnum . fromEnum
+
 instance From Proto.Msat MSat where
   from = fromProto
 

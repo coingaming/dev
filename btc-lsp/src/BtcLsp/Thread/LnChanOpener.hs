@@ -59,7 +59,6 @@ openChan ::
   Entity User ->
   m ()
 openChan (Entity swapKey _) userEnt = do
-  prv <- getChanPrivacy
   rate <- getMsatPerByte
   res <- runSql
     . SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingPeer)
@@ -91,7 +90,7 @@ openChan (Entity swapKey _) userEnt = do
                   Chan.pushMSat = Nothing,
                   Chan.targetConf = Nothing,
                   Chan.mSatPerByte = rate,
-                  Chan.private = Just $ prv == Private,
+                  Chan.private = Just $ swapIntoLnPrivacy swapVal == Private,
                   Chan.minHtlcMsat = Nothing,
                   Chan.remoteCsvDelay = Nothing,
                   Chan.minConfs = Nothing,

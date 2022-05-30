@@ -86,6 +86,7 @@ createDummySwap key mExpAt = do
       (from fundAddr)
       (from refundAddr)
       expAt
+      Public
 
 getLatestBlock :: ExceptT Failure (TestAppM 'LndLsp IO) Btc.BlockVerbose
 getLatestBlock = do

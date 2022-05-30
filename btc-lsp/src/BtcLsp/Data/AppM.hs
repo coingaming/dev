@@ -49,8 +49,6 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     asks Env.envLndPubKey
   getLspLndEnv =
     asks Env.envLnd
-  getChanPrivacy =
-    asks Env.envChanPrivacy
   getLndP2PSocketAddress = do
     host <- asks Env.envLndP2PHost
     port <- asks Env.envLndP2PPort
