@@ -102,7 +102,7 @@ putLatestBlockToDB = do
       Btc.vBlkHeight blk
   k <-
     lift . runSql $
-      Block.createUpdateSql
+      Block.createUpdateConfirmedSql
         height
         (from $ Btc.vBlockHash blk)
         (from <$> Btc.vPrevBlock blk)

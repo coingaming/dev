@@ -206,7 +206,7 @@ persistBlockT blk utxos = do
   lift . runSql $ do
     blockId <-
       entityKey
-        <$> Block.createUpdateSql
+        <$> Block.createUpdateConfirmedSql
           height
           (from $ Btc.vBlockHash blk)
           (from <$> Btc.vPrevBlock blk)
@@ -216,7 +216,7 @@ persistBlockT blk utxos = do
       Block.withLockedRowSql blockId (== BlkConfirmed)
         . const
         $ do
-          SwapUtxo.createManySql $
+          SwapUtxo.createIgnoreManySql $
             newSwapUtxo ct blockId <$> utxos
           --
           -- TODO : Fix this!!! mapM_ is redundant

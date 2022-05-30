@@ -28,33 +28,25 @@ createUpdateSql ::
   Vout 'Funding ->
   ReaderT Psql.SqlBackend m (Entity LnChan)
 createUpdateSql swapId txid vout = do
-  maybeM
-    upsert
-    (const upsert)
-    $ Util.lockByUnique uniq
-  where
-    uniq =
-      UniqueLnChan txid vout
-    upsert = do
-      ct <- getCurrentTime
-      Psql.upsertBy
-        uniq
-        LnChan
-          { lnChanSwapIntoLnId = Just swapId,
-            lnChanFundingTxId = txid,
-            lnChanFundingVout = vout,
-            lnChanClosingTxId = Nothing,
-            lnChanExtId = Nothing,
-            lnChanStatus = LnChanStatusPendingOpen,
-            lnChanInsertedAt = ct,
-            lnChanUpdatedAt = ct,
-            lnChanTransactedAt = ct,
-            lnChanTotalSatoshisReceived = MSat 0,
-            lnChanTotalSatoshisSent = MSat 0
-          }
-        [ LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId),
-          LnChanUpdatedAt Psql.=. Psql.val ct
-        ]
+  ct <- getCurrentTime
+  Psql.upsertBy
+    (UniqueLnChan txid vout)
+    LnChan
+      { lnChanSwapIntoLnId = Just swapId,
+        lnChanFundingTxId = txid,
+        lnChanFundingVout = vout,
+        lnChanClosingTxId = Nothing,
+        lnChanExtId = Nothing,
+        lnChanStatus = LnChanStatusPendingOpen,
+        lnChanInsertedAt = ct,
+        lnChanUpdatedAt = ct,
+        lnChanTransactedAt = ct,
+        lnChanTotalSatoshisReceived = MSat 0,
+        lnChanTotalSatoshisSent = MSat 0
+      }
+    [ LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId),
+      LnChanUpdatedAt Psql.=. Psql.val ct
+    ]
 
 getByChannelPointSql ::
   ( Storage m
