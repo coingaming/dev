@@ -22,7 +22,7 @@ let Postgres = ./Postgres.dhall
 
 let owner = G.unOwner G.Owner.Lsp
 
-let domain = G.unOwner G.Owner.Lsp
+let domainName = ../../build/secrets/lnd/domainname.txt as Text ? G.todo
 
 let cloudProvider = Some C.ProviderType.DigitalOcean
 
@@ -154,7 +154,9 @@ let ports
 let mkDomain
     : G.BitcoinNetwork → Text
     = λ(net : G.BitcoinNetwork) →
-        merge { MainNet = domain, TestNet = domain, RegTest = owner } net
+        merge
+          { MainNet = domainName, TestNet = domainName, RegTest = owner }
+          net
 
 let mkEnv
     : G.BitcoinNetwork → P.Map.Type Text Text

@@ -11,8 +11,7 @@ let network = G.BitcoinNetwork.RegTest
 in  { apiVersion = "v1"
     , kind = "List"
     , items =
-      [ K.Resource.Service
-          (Lsp.mkService network (Some C.ProviderType.DigitalOcean))
+      [ K.Resource.Service (Lsp.mkService network (None C.ProviderType))
       , K.Resource.Ingress (Lsp.mkIngress network)
       , K.Resource.Deployment (Lsp.mkDeployment network)
       ]
