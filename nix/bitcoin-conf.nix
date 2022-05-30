@@ -18,6 +18,7 @@ let
   bitcoinconf = writeText "bitcoin.conf" ''
     regtest=1
     txindex=1
+    mintxfee=0.00000001
 
     rpcuser=${rpcuser}
     rpcpassword=${rpcpassword}
