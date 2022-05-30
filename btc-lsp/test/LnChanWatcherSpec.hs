@@ -111,6 +111,7 @@ testThread result = do
 spec :: Spec
 spec =
   itEnv "Watch channel" $ do
+    setupZeroChannels proxyOwner
     withSpawnLink Main.apply . const $ do
       res <- newEmptyMVar
       (_, thndl) <- forkThread $ testThread res
