@@ -218,13 +218,7 @@ persistBlockT blk utxos = do
         $ do
           SwapUtxo.createManySql $
             newSwapUtxo ct blockId <$> utxos
-          --
-          -- TODO : Fix this!!! mapM_ is redundant
-          -- and utxo list might be wrong!!!
-          --
-          mapM_
-            (SwapUtxo.updateRefundBlockIdSql blockId)
-            (utxoTxId <$> utxos)
+          SwapUtxo.updateRefundBlockIdSql blockId
     whenLeft res $
       $(logTM) ErrorS
         . logStr
