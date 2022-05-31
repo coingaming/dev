@@ -5,6 +5,7 @@ where
 
 import BtcLsp.Import
 import BtcLsp.Storage.Model.SwapUtxo (getUtxosBySwapIdSql)
+import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified BtcLsp.Thread.Main as Main
 import Data.List (intersect)
 import qualified Data.Vector as V
@@ -68,7 +69,7 @@ refundSucceded swp preTrs = do
     fromRight (False, preTrs) res
 
 spec :: Spec
-spec =
+spec = do
   itEnvT "Refunder Spec" $ do
     amt <-
       lift getSwapIntoLnMinAmt
@@ -95,3 +96,50 @@ spec =
     lift . withSpawnLink Main.apply . const $ do
       x <- waitCond 10 (refundSucceded swp) []
       liftIO $ x `shouldBe` True
+  focus $
+    itEnvT "Refunder + reorg Spec" $ do
+      void $ withBtcT Btc.setNetworkActive ($ False)
+      _ <- BlockScanner.scan
+
+      void $ withBtc2T Btc.generate (\h -> h 30 Nothing)
+      amt <-
+        lift getSwapIntoLnMinAmt
+      swp <-
+        createDummySwap "refunder test"
+          . Just
+          =<< getFutureTime (Lnd.Seconds 5)
+      void $
+        withLndT
+          Lnd.sendCoins
+          ( $
+              SendCoins.SendCoinsRequest
+                { SendCoins.addr =
+                    from
+                      . swapIntoLnFundAddress
+                      . entityVal
+                      $ swp,
+                  SendCoins.amount =
+                    from amt
+                }
+          )
+      void putLatestBlockToDB
+      lift $ mine 4 LndLsp
+      void $ withBtcT Btc.setNetworkActive ($ True)
+      void $ lift waitTillNodesSynchronized
+      lift . withSpawnLink Main.apply . const $ do
+        x <- waitCond 10 (refundSucceded swp) []
+        liftIO $ x `shouldBe` True
+
+waitTillNodesSynchronized :: (MonadReader (TestEnv o) m, Env m) => m (Either Failure ())
+waitTillNodesSynchronized = runExceptT $ do
+  sleep (MicroSecondsDelay 1000000)
+  blockCount1 <- withBtcT Btc.getBlockCount id
+  blockCount2 <- withBtc2T Btc.getBlockCount id
+  if blockCount1 == blockCount2
+    then do
+      blockHash1 <- withBtcT Btc.getBlockHash ($ blockCount1)
+      blockHash2 <- withBtc2T Btc.getBlockHash ($ blockCount2)
+      if blockHash1 == blockHash2
+        then return ()
+        else ExceptT waitTillNodesSynchronized
+    else ExceptT waitTillNodesSynchronized
