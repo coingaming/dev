@@ -21,12 +21,12 @@ import qualified Data.Map as M
 import LndClient (txIdParser)
 import qualified LndClient.Data.FinalizePsbt as FNP
 import qualified LndClient.Data.FundPsbt as FP
-import qualified LndClient.Data.OutPoint as OP
 import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.Data.ReleaseOutput as RO
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
+import BtcLsp.Thread.Utils (swapUtxoToPsbtUtxo)
 
 apply :: (Env m) => m ()
 apply =
@@ -50,20 +50,11 @@ defSendUtxoConfig =
       satPerVbyte = 1
     }
 
-data RefundUtxo = RefundUtxo
-  { getOutPoint :: OP.OutPoint,
-    getAmt :: MSat,
-    getLockId :: Maybe UtxoLockId
-  }
-  deriving stock (Show, Generic)
-
 data SendUtxosResult = SendUtxosResult
   { getGetDecTrx :: Btc.DecodedRawTransaction,
     getTotalAmt :: MSat,
     getFee :: MSat
   }
-
-instance Out RefundUtxo
 
 newtype TxLabel
   = TxLabel Text
@@ -77,7 +68,7 @@ newtype TxLabel
 sendUtxosWithMinFee ::
   (Env m) =>
   SendUtxoConfig ->
-  [RefundUtxo] ->
+  [PsbtUtxo] ->
   OnChainAddress 'Refund ->
   TxLabel ->
   ExceptT Failure m SendUtxosResult
@@ -136,7 +127,7 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
 sendUtxos ::
   ( Env m
   ) =>
-  [RefundUtxo] ->
+  [PsbtUtxo] ->
   OnChainAddress 'Refund ->
   TxLabel ->
   ExceptT Failure m SendUtxosResult
@@ -209,14 +200,4 @@ processRefund utxos@(x : _) = do
       . inspect
   where
     refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
-    refUtxos = toOutPointAmt . entityVal . fst <$> utxos
-
-toOutPointAmt :: SwapUtxo -> RefundUtxo
-toOutPointAmt x =
-  RefundUtxo
-    ( OP.OutPoint
-        (coerce $ swapUtxoTxid x)
-        (coerce $ swapUtxoVout x)
-    )
-    (coerce $ swapUtxoAmount x)
-    (swapUtxoLockId x)
+    refUtxos = swapUtxoToPsbtUtxo . entityVal . fst <$> utxos

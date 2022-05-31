@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -70,9 +70,11 @@ library
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
+      BtcLsp.Thread.PsbtOpener
       BtcLsp.Thread.Refunder
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
+      BtcLsp.Thread.Utils
       BtcLsp.Time
       BtcLsp.Yesod.Application
       BtcLsp.Yesod.Data.BootstrapColor
@@ -393,9 +395,11 @@ executable btc-lsp-exe
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
+        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -441,6 +445,7 @@ executable btc-lsp-integration
       LnChanWatcherSpec
       Main
       MathSpec
+      PsbtOpenerSpec
       RefunderSpec
       ReorgSpec
       ServerSpec
@@ -622,9 +627,11 @@ executable btc-lsp-integration
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
+        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -829,9 +836,11 @@ executable btc-lsp-prof
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
+        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -876,6 +885,7 @@ test-suite btc-lsp-test
       BlockScannerSpec
       LnChanWatcherSpec
       MathSpec
+      PsbtOpenerSpec
       RefunderSpec
       ReorgSpec
       ServerSpec
@@ -1056,9 +1066,11 @@ test-suite btc-lsp-test
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
+        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
+        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
