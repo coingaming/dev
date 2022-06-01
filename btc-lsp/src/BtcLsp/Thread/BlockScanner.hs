@@ -94,7 +94,7 @@ maybeFundSwap swapId = do
               swapId
               swapCap
   whenLeft res $
-    $(logTM) ErrorS
+    $(logTM) WarningS
       . logStr
       . ("Funding failed due to wrong status " <>)
       . inspect

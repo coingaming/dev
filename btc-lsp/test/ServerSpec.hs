@@ -9,7 +9,7 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
---import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient as Lnd
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -157,15 +157,16 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
       mine 1 LndLsp
         >> sleep (MicroSecondsDelay 5000000)
         >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
-    -- swapsToSettle <-
-    --   lift $
-    --     runSql SwapIntoLn.getSwapsWaitingLnFundSql
-    -- liftIO $
-    --   swapsToSettle
-    --     `shouldSatisfy` ((== 1) . length)
+    swapsToChan <-
+      lift $
+        runSql SwapIntoLn.getSwapsWaitingChanSql
+    liftIO $
+      swapsToChan
+        `shouldSatisfy` ((== 1) . length)
     lift $
       mine 1 LndLsp
         >> sleep (MicroSecondsDelay 5000000)
+        >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
     alicePub <- getPubKeyT LndAlice
     lndChans <-
       withLndT

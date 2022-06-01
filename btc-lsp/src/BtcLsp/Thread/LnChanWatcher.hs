@@ -29,7 +29,7 @@ applyPoll =
   forever $
     getLspLndEnv
       >>= syncChannelList
-      >> sleep (MicroSecondsDelay $ 60 * 1000000)
+      >> sleep (MicroSecondsDelay 1000000)
 
 applySub :: (Env m) => m ()
 applySub =
@@ -40,4 +40,4 @@ applySub =
         LndSilent.subscribeChannelEvents
           (void . run . LnChan.persistChannelUpdates)
           lnd
-    sleep . MicroSecondsDelay $ 5 * 1000000
+    sleep $ MicroSecondsDelay 1000000
