@@ -12,11 +12,13 @@ module TestAppM
     module ReExport,
     itEnv,
     itEnvT,
+    itMainT,
     xitEnv,
     xitEnvT,
     withTestEnv,
     getGCEnv,
     withLndTestT,
+    getPubKeyT,
     setGrpcCtxT,
     withBtc2,
     withBtc2T,
@@ -30,6 +32,7 @@ import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
+import qualified BtcLsp.Thread.Main as Main
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8 hiding (filter, length)
@@ -181,17 +184,9 @@ withTestEnv action =
   withTestEnv' $ \env ->
     runTestApp env $
       finally
-        ( do
-            LndTest.setupZeroChannels proxyOwner
-            -- scheduleAll
-            -- watchInvoices sub
-            action
-        )
-        -- unScheduleAll
+        (LndTest.setupZeroChannels proxyOwner >> action)
         $ pure ()
 
--- where
---   sub = SubscribeInvoicesRequest (Just $ Lnd.AddIndex 1) Nothing
 withBtc2 ::
   (MonadReader (TestEnv owner) m, MonadIO m) =>
   (Client -> t) ->
@@ -318,6 +313,7 @@ signT env msg = do
       pure $ Just sig
 
 itEnv ::
+  forall owner.
   String ->
   TestAppM owner IO () ->
   SpecWith (Arg (IO ()))
@@ -342,6 +338,30 @@ itEnvT testName expr =
         ( do
             res <- runExceptT expr
             liftIO $ res `shouldSatisfy` isRight
+        )
+
+itMainT ::
+  forall owner e.
+  ( Show e,
+    I.Env (TestAppM owner IO)
+  ) =>
+  String ->
+  ExceptT e (TestAppM owner IO) () ->
+  SpecWith (Arg (IO ()))
+itMainT testName expr =
+  it testName $
+    withTestEnv $
+      katipAddContext
+        (sl "TestName" testName)
+        ( do
+            res <-
+              withSpawnLink Main.apply . const . runExceptT $ do
+                -- Let endpoints spawn
+                sleep $ MicroSecondsDelay 100000
+                -- Evaluate given expression
+                expr
+            liftIO $
+              res `shouldSatisfy` isRight
         )
 
 xitEnv ::
@@ -439,6 +459,16 @@ getGCEnv ::
 getGCEnv =
   asks testEnvGCEnv
 
+getPubKeyT ::
+  ( MonadUnliftIO m,
+    LndTest m owner
+  ) =>
+  owner ->
+  ExceptT Failure m Lnd.NodePubKey
+getPubKeyT owner =
+  GetInfo.identityPubkey
+    <$> withLndTestT owner Lnd.getInfo id
+
 setGrpcCtxT ::
   ( HasField msg "ctx" Proto.Ctx,
     MonadUnliftIO m,
@@ -449,9 +479,7 @@ setGrpcCtxT ::
   ExceptT Failure m msg
 setGrpcCtxT owner message = do
   nonce <- newNonce
-  pubKey <-
-    GetInfo.identityPubkey
-      <$> withLndTestT owner Lnd.getInfo id
+  pubKey <- getPubKeyT owner
   pure $
     message
       & field @"ctx"

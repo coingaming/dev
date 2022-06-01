@@ -28,7 +28,7 @@ let
 
     server=1
     rest=1
-    fallbackfee=0.00000001
+    fallbackfee=0.0000001
   '';
   getFreePort = writeShellApplication {
     name = "get-unused-port";
