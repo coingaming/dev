@@ -3,6 +3,7 @@
 --restart=nix/ns-export-test-envs.sh
 --restart=nix/ns-ghcid-test.sh
 --restart=nix/ns-ghcid-main.sh
+--restart=nix/ns-gen-cfgs.sh
 --restart=proto/
 --restart=integration/
 --restart=config/

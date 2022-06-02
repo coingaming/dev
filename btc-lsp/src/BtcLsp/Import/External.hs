@@ -137,6 +137,7 @@ import Universum as X hiding
     bracket,
     finally,
     on,
+    print,
     set,
     show,
     state,

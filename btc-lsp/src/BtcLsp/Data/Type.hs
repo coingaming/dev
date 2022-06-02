@@ -775,13 +775,18 @@ newtype Vbyte = Vbyte
   deriving newtype
     ( Eq,
       Ord,
-      Show
+      Show,
+      Num
     )
   deriving stock
     ( Generic
     )
 
 instance Out Vbyte
+
+instance From Vbyte (Ratio Natural)
+
+instance From (Ratio Natural) Vbyte
 
 newtype RowQty = RowQty
   { unRowQty :: Int64

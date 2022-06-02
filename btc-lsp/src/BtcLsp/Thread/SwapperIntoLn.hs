@@ -56,6 +56,13 @@ settleSwap ::
   Entity LnChan ->
   m ()
 settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt = do
+  $(logTM) DebugS . logStr $
+    "Trying to settle the swap = "
+      <> inspect swapEnt
+      <> " with channel = "
+      <> inspect chanEnt
+      <> " and user = "
+      <> inspect userEnt
   res <- runSql
     . SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingFundLn)
     $ \swapVal -> do
