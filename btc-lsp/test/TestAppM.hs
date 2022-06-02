@@ -11,6 +11,7 @@ module TestAppM
     assertChannelState,
     module ReExport,
     itEnv,
+    itMain,
     itEnvT,
     itMainT,
     xitEnv,
@@ -324,6 +325,25 @@ itEnv testName expr =
         (sl "TestName" testName)
         expr
 
+itMain ::
+  forall owner.
+  ( I.Env (TestAppM owner IO)
+  ) =>
+  String ->
+  TestAppM owner IO () ->
+  SpecWith (Arg (IO ()))
+itMain testName expr =
+  it testName $
+    withTestEnv $
+      katipAddContext
+        (sl "TestName" testName)
+        ( withSpawnLink Main.apply . const $ do
+            -- Let endpoints and watchers spawn
+            sleep $ MicroSecondsDelay 300000
+            -- Evaluate given expression
+            expr
+        )
+
 itEnvT ::
   ( Show e
   ) =>
@@ -356,8 +376,8 @@ itMainT testName expr =
         ( do
             res <-
               withSpawnLink Main.apply . const . runExceptT $ do
-                -- Let endpoints spawn
-                sleep $ MicroSecondsDelay 100000
+                -- Let endpoints and watchers spawn
+                sleep $ MicroSecondsDelay 300000
                 -- Evaluate given expression
                 expr
             liftIO $

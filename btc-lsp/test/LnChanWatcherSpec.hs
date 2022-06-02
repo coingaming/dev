@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module LnChanWatcherSpec
   ( spec,
   )
@@ -5,7 +7,6 @@ where
 
 import BtcLsp.Import hiding (newEmptyMVar, putMVar, takeMVar)
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
-import qualified BtcLsp.Thread.Main as Main
 import LndClient
 import qualified LndClient.Data.ChannelPoint as Lnd
 import qualified LndClient.Data.CloseChannel as Lnd
@@ -75,7 +76,7 @@ testThread result = do
     liftLndResult
       =<< Lnd.openChannelSync lndFrom (openChannelRequest toPubKey)
   isPendingOpenOk <-
-    tryTimes 10 1 $
+    tryTimes 3 1 $
       justTrue . fmap ((== LnChanStatusPendingOpen) . lnChanStatus . entityVal) <$> queryChannel cp
   mine 10 LndLsp
   isOpenedOk <- tryTimes 3 1 $ do
@@ -108,11 +109,9 @@ testThread result = do
 
 spec :: Spec
 spec =
-  itEnv "Watch channel" $ do
-    setupZeroChannels proxyOwner
-    withSpawnLink Main.apply . const $ do
-      res <- newEmptyMVar
-      (_, thndl) <- forkThread $ testThread res
-      takeMVar thndl
-      r <- takeMVar res
-      liftIO $ r `shouldSatisfy` all (== Just True)
+  itMain @'LndLsp "Watch channel" $ do
+    res <- newEmptyMVar
+    (_, thndl) <- forkThread $ testThread res
+    takeMVar thndl
+    r <- takeMVar res
+    liftIO $ r `shouldSatisfy` all (== Just True)
