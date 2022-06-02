@@ -75,7 +75,7 @@ testThread result = do
     liftLndResult
       =<< Lnd.openChannelSync lndFrom (openChannelRequest toPubKey)
   isPendingOpenOk <-
-    tryTimes 3 1 $
+    tryTimes 10 1 $
       justTrue . fmap ((== LnChanStatusPendingOpen) . lnChanStatus . entityVal) <$> queryChannel cp
   mine 10 LndLsp
   isOpenedOk <- tryTimes 3 1 $ do
