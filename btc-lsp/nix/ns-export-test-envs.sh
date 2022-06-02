@@ -137,6 +137,7 @@ export LSP_LOG_VERBOSITY="V3" # V0-V3
 # EmergencyS
 #
 export LSP_LOG_SEVERITY="ErrorS"
+export LSP_LOG_SECRET="SecretVisible" # SecretHidden | SecretVisible
 export LSP_LND_P2P_HOST="127.0.0.1"
 export LSP_LND_P2P_PORT="9736"
 export LSP_MIN_CHAN_CAP_MSAT="20000000"
