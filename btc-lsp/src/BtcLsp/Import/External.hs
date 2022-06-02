@@ -124,7 +124,9 @@ import Network.HTTP2.Client2 as X (HostName, PortNumber)
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X
-  ( inspect,
+  ( PrettyLog (..),
+    SecretVision (..),
+    inspect,
     inspectGenPlain,
     inspectPlain,
     inspectStr,

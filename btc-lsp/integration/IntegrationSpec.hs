@@ -10,6 +10,7 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
 import qualified BtcLsp.Thread.Main as Main
+import qualified LndClient as Lnd
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.NewAddress as Lnd

@@ -72,6 +72,7 @@ data RawConfig = RawConfig
     rawConfigLogFormat :: LogFormat,
     rawConfigLogVerbosity :: Verbosity,
     rawConfigLogSeverity :: Severity,
+    rawConfigLogSecrets :: SecretVision,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,
@@ -106,6 +107,7 @@ readRawConfig =
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_VERBOSITY" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SEVERITY" opts
+      <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SECRETS" (opts <> E.def SecretHidden)
       -- Lnd
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
