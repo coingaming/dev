@@ -5,14 +5,14 @@ module ReorgSpec
   )
 where
 
+import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified Network.Bitcoin as Btc
 import Test.Hspec
-import TestWithLndLsp
-import BtcLsp.Grpc.Orphan ()
 import TestOrphan ()
+import TestWithLndLsp
 
 spec :: Spec
 spec = do
