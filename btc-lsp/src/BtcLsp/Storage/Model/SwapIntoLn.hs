@@ -430,5 +430,3 @@ withLockedRowSql rowId pre action = do
   if pre $ swapIntoLnStatus rowVal
     then Right <$> action rowVal
     else pure . Left $ Entity rowId rowVal
-
-
