@@ -96,55 +96,53 @@ spec = do
     lift . withSpawnLink Main.apply . const $ do
       x <- waitCond 10 (refundSucceded swp) []
       liftIO $ x `shouldBe` True
-  focus $
-    itEnvT "Refunder + reorg Spec" $ do
-      void $ withBtcT Btc.setNetworkActive ($ False)
-      _ <- BlockScanner.scan
+  itEnvT "Refunder + reorg Spec" $ do
+    void $ withBtcT Btc.setNetworkActive ($ False)
+    _ <- BlockScanner.scan
 
-      void $ withBtc2T Btc.generate (\h -> h 30 Nothing)
-      amt <-
-        lift getSwapIntoLnMinAmt
-      swp <-
-        createDummySwap "refunder test"
-          . Just
-          =<< getFutureTime (Lnd.Seconds 5)
-      void $
-        withLndT
-          Lnd.sendCoins
-          ( $
-              SendCoins.SendCoinsRequest
-                { SendCoins.addr =
-                    from
-                      . swapIntoLnFundAddress
-                      . entityVal
-                      $ swp,
-                  SendCoins.amount =
-                    from amt
-                }
-          )
-      void putLatestBlockToDB
-      lift $ mine 4 LndLsp
-      lift . withSpawnLink Main.apply . const $ do
-        let swpId = entityKey swp
-        x <- waitCond 10 (refundSucceded swp) []
-        utxos <- runSql $ getUtxosBySwapIdSql swpId
-        case listToMaybe utxos of
-          Just utxo -> do
-            liftIO $ swapUtxoStatus (entityVal utxo) `shouldBe` SwapUtxoSpentRefund
-          Nothing -> error "There should be one Utxo for Swap"
+    void $ withBtc2T Btc.generate (\h -> h 30 Nothing)
+    amt <-
+      lift getSwapIntoLnMinAmt
+    swp <-
+      createDummySwap "refunder test"
+        . Just
+        =<< getFutureTime (Lnd.Seconds 5)
+    void $
+      withLndT
+        Lnd.sendCoins
+        ( $
+            SendCoins.SendCoinsRequest
+              { SendCoins.addr =
+                  from
+                    . swapIntoLnFundAddress
+                    . entityVal
+                    $ swp,
+                SendCoins.amount =
+                  from amt
+              }
+        )
+    void putLatestBlockToDB
+    lift $ mine 4 LndLsp
+    lift . withSpawnLink Main.apply . const $ do
+      let swpId = entityKey swp
+      x <- waitCond 10 (refundSucceded swp) []
+      utxos <- runSql $ getUtxosBySwapIdSql swpId
+      case listToMaybe utxos of
+        Just utxo -> do
+          liftIO $ swapUtxoStatus (entityVal utxo) `shouldBe` SwapUtxoSpentRefund
+        Nothing -> error "There should be one Utxo for Swap"
 
+      void $ withBtc Btc.setNetworkActive ($ True)
+      void waitTillNodesSynchronized
 
-        void $ withBtc Btc.setNetworkActive ($ True)
-        void waitTillNodesSynchronized
+      mine 10 LndLsp
+      utxos2 <- runSql $ getUtxosBySwapIdSql swpId
+      case listToMaybe utxos2 of
+        Just utxo2 -> do
+          liftIO $ swapUtxoStatus (entityVal utxo2) `shouldBe` SwapUtxoOrphan
+        Nothing -> error "There should be one Utxo for Swap"
 
-        mine 10 LndLsp
-        utxos2 <- runSql $ getUtxosBySwapIdSql swpId
-        case listToMaybe utxos2 of
-          Just utxo2 -> do
-            liftIO $ swapUtxoStatus (entityVal utxo2) `shouldBe` SwapUtxoOrphan
-          Nothing -> error "There should be one Utxo for Swap"
-
-        liftIO $ x `shouldBe` True
+      liftIO $ x `shouldBe` True
 
 waitTillNodesSynchronized :: (MonadReader (TestEnv o) m, Env m) => m (Either Failure ())
 waitTillNodesSynchronized = runExceptT $ do
