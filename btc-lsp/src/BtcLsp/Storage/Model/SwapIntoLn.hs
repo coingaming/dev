@@ -12,6 +12,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getSwapsAboutToExpirySql,
     getByUuidSql,
     getByFundAddressSql,
+    getByKeySql,
     withLockedRowSql,
     UtxoInfo (..),
     SwapInfo (..),
@@ -410,6 +411,13 @@ getByFundAddressSql =
   Psql.getBy
     . UniqueSwapIntoLnFundAddress
 
+getByKeySql ::
+  ( MonadIO m
+  ) =>
+  Psql.Key SwapIntoLn ->
+  ReaderT Psql.SqlBackend m (Maybe SwapIntoLn)
+getByKeySql = Psql.get
+
 withLockedRowSql ::
   ( MonadIO m
   ) =>
@@ -422,3 +430,5 @@ withLockedRowSql rowId pre action = do
   if pre $ swapIntoLnStatus rowVal
     then Right <$> action rowVal
     else pure . Left $ Entity rowId rowVal
+
+

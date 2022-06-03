@@ -124,10 +124,26 @@ spec = do
           )
       void putLatestBlockToDB
       lift $ mine 4 LndLsp
-      void $ withBtcT Btc.setNetworkActive ($ True)
-      void $ lift waitTillNodesSynchronized
       lift . withSpawnLink Main.apply . const $ do
+        let swpId = entityKey swp
         x <- waitCond 10 (refundSucceded swp) []
+        utxos <- runSql $ getUtxosBySwapIdSql swpId
+        case listToMaybe utxos of
+          Just utxo -> do
+            liftIO $ swapUtxoStatus (entityVal utxo) `shouldBe` SwapUtxoSpentRefund
+          Nothing -> error "There should be one Utxo for Swap"
+
+
+        void $ withBtc Btc.setNetworkActive ($ True)
+        void waitTillNodesSynchronized
+
+        mine 10 LndLsp
+        utxos2 <- runSql $ getUtxosBySwapIdSql swpId
+        case listToMaybe utxos2 of
+          Just utxo2 -> do
+            liftIO $ swapUtxoStatus (entityVal utxo2) `shouldBe` SwapUtxoOrphan
+          Nothing -> error "There should be one Utxo for Swap"
+
         liftIO $ x `shouldBe` True
 
 waitTillNodesSynchronized :: (MonadReader (TestEnv o) m, Env m) => m (Either Failure ())
