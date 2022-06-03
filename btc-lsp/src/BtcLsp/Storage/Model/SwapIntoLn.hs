@@ -12,7 +12,6 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getSwapsAboutToExpirySql,
     getByUuidSql,
     getByFundAddressSql,
-    getByKeySql,
     withLockedRowSql,
     UtxoInfo (..),
     SwapInfo (..),
@@ -410,13 +409,6 @@ getByFundAddressSql ::
 getByFundAddressSql =
   Psql.getBy
     . UniqueSwapIntoLnFundAddress
-
-getByKeySql ::
-  ( MonadIO m
-  ) =>
-  Psql.Key SwapIntoLn ->
-  ReaderT Psql.SqlBackend m (Maybe SwapIntoLn)
-getByKeySql = Psql.get
 
 withLockedRowSql ::
   ( MonadIO m

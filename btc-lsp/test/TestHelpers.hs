@@ -62,7 +62,7 @@ insertFakeUser key = do
             userInsertedAt = ct,
             userUpdatedAt = ct
           }
-  runSql $ Psql.insertEntity u
+  runSql $ Psql.upsert u []
 
 createDummySwap ::
   ByteString ->

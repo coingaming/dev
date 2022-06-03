@@ -135,13 +135,12 @@ spec = do
       void $ withBtc Btc.setNetworkActive ($ True)
       void waitTillNodesSynchronized
 
-      mine 10 LndLsp
+      mine 20 LndLsp
       utxos2 <- runSql $ getUtxosBySwapIdSql swpId
       case listToMaybe utxos2 of
         Just utxo2 -> do
           liftIO $ swapUtxoStatus (entityVal utxo2) `shouldBe` SwapUtxoOrphan
         Nothing -> error "There should be one Utxo for Swap"
-
       liftIO $ x `shouldBe` True
 
 waitTillNodesSynchronized :: (MonadReader (TestEnv o) m, Env m) => m (Either Failure ())
