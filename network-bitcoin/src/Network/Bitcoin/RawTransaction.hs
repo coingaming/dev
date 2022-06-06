@@ -29,8 +29,11 @@ module Network.Bitcoin.RawTransaction ( Client
                                       , decodeRawTransaction
                                       , WhoCanPay(..)
                                       , RawSignedTransaction(..)
+                                      , DecodedPsbt (..)
                                       , signRawTransaction
                                       , sendRawTransaction
+                                      , decodePsbt
+                                      , joinPsbts
                                       ) where
 
 import           Control.Applicative
@@ -40,6 +43,7 @@ import           Data.Aeson.Types         as AT
 import           Data.Maybe
 import qualified Data.Vector              as V
 import           Network.Bitcoin.Internal
+import Data.ByteString (ByteString)
 
 -- | Just like most binary data retrieved from bitcoind, a raw transaction is
 --   represented by a hexstring.
@@ -395,3 +399,19 @@ signRawTransaction client rt us' privkeys wcp =
 
 sendRawTransaction :: Client -> RawTransaction -> IO TransactionID
 sendRawTransaction client rt = callApi client "sendrawtransaction" [ tj rt ]
+
+
+
+newtype DecodedPsbt = DecodedPsbt {
+    tx :: DecodedRawTransaction
+} deriving ( Show, Read, Ord, Eq )
+
+instance FromJSON DecodedPsbt where
+    parseJSON (Object o) = DecodedPsbt <$> o .: "tx"
+    parseJSON _ = mzero
+
+decodePsbt :: Client -> HexString -> IO DecodedPsbt
+decodePsbt client psbt = callApi client "decodepsbt" [ tj psbt ]
+
+joinPsbts :: Client -> [HexString] -> IO HexString
+joinPsbts client psbts = callApi client "joinpsbts" [ tj psbts ]

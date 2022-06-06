@@ -61,6 +61,13 @@ let
 in
 {
   envFile = lspEnv.exportEnvFile;
+  cliAlias = nixPkgs.writeShellScriptBin "cli-alias" ''
+    alias bitcoin-cli="${bitcoindConf.cli}/bin/bitcoin-cli"
+    alias bitcoin-cli-2="${bitcoindConf2.cli}/bin/bitcoin-cli"
+    alias lncli-lsp="${lndLsp.cli}/bin/lncli"
+    alias lncli-alice="${lndAlice.cli}/bin/lncli"
+    alias lncli-bob="${lndBob.cli}/bin/lncli"
+  '';
   startAll = nixPkgs.writeShellScriptBin "start-test-deps" ''
     set -euo pipefail
     ${bitcoindConf.up}/bin/up

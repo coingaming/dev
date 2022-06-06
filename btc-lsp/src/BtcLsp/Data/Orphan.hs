@@ -9,11 +9,11 @@ import qualified BtcLsp.Text as T
 import qualified Data.Time.ISO8601 as Time
 import qualified LndClient as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
-import qualified Network.Bitcoin.RawTransaction as Btc
 import qualified Network.Bitcoin.Types as Btc
 import qualified Text.PrettyPrint as PP
 import qualified Universum
 import qualified Witch
+import qualified Network.Bitcoin.RawTransaction as Btc
 
 deriving stock instance Generic Btc.TxnOutputType
 
@@ -33,6 +33,8 @@ deriving stock instance Generic Btc.BlockChainInfo
 
 deriving stock instance Generic Btc.TransactionID
 
+deriving stock instance Generic Btc.DecodedPsbt
+
 instance Out Btc.TransactionID
 
 instance Out Btc.TxnOutputType
@@ -50,6 +52,8 @@ instance Out Btc.BlockVerbose
 instance Out Btc.DecodedRawTransaction
 
 instance Out Btc.BlockChainInfo
+
+instance Out Btc.DecodedPsbt
 
 instance From Text Lnd.PaymentRequest
 

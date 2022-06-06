@@ -19,6 +19,7 @@ in
     proto.protoc-haskell-bin
     deps.startAll
     deps.stopAll
+    deps.cliAlias
   ];
   tools = {
     cabal = "3.2.0.0";
@@ -28,5 +29,7 @@ in
   };
   shellHook = ''
     gen-hie > hie.yaml
+    source ${deps.envFile}
+    source cli-alias
   '';
 }
