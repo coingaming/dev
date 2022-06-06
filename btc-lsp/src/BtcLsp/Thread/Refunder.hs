@@ -72,10 +72,11 @@ sendUtxos ::
   TxLabel ->
   ExceptT Failure m SendUtxosResult
 sendUtxos feeRate utxos addr txLabel = do
+  inQty <- tryFromT $ length utxos
   estFee <-
     tryFailureT $
       Math.trxEstFee
-        (Math.InQty . fromIntegral $ length utxos)
+        (Math.InQty inQty)
         (Math.OutQty 1)
         feeRate
   let finalOutputAmt = totalInputsAmt - estFee

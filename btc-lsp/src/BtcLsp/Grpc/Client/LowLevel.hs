@@ -162,7 +162,7 @@ msgToSignBytes compressMode msg = header <> body
         <> ( BL.toStrict
                . BS.toLazyByteString
                . BS.putWord32be
-               . fromIntegral
+               . fromIntegral -- Length is non-neg, it's fine.
                $ BS.length body
            )
 

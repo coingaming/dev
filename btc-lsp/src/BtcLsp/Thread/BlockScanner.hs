@@ -346,6 +346,7 @@ compareHash ::
   Btc.BlockHeight ->
   ExceptT Failure m (Maybe Bool)
 compareHash height = do
+  w64h <- tryFromT height
   cHash <- withBtcT Btc.getBlockHash ($ height)
   lift
     . ( (== cHash)
@@ -357,8 +358,7 @@ compareHash height = do
     . (listToMaybe <$>)
     . runSql
     . Block.getBlockByHeightSql
-    . BlkHeight
-    $ fromIntegral height
+    $ BlkHeight w64h
 
 scanOneBlock ::
   ( Env m

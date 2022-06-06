@@ -30,7 +30,7 @@ lockByTable x =
   void
     ( Psql.rawSql
         "SELECT pg_advisory_xact_lock(?)"
-        [Psql.PersistInt64 $ fromIntegral $ fromEnum x] ::
+        [Psql.PersistInt64 . from $ fromEnum x] ::
         (MonadIO m) => Psql.SqlPersistT m [VoidSQL]
     )
 
