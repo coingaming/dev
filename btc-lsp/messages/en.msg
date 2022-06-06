@@ -61,6 +61,13 @@ LnChanStatusPendingClose: Closing
 LnChanStatusClosed: Closed
 
 #
+# ChanPrivacy
+#
+
+ChanPrivate: Private
+ChanPublic: Public
+
+#
 # Page title
 #
 

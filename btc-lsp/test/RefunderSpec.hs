@@ -6,7 +6,6 @@ where
 import BtcLsp.Import
 import BtcLsp.Storage.Model.SwapUtxo (getUtxosBySwapIdSql)
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
-import qualified BtcLsp.Thread.Main as Main
 import Data.List (intersect)
 import qualified Data.Vector as V
 import LndClient (txIdParser)
@@ -70,13 +69,14 @@ refundSucceded swp preTrs = do
 
 spec :: Spec
 spec = do
-  itEnvT "Refunder Spec" $ do
+  itMainT "Refunder Spec" $ do
     amt <-
       lift getSwapIntoLnMinAmt
     swp <-
-      createDummySwap "refunder test"
-        . Just
+      createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
+    -- Let Expirer to expiry the swap
+    sleep $ MicroSecondsDelay 1000000
     void $
       withLndT
         Lnd.sendCoins
@@ -91,22 +91,24 @@ spec = do
                   from amt
               }
         )
-    void putLatestBlockToDB
-    lift $ mine 4 LndLsp
-    lift . withSpawnLink Main.apply . const $ do
-      x <- waitCond 10 (refundSucceded swp) []
-      liftIO $ x `shouldBe` True
-  itEnvT "Refunder + reorg Spec" $ do
+    lift $ mine 1 LndLsp
+    -- Let Refunder to refund UTXO
+    sleep $ MicroSecondsDelay 1000000
+    res <- lift $ waitCond 10 (refundSucceded swp) []
+    liftIO $ res `shouldSatisfy` fst
+  itMainT "Refunder + reorg Spec" $ do
     void $ withBtcT Btc.setNetworkActive ($ False)
     _ <- BlockScanner.scan
 
     void $ withBtc2T Btc.generate (\h -> h 30 Nothing)
+
     amt <-
       lift getSwapIntoLnMinAmt
     swp <-
-      createDummySwap "refunder test"
-        . Just
+      createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
+    -- Let Expirer to expiry the swap
+    sleep $ MicroSecondsDelay 1000000
     void $
       withLndT
         Lnd.sendCoins
@@ -121,28 +123,27 @@ spec = do
                   from amt
               }
         )
-    void putLatestBlockToDB
-    lift $ mine 4 LndLsp
-    lift . withSpawnLink Main.apply . const $ do
-      let swpId = entityKey swp
-      x <- waitCond 10 (refundSucceded swp) []
-      utxos <- runSql $ getUtxosBySwapIdSql swpId
-      case listToMaybe utxos of
-        Just utxo -> do
-          liftIO $ swapUtxoStatus (entityVal utxo) `shouldBe` SwapUtxoSpentRefund
-        Nothing -> error "There should be one Utxo for Swap"
+    lift $ mine 1 LndLsp
+    -- Let Refunder to refund UTXO
+    sleep $ MicroSecondsDelay 1000000
+    let swpId = entityKey swp
+    res <- lift $ waitCond 10 (refundSucceded swp) []
+    utxos <- lift $ runSql $ getUtxosBySwapIdSql swpId
+    case listToMaybe utxos of
+      Just utxo -> do
+        liftIO $ swapUtxoStatus (entityVal utxo) `shouldBe` SwapUtxoSpentRefund
+      Nothing -> error "There should be one Utxo for Swap"
 
-      void $ withBtc Btc.setNetworkActive ($ True)
-      void waitTillNodesSynchronized
+    void $ withBtcT Btc.setNetworkActive ($ True)
+    void $ ExceptT waitTillNodesSynchronized
 
-      mine 20 LndLsp
-      utxos2 <- runSql $ getUtxosBySwapIdSql swpId
-      case listToMaybe utxos2 of
-        Just utxo2 -> do
-          liftIO $ swapUtxoStatus (entityVal utxo2) `shouldBe` SwapUtxoOrphan
-        Nothing -> error "There should be one Utxo for Swap"
-      liftIO $ x `shouldBe` True
-
+    lift $ mine 20 LndLsp
+    utxos2 <- lift $ runSql $ getUtxosBySwapIdSql swpId
+    case listToMaybe utxos2 of
+      Just utxo2 -> do
+        liftIO $ swapUtxoStatus (entityVal utxo2) `shouldBe` SwapUtxoOrphan
+      Nothing -> error "There should be one Utxo for Swap"
+    liftIO $ res `shouldSatisfy` fst
 waitTillNodesSynchronized :: (MonadReader (TestEnv o) m, Env m) => m (Either Failure ())
 waitTillNodesSynchronized = runExceptT $ do
   sleep (MicroSecondsDelay 1000000)
@@ -156,3 +157,7 @@ waitTillNodesSynchronized = runExceptT $ do
         then return ()
         else ExceptT waitTillNodesSynchronized
     else ExceptT waitTillNodesSynchronized
+
+
+
+

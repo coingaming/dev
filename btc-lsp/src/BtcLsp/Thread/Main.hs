@@ -8,7 +8,9 @@ module BtcLsp.Thread.Main
 where
 
 import BtcLsp.Data.AppM (runApp)
+import qualified BtcLsp.Data.Env as Env
 import BtcLsp.Import
+import qualified BtcLsp.Rpc.Env as Btc
 import qualified BtcLsp.Storage.Migration as Storage
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified BtcLsp.Thread.Expirer as Expirer
@@ -38,6 +40,21 @@ main = do
       $(logTM) InfoS "Lsp is starting!"
       $(logTM) InfoS "Reading lsp raw environment..."
       cfg <- liftIO readRawConfig
+      let secret title x =
+            logStr $
+              title
+                <> " = "
+                <> inspect
+                  ( SecretLog (Env.rawConfigLogSecrets cfg) x
+                  )
+      let btc = Env.rawConfigBtcEnv cfg
+      $(logTM) InfoS $
+        secret
+          "rawConfigBtcEnv"
+          [ ("host" :: Text, Btc.bitcoindEnvHost btc),
+            ("user", Btc.bitcoindEnvUsername btc),
+            ("pass", Btc.bitcoindEnvPassword btc)
+          ]
       $(logTM) InfoS "Creating lsp runtime environment..."
       pure cfg
   withEnv cfg $

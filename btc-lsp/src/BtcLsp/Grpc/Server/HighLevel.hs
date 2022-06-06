@@ -11,7 +11,6 @@ where
 import BtcLsp.Import
 import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
-import qualified BtcLsp.Time as Time
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
@@ -45,6 +44,14 @@ swapIntoLn userEnt req = do
              ]
          )
         $ req ^. SwapIntoLn.maybe'refundOnChainAddress
+    privacy <-
+      fromReqT
+        $( mkFieldLocation
+             @SwapIntoLn.Request
+             [ "privacy"
+             ]
+         )
+        $ req ^? SwapIntoLn.privacy
     fundInvLnd <-
       withLndServerT
         Lnd.decodePayReq
@@ -54,6 +61,7 @@ swapIntoLn userEnt req = do
       fundInv
       fundInvLnd
       refundAddr
+      privacy
   pure $ case res of
     Left e -> e
     Right (Entity _ swap) ->
@@ -76,18 +84,20 @@ swapIntoLnT ::
   LnInvoice 'Fund ->
   Lnd.PayReq ->
   OnChainAddress 'Refund ->
+  Privacy ->
   ExceptT SwapIntoLn.Response m (Entity SwapIntoLn)
-swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
+swapIntoLnT userEnt fundInv fundInvLnd refundAddr chanPrivacy = do
   --
   -- TODO : Do not fail immediately, but collect
   -- all the input failures.
   --
+  futureExpiry <- getFutureTime Math.swapExpiryLimitInput
   when
     (Lnd.numMsat fundInvLnd /= MSat 0)
     $ throwSpec
       SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
   when
-    (Lnd.expiry fundInvLnd < Time.swapExpiryLimit)
+    (Lnd.expiresAt fundInvLnd < futureExpiry)
     $ throwSpec
       SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
   when
@@ -114,7 +124,8 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr = do
       (Lnd.paymentHash fundInvLnd)
       fundAddr
       refundAddr
-    $ Lnd.expiresAt fundInvLnd
+      (Lnd.expiresAt fundInvLnd)
+      $ chanPrivacy
 
 getCfg ::
   ( Env m

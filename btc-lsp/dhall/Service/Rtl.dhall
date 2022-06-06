@@ -174,13 +174,13 @@ let mkIngress
       λ(cloudProvider : Optional C.ProviderType) →
         let certArn = ../../build/certarn.txt as Text ? G.todo
 
-        in Ingress.mkIngress
-          owner
-          (S.mkIngressAnnotations net cloudProvider certArn)
-          (mkDomainName net)
-          tcpPort.unPort
-          (S.mkIngressClassName cloudProvider)
-          (None (List K.IngressTLS.Type))
+        in  Ingress.mkIngress
+              owner
+              (S.mkIngressAnnotations net cloudProvider certArn)
+              (mkDomainName net)
+              tcpPort.unPort
+              (S.mkIngressClassName cloudProvider)
+              (None (List K.IngressTLS.Type))
 
 let mkContainerEnv =
         Deployment.mkEnv Deployment.EnvVarType.ConfigMap owner configMapEnv

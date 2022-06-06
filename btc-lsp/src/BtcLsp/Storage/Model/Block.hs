@@ -1,5 +1,5 @@
 module BtcLsp.Storage.Model.Block
-  ( createUpdateSql,
+  ( createUpdateConfirmedSql,
     getLatestSql,
     getBlockByHeightSql,
     getBlocksHigherSql,
@@ -12,40 +12,15 @@ import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Util as Util
 
-createUpdateSql ::
+createUpdateConfirmedSql ::
   ( MonadIO m
   ) =>
   BlkHeight ->
   BlkHash ->
   Maybe BlkPrevHash ->
   ReaderT Psql.SqlBackend m (Entity Block)
-createUpdateSql height hash prev = do
+createUpdateConfirmedSql height hash prev = do
   ct <- getCurrentTime
-  --
-  -- TODO : investigate how this will behave
-  -- in case where multiple instances of scanner
-  -- are running (as lsp cluster).
-  -- Any possible race conditions?
-  --
-  -- TODO : this should be replaced with more advanced
-  -- reorg logic.
-  --
-  Psql.update $ \row -> do
-    Psql.set
-      row
-      [ BlockStatus Psql.=. Psql.val BlkOrphan,
-        BlockUpdatedAt Psql.=. Psql.val ct
-      ]
-    Psql.where_ $
-      ( row Psql.^. BlockHeight
-          Psql.==. Psql.val height
-      )
-        Psql.&&. ( row Psql.^. BlockStatus
-                     Psql.==. Psql.val BlkConfirmed
-                 )
-        Psql.&&. ( row Psql.^. BlockHash
-                     Psql.!=. Psql.val hash
-                 )
   Psql.upsertBy
     (UniqueBlock hash)
     Block

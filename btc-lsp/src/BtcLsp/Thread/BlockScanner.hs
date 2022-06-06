@@ -94,7 +94,7 @@ maybeFundSwap swapId = do
               swapId
               swapCap
   whenLeft res $
-    $(logTM) ErrorS
+    $(logTM) WarningS
       . logStr
       . ("Funding failed due to wrong status " <>)
       . inspect
@@ -206,7 +206,7 @@ persistBlockT blk utxos = do
   lift . runSql $ do
     blockId <-
       entityKey
-        <$> Block.createUpdateSql
+        <$> Block.createUpdateConfirmedSql
           height
           (from $ Btc.vBlockHash blk)
           (from <$> Btc.vPrevBlock blk)
@@ -216,7 +216,7 @@ persistBlockT blk utxos = do
       Block.withLockedRowSql blockId (== BlkConfirmed)
         . const
         $ do
-          SwapUtxo.createManySql $
+          SwapUtxo.createIgnoreManySql $
             newSwapUtxo ct blockId <$> utxos
           SwapUtxo.updateRefundBlockIdSql blockId
     whenLeft res $

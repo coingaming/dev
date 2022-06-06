@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wno-deprecations #-}
+{-# LANGUAGE TypeApplications #-}
 
 module LnChanWatcherSpec
   ( spec,
@@ -7,8 +7,6 @@ where
 
 import BtcLsp.Import hiding (newEmptyMVar, putMVar, takeMVar)
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
-import BtcLsp.Thread.LnChanWatcher (forkThread, watchChannelEvents)
-import qualified BtcLsp.Thread.Server as Server
 import LndClient
 import qualified LndClient.Data.ChannelPoint as Lnd
 import qualified LndClient.Data.CloseChannel as Lnd
@@ -111,13 +109,9 @@ testThread result = do
 
 spec :: Spec
 spec =
-  itEnv "Watch channel" $ do
-    withSpawnLink Server.apply . const $ do
-      lnd <- testLndEnv . testEnvLndLsp <$> ask
-      _ <- watchChannelEvents lnd
-      res <- newEmptyMVar
-      (_, thndl) <- forkThread $ testThread res
-      takeMVar thndl
-      r <- sequence <$> takeMVar res
-      let k = and <$> r
-      liftIO $ shouldBe k (Just True)
+  itMain @'LndLsp "Watch channel" $ do
+    res <- newEmptyMVar
+    (_, thndl) <- forkThread $ testThread res
+    takeMVar thndl
+    r <- takeMVar res
+    liftIO $ r `shouldSatisfy` all (== Just True)

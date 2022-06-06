@@ -46,11 +46,13 @@ import qualified Proto.BtcLsp.Data.HighLevel
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.fundLnInvoice' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.FundLnInvoice@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundLnInvoice' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundLnInvoice)@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.refundOnChainAddress' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress@
-         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'refundOnChainAddress' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress)@ -}
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'refundOnChainAddress' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress)@
+         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.privacy' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.Privacy@ -}
 data Request
   = Request'_constructor {_Request'ctx :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.Ctx),
                           _Request'fundLnInvoice :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundLnInvoice),
                           _Request'refundOnChainAddress :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress),
+                          _Request'privacy :: !Proto.BtcLsp.Data.HighLevel.Privacy,
                           _Request'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show Request where
@@ -100,6 +102,12 @@ instance Data.ProtoLens.Field.HasField Request "maybe'refundOnChainAddress" (Pre
            _Request'refundOnChainAddress
            (\ x__ y__ -> x__ {_Request'refundOnChainAddress = y__}))
         Prelude.id
+instance Data.ProtoLens.Field.HasField Request "privacy" Proto.BtcLsp.Data.HighLevel.Privacy where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _Request'privacy (\ x__ y__ -> x__ {_Request'privacy = y__}))
+        Prelude.id
 instance Data.ProtoLens.Message Request where
   messageName _ = Data.Text.pack "BtcLsp.Method.SwapIntoLn.Request"
   packedMessageDescriptor _
@@ -107,7 +115,8 @@ instance Data.ProtoLens.Message Request where
       \\aRequest\DC2,\n\
       \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2L\n\
       \\SIfund_ln_invoice\CAN\STX \SOH(\v2$.BtcLsp.Data.HighLevel.FundLnInvoiceR\rfundLnInvoice\DC2b\n\
-      \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress"
+      \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\DC28\n\
+      \\aprivacy\CAN\EOT \SOH(\SO2\RS.BtcLsp.Data.HighLevel.PrivacyR\aprivacy"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -135,11 +144,20 @@ instance Data.ProtoLens.Message Request where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'refundOnChainAddress")) ::
               Data.ProtoLens.FieldDescriptor Request
+        privacy__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "privacy"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.EnumField ::
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.Privacy)
+              (Data.ProtoLens.PlainField
+                 Data.ProtoLens.Optional (Data.ProtoLens.Field.field @"privacy")) ::
+              Data.ProtoLens.FieldDescriptor Request
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, ctx__field_descriptor),
            (Data.ProtoLens.Tag 2, fundLnInvoice__field_descriptor),
-           (Data.ProtoLens.Tag 3, refundOnChainAddress__field_descriptor)]
+           (Data.ProtoLens.Tag 3, refundOnChainAddress__field_descriptor),
+           (Data.ProtoLens.Tag 4, privacy__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _Request'_unknownFields
@@ -149,6 +167,7 @@ instance Data.ProtoLens.Message Request where
         {_Request'ctx = Prelude.Nothing,
          _Request'fundLnInvoice = Prelude.Nothing,
          _Request'refundOnChainAddress = Prelude.Nothing,
+         _Request'privacy = Data.ProtoLens.fieldDefault,
          _Request'_unknownFields = []}
   parseMessage
     = let
@@ -196,6 +215,15 @@ instance Data.ProtoLens.Message Request where
                                 loop
                                   (Lens.Family2.set
                                      (Data.ProtoLens.Field.field @"refundOnChainAddress") y x)
+                        32
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (Prelude.fmap
+                                          Prelude.toEnum
+                                          (Prelude.fmap
+                                             Prelude.fromIntegral
+                                             Data.ProtoLens.Encoding.Bytes.getVarInt))
+                                       "privacy"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"privacy") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -254,8 +282,21 @@ instance Data.ProtoLens.Message Request where
                                            (Prelude.fromIntegral (Data.ByteString.length bs)))
                                         (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                                 Data.ProtoLens.encodeMessage _v))
-                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
+                   ((Data.Monoid.<>)
+                      (let
+                         _v = Lens.Family2.view (Data.ProtoLens.Field.field @"privacy") _x
+                       in
+                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                             Data.Monoid.mempty
+                         else
+                             (Data.Monoid.<>)
+                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                               ((Prelude..)
+                                  ((Prelude..)
+                                     Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                                  Prelude.fromEnum _v))
+                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
 instance Control.DeepSeq.NFData Request where
   rnf
     = \ x__
@@ -265,7 +306,9 @@ instance Control.DeepSeq.NFData Request where
                 (_Request'ctx x__)
                 (Control.DeepSeq.deepseq
                    (_Request'fundLnInvoice x__)
-                   (Control.DeepSeq.deepseq (_Request'refundOnChainAddress x__) ())))
+                   (Control.DeepSeq.deepseq
+                      (_Request'refundOnChainAddress x__)
+                      (Control.DeepSeq.deepseq (_Request'privacy x__) ()))))
 {- | Fields :
      
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.ctx' @:: Lens' Response Proto.BtcLsp.Data.HighLevel.Ctx@
@@ -1201,11 +1244,12 @@ instance Control.DeepSeq.NFData Response'Success where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \!btc_lsp/method/swap_into_ln.proto\DC2\CANBtcLsp.Method.SwapIntoLn\SUB\GSbtc_lsp/data/high_level.proto\"\233\SOH\n\
+    \!btc_lsp/method/swap_into_ln.proto\DC2\CANBtcLsp.Method.SwapIntoLn\SUB\GSbtc_lsp/data/high_level.proto\"\163\STX\n\
     \\aRequest\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2L\n\
     \\SIfund_ln_invoice\CAN\STX \SOH(\v2$.BtcLsp.Data.HighLevel.FundLnInvoiceR\rfundLnInvoice\DC2b\n\
-    \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\"\154\ACK\n\
+    \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\DC28\n\
+    \\aprivacy\CAN\EOT \SOH(\SO2\RS.BtcLsp.Data.HighLevel.PrivacyR\aprivacy\"\154\ACK\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
     \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.SuccessH\NULR\asuccess\DC2F\n\
@@ -1222,9 +1266,8 @@ packedFileDescriptor
     \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
     \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
     \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STXB\b\n\
-    \\ACKeitherJ\218\n\
-    \\n\
-    \\ACK\DC2\EOT\NUL\NUL.\SOH\n\
+    \\ACKeitherJ\145\v\n\
+    \\ACK\DC2\EOT\NUL\NUL/\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1233,7 +1276,7 @@ packedFileDescriptor
     \\STX\ETX\NUL\DC2\ETX\EOT\NUL'\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT\ACK\NUL\SO\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\ACK\NUL\SI\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\NUL\SOH\DC2\ETX\ACK\b\SI\n\
@@ -1265,121 +1308,129 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\r.E\n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\rHI\n\
-    \\n\
-    \\n\
-    \\STX\EOT\SOH\DC2\EOT\DLE\NUL.\SOH\n\
-    \\n\
-    \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\DLE\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\DC1\STX%\n\
+    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\SO\STX-\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\DC1\STX\FS\n\
+    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX\SO\STX \n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\DC1\GS \n\
+    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\SO!(\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\DC1#$\n\
-    \\f\n\
-    \\EOT\EOT\SOH\b\NUL\DC2\EOT\DC3\STX\SYN\ETX\n\
-    \\f\n\
-    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX\DC3\b\SO\n\
+    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\SO+,\n\
+    \\n\
+    \\n\
+    \\STX\EOT\SOH\DC2\EOT\DC1\NUL/\SOH\n\
+    \\n\
+    \\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\DC1\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\DC4\EOT\CAN\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\DC2\STX%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\DC4\EOT\v\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\DC2\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\DC4\f\DC3\n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\DC2\GS \n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\DC4\SYN\ETB\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\DC2#$\n\
+    \\f\n\
+    \\EOT\EOT\SOH\b\NUL\DC2\EOT\DC4\STX\ETB\ETX\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX\DC4\b\SO\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX\NAK\EOT\CAN\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\NAK\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\NAK\EOT\v\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\NAK\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\NAK\f\DC3\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\NAK\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\NAK\SYN\ETB\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\NAK\SYN\ETB\n\
+    \\v\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\SYN\EOT\CAN\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\CAN\STX\GS\ETX\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\SYN\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\CAN\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\SYN\f\DC3\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\SYN\SYN\ETB\n\
+    \\f\n\
+    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\EM\STX\RS\ETX\n\
+    \\f\n\
+    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\EM\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\EM\EOTH\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\SUB\EOTH\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\EM\EOT-\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\SUB\EOT-\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\EM.C\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\SUB.C\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\EMFG\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\SUBFG\n\
     \{\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\FS\EOT8\SUBl Minimal expected swap amount. Swap will not happen\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\GS\EOT8\SUBl Minimal expected swap amount. Swap will not happen\n\
     \ until address balance is more or equal than FundMoney.\n\
     \\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\FS\EOT$\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\GS\EOT$\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\FS%3\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\GS%3\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\FS67\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\GS67\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\US\STX-\ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT \STX.\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\US\n\
+    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX \n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX \EOT=\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX!\EOT=\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX \EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX!\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX \r0\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX!\r0\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX 18\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX!18\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX ;<\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX!;<\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX!\EOT'\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX\"\EOT'\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX!\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX\"\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX!\r\EM\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX\"\r\EM\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX!\SUB\"\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX\"\SUB\"\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX!%&\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\"%&\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX\"\EOT*\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX#\EOT*\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX\"\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX#\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX\"\r\FS\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX#\r\FS\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX\"\GS%\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX#\GS%\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX\"()\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX#()\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT$\EOT(\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT%\EOT)\ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX$\t\NAK\n\
+    \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX%\t\NAK\n\
     \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\DC2\ETX%\ACK+\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\DC2\ETX&\ACK+\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX%\ACK&\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX&\ACK&\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX%)*\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX&)*\n\
     \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\DC2\ETX&\ACK+\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\DC2\ETX'\ACK+\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\SOH\DC2\ETX&\ACK&\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\SOH\DC2\ETX'\ACK&\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\STX\DC2\ETX&)*\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\STX\DC2\ETX')*\n\
     \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\DC2\ETX'\ACK3\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\DC2\ETX(\ACK3\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\SOH\DC2\ETX'\ACK.\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\SOH\DC2\ETX(\ACK.\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\STX\DC2\ETX'12\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\STX\DC2\ETX(12\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT*\EOT,\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT+\EOT-\ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX*\f\ESCb\ACKproto3"
+    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX+\f\ESCb\ACKproto3"

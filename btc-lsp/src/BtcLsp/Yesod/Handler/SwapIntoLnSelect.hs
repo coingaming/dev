@@ -152,6 +152,10 @@ newSwapWidget swapInfo =
             . MsgSatoshi
             $ from swapIntoLnFeeMiner
         ),
+        ( MsgChannelPrivacy,
+          Just $
+            chanPrivacyMsg swapIntoLnPrivacy
+        ),
         ( MsgStatus,
           Just $
             swapStatusMsg swapIntoLnStatus
@@ -309,6 +313,11 @@ swapStatusMsg = \case
   SwapWaitingFundLn -> MsgSwapWaitingFundLn
   SwapSucceeded -> MsgSwapSucceeded
   SwapExpired -> MsgSwapExpired
+
+chanPrivacyMsg :: Privacy -> AppMessage
+chanPrivacyMsg = \case
+  Private -> MsgChanPrivate
+  Public -> MsgChanPublic
 
 swapUtxoStatusMsg :: SwapUtxoStatus -> AppMessage
 swapUtxoStatusMsg = \case
