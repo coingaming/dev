@@ -18,6 +18,7 @@ let
   bitcoinconf = writeText "bitcoin.conf" ''
     regtest=1
     txindex=1
+    mintxfee=0.00000001
 
     rpcuser=${rpcuser}
     rpcpassword=${rpcpassword}
@@ -27,8 +28,7 @@ let
 
     server=1
     rest=1
-
-    fallbackfee=0.0002
+    fallbackfee=0.00000001
   '';
   getFreePort = writeShellApplication {
     name = "get-unused-port";

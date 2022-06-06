@@ -1,6 +1,7 @@
 module BtcLsp.Storage.Util
   ( lockByTable,
     lockByRow,
+    lockByUnique,
     cleanDb,
   )
 where
@@ -53,6 +54,19 @@ lockByRow rowId = do
     (error $ "Impossible missing row " <> Universum.show rowId)
     pure
     $ Psql.get rowId
+
+lockByUnique ::
+  ( MonadIO m,
+    HasTable a,
+    Psql.ToBackendKey Psql.SqlBackend a
+  ) =>
+  Psql.Unique a ->
+  Psql.SqlPersistT m (Maybe (Entity a))
+lockByUnique =
+  maybeM
+    (pure Nothing)
+    (\(Entity x _) -> Just . Entity x <$> lockByRow x)
+    . Psql.getBy
 
 cleanDb :: (MonadIO m) => Psql.SqlPersistT m ()
 cleanDb =

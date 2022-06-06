@@ -10,6 +10,12 @@ module BtcLsp.Math.OnChain
     trxHeadSize,
     trxInSize,
     trxOutSize,
+    InQty (..),
+    OutQty (..),
+    SatPerVbyte (..),
+    minFeeRate,
+    trxEstSize,
+    trxEstFee,
   )
 where
 
@@ -86,3 +92,70 @@ trxInSize =
 trxOutSize :: Vbyte
 trxOutSize =
   Vbyte 31
+
+newtype InQty = InQty
+  { unInQty :: Natural
+  }
+  deriving newtype (Eq, Ord, Show, Num)
+  deriving stock (Generic)
+
+instance Out InQty
+
+instance From InQty Natural
+
+instance From Natural InQty
+
+newtype OutQty = OutQty
+  { unOutQty :: Natural
+  }
+  deriving newtype (Eq, Ord, Show, Num)
+  deriving stock (Generic)
+
+instance Out OutQty
+
+instance From OutQty Natural
+
+instance From Natural OutQty
+
+newtype SatPerVbyte = SatPerVbyte
+  { unSatPerVbyte :: Ratio Natural
+  }
+  deriving newtype (Eq, Ord, Show, Num)
+  deriving stock (Generic)
+
+instance Out SatPerVbyte
+
+instance From SatPerVbyte (Ratio Natural)
+
+instance From (Ratio Natural) SatPerVbyte
+
+minFeeRate :: SatPerVbyte
+minFeeRate = 1
+
+trxEstSize :: InQty -> OutQty -> Vbyte
+trxEstSize inQty outQty =
+  trxHeadSize
+    + Vbyte (via @Natural inQty) * trxInSize
+    --
+    -- TODO : LND estimator always requires +1 vout as a change
+    -- even if change does not exit. So we should overpay
+    -- a bit for non-existent output to use LND PSBTs.
+    -- https://github.com/lightningnetwork/lnd/issues/5739
+    --
+    + Vbyte (via @Natural (outQty + 1)) * trxOutSize
+    --
+    -- TODO : For some reason LND estimator
+    -- requires +1 vbyte overhead.
+    --
+    + Vbyte 1
+
+trxEstFee ::
+  InQty ->
+  OutQty ->
+  SatPerVbyte ->
+  Either (TryFromException Natural MSat) MSat
+trxEstFee inQty outQty satPerVbyte =
+  tryFrom @Natural
+    . (* 1000)
+    . (ceiling :: Ratio Natural -> Natural)
+    $ from (trxEstSize inQty outQty) * from satPerVbyte

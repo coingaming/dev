@@ -8,6 +8,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateExpiredSql,
     updateSucceededSql,
     getSwapsWaitingPeerSql,
+    getSwapsWaitingChanSql,
     getSwapsWaitingLnFundSql,
     getSwapsAboutToExpirySql,
     getByUuidSql,
@@ -20,8 +21,8 @@ where
 
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Util as Util
-import qualified LndClient as Lnd
 
 createIgnoreSql ::
   ( MonadIO m
@@ -233,6 +234,34 @@ getSwapsWaitingPeerSql =
       --
       pure (swap, user)
 
+getSwapsWaitingChanSql ::
+  ( MonadIO m
+  ) =>
+  ReaderT
+    Psql.SqlBackend
+    m
+    [ ( Entity SwapIntoLn,
+        Entity User
+      )
+    ]
+getSwapsWaitingChanSql =
+  Psql.select $
+    Psql.from $ \(swap `Psql.InnerJoin` user) -> do
+      Psql.on
+        ( swap Psql.^. SwapIntoLnUserId
+            Psql.==. user Psql.^. UserId
+        )
+      Psql.where_
+        ( swap Psql.^. SwapIntoLnStatus
+            Psql.==. Psql.val SwapWaitingChan
+        )
+      --
+      -- TODO : some sort of exp backoff in case
+      -- where user node is offline for a long time.
+      -- Maybe limits, some proper retries etc.
+      --
+      pure (swap, user)
+
 getSwapsWaitingLnFundSql ::
   ( MonadIO m
   ) =>
@@ -279,8 +308,7 @@ getSwapsAboutToExpirySql ::
   ) =>
   ReaderT Psql.SqlBackend m [Entity SwapIntoLn]
 getSwapsAboutToExpirySql = do
-  nearExpTime <-
-    addSeconds (Lnd.Seconds 3600) <$> getCurrentTime
+  nearExpTime <- getFutureTime Math.swapExpiryLimitInternal
   Psql.select $
     Psql.from $ \row -> do
       Psql.where_

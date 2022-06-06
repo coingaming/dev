@@ -26,7 +26,7 @@ spec = do
         from
           . swapIntoLnFundAddress
           . entityVal
-          <$> createDummySwap "one block" Nothing
+          <$> createDummySwap Nothing
       void $
         withBtcT
           Btc.sendToAddress
@@ -55,7 +55,7 @@ spec = do
         from
           . swapIntoLnFundAddress
           . entityVal
-          <$> createDummySwap "two blocks" Nothing
+          <$> createDummySwap Nothing
       void $
         withBtcT
           Btc.sendToAddress
@@ -81,7 +81,7 @@ spec = do
     let amt1 = amt0 + 3000
     let amt2 = amt0 - 2000
     swapEnt <-
-      createDummySwap "dust test" Nothing
+      createDummySwap Nothing
     let trAddr =
           from
             . swapIntoLnFundAddress

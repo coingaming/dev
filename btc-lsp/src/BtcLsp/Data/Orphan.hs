@@ -132,3 +132,12 @@ instance Out (Ratio Natural) where
     docPrec x . into @Rational
   doc =
     docPrec 0
+
+instance TryFrom Natural MSat where
+  tryFrom =
+    from @Word64
+      `composeTryRhs` tryFrom
+
+instance From MSat Natural where
+  from =
+    via @Word64
