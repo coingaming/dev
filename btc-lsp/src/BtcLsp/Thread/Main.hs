@@ -112,9 +112,8 @@ waitForBitcoindSync =
     $ withBtc Btc.getBlockChainInfo id
   where
     waitAndRetry :: (Env m) => m ()
-    waitAndRetry = do
-      sleep $ MicroSecondsDelay 5000000
-      waitForBitcoindSync
+    waitAndRetry =
+      sleep5s >> waitForBitcoindSync
 
 waitForLndSync :: (Env m) => m ()
 waitForLndSync =
@@ -131,9 +130,8 @@ waitForLndSync =
     $ withLnd Lnd.getInfo id
   where
     waitAndRetry :: (Env m) => m ()
-    waitAndRetry = do
-      sleep $ MicroSecondsDelay 5000000
-      waitForLndSync
+    waitAndRetry =
+      sleep5s >> waitForLndSync
 
 waitForSync :: (Env m) => m ()
 waitForSync =

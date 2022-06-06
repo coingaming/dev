@@ -3,7 +3,7 @@
 module BtcLsp.Storage.Model.LnChan
   ( createUpdateSql,
     getByChannelPointSql,
-    persistChannelUpdates,
+    persistChannelUpdate,
     persistOpenedChannels,
   )
 where
@@ -222,13 +222,13 @@ closedChannelUpsert ct close =
     extId = Just $ CloseChannel.chanId close
     uniq = UniqueLnChan fundTxId fundVout
 
-persistChannelUpdates ::
+persistChannelUpdate ::
   ( KatipContext m,
     Storage m
   ) =>
   Lnd.ChannelEventUpdate ->
   m (Entity LnChan)
-persistChannelUpdates (Lnd.ChannelEventUpdate channelEvent _) = do
+persistChannelUpdate (Lnd.ChannelEventUpdate channelEvent _) = do
   $(logTM) DebugS . logStr $ inspect channelEvent
   ct <- getCurrentTime
   runSql $ case channelEvent of

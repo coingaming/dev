@@ -7,6 +7,10 @@ module BtcLsp.Time
     addSeconds,
     subSeconds,
     swapExpiryLimit,
+    sleep300ms,
+    sleep1s,
+    sleep5s,
+    sleep10s,
   )
 where
 
@@ -14,6 +18,7 @@ import BtcLsp.Data.Orphan ()
 import BtcLsp.Import.External
 import qualified Data.Time.Clock as Time
 import qualified LndClient as Lnd
+import qualified LndClient.Util as Util
 
 getCurrentTime :: (MonadIO m) => m UTCTime
 getCurrentTime =
@@ -48,3 +53,19 @@ subSeconds =
 swapExpiryLimit :: Lnd.Seconds
 swapExpiryLimit =
   Lnd.Seconds $ 24 * 60 * 60
+
+sleep300ms :: (MonadIO m) => m ()
+sleep300ms =
+  Util.sleep $ Util.MicroSecondsDelay 300000
+
+sleep1s :: (MonadIO m) => m ()
+sleep1s =
+  Util.sleep $ Util.MicroSecondsDelay 1000000
+
+sleep5s :: (MonadIO m) => m ()
+sleep5s =
+  Util.sleep $ Util.MicroSecondsDelay 5000000
+
+sleep10s :: (MonadIO m) => m ()
+sleep10s =
+  Util.sleep $ Util.MicroSecondsDelay 10000000

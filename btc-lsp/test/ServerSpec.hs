@@ -155,7 +155,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
         (\h -> h fundAddr 0.01 Nothing Nothing)
     lift $
       mine 1 LndLsp
-        >> sleep (MicroSecondsDelay 5000000)
+        >> sleep5s
         >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
     swapsToChan <-
       lift $
@@ -165,7 +165,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
         `shouldSatisfy` ((== 1) . length)
     lift $
       mine 1 LndLsp
-        >> sleep (MicroSecondsDelay 5000000)
+        >> sleep5s
         >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
     alicePub <- getPubKeyT LndAlice
     lndChans <-

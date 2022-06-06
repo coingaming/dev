@@ -29,7 +29,7 @@ spec = do
   itEnv @'LndLsp "Server SwapIntoLn" $ do
     -- Let app spawn
     Main.waitForSync
-    sleep $ MicroSecondsDelay 500000
+    sleep300ms
     --
     -- TODO : implement withGCEnv!!!
     --
@@ -100,14 +100,20 @@ spec = do
                      . SwapIntoLn.val
                      . SwapIntoLn.val
                  )
-      void $ withLndTestT LndAlice Lnd.sendCoins (\h -> h (Lnd.SendCoinsRequest fundAddr (MSat 200000000)))
+      void $
+        withLndTestT
+          LndAlice
+          Lnd.sendCoins
+          ( \h ->
+              h (Lnd.SendCoinsRequest fundAddr (MSat 200000000))
+          )
       lift $
         LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
       lift $ mine 10 LndLsp
-      sleep $ MicroSecondsDelay 10000000
+      sleep10s
       lift Main.waitForSync
       lift $ mine 10 LndLsp
-      sleep $ MicroSecondsDelay 10000000
+      sleep10s
       withLndT
         Lnd.listChannels
         ( $
@@ -125,8 +131,6 @@ spec = do
     liftIO $
       res1
         `shouldSatisfy` ( \case
-                            Right [_] ->
-                              True
-                            _ ->
-                              False
+                            Right [_] -> True
+                            _ -> False
                         )

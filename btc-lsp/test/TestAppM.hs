@@ -340,7 +340,7 @@ itMain testName expr =
         (sl "TestName" testName)
         ( withSpawnLink Main.apply . const $ do
             -- Let endpoints and watchers spawn
-            sleep $ MicroSecondsDelay 300000
+            sleep300ms
             -- Evaluate given expression
             expr
         )
@@ -379,7 +379,7 @@ itMainT testName expr =
             res <-
               withSpawnLink Main.apply . const . runExceptT $ do
                 -- Let endpoints and watchers spawn
-                sleep $ MicroSecondsDelay 300000
+                sleep300ms
                 -- Evaluate given expression
                 expr
             liftIO $

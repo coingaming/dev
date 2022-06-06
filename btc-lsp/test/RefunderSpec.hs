@@ -74,8 +74,7 @@ spec =
     swp <-
       createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
-    -- Let Expirer to expiry the swap
-    sleep $ MicroSecondsDelay 1000000
+    sleep1s -- Let Expirer to expiry the swap
     void $
       withLndT
         Lnd.sendCoins
@@ -91,7 +90,6 @@ spec =
               }
         )
     lift $ mine 1 LndLsp
-    -- Let Refunder to refund UTXO
-    sleep $ MicroSecondsDelay 1000000
+    sleep1s -- Let Refunder to refund UTXO
     res <- lift $ waitCond 10 (refundSucceded swp) []
     liftIO $ res `shouldSatisfy` fst

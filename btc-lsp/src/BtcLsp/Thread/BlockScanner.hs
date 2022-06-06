@@ -40,8 +40,7 @@ apply =
       )
       maybeFunded
       $ runExceptT scan
-    sleep $
-      MicroSecondsDelay 1000000
+    sleep300ms
 
 maybeFunded :: (Env m) => [Utxo] -> m ()
 maybeFunded [] =
@@ -209,7 +208,6 @@ persistBlockT blk utxos = do
         <$> Block.createUpdateConfirmedSql
           height
           (from $ Btc.vBlockHash blk)
-          (from <$> Btc.vPrevBlock blk)
     ct <-
       getCurrentTime
     res <-

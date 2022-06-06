@@ -34,7 +34,7 @@ apply =
     runSql SwapUtxo.getUtxosForRefundSql
       <&> groupBy (\a b -> swpId a == swpId b)
       >>= mapM_ processRefund
-      >> sleep (MicroSecondsDelay 1000000)
+      >> sleep300ms
   where
     swpId = entityKey . snd
 
