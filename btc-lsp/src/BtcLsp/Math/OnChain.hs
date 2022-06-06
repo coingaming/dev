@@ -155,7 +155,7 @@ trxEstFee ::
   SatPerVbyte ->
   Either (TryFromException Natural MSat) MSat
 trxEstFee inQty outQty satPerVbyte =
-  tryFrom @Natural
+  (from @Word64 `composeTryRhs` tryFrom)
     . (* 1000)
     . (ceiling :: Ratio Natural -> Natural)
     $ from (trxEstSize inQty outQty) * from satPerVbyte
