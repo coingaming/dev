@@ -15,9 +15,9 @@ import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
 import Test.Hspec
+import TestAppM
 import TestHelpers
 import TestOrphan ()
-import TestWithLndLsp
 
 allIn :: Eq a => [a] -> [a] -> Bool
 allIn ax bx =

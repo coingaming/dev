@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module MathSpec
   ( spec,
   )
@@ -8,8 +10,8 @@ import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Math.Swap as Math
 import qualified Network.Bitcoin as Btc
 import Test.Hspec
+import TestAppM
 import TestOrphan ()
-import TestWithLndLsp
 
 spec :: Spec
 spec = do
@@ -19,7 +21,7 @@ spec = do
   it "newSwapIntoLnMinAmt perc" $
     Math.newSwapIntoLnMinAmt 1000000000
       `shouldBe` 502009000
-  itEnv "newSwapCapM abs" $ do
+  itEnv @'LndLsp "newSwapCapM abs" $ do
     res <- Math.newSwapCapM 12000000
     liftIO $
       res
@@ -30,7 +32,7 @@ spec = do
                 swapCapFee = 2000000
               }
           )
-  itEnv "newSwapCapM perc" $ do
+  itEnv @'LndLsp "newSwapCapM perc" $ do
     res <- Math.newSwapCapM 502009000
     liftIO $
       res

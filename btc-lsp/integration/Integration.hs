@@ -7,7 +7,7 @@ import BtcLsp.Import
 import IntegrationSpec
 import Test.Hspec.Formatters
 import Test.Hspec.Runner
-import TestWithLndLsp (mainTestSetup)
+import TestAppM (mainTestSetup)
 
 main :: IO ()
 main = do

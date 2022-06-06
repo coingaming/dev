@@ -24,6 +24,7 @@ module TestAppM
     withBtc2,
     withBtc2T,
     forkThread,
+    mainTestSetup,
   )
 where
 
@@ -32,7 +33,9 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
+import qualified BtcLsp.Storage.Migration as Migration
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
+import qualified BtcLsp.Storage.Util as Util
 import qualified BtcLsp.Thread.Main as Main
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString as BS
@@ -343,6 +346,7 @@ itMain testName expr =
         )
 
 itEnvT ::
+  forall owner e.
   ( Show e
   ) =>
   String ->
@@ -383,6 +387,7 @@ itMainT testName expr =
         )
 
 xitEnv ::
+  forall owner.
   String ->
   TestAppM owner IO () ->
   SpecWith (Arg (IO ()))
@@ -394,6 +399,7 @@ xitEnv testName expr =
         expr
 
 xitEnvT ::
+  forall owner e.
   ( Show e
   ) =>
   String ->
@@ -517,3 +523,9 @@ forkThread proc = do
   handle <- newEmptyMVar
   tid <- forkFinally proc (const $ putMVar handle ())
   return (tid, handle)
+
+mainTestSetup :: IO ()
+mainTestSetup =
+  withTestEnv $ do
+    runSql Util.cleanTestDb
+    Migration.migrateAll

@@ -21,12 +21,12 @@ import qualified LndClient.RPC.Silent as Lnd
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
+import TestAppM
 import TestOrphan ()
-import TestWithLndLsp
 
 spec :: Spec
 spec = do
-  itEnv "Server SwapIntoLn" $ do
+  itEnv @'LndLsp "Server SwapIntoLn" $ do
     -- Let app spawn
     Main.waitForSync
     sleep $ MicroSecondsDelay 500000

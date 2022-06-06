@@ -15,7 +15,7 @@ import qualified LndClient.Data.OpenChannel as OpenChannel
 import LndClient.LndTest
 import qualified LndClient.RPC.Silent as Lnd
 import Test.Hspec
-import TestWithLndLsp
+import TestAppM
 import UnliftIO.Concurrent (killThread, threadDelay)
 import UnliftIO.MVar
 

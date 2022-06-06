@@ -17,8 +17,8 @@ import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
 import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
+import TestAppM
 import TestOrphan ()
-import TestWithLndLsp
 
 genAddress ::
   TestOwner ->

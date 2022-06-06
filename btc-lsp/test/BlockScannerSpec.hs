@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module BlockScannerSpec
   ( spec,
   )
@@ -10,13 +12,13 @@ import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import LndClient.LndTest (mine)
 import qualified Network.Bitcoin as Btc
 import Test.Hspec
+import TestAppM
 import TestHelpers
 import TestOrphan ()
-import TestWithLndLsp
 
 spec :: Spec
 spec = do
-  itEnv "Block scanner works with 1 block" $ do
+  itEnv @'LndLsp "Block scanner works with 1 block" $ do
     sleep $ MicroSecondsDelay 500000
     mine 100 LndLsp
     res <- runExceptT $ do
@@ -45,7 +47,7 @@ spec = do
       let (gotAmt :: MSat) = sum $ BlockScanner.utxoAmt <$> utxos
       pure (expectedAmt == gotAmt)
     liftIO $ shouldBe res (Right True)
-  itEnv "Block scanner works with 2 blocks" $ do
+  itEnv @'LndLsp "Block scanner works with 2 blocks" $ do
     sleep $ MicroSecondsDelay 500000
     mine 100 LndLsp
     res <- runExceptT $ do
@@ -74,7 +76,7 @@ spec = do
       let gotAmt = sum $ BlockScanner.utxoAmt <$> utxos
       pure (expectedAmt == gotAmt)
     liftIO $ shouldBe res (Right True)
-  itEnvT "Block scanner detects dust" $ do
+  itEnvT @'LndLsp "Block scanner detects dust" $ do
     sleep $ MicroSecondsDelay 500000
     lift $ mine 100 LndLsp
     let amt0 = Math.trxDustLimit

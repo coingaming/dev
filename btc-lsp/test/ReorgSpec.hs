@@ -11,12 +11,12 @@ import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified Network.Bitcoin as Btc
 import Test.Hspec
+import TestAppM
 import TestOrphan ()
-import TestWithLndLsp
 
 spec :: Spec
 spec = do
-  itEnv "Reorg test" $ do
+  itEnv @'LndLsp "Reorg test" $ do
     _ <- runExceptT $ do
       void $ withBtcT Btc.setNetworkActive ($ False)
       _ <- BlockScanner.scan
