@@ -2,7 +2,6 @@ module BtcLsp.Storage.Util
   ( lockByTable,
     lockByRow,
     lockByUnique,
-    cleanTestDb,
   )
 where
 
@@ -76,13 +75,3 @@ lockByUnique =
     (pure Nothing)
     (\(Entity x _) -> Just . Entity x <$> lockByRow x)
     . Psql.getBy
-
-cleanTestDb :: (MonadIO m) => Psql.SqlPersistT m ()
-cleanTestDb =
-  Psql.rawExecute
-    ( "DROP SCHEMA IF EXISTS public CASCADE;"
-        <> "CREATE SCHEMA public;"
-        <> "GRANT ALL ON SCHEMA public TO public;"
-        <> "COMMENT ON SCHEMA public IS 'standard public schema';"
-    )
-    []

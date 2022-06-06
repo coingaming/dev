@@ -35,7 +35,6 @@ import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
 import qualified BtcLsp.Storage.Migration as Migration
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
-import qualified BtcLsp.Storage.Util as Util
 import qualified BtcLsp.Thread.Main as Main
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString as BS
@@ -527,5 +526,15 @@ forkThread proc = do
 mainTestSetup :: IO ()
 mainTestSetup =
   withTestEnv $ do
-    runSql Util.cleanTestDb
+    runSql cleanTestDbSql
     Migration.migrateAll
+
+cleanTestDbSql :: (MonadIO m) => Psql.SqlPersistT m ()
+cleanTestDbSql =
+  Psql.rawExecute
+    ( "DROP SCHEMA IF EXISTS public CASCADE;"
+        <> "CREATE SCHEMA public;"
+        <> "GRANT ALL ON SCHEMA public TO public;"
+        <> "COMMENT ON SCHEMA public IS 'standard public schema';"
+    )
+    []
