@@ -52,10 +52,6 @@ swapLnMinFee :: Money 'Lsp btcl 'Gain
 swapLnMinFee =
   Money $ MSat 2000000
 
---
--- TODO : property-based tests for this (QuickCheck)
--- in MathSpec module
---
 newSwapCapM ::
   ( Env m
   ) =>

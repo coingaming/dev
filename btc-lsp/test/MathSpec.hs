@@ -57,8 +57,14 @@ spec = do
               let usr = Math.swapCapUsr res
               let lsp = Math.swapCapLsp res
               let fee = Math.swapCapFee res
-              assert $ (usr + coerce fee) == coerce swp
+              assert $ swp >= minSwp
+              assert $ usr > 0
+              assert $ lsp > 0
+              assert $ fee > 0
+              assert $ usr > coerce fee
+              assert $ lsp > coerce fee
               assert $ usr == coerce lsp
+              assert $ (usr + coerce fee) == coerce swp
           )
           . liftIO
           . run0
