@@ -30,6 +30,7 @@ where
 
 import BtcLsp.Data.Env as Env
 import BtcLsp.Grpc.Client.LowLevel
+import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
@@ -279,13 +280,13 @@ withTestEnv' action = do
 
 signT ::
   Lnd.LndEnv ->
-  ByteString ->
-  KatipContextT IO (Maybe ByteString)
+  Sig.MsgToSign ->
+  KatipContextT IO (Maybe Sig.LndSig)
 signT env msg = do
   eSig <-
     Lnd.signMessage env $
       Lnd.SignMessageRequest
-        { Lnd.message = msg,
+        { Lnd.message = Sig.unMsgToSign msg,
           Lnd.keyLoc =
             Lnd.KeyLocator
               { Lnd.keyFamily = 6,
@@ -304,14 +305,14 @@ signT env msg = do
       let sig = coerce sig0
       $(logTM) DebugS . logStr $
         "Client ==> signing procedure succeeded for msg of "
-          <> inspect (BS.length msg)
+          <> inspect (BS.length $ Sig.unMsgToSign msg)
           <> " bytes "
           <> inspect msg
           <> " got signature of "
           <> inspect (BS.length sig)
           <> " bytes "
           <> inspect sig
-      pure $ Just sig
+      pure . Just $ Sig.LndSig sig
 
 itEnv ::
   forall owner.

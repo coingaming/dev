@@ -1,6 +1,3 @@
-{-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Grpc.Server.LowLevel
@@ -11,13 +8,13 @@ module BtcLsp.Grpc.Server.LowLevel
 where
 
 import BtcLsp.Grpc.Data
-import BtcLsp.Import.Witch
+import qualified BtcLsp.Grpc.Sig as Sig
+import BtcLsp.Import.External
 import Control.Concurrent (modifyMVar)
-import Data.Aeson (FromJSON (..), withObject, (.:), (.:?))
+import Data.Aeson (withObject, (.:), (.:?))
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.CaseInsensitive as CI
-import Data.Coerce (coerce)
 import qualified Data.Text.Encoding as TE
 import Network.GRPC.HTTP2.Encoding (gzip)
 import Network.GRPC.Server
@@ -25,8 +22,6 @@ import Network.HTTP2.Server hiding (Request)
 import Network.Wai
 import Network.Wai.Handler.Warp as Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
-import Text.PrettyPrint.GenericPretty.Import (inspect)
-import Universum
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
@@ -35,10 +30,7 @@ data GSEnv = GSEnv
     gsEnvEncryption :: Encryption,
     gsEnvTls :: Maybe (TlsData 'Server),
     gsEnvLogger :: Text -> IO (),
-    --
-    -- TODO : more typed data
-    --
-    gsEnvSigner :: ByteString -> IO (Maybe ByteString)
+    gsEnvSigner :: Sig.MsgToSign -> IO (Maybe Sig.LndSig)
   }
   deriving stock (Generic)
 
@@ -111,14 +103,14 @@ serverApp handlers env body req rep = do
       ts <- oldMaker Nothing
       case ts of
         Trailers ss -> do
-          mSig <- gsEnvSigner env acc
+          mSig <- gsEnvSigner env $ Sig.MsgToSign acc
           pure $ case mSig of
             Nothing ->
               ts
             Just sig ->
               Trailers $
                 ( CI.mk sigHeaderName,
-                  B64.encode sig
+                  B64.encode $ Sig.unLndSig sig
                 ) :
                 ss
         NextTrailersMaker {} ->

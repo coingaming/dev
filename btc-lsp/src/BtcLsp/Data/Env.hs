@@ -14,6 +14,7 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Server.LowLevel
+import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math.Swap as Math
@@ -203,13 +204,13 @@ withEnv rc this = do
     rmSqlPool = liftIO . destroyAllResources
     signT ::
       Lnd.LndEnv ->
-      ByteString ->
-      KatipContextT IO (Maybe ByteString)
+      Sig.MsgToSign ->
+      KatipContextT IO (Maybe Sig.LndSig)
     signT lnd msg = do
       eSig <-
         Lnd.signMessage lnd $
           Lnd.SignMessageRequest
-            { Lnd.message = msg,
+            { Lnd.message = Sig.unMsgToSign msg,
               Lnd.keyLoc =
                 Lnd.KeyLocator
                   { Lnd.keyFamily = 6,
@@ -228,11 +229,11 @@ withEnv rc this = do
           let sig = coerce sig0
           $(logTM) DebugS . logStr $
             "Server ==> signing procedure succeeded for msg of "
-              <> inspect (BS.length msg)
+              <> inspect (BS.length $ Sig.unMsgToSign msg)
               <> " bytes "
               <> inspect msg
               <> " got signature of "
               <> inspect (BS.length sig)
               <> " bytes "
               <> inspect sig
-          pure $ Just sig
+          pure . Just $ Sig.LndSig sig

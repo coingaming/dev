@@ -79,14 +79,14 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
       . C.importPubKey
       $ coerce pubNode
   sig <-
-    Sig.sigFromReq (gsEnvSigHeaderName env) waiReq
+    Sig.sigToVerify (gsEnvSigHeaderName env) waiReq
   msg <-
     maybeToRight
       ( FailureGrpc $
           "Incorrect message from "
             <> inspectPlain payload
       )
-      $ Sig.prepareMsg payload
+      $ Sig.msgToVerify payload
   if C.verifySig pubDer sig msg
     then pure ()
     else
