@@ -30,9 +30,6 @@ spec = do
     -- Let app spawn
     Main.waitForSync
     sleep300ms
-    --
-    -- TODO : implement withGCEnv!!!
-    --
     gcEnv <- getGCEnv
     res0 <- runExceptT $ do
       fundInv <-
@@ -55,11 +52,6 @@ spec = do
           <$> withLndTestT
             LndAlice
             Lnd.newAddress
-            --
-            -- TODO : maybe pass LndEnv as the last argument
-            -- to the methods (not the first like right now)
-            -- to avoid this style of withLndT?
-            --
             ( $
                 Lnd.NewAddressRequest
                   { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
@@ -78,9 +70,6 @@ spec = do
               & SwapIntoLn.refundOnChainAddress
                 .~ from @(OnChainAddress 'Refund) refundAddr
           )
-    --
-    -- TODO : do more precise match!!!
-    --
     liftIO $
       res0
         `shouldSatisfy` ( \case
@@ -114,6 +103,7 @@ spec = do
       lift Main.waitForSync
       lift $ mine 10 LndLsp
       sleep10s
+      alicePub <- getPubKeyT LndAlice
       withLndT
         Lnd.listChannels
         ( $
@@ -122,10 +112,7 @@ spec = do
                 ListChannels.inactiveOnly = False,
                 ListChannels.publicOnly = False,
                 ListChannels.privateOnly = False,
-                --
-                -- TODO : add peer
-                --
-                ListChannels.peer = Nothing
+                ListChannels.peer = Just alicePub
               }
         )
     liftIO $
