@@ -17,16 +17,14 @@ createUpdateConfirmedSql ::
   ) =>
   BlkHeight ->
   BlkHash ->
-  Maybe BlkPrevHash ->
   ReaderT Psql.SqlBackend m (Entity Block)
-createUpdateConfirmedSql height hash prev = do
+createUpdateConfirmedSql height hash = do
   ct <- getCurrentTime
   Psql.upsertBy
     (UniqueBlock hash)
     Block
       { blockHeight = height,
         blockHash = hash,
-        blockPrev = prev,
         blockStatus = BlkConfirmed,
         blockInsertedAt = ct,
         blockUpdatedAt = ct

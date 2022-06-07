@@ -44,7 +44,7 @@ apply =
           )
           swaps
     mapM_ (liftIO . wait) tasks
-    sleep $ MicroSecondsDelay 500000
+    sleep300ms
 
 --
 -- TODO : Do not open channel in case where

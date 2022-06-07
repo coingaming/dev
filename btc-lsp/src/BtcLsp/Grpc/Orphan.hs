@@ -118,7 +118,7 @@ deriving stock instance Generic CompressMode
 instance FromJSON CompressMode
 
 instance From PortNumber Word32 where
-  from = fromIntegral
+  from = fromIntegral -- Word16 to Word32 is fine.
 
 instance From PortNumber Proto.LnPort where
   from = intoProto

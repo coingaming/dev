@@ -2,7 +2,6 @@ module BtcLsp.Storage.Util
   ( lockByTable,
     lockByRow,
     lockByUnique,
-    cleanDb,
   )
 where
 
@@ -30,7 +29,7 @@ lockByTable x =
   void
     ( Psql.rawSql
         "SELECT pg_advisory_xact_lock(?)"
-        [Psql.PersistInt64 $ fromIntegral $ fromEnum x] ::
+        [Psql.PersistInt64 . from $ fromEnum x] ::
         (MonadIO m) => Psql.SqlPersistT m [VoidSQL]
     )
 
@@ -53,7 +52,16 @@ lockByRow rowId = do
   maybeM
     (error $ "Impossible missing row " <> Universum.show rowId)
     pure
-    $ Psql.get rowId
+    . (entityVal <<$>>)
+    . (listToMaybe <$>)
+    $ Psql.select $
+      Psql.from $ \row -> do
+        Psql.where_
+          ( row Psql.^. Psql.persistIdField
+              Psql.==. Psql.val rowId
+          )
+        Psql.locking Psql.ForUpdate
+        pure row
 
 lockByUnique ::
   ( MonadIO m,
@@ -67,13 +75,3 @@ lockByUnique =
     (pure Nothing)
     (\(Entity x _) -> Just . Entity x <$> lockByRow x)
     . Psql.getBy
-
-cleanDb :: (MonadIO m) => Psql.SqlPersistT m ()
-cleanDb =
-  Psql.rawExecute
-    ( "DROP SCHEMA IF EXISTS public CASCADE;"
-        <> "CREATE SCHEMA public;"
-        <> "GRANT ALL ON SCHEMA public TO public;"
-        <> "COMMENT ON SCHEMA public IS 'standard public schema';"
-    )
-    []

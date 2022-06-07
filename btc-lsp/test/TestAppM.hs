@@ -24,6 +24,7 @@ module TestAppM
     withBtc2,
     withBtc2T,
     forkThread,
+    mainTestSetup,
   )
 where
 
@@ -32,6 +33,7 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
+import qualified BtcLsp.Storage.Migration as Migration
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import qualified BtcLsp.Thread.Main as Main
 import Data.Aeson (eitherDecodeStrict)
@@ -337,12 +339,13 @@ itMain testName expr =
         (sl "TestName" testName)
         ( withSpawnLink Main.apply . const $ do
             -- Let endpoints and watchers spawn
-            sleep $ MicroSecondsDelay 300000
+            sleep300ms
             -- Evaluate given expression
             expr
         )
 
 itEnvT ::
+  forall owner e.
   ( Show e
   ) =>
   String ->
@@ -375,7 +378,7 @@ itMainT testName expr =
             res <-
               withSpawnLink Main.apply . const . runExceptT $ do
                 -- Let endpoints and watchers spawn
-                sleep $ MicroSecondsDelay 300000
+                sleep300ms
                 -- Evaluate given expression
                 expr
             liftIO $
@@ -383,6 +386,7 @@ itMainT testName expr =
         )
 
 xitEnv ::
+  forall owner.
   String ->
   TestAppM owner IO () ->
   SpecWith (Arg (IO ()))
@@ -394,6 +398,7 @@ xitEnv testName expr =
         expr
 
 xitEnvT ::
+  forall owner e.
   ( Show e
   ) =>
   String ->
@@ -517,3 +522,19 @@ forkThread proc = do
   handle <- newEmptyMVar
   tid <- forkFinally proc (const $ putMVar handle ())
   return (tid, handle)
+
+mainTestSetup :: IO ()
+mainTestSetup =
+  withTestEnv $ do
+    runSql cleanTestDbSql
+    Migration.migrateAll
+
+cleanTestDbSql :: (MonadIO m) => Psql.SqlPersistT m ()
+cleanTestDbSql =
+  Psql.rawExecute
+    ( "DROP SCHEMA IF EXISTS public CASCADE;"
+        <> "CREATE SCHEMA public;"
+        <> "GRANT ALL ON SCHEMA public TO public;"
+        <> "COMMENT ON SCHEMA public IS 'standard public schema';"
+    )
+    []

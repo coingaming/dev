@@ -27,6 +27,7 @@ import qualified Env as E
     Mod,
     Var,
     auto,
+    def,
     header,
     help,
     keep,
