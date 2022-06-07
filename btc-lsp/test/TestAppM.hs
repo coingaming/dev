@@ -324,12 +324,11 @@ itProp ::
   SpecWith (Arg (IO ()))
 itProp testName expr =
   it testName $ do
-    p <-
-      withTestEnv $
-        katipAddContext
-          (sl "TestName" testName)
-          expr
-    quickCheck p
+    ioProperty
+      . withTestEnv
+      $ katipAddContext
+        (sl "TestName" testName)
+        expr
 
 itEnv ::
   forall owner.
