@@ -10,6 +10,7 @@ module TestAppM
     proxyOwner,
     assertChannelState,
     module ReExport,
+    itProp,
     itEnv,
     itMain,
     itEnvT,
@@ -51,6 +52,7 @@ import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
+import Test.QuickCheck
 import UnliftIO.Concurrent
   ( ThreadId,
     forkFinally,
@@ -314,6 +316,20 @@ signT env msg = do
           <> " bytes "
           <> inspect sig
       pure . Just $ Sig.LndSig sig
+
+itProp ::
+  forall owner.
+  String ->
+  TestAppM owner IO Property ->
+  SpecWith (Arg (IO ()))
+itProp testName expr =
+  it testName $ do
+    p <-
+      withTestEnv $
+        katipAddContext
+          (sl "TestName" testName)
+          expr
+    quickCheck p
 
 itEnv ::
   forall owner.
