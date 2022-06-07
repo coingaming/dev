@@ -209,7 +209,4 @@ swapFromLn ::
   SwapFromLn.Request ->
   m SwapFromLn.Response
 swapFromLn _ _ =
-  --
-  -- TODO : implement!!!
-  --
   pure defMessage

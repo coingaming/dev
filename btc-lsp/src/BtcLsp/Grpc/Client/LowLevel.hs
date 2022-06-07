@@ -102,9 +102,6 @@ runUnary rpc env verifySig req = do
         (makeClient env req True)
         close
         (\grpc -> rawUnary rpc grpc req)
-  --
-  -- TODO : better composition with ExceptT
-  --
   case res of
     Right (Right (Right (h, mh, Right x))) ->
       case find (\header -> fst header == sigHeaderName) $ h <> fromMaybe mempty mh of

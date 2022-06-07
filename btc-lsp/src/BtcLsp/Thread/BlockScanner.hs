@@ -107,9 +107,6 @@ data Utxo = Utxo
   }
   deriving stock (Show)
 
---
--- TODO: presist log of unsupported transactions
---
 mapVout ::
   ( Env m
   ) =>
@@ -128,7 +125,7 @@ mapVout txid txout@(Btc.TxOut amt vout (Btc.StandardScriptPubKey _ _ _ _ addrsV)
           <> " and txout = "
           <> Universum.show txout
       pure Nothing
-mapVout _ _ =
+mapVout _ (Btc.TxOut _ _ Btc.NonStandardScriptPubKey {}) =
   pure Nothing
 
 handleAddr ::
