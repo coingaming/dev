@@ -14,8 +14,6 @@ module TestAppM
     itMain,
     itEnvT,
     itMainT,
-    xitEnv,
-    xitEnvT,
     withTestEnv,
     getGCEnv,
     withLndTestT,
@@ -181,13 +179,11 @@ instance (MonadUnliftIO m) => Storage (TestAppM owner m) where
     pool <- getSqlPool
     Psql.runSqlPool query pool
 
-withTestEnv :: TestAppM owner IO () -> IO ()
+withTestEnv :: TestAppM owner IO a -> IO a
 withTestEnv action =
   withTestEnv' $ \env ->
     runTestApp env $
-      finally
-        (LndTest.setupZeroChannels proxyOwner >> action)
-        $ pure ()
+      LndTest.setupZeroChannels proxyOwner >> action
 
 withBtc2 ::
   (MonadReader (TestEnv owner) m, MonadIO m) =>
@@ -217,7 +213,7 @@ withLndTestT owner method args = do
   env <- lift $ LndTest.getLndEnv owner
   ExceptT $ first FailureLnd <$> args (method env)
 
-withTestEnv' :: (TestEnv owner -> IO ()) -> IO ()
+withTestEnv' :: (TestEnv owner -> IO a) -> IO a
 withTestEnv' action = do
   gcEnv <- readGCEnv
   lspRc <- readRawConfig
@@ -384,35 +380,6 @@ itMainT testName expr =
                 expr
             liftIO $
               res `shouldSatisfy` isRight
-        )
-
-xitEnv ::
-  forall owner.
-  String ->
-  TestAppM owner IO () ->
-  SpecWith (Arg (IO ()))
-xitEnv testName expr =
-  xit testName $
-    withTestEnv $
-      katipAddContext
-        (sl "TestName" testName)
-        expr
-
-xitEnvT ::
-  forall owner e.
-  ( Show e
-  ) =>
-  String ->
-  ExceptT e (TestAppM owner IO) () ->
-  SpecWith (Arg (IO ()))
-xitEnvT testName expr =
-  xit testName $
-    withTestEnv $
-      katipAddContext
-        (sl "TestName" testName)
-        ( do
-            res <- runExceptT expr
-            liftIO $ res `shouldSatisfy` isRight
         )
 
 readLndAliceEnv :: IO LndEnv
