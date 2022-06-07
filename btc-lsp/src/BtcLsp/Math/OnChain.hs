@@ -1,8 +1,7 @@
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Math.OnChain
-  ( roundWord64ToMSat,
-    trySatToMsat,
+  ( trySatToMsat,
     tryMsatToSat,
     trySatToMsatT,
     tryMsatToSatT,
@@ -23,20 +22,6 @@ import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified Network.Bitcoin as Btc
 import qualified Universum
-
-roundWord64ToMSat :: (Real a) => a -> MSat
-roundWord64ToMSat amt =
-  MSat
-    . (* 1000)
-    . fromInteger
-    $ ceiling (toRational amt / 1000)
-
---
--- TODO : replace Btc.BTC type alias with newtype
--- and then inplement TryFrom BTC MSat and TryFrom MSat BTC,
--- then remove these combinators, they will be available
--- for free.
---
 
 trySatToMsat ::
   Btc.BTC ->
