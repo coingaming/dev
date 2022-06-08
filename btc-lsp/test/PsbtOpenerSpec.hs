@@ -33,6 +33,8 @@ import qualified LndClient.Data.FundingPsbtVerify as FSS
 import qualified LndClient.Data.FundingPsbtFinalize as FPF
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
+import qualified LndClient.Data.OutPoint as Lnd
+import qualified LndClient.Data.ListUnspent as LU
 
 sendAmt :: Env m => Text -> MSat -> ExceptT Failure m ()
 sendAmt addr amt =
@@ -60,30 +62,37 @@ autoSelectUtxos :: Env m => Text -> MSat -> ExceptT Failure m FP.FundPsbtRespons
 autoSelectUtxos addr amt = withLndT Lnd.fundPsbt ($ req)
   where req = fundReq $ FP.TxTemplate [] (M.fromList [(addr, amt)])
 
-useUtxos :: Env m => [PsbtUtxo] -> Text -> MSat -> Text -> MSat -> ExceptT Failure m FP.FundPsbtResponse
-useUtxos utxos addr amt profitAddr lspFeeAmt = do
-  releaseUtxosPsbtLocks utxos
-  withLndT Lnd.fundPsbt ($ req)
-  where req = fundReq $ FP.TxTemplate (getOutPoint <$> utxos) (M.fromList [(addr, amt), (profitAddr, lspFeeAmt)])
-
 toNBPsbt :: ByteString -> Text
 toNBPsbt x = T.decodeUtf8 $ B64.encode x
-
-toLndPsbt :: Monad m => Text -> ExceptT Failure m ByteString
-toLndPsbt x = except $ first (const $ FailureInternal "") $ B64.decode $ T.encodeUtf8 x
+-- toLndPsbt :: Monad m => Text -> ExceptT Failure m ByteString
+-- toLndPsbt x = except $ first (const $ FailureInternal "") $ B64.decode $ T.encodeUtf8 x
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
 
-fundChanPsbt :: (Env m) => [PsbtUtxo] -> OnChainAddress 'Fund -> OnChainAddress 'Gain -> MSat -> MSat  -> ExceptT Failure m Lnd.Psbt
-fundChanPsbt utxos chanFundAddr profitAddr amt lspFeeAmt = do
-  lspFunded <- autoSelectUtxos (coerce chanFundAddr) amt
-  userFunded <- useUtxos utxos (coerce chanFundAddr) amt (coerce profitAddr) lspFeeAmt
-  joinedPsbt <- withBtcT Btc.joinPsbts ($ [toNBPsbt $ FP.fundedPsbt lspFunded, toNBPsbt $ FP.fundedPsbt userFunded])
-  lndJoinedPsbt <- toLndPsbt joinedPsbt
-  trx <- withBtcT Btc.decodePsbt ($ joinedPsbt)
+unspendUtxoLookup :: (Env m) => ExceptT Failure m (Map Lnd.OutPoint LU.Utxo)
+unspendUtxoLookup = do
+  allUtxos <- LU.utxos <$> withLndT Lnd.listUnspent ($ LU.ListUnspentRequest 2 maxBound "")
+  pure $ foldr (\u acc-> M.insert (LU.outpoint u) u acc) M.empty allUtxos
+
+fundChanPsbt :: (Env m) => [PsbtUtxo] -> OnChainAddress 'Fund -> OnChainAddress 'Gain -> MSat -> ExceptT Failure m Lnd.Psbt
+fundChanPsbt utxos chanFundAddr changeAddr lspFee = do
+  let minerFee =  MSat $ 500 * 1000
+  let userAmt = sumAmt utxos - lspFee - minerFee
+  l <- unspendUtxoLookup
+  lspFunded <- autoSelectUtxos (coerce chanFundAddr) userAmt
+  let inpOuts = catMaybes $ (`M.lookup` l) . FP.outpoint <$> FP.lockedUtxos lspFunded
+  let (ourFundsAmt :: MSat) = sum $ LU.amountSat <$> inpOuts
+  let allInputs = (getOutPoint <$> utxos) <> (FP.outpoint <$> FP.lockedUtxos lspFunded)
+  let changeAmt = ourFundsAmt - userAmt + lspFee
+  let req = fundReq $ FP.TxTemplate allInputs (M.fromList [(coerce chanFundAddr, userAmt * 2), (coerce changeAddr, changeAmt)])
+  $(logTM) DebugS $ logStr $ "Funding:" <> inspect (userAmt * 2) <> " " <> inspect changeAmt
+  releaseUtxosPsbtLocks utxos
+  mapM_ (\r -> withLndT Lnd.releaseOutput ($ RO.ReleaseOutputRequest (FP.id r) (Just $ FP.outpoint r))) (FP.lockedUtxos lspFunded)
+  psbt <- withLndT Lnd.fundPsbt ($ req)
+  trx <- withBtcT Btc.decodePsbt ($ toNBPsbt $ FP.fundedPsbt psbt)
   $(logTM) DebugS $ logStr $ "Funding Trx" <> inspect trx
-  pure $ Lnd.Psbt lndJoinedPsbt
+  pure $ Lnd.Psbt $ FP.fundedPsbt psbt
 
 finChanPsbt :: (Env m) => Lnd.Psbt -> ExceptT Failure m FNP.FinalizePsbtResponse
 finChanPsbt psbt = withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (coerce psbt) "")
@@ -152,7 +161,7 @@ openChannelPsbt utxos toPubKey profitAddr lspFee txFee = do
       case upd of
         Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdatePsbtFund (Lnd.ReadyForPsbtFunding faddr famt _))) -> do
           $(logTM) DebugS $ logStr $ "Chan ready for funding at addr:" <> inspect faddr <> " with amt:" <> inspect famt
-          psbt' <- fundChanPsbt utxos (coerce faddr) (coerce profitAddr) amt lspFee
+          psbt' <- fundChanPsbt utxos (coerce faddr) (coerce profitAddr) lspFee
           void $ withLndT Lnd.fundingStateStep ($ psbtVerifyReq pcid psbt')
           sPsbtResp <- finChanPsbt psbt'
           $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp

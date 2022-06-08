@@ -400,8 +400,6 @@ signRawTransaction client rt us' privkeys wcp =
 sendRawTransaction :: Client -> RawTransaction -> IO TransactionID
 sendRawTransaction client rt = callApi client "sendrawtransaction" [ tj rt ]
 
-
-
 newtype DecodedPsbt = DecodedPsbt {
     tx :: DecodedRawTransaction
 } deriving ( Show, Read, Ord, Eq )
