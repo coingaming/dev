@@ -4,13 +4,13 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 SECRETS_DIR="$THIS_DIR/../build/secrets"
-BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
+BITCOIN_NETWORK="$(sh "$THIS_DIR/k8s-get-env-var.sh" lnd BITCOIN_NETWORK)"
 
 mkdir -p "$SECRETS_DIR"
 
 exportCreds () {
   SERVICE="$1"
-  POD=`sh $THIS_DIR/k8s-get-pod.sh $SERVICE`
+  POD="$(sh "$THIS_DIR/k8s-get-pod.sh" "$SERVICE")"
   SERVICE_DIR="$SECRETS_DIR/$SERVICE"
   mkdir -p "$SERVICE_DIR"
 
@@ -70,8 +70,8 @@ exportCreds () {
 
 exportCreds "lnd"
 
-if [ "$BITCOIN_NETWORK" = "regtest" ]; then
-  for OWNER in lnd-alice lnd-bob; do
-    exportCreds "$OWNER"
-  done
-fi
+# if [ "$BITCOIN_NETWORK" = "regtest" ]; then
+#   for OWNER in lnd-alice lnd-bob; do
+#     exportCreds "$OWNER"
+#   done
+# fi

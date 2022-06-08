@@ -75,6 +75,7 @@ jq-1.6
 kubectl-1.23.5
 minikube-1.25.2
 wget-1.21.3
+helm-3.8.2
 ```
 
 ### Regtest setup

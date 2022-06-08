@@ -1,7 +1,7 @@
 #!/bin/sh
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
-BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
+BITCOIN_NETWORK="$(sh "$THIS_DIR/k8s-get-env-var.sh" lnd BITCOIN_NETWORK)"
 
 echo "$0 ==> starting"
 

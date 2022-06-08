@@ -2,8 +2,8 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
-LND_WALLET_PASSWORD=`sh $THIS_DIR/k8s-get-secret.sh lnd lnd_wallet_pass`
+BITCOIN_NETWORK="$(sh "$THIS_DIR/k8s-get-env-var.sh" lnd BITCOIN_NETWORK)"
+LND_WALLET_PASSWORD="$(sh "$THIS_DIR/k8s-get-secret.sh" lsp-secret lnd_wallet_password)"
 LND_MACAROON_PATH="/root/.lnd/data/chain/bitcoin/$BITCOIN_NETWORK/admin.macaroon"
 
 create_wallet() {
@@ -66,10 +66,10 @@ createBtcWallet () {
 
 initWallet "lnd"
 
-if [ "$BITCOIN_NETWORK" = "regtest" ]; then
-  for OWNER in lnd-alice lnd-bob; do
-    initWallet "$OWNER"
-  done
-  createBtcWallet "bitcoind"
-fi
+# if [ "$BITCOIN_NETWORK" = "regtest" ]; then
+#   for OWNER in lnd-alice lnd-bob; do
+#     initWallet "$OWNER"
+#   done
+#   createBtcWallet "bitcoind"
+# fi
 
