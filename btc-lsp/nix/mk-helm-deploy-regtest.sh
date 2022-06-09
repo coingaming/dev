@@ -89,7 +89,7 @@ docker load -q -i "$BUILD_DIR/docker-image-btc-lsp.tar.gz" \
 echo "==> Loading btc-lsp docker image into minikube"
 minikube image load \
   --daemon=true \
-  $(cat "$BUILD_DIR/docker-image-btc-lsp.txt")
+  "$(cat "$BUILD_DIR/docker-image-btc-lsp.txt")"
 
 if [ "$INTEGRATION" = "enabled" ]; then
   echo "==> Loading integration docker image"
@@ -101,16 +101,31 @@ if [ "$INTEGRATION" = "enabled" ]; then
   echo "==> Loading integration docker image into minikube"
   minikube image load \
   --daemon=true \
-  $(cat "$BUILD_DIR/docker-image-integration.txt")
+  "$(cat "$BUILD_DIR/docker-image-integration.txt")"
 fi
 
-for HELM_CHART_NAME in bitcoind lnd rtl postgres lsp; do
-  echo "==> Installing \"$HELM_CHART_NAME\" chart"
-  helm install "$HELM_CHART_NAME" "$HELM_REPO_NAME/$HELM_CHART_NAME"
+installChart () {
+  RELEASE_NAME="$1"
+  CHART_NAME="$2"
+  INSTALL_ARGS="$3"
+
+  echo "==> Installing \"$RELEASE_NAME\" release from \"$CHART_NAME\" chart"
+  helm install "$INSTALL_ARGS" "$RELEASE_NAME" "$CHART_NAME"
+}
+
+for RELEASE_NAME in bitcoind lnd rtl postgres lsp; do
+  installChart "$RELEASE_NAME" "$HELM_REPO_NAME/$RELEASE_NAME"
 done
 
+installChart "lnd-alice" "$HELM_REPO_NAME/lnd"
+installChart "lnd-bob" "$HELM_REPO_NAME/lnd"
+
+if [ "$INTEGRATION" = "enabled" ]; then
+  installChart "integration" "$HELM_REPO_NAME/lsp"
+fi
+
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd postgres"
+sh "$THIS_DIR/k8s-wait.sh" "bitcoind lnd lnd-alice lnd-bob postgres"
 
 echo "==> Initializing LND wallet"
 sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
@@ -118,8 +133,23 @@ sh "$THIS_DIR/k8s-lazy-init-unlock.sh"
 echo "==> Exporting LND creds"
 sh "$THIS_DIR/k8s-export-creds.sh"
 
-export LND_HEX_MACAROON="$(cat "$LND_PATH/macaroon.hex" | tr -d '\r' | tr -d '\n')"
-export LND_TLS_CERT="$(cat "$LND_PATH/tls.cert" | awk 'NF {sub(/\r/, ""); printf "%s\\r\\n",$0;}')"
+exportMacaroon () {
+  local MACAROON_PATH="$1"
+  cat "$MACAROON_PATH" | tr -d '\r' | tr -d '\n'
+}
+
+exportTlsCert () {
+  local TLS_CERT_PATH="$1"
+  cat "$TLS_CERT_PATH" | awk 'NF {sub(/\r/, ""); printf "%s\\r\\n",$0;}'
+}
+
+export LND_HEX_MACAROON="$(exportMacaroon "$LND_PATH/macaroon.hex")"
+export LND_ALICE_HEX_MACAROON="$(exportMacaroon "$LND_ALICE_PATH/macaroon.hex")"
+export LND_BOB_HEX_MACAROON="$(exportMacaroon "$LND_BOB_PATH/macaroon.hex")"
+
+export LND_TLS_CERT="$(exportTlsCert "$LND_PATH/tls.cert")"
+export LND_ALICE_TLS_CERT="$(exportTlsCert "$LND_ALICE_PATH/tls.cert")"
+export LND_BOB_TLS_CERT="$(exportTlsCert "$LND_BOB_PATH/tls.cert")"
 
 # Provide btc-lsp image repo and tag as ENV vars
 BTC_LSP_DOCKER_IMAGE="$(cat "$BUILD_DIR/docker-image-btc-lsp.txt")"
@@ -130,17 +160,35 @@ export LSP_IMAGE_TAG="${BTC_LSP_DOCKER_IMAGE_DATA[1]}"
 
 echo "==> Using \"$LSP_IMAGE_REPO:$LSP_IMAGE_TAG\" image for btc-lsp"
 
-for HELM_CHART_NAME in rtl lsp; do
-  echo "==> Configuring \"$HELM_CHART_NAME\" values with LND creds"
-  envsubst < "$THIS_DIR/../helm/$HELM_CHART_NAME.env.yaml" | \
-  tee "$THIS_DIR/../build/$HELM_CHART_NAME.yaml"
+# Provide integration image repo and tag as ENV vars
+if [ "$INTEGRATION" = "enabled" ]; then
+  INTEGRATION_DOCKER_IMAGE="$(cat "$BUILD_DIR/docker-image-integration.txt")"
+  IFS=':' read -ra INTEGRATION_DOCKER_IMAGE_DATA <<< "$INTEGRATION_DOCKER_IMAGE"
 
-  echo "==> Upgrading \"$HELM_CHART_NAME\" chart"
+  export INTEGRATION_IMAGE_REPO="${INTEGRATION_DOCKER_IMAGE_DATA[0]}"
+  export INTEGRATION_IMAGE_TAG="${INTEGRATION_DOCKER_IMAGE_DATA[1]}"
+
+  echo "==> Using \"$INTEGRATION_IMAGE_REPO:$INTEGRATION_IMAGE_TAG\" image for integration"
+fi
+
+upgradeRelease () {
+  local RELEASE_NAME="$1"
+  local CHART_NAME="$2"
+
+  echo "==> Configuring \"$RELEASE_NAME\" values with LND creds"
+  envsubst < "$THIS_DIR/../helm/$RELEASE_NAME.env.yaml" | \
+  tee "$THIS_DIR/../build/$RELEASE_NAME.yaml"
+
+  echo "==> Upgrading \"$RELEASE_NAME\" release from \"$CHART_NAME\" chart"
   helm upgrade \
-    --values "$THIS_DIR/../build/$HELM_CHART_NAME.yaml" \
-    "$HELM_CHART_NAME" \
-    "$HELM_REPO_NAME/$HELM_CHART_NAME"
-done
+    --values "$THIS_DIR/../build/$RELEASE_NAME.yaml" \
+    "$RELEASE_NAME" \
+    "$HELM_REPO_NAME/$CHART_NAME"
+}
+
+upgradeRelease "rtl" "rtl"
+upgradeRelease "lsp" "lsp"
+upgradeRelease "integration" "lsp"
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
