@@ -114,6 +114,11 @@ fundChanPsbt ::
   MSat -> ExceptT Failure m Lnd.Psbt
 fundChanPsbt userUtxos chanFundAddr changeAddr lspFee minerFee = do
   let userFundingAmt = sumAmt userUtxos - lspFee - minerFee
+
+  $(logTM) DebugS $ logStr $ "UserAmt:"
+    <> inspect (sumAmt userUtxos)
+    <> " LspFee:" <> inspect lspFee <> " MinerFee:" <> inspect minerFee
+
   lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
   lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
   let selectedInputsAmt = sumAmt lspUtxos
@@ -124,7 +129,7 @@ fundChanPsbt userUtxos chanFundAddr changeAddr lspFee minerFee = do
   let outputs =
         if changeAmt > Math.trxDustLimit
           then [(coerce chanFundAddr, userFundingAmt * 2), (coerce changeAddr, changeAmt)]
-          else [(coerce chanFundAddr, userFundingAmt * 2)]
+          else [(coerce chanFundAddr, userFundingAmt * 2 + changeAmt)]
 
   let req = fundPsbtReq $ FP.TxTemplate allInputs (M.fromList outputs)
   releaseUtxosPsbtLocks (userUtxos <> lspUtxos)
