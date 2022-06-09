@@ -1,23 +1,28 @@
 {-# LANGUAGE TemplateHaskell #-}
-module BtcLsp.Thread.PsbtOpener
-  (openChannelPsbt)
-where
+
+module BtcLsp.Thread.PsbtOpener (openChannelPsbt) where
 
 import BtcLsp.Import
-import qualified LndClient as Lnd
-import qualified LndClient.RPC.Katip as Lnd
-import qualified LndClient.Data.FundPsbt as FP
-import qualified Data.Map as M
-import BtcLsp.Thread.Utils (
-  openChannelReq, psbtVerifyReq,
-  psbtFinalizeReq, finalizePsbt, unspendUtxoLookup, fundPsbtReq)
-import qualified LndClient.Data.ReleaseOutput as RO
-import qualified LndClient.Data.FinalizePsbt as FNP
-import qualified LndClient.Data.OpenChannel as Lnd
-import qualified LndClient.Data.ChannelPoint as Lnd
-import qualified UnliftIO.STM as T
-import qualified LndClient.Data.ListUnspent as LU
 import qualified BtcLsp.Math.OnChain as Math
+import BtcLsp.Thread.Utils
+  ( finalizePsbt,
+    fundPsbtReq,
+    openChannelReq,
+    psbtFinalizeReq,
+    psbtVerifyReq,
+    unspendUtxoLookup,
+  )
+import qualified Data.Map as M
+import qualified LndClient as Lnd
+import qualified LndClient.Data.ChannelPoint as Lnd
+import qualified LndClient.Data.FinalizePsbt as FNP
+import qualified LndClient.Data.FundPsbt as FP
+import qualified LndClient.Data.ListUnspent as LU
+import qualified LndClient.Data.OpenChannel as Lnd
+import qualified LndClient.Data.ReleaseOutput as RO
+import qualified LndClient.RPC.Katip as Lnd
+import qualified UnliftIO.STM as T
+import qualified LndClient.Data.OutPoint as OP
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
@@ -31,36 +36,63 @@ releaseUtxosPsbtLocks utxos = mapM_ (\r -> withLndT Lnd.releaseOutput ($ r)) lut
 
 autoSelectUtxos :: Env m => OnChainAddress 'Fund -> MSat -> ExceptT Failure m FP.FundPsbtResponse
 autoSelectUtxos addr amt = withLndT Lnd.fundPsbt ($ req)
-  where req = fundPsbtReq $ FP.TxTemplate [] (M.fromList [(coerce addr, amt)])
+  where
+    req = fundPsbtReq $ FP.TxTemplate [] (M.fromList [(coerce addr, amt)])
 
-fundChanPsbt :: (Env m) => [PsbtUtxo] ->
-  OnChainAddress 'Fund -> OnChainAddress 'Gain -> MSat -> MSat -> ExceptT Failure m Lnd.Psbt
-fundChanPsbt utxos chanFundAddr changeAddr lspFee minerFee = do
-  let userFundingAmt = sumAmt utxos - lspFee - minerFee
+utxoLeaseToPsbtUtxo :: Map OP.OutPoint LU.Utxo -> FP.UtxoLease -> Maybe PsbtUtxo
+utxoLeaseToPsbtUtxo l ul = psbtUtxo . LU.amountSat <$> M.lookup op l
+  where
+    op = FP.outpoint ul
+    psbtUtxo amt = PsbtUtxo {
+      getAmt = amt,
+      getLockId = Just . UtxoLockId $ FP.id ul,
+      getOutPoint = op
+    }
+
+mapLeaseUtxosToPsbtUtxo :: Env m => [FP.UtxoLease] -> ExceptT Failure m [PsbtUtxo]
+mapLeaseUtxosToPsbtUtxo lockedUtxos = do
+  l <- unspendUtxoLookup
+  case sequence $ utxoLeaseToPsbtUtxo l <$> lockedUtxos of
+    Just us -> pure us
+    Nothing -> do
+      $(logTM) DebugS $ logStr $
+        "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
+      throwE $ FailureInternal "Cannot find utxo in unspent list"
+
+fundChanPsbt ::
+  (Env m) =>
+  [PsbtUtxo] ->
+  OnChainAddress 'Fund ->
+  OnChainAddress 'Gain ->
+  MSat ->
+  MSat -> ExceptT Failure m Lnd.Psbt
+fundChanPsbt userUtxos chanFundAddr changeAddr lspFee minerFee = do
+  let userFundingAmt = sumAmt userUtxos - lspFee - minerFee
   lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
-  selectedInputsAmt <- calcInputsAmt $ FP.lockedUtxos lspFunded
+  lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
+  let selectedInputsAmt = sumAmt lspUtxos
   $(logTM) DebugS $ logStr $ "Coins sum by lsp" <> inspect selectedInputsAmt
-  let allInputs = (getOutPoint <$> utxos) <> (FP.outpoint <$> FP.lockedUtxos lspFunded)
+  let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
   let changeAmt = selectedInputsAmt - userFundingAmt + lspFee
 
-  let outputs = if changeAmt > Math.trxDustLimit
-                   then [(coerce chanFundAddr, userFundingAmt * 2), (coerce changeAddr, changeAmt)]
-                   else [(coerce chanFundAddr, userFundingAmt * 2)]
+  let outputs =
+        if changeAmt > Math.trxDustLimit
+          then [(coerce chanFundAddr, userFundingAmt * 2), (coerce changeAddr, changeAmt)]
+          else [(coerce chanFundAddr, userFundingAmt * 2)]
 
   let req = fundPsbtReq $ FP.TxTemplate allInputs (M.fromList outputs)
-  releaseUtxosPsbtLocks utxos
-  mapM_ (\r -> withLndT Lnd.releaseOutput
-    ($ RO.ReleaseOutputRequest (FP.id r) (Just $ FP.outpoint r))) (FP.lockedUtxos lspFunded)
+  releaseUtxosPsbtLocks (userUtxos <> lspUtxos)
   psbt <- withLndT Lnd.fundPsbt ($ req)
   pure $ Lnd.Psbt $ FP.fundedPsbt psbt
-  where
-    calcInputsAmt lockedUtxos = do
-      l <- unspendUtxoLookup
-      $(logTM) DebugS $ logStr $ "Unspent utxos:" <> inspect l <> " " <> inspect lockedUtxos
-      let inpOuts = catMaybes $ (`M.lookup` l) . FP.outpoint <$> lockedUtxos
-      pure $ sum $ LU.amountSat <$> inpOuts
 
-openChannelPsbt :: Env m => [PsbtUtxo] -> NodePubKey -> OnChainAddress 'Gain -> MSat -> MSat -> ExceptT Failure m Lnd.ChannelPoint
+openChannelPsbt ::
+  Env m =>
+  [PsbtUtxo] ->
+  NodePubKey ->
+  OnChainAddress 'Gain ->
+  MSat ->
+  MSat ->
+  ExceptT Failure m Lnd.ChannelPoint
 openChannelPsbt utxos toPubKey changeAddress lspFee minerFee = do
   chan <- lift T.newTChanIO
   pcid <- Lnd.newPendingChanId
@@ -89,4 +121,3 @@ openChannelPsbt utxos toPubKey changeAddress lspFee minerFee = do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
         _ -> throwE (FailureInternal "Unexpected update")
-

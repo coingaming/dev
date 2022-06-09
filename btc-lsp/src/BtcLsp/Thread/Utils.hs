@@ -21,6 +21,7 @@ import qualified LndClient.Data.FundingPsbtFinalize as FPF
 import qualified LndClient.Data.OutPoint as Lnd
 import qualified LndClient.Data.ListUnspent as LU
 import qualified Data.Map as M
+import qualified LndClient.Data.FundingShimCancel as FSC
 
 
 swapUtxoToPsbtUtxo :: SwapUtxo -> PsbtUtxo
@@ -85,6 +86,9 @@ psbtFinalizeReq pcid sp =
         FPF.finalRawTx = Lnd.RawTx ""
       }
 
+shimCancelReq :: Lnd.PendingChannelId -> FSS.FundingStateStepRequest
+shimCancelReq pcid = FSS.FundingStateStepShimCancelRequest $
+  FSC.FundingShimCancel { FSC.pendingChanId = pcid }
 
 finalizePsbt :: (Env m) => Lnd.Psbt -> ExceptT Failure m FNP.FinalizePsbtResponse
 finalizePsbt psbt = withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (coerce psbt) "")
