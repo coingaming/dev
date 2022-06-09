@@ -10,6 +10,8 @@ import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Math.Swap as Math
 import qualified Network.Bitcoin as Btc
 import Test.Hspec
+import Test.QuickCheck
+import Test.QuickCheck.Monadic
 import TestAppM
 import TestOrphan ()
 
@@ -43,6 +45,30 @@ spec = do
                 swapCapFee = 2009000
               }
           )
+  itProp @'LndLsp "newSwapCapM prop" $ do
+    minSwp <- getSwapIntoLnMinAmt
+    withRunInIO $ \run0 ->
+      pure . monadicIO $ do
+        swp <-
+          from @MSat <$> pick arbitrary
+        maybeM
+          (assert $ swp < minSwp)
+          ( \res -> do
+              let usr = Math.swapCapUsr res
+              let lsp = Math.swapCapLsp res
+              let fee = Math.swapCapFee res
+              assert $ swp >= minSwp
+              assert $ usr > 0
+              assert $ lsp > 0
+              assert $ fee > 0
+              assert $ usr > coerce fee
+              assert $ lsp > coerce fee
+              assert $ usr == coerce lsp
+              assert $ (usr + coerce fee) == coerce swp
+          )
+          . liftIO
+          . run0
+          $ Math.newSwapCapM swp
   it "trySatToMsat" $
     mapM_
       ( \(sat, msat) ->

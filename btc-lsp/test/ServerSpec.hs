@@ -109,11 +109,6 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
         <$> withLndTestT
           LndAlice
           Lnd.newAddress
-          --
-          -- TODO : maybe pass LndEnv as the last argument
-          -- to the methods (not the first like right now)
-          -- to avoid this style of withLndT?
-          --
           ( $
               Lnd.NewAddressRequest
                 { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
@@ -133,9 +128,6 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
               & SwapIntoLn.refundOnChainAddress
                 .~ from @(OnChainAddress 'Refund) refundAddr
           )
-    --
-    -- TODO : do more precise match!!!
-    --
     liftIO $
       res0
         `shouldSatisfy` ( \msg ->

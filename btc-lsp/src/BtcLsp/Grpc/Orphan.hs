@@ -16,10 +16,6 @@ import qualified Proto.BtcLsp.Data.LowLevel as Proto
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as LowLevel
 import qualified Witch
 
---
--- TODO : smart constuctors are needed!!!
---
-
 fromProto ::
   forall proto through haskell.
   ( HasField proto "val" through,

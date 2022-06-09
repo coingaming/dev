@@ -161,31 +161,7 @@ export LSP_GRPC_CLIENT_ENV="
 "
 
 #
-# NOTE : for local swarm tests
-#
-# export LSP_GRPC_CLIENT_ENV="
-# {
-#   \"host\":\"yolo_btc-lsp\",
-#   \"port\":443,
-#   \"sig_header_name\":\"sig-bin\",
-#   \"compress_mode\":\"Compressed\"
-# }
-# "
-#
-# TODO : remove this temporary mapping, which
-# is workaround to avoid strange data: end of file
-# error,  probably caused by docker-proxy, but only
-# with Swift client (Haskell client works)
-#
-# export LSP_GRPC_CLIENT_ENV="
-# {
-#   \"host\":\"127.0.0.1\",
-#   \"port\":8081,
-#   \"sig_header_name\":\"sig-bin\"
-# }
-# "
-#
-# NOTE : for local k8s tests
+# NOTE : for regtest k8s tests
 #
 # export LSP_GRPC_CLIENT_ENV="
 # {
@@ -196,7 +172,7 @@ export LSP_GRPC_CLIENT_ENV="
 # }
 # "
 #
-# NOTE : for testnet DO k8s tests
+# NOTE : for testnet k8s tests
 #
 # export LSP_GRPC_CLIENT_ENV="
 # {

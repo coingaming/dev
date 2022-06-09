@@ -1381,9 +1381,8 @@ packedFileDescriptor
     \\SIInternalFailure\"\ESC\n\
     \\fInputFailure\DC2\v\n\
     \\aDEFAULT\DLE\NULB\b\n\
-    \\ACKeitherJ\203\n\
-    \\n\
-    \\ACK\DC2\EOT\NUL\NUL0\SOH\n\
+    \\ACKeitherJ\178\t\n\
+    \\ACK\DC2\EOT\NUL\NUL)\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1407,7 +1406,7 @@ packedFileDescriptor
     \\n\
     \\n\
     \\STX\EOT\SOH\DC2\EOT\n\
-    \\NUL0\SOH\n\
+    \\NUL)\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\SOH\SOH\DC2\ETX\n\
@@ -1441,121 +1440,114 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\SI\SYN\ETB\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\DC2\STX!\ETX\n\
+    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\DC2\STX\SUB\ETX\n\
     \\f\n\
     \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\DC2\n\
     \\DC1\n\
-    \|\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\ETB\EOT<\SUBm\n\
-    \ TODO : replace this rpc with better version estimate_swap\n\
-    \ where client will provide amounts as inputs!!!\n\
-    \\n\
-    \\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\EOT\DC2\ETX\ETB\EOT\f\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\ETB\r*\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\ETB+7\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\ETB:;\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\CAN\EOTA\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\DC3\EOT<\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\CAN\EOT'\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\EOT\DC2\ETX\DC3\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\CAN(<\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\DC3\r*\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\CAN?@\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\DC3+7\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\DC3:;\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\STX\DC2\ETX\EM\EOTA\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\DC4\EOTA\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\STX\ACK\DC2\ETX\EM\EOT'\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\DC4\EOT'\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\STX\SOH\DC2\ETX\EM(<\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\DC4(<\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\STX\ETX\DC2\ETX\EM?@\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\DC4?@\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\ETX\DC2\ETX\SUB\EOTA\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\STX\DC2\ETX\NAK\EOTA\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ETX\ACK\DC2\ETX\SUB\EOT'\n\
+    \\a\EOT\SOH\ETX\NUL\STX\STX\ACK\DC2\ETX\NAK\EOT'\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ETX\SOH\DC2\ETX\SUB(<\n\
+    \\a\EOT\SOH\ETX\NUL\STX\STX\SOH\DC2\ETX\NAK(<\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ETX\ETX\DC2\ETX\SUB?@\n\
+    \\a\EOT\SOH\ETX\NUL\STX\STX\ETX\DC2\ETX\NAK?@\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\EOT\DC2\ETX\ESC\EOTA\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\ETX\DC2\ETX\SYN\EOTA\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\EOT\ACK\DC2\ETX\ESC\EOT'\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ETX\ACK\DC2\ETX\SYN\EOT'\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\EOT\SOH\DC2\ETX\ESC(<\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ETX\SOH\DC2\ETX\SYN(<\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\EOT\ETX\DC2\ETX\ESC?@\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ETX\ETX\DC2\ETX\SYN?@\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\ENQ\DC2\ETX\FS\EOT8\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\EOT\DC2\ETX\ETB\EOTA\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ENQ\ACK\DC2\ETX\FS\EOT\"\n\
+    \\a\EOT\SOH\ETX\NUL\STX\EOT\ACK\DC2\ETX\ETB\EOT'\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ENQ\SOH\DC2\ETX\FS#3\n\
+    \\a\EOT\SOH\ETX\NUL\STX\EOT\SOH\DC2\ETX\ETB(<\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ENQ\ETX\DC2\ETX\FS67\n\
-    \7\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\ACK\DC2\ETX\GS\EOT8\"(\n\
-    \ TODO : add open/close sat/vb fees???\n\
-    \\n\
-    \\n\
+    \\a\EOT\SOH\ETX\NUL\STX\EOT\ETX\DC2\ETX\ETB?@\n\
+    \\r\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\ENQ\DC2\ETX\CAN\EOT8\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ACK\ACK\DC2\ETX\GS\EOT#\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ENQ\ACK\DC2\ETX\CAN\EOT\"\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ACK\SOH\DC2\ETX\GS$3\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ENQ\SOH\DC2\ETX\CAN#3\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\ACK\ETX\DC2\ETX\GS67\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ENQ\ETX\DC2\ETX\CAN67\n\
+    \\r\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\ACK\DC2\ETX\EM\EOT8\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ACK\ACK\DC2\ETX\EM\EOT#\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ACK\SOH\DC2\ETX\EM$3\n\
+    \\SO\n\
+    \\a\EOT\SOH\ETX\NUL\STX\ACK\ETX\DC2\ETX\EM67\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT#\STX/\ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\FS\STX(\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX#\n\
+    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\FS\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX$\EOT=\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX\GS\EOT=\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX$\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX\GS\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX$\r0\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX\GS\r0\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX$18\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX\GS18\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX$;<\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX\GS;<\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX%\EOT'\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX\RS\EOT'\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX%\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX\RS\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX%\r\EM\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX\RS\r\EM\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX%\SUB\"\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX\RS\SUB\"\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX%%&\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\RS%&\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX&\EOT*\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX\US\EOT*\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX&\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX\US\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX&\r\FS\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX\US\r\FS\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX&\GS%\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX\US\GS%\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX&()\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX\US()\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT(\EOT*\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT!\EOT#\ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX(\t\NAK\n\
+    \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX!\t\NAK\n\
     \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\DC2\ETX)\ACK\DC2\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\DC2\ETX\"\ACK\DC2\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX)\ACK\r\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX\"\ACK\r\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX)\DLE\DC1\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX\"\DLE\DC1\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT,\EOT.\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT%\EOT'\ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX,\f\ESCb\ACKproto3"
+    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX%\f\ESCb\ACKproto3"

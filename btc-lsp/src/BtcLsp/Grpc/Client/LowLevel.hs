@@ -7,6 +7,7 @@ where
 
 import BtcLsp.Grpc.Data
 import BtcLsp.Grpc.Orphan ()
+import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import.Witch
 import Data.Aeson
   ( FromJSON (..),
@@ -43,10 +44,7 @@ data GCEnv = GCEnv
     gcEnvPort :: GCPort,
     gcEnvSigHeaderName :: SigHeaderName,
     gcEnvCompressMode :: CompressMode,
-    --
-    -- TODO : more typed data
-    --
-    gcEnvSigner :: ByteString -> IO (Maybe ByteString)
+    gcEnvSigner :: Sig.MsgToSign -> IO (Maybe Sig.LndSig)
   }
   deriving stock
     ( Generic
@@ -104,9 +102,6 @@ runUnary rpc env verifySig req = do
         (makeClient env req True)
         close
         (\grpc -> rawUnary rpc grpc req)
-  --
-  -- TODO : better composition with ExceptT
-  --
   case res of
     Right (Right (Right (h, mh, Right x))) ->
       case find (\header -> fst header == sigHeaderName) $ h <> fromMaybe mempty mh of
@@ -124,19 +119,16 @@ runUnary rpc env verifySig req = do
               then Right x
               else
                 Left $
-                  "Client ==> server signature verification failed for raw bytes "
+                  "Client ==> server signature verification"
+                    <> " failed for raw bytes"
                     <> " from decoded payload "
                     <> inspectPlain x
                     <> " with signature "
                     <> inspectPlain sigDer
     x ->
-      --
-      -- TODO : replace show with inspectPlain
-      -- need additional instances for this.
-      --
       pure . Left $
         "Client ==> server grpc failure "
-          <> show x
+          <> Universum.show x
   where
     sigHeaderName = CI.mk . from $ gcEnvSigHeaderName env
 
@@ -181,7 +173,7 @@ makeClient env req tlsEnabled = do
           { _grpcClientConfigCompression = compression,
             _grpcClientConfigHeaders =
               [ ( sigHeaderName,
-                  B64.encode signature
+                  B64.encode $ Sig.unLndSig signature
                 )
               ]
           }
@@ -190,7 +182,9 @@ makeClient env req tlsEnabled = do
     signer = gcEnvSigner env
     sigHeaderName = from $ gcEnvSigHeaderName env
     compressMode = gcEnvCompressMode env
-    doSignature = signer $ msgToSignBytes compressMode req
+    doSignature =
+      signer . Sig.MsgToSign $
+        msgToSignBytes compressMode req
     compression =
       case compressMode of
         Compressed -> gzip
