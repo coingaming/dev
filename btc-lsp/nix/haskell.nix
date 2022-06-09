@@ -2,10 +2,12 @@ let
   header = (import ./header.nix);
   pkgs = header.pkgs;
   nixPkgs = header.nixPkgs;
+  nixPkgsLegacy = header.nixPkgsLegacy;
 in
   {
     pkgs = pkgs;
     nixPkgs = nixPkgs;
+    nixPkgsLegacy = nixPkgsLegacy;
     project = {
       profile ? false,
     }: pkgs.haskell-nix.project {

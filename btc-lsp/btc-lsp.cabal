@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.5.
+-- This file has been generated from package.yaml by hpack version 0.34.6.
 --
 -- see: https://github.com/sol/hpack
 
@@ -132,85 +132,67 @@ library
   build-depends:
       GenericPretty
     , SHA
-    , aeson ==1.4.*
+    , aeson >=1.4 && <1.6
     , async
     , base >=4.7 && <5
     , base16-bytestring
     , base64-bytestring >=1.2.1
     , binary
-    , blaze-html
-    , bytestring ==0.10.*
+    , bytestring
     , case-insensitive
     , casing
     , chronos
-    , classy-prelude ==1.5.*
-    , classy-prelude-conduit ==1.5.*
     , classy-prelude-yesod ==1.5.*
-    , colonnade
-    , conduit >=1.0 && <2.0
     , containers
     , cryptonite
-    , data-default
-    , directory >=1.1 && <1.4
     , envparse
     , errors
     , esqueleto >=3.5.3
     , extra
     , fast-logger >=2.2 && <3.1
     , file-embed
-    , foreign-store
     , format-numbers
     , generic-pretty-instances
     , hex-text
     , hjsmin >=0.1 && <0.3
-    , http-client
     , http-client-tls ==0.3.*
-    , http-conduit ==2.3.*
-    , http-types
     , http2
     , http2-client
     , http2-client-grpc
     , http2-grpc-proto-lens
     , http2-grpc-types
     , iso8601-time
-    , katip <0.8.5
-    , lens
+    , katip
     , lnd-client
     , memory
     , microlens
-    , monad-control >=0.3 && <1.1
     , monad-logger ==0.3.*
     , network
     , network-bitcoin
     , persistent >=2.13.2.1
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
-    , persistent-template >=2.12
     , pretty
-    , pretty-simple
     , proto-lens
     , proto-lens-runtime
     , qrcode-core
     , qrcode-juicypixels
     , resource-pool
-    , safe
     , scientific
     , secp256k1-haskell
     , shakespeare ==2.0.*
     , stm
     , template-haskell
-    , text >=0.11 && <2.0
+    , text
     , time
     , transformers
     , unbounded-delays
     , universum
     , unliftio
-    , unordered-containers
     , uuid
     , vector
     , wai
     , wai-extra ==3.1.*
-    , wai-logger >=2.2 && <2.4
     , warp >=3.0 && <3.4
     , warp-grpc
     , warp-tls
@@ -218,12 +200,11 @@ library
     , yaml ==0.11.*
     , yesod ==1.6.*
     , yesod-auth ==1.6.*
-    , yesod-colonnade
     , yesod-core ==1.6.*
     , yesod-form ==1.6.*
     , yesod-static ==1.6.*
   if impl(ghc >= 8.10.7)
-    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   default-language: Haskell2010
 
 executable btc-lsp-exe
@@ -256,100 +237,9 @@ executable btc-lsp-exe
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
-      GenericPretty
-    , SHA
-    , aeson ==1.4.*
-    , async
-    , base >=4.7 && <5
-    , base16-bytestring
-    , base64-bytestring >=1.2.1
-    , binary
-    , blaze-html
-    , bytestring ==0.10.*
-    , case-insensitive
-    , casing
-    , chronos
-    , classy-prelude ==1.5.*
-    , classy-prelude-conduit ==1.5.*
-    , classy-prelude-yesod ==1.5.*
-    , colonnade
-    , conduit >=1.0 && <2.0
-    , containers
-    , cryptonite
-    , data-default
-    , directory >=1.1 && <1.4
-    , envparse
-    , errors
-    , esqueleto >=3.5.3
-    , extra
-    , fast-logger >=2.2 && <3.1
-    , file-embed
-    , foreign-store
-    , format-numbers
-    , generic-pretty-instances
-    , hex-text
-    , hjsmin >=0.1 && <0.3
-    , http-client
-    , http-client-tls ==0.3.*
-    , http-conduit ==2.3.*
-    , http-types
-    , http2
-    , http2-client
-    , http2-client-grpc
-    , http2-grpc-proto-lens
-    , http2-grpc-types
-    , iso8601-time
-    , katip <0.8.5
-    , lens
-    , lnd-client
-    , memory
-    , microlens
-    , monad-control >=0.3 && <1.1
-    , monad-logger ==0.3.*
-    , network
-    , network-bitcoin
-    , persistent >=2.13.2.1
-    , persistent-migration
-    , persistent-postgresql >=2.13.2.1
-    , persistent-template >=2.12
-    , pretty
-    , pretty-simple
-    , proto-lens
-    , proto-lens-runtime
-    , qrcode-core
-    , qrcode-juicypixels
-    , resource-pool
-    , safe
-    , scientific
-    , secp256k1-haskell
-    , shakespeare ==2.0.*
-    , stm
-    , template-haskell
-    , text >=0.11 && <2.0
-    , time
-    , transformers
-    , unbounded-delays
-    , universum
-    , unliftio
-    , unordered-containers
-    , uuid
-    , vector
-    , wai
-    , wai-extra ==3.1.*
-    , wai-logger >=2.2 && <2.4
-    , warp >=3.0 && <3.4
-    , warp-grpc
-    , warp-tls
-    , witch
-    , yaml ==0.11.*
-    , yesod ==1.6.*
-    , yesod-auth ==1.6.*
-    , yesod-colonnade
-    , yesod-core ==1.6.*
-    , yesod-form ==1.6.*
-    , yesod-static ==1.6.*
+      base
   if impl(ghc >= 8.10.7)
-    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
@@ -428,6 +318,80 @@ executable btc-lsp-exe
         Proto.BtcLsp_Fields
     hs-source-dirs:
         src
+    build-depends:
+        GenericPretty
+      , SHA
+      , aeson >=1.4 && <1.6
+      , async
+      , base >=4.7 && <5
+      , base16-bytestring
+      , base64-bytestring >=1.2.1
+      , binary
+      , bytestring
+      , case-insensitive
+      , casing
+      , chronos
+      , classy-prelude-yesod ==1.5.*
+      , containers
+      , cryptonite
+      , envparse
+      , errors
+      , esqueleto >=3.5.3
+      , extra
+      , fast-logger >=2.2 && <3.1
+      , file-embed
+      , format-numbers
+      , generic-pretty-instances
+      , hex-text
+      , hjsmin >=0.1 && <0.3
+      , http-client-tls ==0.3.*
+      , http2
+      , http2-client
+      , http2-client-grpc
+      , http2-grpc-proto-lens
+      , http2-grpc-types
+      , iso8601-time
+      , katip
+      , lnd-client
+      , memory
+      , microlens
+      , monad-logger ==0.3.*
+      , network
+      , network-bitcoin
+      , persistent >=2.13.2.1
+      , persistent-migration
+      , persistent-postgresql >=2.13.2.1
+      , pretty
+      , proto-lens
+      , proto-lens-runtime
+      , qrcode-core
+      , qrcode-juicypixels
+      , resource-pool
+      , scientific
+      , secp256k1-haskell
+      , shakespeare ==2.0.*
+      , stm
+      , template-haskell
+      , text
+      , time
+      , transformers
+      , unbounded-delays
+      , universum
+      , unliftio
+      , uuid
+      , vector
+      , wai
+      , wai-extra ==3.1.*
+      , warp >=3.0 && <3.4
+      , warp-grpc
+      , warp-tls
+      , witch
+      , yaml ==0.11.*
+      , yesod ==1.6.*
+      , yesod-auth ==1.6.*
+      , yesod-core ==1.6.*
+      , yesod-form ==1.6.*
+      , yesod-static ==1.6.*
   else
     build-depends:
         btc-lsp
@@ -477,106 +441,19 @@ executable btc-lsp-integration
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -main-is Integration -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
-      GenericPretty
-    , QuickCheck
-    , SHA
-    , aeson ==1.4.*
-    , async
-    , base >=4.7 && <5
-    , base16-bytestring
-    , base64-bytestring >=1.2.1
-    , binary
-    , blaze-html
-    , bytestring ==0.10.*
-    , case-insensitive
-    , casing
-    , chronos
-    , classy-prelude ==1.5.*
-    , classy-prelude-conduit ==1.5.*
-    , classy-prelude-yesod ==1.5.*
-    , colonnade
-    , conduit >=1.0 && <2.0
-    , containers
-    , cryptonite
-    , data-default
-    , directory >=1.1 && <1.4
+      QuickCheck
+    , aeson
+    , base
+    , bytestring
     , envparse
-    , errors
-    , esqueleto >=3.5.3
-    , extra
-    , fast-logger >=2.2 && <3.1
-    , file-embed
-    , foreign-store
-    , format-numbers
-    , generic-arbitrary
-    , generic-pretty-instances
-    , hex-text
-    , hjsmin >=0.1 && <0.3
     , hspec
-    , hspec-discover
-    , hspec-expectations
-    , http-client
-    , http-client-tls ==0.3.*
-    , http-conduit ==2.3.*
-    , http-types
-    , http2
-    , http2-client
-    , http2-client-grpc
-    , http2-grpc-proto-lens
-    , http2-grpc-types
-    , iso8601-time
-    , katip <0.8.5
-    , lens
     , lnd-client
-    , memory
-    , microlens
-    , monad-control >=0.3 && <1.1
-    , monad-logger ==0.3.*
-    , network
     , network-bitcoin
-    , persistent >=2.13.2.1
-    , persistent-migration
-    , persistent-postgresql >=2.13.2.1
-    , persistent-template >=2.12
-    , pretty
-    , pretty-simple
     , proto-lens
-    , proto-lens-runtime
-    , qrcode-core
-    , qrcode-juicypixels
-    , quickcheck-instances
-    , resource-pool
-    , safe
-    , scientific
-    , secp256k1-haskell
-    , shakespeare ==2.0.*
-    , stm
-    , template-haskell
-    , text >=0.11 && <2.0
-    , time
-    , transformers
-    , unbounded-delays
-    , universum
     , unliftio
-    , unordered-containers
-    , uuid
     , vector
-    , wai
-    , wai-extra ==3.1.*
-    , wai-logger >=2.2 && <2.4
-    , warp >=3.0 && <3.4
-    , warp-grpc
-    , warp-tls
-    , witch
-    , yaml ==0.11.*
-    , yesod ==1.6.*
-    , yesod-auth ==1.6.*
-    , yesod-colonnade
-    , yesod-core ==1.6.*
-    , yesod-form ==1.6.*
-    , yesod-static ==1.6.*
   if impl(ghc >= 8.10.7)
-    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
@@ -655,6 +532,80 @@ executable btc-lsp-integration
         Proto.BtcLsp_Fields
     hs-source-dirs:
         src
+    build-depends:
+        GenericPretty
+      , SHA
+      , aeson >=1.4 && <1.6
+      , async
+      , base >=4.7 && <5
+      , base16-bytestring
+      , base64-bytestring >=1.2.1
+      , binary
+      , bytestring
+      , case-insensitive
+      , casing
+      , chronos
+      , classy-prelude-yesod ==1.5.*
+      , containers
+      , cryptonite
+      , envparse
+      , errors
+      , esqueleto >=3.5.3
+      , extra
+      , fast-logger >=2.2 && <3.1
+      , file-embed
+      , format-numbers
+      , generic-pretty-instances
+      , hex-text
+      , hjsmin >=0.1 && <0.3
+      , http-client-tls ==0.3.*
+      , http2
+      , http2-client
+      , http2-client-grpc
+      , http2-grpc-proto-lens
+      , http2-grpc-types
+      , iso8601-time
+      , katip
+      , lnd-client
+      , memory
+      , microlens
+      , monad-logger ==0.3.*
+      , network
+      , network-bitcoin
+      , persistent >=2.13.2.1
+      , persistent-migration
+      , persistent-postgresql >=2.13.2.1
+      , pretty
+      , proto-lens
+      , proto-lens-runtime
+      , qrcode-core
+      , qrcode-juicypixels
+      , resource-pool
+      , scientific
+      , secp256k1-haskell
+      , shakespeare ==2.0.*
+      , stm
+      , template-haskell
+      , text
+      , time
+      , transformers
+      , unbounded-delays
+      , universum
+      , unliftio
+      , uuid
+      , vector
+      , wai
+      , wai-extra ==3.1.*
+      , warp >=3.0 && <3.4
+      , warp-grpc
+      , warp-tls
+      , witch
+      , yaml ==0.11.*
+      , yesod ==1.6.*
+      , yesod-auth ==1.6.*
+      , yesod-core ==1.6.*
+      , yesod-form ==1.6.*
+      , yesod-static ==1.6.*
   else
     build-depends:
         btc-lsp
@@ -690,100 +641,9 @@ executable btc-lsp-prof
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
-      GenericPretty
-    , SHA
-    , aeson ==1.4.*
-    , async
-    , base >=4.7 && <5
-    , base16-bytestring
-    , base64-bytestring >=1.2.1
-    , binary
-    , blaze-html
-    , bytestring ==0.10.*
-    , case-insensitive
-    , casing
-    , chronos
-    , classy-prelude ==1.5.*
-    , classy-prelude-conduit ==1.5.*
-    , classy-prelude-yesod ==1.5.*
-    , colonnade
-    , conduit >=1.0 && <2.0
-    , containers
-    , cryptonite
-    , data-default
-    , directory >=1.1 && <1.4
-    , envparse
-    , errors
-    , esqueleto >=3.5.3
-    , extra
-    , fast-logger >=2.2 && <3.1
-    , file-embed
-    , foreign-store
-    , format-numbers
-    , generic-pretty-instances
-    , hex-text
-    , hjsmin >=0.1 && <0.3
-    , http-client
-    , http-client-tls ==0.3.*
-    , http-conduit ==2.3.*
-    , http-types
-    , http2
-    , http2-client
-    , http2-client-grpc
-    , http2-grpc-proto-lens
-    , http2-grpc-types
-    , iso8601-time
-    , katip <0.8.5
-    , lens
-    , lnd-client
-    , memory
-    , microlens
-    , monad-control >=0.3 && <1.1
-    , monad-logger ==0.3.*
-    , network
-    , network-bitcoin
-    , persistent >=2.13.2.1
-    , persistent-migration
-    , persistent-postgresql >=2.13.2.1
-    , persistent-template >=2.12
-    , pretty
-    , pretty-simple
-    , proto-lens
-    , proto-lens-runtime
-    , qrcode-core
-    , qrcode-juicypixels
-    , resource-pool
-    , safe
-    , scientific
-    , secp256k1-haskell
-    , shakespeare ==2.0.*
-    , stm
-    , template-haskell
-    , text >=0.11 && <2.0
-    , time
-    , transformers
-    , unbounded-delays
-    , universum
-    , unliftio
-    , unordered-containers
-    , uuid
-    , vector
-    , wai
-    , wai-extra ==3.1.*
-    , wai-logger >=2.2 && <2.4
-    , warp >=3.0 && <3.4
-    , warp-grpc
-    , warp-tls
-    , witch
-    , yaml ==0.11.*
-    , yesod ==1.6.*
-    , yesod-auth ==1.6.*
-    , yesod-colonnade
-    , yesod-core ==1.6.*
-    , yesod-form ==1.6.*
-    , yesod-static ==1.6.*
+      base
   if impl(ghc >= 8.10.7)
-    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
@@ -862,6 +722,80 @@ executable btc-lsp-prof
         Proto.BtcLsp_Fields
     hs-source-dirs:
         src
+    build-depends:
+        GenericPretty
+      , SHA
+      , aeson >=1.4 && <1.6
+      , async
+      , base >=4.7 && <5
+      , base16-bytestring
+      , base64-bytestring >=1.2.1
+      , binary
+      , bytestring
+      , case-insensitive
+      , casing
+      , chronos
+      , classy-prelude-yesod ==1.5.*
+      , containers
+      , cryptonite
+      , envparse
+      , errors
+      , esqueleto >=3.5.3
+      , extra
+      , fast-logger >=2.2 && <3.1
+      , file-embed
+      , format-numbers
+      , generic-pretty-instances
+      , hex-text
+      , hjsmin >=0.1 && <0.3
+      , http-client-tls ==0.3.*
+      , http2
+      , http2-client
+      , http2-client-grpc
+      , http2-grpc-proto-lens
+      , http2-grpc-types
+      , iso8601-time
+      , katip
+      , lnd-client
+      , memory
+      , microlens
+      , monad-logger ==0.3.*
+      , network
+      , network-bitcoin
+      , persistent >=2.13.2.1
+      , persistent-migration
+      , persistent-postgresql >=2.13.2.1
+      , pretty
+      , proto-lens
+      , proto-lens-runtime
+      , qrcode-core
+      , qrcode-juicypixels
+      , resource-pool
+      , scientific
+      , secp256k1-haskell
+      , shakespeare ==2.0.*
+      , stm
+      , template-haskell
+      , text
+      , time
+      , transformers
+      , unbounded-delays
+      , universum
+      , unliftio
+      , uuid
+      , vector
+      , wai
+      , wai-extra ==3.1.*
+      , warp >=3.0 && <3.4
+      , warp-grpc
+      , warp-tls
+      , witch
+      , yaml ==0.11.*
+      , yesod ==1.6.*
+      , yesod-auth ==1.6.*
+      , yesod-core ==1.6.*
+      , yesod-form ==1.6.*
+      , yesod-static ==1.6.*
   else
     build-depends:
         btc-lsp
@@ -909,106 +843,19 @@ test-suite btc-lsp-test
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
-      GenericPretty
-    , QuickCheck
-    , SHA
-    , aeson ==1.4.*
-    , async
-    , base >=4.7 && <5
-    , base16-bytestring
-    , base64-bytestring >=1.2.1
-    , binary
-    , blaze-html
-    , bytestring ==0.10.*
-    , case-insensitive
-    , casing
-    , chronos
-    , classy-prelude ==1.5.*
-    , classy-prelude-conduit ==1.5.*
-    , classy-prelude-yesod ==1.5.*
-    , colonnade
-    , conduit >=1.0 && <2.0
-    , containers
-    , cryptonite
-    , data-default
-    , directory >=1.1 && <1.4
+      QuickCheck
+    , aeson
+    , base
+    , bytestring
     , envparse
-    , errors
-    , esqueleto >=3.5.3
-    , extra
-    , fast-logger >=2.2 && <3.1
-    , file-embed
-    , foreign-store
-    , format-numbers
-    , generic-arbitrary
-    , generic-pretty-instances
-    , hex-text
-    , hjsmin >=0.1 && <0.3
     , hspec
-    , hspec-expectations
-    , hspec-wai
-    , http-client
-    , http-client-tls ==0.3.*
-    , http-conduit ==2.3.*
-    , http-types
-    , http2
-    , http2-client
-    , http2-client-grpc
-    , http2-grpc-proto-lens
-    , http2-grpc-types
-    , iso8601-time
-    , katip <0.8.5
-    , lens
     , lnd-client
-    , memory
-    , microlens
-    , monad-control >=0.3 && <1.1
-    , monad-logger ==0.3.*
-    , network
     , network-bitcoin
-    , persistent >=2.13.2.1
-    , persistent-migration
-    , persistent-postgresql >=2.13.2.1
-    , persistent-template >=2.12
-    , pretty
-    , pretty-simple
     , proto-lens
-    , proto-lens-runtime
-    , qrcode-core
-    , qrcode-juicypixels
-    , quickcheck-instances
-    , resource-pool
-    , safe
-    , scientific
-    , secp256k1-haskell
-    , shakespeare ==2.0.*
-    , stm
-    , template-haskell
-    , text >=0.11 && <2.0
-    , time
-    , transformers
-    , unbounded-delays
-    , universum
     , unliftio
-    , unordered-containers
-    , uuid
     , vector
-    , wai
-    , wai-extra ==3.1.*
-    , wai-logger >=2.2 && <2.4
-    , warp >=3.0 && <3.4
-    , warp-grpc
-    , warp-tls
-    , witch
-    , yaml ==0.11.*
-    , yesod ==1.6.*
-    , yesod-auth ==1.6.*
-    , yesod-colonnade
-    , yesod-core ==1.6.*
-    , yesod-form ==1.6.*
-    , yesod-static ==1.6.*
   if impl(ghc >= 8.10.7)
-    ghc-options: -Wno-unused-packages -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
@@ -1087,6 +934,81 @@ test-suite btc-lsp-test
         Proto.BtcLsp_Fields
     hs-source-dirs:
         src
+    ghc-options: -Wno-unused-packages
+    build-depends:
+        GenericPretty
+      , SHA
+      , aeson >=1.4 && <1.6
+      , async
+      , base >=4.7 && <5
+      , base16-bytestring
+      , base64-bytestring >=1.2.1
+      , binary
+      , bytestring
+      , case-insensitive
+      , casing
+      , chronos
+      , classy-prelude-yesod ==1.5.*
+      , containers
+      , cryptonite
+      , envparse
+      , errors
+      , esqueleto >=3.5.3
+      , extra
+      , fast-logger >=2.2 && <3.1
+      , file-embed
+      , format-numbers
+      , generic-pretty-instances
+      , hex-text
+      , hjsmin >=0.1 && <0.3
+      , http-client-tls ==0.3.*
+      , http2
+      , http2-client
+      , http2-client-grpc
+      , http2-grpc-proto-lens
+      , http2-grpc-types
+      , iso8601-time
+      , katip
+      , lnd-client
+      , memory
+      , microlens
+      , monad-logger ==0.3.*
+      , network
+      , network-bitcoin
+      , persistent >=2.13.2.1
+      , persistent-migration
+      , persistent-postgresql >=2.13.2.1
+      , pretty
+      , proto-lens
+      , proto-lens-runtime
+      , qrcode-core
+      , qrcode-juicypixels
+      , resource-pool
+      , scientific
+      , secp256k1-haskell
+      , shakespeare ==2.0.*
+      , stm
+      , template-haskell
+      , text
+      , time
+      , transformers
+      , unbounded-delays
+      , universum
+      , unliftio
+      , uuid
+      , vector
+      , wai
+      , wai-extra ==3.1.*
+      , warp >=3.0 && <3.4
+      , warp-grpc
+      , warp-tls
+      , witch
+      , yaml ==0.11.*
+      , yesod ==1.6.*
+      , yesod-auth ==1.6.*
+      , yesod-core ==1.6.*
+      , yesod-form ==1.6.*
+      , yesod-static ==1.6.*
   else
     build-depends:
         btc-lsp

@@ -1,13 +1,16 @@
 packages: *.cabal
 
-allow-newer: yesod-colonnade:base,
-             lnd-client:base64-bytestring,
-             qrcode-juicypixels:base64-bytestring,
-             wai-app-static:wai-extra,
-             yesod-static:wai-extra
+allow-newer: lnd-client:*
 
 package witch
   flags: +remove-time
+
+--
+-- TODO : this should be removed for better
+-- performance after lnd-client upgrade.
+--
+package lnd-client
+  ghc-options: -Wno-monomorphism-restriction
 
 source-repository-package
   type: git

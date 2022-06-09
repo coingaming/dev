@@ -15,13 +15,14 @@ let
     # haskell.nix provides access to the nixpkgs pins which are used by our CI,
     # hence you will be more likely to get cache hits when using these.
     # But you can also just use your own, e.g. '<nixpkgs>'.
-    haskellNix.sources.nixpkgs-2111
+    haskellNix.sources.nixpkgs-unstable
     # These arguments passed to nixpkgs, include some patches and also
     # the haskell.nix functionality itself as an overlay.
     haskellNix.nixpkgsArgs;
 in {
   nixPkgs = import sources.nixpkgs {};
+  nixPkgsLegacy = import sources.nixPkgsLegacy {};
   pkgs = pkgs;
   haskellPackages = pkgs.haskellPackages;
-  compiler-nix-name = "ghc8107";
+  compiler-nix-name = "ghc902";
 }
