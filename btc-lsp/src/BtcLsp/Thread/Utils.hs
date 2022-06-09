@@ -3,7 +3,8 @@ module BtcLsp.Thread.Utils
     swapUtxoToPsbtUtxo, psbtShim,
     fundPsbtReq, openChannelReq,
     psbtVerifyReq, psbtFinalizeReq,
-    finalizePsbt, unspendUtxoLookup
+    finalizePsbt, unspendUtxoLookup,
+    shimCancelReq
   )
 where
 
@@ -97,4 +98,3 @@ unspendUtxoLookup :: (Env m) => ExceptT Failure m (Map Lnd.OutPoint LU.Utxo)
 unspendUtxoLookup = do
   allUtxos <- LU.utxos <$> withLndT Lnd.listUnspent ($ LU.ListUnspentRequest 0 maxBound "")
   pure $ foldr (\u acc-> M.insert (LU.outpoint u) u acc) M.empty allUtxos
-

@@ -23,6 +23,13 @@ import qualified LndClient.Data.ReleaseOutput as RO
 import qualified LndClient.RPC.Katip as Lnd
 import qualified UnliftIO.STM as T
 import qualified LndClient.Data.OutPoint as OP
+import qualified Data.ByteString.Lazy as L
+import qualified Data.Digest.Pure.SHA as SHA
+  ( bytestringDigest,
+    sha256,
+  )
+import qualified Universum
+import qualified LndClient.Data.LeaseOutput as LO
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
@@ -33,6 +40,42 @@ releaseUtxosPsbtLocks utxos = mapM_ (\r -> withLndT Lnd.releaseOutput ($ r)) lut
     lutxos = foldr lockedFoldFn [] utxos
     lockedFoldFn (PsbtUtxo o _ (Just lid)) acc = acc <> [RO.ReleaseOutputRequest (coerce lid) (Just o)]
     lockedFoldFn _ acc = acc
+
+
+releaseUtxoLeases :: (Env m) => [FP.UtxoLease] -> ExceptT Failure m ()
+releaseUtxoLeases ul = do
+  mapM_ (\r -> withLndT Lnd.releaseOutput ($ RO.ReleaseOutputRequest (FP.id r) (Just $ FP.outpoint r))) ul
+
+newLockId :: OP.OutPoint -> UtxoLockId
+newLockId u =
+  UtxoLockId
+    . L.toStrict
+    . SHA.bytestringDigest
+    . SHA.sha256
+    $ txid <> ":" <> vout
+  where
+    txid = L.fromStrict . coerce $ OP.txid u
+    vout = Universum.show $ OP.outputIndex u
+
+
+lockUtxo :: (Env m) => OP.OutPoint -> ExceptT Failure m FP.UtxoLease
+lockUtxo op = do
+  void $
+    withLndT
+      Lnd.leaseOutput
+      ($ LO.LeaseOutputRequest (coerce lockId) (Just op) expS)
+  pure
+    FP.UtxoLease {
+      FP.id = coerce lockId,
+      FP.expiration = expS,
+      FP.outpoint = op
+    }
+  where
+    expS :: Word64 = 3600 * 24 * 365 * 10
+    lockId = newLockId op
+
+leaseUtxos :: (Env m) => [OP.OutPoint] -> ExceptT Failure m [FP.UtxoLease]
+leaseUtxos = mapM lockUtxo
 
 autoSelectUtxos :: Env m => OnChainAddress 'Fund -> MSat -> ExceptT Failure m FP.FundPsbtResponse
 autoSelectUtxos addr amt = withLndT Lnd.fundPsbt ($ req)
@@ -51,13 +94,16 @@ utxoLeaseToPsbtUtxo l ul = psbtUtxo . LU.amountSat <$> M.lookup op l
 
 mapLeaseUtxosToPsbtUtxo :: Env m => [FP.UtxoLease] -> ExceptT Failure m [PsbtUtxo]
 mapLeaseUtxosToPsbtUtxo lockedUtxos = do
+  releaseUtxoLeases lockedUtxos
   l <- unspendUtxoLookup
-  case sequence $ utxoLeaseToPsbtUtxo l <$> lockedUtxos of
+  newLockedUtxos <- leaseUtxos (FP.outpoint <$> lockedUtxos)
+  case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of
     Just us -> pure us
     Nothing -> do
       $(logTM) DebugS $ logStr $
         "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
       throwE $ FailureInternal "Cannot find utxo in unspent list"
+
 
 fundChanPsbt ::
   (Env m) =>
@@ -98,7 +144,10 @@ openChannelPsbt utxos toPubKey changeAddress lspFee minerFee = do
   pcid <- Lnd.newPendingChanId
   let openChannelRequest = openChannelReq pcid toPubKey (2 * amt) amt
   let subUpdates = void . T.atomically . T.writeTChan chan
-  void $ lift . spawnLink $ withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
+  _res <- lift . spawnLink $ do
+    r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
+    $(logTM) DebugS $ logStr $ "Open channel failed" <> inspect r
+    pure ()
   fundStep pcid chan
   where
     amt = sumAmt utxos - lspFee - minerFee
