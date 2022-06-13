@@ -11,6 +11,9 @@ import BtcLsp.Thread.Utils
     psbtFinalizeReq,
     psbtVerifyReq,
     unspendUtxoLookup,
+    releaseUtxosLocks,
+    releaseUtxosPsbtLocks,
+    newLockId
   )
 import qualified Data.Map as M
 import qualified LndClient as Lnd
@@ -19,44 +22,13 @@ import qualified LndClient.Data.FinalizePsbt as FNP
 import qualified LndClient.Data.FundPsbt as FP
 import qualified LndClient.Data.ListUnspent as LU
 import qualified LndClient.Data.OpenChannel as Lnd
-import qualified LndClient.Data.ReleaseOutput as RO
 import qualified LndClient.RPC.Katip as Lnd
 import qualified UnliftIO.STM as T
 import qualified LndClient.Data.OutPoint as OP
-import qualified Data.ByteString.Lazy as L
-import qualified Data.Digest.Pure.SHA as SHA
-  ( bytestringDigest,
-    sha256,
-  )
-import qualified Universum
 import qualified LndClient.Data.LeaseOutput as LO
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
-
-releaseUtxosPsbtLocks :: (Env m) => [PsbtUtxo] -> ExceptT Failure m ()
-releaseUtxosPsbtLocks utxos = mapM_ (\r -> withLndT Lnd.releaseOutput ($ r)) lutxos
-  where
-    lutxos = foldr lockedFoldFn [] utxos
-    lockedFoldFn (PsbtUtxo o _ (Just lid)) acc = acc <> [RO.ReleaseOutputRequest (coerce lid) (Just o)]
-    lockedFoldFn _ acc = acc
-
-
-releaseUtxoLeases :: (Env m) => [FP.UtxoLease] -> ExceptT Failure m ()
-releaseUtxoLeases ul = do
-  mapM_ (\r -> withLndT Lnd.releaseOutput ($ RO.ReleaseOutputRequest (FP.id r) (Just $ FP.outpoint r))) ul
-
-newLockId :: OP.OutPoint -> UtxoLockId
-newLockId u =
-  UtxoLockId
-    . L.toStrict
-    . SHA.bytestringDigest
-    . SHA.sha256
-    $ txid <> ":" <> vout
-  where
-    txid = L.fromStrict . coerce $ OP.txid u
-    vout = Universum.show $ OP.outputIndex u
-
 
 lockUtxo :: (Env m) => OP.OutPoint -> ExceptT Failure m FP.UtxoLease
 lockUtxo op = do
@@ -94,7 +66,7 @@ utxoLeaseToPsbtUtxo l ul = psbtUtxo . LU.amountSat <$> M.lookup op l
 
 mapLeaseUtxosToPsbtUtxo :: Env m => [FP.UtxoLease] -> ExceptT Failure m [PsbtUtxo]
 mapLeaseUtxosToPsbtUtxo lockedUtxos = do
-  releaseUtxoLeases lockedUtxos
+  releaseUtxosLocks lockedUtxos
   l <- unspendUtxoLookup
   newLockedUtxos <- leaseUtxos (FP.outpoint <$> lockedUtxos)
   case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of

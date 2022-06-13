@@ -15,11 +15,6 @@ import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
-import qualified Data.ByteString.Lazy as L
-import qualified Data.Digest.Pure.SHA as SHA
-  ( bytestringDigest,
-    sha256,
-  )
 import qualified Data.Vector as V
 import LndClient (txIdParser)
 import qualified LndClient.Data.LeaseOutput as LO
@@ -29,6 +24,8 @@ import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
 import qualified Universum
+import BtcLsp.Thread.Utils ( newLockId )
+
 
 apply :: (Env m) => m ()
 apply =
@@ -375,17 +372,6 @@ scanOneBlock height = do
   persistBlockT blk lockedUtxos
   pure utxos
 
-newLockId :: Utxo -> UtxoLockId
-newLockId u =
-  UtxoLockId
-    . L.toStrict
-    . SHA.bytestringDigest
-    . SHA.sha256
-    $ txid <> ":" <> vout
-  where
-    txid = L.fromStrict . coerce $ utxoTxId u
-    vout = Universum.show $ utxoVout u
-
 --
 -- TODO : Verify that it's possible to lock already locked UTXO.
 -- It's corner case where UTXO has been locked but storage
@@ -404,7 +390,7 @@ lockUtxo u = do
   where
     expS :: Word64 = 3600 * 24 * 365 * 10
     outP = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
-    lockId = newLockId u
+    lockId = newLockId outP
 
 lockUtxos :: (Env m) => [Utxo] -> ExceptT Failure m [Utxo]
 lockUtxos =

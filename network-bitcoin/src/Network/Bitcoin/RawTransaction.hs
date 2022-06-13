@@ -43,7 +43,6 @@ import           Data.Aeson.Types         as AT
 import           Data.Maybe
 import qualified Data.Vector              as V
 import           Network.Bitcoin.Internal
-import Data.ByteString (ByteString)
 
 -- | Just like most binary data retrieved from bitcoind, a raw transaction is
 --   represented by a hexstring.

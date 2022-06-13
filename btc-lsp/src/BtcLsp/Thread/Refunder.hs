@@ -22,11 +22,11 @@ import LndClient (txIdParser)
 import qualified LndClient.Data.FinalizePsbt as FNP
 import qualified LndClient.Data.FundPsbt as FP
 import qualified LndClient.Data.PublishTransaction as PT
-import qualified LndClient.Data.ReleaseOutput as RO
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
-import BtcLsp.Thread.Utils (swapUtxoToPsbtUtxo)
+import BtcLsp.Thread.Utils (swapUtxoToPsbtUtxo,
+  releaseUtxosPsbtLocks, releaseUtxosLocks)
 
 apply :: (Env m) => m ()
 apply =
@@ -109,39 +109,6 @@ sendUtxos feeRate utxos addr txLabel = do
   where
     totalInputsAmt =
       sum $ getAmt <$> utxos
-
-releaseUtxosPsbtLocks ::
-  ( Env m
-  ) =>
-  [PsbtUtxo] ->
-  ExceptT Failure m ()
-releaseUtxosPsbtLocks =
-  mapM_
-    ( \refUtxo ->
-        whenJust
-          (getLockId refUtxo)
-          ( \lid ->
-              void $
-                withLndT
-                  Lnd.releaseOutput
-                  ( $
-                      RO.ReleaseOutputRequest
-                        (coerce lid)
-                        (Just $ getOutPoint refUtxo)
-                  )
-          )
-    )
-
-releaseUtxosLocks ::
-  ( Env m
-  ) =>
-  [FP.UtxoLease] ->
-  ExceptT Failure m ()
-releaseUtxosLocks =
-  mapM_ (\r -> withLndT Lnd.releaseOutput ($ toROR r))
-  where
-    toROR (FP.UtxoLease id' op _) =
-      RO.ReleaseOutputRequest id' (Just op)
 
 newFundPsbtReq ::
   Math.SatPerVbyte ->

@@ -4,7 +4,10 @@ module BtcLsp.Thread.Utils
     fundPsbtReq, openChannelReq,
     psbtVerifyReq, psbtFinalizeReq,
     finalizePsbt, unspendUtxoLookup,
-    shimCancelReq
+    shimCancelReq,
+    releaseUtxosPsbtLocks,
+    releaseUtxosLocks,
+    newLockId
   )
 where
 
@@ -23,7 +26,13 @@ import qualified LndClient.Data.OutPoint as Lnd
 import qualified LndClient.Data.ListUnspent as LU
 import qualified Data.Map as M
 import qualified LndClient.Data.FundingShimCancel as FSC
-
+import qualified LndClient.Data.ReleaseOutput as RO
+import qualified Data.Digest.Pure.SHA as SHA
+  ( bytestringDigest,
+    sha256,
+  )
+import qualified Universum
+import qualified Data.ByteString.Lazy as L
 
 swapUtxoToPsbtUtxo :: SwapUtxo -> PsbtUtxo
 swapUtxoToPsbtUtxo x =
@@ -98,3 +107,47 @@ unspendUtxoLookup :: (Env m) => ExceptT Failure m (Map Lnd.OutPoint LU.Utxo)
 unspendUtxoLookup = do
   allUtxos <- LU.utxos <$> withLndT Lnd.listUnspent ($ LU.ListUnspentRequest 0 maxBound "")
   pure $ foldr (\u acc-> M.insert (LU.outpoint u) u acc) M.empty allUtxos
+
+releaseUtxosPsbtLocks ::
+  ( Env m
+  ) =>
+  [PsbtUtxo] ->
+  ExceptT Failure m ()
+releaseUtxosPsbtLocks =
+  mapM_
+    ( \refUtxo ->
+        whenJust
+          (getLockId refUtxo)
+          ( \lid ->
+              void $
+                withLndT
+                  Lnd.releaseOutput
+                  ( $
+                      RO.ReleaseOutputRequest
+                        (coerce lid)
+                        (Just $ getOutPoint refUtxo)
+                  )
+          )
+    )
+
+releaseUtxosLocks ::
+  ( Env m
+  ) =>
+  [FP.UtxoLease] ->
+  ExceptT Failure m ()
+releaseUtxosLocks =
+  mapM_ (\r -> withLndT Lnd.releaseOutput ($ toROR r))
+  where
+    toROR (FP.UtxoLease id' op _) =
+      RO.ReleaseOutputRequest id' (Just op)
+
+newLockId :: OP.OutPoint -> UtxoLockId
+newLockId u =
+  UtxoLockId
+    . L.toStrict
+    . SHA.bytestringDigest
+    . SHA.sha256
+    $ txid <> ":" <> vout
+  where
+    txid = L.fromStrict . coerce $ OP.txid u
+    vout = Universum.show $ OP.outputIndex u
