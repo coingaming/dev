@@ -36,7 +36,6 @@ import qualified Data.Vector               as V
 import           Network.Bitcoin.Types
 import           Network.HTTP.Client
 import           Network.HTTP.Types.Header
-import Debug.Trace (traceShowM)
 
 
 -- | RPC calls return an error object. It can either be empty; or have an
@@ -102,7 +101,6 @@ callApi :: FromJSON v
 callApi client cmd params = readVal =<< client jsonRpcReqBody
     where
         readVal bs = do
-            traceShowM bs
             case decode' bs of
                          Just r@BitcoinRpcResponse {btcError=NoError}
                              -> return $ btcResult r
