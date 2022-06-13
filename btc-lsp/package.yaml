@@ -197,6 +197,8 @@ executables:
         <<: *deps
         source-dirs:
         - src
+        ghc-options:
+        - -Wno-unused-packages
       else:
         dependencies:
         - btc-lsp
@@ -235,6 +237,8 @@ executables:
         <<: *deps
         source-dirs:
         - src
+        ghc-options:
+        - -Wno-unused-packages
       else:
         dependencies:
         - btc-lsp
@@ -262,6 +266,8 @@ executables:
         <<: *deps
         source-dirs:
         - src
+        ghc-options:
+        - -Wno-unused-packages
       else:
         dependencies:
         - btc-lsp

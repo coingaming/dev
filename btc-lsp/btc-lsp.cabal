@@ -318,6 +318,7 @@ executable btc-lsp-exe
         Proto.BtcLsp_Fields
     hs-source-dirs:
         src
+    ghc-options: -Wno-unused-packages
     build-depends:
         GenericPretty
       , SHA
@@ -532,6 +533,7 @@ executable btc-lsp-integration
         Proto.BtcLsp_Fields
     hs-source-dirs:
         src
+    ghc-options: -Wno-unused-packages
     build-depends:
         GenericPretty
       , SHA
@@ -722,6 +724,7 @@ executable btc-lsp-prof
         Proto.BtcLsp_Fields
     hs-source-dirs:
         src
+    ghc-options: -Wno-unused-packages
     build-depends:
         GenericPretty
       , SHA
