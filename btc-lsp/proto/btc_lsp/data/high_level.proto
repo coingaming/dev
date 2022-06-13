@@ -113,3 +113,8 @@ enum InputFailureKind {
   // signature needs to be cryptographically verified.
   VERIFICATION_FAILED = 3;
 }
+
+enum Privacy {
+  PUBLIC = 0;
+  PRIVATE = 1;
+}

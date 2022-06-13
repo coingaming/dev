@@ -14,6 +14,7 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Server.LowLevel
+import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math.Swap as Math
@@ -53,7 +54,6 @@ data Env = Env
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
     envSwapIntoLnMinAmt :: Money 'Usr 'OnChain 'Fund,
-    envChanPrivacy :: Privacy,
     envMsatPerByte :: Maybe MSat,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
@@ -72,12 +72,12 @@ data RawConfig = RawConfig
     rawConfigLogFormat :: LogFormat,
     rawConfigLogVerbosity :: Verbosity,
     rawConfigLogSeverity :: Severity,
+    rawConfigLogSecrets :: SecretVision,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
     rawConfigMinChanCap :: Money 'Chan 'Ln 'Fund,
-    rawConfigChanPrivacy :: Privacy,
     rawConfigMsatPerByte :: Maybe MSat,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
@@ -106,12 +106,12 @@ readRawConfig =
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_VERBOSITY" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SEVERITY" opts
+      <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SECRET" (opts <> E.def SecretHidden)
       -- Lnd
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LND_P2P_PORT" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_CHAN_CAP_MSAT" opts
-      <*> E.var (E.auto <=< E.nonempty) "LSP_CHAN_PRIVACY" (opts <> E.def Public)
       <*> optional (E.var (E.auto <=< E.nonempty) "LSP_MSAT_PER_BYTE" opts)
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
@@ -133,29 +133,37 @@ opts =
   E.keep <> E.help ""
 
 withEnv ::
+  forall m a.
+  ( MonadUnliftIO m
+  ) =>
   RawConfig ->
-  (Env -> KatipContextT IO a) ->
-  IO a
+  (Env -> KatipContextT m a) ->
+  m a
 withEnv rc this = do
   pubKeyVar <- newEmptyMVar
   handleScribe <-
-    mkHandleScribeWithFormatter
-      ( case rawConfigLogFormat rc of
-          Bracket -> bracketFormat
-          JSON -> jsonFormat
-      )
-      ColorIfTerminal
-      stdout
-      (permitItem $ rawConfigLogSeverity rc)
-      (rawConfigLogVerbosity rc)
+    liftIO $
+      mkHandleScribeWithFormatter
+        ( case rawConfigLogFormat rc of
+            Bracket -> bracketFormat
+            JSON -> jsonFormat
+        )
+        ColorIfTerminal
+        stdout
+        (permitItem $ rawConfigLogSeverity rc)
+        (rawConfigLogVerbosity rc)
   let newLogEnv =
-        registerScribe "stdout" handleScribe defaultScribeSettings
-          =<< initLogEnv
-            "BtcLsp"
-            ( Environment $ rawConfigLogEnv rc
-            )
-  let newSqlPool :: IO (Pool Psql.SqlBackend) =
-        runNoLoggingT $
+        liftIO $
+          registerScribe
+            "stdout"
+            handleScribe
+            defaultScribeSettings
+            =<< initLogEnv
+              "BtcLsp"
+              ( Environment $ rawConfigLogEnv rc
+              )
+  let newSqlPool :: m (Pool Psql.SqlBackend) =
+        liftIO . runNoLoggingT $
           Psql.createPostgresqlPool (rawConfigLibpqConnStr rc) 10
   let katipCtx = mempty :: LogContexts
   let katipNs = mempty :: Namespace
@@ -164,10 +172,11 @@ withEnv rc this = do
     bracket newSqlPool rmSqlPool $ \pool -> do
       let rBtc = rawConfigBtcEnv rc
       btc <-
-        Btc.getClient
-          (from $ bitcoindEnvHost rBtc)
-          (from $ bitcoindEnvUsername rBtc)
-          (from $ bitcoindEnvPassword rBtc)
+        liftIO $
+          Btc.getClient
+            (from $ bitcoindEnvHost rBtc)
+            (from $ bitcoindEnvUsername rBtc)
+            (from $ bitcoindEnvPassword rBtc)
       runKatipContextT le katipCtx katipNs
         . withUnliftIO
         $ \(UnliftIO run) ->
@@ -186,7 +195,6 @@ withEnv rc this = do
                 envSwapIntoLnMinAmt =
                   Math.newSwapIntoLnMinAmt $
                     rawConfigMinChanCap rc,
-                envChanPrivacy = rawConfigChanPrivacy rc,
                 envMsatPerByte = rawConfigMsatPerByte rc,
                 envLndPubKey = pubKeyVar,
                 -- Grpc
@@ -199,19 +207,19 @@ withEnv rc this = do
                 envBtc = btc
               }
   where
-    rmLogEnv :: LogEnv -> IO ()
+    rmLogEnv :: LogEnv -> m ()
     rmLogEnv = void . liftIO . closeScribes
-    rmSqlPool :: Pool a -> IO ()
+    rmSqlPool :: Pool Psql.SqlBackend -> m ()
     rmSqlPool = liftIO . destroyAllResources
     signT ::
       Lnd.LndEnv ->
-      ByteString ->
-      KatipContextT IO (Maybe ByteString)
+      Sig.MsgToSign ->
+      KatipContextT m (Maybe Sig.LndSig)
     signT lnd msg = do
       eSig <-
         Lnd.signMessage lnd $
           Lnd.SignMessageRequest
-            { Lnd.message = msg,
+            { Lnd.message = Sig.unMsgToSign msg,
               Lnd.keyLoc =
                 Lnd.KeyLocator
                   { Lnd.keyFamily = 6,
@@ -230,11 +238,11 @@ withEnv rc this = do
           let sig = coerce sig0
           $(logTM) DebugS . logStr $
             "Server ==> signing procedure succeeded for msg of "
-              <> inspect (BS.length msg)
+              <> inspect (BS.length $ Sig.unMsgToSign msg)
               <> " bytes "
               <> inspect msg
               <> " got signature of "
               <> inspect (BS.length sig)
               <> " bytes "
               <> inspect sig
-          pure $ Just sig
+          pure . Just $ Sig.LndSig sig

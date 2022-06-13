@@ -30,7 +30,7 @@ waitTillLastBlockProcessedT ::
 waitTillLastBlockProcessedT 0 =
   throwE $ FailureElectrs CannotSyncBlockchain
 waitTillLastBlockProcessedT decr = do
-  sleep $ MicroSecondsDelay 1000000
+  sleep300ms
   bHeight <- withBtcT getBlockCount id
   bHash <- withBtcT getBlockHash ($ bHeight)
   blkHeight <- tryFromT bHeight

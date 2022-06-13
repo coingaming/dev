@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Thread.Refunder
   ( apply,
@@ -9,7 +10,6 @@ where
 import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
-import BtcLsp.Math.OnChain (roundWord64ToMSat)
 import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
@@ -34,21 +34,9 @@ apply =
     runSql SwapUtxo.getUtxosForRefundSql
       <&> groupBy (\a b -> swpId a == swpId b)
       >>= mapM_ processRefund
-      >> sleep (MicroSecondsDelay 1000000)
+      >> sleep300ms
   where
     swpId = entityKey . snd
-
-data SendUtxoConfig = SendUtxoConfig
-  { estimateFee :: MSat,
-    satPerVbyte :: Integer
-  }
-
-defSendUtxoConfig :: SendUtxoConfig
-defSendUtxoConfig =
-  SendUtxoConfig
-    { estimateFee = MSat $ 500 * 1000,
-      satPerVbyte = 1
-    }
 
 data SendUtxosResult = SendUtxosResult
   { getGetDecTrx :: Btc.DecodedRawTransaction,
@@ -56,8 +44,9 @@ data SendUtxosResult = SendUtxosResult
     getFee :: MSat
   }
 
-newtype TxLabel
-  = TxLabel Text
+newtype TxLabel = TxLabel
+  { unTxLabel :: Text
+  }
   deriving newtype
     ( Show,
       Eq,
@@ -65,20 +54,68 @@ newtype TxLabel
       Semigroup
     )
 
-sendUtxosWithMinFee ::
-  (Env m) =>
-  SendUtxoConfig ->
+sendUtxos ::
+  ( Env m
+  ) =>
+  Math.SatPerVbyte ->
   [PsbtUtxo] ->
   OnChainAddress 'Refund ->
   TxLabel ->
   ExceptT Failure m SendUtxosResult
-sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
-  when (estimateAmt < Math.trxDustLimit) . throwE $
+sendUtxos feeRate utxos addr txLabel = do
+  inQty <- tryFromT $ length utxos
+  estFee <-
+    tryFailureT $
+      Math.trxEstFee
+        (Math.InQty inQty)
+        (Math.OutQty 1)
+        feeRate
+  let finalOutputAmt = totalInputsAmt - estFee
+  when (finalOutputAmt < Math.trxDustLimit) . throwE $
     FailureInternal $
-      "Total utxos amount "
-        <> inspectPlain estimateAmt
+      "Final output amount "
+        <> inspectPlain finalOutputAmt
+        <> " = "
+        <> inspectPlain totalInputsAmt
+        <> " - "
+        <> inspectPlain estFee
         <> " is below dust limit "
         <> inspectPlain Math.trxDustLimit
+  releaseUtxosPsbtLocks utxos
+  estPsbt <-
+    withLndT
+      Lnd.fundPsbt
+      ($ newFundPsbtReq feeRate utxos addr finalOutputAmt)
+  releaseUtxosLocks $ FP.lockedUtxos estPsbt
+  finPsbt <-
+    withLndT
+      Lnd.finalizePsbt
+      ($ FNP.FinalizePsbtRequest (FP.fundedPsbt estPsbt) mempty)
+  decodedTrx <-
+    withBtcT
+      Btc.decodeRawTransaction
+      ($ toHex $ FNP.rawFinalTx finPsbt)
+  ptRes <-
+    withLndT
+      Lnd.publishTransaction
+      ( $
+          PT.PublishTransactionRequest
+            (FNP.rawFinalTx finPsbt)
+            $ unTxLabel txLabel
+      )
+  if null $ PT.publishError ptRes
+    then pure $ SendUtxosResult decodedTrx totalInputsAmt estFee
+    else throwE $ FailureInternal "Failed to publish refund transaction"
+  where
+    totalInputsAmt =
+      sum $ getAmt <$> utxos
+
+releaseUtxosPsbtLocks ::
+  ( Env m
+  ) =>
+  [PsbtUtxo] ->
+  ExceptT Failure m ()
+releaseUtxosPsbtLocks =
   mapM_
     ( \refUtxo ->
         whenJust
@@ -87,52 +124,46 @@ sendUtxosWithMinFee cfg utxos (OnChainAddress addr) (TxLabel txLabel) = do
               void $
                 withLndT
                   Lnd.releaseOutput
-                  ($ RO.ReleaseOutputRequest (coerce lid) (Just $ getOutPoint refUtxo))
+                  ( $
+                      RO.ReleaseOutputRequest
+                        (coerce lid)
+                        (Just $ getOutPoint refUtxo)
+                  )
           )
     )
-    utxos
-  ePsbt <- withLndT Lnd.fundPsbt ($ ePsbtReq)
-  finPsbt <- withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt ePsbt) "")
-  decodedETx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finPsbt)
-  let fee = MSat $ fromInteger (satPerVbyte cfg * 1000 * Btc.decVsize decodedETx)
-  void $ releaseUtxosPsbtLocks (FP.lockedUtxos ePsbt)
-  let rPsbtReq = fundPsbtReq utxos addr fee
-  rPsbt <- withLndT Lnd.fundPsbt ($ rPsbtReq)
-  finRPsbt <- withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (FP.fundedPsbt rPsbt) "")
-  decodedFTx <- withBtcT Btc.decodeRawTransaction ($ toHex $ FNP.rawFinalTx finRPsbt)
-  ptRes <- withLndT Lnd.publishTransaction ($ PT.PublishTransactionRequest (FNP.rawFinalTx finRPsbt) txLabel)
-  if null $ PT.publishError ptRes
-    then pure $ SendUtxosResult decodedFTx totalUtxoAmt fee
-    else throwE $ FailureInternal "Failed to publish refund transaction"
-  where
-    ePsbtReq = fundPsbtReq utxos addr estimateAmt
-    estimateAmt = totalUtxoAmt - estimateFee cfg
-    totalUtxoAmt = sum $ getAmt <$> utxos
-    releaseUtxosPsbtLocks lutxos =
-      mapM_ (\r -> withLndT Lnd.releaseOutput ($ toROR r)) lutxos
-      where
-        toROR (FP.UtxoLease id' op _) = RO.ReleaseOutputRequest id' (Just op)
-    fundPsbtReq utxos' outAddr fee = do
-      let amt' :: Word64 = coerce (totalUtxoAmt - fee)
-      let r = roundWord64ToMSat amt'
-      let mtpl = FP.TxTemplate (getOutPoint <$> utxos') (M.fromList [(outAddr, r)])
-      FP.FundPsbtRequest
-        { FP.account = "",
-          FP.template = mtpl,
-          FP.minConfs = 2,
-          FP.spendUnconfirmed = False,
-          FP.fee = FP.SatPerVbyte 1
-        }
 
-sendUtxos ::
+releaseUtxosLocks ::
   ( Env m
   ) =>
+  [FP.UtxoLease] ->
+  ExceptT Failure m ()
+releaseUtxosLocks =
+  mapM_ (\r -> withLndT Lnd.releaseOutput ($ toROR r))
+  where
+    toROR (FP.UtxoLease id' op _) =
+      RO.ReleaseOutputRequest id' (Just op)
+
+newFundPsbtReq ::
+  Math.SatPerVbyte ->
   [PsbtUtxo] ->
   OnChainAddress 'Refund ->
-  TxLabel ->
-  ExceptT Failure m SendUtxosResult
-sendUtxos =
-  sendUtxosWithMinFee defSendUtxoConfig
+  MSat ->
+  FP.FundPsbtRequest
+newFundPsbtReq feeRate utxos' (OnChainAddress outAddr) est = do
+  let mtpl =
+        FP.TxTemplate
+          (getOutPoint <$> utxos')
+          (M.fromList [(outAddr, est)])
+  FP.FundPsbtRequest
+    { FP.account = mempty,
+      FP.template = mtpl,
+      FP.minConfs = 2,
+      FP.spendUnconfirmed = False,
+      FP.fee =
+        FP.SatPerVbyte
+          . ceiling
+          $ Math.unSatPerVbyte feeRate
+    }
 
 processRefund ::
   ( Env m
@@ -190,6 +221,7 @@ processRefund utxos@(x : _) = do
         . lift
         . runExceptT
         $ sendUtxos
+          Math.minFeeRate
           refUtxos
           (coerce refAddr)
           (TxLabel "refund to " <> coerce refAddr)

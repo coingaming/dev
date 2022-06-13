@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wno-deprecations #-}
+{-# LANGUAGE TypeApplications #-}
 
 module LnChanWatcherSpec
   ( spec,
@@ -7,8 +7,6 @@ where
 
 import BtcLsp.Import hiding (newEmptyMVar, putMVar, takeMVar)
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
-import BtcLsp.Thread.LnChanWatcher (forkThread, watchChannelEvents)
-import qualified BtcLsp.Thread.Server as Server
 import LndClient
 import qualified LndClient.Data.ChannelPoint as Lnd
 import qualified LndClient.Data.CloseChannel as Lnd
@@ -17,11 +15,13 @@ import qualified LndClient.Data.OpenChannel as OpenChannel
 import LndClient.LndTest
 import qualified LndClient.RPC.Silent as Lnd
 import Test.Hspec
-import TestWithLndLsp
+import TestAppM
 import UnliftIO.Concurrent (killThread, threadDelay)
 import UnliftIO.MVar
 
-openChannelRequest :: NodePubKey -> OpenChannel.OpenChannelRequest
+openChannelRequest ::
+  NodePubKey ->
+  OpenChannel.OpenChannelRequest
 openChannelRequest nodePubkey =
   OpenChannel.OpenChannelRequest
     { OpenChannel.nodePubkey = nodePubkey,
@@ -38,8 +38,11 @@ openChannelRequest nodePubkey =
       OpenChannel.fundingShim = Nothing
     }
 
-closeChannelRequest :: Lnd.ChannelPoint -> Lnd.CloseChannelRequest
-closeChannelRequest cp = Lnd.CloseChannelRequest cp False Nothing Nothing Nothing
+closeChannelRequest ::
+  Lnd.ChannelPoint ->
+  Lnd.CloseChannelRequest
+closeChannelRequest cp =
+  Lnd.CloseChannelRequest cp False Nothing Nothing Nothing
 
 getNodePubKey :: MonadUnliftIO m => LndEnv -> m NodePubKey
 getNodePubKey lndEnv = do
@@ -56,7 +59,12 @@ queryChannel (Lnd.ChannelPoint txid vout) =
   runSql $
     LnChan.getByChannelPointSql txid vout
 
-tryTimes :: MonadUnliftIO m => Int -> Int -> m (Maybe a) -> m (Maybe a)
+tryTimes ::
+  MonadUnliftIO m =>
+  Int ->
+  Int ->
+  m (Maybe a) ->
+  m (Maybe a)
 tryTimes times delaySec tryFn = go times
   where
     go 0 = pure Nothing
@@ -70,17 +78,30 @@ justTrue :: Maybe Bool -> Maybe Bool
 justTrue (Just True) = Just True
 justTrue _ = Nothing
 
-testThread :: (LndTest m TestOwner, Storage m) => MVar [Maybe Bool] -> m ()
+testThread ::
+  ( LndTest m TestOwner,
+    Storage m
+  ) =>
+  MVar [Maybe Bool] ->
+  m ()
 testThread result = do
   lndFrom <- getLndEnv LndLsp
   lndTo <- getLndEnv LndAlice
   toPubKey <- getNodePubKey lndTo
   cp <-
     liftLndResult
-      =<< Lnd.openChannelSync lndFrom (openChannelRequest toPubKey)
+      =<< Lnd.openChannelSync
+        lndFrom
+        (openChannelRequest toPubKey)
   isPendingOpenOk <-
     tryTimes 3 1 $
-      justTrue . fmap ((== LnChanStatusPendingOpen) . lnChanStatus . entityVal) <$> queryChannel cp
+      justTrue
+        . fmap
+          ( (== LnChanStatusPendingOpen)
+              . lnChanStatus
+              . entityVal
+          )
+        <$> queryChannel cp
   mine 10 LndLsp
   isOpenedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
@@ -90,7 +111,12 @@ testThread result = do
               [(== LnChanStatusActive) . lnChanStatus <$> ch]
     pure $ justTrue r
   (ctid, _) <- forkThread $ do
-    void $ liftLndResult =<< Lnd.closeChannel (const $ pure ()) lndFrom (closeChannelRequest cp)
+    void $
+      liftLndResult
+        =<< Lnd.closeChannel
+          (const $ pure ())
+          lndFrom
+          (closeChannelRequest cp)
   isInactivedOk <- tryTimes 3 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r =
@@ -104,21 +130,26 @@ testThread result = do
     let r =
           and
             <$> sequence
-              [(== LnChanStatusFullyResolved) . lnChanStatus <$> ch]
+              [ (== LnChanStatusFullyResolved)
+                  . lnChanStatus
+                  <$> ch
+              ]
     pure $ justTrue r
   void $ killThread ctid
-  putMVar result [isPendingOpenOk, isOpenedOk, isInactivedOk, isClosedOk]
+  putMVar
+    result
+    [ isPendingOpenOk,
+      isOpenedOk,
+      isInactivedOk,
+      isClosedOk
+    ]
   pure ()
 
 spec :: Spec
 spec =
-  itEnv "Watch channel" $ do
-    withSpawnLink Server.apply . const $ do
-      lnd <- testLndEnv . testEnvLndLsp <$> ask
-      _ <- watchChannelEvents lnd
-      res <- newEmptyMVar
-      (_, thndl) <- forkThread $ testThread res
-      takeMVar thndl
-      r <- sequence <$> takeMVar res
-      let k = and <$> r
-      liftIO $ shouldBe k (Just True)
+  itMain @'LndLsp "Watch channel" $ do
+    res <- newEmptyMVar
+    (_, thndl) <- forkThread $ testThread res
+    takeMVar thndl
+    r <- takeMVar res
+    liftIO $ r `shouldSatisfy` all (== Just True)

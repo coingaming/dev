@@ -8,7 +8,7 @@ let proto = import ./nix/proto-lens-protoc.nix;
     kompose-src = import ./nix/kompose.nix;
     ideBuildInputs =
       if withHaskellIde
-      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/44cdff524c5be6dabe777a30f878e6db71ed9881") {bundle = ["dhall" "haskell"];})]
+      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/44cdff524c5be6dabe777a30f878e6db71ed9881") {bundle = ["dhall" "haskell"]; vimBackground = "light"; })]
       else [];
 in
 (project { inherit profile; }).shellFor {

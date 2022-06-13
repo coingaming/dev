@@ -105,7 +105,7 @@ verifySig msg sig compressMode = do
           <> ( BL.toStrict
                  . BS.toLazyByteString
                  . BS.putWord32be
-                 . fromIntegral
+                 . fromIntegral -- Length is non-neg, it's fine.
                  $ BS.length msgChunk
              )
           <> msgChunk

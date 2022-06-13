@@ -1,5 +1,5 @@
 module BtcLsp.Storage.Model.SwapUtxo
-  ( createManySql,
+  ( createIgnoreManySql,
     getSpendableUtxosBySwapIdSql,
     updateUnspentChanReserveSql,
     updateSpentChanSql,
@@ -16,12 +16,12 @@ where
 import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 
-createManySql ::
+createIgnoreManySql ::
   ( MonadIO m
   ) =>
   [SwapUtxo] ->
   ReaderT Psql.SqlBackend m ()
-createManySql us =
+createIgnoreManySql us =
   Psql.upsertManyWhere
     us
     [Psql.copyField SwapUtxoUpdatedAt]

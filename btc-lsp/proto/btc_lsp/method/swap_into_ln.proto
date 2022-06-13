@@ -12,6 +12,7 @@ message Request {
   // as high as possible.
   .BtcLsp.Data.HighLevel.FundLnInvoice fund_ln_invoice = 2;
   .BtcLsp.Data.HighLevel.RefundOnChainAddress refund_on_chain_address = 3;
+  .BtcLsp.Data.HighLevel.Privacy privacy = 4;
 }
 
 message Response {

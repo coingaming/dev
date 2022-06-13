@@ -1,35 +1,14 @@
 module BtcLsp.Thread.LnChanWatcher
-  ( watchChannelEvents,
-    forkThread,
-    applyPoll,
+  ( applyPoll,
     applySub,
   )
 where
 
-import BtcLsp.Import (newEmptyMVar)
-import BtcLsp.Import hiding (newEmptyMVar, putMVar, takeMVar)
-import BtcLsp.Storage.Model.LnChan
-  ( persistChannelUpdates,
-    persistOpenedChannels,
-  )
+import BtcLsp.Import
+import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import LndClient
 import LndClient.Data.ListChannels
 import qualified LndClient.RPC.Silent as LndSilent
-import UnliftIO.Concurrent
-  ( ThreadId,
-    forkFinally,
-    putMVar,
-  )
-
-forkThread ::
-  ( MonadUnliftIO m
-  ) =>
-  m () ->
-  m (ThreadId, MVar ())
-forkThread proc = do
-  handle <- newEmptyMVar
-  tid <- forkFinally proc (const $ putMVar handle ())
-  return (tid, handle)
 
 syncChannelList ::
   ( Storage m
@@ -42,35 +21,15 @@ syncChannelList lnd = do
       lnd
       (ListChannelsRequest False False False False Nothing)
   case res of
-    Right chs -> void $ persistOpenedChannels chs
+    Right chs -> void $ LnChan.persistOpenedChannels chs
     Left {} -> pure ()
-
---
--- TODO : verify why this is needed?
---
-watchChannelEvents ::
-  ( Storage m,
-    KatipContext m
-  ) =>
-  LndEnv ->
-  m (ThreadId, MVar ())
-watchChannelEvents lnd =
-  forkThread $
-    withRunInIO act
-  where
-    act run = do
-      void $
-        LndSilent.subscribeChannelEvents
-          (void . run . persistChannelUpdates)
-          lnd
-      act run
 
 applyPoll :: (Env m) => m ()
 applyPoll =
   forever $
     getLspLndEnv
       >>= syncChannelList
-      >> sleep (MicroSecondsDelay $ 60 * 1000000)
+      >> sleep300ms
 
 applySub :: (Env m) => m ()
 applySub =
@@ -79,6 +38,6 @@ applySub =
     withRunInIO $ \run -> do
       void $
         LndSilent.subscribeChannelEvents
-          (void . run . persistChannelUpdates)
+          (void . run . LnChan.persistChannelUpdate)
           lnd
-    sleep . MicroSecondsDelay $ 5 * 1000000
+    sleep300ms

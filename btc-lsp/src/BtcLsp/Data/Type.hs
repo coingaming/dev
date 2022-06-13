@@ -27,7 +27,6 @@ module BtcLsp.Data.Type
     RpcError (..),
     SocketAddress (..),
     BlkHash (..),
-    BlkPrevHash (..),
     BlkHeight (..),
     BlkStatus (..),
     SwapUtxoStatus (..),
@@ -534,17 +533,6 @@ instance From Btc.BlockHash BlkHash
 
 instance From BlkHash Btc.BlockHash
 
-newtype BlkPrevHash
-  = BlkPrevHash Btc.BlockHash
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
-
-instance Out BlkPrevHash
-
-instance From Btc.BlockHash BlkPrevHash
-
-instance From BlkPrevHash Btc.BlockHash
-
 newtype BlkHeight
   = BlkHeight Word64
   deriving stock
@@ -612,8 +600,8 @@ data SwapUtxoStatus
 instance Out SwapUtxoStatus
 
 data Privacy
-  = Private
-  | Public
+  = Public
+  | Private
   deriving stock
     ( Eq,
       Ord,
@@ -777,13 +765,18 @@ newtype Vbyte = Vbyte
   deriving newtype
     ( Eq,
       Ord,
-      Show
+      Show,
+      Num
     )
   deriving stock
     ( Generic
     )
 
 instance Out Vbyte
+
+instance From Vbyte (Ratio Natural)
+
+instance From (Ratio Natural) Vbyte
 
 newtype RowQty = RowQty
   { unRowQty :: Int64
@@ -866,4 +859,5 @@ Psql.derivePersistField "LnChanStatus"
 Psql.derivePersistField "SwapStatus"
 Psql.derivePersistField "BlkStatus"
 Psql.derivePersistField "SwapUtxoStatus"
+Psql.derivePersistField "Privacy"
 Psql.derivePersistField "UtxoLockId"

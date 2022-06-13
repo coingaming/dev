@@ -36,12 +36,6 @@ class
   getLndNodeUri :: m NodeUri
   getLspPubKey :: m Lnd.NodePubKey
   getLspLndEnv :: m Lnd.LndEnv
-  getChanPrivacy :: m Privacy
-
-  --
-  -- TODO : separate getLspPubKey and getLndP2PSocketAddress
-  -- methods are redundant, remove them.
-  --
   getLndNodeUri =
     NodeUri <$> getLspPubKey <*> getLndP2PSocketAddress
   getLspPubKey = do
@@ -66,9 +60,6 @@ class
             let pubKey = Lnd.identityPubkey res
             void $ tryPutMVar var pubKey
             pure pubKey
-  getLspPubKeyT :: ExceptT Failure m Lnd.NodePubKey
-  getLspPubKeyT =
-    lift getLspPubKey
   setGrpcCtx ::
     ( HasField msg "ctx" Proto.Ctx
     ) =>

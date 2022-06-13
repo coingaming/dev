@@ -6,13 +6,12 @@ module PsbtOpenerSpec
 where
 
 import BtcLsp.Import
-import qualified LndClient as Lnd
 import qualified LndClient.Data.SendCoins as SendCoins
 import qualified LndClient.RPC.Silent as Lnd
 import Test.Hspec
 import TestHelpers
 import TestOrphan ()
-import TestWithLndLsp
+import TestAppM
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import LndClient.LndTest (mine)
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
@@ -38,7 +37,7 @@ spec :: Spec
 spec =
   itEnvT "PsbtOpener Spec" $ do
     amt <- lift getSwapIntoLnMinAmt
-    swp <- createDummySwap "psbt opener test" . Just =<< getFutureTime (Lnd.Seconds 5)
+    swp <- createDummySwap Nothing
     let swpId = entityKey swp
     let swpAddr = swapIntoLnFundAddress . entityVal $ swp
     void $ sendAmt (from swpAddr) (from (10 * amt))
@@ -54,7 +53,7 @@ spec =
     chanOpenAsync <- lift . spawnLink $ do
       runExceptT $ openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) lspFee fixedMinerFee
     _mineAsync <- lift . spawnLink $ do
-      sleep $ MicroSecondsDelay 1000000
+      sleep1s
       mine 1 LndLsp
     chanEither <- liftIO $ wait chanOpenAsync
     chan <- except chanEither

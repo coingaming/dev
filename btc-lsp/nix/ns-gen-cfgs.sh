@@ -64,6 +64,7 @@ rpcpassword=developer
 zmqpubrawblock=tcp://127.0.0.1:28332
 zmqpubrawtx=tcp://127.0.0.1:28333
 
+fallbackfee=0.00000001
 server=1
 rest=1" > "$SERVICE_DIR/bitcoin.conf"
 )

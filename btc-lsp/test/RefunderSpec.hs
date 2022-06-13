@@ -5,7 +5,6 @@ where
 
 import BtcLsp.Import
 import BtcLsp.Storage.Model.SwapUtxo (getUtxosBySwapIdSql)
-import qualified BtcLsp.Thread.Main as Main
 import Data.List (intersect)
 import qualified Data.Vector as V
 import LndClient (txIdParser)
@@ -16,9 +15,9 @@ import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
 import Test.Hspec
+import TestAppM
 import TestHelpers
 import TestOrphan ()
-import TestWithLndLsp
 
 allIn :: Eq a => [a] -> [a] -> Bool
 allIn ax bx =
@@ -69,13 +68,13 @@ refundSucceded swp preTrs = do
 
 spec :: Spec
 spec =
-  itEnvT "Refunder Spec" $ do
+  itMainT "Refunder Spec" $ do
     amt <-
       lift getSwapIntoLnMinAmt
     swp <-
-      createDummySwap "refunder test"
-        . Just
+      createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
+    sleep1s -- Let Expirer to expiry the swap
     void $
       withLndT
         Lnd.sendCoins
@@ -90,8 +89,7 @@ spec =
                   from amt
               }
         )
-    void putLatestBlockToDB
-    lift $ mine 4 LndLsp
-    lift . withSpawnLink Main.apply . const $ do
-      x <- waitCond 10 (refundSucceded swp) []
-      liftIO $ x `shouldBe` True
+    lift $ mine 1 LndLsp
+    sleep1s -- Let Refunder to refund UTXO
+    res <- lift $ waitCond 10 (refundSucceded swp) []
+    liftIO $ res `shouldSatisfy` fst
