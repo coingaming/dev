@@ -56,7 +56,7 @@ updateUnspentChanReserveSql ::
   ReaderT Psql.SqlBackend m RowQty
 updateUnspentChanReserveSql ids = do
   ct <- getCurrentTime
-  from <<$>> Psql.updateCount $ \row -> do
+  res <- Psql.updateCount $ \row -> do
     Psql.set
       row
       [ SwapUtxoStatus
@@ -74,6 +74,7 @@ updateUnspentChanReserveSql ids = do
                          SwapUtxoUnspentChanReserve
                        ]
                  )
+  pure $ from res
 
 updateSpentChanSql ::
   ( MonadIO m

@@ -21,6 +21,7 @@ let
     haskellNix.nixpkgsArgs;
 in {
   nixPkgs = import sources.nixpkgs {};
+  nixPkgsLegacy = import sources.nixPkgsLegacy {};
   pkgs = pkgs;
   haskellPackages = pkgs.haskellPackages;
   compiler-nix-name = "ghc902";
