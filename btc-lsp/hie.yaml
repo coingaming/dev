@@ -1,0 +1,8 @@
+cradle:
+  cabal:
+    - path: "./src"
+      component: lib:btc-lsp
+    - path: "./app"
+      component: exe:btc-lsp-exe
+    - path: "./test"
+      component: test:btc-lsp-test
