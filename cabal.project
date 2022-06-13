@@ -11,8 +11,8 @@ package witch
 source-repository-package
   type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 0lngccgiv0ikxx6mqz3wdbp31qw1ynq3ndpqvxcb5za1ycaci185
-  tag: 63dc10961d1afe40d1f43a6fda2d31148417c50c
+  --sha256: 121hcbfn6kgwk57p1bsahc37z43pkk3rc2wl7npkpfk9ng5877aa
+  tag: 2616158dc006bd81cbc896f91e94660bf02f5667
 
 source-repository-package
   type: git
