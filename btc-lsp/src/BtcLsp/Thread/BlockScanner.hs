@@ -17,14 +17,13 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Vector as V
 import LndClient (txIdParser)
-import qualified LndClient.Data.LeaseOutput as LO
 import qualified LndClient.Data.OutPoint as OP
-import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
+import qualified LndClient.Data.FundPsbt as FP
 import qualified Universum
-import BtcLsp.Thread.Utils ( newLockId )
+import BtcLsp.Thread.Utils ( lockUtxo )
 
 
 apply :: (Env m) => m ()
@@ -368,7 +367,7 @@ scanOneBlock height = do
       <> " and hash = "
       <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk
-  lockedUtxos <- lockUtxos utxos
+  lockedUtxos <- mapM lockUtxo' utxos
   persistBlockT blk lockedUtxos
   pure utxos
 
@@ -377,24 +376,14 @@ scanOneBlock height = do
 -- It's corner case where UTXO has been locked but storage
 -- procedure later failed.
 --
-lockUtxo :: (Env m) => Utxo -> ExceptT Failure m Utxo
-lockUtxo u = do
-  void $
-    withLndT
-      leaseOutput
-      ($ LO.LeaseOutputRequest (coerce lockId) (Just outP) expS)
-  pure
-    u
-      { utxoLockId = Just lockId
-      }
-  where
-    expS :: Word64 = 3600 * 24 * 365 * 10
-    outP = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
-    lockId = newLockId outP
 
-lockUtxos :: (Env m) => [Utxo] -> ExceptT Failure m [Utxo]
-lockUtxos =
-  mapM lockUtxo
+utxoToOutPoint :: Utxo -> OP.OutPoint
+utxoToOutPoint u = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
+
+lockUtxo' :: Env m => Utxo -> ExceptT Failure m Utxo
+lockUtxo' u = do
+  l <- lockUtxo (utxoToOutPoint u)
+  pure $ u { utxoLockId = Just $ UtxoLockId $ FP.id l }
 
 maybeSwap ::
   ( Env m

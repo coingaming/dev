@@ -13,7 +13,7 @@ import BtcLsp.Thread.Utils
     unspendUtxoLookup,
     releaseUtxosLocks,
     releaseUtxosPsbtLocks,
-    newLockId
+    lockUtxos
   )
 import qualified Data.Map as M
 import qualified LndClient as Lnd
@@ -25,29 +25,9 @@ import qualified LndClient.Data.OpenChannel as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified UnliftIO.STM as T
 import qualified LndClient.Data.OutPoint as OP
-import qualified LndClient.Data.LeaseOutput as LO
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
-
-lockUtxo :: (Env m) => OP.OutPoint -> ExceptT Failure m FP.UtxoLease
-lockUtxo op = do
-  void $
-    withLndT
-      Lnd.leaseOutput
-      ($ LO.LeaseOutputRequest (coerce lockId) (Just op) expS)
-  pure
-    FP.UtxoLease {
-      FP.id = coerce lockId,
-      FP.expiration = expS,
-      FP.outpoint = op
-    }
-  where
-    expS :: Word64 = 3600 * 24 * 365 * 10
-    lockId = newLockId op
-
-leaseUtxos :: (Env m) => [OP.OutPoint] -> ExceptT Failure m [FP.UtxoLease]
-leaseUtxos = mapM lockUtxo
 
 autoSelectUtxos :: Env m => OnChainAddress 'Fund -> MSat -> ExceptT Failure m FP.FundPsbtResponse
 autoSelectUtxos addr amt = withLndT Lnd.fundPsbt ($ req)
@@ -68,7 +48,7 @@ mapLeaseUtxosToPsbtUtxo :: Env m => [FP.UtxoLease] -> ExceptT Failure m [PsbtUtx
 mapLeaseUtxosToPsbtUtxo lockedUtxos = do
   releaseUtxosLocks lockedUtxos
   l <- unspendUtxoLookup
-  newLockedUtxos <- leaseUtxos (FP.outpoint <$> lockedUtxos)
+  newLockedUtxos <- lockUtxos (FP.outpoint <$> lockedUtxos)
   case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of
     Just us -> pure us
     Nothing -> do

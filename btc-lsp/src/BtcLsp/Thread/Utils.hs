@@ -7,7 +7,9 @@ module BtcLsp.Thread.Utils
     shimCancelReq,
     releaseUtxosPsbtLocks,
     releaseUtxosLocks,
-    newLockId
+    newLockId,
+    lockUtxo,
+    lockUtxos
   )
 where
 
@@ -33,6 +35,7 @@ import qualified Data.Digest.Pure.SHA as SHA
   )
 import qualified Universum
 import qualified Data.ByteString.Lazy as L
+import qualified LndClient.Data.LeaseOutput as LO
 
 swapUtxoToPsbtUtxo :: SwapUtxo -> PsbtUtxo
 swapUtxoToPsbtUtxo x =
@@ -151,3 +154,22 @@ newLockId u =
   where
     txid = L.fromStrict . coerce $ OP.txid u
     vout = Universum.show $ OP.outputIndex u
+
+lockUtxo :: (Env m) => OP.OutPoint -> ExceptT Failure m FP.UtxoLease
+lockUtxo op = do
+  void $
+    withLndT
+      Lnd.leaseOutput
+      ($ LO.LeaseOutputRequest (coerce lockId) (Just op) expS)
+  pure
+    FP.UtxoLease {
+      FP.id = coerce lockId,
+      FP.expiration = expS,
+      FP.outpoint = op
+    }
+  where
+    expS :: Word64 = 3600 * 24 * 365 * 10
+    lockId = newLockId op
+
+lockUtxos :: (Env m) => [OP.OutPoint] -> ExceptT Failure m [FP.UtxoLease]
+lockUtxos = mapM lockUtxo
