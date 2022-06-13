@@ -23,5 +23,5 @@ in {
   nixPkgs = import sources.nixpkgs {};
   pkgs = pkgs;
   haskellPackages = pkgs.haskellPackages;
-  compiler-nix-name = "ghc8107";
+  compiler-nix-name = "ghc902";
 }
