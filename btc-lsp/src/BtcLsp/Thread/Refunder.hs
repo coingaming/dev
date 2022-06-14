@@ -25,7 +25,7 @@ import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
-import BtcLsp.Thread.Utils (swapUtxoToPsbtUtxo,
+import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo,
   releaseUtxosPsbtLocks, releaseUtxosLocks)
 
 apply :: (Env m) => m ()

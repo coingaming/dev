@@ -1,10 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Thread.PsbtOpener (openChannelPsbt) where
+module BtcLsp.Psbt.PsbtOpener (openChannelPsbt) where
 
 import BtcLsp.Import
 import qualified BtcLsp.Math.OnChain as Math
-import BtcLsp.Thread.Utils
+import BtcLsp.Psbt.Utils
   ( finalizePsbt,
     fundPsbtReq,
     openChannelReq,
@@ -25,6 +25,7 @@ import qualified LndClient.Data.OpenChannel as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified UnliftIO.STM as T
 import qualified LndClient.Data.OutPoint as OP
+import qualified UnliftIO.Exception as UE
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
@@ -62,10 +63,11 @@ fundChanPsbt ::
   [PsbtUtxo] ->
   OnChainAddress 'Fund ->
   OnChainAddress 'Gain ->
-  MSat ->
-  MSat -> ExceptT Failure m Lnd.Psbt
+  Money 'Lsp 'OnChain 'Gain ->
+  Money 'Usr 'OnChain 'Loss ->
+  ExceptT Failure m Lnd.Psbt
 fundChanPsbt userUtxos chanFundAddr changeAddr lspFee minerFee = do
-  let userFundingAmt = sumAmt userUtxos - lspFee - minerFee
+  let userFundingAmt = sumAmt userUtxos - coerce lspFee - coerce minerFee
 
   $(logTM) DebugS $ logStr $ "UserAmt:"
     <> inspect (sumAmt userUtxos)
@@ -76,7 +78,7 @@ fundChanPsbt userUtxos chanFundAddr changeAddr lspFee minerFee = do
   let selectedInputsAmt = sumAmt lspUtxos
   $(logTM) DebugS $ logStr $ "Coins sum by lsp" <> inspect selectedInputsAmt
   let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
-  let changeAmt = selectedInputsAmt - userFundingAmt + lspFee
+  let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee
 
   let outputs =
         if changeAmt > Math.trxDustLimit
@@ -93,21 +95,23 @@ openChannelPsbt ::
   [PsbtUtxo] ->
   NodePubKey ->
   OnChainAddress 'Gain ->
-  MSat ->
-  MSat ->
+  Money 'Lsp 'OnChain 'Gain ->
+  Money 'Usr 'OnChain 'Loss ->
   ExceptT Failure m Lnd.ChannelPoint
 openChannelPsbt utxos toPubKey changeAddress lspFee minerFee = do
   chan <- lift T.newTChanIO
   pcid <- Lnd.newPendingChanId
-  let openChannelRequest = openChannelReq pcid toPubKey (2 * amt) amt
+  let openChannelRequest = openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt)
   let subUpdates = void . T.atomically . T.writeTChan chan
-  _res <- lift . spawnLink $ do
+  res <- lift . UE.tryAny . spawnLink $ do
     r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
     $(logTM) DebugS $ logStr $ "Open channel failed" <> inspect r
     pure ()
-  fundStep pcid chan
+  case res of
+    Left e -> throwE $ FailureInternal $ inspect e
+    Right _ -> fundStep pcid chan
   where
-    amt = sumAmt utxos - lspFee - minerFee
+    amt = sumAmt utxos - coerce lspFee - coerce minerFee
     fundStep pcid chan = do
       upd <- T.atomically $ T.readTChan chan
       $(logTM) DebugS $ logStr $ "Got chan status update" <> inspect upd

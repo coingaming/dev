@@ -50,6 +50,8 @@ library
       BtcLsp.Import.Witch
       BtcLsp.Math.OnChain
       BtcLsp.Math.Swap
+      BtcLsp.Psbt.PsbtOpener
+      BtcLsp.Psbt.Utils
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
@@ -70,11 +72,9 @@ library
       BtcLsp.Thread.LnChanOpener
       BtcLsp.Thread.LnChanWatcher
       BtcLsp.Thread.Main
-      BtcLsp.Thread.PsbtOpener
       BtcLsp.Thread.Refunder
       BtcLsp.Thread.Server
       BtcLsp.Thread.SwapperIntoLn
-      BtcLsp.Thread.Utils
       BtcLsp.Time
       BtcLsp.Yesod.Application
       BtcLsp.Yesod.Data.BootstrapColor
@@ -375,6 +375,8 @@ executable btc-lsp-exe
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -395,11 +397,9 @@ executable btc-lsp-exe
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
-        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
-        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -605,6 +605,8 @@ executable btc-lsp-integration
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -625,11 +627,9 @@ executable btc-lsp-integration
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
-        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
-        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -814,6 +814,8 @@ executable btc-lsp-prof
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -834,11 +836,9 @@ executable btc-lsp-prof
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
-        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
-        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -1042,6 +1042,8 @@ test-suite btc-lsp-test
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -1062,11 +1064,9 @@ test-suite btc-lsp-test
         BtcLsp.Thread.LnChanOpener
         BtcLsp.Thread.LnChanWatcher
         BtcLsp.Thread.Main
-        BtcLsp.Thread.PsbtOpener
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
         BtcLsp.Thread.SwapperIntoLn
-        BtcLsp.Thread.Utils
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor

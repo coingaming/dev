@@ -17,8 +17,8 @@ import LndClient.LndTest (mine)
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
-import BtcLsp.Thread.PsbtOpener (openChannelPsbt)
-import BtcLsp.Thread.Utils (swapUtxoToPsbtUtxo)
+import BtcLsp.Psbt.PsbtOpener (openChannelPsbt)
+import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
 import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.Channel as CH
 
@@ -51,7 +51,7 @@ spec =
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     chanOpenAsync <- lift . spawnLink $ do
-      runExceptT $ openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) lspFee fixedMinerFee
+      runExceptT $ openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee) (coerce fixedMinerFee)
     _mineAsync <- lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp

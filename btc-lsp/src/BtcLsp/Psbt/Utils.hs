@@ -1,4 +1,4 @@
-module BtcLsp.Thread.Utils
+module BtcLsp.Psbt.Utils
   (
     swapUtxoToPsbtUtxo, psbtShim,
     fundPsbtReq, openChannelReq,
@@ -64,12 +64,12 @@ fundPsbtReq tmpl = FP.FundPsbtRequest {
   FP.fee = FP.SatPerVbyte 1
 }
 
-openChannelReq :: Lnd.PendingChannelId -> Lnd.NodePubKey -> MSat -> MSat -> Lnd.OpenChannelRequest
+openChannelReq :: Lnd.PendingChannelId -> Lnd.NodePubKey -> Money 'Lsp 'Ln 'Gain -> Money 'Usr 'Ln 'Gain -> Lnd.OpenChannelRequest
 openChannelReq pcid toNode localAmt pushAmt =
   Lnd.OpenChannelRequest
     { Lnd.nodePubkey = toNode,
-      Lnd.localFundingAmount = localAmt,
-      Lnd.pushMSat = Just pushAmt,
+      Lnd.localFundingAmount = coerce localAmt,
+      Lnd.pushMSat = Just $ coerce pushAmt,
       Lnd.targetConf = Nothing,
       Lnd.mSatPerByte = Nothing,
       Lnd.private = Nothing,

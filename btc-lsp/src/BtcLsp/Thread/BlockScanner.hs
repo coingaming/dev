@@ -23,7 +23,7 @@ import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
 import qualified LndClient.Data.FundPsbt as FP
 import qualified Universum
-import BtcLsp.Thread.Utils ( lockUtxo )
+import BtcLsp.Psbt.Utils ( lockUtxo )
 
 
 apply :: (Env m) => m ()
