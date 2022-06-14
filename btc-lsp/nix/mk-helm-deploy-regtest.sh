@@ -107,10 +107,9 @@ fi
 installChart () {
   RELEASE_NAME="$1"
   CHART_NAME="$2"
-  INSTALL_ARGS="$3"
 
   echo "==> Installing \"$RELEASE_NAME\" release from \"$CHART_NAME\" chart"
-  helm install "$INSTALL_ARGS" "$RELEASE_NAME" "$CHART_NAME"
+  helm install "$RELEASE_NAME" "$CHART_NAME"
 }
 
 for RELEASE_NAME in bitcoind lnd rtl postgres lsp; do
@@ -148,8 +147,11 @@ export LND_ALICE_HEX_MACAROON="$(exportMacaroon "$LND_ALICE_PATH/macaroon.hex")"
 export LND_BOB_HEX_MACAROON="$(exportMacaroon "$LND_BOB_PATH/macaroon.hex")"
 
 export LND_TLS_CERT="$(exportTlsCert "$LND_PATH/tls.cert")"
-export LND_ALICE_TLS_CERT="$(exportTlsCert "$LND_ALICE_PATH/tls.cert")"
-export LND_BOB_TLS_CERT="$(exportTlsCert "$LND_BOB_PATH/tls.cert")"
+
+if [ "$INTEGRATION" = "enabled" ]; then
+  export LND_ALICE_TLS_CERT="$(exportTlsCert "$LND_ALICE_PATH/tls.cert")"
+  export LND_BOB_TLS_CERT="$(exportTlsCert "$LND_BOB_PATH/tls.cert")"
+fi
 
 # Provide btc-lsp image repo and tag as ENV vars
 BTC_LSP_DOCKER_IMAGE="$(cat "$BUILD_DIR/docker-image-btc-lsp.txt")"
@@ -175,7 +177,7 @@ upgradeRelease () {
   local RELEASE_NAME="$1"
   local CHART_NAME="$2"
 
-  echo "==> Configuring \"$RELEASE_NAME\" values with LND creds"
+  echo "==> Configuring \"$RELEASE_NAME\" values"
   envsubst < "$THIS_DIR/../helm/$RELEASE_NAME.env.yaml" | \
   tee "$THIS_DIR/../build/$RELEASE_NAME.yaml"
 
@@ -186,9 +188,13 @@ upgradeRelease () {
     "$HELM_REPO_NAME/$CHART_NAME"
 }
 
+upgradeRelease "lnd" "lnd"
 upgradeRelease "rtl" "rtl"
 upgradeRelease "lsp" "lsp"
-upgradeRelease "integration" "lsp"
+
+if [ "$INTEGRATION" = "enabled" ]; then
+  upgradeRelease "integration" "lsp"
+fi
 
 echo "==> Waiting until containers are ready"
 sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
