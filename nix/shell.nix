@@ -7,6 +7,7 @@ in
   withHoogle = true;
   buildInputs = [
     nixPkgsLegacy.cabal-install
+    pkgs.haskell-language-server
     nixPkgs.haskellPackages.hpack
     nixPkgs.haskellPackages.fswatcher
     nixPkgs.haskellPackages.cabal-plan
@@ -24,7 +25,6 @@ in
   tools = {
     hlint = "latest";
     ghcid = "latest";
-    haskell-language-server = "latest";
   };
   shellHook = ''
     gen-hie > hie.yaml

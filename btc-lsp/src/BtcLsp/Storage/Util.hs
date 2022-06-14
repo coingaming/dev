@@ -56,11 +56,11 @@ lockByRow rowId = do
     . (listToMaybe <$>)
     $ Psql.select $
       Psql.from $ \row -> do
+        Psql.locking Psql.ForUpdate
         Psql.where_
           ( row Psql.^. Psql.persistIdField
               Psql.==. Psql.val rowId
           )
-        Psql.locking Psql.ForUpdate
         pure row
 
 lockByUnique ::
