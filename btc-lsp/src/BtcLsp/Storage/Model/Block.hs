@@ -37,14 +37,21 @@ getLatestSql ::
   ( MonadIO m
   ) =>
   ReaderT Psql.SqlBackend m (Maybe (Entity Block))
-getLatestSql =
-  listToMaybe
-    <$> Psql.selectList
-      [ BlockStatus `Psql.persistEq` BlkConfirmed
-      ]
-      [ Psql.Desc BlockHeight,
-        Psql.LimitTo 1
-      ]
+getLatestSql = do
+  xs <- Psql.select $
+    Psql.from $ \row -> do
+      Psql.locking Psql.ForUpdate
+      Psql.where_ $
+        row Psql.^. BlockStatus
+          Psql.==. Psql.val BlkConfirmed
+      Psql.orderBy
+        [ Psql.desc $
+            row Psql.^. BlockHeight
+        ]
+      Psql.limit 1
+      pure row
+  pure $
+    listToMaybe xs
 
 getBlockByHeightSql ::
   ( MonadIO m
@@ -54,6 +61,7 @@ getBlockByHeightSql ::
 getBlockByHeightSql blkHeight = do
   Psql.select $
     Psql.from $ \row -> do
+      Psql.locking Psql.ForUpdate
       Psql.where_ $
         ( row Psql.^. BlockHeight
             Psql.==. Psql.val blkHeight
@@ -71,6 +79,7 @@ getBlocksHigherSql ::
 getBlocksHigherSql blkHeight = do
   Psql.select $
     Psql.from $ \row -> do
+      Psql.locking Psql.ForUpdate
       Psql.where_ $
         ( row Psql.^. BlockHeight
             Psql.>. Psql.val blkHeight
