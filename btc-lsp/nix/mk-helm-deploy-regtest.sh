@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -186,7 +186,7 @@ upgradeRelease () {
 }
 
 upgradeRelease "lnd" "lnd"
-upgradeRelease "lnd-alice" "lnd" 
+upgradeRelease "lnd-alice" "lnd"
 upgradeRelease "lnd-bob" "lnd"
 upgradeRelease "rtl" "rtl"
 upgradeRelease "lsp" "lsp"
