@@ -5,6 +5,9 @@ module BtcLsp.Thread.BlockScanner
   ( apply,
     scan,
     Utxo (..),
+    newLockId,
+    extractRelatedUtxoFromBlock,
+    mapVout,
   )
 where
 
@@ -364,7 +367,7 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  $(logTM) DebugS . logStr $
+  $(logTM) ErrorS . logStr $
     "Got new block with height = "
       <> inspect height
       <> " and hash = "
@@ -392,10 +395,11 @@ newLockId u =
 --
 lockUtxo :: (Env m) => Utxo -> ExceptT Failure m Utxo
 lockUtxo u = do
-  void $
+  res <-
     withLndT
       leaseOutput
       ($ LO.LeaseOutputRequest (coerce lockId) (Just outP) expS)
+  $(logTM) ErrorS . logStr $ "=====================" <> inspect res <> "===================="
   pure
     u
       { utxoLockId = Just lockId
