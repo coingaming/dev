@@ -1,6 +1,5 @@
 module BtcLsp.Import.Psql
   ( module X,
-    persistEq,
   )
 where
 
@@ -27,8 +26,6 @@ import Database.Esqueleto.Legacy as X
     deleteKey,
     desc,
     from,
-    get,
-    getBy,
     in_,
     just,
     limit,
@@ -70,9 +67,7 @@ import Database.Esqueleto.PostgreSQL as X
   )
 import Database.Persist as X
   ( LiteralType (..),
-    SelectOpt (..),
   )
-import qualified Database.Persist as P
 import Database.Persist.Class as X
   ( BackendKey,
   )
@@ -89,12 +84,3 @@ import Database.Persist.Sql as X
 import Database.Persist.TH as X
   ( derivePersistField,
   )
-
-persistEq ::
-  forall v typ.
-  P.PersistField typ =>
-  P.EntityField v typ ->
-  typ ->
-  P.Filter v
-persistEq =
-  (P.==.)

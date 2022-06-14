@@ -437,7 +437,7 @@ getByFundAddressSql ::
   OnChainAddress 'Fund ->
   ReaderT Psql.SqlBackend m (Maybe (Entity SwapIntoLn))
 getByFundAddressSql =
-  Psql.getBy
+  Util.lockByUnique
     . UniqueSwapIntoLnFundAddress
 
 withLockedRowSql ::
