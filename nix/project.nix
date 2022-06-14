@@ -1,7 +1,6 @@
 let
   header = (import ./header.nix);
   pkgs = header.pkgs;
-  nixPkgs = header.nixPkgs;
   prjSrc = pkgs.haskell-nix.haskellLib.cleanGit {
     name = "coins-src-all";
     src = ../.;
@@ -10,6 +9,7 @@ in
 {
   pkgs = pkgs;
   nixPkgs = header.nixPkgs;
+  nixPkgsLegacy = header.nixPkgsLegacy;
   prjSrc = pkgs.haskell-nix.haskellLib.cleanGit {
     name = "coins-src-all";
     src = ../.;

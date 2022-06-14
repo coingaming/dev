@@ -14,6 +14,7 @@ in
 (project { inherit profile; }).shellFor {
   withHoogle = false;
   buildInputs = [
+    nixPkgsLegacy.cabal-install
     pkgs.haskellPackages.hpack
     pkgs.haskellPackages.fswatcher
     pkgs.haskellPackages.cabal-plan
@@ -27,8 +28,7 @@ in
     #(pkgs.callPackage kompose-src {})
   ] ++ ideBuildInputs;
   tools = {
-    cabal = "3.2.0.0";
-    hlint = "3.2.7";
+    hlint = "latest";
     ghcid = "latest";
     haskell-language-server = "latest";
   };
