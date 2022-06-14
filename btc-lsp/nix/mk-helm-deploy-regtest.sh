@@ -147,11 +147,8 @@ export LND_ALICE_HEX_MACAROON="$(exportMacaroon "$LND_ALICE_PATH/macaroon.hex")"
 export LND_BOB_HEX_MACAROON="$(exportMacaroon "$LND_BOB_PATH/macaroon.hex")"
 
 export LND_TLS_CERT="$(exportTlsCert "$LND_PATH/tls.cert")"
-
-if [ "$INTEGRATION" = "enabled" ]; then
-  export LND_ALICE_TLS_CERT="$(exportTlsCert "$LND_ALICE_PATH/tls.cert")"
-  export LND_BOB_TLS_CERT="$(exportTlsCert "$LND_BOB_PATH/tls.cert")"
-fi
+export LND_ALICE_TLS_CERT="$(exportTlsCert "$LND_ALICE_PATH/tls.cert")"
+export LND_BOB_TLS_CERT="$(exportTlsCert "$LND_BOB_PATH/tls.cert")"
 
 # Provide btc-lsp image repo and tag as ENV vars
 BTC_LSP_DOCKER_IMAGE="$(cat "$BUILD_DIR/docker-image-btc-lsp.txt")"
@@ -189,6 +186,8 @@ upgradeRelease () {
 }
 
 upgradeRelease "lnd" "lnd"
+upgradeRelease "lnd-alice" "lnd" 
+upgradeRelease "lnd-bob" "lnd"
 upgradeRelease "rtl" "rtl"
 upgradeRelease "lsp" "lsp"
 
@@ -197,7 +196,7 @@ if [ "$INTEGRATION" = "enabled" ]; then
 fi
 
 echo "==> Waiting until containers are ready"
-sh "$THIS_DIR/k8s-wait.sh" "rtl lsp"
+sh "$THIS_DIR/k8s-wait.sh" "lnd lnd-alice lnd-bob rtl lsp"
 
 echo "==> Mine initial coins"
 sh "$THIS_DIR/k8s-mine.sh" 105
