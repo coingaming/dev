@@ -14,6 +14,7 @@ import Data.Aeson
     withObject,
     withScientific,
     (.:),
+    (.:?),
   )
 import qualified Data.Binary.Builder as BS
 import qualified Data.ByteString as BS
@@ -42,6 +43,7 @@ import Universum
 data GCEnv = GCEnv
   { gcEnvHost :: String,
     gcEnvPort :: GCPort,
+    gcEnvEncryption :: Maybe Encryption,
     gcEnvSigHeaderName :: SigHeaderName,
     gcEnvCompressMode :: CompressMode,
     gcEnvSigner :: Sig.MsgToSign -> IO (Maybe Sig.LndSig)
@@ -58,6 +60,7 @@ instance FromJSON GCEnv where
           GCEnv
             <$> x .: "host"
             <*> x .: "port"
+            <*> x .:? "encryption"
             <*> x .: "sig_header_name"
             <*> x .: "compress_mode"
             <*> pure (const $ pure Nothing)
@@ -99,7 +102,10 @@ runUnary rpc env verifySig req = do
   res <-
     runClientIO $
       bracket
-        (makeClient env req True)
+        ( makeClient env req
+            . maybe True (== Encrypted)
+            $ gcEnvEncryption env
+        )
         close
         (\grpc -> rawUnary rpc grpc req)
   case res of
