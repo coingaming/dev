@@ -47,6 +47,7 @@ spec =
     _utxosRaw <- BlockScanner.scan
     $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee - fixedMinerFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
+    void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
