@@ -6,7 +6,7 @@ let
   };
   protoc-haskell = header.pkgs.haskell-nix.project {
     src = "${protolens}/proto-lens-protoc";
-    compiler-nix-name = "ghc8107";
+    compiler-nix-name = "ghc902";
   };
   protoc-haskell-bin = protoc-haskell.hsPkgs.proto-lens-protoc.components.exes.proto-lens-protoc;
 in {

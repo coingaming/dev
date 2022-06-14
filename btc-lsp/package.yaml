@@ -24,124 +24,6 @@ flags:
     manual: true
     default: false
 
-dependencies:
-# foundation
-- base >= 4.7 && < 5
-- unliftio
-- universum
-- containers
-- transformers
-- extra
-- errors
-- witch
-# time
-- time
-- chronos
-- iso8601-time
-- unbounded-delays
-# storage
-- persistent >= 2.13.2.1
-- persistent-postgresql >= 2.13.2.1
-- persistent-template >= 2.12
-- persistent-migration
-- esqueleto >= 3.5.3
-# logging
-- katip < 0.8.5
-- monad-logger
-- pretty
-- pretty-simple
-- GenericPretty
-- generic-pretty-instances
-# lens
-- lens
-- microlens
-# bytes
-- case-insensitive
-- bytestring
-- text
-- proto-lens
-- proto-lens-runtime
-- binary
-- casing
-- memory
-- aeson
-- base16-bytestring
-- hex-text
-- base64-bytestring >= 1.2.1
-- qrcode-juicypixels
-- qrcode-core
-- format-numbers
-# threads
-- async
-- stm
-- resource-pool
-# th
-- template-haskell
-# crypto
-- uuid
-- network-bitcoin
-- SHA
-- lnd-client
-- cryptonite
-- secp256k1-haskell
-# web
-- wai
-- warp
-- warp-tls
-- warp-grpc
-- http2
-- http2-grpc-types
-- http2-grpc-proto-lens
-- http2-client
-- http2-client-grpc
-- network
-- http-client
-- http-types
-# other
-- envparse
-- scientific
-- vector
-# yesod
-- yesod >=1.6 && <1.7
-- yesod-core >=1.6 && <1.7
-- yesod-auth >=1.6 && <1.7
-- yesod-static >=1.6 && <1.7
-- yesod-form >=1.6 && <1.7
-- classy-prelude >=1.5 && <1.6
-- classy-prelude-conduit >=1.5 && <1.6
-- classy-prelude-yesod >=1.5 && <1.6
-- bytestring >=0.10 && <0.11
-- text >=0.11 && <2.0
-- template-haskell
-- shakespeare >=2.0 && <2.1
-- hjsmin >=0.1 && <0.3
-- monad-control >=0.3 && <1.1
-- wai-extra >=3.1 && <3.2
-- yaml >=0.11 && <0.12
-- http-client-tls >=0.3 && <0.4
-- http-conduit >=2.3 && <2.4
-- directory >=1.1 && <1.4
-- warp >=3.0 && <3.4
-- data-default
-- aeson >=1.4 && <1.5
-- conduit >=1.0 && <2.0
-- monad-logger >=0.3 && <0.4
-- fast-logger >=2.2 && <3.1
-- wai-logger >=2.2 && <2.4
-- file-embed
-- safe
-- unordered-containers
-- containers
-- vector
-- time
-- case-insensitive
-- wai
-- foreign-store
-# yesod-extra
-- blaze-html
-- colonnade
-- yesod-colonnade
-
 default-extensions:
 - NoImplicitPrelude
 - MultiParamTypeClasses
@@ -180,18 +62,133 @@ ghc-options:
 when:
   - condition: impl(ghc >= 8.10.7)
     ghc-options:
-    #
-    # TODO : remove -Wno-unused-packages flag somehow!!!
-    #
-    - -Wno-unused-packages
     - -Wno-missing-safe-haskell-mode
     - -Wno-prepositive-qualified-module
     - -fenable-th-splice-warnings
     - -fprint-potential-instances
 
+_deps: &deps
+  dependencies:
+  # foundation
+  - base >= 4.7 && < 5
+  - unliftio
+  - universum
+  - containers
+  - transformers
+  - extra
+  - errors
+  - witch
+  # time
+  - chronos
+  - iso8601-time
+  - unbounded-delays
+  # storage
+  - persistent >= 2.13.2.1
+  - persistent-postgresql >= 2.13.2.1
+  - persistent-migration
+  - esqueleto >= 3.5.3
+  # logging
+  - katip
+  - pretty
+  - GenericPretty
+  - generic-pretty-instances
+  # lens
+  - microlens
+  # bytes
+  - case-insensitive
+  - bytestring
+  - text
+  - proto-lens
+  - proto-lens-runtime
+  - binary
+  - casing
+  - memory
+  - base16-bytestring
+  - hex-text
+  - base64-bytestring >= 1.2.1
+  - qrcode-juicypixels
+  - qrcode-core
+  - format-numbers
+  # threads
+  - async
+  - stm
+  - resource-pool
+  # th
+  - template-haskell
+  # crypto
+  - uuid
+  - network-bitcoin
+  - SHA
+  - lnd-client
+  - cryptonite
+  - secp256k1-haskell
+  # web
+  - wai
+  - warp
+  - warp-tls
+  - warp-grpc
+  - http2
+  - http2-grpc-types
+  - http2-grpc-proto-lens
+  - http2-client
+  - http2-client-grpc
+  - network
+  # other
+  - envparse
+  - scientific
+  - vector
+  # yesod
+  - yesod >=1.6 && <1.7
+  - yesod-core >=1.6 && <1.7
+  - yesod-auth >=1.6 && <1.7
+  - yesod-static >=1.6 && <1.7
+  - yesod-form >=1.6 && <1.7
+    #- classy-prelude >=1.5 && <1.6
+  - classy-prelude-yesod >=1.5 && <1.6
+  - template-haskell
+  - shakespeare >=2.0 && <2.1
+  - hjsmin >=0.1 && <0.3
+  - wai-extra >=3.1 && <3.2
+  - yaml >=0.11 && <0.12
+  - http-client-tls >=0.3 && <0.4
+  - warp >=3.0 && <3.4
+  - aeson >=1.4 && <1.6
+  - monad-logger >=0.3 && <0.4
+  - fast-logger >=2.2 && <3.1
+  - file-embed
+  - time
+  - case-insensitive
+  - wai
+
+_ghcid: &ghcid
+  when:
+  - condition: flag(ghcid)
+    then:
+      <<: *deps
+      source-dirs:
+      - src
+      ghc-options:
+      - -Wno-unused-packages
+    else:
+      dependencies:
+      - btc-lsp
+
+_optimized: &optimized
+  ghc-options:
+  - -O2
+  - -optc-O3
+  - -funfolding-use-threshold=16
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
+  - -optl-fuse-ld=gold
+  ld-options:
+  - -fuse-ld=gold
+
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
 library:
+  <<: *deps
   source-dirs:
   - src
   ghc-options:
@@ -201,28 +198,26 @@ library:
 executables:
   btc-lsp-exe:
     main: Main.hs
+    dependencies:
+    - base
     source-dirs:
     - app
-    ghc-options:
-    - -O2
-    - -optc-O3
-    - -funfolding-use-threshold=16
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    - -optl-fuse-ld=gold
-    ld-options:
-    - -fuse-ld=gold
-    when:
-    - condition: flag(ghcid)
-      then:
-        source-dirs:
-        - src
-      else:
-        dependencies:
-        - btc-lsp
+    <<: *optimized
+    <<: *ghcid
   btc-lsp-integration:
     main: Integration.hs
+    dependencies:
+    - base
+    - lnd-client
+    - envparse
+    - network-bitcoin
+    - unliftio
+    - proto-lens
+    - aeson
+    - bytestring
+    - vector
+    - QuickCheck
+    - hspec
     source-dirs:
     - integration
     - test
@@ -238,23 +233,11 @@ executables:
     - -optl-fuse-ld=gold
     ld-options:
     - -fuse-ld=gold
-    dependencies:
-    - QuickCheck
-    - quickcheck-instances
-    - generic-arbitrary
-    - hspec
-    - hspec-expectations
-    - hspec-discover
-    when:
-    - condition: flag(ghcid)
-      then:
-        source-dirs:
-        - src
-      else:
-        dependencies:
-        - btc-lsp
+    <<: *ghcid
   btc-lsp-prof:
     main: Main.hs
+    dependencies:
+    - base
     source-dirs:
     - app
     ghc-options:
@@ -269,42 +252,24 @@ executables:
     - -optl-fuse-ld=gold
     ld-options:
     - -fuse-ld=gold
-    when:
-    - condition: flag(ghcid)
-      then:
-        source-dirs:
-        - src
-      else:
-        dependencies:
-        - btc-lsp
+    <<: *ghcid
 
 tests:
   btc-lsp-test:
     main: Main.hs
+    dependencies:
+    - base
+    - lnd-client
+    - envparse
+    - network-bitcoin
+    - unliftio
+    - proto-lens
+    - aeson
+    - bytestring
+    - vector
+    - QuickCheck
+    - hspec
     source-dirs:
     - test
-    ghc-options:
-    - -O2
-    - -optc-O3
-    - -funfolding-use-threshold=16
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    - -optl-fuse-ld=gold
-    ld-options:
-    - -fuse-ld=gold
-    dependencies:
-    - QuickCheck
-    - quickcheck-instances
-    - generic-arbitrary
-    - hspec
-    - hspec-expectations
-    - hspec-wai
-    when:
-    - condition: flag(ghcid)
-      then:
-        source-dirs:
-        - src
-      else:
-        dependencies:
-        - btc-lsp
+    <<: *optimized
+    <<: *ghcid

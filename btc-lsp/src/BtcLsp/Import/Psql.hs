@@ -71,7 +71,6 @@ import Database.Esqueleto.PostgreSQL as X
 import Database.Persist as X
   ( LiteralType (..),
     SelectOpt (..),
-    selectList,
   )
 import qualified Database.Persist as P
 import Database.Persist.Class as X
