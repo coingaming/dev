@@ -33,8 +33,6 @@ deriving stock instance Generic Btc.BlockChainInfo
 
 deriving stock instance Generic Btc.TransactionID
 
-deriving stock instance Generic Btc.DecodedPsbt
-
 instance Out Btc.TransactionID
 
 instance Out Btc.TxnOutputType
@@ -52,8 +50,6 @@ instance Out Btc.BlockVerbose
 instance Out Btc.DecodedRawTransaction
 
 instance Out Btc.BlockChainInfo
-
-instance Out Btc.DecodedPsbt
 
 instance From Text Lnd.PaymentRequest
 
