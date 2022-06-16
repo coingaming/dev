@@ -30,11 +30,12 @@ import qualified Network.Bitcoin.Types as Btc
 
 apply :: (Env m) => m ()
 apply =
-  forever $
-    runSql SwapUtxo.getUtxosForRefundSql
-      <&> groupBy (\a b -> swpId a == swpId b)
-      >>= mapM_ processRefund
-      >> sleep300ms
+  forever $ do
+    runSql $
+      SwapUtxo.getUtxosForRefundSql
+        >>= mapM_ processRefundSql
+          . groupBy (\a b -> swpId a == swpId b)
+    sleep300ms
   where
     swpId = entityKey . snd
 
@@ -174,17 +175,16 @@ newFundPsbtReq feeRate utxos' (OnChainAddress outAddr) est = do
           $ Math.unSatPerVbyte feeRate
     }
 
-processRefund ::
+processRefundSql ::
   ( Env m
   ) =>
   [(Entity SwapUtxo, Entity SwapIntoLn)] ->
-  m ()
-processRefund [] = pure ()
-processRefund utxos@(x : _) = do
-  res <- runSql
-    . SwapIntoLn.withLockedRowSql
-      (entityKey $ snd x)
-      (`elem` swapStatusFinal)
+  ReaderT Psql.SqlBackend m ()
+processRefundSql [] = pure ()
+processRefundSql utxos@(x : _) = do
+  res <- SwapIntoLn.withLockedRowSql
+    (entityKey $ snd x)
+    (`elem` swapStatusFinal)
     . const
     $ do
       $(logTM) DebugS . logStr $

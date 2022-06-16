@@ -3,8 +3,8 @@
 module BtcLsp.Storage.Model.LnChan
   ( createUpdateSql,
     getByChannelPointSql,
-    persistChannelUpdate,
-    persistOpenedChannels,
+    persistChannelUpdateSql,
+    persistOpenedChannelsSql,
   )
 where
 
@@ -222,16 +222,15 @@ closedChannelUpsert ct close =
     extId = Just $ CloseChannel.chanId close
     uniq = UniqueLnChan fundTxId fundVout
 
-persistChannelUpdate ::
-  ( KatipContext m,
-    Storage m
+persistChannelUpdateSql ::
+  ( KatipContext m
   ) =>
   Lnd.ChannelEventUpdate ->
-  m (Entity LnChan)
-persistChannelUpdate (Lnd.ChannelEventUpdate channelEvent _) = do
+  ReaderT Psql.SqlBackend m (Entity LnChan)
+persistChannelUpdateSql (Lnd.ChannelEventUpdate channelEvent _) = do
   $(logTM) DebugS . logStr $ inspect channelEvent
   ct <- getCurrentTime
-  runSql $ case channelEvent of
+  case channelEvent of
     Lnd.ChannelEventUpdateChannelOpenChannel chan ->
       upsertChannelSql ct (Just LnChanStatusOpened) chan
     Lnd.ChannelEventUpdateChannelActiveChannel cp ->
@@ -247,13 +246,12 @@ persistChannelUpdate (Lnd.ChannelEventUpdate channelEvent _) = do
         upsertChannelPointSql ct LnChanStatusPendingOpen $
           Lnd.ChannelPoint txid vout
 
-persistOpenedChannels ::
-  ( Storage m
+persistOpenedChannelsSql ::
+  ( MonadIO m
   ) =>
   [Lnd.Channel] ->
-  m [Entity LnChan]
-persistOpenedChannels cs = do
+  ReaderT Psql.SqlBackend m [Entity LnChan]
+persistOpenedChannelsSql cs = do
   ct <- getCurrentTime
-  runSql
-    . forM (sortOn Channel.channelPoint cs)
-    $ upsertChannelSql ct Nothing
+  forM (sortOn Channel.channelPoint cs) $
+    upsertChannelSql ct Nothing
