@@ -55,7 +55,7 @@ getByChannelPointSql ::
   Vout 'Funding ->
   ReaderT Psql.SqlBackend m (Maybe (Entity LnChan))
 getByChannelPointSql txid =
-  Psql.getBy
+  Util.lockByUnique
     . UniqueLnChan txid
 
 lazyUpdateSwapStatus ::

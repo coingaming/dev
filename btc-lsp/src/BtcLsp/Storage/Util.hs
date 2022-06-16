@@ -9,6 +9,7 @@ import BtcLsp.Class.Storage
 import BtcLsp.Data.Kind
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
+import qualified Database.Esqueleto.Legacy as Esqueleto
 import qualified Universum
 
 -- | This ugly fake type is here just to
@@ -74,4 +75,4 @@ lockByUnique =
   maybeM
     (pure Nothing)
     (\(Entity x _) -> Just . Entity x <$> lockByRow x)
-    . Psql.getBy
+    . Esqueleto.getBy
