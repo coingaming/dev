@@ -248,6 +248,7 @@ getSwapsWaitingChanSql ::
 getSwapsWaitingChanSql =
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` user) -> do
+      Psql.locking Psql.ForUpdate
       Psql.on
         ( swap Psql.^. SwapIntoLnUserId
             Psql.==. user Psql.^. UserId

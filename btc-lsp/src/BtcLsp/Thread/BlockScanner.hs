@@ -219,7 +219,7 @@ persistBlockT blk utxos = do
           --
           mapM_
             (SwapUtxo.updateRefundBlockIdSql blockId)
-            (utxoTxId <$> utxos)
+            (sort $ utxoTxId <$> utxos)
     whenLeft res $
       $(logTM) ErrorS
         . logStr

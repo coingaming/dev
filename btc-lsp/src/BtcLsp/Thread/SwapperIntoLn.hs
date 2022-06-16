@@ -31,13 +31,11 @@ apply =
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
-    swapsToSettle <-
-      runSql SwapIntoLn.getSwapsWaitingLnFundSql
-    tasks <-
-      mapM
-        ( spawnLink
-            . uncurry3 settleSwap
-        )
+    runSql $ do
+      swapsToSettle <-
+        SwapIntoLn.getSwapsWaitingLnFundSql
+      mapM_
+        (uncurry3 settleSwap)
         $ filter
           ( \(_, usr, _) ->
               Set.member
@@ -45,7 +43,6 @@ apply =
                 peerSet
           )
           swapsToSettle
-    mapM_ (liftIO . wait) tasks
     sleep300ms
 
 settleSwap ::
@@ -54,7 +51,7 @@ settleSwap ::
   Entity SwapIntoLn ->
   Entity User ->
   Entity LnChan ->
-  m ()
+  ReaderT Psql.SqlBackend m ()
 settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt = do
   $(logTM) DebugS . logStr $
     "Trying to settle the swap = "
@@ -63,9 +60,8 @@ settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt = do
       <> inspect chanEnt
       <> " and user = "
       <> inspect userEnt
-  res <- runSql
-    . SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingFundLn)
-    $ \swapVal -> do
+  res <- SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingFundLn) $
+    \swapVal -> do
       let payReq =
             from $
               swapIntoLnFundInvoice swapVal
