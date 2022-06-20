@@ -3,12 +3,6 @@ packages:
   network-bitcoin/
   generic-pretty-instances/
 
-
-allow-newer: yesod-colonnade:base,
-             lnd-client:base64-bytestring,
-             qrcode-juicypixels:base64-bytestring
-
-
 index-state: 2022-04-06T00:00:00Z
 
 package witch
@@ -17,8 +11,8 @@ package witch
 source-repository-package
   type: git
   location: https://github.com/coingaming/lnd-client.git
-  --sha256: 08jl8wiwnnwqpqp9z4zsafsam32vq1yw2j1miki6n8rvyscpw7qr
-  tag: b18ea0241b30177f6335245f7835879a1c93b37f
+  --sha256: 0980kiyn8gnjvrvyjm2m793zg7pmlb1g0fb4aj81jc5dj37ls02c
+  tag: 97ac1de9f0991b04553c1ca152d04119da91087d
 
 source-repository-package
   type: git

@@ -36,6 +36,7 @@ getSpendableUtxosBySwapIdSql ::
 getSpendableUtxosBySwapIdSql swapId = do
   Psql.select $
     Psql.from $ \row -> do
+      Psql.locking Psql.ForUpdate
       Psql.where_
         ( ( row Psql.^. SwapUtxoSwapIntoLnId
               Psql.==. Psql.val swapId
@@ -56,7 +57,7 @@ updateUnspentChanReserveSql ::
   ReaderT Psql.SqlBackend m RowQty
 updateUnspentChanReserveSql ids = do
   ct <- getCurrentTime
-  from <<$>> Psql.updateCount $ \row -> do
+  res <- Psql.updateCount $ \row -> do
     Psql.set
       row
       [ SwapUtxoStatus
@@ -74,6 +75,7 @@ updateUnspentChanReserveSql ids = do
                          SwapUtxoUnspentChanReserve
                        ]
                  )
+  pure $ from res
 
 updateSpentChanSql ::
   ( MonadIO m
@@ -157,6 +159,7 @@ getUtxosForRefundSql ::
 getUtxosForRefundSql =
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` utxo) -> do
+      Psql.locking Psql.ForUpdate
       Psql.on
         ( (swap Psql.^. SwapIntoLnId)
             Psql.==. (utxo Psql.^. SwapUtxoSwapIntoLnId)
@@ -191,6 +194,7 @@ getUtxosBySwapIdSql ::
 getUtxosBySwapIdSql swapId = do
   Psql.select $
     Psql.from $ \row -> do
+      Psql.locking Psql.ForUpdate
       Psql.where_
         ( row Psql.^. SwapUtxoSwapIntoLnId
             Psql.==. Psql.val swapId
@@ -242,7 +246,11 @@ updateOrphanSql ids = do
       row Psql.^. SwapUtxoBlockId
         `Psql.in_` Psql.valList ids
 
-revertRefundedSql :: (MonadIO m) => [BlockId] -> ReaderT Psql.SqlBackend m ()
+revertRefundedSql ::
+  ( MonadIO m
+  ) =>
+  [BlockId] ->
+  ReaderT Psql.SqlBackend m ()
 revertRefundedSql ids = do
   ct <- getCurrentTime
   Psql.update $ \row -> do

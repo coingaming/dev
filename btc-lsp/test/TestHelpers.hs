@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module TestHelpers
   ( genAddress,
     createDummySwap,
@@ -17,8 +15,8 @@ import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
 import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
+import TestAppM
 import TestOrphan ()
-import TestWithLndLsp
 
 genAddress ::
   TestOwner ->
@@ -108,6 +106,6 @@ waitCond times condition st = do
       if times == 0
         then pure (False, newSt)
         else do
-          sleep $ MicroSecondsDelay 1000000
+          sleep1s
           mine 1 LndLsp
           waitCond (times - 1) condition newSt

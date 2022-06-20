@@ -7,11 +7,11 @@ import BtcLsp.Import
 import qualified Spec
 import Test.Hspec.Formatters
 import Test.Hspec.Runner
-import TestWithLndLsp (mainTestSetup)
+import qualified TestAppM
 
 main :: IO ()
 main = do
-  mainTestSetup
+  TestAppM.mainTestSetup
   hspecWith
     defaultConfig
       { configFormatter = Just progress

@@ -46,7 +46,7 @@ apply =
           )
           swapsToSettle
     mapM_ (liftIO . wait) tasks
-    sleep $ MicroSecondsDelay 500000
+    sleep300ms
 
 settleSwap ::
   ( Env m

@@ -7,12 +7,14 @@ where
 
 import BtcLsp.Grpc.Data
 import BtcLsp.Grpc.Orphan ()
+import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import.Witch
 import Data.Aeson
   ( FromJSON (..),
     withObject,
     withScientific,
     (.:),
+    (.:?),
   )
 import qualified Data.Binary.Builder as BS
 import qualified Data.ByteString as BS
@@ -41,12 +43,10 @@ import Universum
 data GCEnv = GCEnv
   { gcEnvHost :: String,
     gcEnvPort :: GCPort,
+    gcEnvEncryption :: Maybe Encryption,
     gcEnvSigHeaderName :: SigHeaderName,
     gcEnvCompressMode :: CompressMode,
-    --
-    -- TODO : more typed data
-    --
-    gcEnvSigner :: ByteString -> IO (Maybe ByteString)
+    gcEnvSigner :: Sig.MsgToSign -> IO (Maybe Sig.LndSig)
   }
   deriving stock
     ( Generic
@@ -60,6 +60,7 @@ instance FromJSON GCEnv where
           GCEnv
             <$> x .: "host"
             <*> x .: "port"
+            <*> x .:? "encryption"
             <*> x .: "sig_header_name"
             <*> x .: "compress_mode"
             <*> pure (const $ pure Nothing)
@@ -101,12 +102,12 @@ runUnary rpc env verifySig req = do
   res <-
     runClientIO $
       bracket
-        (makeClient env req True)
+        ( makeClient env req
+            . maybe True (== Encrypted)
+            $ gcEnvEncryption env
+        )
         close
         (\grpc -> rawUnary rpc grpc req)
-  --
-  -- TODO : better composition with ExceptT
-  --
   case res of
     Right (Right (Right (h, mh, Right x))) ->
       case find (\header -> fst header == sigHeaderName) $ h <> fromMaybe mempty mh of
@@ -124,19 +125,16 @@ runUnary rpc env verifySig req = do
               then Right x
               else
                 Left $
-                  "Client ==> server signature verification failed for raw bytes "
+                  "Client ==> server signature verification"
+                    <> " failed for raw bytes"
                     <> " from decoded payload "
                     <> inspectPlain x
                     <> " with signature "
                     <> inspectPlain sigDer
     x ->
-      --
-      -- TODO : replace show with inspectPlain
-      -- need additional instances for this.
-      --
       pure . Left $
         "Client ==> server grpc failure "
-          <> show x
+          <> Universum.show x
   where
     sigHeaderName = CI.mk . from $ gcEnvSigHeaderName env
 
@@ -162,7 +160,7 @@ msgToSignBytes compressMode msg = header <> body
         <> ( BL.toStrict
                . BS.toLazyByteString
                . BS.putWord32be
-               . fromIntegral
+               . fromIntegral -- Length is non-neg, it's fine.
                $ BS.length body
            )
 
@@ -181,7 +179,7 @@ makeClient env req tlsEnabled = do
           { _grpcClientConfigCompression = compression,
             _grpcClientConfigHeaders =
               [ ( sigHeaderName,
-                  B64.encode signature
+                  B64.encode $ Sig.unLndSig signature
                 )
               ]
           }
@@ -190,7 +188,9 @@ makeClient env req tlsEnabled = do
     signer = gcEnvSigner env
     sigHeaderName = from $ gcEnvSigHeaderName env
     compressMode = gcEnvCompressMode env
-    doSignature = signer $ msgToSignBytes compressMode req
+    doSignature =
+      signer . Sig.MsgToSign $
+        msgToSignBytes compressMode req
     compression =
       case compressMode of
         Compressed -> gzip

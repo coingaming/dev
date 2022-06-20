@@ -39,9 +39,9 @@ import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
 --import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
+import TestAppM
 import TestHelpers
 import TestOrphan ()
-import TestWithLndLsp
 import Universum
 
 allIn :: Eq a => [a] -> [a] -> Bool
@@ -99,8 +99,7 @@ spec = do
     swp <-
       createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
-    -- Let Expirer to expiry the swap
-    sleep $ MicroSecondsDelay 1000000
+    sleep1s -- Let Expirer to expiry the swap
     void $
       withLndT
         Lnd.sendCoins
@@ -116,8 +115,7 @@ spec = do
               }
         )
     lift $ mine 1 LndLsp
-    -- Let Refunder to refund UTXO
-    sleep $ MicroSecondsDelay 1000000
+    sleep1s -- Let Refunder to refund UTXO
     res <- lift $ waitCond 10 (refundSucceded swp) []
     liftIO $ res `shouldSatisfy` fst
   itMainT "Refunder + reorg Spec" $ do
@@ -132,7 +130,7 @@ spec = do
       createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
     -- Let Expirer to expiry the swap
-    sleep $ MicroSecondsDelay 1000000
+    sleep1s
     void $
       withLndT
         Lnd.sendCoins
@@ -149,7 +147,7 @@ spec = do
         )
     lift $ mine 1 LndLsp
     -- Let Refunder to refund UTXO
-    sleep $ MicroSecondsDelay 1000000
+    sleep1s
     let swpId = entityKey swp
     res <- lift $ waitCond 10 (refundSucceded swp) []
     utxos <- lift $ runSql $ getUtxosBySwapIdSql swpId
@@ -296,7 +294,7 @@ spec = do
     void $ ExceptT $ waitTillNodesSynchronized 100
     --lift $ mine 1 LndLsp
     --_ <- BlockScanner.scan
-    sleep (MicroSecondsDelay 10000000)
+    sleep1s
     bHeight <- withBtcT Btc.getBlockCount id
     hash <- withBtcT Btc.getBlockHash ($ bHeight)
     blk <- withBtcT Btc.getBlockVerbose ($ hash)
@@ -353,7 +351,7 @@ spec = do
 waitTillNodesSynchronized :: (MonadReader (TestEnv o) m, Env m) => Int -> m (Either Failure ())
 waitTillNodesSynchronized 0 = return $ Left $ FailureInternal "Cannot be synchronized"
 waitTillNodesSynchronized n = runExceptT $ do
-  sleep (MicroSecondsDelay 1000000)
+  sleep1s
   blockCount1 <- withBtcT Btc.getBlockCount id
   blockCount2 <- withBtc2T Btc.getBlockCount id
   if blockCount1 == blockCount2

@@ -112,10 +112,7 @@ import LndClient as X
     Vout (..),
   )
 import LndClient.Util as X
-  ( MicroSecondsDelay (..),
-    readTChanTimeout,
-    sleep,
-    spawnLink,
+  ( spawnLink,
     txIdHex,
     withSpawnLink,
   )

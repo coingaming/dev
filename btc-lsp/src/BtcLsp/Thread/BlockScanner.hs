@@ -43,8 +43,7 @@ apply =
       )
       maybeFunded
       $ runExceptT scan
-    sleep $
-      MicroSecondsDelay 1000000
+    sleep300ms
 
 maybeFunded :: (Env m) => [Utxo] -> m ()
 maybeFunded [] =
@@ -111,9 +110,6 @@ data Utxo = Utxo
   }
   deriving stock (Show)
 
---
--- TODO: presist log of unsupported transactions
---
 mapVout ::
   ( Env m
   ) =>
@@ -132,7 +128,7 @@ mapVout txid txout@(Btc.TxOut amt vout (Btc.StandardScriptPubKey _ _ _ _ addrsV)
           <> " and txout = "
           <> Universum.show txout
       pure Nothing
-mapVout _ _ =
+mapVout _ (Btc.TxOut _ _ Btc.NonStandardScriptPubKey {}) =
   pure Nothing
 
 handleAddr ::
@@ -212,7 +208,6 @@ persistBlockT blk utxos = do
         <$> Block.createUpdateConfirmedSql
           height
           (from $ Btc.vBlockHash blk)
-          (from <$> Btc.vPrevBlock blk)
     ct <-
       getCurrentTime
     res <-
@@ -345,6 +340,7 @@ compareHash ::
   Btc.BlockHeight ->
   ExceptT Failure m (Maybe Bool)
 compareHash height = do
+  w64h <- tryFromT height
   cHash <- withBtcT Btc.getBlockHash ($ height)
   lift
     . ( (== cHash)
@@ -356,8 +352,7 @@ compareHash height = do
     . (listToMaybe <$>)
     . runSql
     . Block.getBlockByHeightSql
-    . BlkHeight
-    $ fromIntegral height
+    $ BlkHeight w64h
 
 scanOneBlock ::
   ( Env m

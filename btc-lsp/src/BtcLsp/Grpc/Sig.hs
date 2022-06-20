@@ -1,6 +1,8 @@
 module BtcLsp.Grpc.Sig
-  ( sigFromReq,
-    prepareMsg,
+  ( MsgToSign (..),
+    LndSig (..),
+    sigToVerify,
+    msgToVerify,
   )
 where
 
@@ -15,8 +17,38 @@ import qualified Data.ByteString.Base64 as B64
 import qualified Data.CaseInsensitive as CI
 import Network.Wai.Internal (Request (..))
 
-sigFromReq :: SigHeaderName -> Request -> Either Failure C.Sig
-sigFromReq sigHeaderName waiReq = do
+newtype MsgToSign = MsgToSign
+  { unMsgToSign :: ByteString
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      NFData
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out MsgToSign
+
+newtype LndSig = LndSig
+  { unLndSig :: ByteString
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      NFData
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out LndSig
+
+sigToVerify :: SigHeaderName -> Request -> Either Failure C.Sig
+sigToVerify sigHeaderName waiReq = do
   (_, b64sig) <-
     maybeToRight
       ( FailureGrpc $
@@ -45,8 +77,8 @@ sigFromReq sigHeaderName waiReq = do
     sigHeaderNameCI =
       CI.mk sigHeaderNameBS
 
-prepareMsg :: ByteString -> Maybe C.Msg
-prepareMsg =
+msgToVerify :: ByteString -> Maybe C.Msg
+msgToVerify =
   C.msg
     . BS.pack
     . BA.unpack

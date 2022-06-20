@@ -44,7 +44,7 @@ apply =
           )
           swaps
     mapM_ (liftIO . wait) tasks
-    sleep $ MicroSecondsDelay 500000
+    sleep300ms
 
 --
 -- TODO : Do not open channel in case where
@@ -95,7 +95,8 @@ openChan (Entity swapKey _) userEnt = do
                   Chan.remoteCsvDelay = Nothing,
                   Chan.minConfs = Nothing,
                   Chan.spendUnconfirmed = Nothing,
-                  Chan.closeAddress = Nothing
+                  Chan.closeAddress = Nothing,
+                  Chan.fundingShim = Nothing
                 }
           )
   whenLeft res $

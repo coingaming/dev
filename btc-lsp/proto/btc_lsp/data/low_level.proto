@@ -13,21 +13,6 @@ message Urational {
   uint64 denominator = 2;
 }
 
-//
-// TODO : maybe have a sum-type like this:
-//
-// message Btc {
-//   oneof either {
-//     Sat sat = 1;
-//     Msat msat = 2;
-//   }
-// }
-//
-// message Sat {
-//   uint64 val = 1;
-// }
-//
-
 message Msat {
   uint64 val = 1;
 }

@@ -15,12 +15,12 @@ apply =
   forever $ do
     runSql $
       entityKey <<$>> SwapIntoLn.getSwapsAboutToExpirySql
+        --
+        -- NOTE : We need to always sort id list before working
+        -- with the row locks to avoid possible deadlocks.
+        --
         >>= mapM_ updateExpiredSwapSql . sort
-    --
-    -- NOTE : We need to always sort id list before working
-    -- with the row locks to avoid possible deadlocks.
-    --
-    sleep (MicroSecondsDelay 1000000)
+    sleep300ms
 
 updateExpiredSwapSql ::
   ( KatipContext m

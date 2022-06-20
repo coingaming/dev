@@ -21,18 +21,15 @@ import qualified LndClient.RPC.Silent as Lnd
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
 import Test.Hspec
+import TestAppM
 import TestOrphan ()
-import TestWithLndLsp
 
 spec :: Spec
 spec = do
-  itEnv "Server SwapIntoLn" $ do
+  itEnv @'LndLsp "Server SwapIntoLn" $ do
     -- Let app spawn
     Main.waitForSync
-    sleep $ MicroSecondsDelay 500000
-    --
-    -- TODO : implement withGCEnv!!!
-    --
+    sleep300ms
     gcEnv <- getGCEnv
     res0 <- runExceptT $ do
       fundInv <-
@@ -55,11 +52,6 @@ spec = do
           <$> withLndTestT
             LndAlice
             Lnd.newAddress
-            --
-            -- TODO : maybe pass LndEnv as the last argument
-            -- to the methods (not the first like right now)
-            -- to avoid this style of withLndT?
-            --
             ( $
                 Lnd.NewAddressRequest
                   { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
@@ -78,9 +70,6 @@ spec = do
               & SwapIntoLn.refundOnChainAddress
                 .~ from @(OnChainAddress 'Refund) refundAddr
           )
-    --
-    -- TODO : do more precise match!!!
-    --
     liftIO $
       res0
         `shouldSatisfy` ( \case
@@ -100,14 +89,21 @@ spec = do
                      . SwapIntoLn.val
                      . SwapIntoLn.val
                  )
-      void $ withLndTestT LndAlice Lnd.sendCoins (\h -> h (Lnd.SendCoinsRequest fundAddr (MSat 200000000)))
+      void $
+        withLndTestT
+          LndAlice
+          Lnd.sendCoins
+          ( \h ->
+              h (Lnd.SendCoinsRequest fundAddr (MSat 200000000))
+          )
       lift $
         LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
       lift $ mine 10 LndLsp
-      sleep $ MicroSecondsDelay 10000000
+      sleep10s
       lift Main.waitForSync
       lift $ mine 10 LndLsp
-      sleep $ MicroSecondsDelay 10000000
+      sleep10s
+      alicePub <- getPubKeyT LndAlice
       withLndT
         Lnd.listChannels
         ( $
@@ -116,17 +112,12 @@ spec = do
                 ListChannels.inactiveOnly = False,
                 ListChannels.publicOnly = False,
                 ListChannels.privateOnly = False,
-                --
-                -- TODO : add peer
-                --
-                ListChannels.peer = Nothing
+                ListChannels.peer = Just alicePub
               }
         )
     liftIO $
       res1
         `shouldSatisfy` ( \case
-                            Right [_] ->
-                              True
-                            _ ->
-                              False
+                            Right [_] -> True
+                            _ -> False
                         )

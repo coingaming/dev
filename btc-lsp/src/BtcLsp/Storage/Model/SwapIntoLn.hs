@@ -36,7 +36,7 @@ createIgnoreSql ::
   UTCTime ->
   Privacy ->
   ReaderT Psql.SqlBackend m (Entity SwapIntoLn)
-createIgnoreSql userEnt fundInv fundHash fundAddr refundAddr expAt chanPrivacy= do
+createIgnoreSql userEnt fundInv fundHash fundAddr refundAddr expAt chanPrivacy = do
   ct <- getCurrentTime
   uuid <- newUuid
   --
@@ -466,7 +466,7 @@ getByFundAddressSql ::
   OnChainAddress 'Fund ->
   ReaderT Psql.SqlBackend m (Maybe (Entity SwapIntoLn))
 getByFundAddressSql =
-  Psql.getBy
+  Util.lockByUnique
     . UniqueSwapIntoLnFundAddress
 
 withLockedRowSql ::

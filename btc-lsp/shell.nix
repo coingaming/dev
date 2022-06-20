@@ -5,15 +5,16 @@
 }:
 with (import ./nix/haskell.nix);
 let proto = import ./nix/proto-lens-protoc.nix;
-    kompose-src = import ./nix/kompose.nix;
     ideBuildInputs =
       if withHaskellIde
-      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/44cdff524c5be6dabe777a30f878e6db71ed9881") {bundle = ["dhall" "haskell"];})]
+      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/ba6c0091debe147b1a23ecdae97efd42312f9b4f") {bundle = ["dhall" "haskell"]; vimBackground = "light"; })]
       else [];
 in
 (project { inherit profile; }).shellFor {
   withHoogle = false;
   buildInputs = [
+    nixPkgsLegacy.cabal-install
+    pkgs.haskell-language-server
     pkgs.haskellPackages.hpack
     pkgs.haskellPackages.fswatcher
     pkgs.haskellPackages.cabal-plan
@@ -24,13 +25,10 @@ in
     nixPkgs.socat
     nixPkgs.plantuml
     proto.protoc-haskell-bin
-    #(pkgs.callPackage kompose-src {})
   ] ++ ideBuildInputs;
   tools = {
-    cabal = "3.2.0.0";
-    hlint = "3.2.7";
+    hlint = "latest";
     ghcid = "latest";
-    haskell-language-server = "latest";
   };
   shellHook =
     if withShellHook

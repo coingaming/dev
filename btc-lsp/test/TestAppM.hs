@@ -10,12 +10,11 @@ module TestAppM
     proxyOwner,
     assertChannelState,
     module ReExport,
+    itProp,
     itEnv,
     itMain,
     itEnvT,
     itMainT,
-    xitEnv,
-    xitEnvT,
     withTestEnv,
     getGCEnv,
     withLndTestT,
@@ -24,14 +23,17 @@ module TestAppM
     withBtc2,
     withBtc2T,
     forkThread,
+    mainTestSetup,
   )
 where
 
 import BtcLsp.Data.Env as Env
 import BtcLsp.Grpc.Client.LowLevel
+import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
 import BtcLsp.Rpc.Env
+import qualified BtcLsp.Storage.Migration as Migration
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import qualified BtcLsp.Thread.Main as Main
 import Data.Aeson (eitherDecodeStrict)
@@ -50,6 +52,7 @@ import Network.Bitcoin as Btc (Client, getClient)
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
+import Test.QuickCheck
 import UnliftIO.Concurrent
   ( ThreadId,
     forkFinally,
@@ -136,7 +139,7 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     --
     liftIO $ Right <$> args (method env)
 
-instance (MonadIO m) => Katip (TestAppM owner m) where
+instance (MonadUnliftIO m) => Katip (TestAppM owner m) where
   getLogEnv =
     asks testEnvKatipLE
   localLogEnv f (TestAppM m) =
@@ -146,7 +149,7 @@ instance (MonadIO m) => Katip (TestAppM owner m) where
           m
       )
 
-instance (MonadIO m) => KatipContext (TestAppM owner m) where
+instance (MonadUnliftIO m) => KatipContext (TestAppM owner m) where
   getKatipContext =
     asks testEnvKatipCTX
   localKatipContext f (TestAppM m) =
@@ -178,16 +181,14 @@ instance (MonadUnliftIO m) => Storage (TestAppM owner m) where
     pool <- getSqlPool
     Psql.runSqlPool query pool
 
-withTestEnv :: TestAppM owner IO () -> IO ()
+withTestEnv :: (MonadUnliftIO m) => TestAppM owner m a -> m a
 withTestEnv action =
   withTestEnv' $ \env ->
     runTestApp env $
-      finally
-        (LndTest.setupZeroChannels proxyOwner >> action)
-        $ pure ()
+      LndTest.setupZeroChannels proxyOwner >> action
 
 withBtc2 ::
-  (MonadReader (TestEnv owner) m, MonadIO m) =>
+  (MonadReader (TestEnv owner) m, MonadUnliftIO m) =>
   (Client -> t) ->
   (t -> IO b) ->
   m (Either a b)
@@ -196,7 +197,7 @@ withBtc2 method args = do
   liftIO $ Right <$> args (method env)
 
 withBtc2T ::
-  (MonadReader (TestEnv owner) m, MonadIO m) =>
+  (MonadReader (TestEnv owner) m, MonadUnliftIO m) =>
   (Client -> t) ->
   (t -> IO a) ->
   ExceptT e m a
@@ -214,76 +215,81 @@ withLndTestT owner method args = do
   env <- lift $ LndTest.getLndEnv owner
   ExceptT $ first FailureLnd <$> args (method env)
 
-withTestEnv' :: (TestEnv owner -> IO ()) -> IO ()
+withTestEnv' ::
+  ( MonadUnliftIO m
+  ) =>
+  (TestEnv owner -> m a) ->
+  m a
 withTestEnv' action = do
-  gcEnv <- readGCEnv
-  lspRc <- readRawConfig
+  gcEnv <- liftIO readGCEnv
+  lspRc <- liftIO readRawConfig
   lndAliceEnv <- readLndAliceEnv
   btcClient <-
-    Btc.getClient
-      (unpack . bitcoindEnvHost $ rawConfigBtcEnv lspRc)
-      (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv lspRc)
-      (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv lspRc)
+    liftIO $
+      Btc.getClient
+        (unpack . bitcoindEnvHost $ rawConfigBtcEnv lspRc)
+        (encodeUtf8 . bitcoindEnvUsername $ rawConfigBtcEnv lspRc)
+        (encodeUtf8 . bitcoindEnvPassword $ rawConfigBtcEnv lspRc)
   btcEnv2 <- readBtcEnv2
   btcClient2 <-
-    Btc.getClient
-      (unpack . bitcoindEnvHost $ btcEnv2)
-      (encodeUtf8 . bitcoindEnvUsername $ btcEnv2)
-      (encodeUtf8 . bitcoindEnvPassword $ btcEnv2)
+    liftIO $
+      Btc.getClient
+        (unpack . bitcoindEnvHost $ btcEnv2)
+        (encodeUtf8 . bitcoindEnvUsername $ btcEnv2)
+        (encodeUtf8 . bitcoindEnvPassword $ btcEnv2)
   let aliceRc =
         lspRc
           { rawConfigLndEnv = lndAliceEnv
           }
   withEnv lspRc $ \lspAppEnv ->
-    liftIO $
-      withEnv aliceRc $ \aliceAppEnv -> do
-        let katipNS = envKatipNS lspAppEnv
-        let katipLE = envKatipLE lspAppEnv
-        let katipCTX = envKatipCTX lspAppEnv
-        runKatipContextT katipLE katipCTX katipNS $
+    lift . withEnv aliceRc $ \aliceAppEnv -> do
+      let katipNS = envKatipNS lspAppEnv
+      let katipLE = envKatipLE lspAppEnv
+      let katipCTX = envKatipCTX lspAppEnv
+      LndTest.withTestEnv
+        (envLnd lspAppEnv)
+        (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost lspAppEnv) (envLndP2PPort lspAppEnv))
+        $ \lspTestEnv ->
           LndTest.withTestEnv
-            (envLnd lspAppEnv)
-            (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost lspAppEnv) (envLndP2PPort lspAppEnv))
-            $ \lspTestEnv ->
-              LndTest.withTestEnv
-                (envLnd aliceAppEnv)
-                (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost aliceAppEnv) (envLndP2PPort aliceAppEnv))
-                $ \aliceTestEnv ->
-                  liftIO . action $
-                    TestEnv
-                      { testEnvLsp = lspAppEnv,
-                        testEnvBtc = btcClient,
-                        testEnvBtc2 = btcClient2,
-                        testEnvLndLsp = lspTestEnv,
-                        testEnvLndAlice = aliceTestEnv,
-                        testEnvKatipNS = katipNS,
-                        testEnvKatipLE = katipLE,
-                        testEnvKatipCTX = katipCTX,
-                        testEnvGCEnv =
-                          gcEnv
-                            { gcEnvSigner =
-                                runKatipContextT
-                                  katipLE
-                                  katipCTX
-                                  katipNS
-                                  . signT
-                                    ( LndTest.testLndEnv
-                                        aliceTestEnv
-                                    )
-                            }
-                      }
+            (envLnd aliceAppEnv)
+            (Lnd.NodeLocation $ getP2PAddr (envLndP2PHost aliceAppEnv) (envLndP2PPort aliceAppEnv))
+            $ \aliceTestEnv ->
+              lift . action $
+                TestEnv
+                  { testEnvLsp = lspAppEnv,
+                    testEnvBtc = btcClient,
+                    testEnvBtc2 = btcClient2,
+                    testEnvLndLsp = lspTestEnv,
+                    testEnvLndAlice = aliceTestEnv,
+                    testEnvKatipNS = katipNS,
+                    testEnvKatipLE = katipLE,
+                    testEnvKatipCTX = katipCTX,
+                    testEnvGCEnv =
+                      gcEnv
+                        { gcEnvSigner =
+                            runKatipContextT
+                              katipLE
+                              katipCTX
+                              katipNS
+                              . signT
+                                ( LndTest.testLndEnv
+                                    aliceTestEnv
+                                )
+                        }
+                  }
   where
-    getP2PAddr host port = pack host <> ":" <> pack (show port)
+    getP2PAddr host port =
+      pack host <> ":" <> pack (show port)
 
 signT ::
   Lnd.LndEnv ->
-  ByteString ->
-  KatipContextT IO (Maybe ByteString)
+  Sig.MsgToSign ->
+  KatipContextT IO (Maybe Sig.LndSig)
 signT env msg = do
   eSig <-
     Lnd.signMessage env $
       Lnd.SignMessageRequest
-        { Lnd.message = msg,
+        { Lnd.message = Sig.unMsgToSign msg,
           Lnd.keyLoc =
             Lnd.KeyLocator
               { Lnd.keyFamily = 6,
@@ -302,14 +308,27 @@ signT env msg = do
       let sig = coerce sig0
       $(logTM) DebugS . logStr $
         "Client ==> signing procedure succeeded for msg of "
-          <> inspect (BS.length msg)
+          <> inspect (BS.length $ Sig.unMsgToSign msg)
           <> " bytes "
           <> inspect msg
           <> " got signature of "
           <> inspect (BS.length sig)
           <> " bytes "
           <> inspect sig
-      pure $ Just sig
+      pure . Just $ Sig.LndSig sig
+
+itProp ::
+  forall owner.
+  String ->
+  TestAppM owner IO Property ->
+  SpecWith (Arg (IO ()))
+itProp testName expr =
+  it testName $ do
+    ioProperty
+      . withTestEnv
+      $ katipAddContext
+        (sl "TestName" testName)
+        expr
 
 itEnv ::
   forall owner.
@@ -337,12 +356,13 @@ itMain testName expr =
         (sl "TestName" testName)
         ( withSpawnLink Main.apply . const $ do
             -- Let endpoints and watchers spawn
-            sleep $ MicroSecondsDelay 300000
+            sleep300ms
             -- Evaluate given expression
             expr
         )
 
 itEnvT ::
+  forall owner e.
   ( Show e
   ) =>
   String ->
@@ -375,44 +395,17 @@ itMainT testName expr =
             res <-
               withSpawnLink Main.apply . const . runExceptT $ do
                 -- Let endpoints and watchers spawn
-                sleep $ MicroSecondsDelay 300000
+                sleep300ms
                 -- Evaluate given expression
                 expr
             liftIO $
               res `shouldSatisfy` isRight
         )
 
-xitEnv ::
-  String ->
-  TestAppM owner IO () ->
-  SpecWith (Arg (IO ()))
-xitEnv testName expr =
-  xit testName $
-    withTestEnv $
-      katipAddContext
-        (sl "TestName" testName)
-        expr
-
-xitEnvT ::
-  ( Show e
-  ) =>
-  String ->
-  ExceptT e (TestAppM owner IO) () ->
-  SpecWith (Arg (IO ()))
-xitEnvT testName expr =
-  xit testName $
-    withTestEnv $
-      katipAddContext
-        (sl "TestName" testName)
-        ( do
-            res <- runExceptT expr
-            liftIO $ res `shouldSatisfy` isRight
-        )
-
-readLndAliceEnv :: IO LndEnv
+readLndAliceEnv :: (MonadUnliftIO m) => m LndEnv
 readLndAliceEnv =
-  E.parse
-    (E.header "LndEnv")
+  liftIO
+    . E.parse (E.header "LndEnv")
     $ E.var
       (parser <=< E.nonempty)
       "LND_ALICE_ENV"
@@ -422,10 +415,10 @@ readLndAliceEnv =
     parser x =
       first E.UnreadError $ eitherDecodeStrict $ C8.pack x
 
-readBtcEnv2 :: IO BitcoindEnv
-readBtcEnv2 = do
-  E.parse
-    (E.header "BitcoindEnv")
+readBtcEnv2 :: (MonadUnliftIO m) => m BitcoindEnv
+readBtcEnv2 =
+  liftIO
+    . E.parse (E.header "BitcoindEnv")
     $ E.var
       (parser <=< E.nonempty)
       "LSP_BITCOIND_ENV2"
@@ -517,3 +510,19 @@ forkThread proc = do
   handle <- newEmptyMVar
   tid <- forkFinally proc (const $ putMVar handle ())
   return (tid, handle)
+
+mainTestSetup :: IO ()
+mainTestSetup =
+  withTestEnv $ do
+    runSql cleanTestDbSql
+    Migration.migrateAll
+
+cleanTestDbSql :: (MonadUnliftIO m) => Psql.SqlPersistT m ()
+cleanTestDbSql =
+  Psql.rawExecute
+    ( "DROP SCHEMA IF EXISTS public CASCADE;"
+        <> "CREATE SCHEMA public;"
+        <> "GRANT ALL ON SCHEMA public TO public;"
+        <> "COMMENT ON SCHEMA public IS 'standard public schema';"
+    )
+    []

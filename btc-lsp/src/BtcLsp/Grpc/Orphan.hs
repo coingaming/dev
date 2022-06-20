@@ -16,10 +16,6 @@ import qualified Proto.BtcLsp.Data.LowLevel as Proto
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as LowLevel
 import qualified Witch
 
---
--- TODO : smart constuctors are needed!!!
---
-
 fromProto ::
   forall proto through haskell.
   ( HasField proto "val" through,
@@ -118,7 +114,7 @@ deriving stock instance Generic CompressMode
 instance FromJSON CompressMode
 
 instance From PortNumber Word32 where
-  from = fromIntegral
+  from = fromIntegral -- Word16 to Word32 is fine.
 
 instance From PortNumber Proto.LnPort where
   from = intoProto
