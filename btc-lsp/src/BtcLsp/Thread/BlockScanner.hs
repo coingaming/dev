@@ -25,9 +25,6 @@ import qualified Data.Digest.Pure.SHA as SHA
   )
 import qualified Data.Vector as V
 import LndClient (txIdParser)
-import qualified LndClient.Data.LeaseOutput as LO
-import qualified LndClient.Data.OutPoint as OP
-import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
@@ -390,19 +387,10 @@ newLockId u =
 --
 lockUtxo :: (Env m) => Utxo -> ExceptT Failure m Utxo
 lockUtxo u = do
-  res <-
-    withLndT
-      leaseOutput
-      ($ LO.LeaseOutputRequest (coerce lockId) (Just outP) expS)
-  $(logTM) ErrorS . logStr $ "=====================" <> inspect res <> "===================="
   pure
     u
-      { utxoLockId = Just lockId
+      { utxoLockId = Just $ newLockId u
       }
-  where
-    expS :: Word64 = 3600 * 24 * 365 * 10
-    outP = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
-    lockId = newLockId u
 
 lockUtxos :: (Env m) => [Utxo] -> ExceptT Failure m [Utxo]
 lockUtxos =
