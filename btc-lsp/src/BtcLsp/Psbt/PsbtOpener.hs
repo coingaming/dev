@@ -3,13 +3,13 @@
 module BtcLsp.Psbt.PsbtOpener (openChannelPsbt) where
 
 import BtcLsp.Import
-import qualified BtcLsp.Math.OnChain as Math
 import BtcLsp.Psbt.Utils
   ( finalizePsbt,
     fundPsbtReq,
     openChannelReq,
     psbtFinalizeReq,
     psbtVerifyReq,
+    -- shimCancelReq,
     unspendUtxoLookup,
     releaseUtxosLocks,
     releaseUtxosPsbtLocks,
@@ -26,6 +26,7 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified UnliftIO.STM as T
 import qualified LndClient.Data.OutPoint as OP
 import qualified UnliftIO.Exception as UE
+import qualified BtcLsp.Math.OnChain as Math
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
@@ -64,31 +65,36 @@ fundChanPsbt ::
   OnChainAddress 'Fund ->
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
-  Money 'Usr 'OnChain 'Loss ->
   ExceptT Failure m Lnd.Psbt
-fundChanPsbt userUtxos chanFundAddr changeAddr lspFee minerFee = do
-  let userFundingAmt = sumAmt userUtxos - coerce lspFee - coerce minerFee
+fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
+  let userFundingAmt = sumAmt userUtxos - coerce lspFee
 
   $(logTM) DebugS $ logStr $ "UserAmt:"
     <> inspect (sumAmt userUtxos)
-    <> " LspFee:" <> inspect lspFee <> " MinerFee:" <> inspect minerFee
+    <> " LspFee:" <> inspect lspFee
 
   lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
   lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
   let selectedInputsAmt = sumAmt lspUtxos
   $(logTM) DebugS $ logStr $ "Coins sum by lsp" <> inspect selectedInputsAmt
   let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
-  let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee
-
+  numInps <- tryFromT (length allInputs)
+  estFee <- tryFailureT $ Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
+  $(logTM) ErrorS $ logStr $ "Est fee:" <> inspect estFee
+  let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - (estFee)
   let outputs =
         if changeAmt > Math.trxDustLimit
           then [(coerce chanFundAddr, userFundingAmt * 2), (coerce changeAddr, changeAmt)]
           else [(coerce chanFundAddr, userFundingAmt * 2 + changeAmt)]
-
   let req = fundPsbtReq $ FP.TxTemplate allInputs (M.fromList outputs)
   releaseUtxosPsbtLocks (userUtxos <> lspUtxos)
   psbt <- withLndT Lnd.fundPsbt ($ req)
   pure $ Lnd.Psbt $ FP.fundedPsbt psbt
+
+
+data OpenUpdateEvt = LndUpdate Lnd.OpenStatusUpdate | LndSubFail deriving stock Generic
+
+instance Out OpenUpdateEvt
 
 openChannelPsbt ::
   Env m =>
@@ -96,38 +102,43 @@ openChannelPsbt ::
   NodePubKey ->
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
-  Money 'Usr 'OnChain 'Loss ->
   ExceptT Failure m Lnd.ChannelPoint
-openChannelPsbt utxos toPubKey changeAddress lspFee minerFee = do
+openChannelPsbt utxos toPubKey changeAddress lspFee = do
   chan <- lift T.newTChanIO
   pcid <- Lnd.newPendingChanId
   let openChannelRequest = openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt)
-  let subUpdates = void . T.atomically . T.writeTChan chan
+  let subUpdates u = void . T.atomically . T.writeTChan chan $ LndUpdate u
   res <- lift . UE.tryAny . spawnLink $ do
     r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
-    $(logTM) DebugS $ logStr $ "Open channel failed" <> inspect r
-    pure ()
+    case r of
+      Left e -> do
+        $(logTM) ErrorS $ logStr $ "Open channel failed" <> inspect e
+        void . T.atomically . T.writeTChan chan $ LndSubFail
+      Right _ -> pure ()
   case res of
     Left e -> throwE $ FailureInternal $ inspect e
     Right _ -> fundStep pcid chan
   where
-    amt = sumAmt utxos - coerce lspFee - coerce minerFee
+    amt = sumAmt utxos - coerce lspFee
     fundStep pcid chan = do
       upd <- T.atomically $ T.readTChan chan
       $(logTM) DebugS $ logStr $ "Got chan status update" <> inspect upd
       case upd of
-        Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdatePsbtFund (Lnd.ReadyForPsbtFunding faddr famt _))) -> do
+        LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdatePsbtFund (Lnd.ReadyForPsbtFunding faddr famt _)))) -> do
           $(logTM) DebugS $ logStr $ "Chan ready for funding at addr:" <> inspect faddr <> " with amt:" <> inspect famt
-          psbt' <- fundChanPsbt utxos (coerce faddr) (coerce changeAddress) lspFee minerFee
+          psbt' <- fundChanPsbt utxos (coerce faddr) (coerce changeAddress) lspFee
           void $ withLndT Lnd.fundingStateStep ($ psbtVerifyReq pcid psbt')
           sPsbtResp <- finalizePsbt psbt'
           $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp
           void $ withLndT Lnd.fundingStateStep ($ psbtFinalizeReq pcid (Lnd.Psbt $ FNP.signedPsbt sPsbtResp))
           fundStep pcid chan
-        Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanPending p)) -> do
+        LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanPending p))) -> do
           $(logTM) DebugS $ logStr $ "Chan is pending... mining..." <> inspect p
           fundStep pcid chan
-        Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp))) -> do
+        LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp)))) -> do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
+        LndSubFail -> do
+          -- void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid )
+          throwE (FailureInternal "Lnd subscription failed")
         _ -> throwE (FailureInternal "Unexpected update")

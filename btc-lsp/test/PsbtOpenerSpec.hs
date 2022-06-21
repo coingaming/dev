@@ -52,7 +52,7 @@ spec =
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     chanOpenAsync <- lift . spawnLink $ do
-      runExceptT $ openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee) (coerce fixedMinerFee)
+      runExceptT $ openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee)
     _mineAsync <- lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp

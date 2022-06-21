@@ -14,6 +14,7 @@ in
     nixPkgs.haskellPackages.hp2pretty
     nixPkgs.haskellPackages.hspec-discover
     nixPkgs.haskellPackages.implicit-hie
+    nixPkgs.haskellPackages.hie-bios
     nixPkgs.zlib
     nixPkgs.protobuf
     nixPkgs.netcat-gnu
