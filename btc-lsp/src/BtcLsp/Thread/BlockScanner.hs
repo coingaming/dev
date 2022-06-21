@@ -25,6 +25,9 @@ import qualified Data.Digest.Pure.SHA as SHA
   )
 import qualified Data.Vector as V
 import LndClient (txIdParser)
+import qualified LndClient.Data.LeaseOutput as LO
+import qualified LndClient.Data.OutPoint as OP
+import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
@@ -359,7 +362,7 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  $(logTM) ErrorS . logStr $
+  $(logTM) DebugS . logStr $
     "Got new block with height = "
       <> inspect height
       <> " and hash = "
@@ -387,10 +390,18 @@ newLockId u =
 --
 lockUtxo :: (Env m) => Utxo -> ExceptT Failure m Utxo
 lockUtxo u = do
+  void $
+    withLndT
+      leaseOutput
+      ($ LO.LeaseOutputRequest (coerce lockId) (Just outP) expS)
   pure
     u
-      { utxoLockId = Just $ newLockId u
+      { utxoLockId = Just lockId
       }
+  where
+    expS :: Word64 = 3600 * 24 * 365 * 10
+    outP = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
+    lockId = newLockId u
 
 lockUtxos :: (Env m) => [Utxo] -> ExceptT Failure m [Utxo]
 lockUtxos =

@@ -11,7 +11,6 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getSwapsWaitingChanSql,
     getSwapsWaitingLnFundSql,
     getSwapsAboutToExpirySql,
-    getSwaps,
     getByUuidSql,
     getByFundAddressSql,
     withLockedRowSql,
@@ -256,34 +255,6 @@ getSwapsWaitingChanSql =
         ( swap Psql.^. SwapIntoLnStatus
             Psql.==. Psql.val SwapWaitingChan
         )
-      --
-      -- TODO : some sort of exp backoff in case
-      -- where user node is offline for a long time.
-      -- Maybe limits, some proper retries etc.
-      --
-      pure (swap, user)
-
-getSwaps ::
-  ( MonadIO m
-  ) =>
-  ReaderT
-    Psql.SqlBackend
-    m
-    [ ( Entity SwapIntoLn,
-        Entity User
-      )
-    ]
-getSwaps =
-  Psql.select $
-    Psql.from $ \(swap `Psql.InnerJoin` user) -> do
-      Psql.on
-        ( swap Psql.^. SwapIntoLnUserId
-            Psql.==. user Psql.^. UserId
-        )
---      Psql.where_
---        ( swap Psql.^. SwapIntoLnStatus
---            Psql.==. Psql.val SwapWaitingFundChain
---        )
       --
       -- TODO : some sort of exp backoff in case
       -- where user node is offline for a long time.

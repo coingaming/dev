@@ -36,7 +36,6 @@ import qualified Env as E
     parse,
     str,
     var,
-    def,
   )
 import qualified LndClient as Lnd
 import qualified LndClient.Data.SignMessage as Lnd
