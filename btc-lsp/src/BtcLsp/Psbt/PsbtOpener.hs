@@ -112,11 +112,9 @@ openChannelPsbt utxos toPubKey changeAddress lspFee = do
   let subUpdates u = void . T.atomically . T.writeTChan chan $ LndUpdate u
   res <- lift . UE.tryAny . spawnLink $ do
     r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
-    case r of
-      Left e -> do
-        $(logTM) ErrorS $ logStr $ "Open channel failed" <> inspect e
-        void . T.atomically . T.writeTChan chan $ LndSubFail
-      Right _ -> pure ()
+    whenLeft r $ \e -> do
+      $(logTM) ErrorS $ logStr $ "Open channel failed" <> inspect e
+      void . T.atomically . T.writeTChan chan $ LndSubFail
   case res of
     Left e -> throwE $ FailureInternal $ inspect e
     Right _ -> fundStep pcid chan
