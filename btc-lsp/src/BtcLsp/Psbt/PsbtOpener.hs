@@ -9,7 +9,7 @@ import BtcLsp.Psbt.Utils
     openChannelReq,
     psbtFinalizeReq,
     psbtVerifyReq,
-    -- shimCancelReq,
+    shimCancelReq,
     unspendUtxoLookup,
     releaseUtxosLocks,
     releaseUtxosPsbtLocks,
@@ -80,8 +80,10 @@ fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
   let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
   numInps <- tryFromT (length allInputs)
   estFee <- tryFailureT $ Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
-  $(logTM) ErrorS $ logStr $ "Est fee:" <> inspect estFee
-  let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - (estFee)
+  -- TODO: find exact additional cost of open trx
+  let fee = estFee + MSat 50000
+  $(logTM) DebugS $ logStr $ "Est fee:" <> inspect fee
+  let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
   let outputs =
         if changeAmt > Math.trxDustLimit
           then [(coerce chanFundAddr, userFundingAmt * 2), (coerce changeAddr, changeAmt)]
@@ -139,6 +141,6 @@ openChannelPsbt utxos toPubKey changeAddress lspFee = do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
         LndSubFail -> do
-          -- void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid )
-          throwE (FailureInternal "Lnd subscription failed")
+          void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid )
+          throwE (FailureInternal "Lnd subscription failed trying to cancel psbt flow")
         _ -> throwE (FailureInternal "Unexpected update")

@@ -27,9 +27,6 @@ sendAmt addr amt =
   void $ withLndT
     Lnd.sendCoins ($ SendCoins.SendCoinsRequest {SendCoins.addr = addr, SendCoins.amount = amt})
 
-fixedMinerFee :: MSat
-fixedMinerFee = MSat $ 500 * 1000
-
 lspFee :: MSat
 lspFee = MSat 20000 * 1000
 
@@ -45,7 +42,7 @@ spec =
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
     _utxosRaw <- BlockScanner.scan
-    $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee - fixedMinerFee)
+    $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
@@ -72,7 +69,7 @@ spec =
         )
     $(logTM) DebugS $ logStr $ "Channel is opened:" <> inspect chnls
     let (openedChanMaybe :: Maybe CH.Channel) = find (\c -> CH.channelPoint c == chan) chnls
-    let (expectedRemoteBalance :: MSat) = coerce (20 * amt) - lspFee - fixedMinerFee
+    let (expectedRemoteBalance :: MSat) = coerce (20 * amt) - lspFee
     case openedChanMaybe of
       Just c -> do
         liftIO $ do
