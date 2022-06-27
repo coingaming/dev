@@ -17,10 +17,11 @@ import LndClient.LndTest (mine)
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
-import BtcLsp.Psbt.PsbtOpener (openChannelPsbt)
+import qualified BtcLsp.Psbt.PsbtOpener as PO
 import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
 import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.Channel as CH
+import qualified UnliftIO.STM as T
 
 sendAmt :: Env m => Text -> MSat -> ExceptT Failure m ()
 sendAmt addr amt =
@@ -31,7 +32,7 @@ lspFee :: MSat
 lspFee = MSat 20000 * 1000
 
 spec :: Spec
-spec =
+spec = do
   itEnvT "PsbtOpener Spec" $ do
     amt <- lift getSwapIntoLnMinAmt
     swp <- createDummySwap Nothing
@@ -48,12 +49,11 @@ spec =
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
-    chanOpenAsync <- lift . spawnLink $ do
-      runExceptT $ openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee)
+    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee)
     _mineAsync <- lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
-    chanEither <- liftIO $ wait chanOpenAsync
+    chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
     chan <- except chanEither
     $(logTM) DebugS $ logStr $ "Channel is opened:" <> inspect chan
     chnls <- withLndT
@@ -75,5 +75,31 @@ spec =
         liftIO $ do
           shouldBe expectedRemoteBalance (CH.remoteBalance c)
       Nothing -> throwE $ FailureInternal "Failed to open channel with psbt"
+
+  itEnvT "PsbtOpener subscription exception" $ do
+    amt <- lift getSwapIntoLnMinAmt
+    swp <- createDummySwap Nothing
+    let swpId = entityKey swp
+    let swpAddr = swapIntoLnFundAddress . entityVal $ swp
+    void $ sendAmt (from swpAddr) (from (10 * amt))
+    void $ sendAmt (from swpAddr) (from (10 * amt))
+    void putLatestBlockToDB
+    lift $ mine 4 LndLsp
+    _utxosRaw <- BlockScanner.scan
+    $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee)
+    utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
+    void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
+    let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
+    profitAddr <- genAddress LndLsp
+    Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
+    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee)
+    _mineAsync <- lift . spawnLink $ do
+      sleep1s
+      mine 1 LndLsp
+    void . T.atomically . T.writeTChan (PO.tchan openChanRes) $ PO.LndSubFail
+    chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
+    $(logTM) DebugS $ logStr $ "Fails with:" <> inspect chanEither
+    liftIO $ do
+      shouldSatisfy chanEither isLeft
 
 
