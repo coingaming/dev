@@ -70,10 +70,11 @@ let
     ${bitcoind}/bin/bitcoin-cli -rpcwait -datadir='${workDir}' -rpcport=${toString rpcport} "$@"
   '';
   up = writeShellScriptBin "up" ''
-    pwd
-    ${setup}/bin/setup
-    ${start}/bin/start
-    ${init}/bin/init
+    ( kill -0 `cat ${workDir}/regtest/bitcoind.pid` && \
+      echo "==> btc-${name} is still running" ) || \
+    ( ${setup}/bin/setup && \
+      ${start}/bin/start && \
+      ${init}/bin/init )
   '';
   down = writeShellScriptBin "down" ''
     ${stop}/bin/stop

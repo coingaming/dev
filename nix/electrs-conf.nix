@@ -39,8 +39,10 @@ let
     kill -9 "$electrs_pid"
   '';
   up = writeShellScriptBin "up" ''
-    ${setup}/bin/setup
-    ${start}/bin/start
+    ( kill -0 `cat ${workDir}/electrs.pid` && \
+      echo "==> ${serviceName} is still running" ) || \
+    ( ${setup}/bin/setup && \
+      ${start}/bin/start )
   '';
   down = writeShellScriptBin "down" ''
     ${stop}/bin/stop

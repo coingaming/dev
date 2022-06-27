@@ -58,16 +58,6 @@ let
     lspCerts = lndLsp.tlscert;
     inherit dataDir prjSrc;
   };
-in
-{
-  envFile = lspEnv.exportEnvFile;
-  cliAlias = nixPkgs.writeShellScriptBin "cli-alias" ''
-    alias bitcoin-cli="${bitcoindConf.cli}/bin/bitcoin-cli"
-    alias bitcoin-cli-2="${bitcoindConf2.cli}/bin/bitcoin-cli"
-    alias lncli-lsp="${lndLsp.cli}/bin/lncli"
-    alias lncli-alice="${lndAlice.cli}/bin/lncli"
-    alias lncli-bob="${lndBob.cli}/bin/lncli"
-  '';
   startAll = nixPkgs.writeShellScriptBin "start-test-deps" ''
     set -euo pipefail
     ${bitcoindConf.up}/bin/up
@@ -80,6 +70,16 @@ in
     ${postgres.up}/bin/up
     ${lspEnv.setup}/bin/setup
   '';
+  envFile = lspEnv.exportEnvFile;
+in
+{
+  cliAlias = nixPkgs.writeShellScriptBin "cli-alias" ''
+    alias bitcoin-cli="${bitcoindConf.cli}/bin/bitcoin-cli"
+    alias bitcoin-cli-2="${bitcoindConf2.cli}/bin/bitcoin-cli"
+    alias lncli-lsp="${lndLsp.cli}/bin/lncli"
+    alias lncli-alice="${lndAlice.cli}/bin/lncli"
+    alias lncli-bob="${lndBob.cli}/bin/lncli"
+  '';
   stopAll = nixPkgs.writeShellScriptBin "stop-test-deps" ''
     ${bitcoindConf.down}/bin/down
     ${lndLsp.down}/bin/down
@@ -89,6 +89,12 @@ in
     ${bitcoindConf2.down}/bin/down
     ${postgres.down}/bin/down
   '';
-  inherit bitcoindConf;
+  ghcidLspMain = nixPkgs.writeShellScriptBin "ghcid-lsp-main" ''
+    ghcid --test=":main" --command="(${startAll}/bin/start-test-deps || true) && . ${envFile} && cabal new-repl btc-lsp-exe --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
+  '';
+  ghcidLspTest = nixPkgs.writeShellScriptBin "ghcid-lsp-test" ''
+    ghcid --test=":main --fail-fast --color -f failed-examples" --command="(${startAll}/bin/start-test-deps || true) && . ${envFile} && cabal new-repl test:btc-lsp-test --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
+  '';
+  inherit envFile startAll bitcoindConf;
 }
 
