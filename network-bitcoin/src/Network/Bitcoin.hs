@@ -126,6 +126,7 @@ module Network.Bitcoin
     , changePassword
     , encryptWallet
     , isAddressValid
+    , DecodedPsbt (..)
     ) where
 
 import           Network.Bitcoin.BlockChain

@@ -100,7 +100,8 @@ callApi :: FromJSON v
         -> IO v
 callApi client cmd params = readVal =<< client jsonRpcReqBody
     where
-        readVal bs = case decode' bs of
+        readVal bs = do
+            case decode' bs of
                          Just r@BitcoinRpcResponse {btcError=NoError}
                              -> return $ btcResult r
                          Just BitcoinRpcResponse {btcError=BitcoinRpcError code msg}

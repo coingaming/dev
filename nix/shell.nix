@@ -14,6 +14,7 @@ in
     nixPkgs.haskellPackages.hp2pretty
     nixPkgs.haskellPackages.hspec-discover
     nixPkgs.haskellPackages.implicit-hie
+    nixPkgs.haskellPackages.hie-bios
     nixPkgs.zlib
     nixPkgs.protobuf
     nixPkgs.netcat-gnu
@@ -21,6 +22,7 @@ in
     proto.protoc-haskell-bin
     deps.startAll
     deps.stopAll
+    deps.cliAlias
   ];
   tools = {
     hlint = "latest";
@@ -28,5 +30,7 @@ in
   };
   shellHook = ''
     gen-hie > hie.yaml
+    source ${deps.envFile}
+    source cli-alias
   '';
 }
