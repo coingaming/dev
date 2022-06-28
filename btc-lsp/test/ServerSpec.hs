@@ -9,7 +9,7 @@ import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
-import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+-- import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient as Lnd
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -29,7 +29,7 @@ import TestAppM
 import TestOrphan ()
 
 spec :: Spec
-spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
+spec = forM_ [Compressed] $ \compressMode -> do
   itMainT @'LndLsp "GetCfg" $ do
     let minAmt :: Proto.LocalBalance =
           defMessage
@@ -146,17 +146,11 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
         Btc.sendToAddress
         (\h -> h fundAddr 0.01 Nothing Nothing)
     lift $
-      mine 1 LndLsp
+      mine 10 LndLsp
         >> sleep5s
         >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
-    swapsToChan <-
-      lift $
-        runSql SwapIntoLn.getSwapsWaitingChanSql
-    liftIO $
-      swapsToChan
-        `shouldSatisfy` ((== 1) . length)
     lift $
-      mine 1 LndLsp
+      mine 10 LndLsp
         >> sleep5s
         >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
     alicePub <- getPubKeyT LndAlice

@@ -49,7 +49,7 @@ spec = do
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
-    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee)
+    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee) Nothing True
     _mineAsync <- lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
@@ -92,7 +92,8 @@ spec = do
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
-    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee)
+    openChanRes <-
+      PO.openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee) Nothing True
     _mineAsync <- lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp

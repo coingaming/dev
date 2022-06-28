@@ -31,11 +31,12 @@ createIgnoreSql ::
   LnInvoice 'Fund ->
   RHash ->
   OnChainAddress 'Fund ->
+  OnChainAddress 'Gain ->
   OnChainAddress 'Refund ->
   UTCTime ->
   Privacy ->
   ReaderT Psql.SqlBackend m (Entity SwapIntoLn)
-createIgnoreSql userEnt fundInv fundHash fundAddr refundAddr expAt chanPrivacy = do
+createIgnoreSql userEnt fundInv fundHash fundAddr feeAndChangeAddr refundAddr expAt chanPrivacy = do
   ct <- getCurrentTime
   uuid <- newUuid
   --
@@ -51,6 +52,7 @@ createIgnoreSql userEnt fundInv fundHash fundAddr refundAddr expAt chanPrivacy =
         swapIntoLnFundInvoice = fundInv,
         swapIntoLnFundInvHash = fundHash,
         swapIntoLnFundAddress = fundAddr,
+        swapIntoLnLspFeeAndChangeAddress = feeAndChangeAddr,
         swapIntoLnFundProof = Nothing,
         swapIntoLnRefundAddress = refundAddr,
         swapIntoLnChanCapUser = Money 0,
