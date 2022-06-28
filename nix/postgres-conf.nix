@@ -14,7 +14,6 @@ let
   serviceName = "postgresql-${name}";
   workDir = "${dataDir}/${serviceName}";
   setup = writeShellScriptBin "setup" ''
-    rm -rf ${workDir}
     ${postgresql}/bin/initdb -D ${workDir} --auth=trust --no-locale --encoding=UTF8
     mkdir -p "${workDir}/sockets"
     cp -f ${postgresqlconf} ${workDir}/postgresql.conf
@@ -30,6 +29,7 @@ let
   '';
   stop = writeShellScriptBin "stop" ''
     timeout 5 ${postgresql}/bin/pg_ctl -D ${workDir} stop
+    rm -rf ${workDir}
   '';
   up = writeShellScriptBin "up" ''
     ${setup}/bin/setup

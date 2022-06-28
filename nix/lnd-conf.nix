@@ -68,7 +68,6 @@ let
     exec ${lnd}/bin/lncli -n regtest --rpcserver 127.0.0.1:${toString rpcport} --lnddir=${workDir} "$@"
   '';
   setup = writeShellScriptBin "setup" ''
-    rm -rf ${workDir}
     mkdir -p "${workDir}"
     cp -f ${lndconf} ${workDir}/lnd.conf
     cp -f ${tlscert}/* ${workDir}/
@@ -115,6 +114,7 @@ let
     echo "Stoping lnd ${name} $lnd_pid"
     timeout 5 ${cli}/bin/lncli stop
     kill -9 "$lnd_pid"
+    rm -rf ${workDir}
   '';
   up = writeShellScriptBin "up" ''
     ( kill -0 `cat ${workDir}/lnd.pid` && \

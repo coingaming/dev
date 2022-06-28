@@ -17,7 +17,6 @@ let
   serviceName = "electrs-${name}";
   workDir = "${dataDir}/${serviceName}";
   setup = writeShellScriptBin "setup" ''
-    rm -rf ${workDir}
     mkdir -p "${workDir}/db"
     cp -f ${electrstoml} ${workDir}/electrs.toml
   '';
@@ -38,6 +37,7 @@ let
     electrs_pid=`cat ${workDir}/electrs.pid`
     echo "Stoping electrs ${name} $electrs_pid"
     kill -9 "$electrs_pid"
+    rm -rf ${workDir}
   '';
   up = writeShellScriptBin "up" ''
     ( kill -0 `cat ${workDir}/electrs.pid` && \
