@@ -29,7 +29,7 @@ import TestAppM
 import TestOrphan ()
 
 spec :: Spec
-spec = forM_ [Compressed] $ \compressMode -> do
+spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
   itMainT @'LndLsp "GetCfg" $ do
     let minAmt :: Proto.LocalBalance =
           defMessage
