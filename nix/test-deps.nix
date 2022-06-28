@@ -66,9 +66,13 @@ let
     ${lndBob.up}/bin/up
     ${electrsAlice.up}/bin/up
     ${bitcoindConf2.up}/bin/up
+    echo "test-deps ==> connecting bitcoin nodes..."
     ${bitcoindConf.cli}/bin/bitcoin-cli addnode "127.0.0.1:21000" "add"
+    echo "test-deps ==> spawning postgres..."
     ${postgres.up}/bin/up
+    echo "test-deps ==> lsp setup..."
     ${lspEnv.setup}/bin/setup
+    echo "test-deps ==> done"
   '';
   envFile = lspEnv.exportEnvFile;
 in
