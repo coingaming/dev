@@ -17,6 +17,7 @@ let
   serviceName = "electrs-${name}";
   workDir = "${dataDir}/${serviceName}";
   setup = writeShellScriptBin "setup" ''
+    rm -rf ${workDir}
     mkdir -p "${workDir}/db"
     cp -f ${electrstoml} ${workDir}/electrs.toml
   '';

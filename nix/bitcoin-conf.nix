@@ -63,6 +63,7 @@ let
   '';
   setup = writeShellScriptBin "setup" ''
     echo "Setup"
+    rm -rf ${workDir}
     mkdir -p ${workDir}
     cp -f ${bitcoinconf} "${workDir}/bitcoin.conf"
   '';

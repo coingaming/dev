@@ -68,6 +68,7 @@ let
     exec ${lnd}/bin/lncli -n regtest --rpcserver 127.0.0.1:${toString rpcport} --lnddir=${workDir} "$@"
   '';
   setup = writeShellScriptBin "setup" ''
+    rm -rf ${workDir}
     mkdir -p "${workDir}"
     cp -f ${lndconf} ${workDir}/lnd.conf
     cp -f ${tlscert}/* ${workDir}/
@@ -100,14 +101,14 @@ let
     EOF
     }
 
-    ( echo "${serviceName} ==> Checking Lnd wallet" \
-      && ${cli}/bin/lncli getinfo ) \
-    || ( echo "${serviceName} ==> Unlocking Lnd wallet" \
-         echo developer | \
-         ${cli}/bin/lncli unlock --stdin ) \
-    || ( echo "${serviceName} ==> Creating Lnd wallet" \
-         && createWallet ) \
-    || ( echo "${serviceName} ==> INIT ERROR" )
+    ( echo "${serviceName} ==> Checking Lnd wallet" && \
+      ${cli}/bin/lncli getinfo ) || \
+    ( echo "${serviceName} ==> Unlocking Lnd wallet" && \
+      echo developer | ${cli}/bin/lncli unlock --stdin ) || \
+    ( echo "${serviceName} ==> Creating Lnd wallet" && \
+      createWallet ) || \
+    ( echo "${serviceName} ==> INIT ERROR" && \
+      exit 1 )
   '';
   stop = writeShellScriptBin "stop" ''
     lnd_pid=`cat ${workDir}/lnd.pid`

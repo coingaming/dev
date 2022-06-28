@@ -95,6 +95,42 @@ in
   ghcidLspTest = nixPkgs.writeShellScriptBin "ghcid-lsp-test" ''
     ghcid --test=":main --fail-fast --color -f failed-examples" --command="(${startAll}/bin/start-test-deps || true) && . ${envFile} && cabal new-repl test:btc-lsp-test --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
   '';
+  mine = nixPkgs.writeShellScriptBin "mine" ''
+    set -e
+
+    echo "==> started mining blocks"
+
+    CURRENT_BLOCK=0
+    if [ -z "$1" ]; then
+      ASKED_BLOCKS="6"
+    else
+      ASKED_BLOCKS="$1"
+    fi
+
+    if [ $ASKED_BLOCKS -lt 10 ]; then
+      BLOCKS2MINE=1
+    else
+      BLOCKS2MINE=$ASKED_BLOCKS
+    fi
+
+    while [ $CURRENT_BLOCK -lt $ASKED_BLOCKS ]; do
+      for LNCLI in "${lndLsp.cli}/bin/lncli" "${lndAlice.cli}/bin/lncli" "${lndBob.cli}/bin/lncli"; do
+
+        CURRENT_BLOCK=$(( CURRENT_BLOCK + BLOCKS2MINE ))
+        LND_ADDRESS=`$LNCLI newaddress p2wkh | ${nixPkgs.jq}/bin/jq -r '.address' | tr -d '\r\n'`
+        echo "$LNCLI ==> got LND_ADDRESS $LND_ADDRESS"
+        ${bitcoindConf.cli}/bin/bitcoin-cli generatetoaddress $BLOCKS2MINE $LND_ADDRESS 1>/dev/null
+        echo "$LNCLI ==> mined $CURRENT_BLOCK blocks"
+
+        if [ $ASKED_BLOCKS -lt 10 ] && [ $CURRENT_BLOCK -ge $ASKED_BLOCKS ]; then
+          break
+        fi
+
+      done
+    done
+
+    echo "==> mined enough blocks"
+  '';
   inherit envFile startAll bitcoindConf;
 }
 
