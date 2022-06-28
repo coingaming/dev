@@ -14,6 +14,7 @@ let
   serviceName = "postgresql-${name}";
   workDir = "${dataDir}/${serviceName}";
   setup = writeShellScriptBin "setup" ''
+    rm -rf ${workDir}
     ${postgresql}/bin/initdb -D ${workDir} --auth=trust --no-locale --encoding=UTF8
     mkdir -p "${workDir}/sockets"
     cp -f ${postgresqlconf} ${workDir}/postgresql.conf
