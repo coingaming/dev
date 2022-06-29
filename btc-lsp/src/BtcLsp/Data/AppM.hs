@@ -67,10 +67,10 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
       $ asks Env.envElectrs
   withBtc method args = do
     env <- asks Env.envBtc
-    --
-    -- TODO : catch exceptions!!!
-    --
-    liftIO $ Right <$> args (method env)
+    liftIO $ first exHandler <$> tryAny (args $ method env)
+    where
+      exHandler :: (Exception e) => e -> Failure
+      exHandler = FailureBitcoind . OtherError . pack . displayException
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool
