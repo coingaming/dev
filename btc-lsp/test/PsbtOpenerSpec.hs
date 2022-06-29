@@ -22,6 +22,7 @@ import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
 import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.Channel as CH
 import qualified UnliftIO.STM as T
+import qualified LndClient.Data.ListLeases as LL
 
 sendAmt :: Env m => Text -> MSat -> ExceptT Failure m ()
 sendAmt addr amt =
@@ -100,7 +101,10 @@ spec = do
     void . T.atomically . T.writeTChan (PO.tchan openChanRes) $ PO.LndSubFail
     chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
     $(logTM) DebugS $ logStr $ "Fails with:" <> inspect chanEither
+    leases <- withLndT Lnd.listLeases ($ LL.ListLeasesRequest) <&> LL.lockedUtxos
+    let allLockedAfterFail = all (\pu -> isJust $ find (\l -> LL.outpoint l == Just (getOutPoint pu)) leases) psbtUtxos
     liftIO $ do
       shouldSatisfy chanEither isLeft
+      shouldBe allLockedAfterFail True
 
 

@@ -154,5 +154,6 @@ openChannelPsbt utxos toPubKey changeAddress lspFee cFee private = do
           pure cp
         LndSubFail -> do
           void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid )
+          void $ lockUtxos (getOutPoint <$> utxos)
           throwE (FailureInternal "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
         _ -> throwE (FailureInternal "Unexpected update")
