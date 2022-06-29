@@ -23,6 +23,18 @@
         "url": "https://github.com/nmattia/niv/archive/82e5cd1ad3c387863f0545d7591512e76ab0fc41.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "nixBitcoin": {
+        "branch": "release",
+        "description": "A collection of Nix packages and NixOS modules for easily installing full-featured Bitcoin nodes with an emphasis on security.",
+        "homepage": "https://nixbitcoin.org/",
+        "owner": "fort-nix",
+        "repo": "nix-bitcoin",
+        "rev": "285a38803c88b642b83487056bcd8a6626356cce",
+        "sha256": "00rmzhqmc0jpgyz3kb1hs0b6k5n6qhrdl1fpqarm0fcr6clzgp0k",
+        "type": "tarball",
+        "url": "https://github.com/fort-nix/nix-bitcoin/archive/285a38803c88b642b83487056bcd8a6626356cce.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "nixPkgsLegacy": {
         "branch": "release-20.09",
         "description": "Nix Packages collection",

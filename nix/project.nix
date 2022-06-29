@@ -10,6 +10,7 @@ in
   pkgs = pkgs;
   nixPkgs = header.nixPkgs;
   nixPkgsLegacy = header.nixPkgsLegacy;
+  nixBitcoin = header.nixBitcoin;
   prjSrc = pkgs.haskell-nix.haskellLib.cleanGit {
     name = "coins-src-all";
     src = ../.;

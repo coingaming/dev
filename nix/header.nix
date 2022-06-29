@@ -22,6 +22,7 @@ let
 in {
   nixPkgs = import sources.nixpkgs {};
   nixPkgsLegacy = import sources.nixPkgsLegacy {};
+  nixBitcoin = import sources.nixBitcoin {inherit pkgs;};
   pkgs = pkgs;
   haskellPackages = pkgs.haskellPackages;
   compiler-nix-name = "ghc902";
