@@ -29,6 +29,7 @@ let
   '';
   stop = writeShellScriptBin "stop" ''
     timeout 5 ${postgresql}/bin/pg_ctl -D ${workDir} stop
+    rm -rf ${workDir}
   '';
   up = writeShellScriptBin "up" ''
     ${setup}/bin/setup

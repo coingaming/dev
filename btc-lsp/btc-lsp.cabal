@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.6.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -50,6 +50,8 @@ library
       BtcLsp.Import.Witch
       BtcLsp.Math.OnChain
       BtcLsp.Math.Swap
+      BtcLsp.Psbt.PsbtOpener
+      BtcLsp.Psbt.Utils
       BtcLsp.Rpc.Client
       BtcLsp.Rpc.ElectrsRpc
       BtcLsp.Rpc.Env
@@ -263,6 +265,8 @@ executable btc-lsp-exe
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -406,6 +410,7 @@ executable btc-lsp-integration
       LnChanWatcherSpec
       Main
       MathSpec
+      PsbtOpenerSpec
       RefunderSpec
       ReorgSpec
       ServerSpec
@@ -478,6 +483,8 @@ executable btc-lsp-integration
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -669,6 +676,8 @@ executable btc-lsp-prof
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env
@@ -811,6 +820,7 @@ test-suite btc-lsp-test
       BlockScannerSpec
       LnChanWatcherSpec
       MathSpec
+      PsbtOpenerSpec
       RefunderSpec
       ReorgSpec
       ServerSpec
@@ -882,6 +892,8 @@ test-suite btc-lsp-test
         BtcLsp.Import.Witch
         BtcLsp.Math.OnChain
         BtcLsp.Math.Swap
+        BtcLsp.Psbt.PsbtOpener
+        BtcLsp.Psbt.Utils
         BtcLsp.Rpc.Client
         BtcLsp.Rpc.ElectrsRpc
         BtcLsp.Rpc.Env

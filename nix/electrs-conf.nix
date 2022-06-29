@@ -37,10 +37,13 @@ let
     electrs_pid=`cat ${workDir}/electrs.pid`
     echo "Stoping electrs ${name} $electrs_pid"
     kill -9 "$electrs_pid"
+    rm -rf ${workDir}
   '';
   up = writeShellScriptBin "up" ''
-    ${setup}/bin/setup
-    ${start}/bin/start
+    ( kill -0 `cat ${workDir}/electrs.pid` && \
+      echo "==> ${serviceName} is still running" ) || \
+    ( ${setup}/bin/setup && \
+      ${start}/bin/start )
   '';
   down = writeShellScriptBin "down" ''
     ${stop}/bin/stop

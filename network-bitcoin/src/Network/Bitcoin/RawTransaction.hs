@@ -29,8 +29,11 @@ module Network.Bitcoin.RawTransaction ( Client
                                       , decodeRawTransaction
                                       , WhoCanPay(..)
                                       , RawSignedTransaction(..)
+                                      , DecodedPsbt (..)
                                       , signRawTransaction
                                       , sendRawTransaction
+                                      , decodePsbt
+                                      , joinPsbts
                                       ) where
 
 import           Control.Applicative
@@ -395,3 +398,17 @@ signRawTransaction client rt us' privkeys wcp =
 
 sendRawTransaction :: Client -> RawTransaction -> IO TransactionID
 sendRawTransaction client rt = callApi client "sendrawtransaction" [ tj rt ]
+
+newtype DecodedPsbt = DecodedPsbt {
+    tx :: DecodedRawTransaction
+} deriving ( Show, Read, Ord, Eq )
+
+instance FromJSON DecodedPsbt where
+    parseJSON (Object o) = DecodedPsbt <$> o .: "tx"
+    parseJSON _ = mzero
+
+decodePsbt :: Client -> HexString -> IO DecodedPsbt
+decodePsbt client psbt = callApi client "decodepsbt" [ tj psbt ]
+
+joinPsbts :: Client -> [HexString] -> IO HexString
+joinPsbts client psbts = callApi client "joinpsbts" [ tj psbts ]

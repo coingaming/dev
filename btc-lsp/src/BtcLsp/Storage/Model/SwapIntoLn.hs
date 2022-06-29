@@ -219,6 +219,7 @@ getSwapsWaitingPeerSql ::
 getSwapsWaitingPeerSql =
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` user) -> do
+      Psql.locking Psql.ForUpdate
       Psql.on
         ( swap Psql.^. SwapIntoLnUserId
             Psql.==. user Psql.^. UserId
@@ -247,6 +248,7 @@ getSwapsWaitingChanSql ::
 getSwapsWaitingChanSql =
   Psql.select $
     Psql.from $ \(swap `Psql.InnerJoin` user) -> do
+      Psql.locking Psql.ForUpdate
       Psql.on
         ( swap Psql.^. SwapIntoLnUserId
             Psql.==. user Psql.^. UserId
@@ -311,6 +313,7 @@ getSwapsAboutToExpirySql = do
   nearExpTime <- getFutureTime Math.swapExpiryLimitInternal
   Psql.select $
     Psql.from $ \row -> do
+      Psql.locking Psql.ForUpdate
       Psql.where_
         ( ( row Psql.^. SwapIntoLnStatus
               `Psql.in_` Psql.valList

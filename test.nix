@@ -7,19 +7,16 @@ let
   genericPrettyInstancesTest = p.generic-pretty-instances.components.tests.generic-pretty-instances-test;
   btcLspTest = p.btc-lsp.components.tests.btc-lsp-test;
 in {
-  network-bitcoin-test = nixPkgs.runCommand "network-bitcoin-test" {
-    buildInputs=[nixPkgs.ps];
-  } ''
-    ${deps.bitcoindConf.up}/bin/up
-    ${networkBitcoinTest}/bin/network-bitcoin-tests 2>&1 | tee $out
-    ${deps.bitcoindConf.down}/bin/down
-  '';
   generic-pretty-instances-test = nixPkgs.runCommand "generic-pretty-instances-test" {} ''
     ${genericPrettyInstancesTest}/bin/generic-pretty-instances-test 2>&1 | tee $out
   '';
-  btc-lsp-test =  nixPkgs.runCommand "btc-lsp-test" ({
+  stateful-test = nixPkgs.runCommand "stateful-test" ({
     buildInputs=[nixPkgs.ps];
   }) ''
+    ${deps.bitcoindConf.up}/bin/up
+    ${networkBitcoinTest}/bin/network-bitcoin-tests 2>&1 | tee $out
+    ${deps.bitcoindConf.down}/bin/down
+
     ${deps.startAll}/bin/start-test-deps
     source ${deps.envFile}
     ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out

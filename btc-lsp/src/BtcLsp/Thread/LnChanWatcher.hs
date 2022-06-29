@@ -20,9 +20,10 @@ syncChannelList lnd = do
     LndSilent.listChannels
       lnd
       (ListChannelsRequest False False False False Nothing)
-  case res of
-    Right chs -> void $ LnChan.persistOpenedChannels chs
-    Left {} -> pure ()
+  whenRight res $
+    runSql
+      . void
+      . LnChan.persistOpenedChannelsSql
 
 applyPoll :: (Env m) => m ()
 applyPoll =
@@ -38,6 +39,10 @@ applySub =
     withRunInIO $ \run -> do
       void $
         LndSilent.subscribeChannelEvents
-          (void . run . LnChan.persistChannelUpdate)
+          ( void
+              . run
+              . runSql
+              . LnChan.persistChannelUpdateSql
+          )
           lnd
     sleep300ms
