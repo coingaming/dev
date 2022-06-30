@@ -8,6 +8,8 @@ SECRETS_DIR="$BUILD_DIR/secrets"
 
 export BITCOIND_PATH="$SECRETS_DIR/bitcoind"
 export LND_PATH="$SECRETS_DIR/lnd"
+export LND_ALICE_PATH="$SECRETS_DIR/lnd-alice"
+export LND_BOB_PATH="$SECRETS_DIR/lnd-bob"
 export RTL_PATH="$SECRETS_DIR/rtl"
 export LSP_PATH="$SECRETS_DIR/lsp"
 export POSTGRES_PATH="$SECRETS_DIR/postgres"

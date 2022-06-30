@@ -7,7 +7,7 @@ check_state () {
   kubectl wait pod \
     --for condition=ready \
     --timeout=300s \
-    --selector=name=$1
+    --selector=app.kubernetes.io/name="$1"
   echo "Success! $1 is up and running!"
 }
 

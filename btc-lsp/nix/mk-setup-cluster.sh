@@ -12,9 +12,7 @@ minikube stop && minikube delete
 echo "==> Create new kubernetes cluster"
 minikube start \
   --profile="$MINIKUBE_PROFILE" \
-  --driver=docker \
-  --apiserver-names=kubernetes.docker.internal \
-  --mount --mount-string="$HOME:$HOME"
+  --driver=docker
 
 echo "==> Setting default minikube profile"
 sh "$THIS_DIR/mk-setup-profile.sh"
@@ -23,10 +21,7 @@ echo "==> Enable ingress addon"
 minikube addons enable ingress
 
 echo "==> Setup hosts to access services from localhost"
-CLUSTER_IP=`minikube ip`
+CLUSTER_IP="$(minikube ip)"
 sudo sh "$THIS_DIR/mk-setup-hosts.sh" "$CLUSTER_IP"
-
-echo "==> Allow to use kubectl from nix-shell"
-sh "$THIS_DIR/mk-setup-kubeconf.sh"
 
 echo "==> Cluster is ready for deployments!"
