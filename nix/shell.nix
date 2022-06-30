@@ -26,6 +26,7 @@ in
     deps.ghcidLspMain
     deps.ghcidLspTest
     deps.mine
+    nixBitcoin.lndinit
   ];
   tools = {
     hlint = "latest";
