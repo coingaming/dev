@@ -6,7 +6,7 @@ let
   networkBitcoinTest = p.network-bitcoin.components.tests.network-bitcoin-tests;
   genericPrettyInstancesTest = p.generic-pretty-instances.components.tests.generic-pretty-instances-test;
   btcLspTest = p.btc-lsp.components.tests.btc-lsp-test;
-  electrsClientTest = p.btc-lsp.components.tests.electrs-client-test;
+  electrsClientTest = p.electrs-client.components.tests.electrs-client-test;
 in {
   network-bitcoin-test = nixPkgs.runCommand "network-bitcoin-test" {
     buildInputs=[nixPkgs.ps];
