@@ -1,0 +1,138 @@
+name:                electrs-client
+version:             0.1.0.0
+github:              "githubuser/electrs-client"
+license:             BSD3
+author:              "Mikhail Prushinskiy"
+maintainer:          "mikhail.prushinskiy@heathmont.net"
+copyright:           "2022 Heathmont"
+
+extra-source-files:
+- CHANGELOG.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/githubuser/electrs-client#readme>
+
+#flags:
+#  ghcid:
+#    manual: true
+#    default: false
+
+default-extensions:
+- NoImplicitPrelude
+- MultiParamTypeClasses
+- LambdaCase
+- OverloadedStrings
+- ScopedTypeVariables
+- DeriveGeneric
+- GeneralizedNewtypeDeriving
+- TupleSections
+- DataKinds
+- DerivingStrategies
+- KindSignatures
+- FlexibleContexts
+- FlexibleInstances
+- StrictData
+- TypeFamilies
+- TypeOperators
+- StandaloneDeriving
+- DerivingVia
+- ExistentialQuantification
+- InstanceSigs
+
+ghc-options:
+# For details on warnings: https://downloads.haskell.org/~ghc/master/users-guide/using-warnings.html
+# Enable all warnings with -Weverything, then disable the ones we don’t care about
+- -Weverything
+- -Werror
+- -Wno-missing-exported-signatures # missing-exported-signatures turns off the more strict -Wmissing-signatures. See https://ghc.haskell.org/trac/ghc/ticket/14794#ticket
+- -Wno-missing-import-lists # Requires explicit imports of _every_ function (e.g. ‘$’); too strict
+- -Wno-missed-specialisations # When GHC can’t specialize a polymorphic function. No big deal and requires fixing underlying libraries to solve.
+- -Wno-all-missed-specialisations # See missed-specialisations
+- -Wno-unsafe # Don’t use Safe Haskell warnings
+- -Wno-safe # Don’t use Safe Haskell warnings
+- -Wno-missing-local-signatures # Warning for polymorphic local bindings; nothing wrong with those.
+- -Wno-missing-export-lists # Because of proto-lens
+when:
+  - condition: impl(ghc >= 8.10.7)
+    ghc-options:
+    - -Wno-missing-safe-haskell-mode
+    - -Wno-prepositive-qualified-module
+    - -fenable-th-splice-warnings
+    - -fprint-potential-instances
+
+_deps: &deps
+  dependencies:
+  - base >= 4.7 && < 5
+  - unliftio
+  - universum
+  - containers
+  - transformers
+  - extra
+  - errors
+  - chronos
+  - unbounded-delays
+  - esqueleto >= 3.5.3
+  - katip
+  - GenericPretty
+  - generic-pretty-instances
+  - bytestring
+  - text
+  - proto-lens
+  - casing
+  - hex-text
+  - async
+  - stm
+  - resource-pool
+  - uuid
+  - network-bitcoin
+  - SHA
+  - lnd-client
+  - cryptonite
+  - http2-client
+  - http2-client-grpc
+  - network
+  - envparse
+  - yesod-core >=1.6 && <1.7
+  - shakespeare >=2.0 && <2.1
+  - aeson >=1.4 && <1.6
+  - time
+
+_optimized: &optimized
+  ghc-options:
+  - -O2
+  - -optc-O3
+  - -funfolding-use-threshold=16
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
+  - -optl-fuse-ld=gold
+  ld-options:
+  - -fuse-ld=gold
+
+# The library contains all of our application code. The executable
+# defined below is just a thin wrapper.
+library:
+  <<: *deps
+  source-dirs:
+  - src
+  ghc-options:
+  - -fwarn-tabs
+  - -O2
+
+tests:
+  electr-client-test:
+    main: Main.hs
+    dependencies:
+    - base
+    - electrs-client
+    #- network-bitcoin
+    - hspec
+    source-dirs:
+    - test
+    <<: *optimized
