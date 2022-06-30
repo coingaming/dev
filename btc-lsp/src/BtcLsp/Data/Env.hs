@@ -49,6 +49,7 @@ data Env = Env
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
     envKatipLE :: LogEnv,
+    envYesodLog :: YesodLog,
     -- | Lnd
     envLnd :: Lnd.LndEnv,
     envLndP2PHost :: HostName,
@@ -73,6 +74,7 @@ data RawConfig = RawConfig
     rawConfigLogVerbosity :: Verbosity,
     rawConfigLogSeverity :: Severity,
     rawConfigLogSecrets :: SecretVision,
+    rawConfigLogYesod :: YesodLog,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,
@@ -107,6 +109,7 @@ readRawConfig =
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_VERBOSITY" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SEVERITY" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SECRET" (opts <> E.def SecretHidden)
+      <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_YESOD" (opts <> E.def YesodLogNoMain)
       -- Lnd
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
@@ -188,6 +191,7 @@ withEnv rc this = do
                 envKatipLE = le,
                 envKatipCTX = katipCtx,
                 envKatipNS = katipNs,
+                envYesodLog = rawConfigLogYesod rc,
                 -- Lnd
                 envLnd = lnd,
                 envLndP2PHost = rawConfigLndP2PHost rc,

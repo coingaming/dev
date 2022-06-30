@@ -94,10 +94,10 @@ in
     ${postgres.down}/bin/down
   '';
   ghcidLspMain = nixPkgs.writeShellScriptBin "ghcid-lsp-main" ''
-    ghcid --test=":main" --command="(${startAll}/bin/start-test-deps || true) && . ${envFile} && cabal new-repl btc-lsp-exe --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
+    ghcid --test=":main" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl btc-lsp-exe --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
   '';
   ghcidLspTest = nixPkgs.writeShellScriptBin "ghcid-lsp-test" ''
-    ghcid --test=":main --fail-fast --color -f failed-examples" --command="(${startAll}/bin/start-test-deps || true) && . ${envFile} && cabal new-repl test:btc-lsp-test --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
+    ghcid --test=":main --fail-fast --color -f failed-examples" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl test:btc-lsp-test --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
   '';
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e
