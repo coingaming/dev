@@ -91,22 +91,22 @@ makeFoundation sqlPool appMRunner appSettings = do
 
 -- | Convert our foundation to a WAI Application by calling @toWaiAppPlain@ and
 -- applying some additional middlewares.
-makeApplication :: App -> IO Application
-makeApplication foundation = do
-  logWare <- makeLogWare foundation
+makeApplication :: YesodLog -> App -> IO Application
+makeApplication yesodLog foundation = do
+  logWare <- makeLogWare yesodLog foundation
   -- Create the WAI application and apply middlewares
   appPlain <- toWaiAppPlain foundation
   return $ logWare $ defaultMiddlewaresNoLogging appPlain
 
-makeLogWare :: App -> IO Middleware
-makeLogWare foundation =
+makeLogWare :: YesodLog -> App -> IO Middleware
+makeLogWare yesodLog foundation =
   mkRequestLogger
     def
       { outputFormat =
           DetailedWithSettings $
             def
               { useColors = True,
-                mFilterRequests = Just reqFilter
+                mFilterRequests = Just $ reqFilter yesodLog
               },
         destination =
           Logger
@@ -114,7 +114,11 @@ makeLogWare foundation =
             $ appLogger foundation
       }
   where
-    reqFilter req =
+    reqFilter YesodLogAll _ =
+      const True
+    reqFilter YesodLogNothing _ =
+      const False
+    reqFilter YesodLogNoMain req =
       const $
         case pathInfo req of
           [] -> False
@@ -147,10 +151,11 @@ warpSettings foundation =
 appMain ::
   ( Class.Env m
   ) =>
+  YesodLog ->
   Pool SqlBackend ->
   UnliftIO m ->
   IO ()
-appMain sqlPool appMRunner = do
+appMain yesodLog sqlPool appMRunner = do
   -- Get the settings from all relevant sources
   settings <-
     loadYamlSettingsArgs
@@ -163,7 +168,7 @@ appMain sqlPool appMRunner = do
   foundation <- makeFoundation sqlPool appMRunner settings
 
   -- Generate a WAI Application from the foundation
-  app <- makeApplication foundation
+  app <- makeApplication yesodLog foundation
 
   -- Run the application with Warp
   runSettings (warpSettings foundation) app
