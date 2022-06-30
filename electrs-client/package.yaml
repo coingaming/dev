@@ -126,7 +126,7 @@ library:
   - -O2
 
 tests:
-  electr-client-test:
+  electrs-client-test:
     main: Main.hs
     dependencies:
     - base
