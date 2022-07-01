@@ -131,7 +131,7 @@ tests:
     dependencies:
     - base
     - electrs-client
-    #- network-bitcoin
+    - network-bitcoin
     - hspec
     source-dirs:
     - test
