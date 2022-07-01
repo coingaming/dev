@@ -23,7 +23,7 @@ waitTillLastBlockProcessed ::
   Client ->
   ElectrsEnv ->
   Natural ->
-  m (Either Failure ())
+  m (Either RpcError ())
 waitTillLastBlockProcessed c e  =
   runExceptT . waitTillLastBlockProcessedT c e
 
@@ -33,14 +33,14 @@ waitTillLastBlockProcessedT ::
   Client ->
   ElectrsEnv ->
   Natural ->
-  ExceptT Failure m ()
+  ExceptT RpcError m ()
 waitTillLastBlockProcessedT _ _ 0 =
-  throwE $ FailureElectrs CannotSyncBlockchain
+  throwE CannotSyncBlockchain
 waitTillLastBlockProcessedT client env decr = do
   liftIO $ Delay.delay 300
   bHeight <- liftIO $ getBlockCount client
   bHash <- liftIO $ getBlockHash client bHeight
-  bHeader <- withExceptT FailureElectrs $ ExceptT $ Rpc.blockHeader env $ BlkHeight $ fromInteger bHeight
+  bHeader <- ExceptT $ Rpc.blockHeader env $ BlkHeight $ fromInteger bHeight
   if (doubleSha256AndReverse <$> TH.decodeHex (coerce bHeader))
     == TH.decodeHex (coerce $ Rpc.BlockHeader bHash)
     then return ()

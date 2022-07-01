@@ -10,7 +10,6 @@ import Test.Hspec.Runner
 
 main :: IO ()
 main = do
-  --TestAppM.mainTestSetup
   hspecWith
     defaultConfig
       { configFormatter = Just progress

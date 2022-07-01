@@ -1,7 +1,6 @@
 module ElectrsClient.Type
   (
    RpcError (..),
-   Failure (..),
    OnChainAddress (..),
    BlkHeight (..)
    )
@@ -20,29 +19,6 @@ data RpcError
       Generic,
       Show
     )
-
-data Failure
-   = FailureNonce
---   | FailureInput [Proto.InputFailure]
---   | FailureLnd Lnd.LndError
-   | --
-     -- TODO : do proper input/internal
-     -- failure proto messages instead.
-     --
-     FailureGrpc Text
-   | FailureElectrs RpcError
-   | --
-     -- NOTE : can not use SomeException there
-     -- because need Eq instance.
-     --
-     FailureTryFrom Text
-   | FailureInternal Text
-   | FailureBitcoind RpcError
-   deriving stock
-     ( Eq,
-       Show,
-       Generic
-     )
 
 newtype OnChainAddress (mrel :: MoneyRelation)
    = OnChainAddress Text

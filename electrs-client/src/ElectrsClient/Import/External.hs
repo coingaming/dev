@@ -3,7 +3,6 @@ module ElectrsClient.Import.External
   )
 where
 
---import BtcLsp.Import.Witch as X
 import Chronos as X (Timespan (..), stopwatch)
 import Control.Concurrent.Async as X
   ( Async,

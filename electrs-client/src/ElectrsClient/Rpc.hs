@@ -84,7 +84,7 @@ getBalance env bEnv (Left address) = do
 blockHeader :: MonadUnliftIO m => ElectrsEnv -> BlkHeight -> m (Either RpcError BlockHeader)
 blockHeader env bh = callRpc GetBlockHeader [bh] env
 
-getScriptHash :: (MonadUnliftIO m) => BitcoindEnv -> OnChainAddress a -> m (Either Failure ScriptHash)
+getScriptHash :: (MonadUnliftIO m) => BitcoindEnv -> OnChainAddress a -> m (Either RpcError ScriptHash)
 getScriptHash bEnv addr = runExceptT $ do
   btcClient <-
     liftIO $
@@ -96,12 +96,12 @@ getScriptHash bEnv addr = runExceptT $ do
   BtcW.AddrInfo _ sp <- liftIO $ BtcW.getAddrInfo btcClient (coerce addr)
   decodeSp sp
   where
-    decodeSp :: (MonadUnliftIO m) => BtcW.ScrPubKey -> ExceptT Failure m ScriptHash
+    decodeSp :: (MonadUnliftIO m) => BtcW.ScrPubKey -> ExceptT RpcError m ScriptHash
     decodeSp =
       ExceptT
         . pure
         . second sha256AndReverse
-        . maybeToRight (FailureBitcoind RpcHexDecodeError)
+        . maybeToRight RpcHexDecodeError
         . TH.decodeHex
         . coerce
     sha256AndReverse =
