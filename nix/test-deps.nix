@@ -82,12 +82,12 @@ in
     ${bitcoindConf2.down}/bin/down
     ${postgres.down}/bin/down
   '';
-  startElectrs = nixPkgs.writeShellScriptBin "start-test-deps" ''
+  startElectrs = nixPkgs.writeShellScriptBin "start-test-electrs" ''
     set -euo pipefail
     ${bitcoindConf.up}/bin/up
     ${electrsAlice.up}/bin/up
   '';
-  stopElectrs = nixPkgs.writeShellScriptBin "stop-test-deps" ''
+  stopElectrs = nixPkgs.writeShellScriptBin "stop-test-electrs" ''
     ${bitcoindConf.down}/bin/down
     ${electrsAlice.down}/bin/down
   '';
