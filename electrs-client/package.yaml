@@ -75,10 +75,10 @@ _deps: &deps
   - esqueleto >= 3.5.3
   - katip
   - GenericPretty
-  - generic-pretty-instances
+    #- generic-pretty-instances
   - bytestring
   - text
-  - proto-lens
+  #- proto-lens
   - casing
   - hex-text
   - async
@@ -89,8 +89,8 @@ _deps: &deps
   - SHA
   - lnd-client
   - cryptonite
-  - http2-client
-  - http2-client-grpc
+    #- http2-client
+    #- http2-client-grpc
   - network
   - envparse
   - yesod-core >=1.6 && <1.7

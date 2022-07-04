@@ -72,15 +72,11 @@ library
     , errors
     , esqueleto >=3.5.3
     , extra
-    , generic-pretty-instances
     , hex-text
-    , http2-client
-    , http2-client-grpc
     , katip
     , lnd-client
     , network
     , network-bitcoin
-    , proto-lens
     , resource-pool
     , shakespeare ==2.0.*
     , stm

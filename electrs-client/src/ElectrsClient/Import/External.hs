@@ -51,8 +51,8 @@ import Data.List as X (partition)
 import Data.List.Extra as X (notNull)
 import Data.Maybe as X (fromJust)
 import Data.Pool as X (Pool, destroyAllResources)
-import Data.ProtoLens as X (defMessage)
-import Data.ProtoLens.Encoding as X (decodeMessage, encodeMessage)
+--import Data.ProtoLens as X (defMessage)
+--import Data.ProtoLens.Encoding as X (decodeMessage, encodeMessage)
 import Data.Ratio as X ((%))
 import Data.Text as X (pack, unpack)
 import Data.Time.Clock as X
@@ -100,35 +100,27 @@ import Katip.Format.Time as X
   ( formatAsLogTime,
   )
 import LndClient as X
-  ( ChanId (..),
-    LndError (..),
-    MSat (..),
-    NodePubKey (..),
-    RHash (..),
-    RPreimage (..),
-    TxId (..),
-    TxKind (..),
-    Vout (..),
+  ( MSat (..),
   )
-import LndClient.Util as X
-  ( spawnLink,
-    txIdHex,
-    withSpawnLink,
-  )
-import Network.GRPC.Client as X (CompressMode (..))
-import Network.HTTP2.Client2 as X (HostName, PortNumber)
+--import LndClient.Util as X
+--  ( spawnLink,
+--    txIdHex,
+--    withSpawnLink,
+--  )
+--import Network.GRPC.Client as X (CompressMode (..))
+--import Network.HTTP2.Client2 as X (HostName, PortNumber)
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
-import Text.PrettyPrint.GenericPretty.Import as X
-  ( PrettyLog (..),
-    SecretVision (..),
-    inspect,
-    inspectGenPlain,
-    inspectPlain,
-    inspectStr,
-    inspectStrPlain,
-  )
-import Text.PrettyPrint.GenericPretty.Instance as X ()
+--import Text.PrettyPrint.GenericPretty.Import as X
+--  ( PrettyLog (..),
+--    SecretVision (..),
+--    inspect,
+--    inspectGenPlain,
+--    inspectPlain,
+--    inspectStr,
+--    inspectStrPlain,
+--  )
+--import Text.PrettyPrint.GenericPretty.Instance as X ()
 import Text.Shakespeare.I18N as X (ToMessage (..))
 import Universum as X hiding
   ( atomically,
