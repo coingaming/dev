@@ -451,6 +451,7 @@ data Failure
     FailureTryFrom Text
   | FailureInternal Text
   | FailureBitcoind RpcError
+  | FailureNonSegwit
   deriving stock
     ( Eq,
       Show,
