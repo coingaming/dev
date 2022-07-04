@@ -28,8 +28,8 @@ in {
   electrs-client-test =  nixPkgs.runCommand "electrs-client-test" ({
     buildInputs=[nixPkgs.ps];
   }) ''
+    ${deps.startAll}/bin/start-test-deps
     source ${deps.envFile}
     ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out
-    ${deps.stopAll}/bin/stop-test-deps
   '';
 }
