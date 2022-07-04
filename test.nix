@@ -24,6 +24,7 @@ in {
     ${deps.startAll}/bin/start-test-deps
     source ${deps.envFile}
     ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out
+    ${deps.stopAll}/bin/stop-test-deps
   '';
   electrs-client-test =  nixPkgs.runCommand "electrs-client-test" ({
     buildInputs=[nixPkgs.ps];
