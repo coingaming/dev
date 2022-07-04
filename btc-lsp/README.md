@@ -75,6 +75,7 @@ jq-1.6
 kubectl-1.23.5
 minikube-1.25.2
 wget-1.21.3
+helm-3.8.2
 ```
 
 ### Regtest setup
@@ -254,3 +255,33 @@ kubectl get nodes -o wide
 ```sh
 kubectl get storageclass
 ```
+
+## Seed
+
+Secure lnd seed generation procedure for the mainnet:
+
+1. Go to a private place without cameras and witnesses.
+
+2. Create USB stick with minimal [nixos](https://nixos.org) image (cli only).
+
+3. Boot from USB stick to nixos installer and connect to the internet.
+
+4. Load nix-shell using the command:
+
+```sh
+nix-shell --pure -p '(import (fetchTarball { url = "https://github.com/coingaming/src/tarball/ef7ed491e5102063763538bc4cb2e86bc8021973"; sha256 = "1ml6jrz605jx7pmzd38d1490n8cbjv8yaclpqy57j7lqp1raaa7w"; } + "/nix/project.nix")).nixBitcoin.lndinit'
+```
+
+5. DISCONNECT FROM THE INTERNET.
+
+6. Generate the seed using the command:
+
+```sh
+lndinit gen-seed
+```
+
+7. Copy the seed to non-digital durable media, for example steel plate.
+
+8. Turn off the computer and erase the USB stick.
+
+9. Keep the seed media safe.

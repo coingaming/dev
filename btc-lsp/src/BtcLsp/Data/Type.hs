@@ -12,6 +12,7 @@ module BtcLsp.Data.Type
     OnChainAddress (..),
     Seconds (..),
     LogFormat (..),
+    YesodLog (..),
     MicroSeconds (..),
     TaskRes (..),
     Timing (..),
@@ -41,6 +42,7 @@ module BtcLsp.Data.Type
     newUuid,
     Vbyte (..),
     RowQty (..),
+    PsbtUtxo (..),
   )
 where
 
@@ -58,6 +60,7 @@ import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
+import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Universum
@@ -110,6 +113,20 @@ data LogFormat
   deriving stock
     ( Read
     )
+
+data YesodLog
+  = YesodLogAll
+  | YesodLogNoMain
+  | YesodLogNothing
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
+
+instance FromJSON YesodLog
 
 newtype Seconds
   = Seconds Word64
@@ -789,6 +806,15 @@ newtype RowQty = RowQty
     )
 
 instance Out RowQty
+
+data PsbtUtxo = PsbtUtxo
+  { getOutPoint :: OP.OutPoint,
+    getAmt :: MSat,
+    getLockId :: Maybe UtxoLockId
+  }
+  deriving stock (Show, Generic)
+
+instance Out PsbtUtxo
 
 instance From RowQty Int64
 

@@ -2,6 +2,7 @@ module TestHelpers
   ( genAddress,
     createDummySwap,
     getLatestBlock,
+    putLatestBlockToDB,
     waitCond,
   )
 where
@@ -17,6 +18,7 @@ import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
 import TestAppM
 import TestOrphan ()
+import qualified BtcLsp.Storage.Model.Block as Block
 
 genAddress ::
   TestOwner ->
@@ -89,6 +91,18 @@ getLatestBlock = do
   blkCount <- withBtcT Btc.getBlockCount id
   hash <- withBtcT Btc.getBlockHash ($ blkCount)
   withBtcT Btc.getBlockVerbose ($ hash)
+
+putLatestBlockToDB :: ExceptT Failure (TestAppM 'LndLsp IO) (Btc.BlockVerbose, Entity Block)
+putLatestBlockToDB = do
+  blk <- getLatestBlock
+  height <- tryFromT $
+      Btc.vBlkHeight blk
+  k <-
+    lift . runSql $
+      Block.createUpdateConfirmedSql
+        height
+        (from $ Btc.vBlockHash blk)
+  pure (blk, k)
 
 waitCond ::
   ( Env m,

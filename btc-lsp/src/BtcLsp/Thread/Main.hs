@@ -72,6 +72,7 @@ apply = do
       waitForLndSync
       $(logTM) InfoS "Running postgres migrations..."
       Storage.migrateAll
+      log <- getYesodLog
       pool <- getSqlPool
       $(logTM) InfoS "Spawning lsp threads..."
       xs <-
@@ -85,7 +86,7 @@ apply = do
             BlockScanner.apply,
             Refunder.apply,
             Expirer.apply,
-            withUnliftIO $ Yesod.appMain pool
+            withUnliftIO $ Yesod.appMain log pool
           ]
       $(logTM) InfoS "Lsp is running!"
       liftIO

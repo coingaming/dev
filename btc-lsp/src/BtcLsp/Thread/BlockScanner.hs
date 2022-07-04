@@ -15,20 +15,16 @@ import qualified BtcLsp.Math.OnChain as Math
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
-import qualified Data.ByteString.Lazy as L
-import qualified Data.Digest.Pure.SHA as SHA
-  ( bytestringDigest,
-    sha256,
-  )
 import qualified Data.Vector as V
 import LndClient (txIdParser)
-import qualified LndClient.Data.LeaseOutput as LO
 import qualified LndClient.Data.OutPoint as OP
-import LndClient.RPC.Katip
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
+import qualified LndClient.Data.FundPsbt as FP
 import qualified Universum
+import BtcLsp.Psbt.Utils ( lockUtxo )
+
 
 apply :: (Env m) => m ()
 apply =
@@ -219,7 +215,7 @@ persistBlockT blk utxos = do
           --
           mapM_
             (SwapUtxo.updateRefundBlockIdSql blockId)
-            (utxoTxId <$> utxos)
+            (sort $ utxoTxId <$> utxos)
     whenLeft res $
       $(logTM) ErrorS
         . logStr
@@ -371,44 +367,23 @@ scanOneBlock height = do
       <> " and hash = "
       <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk
-  lockedUtxos <- lockUtxos utxos
+  lockedUtxos <- mapM lockUtxo' utxos
   persistBlockT blk lockedUtxos
   pure utxos
-
-newLockId :: Utxo -> UtxoLockId
-newLockId u =
-  UtxoLockId
-    . L.toStrict
-    . SHA.bytestringDigest
-    . SHA.sha256
-    $ txid <> ":" <> vout
-  where
-    txid = L.fromStrict . coerce $ utxoTxId u
-    vout = Universum.show $ utxoVout u
 
 --
 -- TODO : Verify that it's possible to lock already locked UTXO.
 -- It's corner case where UTXO has been locked but storage
 -- procedure later failed.
 --
-lockUtxo :: (Env m) => Utxo -> ExceptT Failure m Utxo
-lockUtxo u = do
-  void $
-    withLndT
-      leaseOutput
-      ($ LO.LeaseOutputRequest (coerce lockId) (Just outP) expS)
-  pure
-    u
-      { utxoLockId = Just lockId
-      }
-  where
-    expS :: Word64 = 3600 * 24 * 365 * 10
-    outP = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
-    lockId = newLockId u
 
-lockUtxos :: (Env m) => [Utxo] -> ExceptT Failure m [Utxo]
-lockUtxos =
-  mapM lockUtxo
+utxoToOutPoint :: Utxo -> OP.OutPoint
+utxoToOutPoint u = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
+
+lockUtxo' :: Env m => Utxo -> ExceptT Failure m Utxo
+lockUtxo' u = do
+  l <- lockUtxo (utxoToOutPoint u)
+  pure $ u { utxoLockId = Just $ UtxoLockId $ FP.id l }
 
 maybeSwap ::
   ( Env m

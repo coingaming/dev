@@ -21,37 +21,29 @@ import qualified Data.Map as M
 import LndClient (txIdParser)
 import qualified LndClient.Data.FinalizePsbt as FNP
 import qualified LndClient.Data.FundPsbt as FP
-import qualified LndClient.Data.OutPoint as OP
 import qualified LndClient.Data.PublishTransaction as PT
-import qualified LndClient.Data.ReleaseOutput as RO
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
+import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo,
+  releaseUtxosPsbtLocks, releaseUtxosLocks)
 
 apply :: (Env m) => m ()
 apply =
-  forever $
-    runSql SwapUtxo.getUtxosForRefundSql
-      <&> groupBy (\a b -> swpId a == swpId b)
-      >>= mapM_ processRefund
-      >> sleep300ms
+  forever $ do
+    runSql $
+      SwapUtxo.getUtxosForRefundSql
+        >>= mapM_ processRefundSql
+          . groupBy (\a b -> swpId a == swpId b)
+    sleep300ms
   where
     swpId = entityKey . snd
-
-data RefundUtxo = RefundUtxo
-  { getOutPoint :: OP.OutPoint,
-    getAmt :: MSat,
-    getLockId :: Maybe UtxoLockId
-  }
-  deriving stock (Show, Generic)
 
 data SendUtxosResult = SendUtxosResult
   { getGetDecTrx :: Btc.DecodedRawTransaction,
     getTotalAmt :: MSat,
     getFee :: MSat
   }
-
-instance Out RefundUtxo
 
 newtype TxLabel = TxLabel
   { unTxLabel :: Text
@@ -67,7 +59,7 @@ sendUtxos ::
   ( Env m
   ) =>
   Math.SatPerVbyte ->
-  [RefundUtxo] ->
+  [PsbtUtxo] ->
   OnChainAddress 'Refund ->
   TxLabel ->
   ExceptT Failure m SendUtxosResult
@@ -90,12 +82,12 @@ sendUtxos feeRate utxos addr txLabel = do
         <> inspectPlain estFee
         <> " is below dust limit "
         <> inspectPlain Math.trxDustLimit
-  releaseUtxosLocks utxos
+  releaseUtxosPsbtLocks utxos
   estPsbt <-
     withLndT
       Lnd.fundPsbt
       ($ newFundPsbtReq feeRate utxos addr finalOutputAmt)
-  releaseUtxosPsbtLocks $ FP.lockedUtxos estPsbt
+  releaseUtxosLocks $ FP.lockedUtxos estPsbt
   finPsbt <-
     withLndT
       Lnd.finalizePsbt
@@ -119,42 +111,9 @@ sendUtxos feeRate utxos addr txLabel = do
     totalInputsAmt =
       sum $ getAmt <$> utxos
 
-releaseUtxosLocks ::
-  ( Env m
-  ) =>
-  [RefundUtxo] ->
-  ExceptT Failure m ()
-releaseUtxosLocks =
-  mapM_
-    ( \refUtxo ->
-        whenJust
-          (getLockId refUtxo)
-          ( \lid ->
-              void $
-                withLndT
-                  Lnd.releaseOutput
-                  ( $
-                      RO.ReleaseOutputRequest
-                        (coerce lid)
-                        (Just $ getOutPoint refUtxo)
-                  )
-          )
-    )
-
-releaseUtxosPsbtLocks ::
-  ( Env m
-  ) =>
-  [FP.UtxoLease] ->
-  ExceptT Failure m ()
-releaseUtxosPsbtLocks =
-  mapM_ (\r -> withLndT Lnd.releaseOutput ($ toROR r))
-  where
-    toROR (FP.UtxoLease id' op _) =
-      RO.ReleaseOutputRequest id' (Just op)
-
 newFundPsbtReq ::
   Math.SatPerVbyte ->
-  [RefundUtxo] ->
+  [PsbtUtxo] ->
   OnChainAddress 'Refund ->
   MSat ->
   FP.FundPsbtRequest
@@ -174,17 +133,16 @@ newFundPsbtReq feeRate utxos' (OnChainAddress outAddr) est = do
           $ Math.unSatPerVbyte feeRate
     }
 
-processRefund ::
+processRefundSql ::
   ( Env m
   ) =>
   [(Entity SwapUtxo, Entity SwapIntoLn)] ->
-  m ()
-processRefund [] = pure ()
-processRefund utxos@(x : _) = do
-  res <- runSql
-    . SwapIntoLn.withLockedRowSql
-      (entityKey $ snd x)
-      (`elem` swapStatusFinal)
+  ReaderT Psql.SqlBackend m ()
+processRefundSql [] = pure ()
+processRefundSql utxos@(x : _) = do
+  res <- SwapIntoLn.withLockedRowSql
+    (entityKey $ snd x)
+    (`elem` swapStatusFinal)
     . const
     $ do
       $(logTM) DebugS . logStr $
@@ -241,14 +199,4 @@ processRefund utxos@(x : _) = do
       . inspect
   where
     refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
-    refUtxos = toOutPointAmt . entityVal . fst <$> utxos
-
-toOutPointAmt :: SwapUtxo -> RefundUtxo
-toOutPointAmt x =
-  RefundUtxo
-    ( OP.OutPoint
-        (coerce $ swapUtxoTxid x)
-        (coerce $ swapUtxoVout x)
-    )
-    (coerce $ swapUtxoAmount x)
-    (swapUtxoLockId x)
+    refUtxos = swapUtxoToPsbtUtxo . entityVal . fst <$> utxos
