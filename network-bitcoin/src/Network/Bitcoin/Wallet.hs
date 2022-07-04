@@ -824,6 +824,8 @@ data AddrInfo = AddrInfo { -- | The address in question.
                                  address :: Address
                                -- | The address' balance.
                                , scriptPubKey  :: ScrPubKey
+                               , isScript :: Bool
+                               , isWitness :: Bool
                                }
     deriving ( Show, Read, Eq, Ord )
 
@@ -832,6 +834,8 @@ instance FromJSON AddrInfo where
       AddrInfo
         <$> o .:  "address"
         <*> o .:  "scriptPubKey"
+        <*> o .:  "isscript"
+        <*> o .:  "iswitness"
     parseJSON _ = mzero
 
 newtype ScrPubKey = ScrPubKey Text
