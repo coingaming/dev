@@ -25,6 +25,7 @@ in
     deps.cliAlias
     deps.ghcidLspMain
     deps.ghcidLspTest
+    deps.ghcidBtcTest
     deps.mine
     nixBitcoin.lndinit
   ];
