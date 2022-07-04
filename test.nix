@@ -18,18 +18,19 @@ in {
   generic-pretty-instances-test = nixPkgs.runCommand "generic-pretty-instances-test" {} ''
     ${genericPrettyInstancesTest}/bin/generic-pretty-instances-test 2>&1 | tee $out
   '';
-#  btc-lsp-test =  nixPkgs.runCommand "btc-lsp-test" ({
-#    buildInputs=[nixPkgs.ps];
-#  }) ''
-#    ${deps.startAll}/bin/start-test-deps
-#    source ${deps.envFile}
-#    ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out
-#  '';
-  electrs-client-test =  nixPkgs.runCommand "electrs-client-test" ({
+  btc-lsp-test =  nixPkgs.runCommand "btc-lsp-test" ({
     buildInputs=[nixPkgs.ps];
   }) ''
-    ${deps.startElectrs}/bin/start-test-electrs
+    ${deps.startAll}/bin/start-test-deps
     source ${deps.envFile}
+    ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out
     ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out
   '';
+#  electrs-client-test =  nixPkgs.runCommand "electrs-client-test" ({
+#    buildInputs=[nixPkgs.ps];
+#  }) ''
+#    ${deps.startElectrs}/bin/start-test-electrs
+#    source ${deps.envFile}
+#    ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out
+#  '';
 }
