@@ -451,7 +451,8 @@ data Failure
     FailureTryFrom Text
   | FailureInternal Text
   | FailureBitcoind RpcError
-  | FailureNonSegwit
+  | FailureNonSegwitAddr
+  | FailureNonValidAddr
   deriving stock
     ( Eq,
       Show,

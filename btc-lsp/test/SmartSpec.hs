@@ -43,4 +43,9 @@ spec = do
             )
       Smart.newOnChainAddressT raw
     liftIO $
-      res `shouldBe` Left FailureNonSegwit
+      res `shouldBe` Left FailureNonSegwitAddr
+  itEnv @'LndLsp "newOnChainAddressT throws" $ do
+    res <-
+      Smart.newOnChainAddress "hello"
+    liftIO $
+      res `shouldBe` Left FailureNonValidAddr
