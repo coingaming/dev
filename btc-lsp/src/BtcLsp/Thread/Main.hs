@@ -10,7 +10,6 @@ where
 import BtcLsp.Data.AppM (runApp)
 import qualified BtcLsp.Data.Env as Env
 import BtcLsp.Import
-import qualified BtcLsp.Rpc.Env as Btc
 import qualified BtcLsp.Storage.Migration as Storage
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified BtcLsp.Thread.Expirer as Expirer
@@ -51,9 +50,9 @@ main = do
       $(logTM) InfoS $
         secret
           "rawConfigBtcEnv"
-          [ ("host" :: Text, Btc.bitcoindEnvHost btc),
-            ("user", Btc.bitcoindEnvUsername btc),
-            ("pass", Btc.bitcoindEnvPassword btc)
+          [ ("host" :: Text, Env.bitcoindEnvHost btc),
+            ("user", Env.bitcoindEnvUsername btc),
+            ("pass", Env.bitcoindEnvPassword btc)
           ]
       $(logTM) InfoS "Creating lsp runtime environment..."
       pure cfg

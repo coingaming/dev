@@ -35,7 +35,6 @@ in
           nixPkgs.haskellPackages.hspec-discover
           nixPkgs.postgresql
           nixPkgs.openssl
-          nixPkgs.electrs
           nixPkgs.bitcoin
           nixPkgs.lnd
         ];
@@ -44,7 +43,6 @@ in
           nixPkgs.postgresql
           nixPkgs.openssl
           nixPkgs.bitcoin
-          nixPkgs.electrs
           nixPkgs.lnd
         ];
         packages.btc-lsp.components.tests.btc-lsp-test.postCheck = ''

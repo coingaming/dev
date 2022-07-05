@@ -10,9 +10,7 @@ bitcoin2_pid=`cat $BTCD2_DIR/regtest/bitcoind.pid`
 lnd_lsp_pid=`cat $LND_LSP_DIR/lnd.pid`
 lnd_alice_pid=`cat $LND_ALICE_DIR/lnd.pid`
 lnd_bob_pid=`cat $LND_BOB_DIR/lnd.pid`
-electrs_pid=`cat $SHELL_DIR/electrs/electrs.pid`
 
-kill -9 "$electrs_pid" && true
 lncli-lsp stop
 lncli-alice stop
 lncli-bob stop
