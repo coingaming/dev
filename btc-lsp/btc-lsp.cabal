@@ -873,6 +873,7 @@ test-suite btc-lsp-test
     , proto-lens
     , unliftio
     , vector
+    , witch
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
