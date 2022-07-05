@@ -8,6 +8,7 @@ module BtcLsp.Grpc.Server.HighLevel
   )
 where
 
+import qualified BtcLsp.Data.Smart as Smart
 import BtcLsp.Import
 import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
@@ -36,14 +37,6 @@ swapIntoLn userEnt req = do
              ]
          )
         $ req ^. SwapIntoLn.maybe'fundLnInvoice
-    refundAddr <-
-      fromReqT
-        $( mkFieldLocation
-             @SwapIntoLn.Request
-             [ "refund_on_chain_address"
-             ]
-         )
-        $ req ^. SwapIntoLn.maybe'refundOnChainAddress
     privacy <-
       fromReqT
         $( mkFieldLocation
@@ -56,11 +49,30 @@ swapIntoLn userEnt req = do
       withLndServerT
         Lnd.decodePayReq
         ($ from fundInv)
+    txtAddr <-
+      fromReqT
+        $( mkFieldLocation
+             @SwapIntoLn.Request
+             [ "refund_on_chain_address"
+             ]
+         )
+        $ req ^. SwapIntoLn.maybe'refundOnChainAddress
+    refAddr <-
+      withExceptT
+        ( \case
+            FailureNonSegwitAddr ->
+              newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
+            FailureNonValidAddr ->
+              newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+            _ ->
+              newInternalFailure defMessage
+        )
+        $ Smart.newOnChainAddressT txtAddr
     swapIntoLnT
       userEnt
       fundInv
       fundInvLnd
-      refundAddr
+      refAddr
       privacy
   pure $ case res of
     Left e -> e
@@ -125,7 +137,7 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr chanPrivacy = do
       fundAddr
       refundAddr
       (Lnd.expiresAt fundInvLnd)
-      $ chanPrivacy
+    $ chanPrivacy
 
 getCfg ::
   ( Env m

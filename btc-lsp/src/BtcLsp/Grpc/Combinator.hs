@@ -8,6 +8,8 @@ module BtcLsp.Grpc.Combinator
   ( fromReqT,
     fromReqE,
     newGenFailure,
+    newSpecFailure,
+    newInternalFailure,
     throwSpec,
     mkFieldLocation,
     GrpcReq,
@@ -97,6 +99,36 @@ newGenFailure kind loc =
                   ]
          )
 
+newSpecFailure ::
+  forall res failure specific internal.
+  ( GrpcRes res failure specific internal
+  ) =>
+  specific ->
+  res
+newSpecFailure spec =
+  defMessage
+    & field @"failure"
+      .~ ( defMessage
+             & field @"specific"
+               .~ [ spec
+                  ]
+         )
+
+newInternalFailure ::
+  forall res failure specific internal.
+  ( GrpcRes res failure specific internal
+  ) =>
+  internal ->
+  res
+newInternalFailure int =
+  defMessage
+    & field @"failure"
+      .~ ( defMessage
+             & field @"internal"
+               .~ [ int
+                  ]
+         )
+
 throwSpec ::
   forall a res failure specific internal m.
   ( GrpcRes res failure specific internal,
@@ -104,15 +136,8 @@ throwSpec ::
   ) =>
   specific ->
   ExceptT res m a
-throwSpec spec =
-  throwE $
-    defMessage
-      & field @"failure"
-        .~ ( defMessage
-               & field @"specific"
-                 .~ [ spec
-                    ]
-           )
+throwSpec =
+  throwE . newSpecFailure
 
 --
 -- TH FieldIndex combinators
