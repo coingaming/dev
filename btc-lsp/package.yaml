@@ -208,6 +208,7 @@ executables:
     main: Integration.hs
     dependencies:
     - base
+    - witch
     - lnd-client
     - envparse
     - network-bitcoin
