@@ -100,7 +100,7 @@ spec = do
       mine 1 LndLsp
     void . T.atomically . T.writeTChan (PO.tchan openChanRes) $ PO.LndSubFail
     chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
-    $(logTM) DebugS $ logStr $ "Fails with:" <> inspect chanEither
+    $(logTM) ErrorS $ logStr $ "Fails with:" <> inspect chanEither
     leases <- withLndT Lnd.listLeases ($ LL.ListLeasesRequest) <&> LL.lockedUtxos
     let allLockedAfterFail = all (\pu -> isJust $ find (\l -> LL.outpoint l == Just (getOutPoint pu)) leases) psbtUtxos
     liftIO $ do

@@ -146,10 +146,10 @@ openChannelPsbt utxos toPubKey changeAddress lspFee cFee private = do
           $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp
           void $ withLndT Lnd.fundingStateStep ($ psbtFinalizeReq pcid (Lnd.Psbt $ FNP.signedPsbt sPsbtResp))
           fundStep pcid chan
-        LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanPending p))) -> do
+        LndUpdate (Lnd.OpenStatusUpdate _newPcid (Just (Lnd.OpenStatusUpdateChanPending p))) -> do
           $(logTM) DebugS $ logStr $ "Chan is pending... mining..." <> inspect p
           fundStep pcid chan
-        LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp)))) -> do
+        LndUpdate (Lnd.OpenStatusUpdate _newPcid (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp)))) -> do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
         LndSubFail -> do

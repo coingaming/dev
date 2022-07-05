@@ -87,7 +87,7 @@ settleSwap swapEnt@(Entity swapKey _) userEnt chanEnt = do
               "SettleSwap procedure failed: " <> inspect e
         )
         ( \x -> do
-            SwapIntoLn.updateSucceededSql swapKey x
+            SwapIntoLn.updateSucceededSql swapKey (Just x)
             SwapUtxo.updateSpentChanSwappedSql swapKey
         )
         . lift

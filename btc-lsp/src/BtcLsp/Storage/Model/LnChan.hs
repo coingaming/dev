@@ -5,6 +5,7 @@ module BtcLsp.Storage.Model.LnChan
     getByChannelPointSql,
     persistChannelUpdateSql,
     persistOpenedChannelsSql,
+    getBySwapIdSql
   )
 where
 
@@ -58,6 +59,17 @@ getByChannelPointSql txid =
   Util.lockByUnique
     . UniqueLnChan txid
 
+getBySwapIdSql ::
+  ( Storage m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m [Entity LnChan]
+getBySwapIdSql swpId =
+  Psql.select $ Psql.from $ \c -> do
+    Psql.where_ (c Psql.^. LnChanSwapIntoLnId Psql.==. Psql.val (Just swpId))
+    pure c
+
+
 lazyUpdateSwapStatus ::
   ( MonadIO m
   ) =>
@@ -69,7 +81,7 @@ lazyUpdateSwapStatus (Entity _ chanVal) = do
       . void
       . SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingChan)
       . const
-      $ SwapIntoLn.updateWaitingFundLnSql swapKey
+      $ SwapIntoLn.updateSucceededWithoutInvoiceSql swapKey
 
 upsertChannelSql ::
   ( MonadIO m

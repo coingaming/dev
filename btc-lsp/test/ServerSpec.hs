@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module ServerSpec
   ( spec,
@@ -8,25 +9,42 @@ where
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
+import qualified Network.Bitcoin as Btc
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
--- import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient as Lnd
 import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
-import qualified LndClient.Data.NewAddress as Lnd
-import LndClient.LndTest (mine)
-import qualified LndClient.LndTest as LndTest
+import LndClient.LndTest (mine, lazyConnectNodes)
 import qualified LndClient.RPC.Silent as Lnd
-import qualified Network.Bitcoin as Btc
+import qualified LndClient.Data.Channel as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as LowLevel
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
 import qualified Proto.BtcLsp.Method.GetCfg_Fields as GetCfg
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
+import qualified BtcLsp.Storage.Model.SwapIntoLn as S
+import qualified BtcLsp.Storage.Model.SwapUtxo as SU
+import qualified BtcLsp.Storage.Model.LnChan as L
 import Test.Hspec
+import TestHelpers
 import TestAppM
 import TestOrphan ()
+
+
+getChannels :: Env m => Lnd.NodePubKey -> ExceptT Failure m [Lnd.Channel]
+getChannels pub =
+  withLndT
+    Lnd.listChannels
+    ( $
+        ListChannels.ListChannelsRequest
+          { ListChannels.activeOnly = True,
+            ListChannels.inactiveOnly = False,
+            ListChannels.publicOnly = False,
+            ListChannels.privateOnly = False,
+            ListChannels.peer = Just pub
+          }
+    )
 
 spec :: Spec
 spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
@@ -104,17 +122,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                       $ 7 * 24 * 3600
                 }
           )
-    refundAddr <-
-      from
-        <$> withLndTestT
-          LndAlice
-          Lnd.newAddress
-          ( $
-              Lnd.NewAddressRequest
-                { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-                  Lnd.account = Nothing
-                }
-          )
+    refundAddr <- from <$> genAddress LndAlice
     res0 <-
       Client.swapIntoLnT
         gcEnv
@@ -128,6 +136,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
               & SwapIntoLn.refundOnChainAddress
                 .~ from @(OnChainAddress 'Refund) refundAddr
           )
+
     liftIO $
       res0
         `shouldSatisfy` ( \msg ->
@@ -141,31 +150,24 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                    . SwapIntoLn.val
                    . SwapIntoLn.val
                )
-    void $
-      withBtcT
-        Btc.sendToAddress
-        (\h -> h fundAddr 0.01 Nothing Nothing)
-    lift $
-      mine 10 LndLsp
-        >> sleep5s
-        >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
-    lift $
-      mine 10 LndLsp
-        >> sleep5s
-        >> LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)
     alicePub <- getPubKeyT LndAlice
-    lndChans <-
-      withLndT
-        Lnd.listChannels
-        ( $
-            ListChannels.ListChannelsRequest
-              { ListChannels.activeOnly = True,
-                ListChannels.inactiveOnly = False,
-                ListChannels.publicOnly = False,
-                ListChannels.privateOnly = False,
-                ListChannels.peer = Just alicePub
-              }
-        )
-    liftIO $
-      lndChans
-        `shouldSatisfy` ((== 1) . length)
+    void $ withBtcT Btc.sendToAddress (\h -> h fundAddr 0.01 Nothing Nothing)
+    lift $ mine 5 LndLsp >> sleep1s >> lazyConnectNodes (Proxy :: Proxy TestOwner)
+    checksPassed <- lift $ waitCond 10 (\_ -> do
+      mine 5 LndLsp
+      eLndChans <- runExceptT $ getChannels alicePub
+      mswp <- runSql $ S.getByFundAddressSql (from fundAddr)
+      case (mswp, eLndChans) of
+        (Just swp, Right lndChans) -> do
+          let swapInDbSuccess = SwapSucceeded == swapIntoLnStatus (entityVal swp)
+          utxos <- runSql $ SU.getUtxosBySwapIdSql $ entityKey swp
+          let allUtxosMarkedAsUsed = all (\u -> (swapUtxoStatus $ entityVal u) == SwapUtxoSpentChanSwapped) utxos
+          let expectedRemoteBalance = swapIntoLnChanCapUser $ entityVal swp
+          dbChans <- runSql $ L.getBySwapIdSql $ entityKey swp
+          let chanExistInDb = length dbChans == 1
+          let openedChanWithRightCap = isJust $ find (\c -> (Lnd.remoteBalance c) == from expectedRemoteBalance) lndChans
+          pure (swapInDbSuccess && allUtxosMarkedAsUsed && openedChanWithRightCap && chanExistInDb, ())
+        _ -> pure (False, ())
+      ) ()
+    liftIO $ do
+      shouldBe (fst checksPassed) True
