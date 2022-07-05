@@ -1,0 +1,120 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.7.
+--
+-- see: https://github.com/sol/hpack
+
+name:                electrs-client
+version:             0.1.0.0
+description:         Please see the README on GitHub at <https://github.com/githubuser/electrs-client#readme>
+homepage:            https://github.com/githubuser/electrs-client#readme
+bug-reports:         https://github.com/githubuser/electrs-client/issues
+license:             BSD3
+build-type:          Simple
+author:              Mikhail Prushinskiy
+maintainer:          mikhail.prushinskiy@heathmont.net
+copyright:           2022 Heathmont
+extra-source-files:
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/electrs-client
+
+library
+  exposed-modules:
+      ElectrsClient.Client
+      ElectrsClient.Data.Env
+      ElectrsClient.Helper
+      ElectrsClient.Import.External
+      ElectrsClient.Rpc
+      ElectrsClient.RpcRequest
+      ElectrsClient.RpcResponse
+      ElectrsClient.Type
+  other-modules:
+      Paths_electrs_client
+  hs-source-dirs:
+      src
+  default-extensions:
+      NoImplicitPrelude
+      MultiParamTypeClasses
+      LambdaCase
+      OverloadedStrings
+      ScopedTypeVariables
+      DeriveGeneric
+      GeneralizedNewtypeDeriving
+      TupleSections
+      DataKinds
+      DerivingStrategies
+      KindSignatures
+      FlexibleContexts
+      FlexibleInstances
+      StrictData
+      TypeFamilies
+      TypeOperators
+      StandaloneDeriving
+      DerivingVia
+      ExistentialQuantification
+      InstanceSigs
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -fwarn-tabs -O2
+  build-depends:
+      GenericPretty
+    , SHA
+    , aeson >=1.4 && <1.6
+    , base >=4.7 && <5
+    , bytestring
+    , envparse
+    , hex-text
+    , lnd-client
+    , network
+    , network-bitcoin
+    , text
+    , transformers
+    , unbounded-delays
+    , universum
+    , unliftio
+    , yesod-core ==1.6.*
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+  default-language: Haskell2010
+
+test-suite electrs-client-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      RpcSpec
+      Spec
+      Paths_electrs_client
+  hs-source-dirs:
+      test
+  default-extensions:
+      NoImplicitPrelude
+      MultiParamTypeClasses
+      LambdaCase
+      OverloadedStrings
+      ScopedTypeVariables
+      DeriveGeneric
+      GeneralizedNewtypeDeriving
+      TupleSections
+      DataKinds
+      DerivingStrategies
+      KindSignatures
+      FlexibleContexts
+      FlexibleInstances
+      StrictData
+      TypeFamilies
+      TypeOperators
+      StandaloneDeriving
+      DerivingVia
+      ExistentialQuantification
+      InstanceSigs
+  ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
+  ld-options: -fuse-ld=gold
+  build-depends:
+      base
+    , electrs-client
+    , hspec
+    , network-bitcoin
+  if impl(ghc >= 8.10.7)
+    ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
+  default-language: Haskell2010

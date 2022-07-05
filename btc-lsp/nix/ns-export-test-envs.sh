@@ -196,13 +196,6 @@ export LSP_GRPC_SERVER_ENV="
 }
 "
 
-export LSP_ELECTRS_ENV="
-{
-  \"host\":\"127.0.0.1\",
-  \"port\":\"60401\"
-}
-"
-
 export LSP_BITCOIND_ENV="
 {
   \"host\":\"http://localhost:18443\",

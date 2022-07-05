@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module BtcLsp.Rpc.ElectrsRpc
+module ElectrsClient.Rpc
   ( getBalance,
     version,
     blockHeader,
@@ -11,11 +11,12 @@ module BtcLsp.Rpc.ElectrsRpc
   )
 where
 
-import BtcLsp.Import
-import BtcLsp.Rpc.Client as Client
-import BtcLsp.Rpc.Env
-import BtcLsp.Rpc.RpcRequest as Req
-import BtcLsp.Rpc.RpcResponse as Resp
+import ElectrsClient.Import.External
+import ElectrsClient.Client as Client
+import ElectrsClient.Data.Env
+import ElectrsClient.RpcRequest as Req
+import ElectrsClient.RpcResponse as Resp
+import ElectrsClient.Type
 import Data.Aeson (decode, encode, withObject, (.:))
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.Digest.Pure.SHA as SHA
@@ -52,7 +53,7 @@ instance FromJSON BlockHeader
 
 instance Out Balance
 
-callRpc :: (Env m, ToJSON req, FromJSON resp) => Method -> req -> ElectrsEnv -> m (Either RpcError resp)
+callRpc :: (MonadUnliftIO m, ToJSON req, FromJSON resp) => Method -> req -> ElectrsEnv -> m (Either RpcError resp)
 callRpc m r env = do
   let request =
         RpcRequest
@@ -69,31 +70,38 @@ callRpc m r env = do
     lazyEncode :: ToJSON req => RpcRequest req -> ByteString
     lazyEncode = BS.toStrict . encode
 
-version :: Env m => ElectrsEnv -> () -> m (Either RpcError [Text])
+version :: MonadUnliftIO m => ElectrsEnv -> () -> m (Either RpcError [Text])
 version env () = callRpc Version ["" :: Text, "1.4" :: Text] env
 
-getBalance :: Env m => ElectrsEnv -> Either (OnChainAddress a) ScriptHash -> m (Either RpcError Balance)
-getBalance env (Right scriptHash) = callRpc GetBalance [scriptHash] env
-getBalance env (Left address) = do
-  scrHash <- getScriptHash address
+getBalance :: MonadUnliftIO m => ElectrsEnv -> BitcoindEnv -> Either (OnChainAddress a) ScriptHash -> m (Either RpcError Balance)
+getBalance env _ (Right scriptHash) = callRpc GetBalance [scriptHash] env
+getBalance env bEnv (Left address) = do
+  scrHash <- getScriptHash bEnv address
   case scrHash of
-    Right sh -> getBalance env (Right sh)
+    Right sh -> getBalance env bEnv (Right sh)
     Left _ -> pure $ Left (OtherError "Getting ScriptHash error")
 
-blockHeader :: Env m => ElectrsEnv -> BlkHeight -> m (Either RpcError BlockHeader)
+blockHeader :: MonadUnliftIO m => ElectrsEnv -> BlkHeight -> m (Either RpcError BlockHeader)
 blockHeader env bh = callRpc GetBlockHeader [bh] env
 
-getScriptHash :: (Env m) => OnChainAddress a -> m (Either Failure ScriptHash)
-getScriptHash addr = runExceptT $ do
-  BtcW.AddrInfo _ sp <- withBtcT BtcW.getAddrInfo ($ coerce addr)
+getScriptHash :: (MonadUnliftIO m) => BitcoindEnv -> OnChainAddress a -> m (Either RpcError ScriptHash)
+getScriptHash bEnv addr = runExceptT $ do
+  btcClient <-
+    liftIO $
+      BtcW.getClient
+        (unpack $ bitcoindEnvHost bEnv)
+        (encodeUtf8 $ bitcoindEnvUsername bEnv)
+        (encodeUtf8 $ bitcoindEnvPassword bEnv)
+
+  BtcW.AddrInfo _ sp <- liftIO $ BtcW.getAddrInfo btcClient (coerce addr)
   decodeSp sp
   where
-    decodeSp :: (Env m) => BtcW.ScrPubKey -> ExceptT Failure m ScriptHash
+    decodeSp :: (MonadUnliftIO m) => BtcW.ScrPubKey -> ExceptT RpcError m ScriptHash
     decodeSp =
       ExceptT
         . pure
         . second sha256AndReverse
-        . maybeToRight (FailureBitcoind RpcHexDecodeError)
+        . maybeToRight RpcHexDecodeError
         . TH.decodeHex
         . coerce
     sha256AndReverse =
