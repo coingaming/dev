@@ -66,37 +66,19 @@ _deps: &deps
   - base >= 4.7 && < 5
   - unliftio
   - universum
-  - containers
   - transformers
-  - extra
-  - errors
-  - chronos
   - unbounded-delays
-  - esqueleto >= 3.5.3
-  - katip
   - GenericPretty
-    #- generic-pretty-instances
   - bytestring
   - text
-  #- proto-lens
-  - casing
   - hex-text
-  - async
-  - stm
-  - resource-pool
-  - uuid
   - network-bitcoin
   - SHA
   - lnd-client
-  - cryptonite
-    #- http2-client
-    #- http2-client-grpc
   - network
   - envparse
   - yesod-core >=1.6 && <1.7
-  - shakespeare >=2.0 && <2.1
   - aeson >=1.4 && <1.6
-  - time
 
 _optimized: &optimized
   ghc-options:

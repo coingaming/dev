@@ -61,32 +61,18 @@ library
       GenericPretty
     , SHA
     , aeson >=1.4 && <1.6
-    , async
     , base >=4.7 && <5
     , bytestring
-    , casing
-    , chronos
-    , containers
-    , cryptonite
     , envparse
-    , errors
-    , esqueleto >=3.5.3
-    , extra
     , hex-text
-    , katip
     , lnd-client
     , network
     , network-bitcoin
-    , resource-pool
-    , shakespeare ==2.0.*
-    , stm
     , text
-    , time
     , transformers
     , unbounded-delays
     , universum
     , unliftio
-    , uuid
     , yesod-core ==1.6.*
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
