@@ -116,7 +116,7 @@ OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with
 
 SwapIntoLnFailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
 SwapIntoLnFailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
-SwapIntoLnFailureRefundOnChainAddressIsNotValid: Provided on-chain refund address is not valid. Please provide valid on-chain refund address. LSP accepts only native segwit bech32 bitcoin addresses.
+SwapIntoLnFailureRefundOnChainAddressIsNotValid: Provided on-chain refund address is not valid. LSP accepts only native segwit bech32 bitcoin addresses.
 SwapIntoLnFailureRefundOnChainAddressIsNotSegwit: Provided on-chain refund address is not native segwit bech32 address. LSP accepts only native segwit bech32 bitcoin addresses.
 
 #
