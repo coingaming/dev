@@ -23,14 +23,19 @@ in
     deps.startAll
     deps.stopAll
     deps.cliAlias
+    deps.ghcidLspMain
+    deps.ghcidLspTest
+    deps.mine
+    nixBitcoin.lndinit
   ];
   tools = {
     hlint = "latest";
     ghcid = "latest";
   };
   shellHook = ''
+    trap "${deps.stopAll}/bin/stop-test-deps 2> /dev/null" EXIT
     gen-hie > hie.yaml
-    source ${deps.envFile}
-    source cli-alias
+    . ${deps.envFile}
+    . cli-alias
   '';
 }

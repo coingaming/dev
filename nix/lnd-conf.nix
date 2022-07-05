@@ -11,6 +11,7 @@
 , openssl
 , ps
 , lnd
+, expect
 }:
 let
   lndconf = writeText "lnd.conf" ''
@@ -80,15 +81,47 @@ let
     disown $(cat ${workDir}/lnd.pid)
     echo "Lnd ${name} started $!"
   '';
+  init = writeShellScriptBin "init" ''
+
+    createWallet() {
+    ${expect}/bin/expect <<- EOF
+      spawn sh -c "${cli}/bin/lncli create";
+      expect "Input wallet password: ";
+      send "developer\r";
+      expect "Confirm password: ";
+      send "developer\r";
+      expect "Do you have";
+      send "n\r";
+      expect "Input your passphrase if ";
+      send "\r";
+      expect "lnd successfully initialized!";
+      sleep 2;
+      interact;
+    EOF
+    }
+
+    ( echo "${serviceName} ==> Checking Lnd wallet" && \
+      ${cli}/bin/lncli getinfo ) || \
+    ( echo "${serviceName} ==> Unlocking Lnd wallet" && \
+      echo developer | ${cli}/bin/lncli unlock --stdin ) || \
+    ( echo "${serviceName} ==> Creating Lnd wallet" && \
+      createWallet ) || \
+    ( echo "${serviceName} ==> INIT ERROR" && \
+      exit 1 )
+  '';
   stop = writeShellScriptBin "stop" ''
     lnd_pid=`cat ${workDir}/lnd.pid`
     echo "Stoping lnd ${name} $lnd_pid"
     timeout 5 ${cli}/bin/lncli stop
     kill -9 "$lnd_pid"
+    rm -rf ${workDir}
   '';
   up = writeShellScriptBin "up" ''
-    ${setup}/bin/setup
-    ${start}/bin/start
+    ( kill -0 `cat ${workDir}/lnd.pid` && \
+      echo "==> ${serviceName} is still running" ) || \
+    ( ${setup}/bin/setup && \
+      ${start}/bin/start && \
+      ${init}/bin/init )
   '';
   down = writeShellScriptBin "down" ''
     ${stop}/bin/stop

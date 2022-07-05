@@ -12,6 +12,7 @@ module BtcLsp.Data.Type
     OnChainAddress (..),
     Seconds (..),
     LogFormat (..),
+    YesodLog (..),
     MicroSeconds (..),
     TaskRes (..),
     Timing (..),
@@ -41,7 +42,7 @@ module BtcLsp.Data.Type
     newUuid,
     Vbyte (..),
     RowQty (..),
-    PsbtUtxo (..)
+    PsbtUtxo (..),
   )
 where
 
@@ -59,11 +60,11 @@ import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
+import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Universum
 import qualified Witch
-import qualified LndClient.Data.OutPoint as OP
 
 newtype Nonce
   = Nonce Word64
@@ -112,6 +113,20 @@ data LogFormat
   deriving stock
     ( Read
     )
+
+data YesodLog
+  = YesodLogAll
+  | YesodLogNoMain
+  | YesodLogNothing
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
+    )
+
+instance FromJSON YesodLog
 
 newtype Seconds
   = Seconds Word64

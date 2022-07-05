@@ -49,6 +49,8 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     asks Env.envLndPubKey
   getLspLndEnv =
     asks Env.envLnd
+  getYesodLog =
+    asks Env.envYesodLog
   getLndP2PSocketAddress = do
     host <- asks Env.envLndP2PHost
     port <- asks Env.envLndP2PPort
@@ -67,10 +69,10 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
       $ asks Env.envElectrs
   withBtc method args = do
     env <- asks Env.envBtc
-    --
-    -- TODO : catch exceptions!!!
-    --
-    liftIO $ Right <$> args (method env)
+    liftIO $ first exHandler <$> tryAny (args $ method env)
+    where
+      exHandler :: (Exception e) => e -> Failure
+      exHandler = FailureBitcoind . OtherError . pack . displayException
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool

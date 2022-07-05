@@ -2,8 +2,8 @@
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 
-BITCOIN_NETWORK=`sh $THIS_DIR/k8s-get-config.sh lnd bitcoin_network`
-LND_WALLET_PASSWORD=`sh $THIS_DIR/k8s-get-secret.sh lnd lnd_wallet_pass`
+BITCOIN_NETWORK="$(sh "$THIS_DIR/k8s-get-env-var.sh" lnd BITCOIN_NETWORK)"
+LND_WALLET_PASSWORD="$(sh "$THIS_DIR/k8s-get-secret.sh" lnd-secret lnd_wallet_password)"
 LND_MACAROON_PATH="/root/.lnd/data/chain/bitcoin/$BITCOIN_NETWORK/admin.macaroon"
 
 create_wallet() {
@@ -24,8 +24,8 @@ EOF
 }
 
 initWallet () {
-  LND_SERVICE="$1"
-  LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
+  local LND_SERVICE="$1"
+  local LND_POD=`sh $THIS_DIR/k8s-get-pod.sh $LND_SERVICE`
   ( echo "$LND_SERVICE ==> Checking wallet of $LND_POD" \
     && kubectl exec \
         -i "$LND_POD" \
@@ -53,23 +53,17 @@ initWallet () {
 }
 
 createBtcWallet () {
-  SERVICE="$1"
-  BITCOIND_POD=`sh $THIS_DIR/k8s-get-pod.sh $SERVICE`
+  local BITCOIND_SERVICE="$1"
+  local BITCOIND_POD="$(sh "$THIS_DIR/k8s-get-pod.sh" "$BITCOIND_SERVICE")"
   ( echo "Create BTC Wallet of $BITCOIND_POD" \
     && kubectl exec \
         -it "$BITCOIND_POD" \
         -- bitcoin-cli \
-        -rpcwait -$BITCOIN_NETWORK \
+        -rpcwait -"$BITCOIN_NETWORK" \
         createwallet "testwallet") || true
-
 }
 
 initWallet "lnd"
-
-if [ "$BITCOIN_NETWORK" = "regtest" ]; then
-  for OWNER in lnd-alice lnd-bob; do
-    initWallet "$OWNER"
-  done
-  createBtcWallet "bitcoind"
-fi
-
+initWallet "lnd-alice"
+initWallet "lnd-bob"
+createBtcWallet "bitcoind"

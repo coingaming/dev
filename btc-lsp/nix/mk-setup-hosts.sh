@@ -16,5 +16,5 @@ setup () {
 }
 
 for SERVICE in bitcoind lnd rtl lsp; do
-  setup "$SERVICE"
+  setup "$SERVICE.local"
 done
