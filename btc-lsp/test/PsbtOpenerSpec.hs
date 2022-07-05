@@ -1,31 +1,34 @@
-{-# OPTIONS_GHC -Wno-deprecations #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
+
 module PsbtOpenerSpec
   ( spec,
   )
 where
 
 import BtcLsp.Import
-import qualified LndClient.Data.SendCoins as SendCoins
-import qualified LndClient.RPC.Silent as Lnd
-import Test.Hspec
-import TestHelpers
-import TestOrphan ()
-import TestAppM
-import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
-import LndClient.LndTest (mine)
-import qualified BtcLsp.Thread.BlockScanner as BlockScanner
-import qualified LndClient.Data.GetInfo as Lnd
-import qualified LndClient.Data.NewAddress as Lnd
 import BtcLsp.Psbt.PsbtOpener (openChannelPsbt)
 import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
-import qualified LndClient.Data.ListChannels as ListChannels
+import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
+import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified LndClient.Data.Channel as CH
+import qualified LndClient.Data.GetInfo as Lnd
+import qualified LndClient.Data.ListChannels as ListChannels
+import qualified LndClient.Data.NewAddress as Lnd
+import qualified LndClient.Data.SendCoins as SendCoins
+import LndClient.LndTest (mine)
+import qualified LndClient.RPC.Silent as Lnd
+import Test.Hspec
+import TestAppM
+import TestHelpers
+import TestOrphan ()
 
 sendAmt :: Env m => Text -> MSat -> ExceptT Failure m ()
 sendAmt addr amt =
-  void $ withLndT
-    Lnd.sendCoins ($ SendCoins.SendCoinsRequest {SendCoins.addr = addr, SendCoins.amount = amt})
+  void $
+    withLndT
+      Lnd.sendCoins
+      ($ SendCoins.SendCoinsRequest {SendCoins.addr = addr, SendCoins.amount = amt})
 
 lspFee :: MSat
 lspFee = MSat 20000 * 1000
@@ -49,14 +52,15 @@ spec =
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     chanOpenAsync <- lift . spawnLink $ do
-      runExceptT $ openChannelPsbt psbtUtxos alicePubKey (coerce $ Lnd.address profitAddr) (coerce lspFee)
+      runExceptT $ openChannelPsbt psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee)
     _mineAsync <- lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
     chanEither <- liftIO $ wait chanOpenAsync
     chan <- except chanEither
     $(logTM) DebugS $ logStr $ "Channel is opened:" <> inspect chan
-    chnls <- withLndT
+    chnls <-
+      withLndT
         Lnd.listChannels
         ( $
             ListChannels.ListChannelsRequest
@@ -75,5 +79,3 @@ spec =
         liftIO $ do
           shouldBe expectedRemoteBalance (CH.remoteBalance c)
       Nothing -> throwE $ FailureInternal "Failed to open channel with psbt"
-
-

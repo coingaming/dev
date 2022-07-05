@@ -10,7 +10,6 @@ module BtcLsp.Data.Type
     Money (..),
     FeeRate (..),
     UnsafeOnChainAddress (..),
-    OnChainAddress (..),
     Seconds (..),
     LogFormat (..),
     YesodLog (..),
@@ -60,7 +59,6 @@ import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified LndClient as Lnd
-import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
@@ -347,35 +345,6 @@ instance Out (UnsafeOnChainAddress mrel)
 instance From Text (UnsafeOnChainAddress mrel)
 
 instance From (UnsafeOnChainAddress mrel) Text
-
-newtype OnChainAddress (mrel :: MoneyRelation)
-  = OnChainAddress Text
-  deriving newtype
-    ( Eq,
-      Ord,
-      Show,
-      Read,
-      PathPiece,
-      Psql.PersistField,
-      Psql.PersistFieldSql
-    )
-  deriving stock
-    ( Generic
-    )
-
-instance Out (OnChainAddress mrel)
-
-instance From Text (OnChainAddress mrel)
-
-instance From (OnChainAddress mrel) Text
-
-instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
-
-instance From (OnChainAddress 'Fund) Lnd.NewAddressResponse
-
-instance FromJSON (OnChainAddress mrel)
-
-instance ToJSON (OnChainAddress mrel)
 
 data SwapStatus
   = -- | Waiting on-chain funding trx with

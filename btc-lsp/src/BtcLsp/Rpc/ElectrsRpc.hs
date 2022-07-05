@@ -85,7 +85,7 @@ blockHeader env bh = callRpc GetBlockHeader [bh] env
 
 getScriptHash :: (Env m) => OnChainAddress a -> m (Either Failure ScriptHash)
 getScriptHash addr = runExceptT $ do
-  BtcW.AddrInfo _ sp _ _ <- withBtcT BtcW.getAddrInfo ($ coerce addr)
+  BtcW.AddrInfo _ sp _ _ <- withBtcT BtcW.getAddrInfo ($ unOnChainAddress addr)
   decodeSp sp
   where
     decodeSp :: (Env m) => BtcW.ScrPubKey -> ExceptT Failure m ScriptHash
