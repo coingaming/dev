@@ -104,7 +104,6 @@ _deps: &deps
   - casing
   - memory
   - base16-bytestring
-  # hex-text
   - base64-bytestring >= 1.2.1
   - qrcode-juicypixels
   - qrcode-core
@@ -132,7 +131,6 @@ _deps: &deps
   - http2-grpc-proto-lens
   - http2-client
   - http2-client-grpc
-  # network
   # other
   - envparse
   - scientific
