@@ -9,6 +9,7 @@ module BtcLsp.Data.Type
     LnChanStatus (..),
     Money (..),
     FeeRate (..),
+    UnsafeOnChainAddress (..),
     OnChainAddress (..),
     Seconds (..),
     LogFormat (..),
@@ -325,6 +326,27 @@ instance ToMessage FeeRate where
       . T.displayRational 1
       . (* 100)
       . from
+
+newtype UnsafeOnChainAddress (mrel :: MoneyRelation)
+  = UnsafeOnChainAddress Text
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      PathPiece,
+      Psql.PersistField,
+      Psql.PersistFieldSql
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out (UnsafeOnChainAddress mrel)
+
+instance From Text (UnsafeOnChainAddress mrel)
+
+instance From (UnsafeOnChainAddress mrel) Text
 
 newtype OnChainAddress (mrel :: MoneyRelation)
   = OnChainAddress Text

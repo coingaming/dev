@@ -26,7 +26,7 @@ spec = do
                   Lnd.account = Nothing
                 }
           )
-    res <- Smart.newOnChainAddressT raw
+    res <- Smart.newOnChainAddressT $ from raw
     liftIO $ raw `shouldBe` from res
   itEnv @'LndLsp "newOnChainAddressT fails" $ do
     res <- runExceptT $ do
@@ -41,11 +41,11 @@ spec = do
                     Lnd.account = Nothing
                   }
             )
-      Smart.newOnChainAddressT raw
+      Smart.newOnChainAddressT $ from raw
     liftIO $
       res `shouldBe` Left FailureNonSegwitAddr
   itEnv @'LndLsp "newOnChainAddressT throws" $ do
     res <-
-      Smart.newOnChainAddress "hello"
+      Smart.newOnChainAddress $ from @Text "hello"
     liftIO $
       res `shouldBe` Left FailureNonValidAddr

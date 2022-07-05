@@ -29,7 +29,7 @@ import Yesod.Form.Bootstrap3
 
 data SwapRequest = SwapRequest
   { swapRequestInvoice :: LnInvoice 'Fund,
-    swapRequestRefund :: OnChainAddress 'Refund,
+    swapRequestRefund :: UnsafeOnChainAddress 'Refund,
     swapRequestPrivacy :: Privacy
   }
   deriving stock

@@ -13,10 +13,11 @@ import qualified Network.Bitcoin.Wallet as Btc
 newOnChainAddress ::
   ( Env m
   ) =>
-  Text ->
+  UnsafeOnChainAddress mrel ->
   m (Either Failure (OnChainAddress mrel))
-newOnChainAddress raw = do
-  eRes <- withBtc Btc.getAddrInfo ($ raw)
+newOnChainAddress unsafeAddr = do
+  let txtAddr = from unsafeAddr
+  eRes <- withBtc Btc.getAddrInfo ($ txtAddr)
   pure $ case eRes of
     Left e@(FailureBitcoind (OtherError txt)) ->
       if "Not a valid Bech32 or Base58 encoding" `T.isInfixOf` txt
@@ -26,13 +27,13 @@ newOnChainAddress raw = do
       Left e
     Right res ->
       if Btc.isWitness res
-        then Right $ OnChainAddress raw
+        then Right $ OnChainAddress txtAddr
         else Left FailureNonSegwitAddr
 
 newOnChainAddressT ::
   ( Env m
   ) =>
-  Text ->
+  UnsafeOnChainAddress mrel ->
   ExceptT Failure m (OnChainAddress mrel)
 newOnChainAddressT =
   ExceptT . newOnChainAddress

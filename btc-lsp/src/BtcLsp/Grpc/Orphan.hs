@@ -77,10 +77,10 @@ instance From Proto.OnChainAddress (OnChainAddress mrel) where
 instance From (OnChainAddress mrel) Proto.OnChainAddress where
   from = intoProto
 
-instance From Proto.OnChainAddress Text where
-  from = (^. field @"val")
+instance From Proto.OnChainAddress (UnsafeOnChainAddress 'Refund) where
+  from = fromProto
 
-instance From Proto.RefundOnChainAddress Text where
+instance From Proto.RefundOnChainAddress (UnsafeOnChainAddress 'Refund) where
   from = fromProto
 
 instance From (OnChainAddress 'Refund) Proto.RefundOnChainAddress where

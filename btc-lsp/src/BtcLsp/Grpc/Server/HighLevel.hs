@@ -49,7 +49,7 @@ swapIntoLn userEnt req = do
       withLndServerT
         Lnd.decodePayReq
         ($ from fundInv)
-    txtAddr <-
+    unsafeRefundAddr <-
       fromReqT
         $( mkFieldLocation
              @SwapIntoLn.Request
@@ -57,22 +57,11 @@ swapIntoLn userEnt req = do
              ]
          )
         $ req ^. SwapIntoLn.maybe'refundOnChainAddress
-    refAddr <-
-      withExceptT
-        ( \case
-            FailureNonSegwitAddr ->
-              newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
-            FailureNonValidAddr ->
-              newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
-            _ ->
-              newInternalFailure defMessage
-        )
-        $ Smart.newOnChainAddressT txtAddr
     swapIntoLnT
       userEnt
       fundInv
       fundInvLnd
-      refAddr
+      unsafeRefundAddr
       privacy
   pure $ case res of
     Left e -> e
@@ -95,10 +84,10 @@ swapIntoLnT ::
   Entity User ->
   LnInvoice 'Fund ->
   Lnd.PayReq ->
-  OnChainAddress 'Refund ->
+  UnsafeOnChainAddress 'Refund ->
   Privacy ->
   ExceptT SwapIntoLn.Response m (Entity SwapIntoLn)
-swapIntoLnT userEnt fundInv fundInvLnd refundAddr chanPrivacy = do
+swapIntoLnT userEnt fundInv fundInvLnd unsafeRefundAddr chanPrivacy = do
   --
   -- TODO : Do not fail immediately, but collect
   -- all the input failures.
@@ -118,6 +107,17 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr chanPrivacy = do
     )
     $ throwSpec
       SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  refundAddr <-
+    withExceptT
+      ( \case
+          FailureNonSegwitAddr ->
+            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
+          FailureNonValidAddr ->
+            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+          _ ->
+            newInternalFailure defMessage
+      )
+      $ Smart.newOnChainAddressT unsafeRefundAddr
   fundAddr <-
     from
       <$> withLndServerT
