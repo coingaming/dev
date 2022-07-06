@@ -83,7 +83,7 @@ createDummySwap mExpAt = do
       (from $ Lnd.paymentRequest payReq)
       (Lnd.rHash payReq)
       (from fundAddr)
-      (coerce changeAndFeeAddr)
+      (from changeAndFeeAddr)
       (from refundAddr)
       expAt
       Public

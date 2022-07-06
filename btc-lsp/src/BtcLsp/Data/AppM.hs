@@ -9,6 +9,7 @@ where
 import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
+import qualified UnliftIO.Exception as UnIO
 
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
@@ -62,14 +63,9 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
   withLnd method args = do
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)
-  withElectrs method args =
-    maybeM
-      (error "Electrs Env is missing")
-      ((first FailureElectrs <$>) . args . method)
-      $ asks Env.envElectrs
   withBtc method args = do
     env <- asks Env.envBtc
-    liftIO $ first exHandler <$> tryAny (args $ method env)
+    liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
     where
       exHandler :: (Exception e) => e -> Failure
       exHandler = FailureBitcoind . OtherError . pack . displayException

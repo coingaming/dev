@@ -9,7 +9,7 @@ module BtcLsp.Data.Type
     LnChanStatus (..),
     Money (..),
     FeeRate (..),
-    OnChainAddress (..),
+    UnsafeOnChainAddress (..),
     Seconds (..),
     LogFormat (..),
     YesodLog (..),
@@ -59,7 +59,6 @@ import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Data.UUID as UUID
 import qualified Data.UUID.V4 as UUID
 import qualified LndClient as Lnd
-import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
@@ -326,8 +325,8 @@ instance ToMessage FeeRate where
       . (* 100)
       . from
 
-newtype OnChainAddress (mrel :: MoneyRelation)
-  = OnChainAddress Text
+newtype UnsafeOnChainAddress (mrel :: MoneyRelation)
+  = UnsafeOnChainAddress Text
   deriving newtype
     ( Eq,
       Ord,
@@ -341,19 +340,11 @@ newtype OnChainAddress (mrel :: MoneyRelation)
     ( Generic
     )
 
-instance Out (OnChainAddress mrel)
+instance Out (UnsafeOnChainAddress mrel)
 
-instance From Text (OnChainAddress mrel)
+instance From Text (UnsafeOnChainAddress mrel)
 
-instance From (OnChainAddress mrel) Text
-
-instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
-
-instance From (OnChainAddress 'Fund) Lnd.NewAddressResponse
-
-instance FromJSON (OnChainAddress mrel)
-
-instance ToJSON (OnChainAddress mrel)
+instance From (UnsafeOnChainAddress mrel) Text
 
 data SwapStatus
   = -- | Waiting on-chain funding trx with
@@ -443,7 +434,6 @@ data Failure
     -- failure proto messages instead.
     --
     FailureGrpc Text
-  | FailureElectrs RpcError
   | --
     -- NOTE : can not use SomeException there
     -- because need Eq instance.
@@ -451,6 +441,8 @@ data Failure
     FailureTryFrom Text
   | FailureInternal Text
   | FailureBitcoind RpcError
+  | FailureNonSegwitAddr
+  | FailureNonValidAddr
   deriving stock
     ( Eq,
       Show,

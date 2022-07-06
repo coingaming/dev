@@ -6,6 +6,7 @@ let
   networkBitcoinTest = p.network-bitcoin.components.tests.network-bitcoin-tests;
   genericPrettyInstancesTest = p.generic-pretty-instances.components.tests.generic-pretty-instances-test;
   btcLspTest = p.btc-lsp.components.tests.btc-lsp-test;
+  electrsClientTest = p.electrs-client.components.tests.electrs-client-test;
 in {
   generic-pretty-instances-test = nixPkgs.runCommand "generic-pretty-instances-test" {} ''
     ${genericPrettyInstancesTest}/bin/generic-pretty-instances-test 2>&1 | tee $out
@@ -20,5 +21,11 @@ in {
     ${deps.startAll}/bin/start-test-deps
     source ${deps.envFile}
     ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out
+    ${deps.stopAll}/bin/stop-test-deps
+
+    ${deps.startElectrs}/bin/start-test-electrs
+    source ${deps.envFile}
+    ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out
+    ${deps.stopElectrs}/bin/stop-test-electrs
   '';
 }

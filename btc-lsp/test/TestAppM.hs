@@ -32,7 +32,6 @@ import BtcLsp.Grpc.Client.LowLevel
 import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import as I hiding (setGrpcCtxT)
 import qualified BtcLsp.Import.Psql as Psql
-import BtcLsp.Rpc.Env
 import qualified BtcLsp.Storage.Migration as Migration
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import qualified BtcLsp.Thread.Main as Main
@@ -57,6 +56,7 @@ import UnliftIO.Concurrent
   ( ThreadId,
     forkFinally,
   )
+import qualified UnliftIO.Exception as UnIO
 import Prelude (show)
 
 data TestOwner
@@ -128,18 +128,12 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
     first FailureLnd <$> args (method lnd)
-  withElectrs method args =
-    maybeM
-      (error "Electrs Env is missing")
-      ((first FailureElectrs <$>) . args . method)
-      . asks
-      $ envElectrs . testEnvLsp
   withBtc method args = do
     env <- asks $ Env.envBtc . testEnvLsp
-    --
-    -- TODO : catch exceptions!!!
-    --
-    liftIO $ Right <$> args (method env)
+    liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
+    where
+      exHandler :: (Exception e) => e -> Failure
+      exHandler = FailureBitcoind . OtherError . pack . displayException
 
 instance (MonadUnliftIO m) => Katip (TestAppM owner m) where
   getLogEnv =

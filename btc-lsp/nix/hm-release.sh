@@ -20,10 +20,6 @@ else
         RELEASE_TARGET="btc-lsp"
         shift
         ;;
-      electrs|--electrs)
-        RELEASE_TARGET="electrs"
-        shift
-        ;;
       integration|--integration)
         RELEASE_TARGET="integration"
         shift
@@ -45,15 +41,6 @@ release_btc_lsp () {
      "
 }
 
-release_electrs () {
-  rm -rf "$THIS_DIR/../build/docker-image-electrs.tar.gz"
-  rm -rf "$THIS_DIR/../build/docker-image-electrs.txt"
-  sh "$THIS_DIR/hm-shell-docker.sh" --mini "$NIX_EXTRA_ARGS" \
-     "--run './nix/ns-release.sh docker-image-electrs.nix && \
-     cp -Lr ./result ./build/docker-image-electrs.tar.gz'
-     "
-}
-
 release_integration () {
   rm -rf "$THIS_DIR/../build/docker-image-integration.tar.gz"
   rm -rf "$THIS_DIR/../build/docker-image-integration.txt"
@@ -64,7 +51,6 @@ release_integration () {
 }
 
 release_all () {
-  release_electrs
   release_btc_lsp
   release_integration
 }
@@ -77,10 +63,6 @@ case $RELEASE_TARGET in
   btc-lsp)
     echo "==> Release btc-lsp"
     release_btc_lsp
-    ;;
-  electrs)
-    echo "==> Release electrs"
-    release_electrs
     ;;
   integration)
     echo "==> Release integration"

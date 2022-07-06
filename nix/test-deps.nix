@@ -93,11 +93,23 @@ in
     ${bitcoindConf2.down}/bin/down
     ${postgres.down}/bin/down
   '';
+  startElectrs = nixPkgs.writeShellScriptBin "start-test-electrs" ''
+    set -euo pipefail
+    ${bitcoindConf.up}/bin/up
+    ${electrsAlice.up}/bin/up
+  '';
+  stopElectrs = nixPkgs.writeShellScriptBin "stop-test-electrs" ''
+    ${bitcoindConf.down}/bin/down
+    ${electrsAlice.down}/bin/down
+  '';
   ghcidLspMain = nixPkgs.writeShellScriptBin "ghcid-lsp-main" ''
     ghcid --test=":main" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl btc-lsp-exe --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
   '';
   ghcidLspTest = nixPkgs.writeShellScriptBin "ghcid-lsp-test" ''
     ghcid --test=":main --fail-fast --color -f failed-examples" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl test:btc-lsp-test --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
+  '';
+  ghcidBtcTest = nixPkgs.writeShellScriptBin "ghcid-btc-test" ''
+    ghcid --test=":main" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl test:network-bitcoin-tests --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
   '';
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e

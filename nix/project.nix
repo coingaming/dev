@@ -26,6 +26,9 @@ in
       packages.btc-lsp.components.tests.btc-lsp-test.build-tools = [
         pkgs.haskellPackages.hspec-discover
       ];
+      packages.electrs-client.components.tests.electrs-client-test.build-tools = [
+        pkgs.haskellPackages.hspec-discover
+      ];
     }];
   };
 }

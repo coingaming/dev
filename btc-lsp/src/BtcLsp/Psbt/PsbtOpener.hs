@@ -7,17 +7,18 @@ module BtcLsp.Psbt.PsbtOpener (
 ) where
 
 import BtcLsp.Import
+import qualified BtcLsp.Math.OnChain as Math
 import BtcLsp.Psbt.Utils
   ( finalizePsbt,
     fundPsbtReq,
+    lockUtxos,
     openChannelReq,
     psbtFinalizeReq,
     psbtVerifyReq,
-    shimCancelReq,
-    unspendUtxoLookup,
     releaseUtxosLocks,
     releaseUtxosPsbtLocks,
-    lockUtxos
+    shimCancelReq,
+    unspendUtxoLookup,
   )
 import qualified Data.Map as M
 import qualified LndClient as Lnd
@@ -26,11 +27,10 @@ import qualified LndClient.Data.FinalizePsbt as FNP
 import qualified LndClient.Data.FundPsbt as FP
 import qualified LndClient.Data.ListUnspent as LU
 import qualified LndClient.Data.OpenChannel as Lnd
-import qualified LndClient.RPC.Katip as Lnd
-import qualified UnliftIO.STM as T
 import qualified LndClient.Data.OutPoint as OP
+import qualified LndClient.RPC.Katip as Lnd
 import qualified UnliftIO.Exception as UE
-import qualified BtcLsp.Math.OnChain as Math
+import qualified UnliftIO.STM as T
 
 sumAmt :: [PsbtUtxo] -> MSat
 sumAmt utxos = sum $ getAmt <$> utxos
@@ -38,17 +38,18 @@ sumAmt utxos = sum $ getAmt <$> utxos
 autoSelectUtxos :: Env m => OnChainAddress 'Fund -> MSat -> ExceptT Failure m FP.FundPsbtResponse
 autoSelectUtxos addr amt = withLndT Lnd.fundPsbt ($ req)
   where
-    req = fundPsbtReq $ FP.TxTemplate [] (M.fromList [(coerce addr, amt)])
+    req = fundPsbtReq $ FP.TxTemplate [] (M.fromList [(unOnChainAddress addr, amt)])
 
 utxoLeaseToPsbtUtxo :: Map OP.OutPoint LU.Utxo -> FP.UtxoLease -> Maybe PsbtUtxo
 utxoLeaseToPsbtUtxo l ul = psbtUtxo . LU.amountSat <$> M.lookup op l
   where
     op = FP.outpoint ul
-    psbtUtxo amt = PsbtUtxo {
-      getAmt = amt,
-      getLockId = Just . UtxoLockId $ FP.id ul,
-      getOutPoint = op
-    }
+    psbtUtxo amt =
+      PsbtUtxo
+        { getAmt = amt,
+          getLockId = Just . UtxoLockId $ FP.id ul,
+          getOutPoint = op
+        }
 
 mapLeaseUtxosToPsbtUtxo :: Env m => [FP.UtxoLease] -> ExceptT Failure m [PsbtUtxo]
 mapLeaseUtxosToPsbtUtxo lockedUtxos = do
@@ -58,10 +59,10 @@ mapLeaseUtxosToPsbtUtxo lockedUtxos = do
   case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of
     Just us -> pure us
     Nothing -> do
-      $(logTM) DebugS $ logStr $
-        "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
+      $(logTM) DebugS $
+        logStr $
+          "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
       throwE $ FailureInternal "Cannot find utxo in unspent list"
-
 
 fundChanPsbt ::
   (Env m) =>
@@ -73,9 +74,12 @@ fundChanPsbt ::
 fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
   let userFundingAmt = sumAmt userUtxos - coerce lspFee
 
-  $(logTM) DebugS $ logStr $ "UserAmt:"
-    <> inspect (sumAmt userUtxos)
-    <> " LspFee:" <> inspect lspFee
+  $(logTM) DebugS $
+    logStr $
+      "UserAmt:"
+        <> inspect (sumAmt userUtxos)
+        <> " LspFee:"
+        <> inspect lspFee
 
   lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
   lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
@@ -90,15 +94,19 @@ fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
   let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
   let outputs =
         if changeAmt > Math.trxDustLimit
-          then [(coerce chanFundAddr, userFundingAmt * 2), (coerce changeAddr, changeAmt)]
-          else [(coerce chanFundAddr, userFundingAmt * 2 + changeAmt)]
+          then
+            [ (unOnChainAddress chanFundAddr, userFundingAmt * 2),
+              (unOnChainAddress changeAddr, changeAmt)
+            ]
+          else
+            [ (unOnChainAddress chanFundAddr, userFundingAmt * 2 + changeAmt)
+            ]
   let req = fundPsbtReq $ FP.TxTemplate allInputs (M.fromList outputs)
   releaseUtxosPsbtLocks (userUtxos <> lspUtxos)
   psbt <- withLndT Lnd.fundPsbt ($ req)
   pure $ Lnd.Psbt $ FP.fundedPsbt psbt
 
-
-data OpenUpdateEvt = LndUpdate Lnd.OpenStatusUpdate | LndSubFail deriving stock Generic
+data OpenUpdateEvt = LndUpdate Lnd.OpenStatusUpdate | LndSubFail deriving stock (Generic)
 
 instance Out OpenUpdateEvt
 
@@ -140,7 +148,7 @@ openChannelPsbt utxos toPubKey changeAddress lspFee cFee private = do
       case upd of
         LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdatePsbtFund (Lnd.ReadyForPsbtFunding faddr famt _)))) -> do
           $(logTM) DebugS $ logStr $ "Chan ready for funding at addr:" <> inspect faddr <> " with amt:" <> inspect famt
-          psbt' <- fundChanPsbt utxos (coerce faddr) (coerce changeAddress) lspFee
+          psbt' <- fundChanPsbt utxos (unsafeNewOnChainAddress faddr) (coerce changeAddress) lspFee
           void $ withLndT Lnd.fundingStateStep ($ psbtVerifyReq pcid psbt')
           sPsbtResp <- finalizePsbt psbt'
           $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp

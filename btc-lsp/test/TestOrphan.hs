@@ -5,9 +5,14 @@ module TestOrphan () where
 import BtcLsp.Import
 import qualified LndClient.Data.NewAddress as Lnd
 import Test.QuickCheck
+import qualified Witch
 
-instance From Lnd.NewAddressResponse (OnChainAddress 'Refund)
+instance From Lnd.NewAddressResponse (OnChainAddress 'Refund) where
+  from =
+    unsafeNewOnChainAddress . coerce
 
-instance From (OnChainAddress 'Refund) Lnd.NewAddressResponse
+instance From (OnChainAddress 'Refund) Lnd.NewAddressResponse where
+  from =
+    coerce . unOnChainAddress
 
 deriving newtype instance Arbitrary MSat

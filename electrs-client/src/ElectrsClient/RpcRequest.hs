@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module BtcLsp.Rpc.RpcRequest
+module ElectrsClient.RpcRequest
   ( RpcRequest (..),
     Method (..),
   )
 where
 
-import BtcLsp.Import
+import ElectrsClient.Import.External
 import Data.Aeson (ToJSON (toJSON), Value (String))
 
 data RpcRequest a = RpcRequest

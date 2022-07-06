@@ -12,6 +12,7 @@ import           Data.Text                (Text)
 import           Data.Vector              (empty)
 import qualified Data.Vector              as V
 import           Network.Bitcoin
+import           Network.Bitcoin.Wallet
 import           Network.Bitcoin.Internal (callApi, tj)
 import qualified Network.Bitcoin.Mining   as M
 import           Test.QuickCheck
@@ -30,6 +31,7 @@ main = defaultMain . testGroup "network-bitcoin tests" $
     , canGetRawTransaction
     , canGetAddress
     , canSendPayment
+    , canGetAddrInfo
     ]
 
 
@@ -108,3 +110,11 @@ canSendPayment = nbTest "send payment" $ do
     assert . V.elem (addr, amt) . fmap f $ recv
   where
     f = (,) <$> recvAddress <*> recvAmount
+
+
+canGetAddrInfo :: TestTree
+canGetAddrInfo = nbTest "send payment" $ do
+    c    <- run client
+    addr <- run $ getNewAddress c Nothing
+    info <- run $ getAddrInfo c addr
+    assert $ isWitness info

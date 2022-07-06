@@ -1,9 +1,9 @@
-module BtcLsp.Rpc.RpcResponse
+module ElectrsClient.RpcResponse
   ( RpcResponse (..),
   )
 where
 
-import BtcLsp.Import
+import ElectrsClient.Import.External
 
 data RpcResponse a = RpcResponse
   { id :: Integer,

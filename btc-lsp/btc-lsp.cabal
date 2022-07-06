@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.34.7.
 --
 -- see: https://github.com/sol/hpack
 
@@ -35,6 +35,7 @@ library
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
       BtcLsp.Data.Orphan
+      BtcLsp.Data.Smart
       BtcLsp.Data.Type
       BtcLsp.Grpc.Client.HighLevel
       BtcLsp.Grpc.Client.LowLevel
@@ -52,12 +53,6 @@ library
       BtcLsp.Math.Swap
       BtcLsp.Psbt.PsbtOpener
       BtcLsp.Psbt.Utils
-      BtcLsp.Rpc.Client
-      BtcLsp.Rpc.ElectrsRpc
-      BtcLsp.Rpc.Env
-      BtcLsp.Rpc.Helper
-      BtcLsp.Rpc.RpcRequest
-      BtcLsp.Rpc.RpcResponse
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.Block
@@ -155,7 +150,6 @@ library
     , file-embed
     , format-numbers
     , generic-pretty-instances
-    , hex-text
     , hjsmin >=0.1 && <0.3
     , http-client-tls ==0.3.*
     , http2
@@ -169,7 +163,6 @@ library
     , memory
     , microlens
     , monad-logger ==0.3.*
-    , network
     , network-bitcoin
     , persistent >=2.13.2.1
     , persistent-migration
@@ -250,6 +243,7 @@ executable btc-lsp-exe
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel
@@ -267,12 +261,6 @@ executable btc-lsp-exe
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -347,7 +335,6 @@ executable btc-lsp-exe
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -361,7 +348,6 @@ executable btc-lsp-exe
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration
@@ -414,6 +400,7 @@ executable btc-lsp-integration
       RefunderSpec
       ReorgSpec
       ServerSpec
+      SmartSpec
       Spec
       TestAppM
       TestHelpers
@@ -458,6 +445,7 @@ executable btc-lsp-integration
     , proto-lens
     , unliftio
     , vector
+    , witch
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
@@ -468,6 +456,7 @@ executable btc-lsp-integration
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel
@@ -485,12 +474,6 @@ executable btc-lsp-integration
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -565,7 +548,6 @@ executable btc-lsp-integration
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -579,7 +561,6 @@ executable btc-lsp-integration
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration
@@ -661,6 +642,7 @@ executable btc-lsp-prof
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel
@@ -678,12 +660,6 @@ executable btc-lsp-prof
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -758,7 +734,6 @@ executable btc-lsp-prof
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -772,7 +747,6 @@ executable btc-lsp-prof
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration
@@ -824,6 +798,7 @@ test-suite btc-lsp-test
       RefunderSpec
       ReorgSpec
       ServerSpec
+      SmartSpec
       Spec
       TestAppM
       TestHelpers
@@ -867,6 +842,7 @@ test-suite btc-lsp-test
     , proto-lens
     , unliftio
     , vector
+    , witch
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
@@ -877,6 +853,7 @@ test-suite btc-lsp-test
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel
@@ -894,12 +871,6 @@ test-suite btc-lsp-test
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -974,7 +945,6 @@ test-suite btc-lsp-test
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -988,7 +958,6 @@ test-suite btc-lsp-test
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration

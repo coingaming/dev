@@ -1,7 +1,11 @@
 packages: *.cabal
 
-package witch
-  flags: +remove-time
+source-repository-package
+  type: git
+  location: https://github.com/coingaming/src.git
+  tag: b1f2ccf142685255c091302db0957f3e2d772301
+  --sha256: 0kpzh29vik269paa664jpy8ggvnxqa7ygy41flv0w04m7b5k9lz9
+  subdir: network-bitcoin
 
 source-repository-package
   type: git
@@ -25,39 +29,6 @@ source-repository-package
 
 source-repository-package
   type: git
-  location: https://github.com/21it/witch.git
-  --sha256: 17dvcqj29883sysx5qcgjbi3smn1c9kjaj807a9a2vj24fg2jwja
-  tag: ee0259bc5eb46d9c47d1c15473ff3e7d8212dc43
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/src.git
-  tag: bd13f5e66383aa56366bb075d19ae38e737aa9cd
-  --sha256: 0dyp954h1qhrrylzvdr31i3rgn5s8hkj8r8aaf3wkzjc6jrll41z
-  subdir: generic-pretty-instances
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/src.git
-  tag: 3b731f3e7835276d3a15448880eeb8795b196fdb
-  --sha256: 1dil468r4s9sjvg7lhs2jx80y8v74aiapsvlyhvk1d6cihhzp5f3
-  subdir: network-bitcoin
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/http2-client.git
-  tag: 59df9dcaddf56930aca88e37efece280475f823e
-  --sha256: 19gmql3hy0k4i71kiipkayp0fzjjbwgc2y5f5mrcnicnarfq0w4r
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/http2-grpc-haskell.git
-  tag: 4037e853bb73e9c547fce31a11cf633a09907228
-  --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: http2-client-grpc
-
-source-repository-package
-  type: git
   location: https://github.com/coingaming/http2-grpc-haskell.git
   tag: 4037e853bb73e9c547fce31a11cf633a09907228
   --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
@@ -75,11 +46,18 @@ source-repository-package
   location: https://github.com/coingaming/http2-grpc-haskell.git
   tag: 4037e853bb73e9c547fce31a11cf633a09907228
   --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: http2-grpc-proto3-wire
+  subdir: http2-client-grpc
 
 source-repository-package
   type: git
-  location: https://github.com/coingaming/http2-grpc-haskell.git
-  tag: 4037e853bb73e9c547fce31a11cf633a09907228
-  --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: warp-grpc
+  location: https://github.com/coingaming/http2-client.git
+  tag: 59df9dcaddf56930aca88e37efece280475f823e
+  --sha256: 19gmql3hy0k4i71kiipkayp0fzjjbwgc2y5f5mrcnicnarfq0w4r
+
+source-repository-package
+  type: git
+  location: https://github.com/coingaming/src.git
+  tag: bd13f5e66383aa56366bb075d19ae38e737aa9cd
+  --sha256: 0dyp954h1qhrrylzvdr31i3rgn5s8hkj8r8aaf3wkzjc6jrll41z
+  subdir: generic-pretty-instances
+

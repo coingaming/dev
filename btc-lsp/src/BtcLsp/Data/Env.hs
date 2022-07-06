@@ -3,6 +3,7 @@
 module BtcLsp.Data.Env
   ( Env (..),
     RawConfig (..),
+    BitcoindEnv (..),
     readRawConfig,
     readGCEnv,
     withEnv,
@@ -18,7 +19,6 @@ import qualified BtcLsp.Grpc.Sig as Sig
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math.Swap as Math
-import BtcLsp.Rpc.Env
 import Control.Monad.Logger (runNoLoggingT)
 import qualified Data.Aeson as A (decode)
 import qualified Data.ByteString as BS
@@ -41,6 +41,7 @@ import qualified LndClient as Lnd
 import qualified LndClient.Data.SignMessage as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
+import Data.Aeson (withObject, (.:))
 
 data Env = Env
   { -- | General
@@ -59,8 +60,6 @@ data Env = Env
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
-    -- | Elecrts
-    envElectrs :: Maybe ElectrsEnv,
     -- | Bitcoind
     envBtc :: Btc.Client
   }
@@ -83,11 +82,27 @@ data RawConfig = RawConfig
     rawConfigMsatPerByte :: Maybe MSat,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
-    -- | Electrs Rpc
-    rawConfigElectrsEnv :: Maybe ElectrsEnv,
     -- | Bitcoind
     rawConfigBtcEnv :: BitcoindEnv
   }
+
+data BitcoindEnv = BitcoindEnv
+  { bitcoindEnvHost :: Text,
+    bitcoindEnvUsername :: Text,
+    bitcoindEnvPassword :: Text
+  }
+  deriving stock (Generic)
+
+instance FromJSON BitcoindEnv where
+  parseJSON =
+    withObject
+      "BitcoindEnv"
+      ( \x ->
+          BitcoindEnv
+            <$> x .: "host"
+            <*> x .: "username"
+            <*> x .: "password"
+      )
 
 parseFromJSON :: (FromJSON a) => String -> Either E.Error a
 parseFromJSON =
@@ -118,11 +133,6 @@ readRawConfig =
       <*> optional (E.var (E.auto <=< E.nonempty) "LSP_MSAT_PER_BYTE" opts)
       -- Grpc
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_GRPC_SERVER_ENV" opts
-      -- Electrs
-      --
-      -- TODO : move into separate package
-      --
-      <*> optional (E.var (parseFromJSON <=< E.nonempty) "LSP_ELECTRS_ENV" opts)
       -- Bitcoind
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_BITCOIND_ENV" opts
 
@@ -207,7 +217,6 @@ withEnv rc this = do
                     { gsEnvSigner = run . signT lnd,
                       gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
-                envElectrs = rawConfigElectrsEnv rc,
                 envBtc = btc
               }
   where

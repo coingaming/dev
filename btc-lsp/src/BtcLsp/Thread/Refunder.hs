@@ -11,6 +11,11 @@ import BtcLsp.Data.Orphan ()
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math.OnChain as Math
+import BtcLsp.Psbt.Utils
+  ( releaseUtxosLocks,
+    releaseUtxosPsbtLocks,
+    swapUtxoToPsbtUtxo,
+  )
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
   ( getUtxosForRefundSql,
@@ -25,8 +30,6 @@ import qualified LndClient.Data.PublishTransaction as PT
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
-import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo,
-  releaseUtxosPsbtLocks, releaseUtxosLocks)
 
 apply :: (Env m) => m ()
 apply =
@@ -117,11 +120,11 @@ newFundPsbtReq ::
   OnChainAddress 'Refund ->
   MSat ->
   FP.FundPsbtRequest
-newFundPsbtReq feeRate utxos' (OnChainAddress outAddr) est = do
+newFundPsbtReq feeRate utxos' outAddr est = do
   let mtpl =
         FP.TxTemplate
           (getOutPoint <$> utxos')
-          (M.fromList [(outAddr, est)])
+          (M.fromList [(unOnChainAddress outAddr, est)])
   FP.FundPsbtRequest
     { FP.account = mempty,
       FP.template = mtpl,
@@ -191,7 +194,7 @@ processRefundSql utxos@(x : _) = do
           Math.minFeeRate
           refUtxos
           (coerce refAddr)
-          (TxLabel "refund to " <> coerce refAddr)
+          (TxLabel $ "refund to " <> unOnChainAddress refAddr)
   whenLeft res $
     $(logTM) ErrorS
       . logStr

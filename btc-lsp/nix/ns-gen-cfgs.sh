@@ -6,14 +6,6 @@ BUILD_DIR="$ROOT_DIR/build"
 SHELL_DIR="$BUILD_DIR/shell"
 
 (
-  SERVICE_DIR="$SHELL_DIR/electrs"
-  echo "==> Generating $SERVICE_DIR"
-  mkdir -p "$SERVICE_DIR/db"
-  echo 'auth="developer:developer"
-log_filters = "INFO"' > "$SERVICE_DIR/electrs.toml"
-)
-
-(
   set -- lsp alice bob
   for i in $(seq 1 3); do
     OWNER=$(eval "echo \$$i")

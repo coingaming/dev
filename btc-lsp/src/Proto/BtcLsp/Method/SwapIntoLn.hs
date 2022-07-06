@@ -414,16 +414,18 @@ instance Data.ProtoLens.Message Response where
       \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\175\SOH\n\
       \\aSuccess\DC2\\\n\
       \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2F\n\
-      \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\147\ETX\n\
+      \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\232\ETX\n\
       \\aFailure\DC2=\n\
       \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
       \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
       \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-      \\SIInternalFailure\"\136\SOH\n\
+      \\SIInternalFailure\"\221\SOH\n\
       \\fInputFailure\DC2$\n\
       \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
       \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
-      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STXB\b\n\
+      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX\DC2(\n\
+      \$REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID\DLE\ETX\DC2)\n\
+      \%REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT\DLE\EOTB\b\n\
       \\ACKeither"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -667,11 +669,13 @@ instance Data.ProtoLens.Message Response'Failure where
       \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
       \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
       \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-      \\SIInternalFailure\"\136\SOH\n\
+      \\SIInternalFailure\"\221\SOH\n\
       \\fInputFailure\DC2$\n\
       \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
       \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
-      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX"
+      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX\DC2(\n\
+      \$REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID\DLE\ETX\DC2)\n\
+      \%REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT\DLE\EOT"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
     = let
@@ -906,6 +910,8 @@ data Response'Failure'InputFailure
   = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT |
     Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON |
     Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE |
+    Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID |
+    Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT |
     Response'Failure'InputFailure'Unrecognized !Response'Failure'InputFailure'UnrecognizedValue
   deriving stock (Prelude.Show,
                   Prelude.Eq,
@@ -919,6 +925,12 @@ instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
   maybeToEnum 2
     = Prelude.Just
         Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  maybeToEnum 3
+    = Prelude.Just
+        Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+  maybeToEnum 4
+    = Prelude.Just
+        Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
   maybeToEnum k
     = Prelude.Just
         (Response'Failure'InputFailure'Unrecognized
@@ -930,6 +942,10 @@ instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
     = "FUND_LN_INVOICE_EXPIRES_TOO_SOON"
   showEnum Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
     = "FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE"
+  showEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+    = "REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID"
+  showEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
+    = "REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT"
   showEnum
     (Response'Failure'InputFailure'Unrecognized (Response'Failure'InputFailure'UnrecognizedValue k))
     = Prelude.show k
@@ -941,12 +957,17 @@ instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
     | (Prelude.==) k "FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE"
     = Prelude.Just
         Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    | (Prelude.==) k "REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID"
+    = Prelude.Just
+        Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+    | (Prelude.==) k "REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT"
+    = Prelude.Just
+        Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded Response'Failure'InputFailure where
   minBound = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
-  maxBound
-    = Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  maxBound = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
 instance Prelude.Enum Response'Failure'InputFailure where
   toEnum k__
     = Prelude.maybe
@@ -959,16 +980,22 @@ instance Prelude.Enum Response'Failure'InputFailure where
   fromEnum Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON = 1
   fromEnum Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
     = 2
+  fromEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID = 3
+  fromEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT = 4
   fromEnum
     (Response'Failure'InputFailure'Unrecognized (Response'Failure'InputFailure'UnrecognizedValue k))
     = Prelude.fromIntegral k
-  succ Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  succ Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
     = Prelude.error
-        "Response'Failure'InputFailure.succ: bad argument Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE. This value would be out of bounds."
+        "Response'Failure'InputFailure.succ: bad argument Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT. This value would be out of bounds."
   succ Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
     = Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
   succ Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
     = Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  succ Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+  succ Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+    = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
   succ (Response'Failure'InputFailure'Unrecognized _)
     = Prelude.error
         "Response'Failure'InputFailure.succ: bad argument: unrecognized value"
@@ -979,6 +1006,10 @@ instance Prelude.Enum Response'Failure'InputFailure where
     = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
   pred Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
     = Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+  pred Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+    = Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  pred Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
+    = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
   pred (Response'Failure'InputFailure'Unrecognized _)
     = Prelude.error
         "Response'Failure'InputFailure.pred: bad argument: unrecognized value"
@@ -1249,25 +1280,27 @@ packedFileDescriptor
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2L\n\
     \\SIfund_ln_invoice\CAN\STX \SOH(\v2$.BtcLsp.Data.HighLevel.FundLnInvoiceR\rfundLnInvoice\DC2b\n\
     \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\DC28\n\
-    \\aprivacy\CAN\EOT \SOH(\SO2\RS.BtcLsp.Data.HighLevel.PrivacyR\aprivacy\"\154\ACK\n\
+    \\aprivacy\CAN\EOT \SOH(\SO2\RS.BtcLsp.Data.HighLevel.PrivacyR\aprivacy\"\239\ACK\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
     \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.SuccessH\NULR\asuccess\DC2F\n\
     \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\175\SOH\n\
     \\aSuccess\DC2\\\n\
     \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2F\n\
-    \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\147\ETX\n\
+    \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\232\ETX\n\
     \\aFailure\DC2=\n\
     \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
     \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
     \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapIntoLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-    \\SIInternalFailure\"\136\SOH\n\
+    \\SIInternalFailure\"\221\SOH\n\
     \\fInputFailure\DC2$\n\
     \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
     \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
-    \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STXB\b\n\
-    \\ACKeitherJ\145\v\n\
-    \\ACK\DC2\EOT\NUL\NUL/\SOH\n\
+    \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX\DC2(\n\
+    \$REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID\DLE\ETX\DC2)\n\
+    \%REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT\DLE\EOTB\b\n\
+    \\ACKeitherJ\251\v\n\
+    \\ACK\DC2\EOT\NUL\NUL1\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1318,7 +1351,7 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\SO+,\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\DC1\NUL/\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\DC1\NUL1\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\SOH\SOH\DC2\ETX\DC1\b\DLE\n\
@@ -1374,7 +1407,7 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\GS67\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT \STX.\ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT \STX0\ETX\n\
     \\f\n\
     \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX \n\
     \\DC1\n\
@@ -1409,7 +1442,7 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX#()\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT%\EOT)\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT%\EOT+\ENQ\n\
     \\SO\n\
     \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX%\t\NAK\n\
     \\SI\n\
@@ -1430,7 +1463,19 @@ packedFileDescriptor
     \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\SOH\DC2\ETX(\ACK.\n\
     \\DLE\n\
     \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\STX\DC2\ETX(12\n\
+    \\SI\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\ETX\DC2\ETX)\ACK/\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\ETX\SOH\DC2\ETX)\ACK*\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\ETX\STX\DC2\ETX)-.\n\
+    \\SI\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\EOT\DC2\ETX*\ACK0\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\EOT\SOH\DC2\ETX*\ACK+\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\EOT\STX\DC2\ETX*./\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT+\EOT-\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT-\EOT/\ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX+\f\ESCb\ACKproto3"
+    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX-\f\ESCb\ACKproto3"
