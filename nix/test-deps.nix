@@ -111,6 +111,20 @@ in
   ghcidBtcTest = nixPkgs.writeShellScriptBin "ghcid-btc-test" ''
     ghcid --test=":main" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl test:network-bitcoin-tests --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
   '';
+  ormoluTest = nixPkgs.writeShellScriptBin "ormolu-test" ''
+    ${nixPkgs.ormolu}/bin/ormolu --mode check $( find . \( \
+      -path './btc-lsp/src/BtcLsp/*' \
+      -o -path './btc-lsp/test/*' \
+      -o -path './btc-lsp/integration/*' \
+      -o -path './generic-pretty-instances/src/*' \
+      -o -path './generic-pretty-instances/test/*' \
+      -o -path './electrs-client/src/*' \
+      -o -path './electrs-client/test/*' \) \
+      -name '*.hs' )
+  '';
+  hlintTest = nixPkgs.writeShellScriptBin "hlint-test" ''
+    ${nixPkgs.hlint}/bin/hlint . --ignore-glob=btc-lsp/src/Proto
+  '';
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e
 

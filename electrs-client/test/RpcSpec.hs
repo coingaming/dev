@@ -1,14 +1,12 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module RpcSpec
   ( spec,
   )
 where
 
+import ElectrsClient.Data.Env
+import ElectrsClient.Helper
 import ElectrsClient.Import.External
 import ElectrsClient.Rpc as Rpc
-import ElectrsClient.Helper
-import ElectrsClient.Data.Env
 import ElectrsClient.Type
 import Network.Bitcoin
 import Test.Hspec
