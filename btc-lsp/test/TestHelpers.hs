@@ -8,6 +8,7 @@ module TestHelpers
 where
 
 import BtcLsp.Import
+import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.User as User
 import qualified LndClient as Lnd
@@ -18,7 +19,6 @@ import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
 import TestAppM
 import TestOrphan ()
-import qualified BtcLsp.Storage.Model.Block as Block
 
 genAddress ::
   TestOwner ->
@@ -95,7 +95,8 @@ getLatestBlock = do
 putLatestBlockToDB :: ExceptT Failure (TestAppM 'LndLsp IO) (Btc.BlockVerbose, Entity Block)
 putLatestBlockToDB = do
   blk <- getLatestBlock
-  height <- tryFromT $
+  height <-
+    tryFromT $
       Btc.vBlkHeight blk
   k <-
     lift . runSql $

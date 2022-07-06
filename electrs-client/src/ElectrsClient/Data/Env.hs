@@ -10,22 +10,22 @@ module ElectrsClient.Data.Env
   )
 where
 
-import ElectrsClient.Import.External
-import Network.Bitcoin as Btc
 import Data.Aeson (withObject, (.:))
 import qualified Data.Aeson as A (decode)
 import Data.ByteString.Lazy.Char8 as C8L (pack)
+import ElectrsClient.Import.External
 import qualified Env as E
-   ( Error (..),
-     Mod,
-     Var,
-     header,
-     help,
-     keep,
-     nonempty,
-     parse,
-     var,
-   )
+  ( Error (..),
+    Mod,
+    Var,
+    header,
+    help,
+    keep,
+    nonempty,
+    parse,
+    var,
+  )
+import Network.Bitcoin as Btc
 
 data ElectrsEnv = ElectrsEnv
   { electrsEnvPort :: Text,
@@ -62,8 +62,7 @@ instance FromJSON BitcoindEnv where
       )
 
 data Env = Env
-  {
-    envElectrs :: ElectrsEnv,
+  { envElectrs :: ElectrsEnv,
     envBtc :: Btc.Client
   }
 

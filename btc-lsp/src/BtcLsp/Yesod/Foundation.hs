@@ -139,9 +139,9 @@ instance Yesod App where
   authRoute _ = Just $ AuthR LoginR
 
   isAuthorized ::
-    -- | The route the user is visiting.
+    -- The route the user is visiting.
     Route App ->
-    -- | Whether or not this is a "write" request.
+    -- Whether or not this is a "write" request.
     Bool ->
     Handler AuthResult
   -- Routes not requiring authentication.
@@ -161,11 +161,11 @@ instance Yesod App where
   -- expiration dates to be set far in the future without worry of
   -- users receiving stale content.
   addStaticContent ::
-    -- | The file extension
+    -- The file extension
     Text ->
-    -- | The MIME content type
+    -- The MIME content type
     Text ->
-    -- | The contents of the file
+    -- The contents of the file
     LByteString ->
     Handler (Maybe (Either Text (Route App, [(Text, Text)])))
   addStaticContent ext mime content = do
@@ -201,7 +201,7 @@ instance YesodBreadcrumbs App where
   -- of the 'Text' that you want the label to display, and a previous
   -- breadcrumb route.
   breadcrumb ::
-    -- | The route the user is visiting currently.
+    -- The route the user is visiting currently.
     Route App ->
     Handler (Text, Maybe (Route App))
   breadcrumb r = do

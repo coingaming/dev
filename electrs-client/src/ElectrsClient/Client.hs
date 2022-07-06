@@ -3,8 +3,8 @@ module ElectrsClient.Client
   )
 where
 
-import ElectrsClient.Import.External
 import ElectrsClient.Data.Env
+import ElectrsClient.Import.External
 import ElectrsClient.Type
 import Network.Socket
 import Network.Socket.ByteString (recv, sendAll)
@@ -58,4 +58,3 @@ runTCPClient host port client = withRunInIO $ \x -> do
         $ \sock -> do
           _ <- liftIO $ connect sock $ addrAddress addr
           pure sock
-

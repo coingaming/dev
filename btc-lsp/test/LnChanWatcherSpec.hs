@@ -72,7 +72,7 @@ tryTimes times delaySec tryFn = go times
       res <- tryFn
       case res of
         Just r -> pure $ Just r
-        Nothing -> threadDelay (delaySec * 1000000) >> go (n -1)
+        Nothing -> threadDelay (delaySec * 1000000) >> go (n - 1)
 
 justTrue :: Maybe Bool -> Maybe Bool
 justTrue (Just True) = Just True
