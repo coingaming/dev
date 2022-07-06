@@ -156,7 +156,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
     checksPassed <- lift $ waitCond 10 (\_ -> do
       mine 5 LndLsp
       eLndChans <- runExceptT $ getChannels alicePub
-      mswp <- runSql $ S.getByFundAddressSql (from fundAddr)
+      mswp <- runSql $ S.getByFundAddressSql (unsafeNewOnChainAddress fundAddr)
       case (mswp, eLndChans) of
         (Just swp, Right lndChans) -> do
           let swapInDbSuccess = SwapSucceeded == swapIntoLnStatus (entityVal swp)

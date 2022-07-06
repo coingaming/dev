@@ -121,14 +121,13 @@ openChannelPsbt ::
   NodePubKey ->
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
-  Maybe (Money 'Lsp 'OnChain 'Gain) ->
   Privacy ->
   ExceptT Failure m OpenChannelPsbtResult
-openChannelPsbt utxos toPubKey changeAddress lspFee cFee private = do
+openChannelPsbt utxos toPubKey changeAddress lspFee private = do
   chan <- lift T.newTChanIO
   pcid <- Lnd.newPendingChanId
   let openChannelRequest =
-        openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt) (coerce cFee) private
+        openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt) private
   let subUpdates u = void . T.atomically . T.writeTChan chan $ LndUpdate u
   res <- lift . UE.tryAny . spawnLink $ do
     r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)

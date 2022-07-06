@@ -50,7 +50,7 @@ spec = do
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
-    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (from $ Lnd.address profitAddr) (coerce lspFee) Nothing Public
+    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
     void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
@@ -94,7 +94,7 @@ spec = do
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     openChanRes <-
-      PO.openChannelPsbt psbtUtxos alicePubKey (from $ Lnd.address profitAddr) (coerce lspFee) Nothing Public
+      PO.openChannelPsbt psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
     void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp

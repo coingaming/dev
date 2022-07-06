@@ -19,7 +19,6 @@ import qualified Network.Bitcoin.Wallet as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.LowLevel as Proto
 import qualified Witch
-import qualified Network.Bitcoin as Btc
 
 newtype OnChainAddress (mrel :: MoneyRelation) = OnChainAddress
   { unOnChainAddress0 :: Text
@@ -46,9 +45,6 @@ instance From Lnd.NewAddressResponse (OnChainAddress 'Gain)
 
 instance From (OnChainAddress mrel) Proto.OnChainAddress where
   from = intoProto
-
-
-instance From Btc.Address (OnChainAddress mrel)
 
 instance From (OnChainAddress 'Refund) Proto.RefundOnChainAddress where
   from = intoProto
