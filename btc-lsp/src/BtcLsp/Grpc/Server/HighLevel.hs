@@ -8,6 +8,7 @@ module BtcLsp.Grpc.Server.HighLevel
   )
 where
 
+import qualified BtcLsp.Data.Smart as Smart
 import BtcLsp.Import
 import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
@@ -36,14 +37,6 @@ swapIntoLn userEnt req = do
              ]
          )
         $ req ^. SwapIntoLn.maybe'fundLnInvoice
-    refundAddr <-
-      fromReqT
-        $( mkFieldLocation
-             @SwapIntoLn.Request
-             [ "refund_on_chain_address"
-             ]
-         )
-        $ req ^. SwapIntoLn.maybe'refundOnChainAddress
     privacy <-
       fromReqT
         $( mkFieldLocation
@@ -56,11 +49,19 @@ swapIntoLn userEnt req = do
       withLndServerT
         Lnd.decodePayReq
         ($ from fundInv)
+    unsafeRefundAddr <-
+      fromReqT
+        $( mkFieldLocation
+             @SwapIntoLn.Request
+             [ "refund_on_chain_address"
+             ]
+         )
+        $ req ^. SwapIntoLn.maybe'refundOnChainAddress
     swapIntoLnT
       userEnt
       fundInv
       fundInvLnd
-      refundAddr
+      unsafeRefundAddr
       privacy
   pure $ case res of
     Left e -> e
@@ -83,10 +84,10 @@ swapIntoLnT ::
   Entity User ->
   LnInvoice 'Fund ->
   Lnd.PayReq ->
-  OnChainAddress 'Refund ->
+  UnsafeOnChainAddress 'Refund ->
   Privacy ->
   ExceptT SwapIntoLn.Response m (Entity SwapIntoLn)
-swapIntoLnT userEnt fundInv fundInvLnd refundAddr chanPrivacy = do
+swapIntoLnT userEnt fundInv fundInvLnd unsafeRefundAddr chanPrivacy = do
   --
   -- TODO : Do not fail immediately, but collect
   -- all the input failures.
@@ -106,6 +107,17 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr chanPrivacy = do
     )
     $ throwSpec
       SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  refundAddr <-
+    withExceptT
+      ( \case
+          FailureNonSegwitAddr ->
+            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
+          FailureNonValidAddr ->
+            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+          _ ->
+            newInternalFailure defMessage
+      )
+      $ Smart.newOnChainAddressT unsafeRefundAddr
   fundAddr <-
     from
       <$> withLndServerT
@@ -125,7 +137,7 @@ swapIntoLnT userEnt fundInv fundInvLnd refundAddr chanPrivacy = do
       fundAddr
       refundAddr
       (Lnd.expiresAt fundInvLnd)
-      $ chanPrivacy
+    $ chanPrivacy
 
 getCfg ::
   ( Env m

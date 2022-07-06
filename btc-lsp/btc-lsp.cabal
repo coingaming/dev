@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.6.
+-- This file has been generated from package.yaml by hpack version 0.34.7.
 --
 -- see: https://github.com/sol/hpack
 
@@ -35,6 +35,7 @@ library
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
       BtcLsp.Data.Orphan
+      BtcLsp.Data.Smart
       BtcLsp.Data.Type
       BtcLsp.Grpc.Client.HighLevel
       BtcLsp.Grpc.Client.LowLevel
@@ -242,6 +243,7 @@ executable btc-lsp-exe
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel
@@ -398,6 +400,7 @@ executable btc-lsp-integration
       RefunderSpec
       ReorgSpec
       ServerSpec
+      SmartSpec
       Spec
       TestAppM
       TestHelpers
@@ -442,6 +445,7 @@ executable btc-lsp-integration
     , proto-lens
     , unliftio
     , vector
+    , witch
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
@@ -452,6 +456,7 @@ executable btc-lsp-integration
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel
@@ -637,6 +642,7 @@ executable btc-lsp-prof
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel
@@ -792,6 +798,7 @@ test-suite btc-lsp-test
       RefunderSpec
       ReorgSpec
       ServerSpec
+      SmartSpec
       Spec
       TestAppM
       TestHelpers
@@ -835,6 +842,7 @@ test-suite btc-lsp-test
     , proto-lens
     , unliftio
     , vector
+    , witch
   if impl(ghc >= 8.10.7)
     ghc-options: -Wno-missing-safe-haskell-mode -Wno-prepositive-qualified-module -fenable-th-splice-warnings -fprint-potential-instances
   if flag(ghcid)
@@ -845,6 +853,7 @@ test-suite btc-lsp-test
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
         BtcLsp.Data.Orphan
+        BtcLsp.Data.Smart
         BtcLsp.Data.Type
         BtcLsp.Grpc.Client.HighLevel
         BtcLsp.Grpc.Client.LowLevel

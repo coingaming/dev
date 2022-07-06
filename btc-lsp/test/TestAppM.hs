@@ -56,6 +56,7 @@ import UnliftIO.Concurrent
   ( ThreadId,
     forkFinally,
   )
+import qualified UnliftIO.Exception as UnIO
 import Prelude (show)
 
 data TestOwner
@@ -129,10 +130,10 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     first FailureLnd <$> args (method lnd)
   withBtc method args = do
     env <- asks $ Env.envBtc . testEnvLsp
-    --
-    -- TODO : catch exceptions!!!
-    --
-    liftIO $ Right <$> args (method env)
+    liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
+    where
+      exHandler :: (Exception e) => e -> Failure
+      exHandler = FailureBitcoind . OtherError . pack . displayException
 
 instance (MonadUnliftIO m) => Katip (TestAppM owner m) where
   getLogEnv =

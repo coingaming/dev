@@ -1,7 +1,11 @@
 {-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-module BtcLsp.Grpc.Orphan () where
+module BtcLsp.Grpc.Orphan
+  ( intoProto,
+    fromProto,
+  )
+where
 
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Orphan ()
@@ -71,23 +75,11 @@ instance From Proto.FundLnInvoice (LnInvoice 'Fund) where
 instance From (LnInvoice 'Fund) Proto.FundLnInvoice where
   from = intoProto
 
-instance From Proto.OnChainAddress (OnChainAddress mrel) where
+instance From Proto.OnChainAddress (UnsafeOnChainAddress 'Refund) where
   from = fromProto
 
-instance From (OnChainAddress mrel) Proto.OnChainAddress where
-  from = intoProto
-
-instance From Proto.RefundOnChainAddress (OnChainAddress 'Refund) where
+instance From Proto.RefundOnChainAddress (UnsafeOnChainAddress 'Refund) where
   from = fromProto
-
-instance From (OnChainAddress 'Refund) Proto.RefundOnChainAddress where
-  from = intoProto
-
-instance From Proto.FundOnChainAddress (OnChainAddress 'Fund) where
-  from = fromProto
-
-instance From (OnChainAddress 'Fund) Proto.FundOnChainAddress where
-  from = intoProto
 
 instance From Proto.Privacy Privacy where
   from = toEnum . fromEnum

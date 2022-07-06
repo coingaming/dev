@@ -29,7 +29,7 @@ import Yesod.Form.Bootstrap3
 
 data SwapRequest = SwapRequest
   { swapRequestInvoice :: LnInvoice 'Fund,
-    swapRequestRefund :: OnChainAddress 'Refund,
+    swapRequestRefund :: UnsafeOnChainAddress 'Refund,
     swapRequestPrivacy :: Privacy
   }
   deriving stock
@@ -111,6 +111,10 @@ explainFailure res =
           MsgSwapIntoLnFailureFundLnInvoiceExpiresTooSoon
         SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE ->
           MsgInputFailure
+        SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID ->
+          MsgSwapIntoLnFailureRefundOnChainAddressIsNotValid
+        SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT ->
+          MsgSwapIntoLnFailureRefundOnChainAddressIsNotSegwit
         SwapIntoLn.Response'Failure'InputFailure'Unrecognized {} ->
           MsgInputFailure
     )

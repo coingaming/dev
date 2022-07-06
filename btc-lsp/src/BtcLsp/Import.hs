@@ -8,6 +8,7 @@ import BtcLsp.Class.Storage as X (Storage (..))
 import BtcLsp.Data.Env as X (readRawConfig, withEnv)
 import BtcLsp.Data.Kind as X
 import BtcLsp.Data.Orphan as X ()
+import BtcLsp.Data.Smart as X
 import BtcLsp.Data.Type as X
 import BtcLsp.Grpc.Combinator as X
 import BtcLsp.Grpc.Orphan as X ()

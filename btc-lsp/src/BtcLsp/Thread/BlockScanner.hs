@@ -9,22 +9,22 @@ module BtcLsp.Thread.BlockScanner
 where
 
 import BtcLsp.Data.Orphan ()
+import qualified BtcLsp.Data.Smart as Smart
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math.OnChain as Math
+import BtcLsp.Psbt.Utils (lockUtxo)
 import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Vector as V
 import LndClient (txIdParser)
+import qualified LndClient.Data.FundPsbt as FP
 import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
-import qualified LndClient.Data.FundPsbt as FP
 import qualified Universum
-import BtcLsp.Psbt.Utils ( lockUtxo )
-
 
 apply :: (Env m) => m ()
 apply =
@@ -383,7 +383,7 @@ utxoToOutPoint u = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
 lockUtxo' :: Env m => Utxo -> ExceptT Failure m Utxo
 lockUtxo' u = do
   l <- lockUtxo (utxoToOutPoint u)
-  pure $ u { utxoLockId = Just $ UtxoLockId $ FP.id l }
+  pure $ u {utxoLockId = Just $ UtxoLockId $ FP.id l}
 
 maybeSwap ::
   ( Env m
@@ -393,4 +393,4 @@ maybeSwap ::
 maybeSwap =
   runSql
     . SwapIntoLn.getByFundAddressSql
-    . from
+    . Smart.unsafeNewOnChainAddress

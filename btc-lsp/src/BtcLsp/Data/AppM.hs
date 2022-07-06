@@ -9,6 +9,7 @@ where
 import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
+import qualified UnliftIO.Exception as UnIO
 
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
@@ -64,7 +65,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     first FailureLnd <$> args (method lnd)
   withBtc method args = do
     env <- asks Env.envBtc
-    liftIO $ first exHandler <$> tryAny (args $ method env)
+    liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
     where
       exHandler :: (Exception e) => e -> Failure
       exHandler = FailureBitcoind . OtherError . pack . displayException

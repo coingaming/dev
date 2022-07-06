@@ -108,6 +108,9 @@ in
   ghcidLspTest = nixPkgs.writeShellScriptBin "ghcid-lsp-test" ''
     ghcid --test=":main --fail-fast --color -f failed-examples" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl test:btc-lsp-test --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
   '';
+  ghcidBtcTest = nixPkgs.writeShellScriptBin "ghcid-btc-test" ''
+    ghcid --test=":main" --command="(setsid ${startAll}/bin/start-test-deps & wait) && . ${envFile} && cabal new-repl test:network-bitcoin-tests --disable-optimization --repl-options=-fobject-code --repl-options=-fno-break-on-exception --repl-options=-fno-break-on-error --repl-options=-v1 --repl-options=-ferror-spans --repl-options=-j -fghcid"
+  '';
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e
 

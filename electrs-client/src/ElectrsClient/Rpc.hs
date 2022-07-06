@@ -11,15 +11,15 @@ module ElectrsClient.Rpc
   )
 where
 
-import ElectrsClient.Import.External
-import ElectrsClient.Client as Client
-import ElectrsClient.Data.Env
-import ElectrsClient.RpcRequest as Req
-import ElectrsClient.RpcResponse as Resp
-import ElectrsClient.Type
 import Data.Aeson (decode, encode, withObject, (.:))
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.Digest.Pure.SHA as SHA
+import ElectrsClient.Client as Client
+import ElectrsClient.Data.Env
+import ElectrsClient.Import.External
+import ElectrsClient.RpcRequest as Req
+import ElectrsClient.RpcResponse as Resp
+import ElectrsClient.Type
 import qualified Network.Bitcoin.Wallet as BtcW
 import qualified Text.Hex as TH
 
@@ -93,7 +93,7 @@ getScriptHash bEnv addr = runExceptT $ do
         (encodeUtf8 $ bitcoindEnvUsername bEnv)
         (encodeUtf8 $ bitcoindEnvPassword bEnv)
 
-  BtcW.AddrInfo _ sp <- liftIO $ BtcW.getAddrInfo btcClient (coerce addr)
+  BtcW.AddrInfo _ sp _ _ <- liftIO $ BtcW.getAddrInfo btcClient (coerce addr)
   decodeSp sp
   where
     decodeSp :: (MonadUnliftIO m) => BtcW.ScrPubKey -> ExceptT RpcError m ScriptHash
