@@ -1,6 +1,7 @@
 let
   project = import ./nix/project.nix;
   p = project.project {};
+  src = project.prjSrc;
   nixPkgs = project.nixPkgs;
   deps = import ./nix/test-deps.nix {dataDir = ".";};
   networkBitcoinTest = p.network-bitcoin.components.tests.network-bitcoin-tests;
@@ -27,5 +28,21 @@ in {
     source ${deps.envFile}
     ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out
     ${deps.stopElectrs}/bin/stop-test-electrs
+  '';
+  ormolu-test = nixPkgs.runCommand "ormolu-test" {} ''
+    ${nixPkgs.ormolu}/bin/ormolu --mode check $( find ${src} \( \
+      -path '${src}/btc-lsp/src/BtcLsp/*' \
+      -o -path '${src}/btc-lsp/test/*' \
+      -o -path '${src}/btc-lsp/integration/*' \
+      -o -path '${src}/generic-pretty-instances/src/*' \
+      -o -path '${src}/generic-pretty-instances/test/*' \
+      -o -path '${src}/electrs-client/src/*' \
+      -o -path '${src}/electrs-client/test/*' \) \
+      -name '*.hs' )
+    mkdir $out
+  '';
+  hlint-test = nixPkgs.runCommand "hlint-test" {} ''
+    ${nixPkgs.hlint}/bin/hlint ${src} --ignore-glob=${src}/btc-lsp/src/Proto
+    mkdir $out
   '';
 }

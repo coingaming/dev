@@ -4,18 +4,18 @@ module ElectrsClient.Helper
   )
 where
 
-import ElectrsClient.Import.External
-import ElectrsClient.Type
-import ElectrsClient.Rpc as Rpc
-import ElectrsClient.Data.Env
+import qualified Control.Concurrent.Thread.Delay as Delay (delay)
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.Digest.Pure.SHA as SHA
   ( bytestringDigest,
     sha256,
   )
-import Network.Bitcoin (getBlockCount, getBlockHash, Client)
+import ElectrsClient.Data.Env
+import ElectrsClient.Import.External
+import ElectrsClient.Rpc as Rpc
+import ElectrsClient.Type
+import Network.Bitcoin (Client, getBlockCount, getBlockHash)
 import qualified Text.Hex as TH
-import qualified Control.Concurrent.Thread.Delay as Delay (delay)
 
 waitTillLastBlockProcessed ::
   ( MonadUnliftIO m
@@ -24,7 +24,7 @@ waitTillLastBlockProcessed ::
   ElectrsEnv ->
   Natural ->
   m (Either RpcError ())
-waitTillLastBlockProcessed c e  =
+waitTillLastBlockProcessed c e =
   runExceptT . waitTillLastBlockProcessedT c e
 
 waitTillLastBlockProcessedT ::
@@ -44,7 +44,7 @@ waitTillLastBlockProcessedT client env decr = do
   if (doubleSha256AndReverse <$> TH.decodeHex (coerce bHeader))
     == TH.decodeHex (coerce $ Rpc.BlockHeader bHash)
     then return ()
-    else waitTillLastBlockProcessedT client env (decr -1)
+    else waitTillLastBlockProcessedT client env (decr - 1)
   where
     doubleSha256AndReverse =
       BS.toStrict

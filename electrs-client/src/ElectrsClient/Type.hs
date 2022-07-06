@@ -1,9 +1,8 @@
 module ElectrsClient.Type
-  (
-   RpcError (..),
-   OnChainAddress (..),
-   BlkHeight (..)
-   )
+  ( RpcError (..),
+    OnChainAddress (..),
+    BlkHeight (..),
+  )
 where
 
 import ElectrsClient.Import.External
@@ -21,17 +20,17 @@ data RpcError
     )
 
 newtype OnChainAddress (mrel :: MoneyRelation)
-   = OnChainAddress Text
-   deriving newtype
-     ( Eq,
-       Ord,
-       Show,
-       Read,
-       PathPiece
-     )
-   deriving stock
-     ( Generic
-     )
+  = OnChainAddress Text
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      PathPiece
+    )
+  deriving stock
+    ( Generic
+    )
 
 data MoneyRelation
   = Fund
@@ -57,4 +56,3 @@ newtype BlkHeight
     ( Num,
       ToJSON
     )
-

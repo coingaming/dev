@@ -6,8 +6,8 @@ module ElectrsClient.RpcRequest
   )
 where
 
-import ElectrsClient.Import.External
 import Data.Aeson (ToJSON (toJSON), Value (String))
+import ElectrsClient.Import.External
 
 data RpcRequest a = RpcRequest
   { id :: Integer,

@@ -26,6 +26,9 @@ in
     deps.ghcidLspMain
     deps.ghcidLspTest
     deps.ghcidBtcTest
+    deps.ormoluFormat
+    deps.ormoluTest
+    deps.hlintTest
     deps.mine
     nixBitcoin.lndinit
   ];

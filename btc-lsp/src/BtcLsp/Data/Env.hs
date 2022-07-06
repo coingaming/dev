@@ -20,6 +20,7 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math.Swap as Math
 import Control.Monad.Logger (runNoLoggingT)
+import Data.Aeson (withObject, (.:))
 import qualified Data.Aeson as A (decode)
 import qualified Data.ByteString as BS
 import Data.ByteString.Lazy.Char8 as C8L (pack)
@@ -41,7 +42,6 @@ import qualified LndClient as Lnd
 import qualified LndClient.Data.SignMessage as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
-import Data.Aeson (withObject, (.:))
 
 data Env = Env
   { -- | General
