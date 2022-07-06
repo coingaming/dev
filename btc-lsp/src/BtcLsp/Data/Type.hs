@@ -434,7 +434,6 @@ data Failure
     -- failure proto messages instead.
     --
     FailureGrpc Text
-  | FailureElectrs RpcError
   | --
     -- NOTE : can not use SomeException there
     -- because need Eq instance.

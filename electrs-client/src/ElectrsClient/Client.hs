@@ -1,16 +1,17 @@
-module BtcLsp.Rpc.Client
+module ElectrsClient.Client
   ( send,
   )
 where
 
-import BtcLsp.Import
-import BtcLsp.Rpc.Env
+import ElectrsClient.Import.External
+import ElectrsClient.Data.Env
+import ElectrsClient.Type
 import Network.Socket
 import Network.Socket.ByteString (recv, sendAll)
 import qualified UnliftIO.Exception as E
 
 send ::
-  ( Env m
+  ( MonadUnliftIO m
   ) =>
   ByteString ->
   ElectrsEnv ->
@@ -57,3 +58,4 @@ runTCPClient host port client = withRunInIO $ \x -> do
         $ \sock -> do
           _ <- liftIO $ connect sock $ addrAddress addr
           pure sock
+

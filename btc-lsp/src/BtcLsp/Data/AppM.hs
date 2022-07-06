@@ -63,11 +63,6 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
   withLnd method args = do
     lnd <- asks Env.envLnd
     first FailureLnd <$> args (method lnd)
-  withElectrs method args =
-    maybeM
-      (error "Electrs Env is missing")
-      ((first FailureElectrs <$>) . args . method)
-      $ asks Env.envElectrs
   withBtc method args = do
     env <- asks Env.envBtc
     liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)

@@ -11,6 +11,4 @@ for OWNER in lsp alice bob; do
   ./nix/ns-spawn-lnd.sh "$OWNER"
 done
 
-./nix/ns-spawn-electrs.sh
-
 echo "==> ns-spawn-test-deps executed"

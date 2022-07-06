@@ -53,12 +53,6 @@ library
       BtcLsp.Math.Swap
       BtcLsp.Psbt.PsbtOpener
       BtcLsp.Psbt.Utils
-      BtcLsp.Rpc.Client
-      BtcLsp.Rpc.ElectrsRpc
-      BtcLsp.Rpc.Env
-      BtcLsp.Rpc.Helper
-      BtcLsp.Rpc.RpcRequest
-      BtcLsp.Rpc.RpcResponse
       BtcLsp.Storage.Migration
       BtcLsp.Storage.Model
       BtcLsp.Storage.Model.Block
@@ -156,7 +150,6 @@ library
     , file-embed
     , format-numbers
     , generic-pretty-instances
-    , hex-text
     , hjsmin >=0.1 && <0.3
     , http-client-tls ==0.3.*
     , http2
@@ -170,7 +163,6 @@ library
     , memory
     , microlens
     , monad-logger ==0.3.*
-    , network
     , network-bitcoin
     , persistent >=2.13.2.1
     , persistent-migration
@@ -269,12 +261,6 @@ executable btc-lsp-exe
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -349,7 +335,6 @@ executable btc-lsp-exe
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -363,7 +348,6 @@ executable btc-lsp-exe
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration
@@ -490,12 +474,6 @@ executable btc-lsp-integration
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -570,7 +548,6 @@ executable btc-lsp-integration
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -584,7 +561,6 @@ executable btc-lsp-integration
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration
@@ -684,12 +660,6 @@ executable btc-lsp-prof
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -764,7 +734,6 @@ executable btc-lsp-prof
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -778,7 +747,6 @@ executable btc-lsp-prof
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration
@@ -903,12 +871,6 @@ test-suite btc-lsp-test
         BtcLsp.Math.Swap
         BtcLsp.Psbt.PsbtOpener
         BtcLsp.Psbt.Utils
-        BtcLsp.Rpc.Client
-        BtcLsp.Rpc.ElectrsRpc
-        BtcLsp.Rpc.Env
-        BtcLsp.Rpc.Helper
-        BtcLsp.Rpc.RpcRequest
-        BtcLsp.Rpc.RpcResponse
         BtcLsp.Storage.Migration
         BtcLsp.Storage.Model
         BtcLsp.Storage.Model.Block
@@ -983,7 +945,6 @@ test-suite btc-lsp-test
       , file-embed
       , format-numbers
       , generic-pretty-instances
-      , hex-text
       , hjsmin >=0.1 && <0.3
       , http-client-tls ==0.3.*
       , http2
@@ -997,7 +958,6 @@ test-suite btc-lsp-test
       , memory
       , microlens
       , monad-logger ==0.3.*
-      , network
       , network-bitcoin
       , persistent >=2.13.2.1
       , persistent-migration
