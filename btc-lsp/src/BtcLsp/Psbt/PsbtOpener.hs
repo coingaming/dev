@@ -122,7 +122,7 @@ openChannelPsbt ::
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
   Maybe (Money 'Lsp 'OnChain 'Gain) ->
-  Bool ->
+  Privacy ->
   ExceptT Failure m OpenChannelPsbtResult
 openChannelPsbt utxos toPubKey changeAddress lspFee cFee private = do
   chan <- lift T.newTChanIO
@@ -137,7 +137,7 @@ openChannelPsbt utxos toPubKey changeAddress lspFee cFee private = do
       void . T.atomically . T.writeTChan chan $ LndSubFail
   case res of
     Left e -> throwE $ FailureInternal $ inspect e
-    Right _subA -> do
+    Right _ -> do
       fundA <- lift . spawnLink $ runExceptT $ fundStep pcid chan
       pure $ OpenChannelPsbtResult chan fundA
   where
@@ -154,10 +154,10 @@ openChannelPsbt utxos toPubKey changeAddress lspFee cFee private = do
           $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp
           void $ withLndT Lnd.fundingStateStep ($ psbtFinalizeReq pcid (Lnd.Psbt $ FNP.signedPsbt sPsbtResp))
           fundStep pcid chan
-        LndUpdate (Lnd.OpenStatusUpdate _newPcid (Just (Lnd.OpenStatusUpdateChanPending p))) -> do
+        LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanPending p))) -> do
           $(logTM) DebugS $ logStr $ "Chan is pending... mining..." <> inspect p
           fundStep pcid chan
-        LndUpdate (Lnd.OpenStatusUpdate _newPcid (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp)))) -> do
+        LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp)))) -> do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
         LndSubFail -> do

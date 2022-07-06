@@ -74,16 +74,16 @@ openChannelReq ::
   Money 'Lsp 'Ln 'Gain ->
   Money 'Usr 'Ln 'Gain ->
   Maybe (Money 'Lsp 'Ln 'Gain) ->
-  Bool ->
+  Privacy ->
   Lnd.OpenChannelRequest
-openChannelReq pcid toNode localAmt pushAmt cFee private =
+openChannelReq pcid toNode totalFundAmt pushAmt cFee private =
   Lnd.OpenChannelRequest
     { Lnd.nodePubkey = toNode,
-      Lnd.localFundingAmount = coerce localAmt,
+      Lnd.localFundingAmount = coerce totalFundAmt,
       Lnd.pushMSat = Just $ coerce pushAmt,
       Lnd.targetConf = Nothing,
       Lnd.mSatPerByte = coerce cFee,
-      Lnd.private = Just private,
+      Lnd.private = Just $ private == Private,
       Lnd.minHtlcMsat = Nothing,
       Lnd.remoteCsvDelay = Nothing,
       Lnd.minConfs = Nothing,

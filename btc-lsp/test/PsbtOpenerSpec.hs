@@ -43,15 +43,15 @@ spec = do
     void $ sendAmt (from swpAddr) (from (10 * amt))
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
-    _utxosRaw <- BlockScanner.scan
+    void BlockScanner.scan
     $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
-    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (from $ Lnd.address profitAddr) (coerce lspFee) Nothing True
-    _mineAsync <- lift . spawnLink $ do
+    openChanRes <- PO.openChannelPsbt psbtUtxos alicePubKey (from $ Lnd.address profitAddr) (coerce lspFee) Nothing Public
+    void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
     chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
@@ -86,7 +86,7 @@ spec = do
     void $ sendAmt (from swpAddr) (from (10 * amt))
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
-    _utxosRaw <- BlockScanner.scan
+    void BlockScanner.scan
     $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
@@ -94,8 +94,8 @@ spec = do
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     openChanRes <-
-      PO.openChannelPsbt psbtUtxos alicePubKey (from $ Lnd.address profitAddr) (coerce lspFee) Nothing True
-    _mineAsync <- lift . spawnLink $ do
+      PO.openChannelPsbt psbtUtxos alicePubKey (from $ Lnd.address profitAddr) (coerce lspFee) Nothing Public
+    void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
     void . T.atomically . T.writeTChan (PO.tchan openChanRes) $ PO.LndSubFail

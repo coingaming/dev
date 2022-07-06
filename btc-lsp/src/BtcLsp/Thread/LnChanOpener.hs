@@ -68,7 +68,7 @@ openChanSql (Entity swapKey _) userEnt = do
             (coerce $ swapIntoLnLspFeeAndChangeAddress swapVal)
             (coerce swapIntoLnFeeLsp swapVal)
             Nothing
-            (swapIntoLnPrivacy swapVal == Private)
+            (swapIntoLnPrivacy swapVal)
           liftIO (wait $ PO.fundAsync r) >>= except
         either
           ( $(logTM) ErrorS . logStr
