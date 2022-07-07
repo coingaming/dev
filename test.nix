@@ -29,7 +29,6 @@ in {
     source ${deps.envFile}
     set +e
     ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out/lsp-test-log.txt
-    sh -c "exit 1"
     retCode="$?"
     set -e
     whoami
