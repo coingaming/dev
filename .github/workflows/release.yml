@@ -31,6 +31,7 @@ jobs:
     - name: Test all
       run: |
         mkdir -p ${{ github.workspace }}/logs
+        chmod -R 777 ${{ github.workspace }}/logs
         logsdir="${{ github.workspace }}/logs"
         nix-build --option sandbox false --show-trace --pure ./test.nix --argstr log "$logsdir"
     - uses: actions/upload-artifact@v3
