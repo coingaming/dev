@@ -17,7 +17,7 @@ in {
     buildInputs=[nixPkgs.ps];
   }) ''
     set -x
-    logsdir="${log}/"
+    logsdir="${log}"
     echo "$logsdir"
     mkdir $out
     ${deps.bitcoindConf.up}/bin/up
@@ -35,6 +35,7 @@ in {
     cp ./lnd-alice/stdout.log "$logsdir/lnd-alice.stdout.log"
     cp ./lnd-bob/stdout.log "$logsdir/lnd-bob.stdout.log"
     cp ./lnd-lsp/stdout.log "$logsdir/lnd-lsp.stdout.log"
+    ls -la $logsdir
     ${deps.stopAll}/bin/stop-test-deps
     if [ $retCode -ne 0 ]; then
       echo "lsp tests failed"
