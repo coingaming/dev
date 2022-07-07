@@ -1,10 +1,11 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Psbt.PsbtOpener (
-  openChannelPsbt,
-  OpenChannelPsbtResult(..),
-  OpenUpdateEvt(..)
-) where
+module BtcLsp.Psbt.PsbtOpener
+  ( openChannelPsbt,
+    OpenChannelPsbtResult (..),
+    OpenUpdateEvt (..),
+  )
+where
 
 import BtcLsp.Import
 import qualified BtcLsp.Math.OnChain as Math
@@ -110,10 +111,10 @@ data OpenUpdateEvt = LndUpdate Lnd.OpenStatusUpdate | LndSubFail deriving stock 
 
 instance Out OpenUpdateEvt
 
-data OpenChannelPsbtResult = OpenChannelPsbtResult {
-  tchan :: TChan OpenUpdateEvt,
-  fundAsync :: Async (Either Failure Lnd.ChannelPoint)
-}
+data OpenChannelPsbtResult = OpenChannelPsbtResult
+  { tchan :: TChan OpenUpdateEvt,
+    fundAsync :: Async (Either Failure Lnd.ChannelPoint)
+  }
 
 openChannelPsbt ::
   Env m =>
@@ -160,7 +161,7 @@ openChannelPsbt utxos toPubKey changeAddress lspFee private = do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
         LndSubFail -> do
-          void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid )
+          void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid)
           void $ lockUtxos (getOutPoint <$> utxos)
           throwE (FailureInternal "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
         _ -> throwE (FailureInternal "Unexpected update")

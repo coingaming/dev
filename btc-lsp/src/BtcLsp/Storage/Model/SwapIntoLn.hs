@@ -206,8 +206,6 @@ updateSucceededWithoutInvoiceSql sid = do
                      Psql.==. Psql.val SwapWaitingChan
                  )
 
-
-
 updateSucceededSql ::
   ( MonadIO m
   ) =>

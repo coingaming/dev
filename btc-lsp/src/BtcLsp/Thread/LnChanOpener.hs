@@ -7,6 +7,8 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
+import qualified BtcLsp.Psbt.PsbtOpener as PO
+import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
@@ -14,8 +16,6 @@ import qualified Data.Set as Set
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.Peer as Peer
 import qualified LndClient.RPC.Silent as LndSilent
-import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
-import qualified BtcLsp.Psbt.PsbtOpener as PO
 
 apply :: (Env m) => m ()
 apply =
@@ -62,12 +62,13 @@ openChanSql (Entity swapKey _) userEnt = do
       \swapVal -> do
         utxos <- SwapUtxo.getSpendableUtxosBySwapIdSql swapKey
         cpEither <- lift . runExceptT $ do
-          r <- PO.openChannelPsbt
-            (swapUtxoToPsbtUtxo . entityVal <$> utxos)
-            (userNodePubKey $ entityVal userEnt)
-            (coerce $ swapIntoLnLspFeeAndChangeAddress swapVal)
-            (coerce swapIntoLnFeeLsp swapVal)
-            (swapIntoLnPrivacy swapVal)
+          r <-
+            PO.openChannelPsbt
+              (swapUtxoToPsbtUtxo . entityVal <$> utxos)
+              (userNodePubKey $ entityVal userEnt)
+              (coerce $ swapIntoLnLspFeeAndChangeAddress swapVal)
+              (coerce swapIntoLnFeeLsp swapVal)
+              (swapIntoLnPrivacy swapVal)
           liftIO (wait $ PO.fundAsync r) >>= except
         either
           ( $(logTM) ErrorS . logStr
