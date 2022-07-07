@@ -5,7 +5,7 @@ module BtcLsp.Storage.Model.LnChan
     getByChannelPointSql,
     persistChannelUpdateSql,
     persistOpenedChannelsSql,
-    getBySwapIdSql
+    getBySwapIdSql,
   )
 where
 
@@ -65,10 +65,10 @@ getBySwapIdSql ::
   SwapIntoLnId ->
   ReaderT Psql.SqlBackend m [Entity LnChan]
 getBySwapIdSql swpId =
-  Psql.select $ Psql.from $ \c -> do
-    Psql.where_ (c Psql.^. LnChanSwapIntoLnId Psql.==. Psql.val (Just swpId))
-    pure c
-
+  Psql.select $
+    Psql.from $ \c -> do
+      Psql.where_ (c Psql.^. LnChanSwapIntoLnId Psql.==. Psql.val (Just swpId))
+      pure c
 
 lazyUpdateSwapStatus ::
   ( MonadIO m

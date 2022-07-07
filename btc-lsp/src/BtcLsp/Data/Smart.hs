@@ -41,6 +41,7 @@ instance Out (OnChainAddress mrel)
 instance From (OnChainAddress mrel) Text
 
 instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
+
 instance From Lnd.NewAddressResponse (OnChainAddress 'Gain)
 
 instance From (OnChainAddress mrel) Proto.OnChainAddress where

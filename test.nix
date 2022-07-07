@@ -1,3 +1,4 @@
+{log ? "."}:
 let
   project = import ./nix/project.nix;
   p = project.project {};
@@ -15,18 +16,34 @@ in {
   stateful-test = nixPkgs.runCommand "stateful-test" ({
     buildInputs=[nixPkgs.ps];
   }) ''
+    set -x
+    logsdir="${log}/"
+    echo "$logsdir"
+    mkdir $out
     ${deps.bitcoindConf.up}/bin/up
-    ${networkBitcoinTest}/bin/network-bitcoin-tests 2>&1 | tee $out
+    ${networkBitcoinTest}/bin/network-bitcoin-tests 2>&1 | tee $out/network-bitcoin-test.log
     ${deps.bitcoindConf.down}/bin/down
+
 
     ${deps.startAll}/bin/start-test-deps
     source ${deps.envFile}
-    ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out
+    set +e
+    ${btcLspTest}/bin/btc-lsp-test 2>&1 | tee $out/lsp-test-log.txt
+    sh -c "exit 1"
+    retCode="$?"
+    set -e
+    cp ./lnd-alice/stdout.log "$logsdir/lnd-alice.stdout.log"
+    cp ./lnd-bob/stdout.log "$logsdir/lnd-bob.stdout.log"
+    cp ./lnd-lsp/stdout.log "$logsdir/lnd-lsp.stdout.log"
     ${deps.stopAll}/bin/stop-test-deps
+    if [ $retCode -ne 0 ]; then
+      echo "lsp tests failed"
+      exit "$retCode"
+    fi
 
     ${deps.startElectrs}/bin/start-test-electrs
     source ${deps.envFile}
-    ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out
+    ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out/electrs-test.log
     ${deps.stopElectrs}/bin/stop-test-electrs
   '';
   ormolu-test = nixPkgs.runCommand "ormolu-test" {} ''

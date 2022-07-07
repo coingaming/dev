@@ -1,33 +1,36 @@
-{-# OPTIONS_GHC -Wno-deprecations #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
+
 module PsbtOpenerSpec
   ( spec,
   )
 where
 
 import BtcLsp.Import
-import qualified LndClient.Data.SendCoins as SendCoins
-import qualified LndClient.RPC.Silent as Lnd
-import Test.Hspec
-import TestHelpers
-import TestOrphan ()
-import TestAppM
-import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
-import LndClient.LndTest (mine)
-import qualified BtcLsp.Thread.BlockScanner as BlockScanner
-import qualified LndClient.Data.GetInfo as Lnd
-import qualified LndClient.Data.NewAddress as Lnd
 import qualified BtcLsp.Psbt.PsbtOpener as PO
 import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
-import qualified LndClient.Data.ListChannels as ListChannels
+import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
+import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified LndClient.Data.Channel as CH
-import qualified UnliftIO.STM as T
+import qualified LndClient.Data.GetInfo as Lnd
+import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.ListLeases as LL
+import qualified LndClient.Data.NewAddress as Lnd
+import qualified LndClient.Data.SendCoins as SendCoins
+import LndClient.LndTest (mine)
+import qualified LndClient.RPC.Silent as Lnd
+import Test.Hspec
+import TestAppM
+import TestHelpers
+import TestOrphan ()
+import qualified UnliftIO.STM as T
 
 sendAmt :: Env m => Text -> MSat -> ExceptT Failure m ()
 sendAmt addr amt =
-  void $ withLndT
-    Lnd.sendCoins ($ SendCoins.SendCoinsRequest {SendCoins.addr = addr, SendCoins.amount = amt})
+  void $
+    withLndT
+      Lnd.sendCoins
+      ($ SendCoins.SendCoinsRequest {SendCoins.addr = addr, SendCoins.amount = amt})
 
 lspFee :: MSat
 lspFee = MSat 20000 * 1000
@@ -57,7 +60,8 @@ spec = do
     chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
     chan <- except chanEither
     $(logTM) DebugS $ logStr $ "Channel is opened:" <> inspect chan
-    chnls <- withLndT
+    chnls <-
+      withLndT
         Lnd.listChannels
         ( $
             ListChannels.ListChannelsRequest
@@ -106,5 +110,3 @@ spec = do
     liftIO $ do
       shouldSatisfy chanEither isLeft
       shouldBe allLockedAfterFail True
-
-
