@@ -17,7 +17,6 @@ import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
 import qualified BtcLsp.Thread.LnChanWatcher as LnChanWatcher
 import qualified BtcLsp.Thread.Refunder as Refunder
 import qualified BtcLsp.Thread.Server as Server
-import qualified BtcLsp.Thread.SwapperIntoLn as SwapperIntoLn
 import qualified BtcLsp.Yesod.Application as Yesod
 import Katip
 import qualified LndClient.Data.GetInfo as Lnd
@@ -81,7 +80,6 @@ apply = do
             LnChanWatcher.applySub,
             LnChanWatcher.applyPoll,
             LnChanOpener.apply,
-            SwapperIntoLn.apply,
             BlockScanner.apply,
             Refunder.apply,
             Expirer.apply,

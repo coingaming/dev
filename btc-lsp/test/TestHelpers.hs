@@ -70,6 +70,7 @@ createDummySwap mExpAt = do
   usr <- genUser LndAlice
   payReq <- genPayReq LndAlice
   fundAddr <- genAddress LndLsp
+  changeAndFeeAddr <- genAddress LndLsp
   refundAddr <- genAddress LndAlice
   expAt <-
     maybeM
@@ -82,6 +83,7 @@ createDummySwap mExpAt = do
       (from $ Lnd.paymentRequest payReq)
       (Lnd.rHash payReq)
       (from fundAddr)
+      (from changeAndFeeAddr)
       (from refundAddr)
       expAt
       Public

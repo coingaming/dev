@@ -15,6 +15,7 @@ SwapIntoLn
   fundInvoice (LnInvoice 'Fund)
   fundInvHash RHash
   fundAddress (OnChainAddress 'Fund)
+  lspFeeAndChangeAddress (OnChainAddress 'Gain)
   fundProof RPreimage Maybe
   refundAddress (OnChainAddress 'Refund)
   chanCapUser (Money 'Usr 'Ln 'Fund)

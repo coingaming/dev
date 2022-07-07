@@ -12,10 +12,10 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified Data.Set as Set
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
-import qualified LndClient.Data.OpenChannel as Chan
 import qualified LndClient.Data.Peer as Peer
-import qualified LndClient.RPC.Katip as LndKatip
 import qualified LndClient.RPC.Silent as LndSilent
+import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
+import qualified BtcLsp.Psbt.PsbtOpener as PO
 
 apply :: (Env m) => m ()
 apply =
@@ -57,12 +57,19 @@ openChanSql ::
   Entity User ->
   ReaderT Psql.SqlBackend m ()
 openChanSql (Entity swapKey _) userEnt = do
-  spb <-
-    lift getMsatPerByte
   res <-
     SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingPeer) $
-      \swapVal ->
-        eitherM
+      \swapVal -> do
+        utxos <- SwapUtxo.getSpendableUtxosBySwapIdSql swapKey
+        cpEither <- lift . runExceptT $ do
+          r <- PO.openChannelPsbt
+            (swapUtxoToPsbtUtxo . entityVal <$> utxos)
+            (userNodePubKey $ entityVal userEnt)
+            (coerce $ swapIntoLnLspFeeAndChangeAddress swapVal)
+            (coerce swapIntoLnFeeLsp swapVal)
+            (swapIntoLnPrivacy swapVal)
+          liftIO (wait $ PO.fundAsync r) >>= except
+        either
           ( $(logTM) ErrorS . logStr
               . ("OpenChan procedure failed: " <>)
               . inspect
@@ -74,32 +81,9 @@ openChanSql (Entity swapKey _) userEnt = do
                 (ChannelPoint.outputIndex cp)
                 >> SwapIntoLn.updateWaitingChanSql swapKey
                 >> SwapUtxo.updateSpentChanSql swapKey
+                >> SwapUtxo.updateSpentChanSwappedSql swapKey
           )
-          . lift
-          $ withLnd
-            LndKatip.openChannelSync
-            ( $
-                Chan.OpenChannelRequest
-                  { Chan.nodePubkey =
-                      userNodePubKey $
-                        entityVal userEnt,
-                    Chan.localFundingAmount =
-                      from (swapIntoLnChanCapLsp swapVal)
-                        + from (swapIntoLnChanCapUser swapVal),
-                    Chan.pushMSat = Nothing,
-                    Chan.targetConf = Nothing,
-                    Chan.mSatPerByte = spb,
-                    Chan.private =
-                      Just $
-                        swapIntoLnPrivacy swapVal == Private,
-                    Chan.minHtlcMsat = Nothing,
-                    Chan.remoteCsvDelay = Nothing,
-                    Chan.minConfs = Nothing,
-                    Chan.spendUnconfirmed = Nothing,
-                    Chan.closeAddress = Nothing,
-                    Chan.fundingShim = Nothing
-                  }
-            )
+          cpEither
   whenLeft res $
     $(logTM) ErrorS
       . logStr

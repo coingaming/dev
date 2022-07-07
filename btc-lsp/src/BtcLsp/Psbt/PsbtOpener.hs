@@ -1,6 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module BtcLsp.Psbt.PsbtOpener (openChannelPsbt) where
+module BtcLsp.Psbt.PsbtOpener (
+  openChannelPsbt,
+  OpenChannelPsbtResult(..),
+  OpenUpdateEvt(..)
+) where
 
 import BtcLsp.Import
 import qualified BtcLsp.Math.OnChain as Math
@@ -106,17 +110,24 @@ data OpenUpdateEvt = LndUpdate Lnd.OpenStatusUpdate | LndSubFail deriving stock 
 
 instance Out OpenUpdateEvt
 
+data OpenChannelPsbtResult = OpenChannelPsbtResult {
+  tchan :: TChan OpenUpdateEvt,
+  fundAsync :: Async (Either Failure Lnd.ChannelPoint)
+}
+
 openChannelPsbt ::
   Env m =>
   [PsbtUtxo] ->
   NodePubKey ->
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
-  ExceptT Failure m Lnd.ChannelPoint
-openChannelPsbt utxos toPubKey changeAddress lspFee = do
+  Privacy ->
+  ExceptT Failure m OpenChannelPsbtResult
+openChannelPsbt utxos toPubKey changeAddress lspFee private = do
   chan <- lift T.newTChanIO
   pcid <- Lnd.newPendingChanId
-  let openChannelRequest = openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt)
+  let openChannelRequest =
+        openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt) private
   let subUpdates u = void . T.atomically . T.writeTChan chan $ LndUpdate u
   res <- lift . UE.tryAny . spawnLink $ do
     r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
@@ -125,7 +136,9 @@ openChannelPsbt utxos toPubKey changeAddress lspFee = do
       void . T.atomically . T.writeTChan chan $ LndSubFail
   case res of
     Left e -> throwE $ FailureInternal $ inspect e
-    Right _ -> fundStep pcid chan
+    Right _ -> do
+      fundA <- lift . spawnLink $ runExceptT $ fundStep pcid chan
+      pure $ OpenChannelPsbtResult chan fundA
   where
     amt = sumAmt utxos - coerce lspFee
     fundStep pcid chan = do
@@ -147,6 +160,7 @@ openChannelPsbt utxos toPubKey changeAddress lspFee = do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
         LndSubFail -> do
-          void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid)
-          throwE (FailureInternal "Lnd subscription failed trying to cancel psbt flow")
+          void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid )
+          void $ lockUtxos (getOutPoint <$> utxos)
+          throwE (FailureInternal "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
         _ -> throwE (FailureInternal "Unexpected update")

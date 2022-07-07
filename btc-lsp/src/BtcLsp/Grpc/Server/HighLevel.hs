@@ -128,6 +128,15 @@ swapIntoLnT userEnt fundInv fundInvLnd unsafeRefundAddr chanPrivacy = do
                 Lnd.account = Nothing
               }
         )
+  feeAndChangeAddr <-
+      withLndServerT
+        Lnd.newAddress
+        ( $
+            Lnd.NewAddressRequest
+              { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                Lnd.account = Nothing
+              }
+        )
   lift
     . runSql
     . SwapIntoLn.createIgnoreSql
@@ -135,6 +144,7 @@ swapIntoLnT userEnt fundInv fundInvLnd unsafeRefundAddr chanPrivacy = do
       fundInv
       (Lnd.paymentHash fundInvLnd)
       fundAddr
+      (from feeAndChangeAddr)
       refundAddr
       (Lnd.expiresAt fundInvLnd)
     $ chanPrivacy

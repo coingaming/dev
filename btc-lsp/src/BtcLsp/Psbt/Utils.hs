@@ -68,15 +68,21 @@ fundPsbtReq tmpl =
       FP.fee = FP.SatPerVbyte 1
     }
 
-openChannelReq :: Lnd.PendingChannelId -> Lnd.NodePubKey -> Money 'Lsp 'Ln 'Gain -> Money 'Usr 'Ln 'Gain -> Lnd.OpenChannelRequest
-openChannelReq pcid toNode localAmt pushAmt =
+openChannelReq ::
+  Lnd.PendingChannelId ->
+  Lnd.NodePubKey ->
+  Money 'Lsp 'Ln 'Gain ->
+  Money 'Usr 'Ln 'Gain ->
+  Privacy ->
+  Lnd.OpenChannelRequest
+openChannelReq pcid toNode totalFundAmt pushAmt private =
   Lnd.OpenChannelRequest
     { Lnd.nodePubkey = toNode,
-      Lnd.localFundingAmount = coerce localAmt,
+      Lnd.localFundingAmount = coerce totalFundAmt,
       Lnd.pushMSat = Just $ coerce pushAmt,
       Lnd.targetConf = Nothing,
       Lnd.mSatPerByte = Nothing,
-      Lnd.private = Nothing,
+      Lnd.private = Just $ private == Private,
       Lnd.minHtlcMsat = Nothing,
       Lnd.remoteCsvDelay = Nothing,
       Lnd.minConfs = Nothing,

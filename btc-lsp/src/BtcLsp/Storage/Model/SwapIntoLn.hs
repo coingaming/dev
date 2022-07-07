@@ -11,6 +11,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getSwapsWaitingChanSql,
     getSwapsWaitingLnFundSql,
     getSwapsAboutToExpirySql,
+    updateSucceededWithoutInvoiceSql,
     getByUuidSql,
     getByFundAddressSql,
     withLockedRowSql,
@@ -31,11 +32,12 @@ createIgnoreSql ::
   LnInvoice 'Fund ->
   RHash ->
   OnChainAddress 'Fund ->
+  OnChainAddress 'Gain ->
   OnChainAddress 'Refund ->
   UTCTime ->
   Privacy ->
   ReaderT Psql.SqlBackend m (Entity SwapIntoLn)
-createIgnoreSql userEnt fundInv fundHash fundAddr refundAddr expAt chanPrivacy = do
+createIgnoreSql userEnt fundInv fundHash fundAddr feeAndChangeAddr refundAddr expAt chanPrivacy = do
   ct <- getCurrentTime
   uuid <- newUuid
   --
@@ -51,6 +53,7 @@ createIgnoreSql userEnt fundInv fundHash fundAddr refundAddr expAt chanPrivacy =
         swapIntoLnFundInvoice = fundInv,
         swapIntoLnFundInvHash = fundHash,
         swapIntoLnFundAddress = fundAddr,
+        swapIntoLnLspFeeAndChangeAddress = feeAndChangeAddr,
         swapIntoLnFundProof = Nothing,
         swapIntoLnRefundAddress = refundAddr,
         swapIntoLnChanCapUser = Money 0,
@@ -180,11 +183,36 @@ updateExpiredSql rowId = do
       <> " for the swap "
       <> inspect rowId
 
+updateSucceededWithoutInvoiceSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateSucceededWithoutInvoiceSql sid = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapSucceeded,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val sid
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     Psql.==. Psql.val SwapWaitingChan
+                 )
+
+
+
 updateSucceededSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
-  RPreimage ->
+  Maybe RPreimage ->
   ReaderT Psql.SqlBackend m ()
 updateSucceededSql sid rp = do
   ct <- getCurrentTime
@@ -192,7 +220,7 @@ updateSucceededSql sid rp = do
     Psql.set
       row
       [ SwapIntoLnFundProof
-          Psql.=. Psql.val (Just rp),
+          Psql.=. Psql.val rp,
         SwapIntoLnStatus
           Psql.=. Psql.val SwapSucceeded,
         SwapIntoLnUpdatedAt
