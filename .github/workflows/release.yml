@@ -30,14 +30,14 @@ jobs:
         restore-keys: cache-${{ runner.os }}-${{ matrix.configuration }}-
     - name: Test all
       run: |
-        mkdir logs
-        logsdir="`pwd`/logs"
+        mkdir -p ${{ github.workspace }}/logs
+        logsdir="${{ github.workspace }}/logs"
         nix-build --option sandbox false --show-trace --pure ./test.nix --argstr log "$logsdir"
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: lnd-logs
-        path: ./logs
+        path: ${{ github.workspace }}/logs/
     - name: Release all
       run: ./nix/ci-release.sh
     - name: Create github release
