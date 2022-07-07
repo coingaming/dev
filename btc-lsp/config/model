@@ -62,6 +62,7 @@ LnChan
   fundingVout (Vout 'Funding)
   closingTxId (TxId 'Closing) Maybe
   extId ChanId Maybe
+  bak Lnd.SingleChanBackupBlob Maybe
   --
   -- NOTE : We need to track is channel used or not.
   -- If channel is not used for a long time, then

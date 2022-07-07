@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module BtcLsp.Thread.LnChanWatcher
   ( applyPoll,
     applySub,
@@ -6,30 +8,47 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
-import LndClient
+import qualified LndClient.Data.Channel as Lnd
+import qualified LndClient.Data.ChannelBackup as Bak
 import LndClient.Data.ListChannels
 import qualified LndClient.RPC.Silent as LndSilent
 
-syncChannelList ::
-  ( Storage m
-  ) =>
-  LndEnv ->
-  m ()
-syncChannelList lnd = do
+syncChannelList :: (Env m) => m ()
+syncChannelList = do
   res <-
-    LndSilent.listChannels
-      lnd
-      (ListChannelsRequest False False False False Nothing)
-  whenRight res $
-    runSql
-      . void
-      . LnChan.persistOpenedChannelsSql
+    runExceptT $ do
+      cs <-
+        withLndT
+          LndSilent.listChannels
+          ($ ListChannelsRequest False False False False Nothing)
+      --
+      -- TODO : can optimize this, backups are immutable,
+      -- so can poll and write them only once per channel.
+      --
+      mapM
+        ( \ch -> do
+            bak <-
+              withLndT
+                LndSilent.exportChannelBackup
+                ($ Lnd.channelPoint ch)
+            pure
+              ( ch,
+                Bak.chanBackup bak
+              )
+        )
+        cs
+  case res of
+    Left e ->
+      $(logTM) ErrorS . logStr $
+        "SyncChannelList failure " <> inspect e
+    Right xs ->
+      runSql . void $
+        LnChan.persistOpenedChannelsSql xs
 
 applyPoll :: (Env m) => m ()
 applyPoll =
   forever $
-    getLspLndEnv
-      >>= syncChannelList
+    syncChannelList
       >> sleep300ms
 
 applySub :: (Env m) => m ()
