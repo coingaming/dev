@@ -1,5 +1,4 @@
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module ServerSpec
   ( spec,
@@ -9,28 +8,27 @@ where
 import qualified BtcLsp.Grpc.Client.HighLevel as Client
 import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
-import qualified Network.Bitcoin as Btc
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
+import qualified BtcLsp.Storage.Model.LnChan as L
+import qualified BtcLsp.Storage.Model.SwapIntoLn as S
+import qualified BtcLsp.Storage.Model.SwapUtxo as SU
 import qualified LndClient as Lnd
 import qualified LndClient.Data.AddInvoice as Lnd
-import qualified LndClient.Data.ListChannels as ListChannels
-import LndClient.LndTest (mine, lazyConnectNodes)
-import qualified LndClient.RPC.Silent as Lnd
 import qualified LndClient.Data.Channel as Lnd
+import qualified LndClient.Data.ListChannels as ListChannels
+import LndClient.LndTest (lazyConnectNodes, mine)
+import qualified LndClient.RPC.Silent as Lnd
+import qualified Network.Bitcoin as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as LowLevel
 import qualified Proto.BtcLsp.Data.LowLevel_Fields as SwapIntoLn
 import qualified Proto.BtcLsp.Method.GetCfg_Fields as GetCfg
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
-import qualified BtcLsp.Storage.Model.SwapIntoLn as S
-import qualified BtcLsp.Storage.Model.SwapUtxo as SU
-import qualified BtcLsp.Storage.Model.LnChan as L
 import Test.Hspec
-import TestHelpers
 import TestAppM
+import TestHelpers
 import TestOrphan ()
-
 
 getChannels :: Env m => Lnd.NodePubKey -> ExceptT Failure m [Lnd.Channel]
 getChannels pub =
@@ -153,21 +151,26 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
     alicePub <- getPubKeyT LndAlice
     void $ withBtcT Btc.sendToAddress (\h -> h fundAddr 0.01 Nothing Nothing)
     lift $ mine 5 LndLsp >> sleep1s >> lazyConnectNodes (Proxy :: Proxy TestOwner)
-    checksPassed <- lift $ waitCond 10 (\_ -> do
-      mine 5 LndLsp
-      eLndChans <- runExceptT $ getChannels alicePub
-      mswp <- runSql $ S.getByFundAddressSql (unsafeNewOnChainAddress fundAddr)
-      case (mswp, eLndChans) of
-        (Just swp, Right lndChans) -> do
-          let swapInDbSuccess = SwapSucceeded == swapIntoLnStatus (entityVal swp)
-          utxos <- runSql $ SU.getUtxosBySwapIdSql $ entityKey swp
-          let allUtxosMarkedAsUsed = all (\u -> (swapUtxoStatus $ entityVal u) == SwapUtxoSpentChanSwapped) utxos
-          let expectedRemoteBalance = swapIntoLnChanCapUser $ entityVal swp
-          dbChans <- runSql $ L.getBySwapIdSql $ entityKey swp
-          let chanExistInDb = length dbChans == 1
-          let openedChanWithRightCap = isJust $ find (\c -> (Lnd.remoteBalance c) == from expectedRemoteBalance) lndChans
-          pure (swapInDbSuccess && allUtxosMarkedAsUsed && openedChanWithRightCap && chanExistInDb, ())
-        _ -> pure (False, ())
-      ) ()
+    checksPassed <-
+      lift $
+        waitCond
+          10
+          ( \_ -> do
+              mine 5 LndLsp
+              eLndChans <- runExceptT $ getChannels alicePub
+              mswp <- runSql $ S.getByFundAddressSql (unsafeNewOnChainAddress fundAddr)
+              case (mswp, eLndChans) of
+                (Just swp, Right lndChans) -> do
+                  let swapInDbSuccess = SwapSucceeded == swapIntoLnStatus (entityVal swp)
+                  utxos <- runSql $ SU.getUtxosBySwapIdSql $ entityKey swp
+                  let allUtxosMarkedAsUsed = all (\u -> swapUtxoStatus (entityVal u) == SwapUtxoSpentChanSwapped) utxos
+                  let expectedRemoteBalance = swapIntoLnChanCapUser $ entityVal swp
+                  dbChans <- runSql $ L.getBySwapIdSql $ entityKey swp
+                  let chanExistInDb = length dbChans == 1
+                  let openedChanWithRightCap = isJust $ find (\c -> Lnd.remoteBalance c == from expectedRemoteBalance) lndChans
+                  pure (swapInDbSuccess && allUtxosMarkedAsUsed && openedChanWithRightCap && chanExistInDb, ())
+                _ -> pure (False, ())
+          )
+          ()
     liftIO $ do
       shouldBe (fst checksPassed) True
