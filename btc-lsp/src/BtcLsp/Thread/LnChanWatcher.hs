@@ -8,8 +8,9 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
-import qualified LndClient.Data.Channel as Lnd
+import qualified LndClient.Data.Channel as Lnd hiding (outputIndex)
 import qualified LndClient.Data.ChannelBackup as Bak
+import qualified LndClient.Data.ChannelPoint as Lnd
 import LndClient.Data.ListChannels
 import qualified LndClient.RPC.Silent as LndSilent
 
@@ -27,13 +28,27 @@ syncChannelList = do
       --
       mapM
         ( \ch -> do
-            bak <-
-              withLndT
-                LndSilent.exportChannelBackup
-                ($ Lnd.channelPoint ch)
+            let cp =
+                  Lnd.channelPoint ch
+            let getBakT =
+                  Just . Bak.chanBackup
+                    <$> withLndT
+                      LndSilent.exportChannelBackup
+                      ($ Lnd.channelPoint ch)
+            mCh <-
+              lift
+                . (entityVal <<$>>)
+                . runSql
+                . LnChan.getByChannelPointSql (Lnd.fundingTxId cp)
+                $ Lnd.outputIndex cp
+            mBak <-
+              case mCh of
+                Nothing -> getBakT
+                Just (LnChan {lnChanBak = Nothing}) -> getBakT
+                Just {} -> pure Nothing
             pure
               ( ch,
-                Bak.chanBackup bak
+                mBak
               )
         )
         cs

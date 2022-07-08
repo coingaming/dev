@@ -267,10 +267,9 @@ persistChannelUpdateSql (Lnd.ChannelEventUpdate channelEvent _) = do
 persistOpenedChannelsSql ::
   ( MonadIO m
   ) =>
-  [(Lnd.Channel, Lnd.SingleChanBackupBlob)] ->
+  [(Lnd.Channel, Maybe Lnd.SingleChanBackupBlob)] ->
   ReaderT Psql.SqlBackend m [Entity LnChan]
 persistOpenedChannelsSql cs = do
   ct <- getCurrentTime
   forM (sortOn (Channel.channelPoint . fst) cs) $
     uncurry (upsertChannelSql ct Nothing)
-      . second Just
