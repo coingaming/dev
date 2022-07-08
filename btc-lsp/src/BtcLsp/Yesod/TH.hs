@@ -3,7 +3,8 @@ module BtcLsp.Yesod.TH
   )
 where
 
-import BtcLsp.Yesod.Import.NoFoundation
+import BtcLsp.Yesod.Import.NoFoundation hiding (forM_)
+import Data.Foldable (forM_)
 import Data.List.NonEmpty
 import Language.Haskell.TH.Syntax
 
@@ -16,5 +17,5 @@ mkMessageNoFallback ::
   NonEmpty Lang ->
   Q [Dec]
 mkMessageNoFallback dt folder (lang :| langs) = do
-  void $ mapM (mkMessage dt folder) langs
+  forM_ langs $ mkMessage dt folder
   mkMessage dt folder lang
