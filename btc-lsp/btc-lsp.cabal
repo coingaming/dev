@@ -392,6 +392,7 @@ executable btc-lsp-integration
   main-is: Integration.hs
   other-modules:
       IntegrationSpec
+      BakSpec
       BlockScannerSpec
       LnChanWatcherSpec
       Main
@@ -791,6 +792,7 @@ test-suite btc-lsp-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      BakSpec
       BlockScannerSpec
       LnChanWatcherSpec
       MathSpec
