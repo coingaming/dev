@@ -7,6 +7,14 @@ Proxy txt@Text: #{txt}
 UtcTime utc@UTCTime: #{formatAsLogTime utc} UTC
 
 #
+# Logo
+#
+
+L: L
+S: S
+P: P
+
+#
 # General
 #
 

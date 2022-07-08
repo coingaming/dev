@@ -4,9 +4,9 @@
     <div .container-fluid>
         <div .navbar-header>
             <a href="@{HomeR}" .navbar-brand>
-              <span .brand-logo.text-danger>L#
-              <span .brand-logo.text-success>S#
-              <span .brand-logo.text-primary>P#
+              <span .brand-logo.text-danger>_{MsgL}#
+              <span .brand-logo.text-success>_{MsgS}#
+              <span .brand-logo.text-primary>_{MsgP}#
             <button type="button" .navbar-toggle.collapsed data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
