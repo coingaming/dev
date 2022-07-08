@@ -124,11 +124,10 @@ upsertChannelSql ct mSS chan mBak =
               LnChanUpdatedAt
                 Psql.=. Psql.val ct
             ]
-            <> ( maybe
-                   mempty
-                   (\x -> [LnChanBak Psql.=. Psql.val (Just x)])
-                   mBak
-               )
+            <> maybe
+              mempty
+              (\x -> [LnChanBak Psql.=. Psql.val (Just x)])
+              mBak
             <> otherUpdates
       lazyUpdateSwapStatus chanEnt
       pure chanEnt
