@@ -88,6 +88,7 @@ library
       BtcLsp.Yesod.Import.NoFoundation
       BtcLsp.Yesod.Settings
       BtcLsp.Yesod.Settings.StaticFiles
+      BtcLsp.Yesod.TH
       Proto.BtcLsp
       Proto.BtcLsp.Data.HighLevel
       Proto.BtcLsp.Data.HighLevel_Fields
@@ -296,6 +297,7 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
+        BtcLsp.Yesod.TH
         Proto.BtcLsp
         Proto.BtcLsp.Data.HighLevel
         Proto.BtcLsp.Data.HighLevel_Fields
@@ -510,6 +512,7 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
+        BtcLsp.Yesod.TH
         Proto.BtcLsp
         Proto.BtcLsp.Data.HighLevel
         Proto.BtcLsp.Data.HighLevel_Fields
@@ -696,6 +699,7 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
+        BtcLsp.Yesod.TH
         Proto.BtcLsp
         Proto.BtcLsp.Data.HighLevel
         Proto.BtcLsp.Data.HighLevel_Fields
@@ -908,6 +912,7 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
         BtcLsp.Yesod.Settings.StaticFiles
+        BtcLsp.Yesod.TH
         Proto.BtcLsp
         Proto.BtcLsp.Data.HighLevel
         Proto.BtcLsp.Data.HighLevel_Fields

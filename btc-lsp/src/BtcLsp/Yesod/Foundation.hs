@@ -15,9 +15,11 @@ import qualified BtcLsp.Class.Env as Class
 import BtcLsp.Yesod.Data.BootstrapColor
 import qualified BtcLsp.Yesod.Data.Language
 import BtcLsp.Yesod.Import.NoFoundation
+import BtcLsp.Yesod.TH (mkMessageNoFallback)
 import Control.Monad.Logger (LogSource)
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Kind as Kind
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.Text.Encoding as TE
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet (hamletFile)
@@ -56,7 +58,7 @@ data App = forall m.
     appMRunner :: UnliftIO m
   }
 
-mkMessage "App" "messages" "en"
+mkMessageNoFallback "App" "messages" $ "en" :| ["ru"]
 
 data MenuItem = MenuItem
   { menuItemLabel :: AppMessage,
