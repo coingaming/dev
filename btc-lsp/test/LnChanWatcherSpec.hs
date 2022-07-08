@@ -17,7 +17,6 @@ import qualified LndClient.RPC.Silent as Lnd
 import Test.Hspec
 import TestAppM
 import UnliftIO.Concurrent (killThread, threadDelay)
-import UnliftIO.MVar
 
 openChannelRequest ::
   NodePubKey ->
@@ -78,13 +77,12 @@ justTrue :: Maybe Bool -> Maybe Bool
 justTrue (Just True) = Just True
 justTrue _ = Nothing
 
-testThread ::
+testFun ::
   ( LndTest m TestOwner,
     Storage m
   ) =>
-  MVar [Maybe Bool] ->
-  m ()
-testThread result = do
+  m [Maybe Bool]
+testFun = do
   lndFrom <- getLndEnv LndLsp
   lndTo <- getLndEnv LndAlice
   toPubKey <- getNodePubKey lndTo
@@ -109,6 +107,13 @@ testThread result = do
           and
             <$> sequence
               [(== LnChanStatusActive) . lnChanStatus <$> ch]
+    pure $ justTrue r
+  isBackedUp <- tryTimes 3 1 $ do
+    ch <- fmap entityVal <$> queryChannel cp
+    let r =
+          and
+            <$> sequence
+              [isJust . lnChanBak <$> ch]
     pure $ justTrue r
   (ctid, _) <- forkThread $ do
     void $
@@ -136,20 +141,16 @@ testThread result = do
               ]
     pure $ justTrue r
   void $ killThread ctid
-  putMVar
-    result
+  pure
     [ isPendingOpenOk,
       isOpenedOk,
+      isBackedUp,
       isInactivedOk,
       isClosedOk
     ]
-  pure ()
 
 spec :: Spec
 spec =
   itMain @'LndLsp "Watch channel" $ do
-    res <- newEmptyMVar
-    (_, thndl) <- forkThread $ testThread res
-    takeMVar thndl
-    r <- takeMVar res
+    r <- testFun
     liftIO $ r `shouldSatisfy` all (== Just True)

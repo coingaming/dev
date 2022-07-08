@@ -22,10 +22,6 @@ syncChannelList = do
         withLndT
           LndSilent.listChannels
           ($ ListChannelsRequest False False False False Nothing)
-      --
-      -- TODO : can optimize this, backups are immutable,
-      -- so can poll and write them only once per channel.
-      --
       mapM
         ( \ch -> do
             let cp =
