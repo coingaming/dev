@@ -15,6 +15,7 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Util as Util
 import qualified LndClient.Data.Channel as Channel
 import qualified LndClient.Data.Channel as Lnd
+import qualified LndClient.Data.ChannelBackup as Lnd
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.ChannelPoint as Lnd
 import qualified LndClient.Data.CloseChannel as CloseChannel
@@ -38,6 +39,7 @@ createUpdateSql swapId txid vout = do
         lnChanFundingVout = vout,
         lnChanClosingTxId = Nothing,
         lnChanExtId = Nothing,
+        lnChanBak = Nothing,
         lnChanStatus = LnChanStatusPendingOpen,
         lnChanInsertedAt = ct,
         lnChanUpdatedAt = ct,
@@ -89,8 +91,9 @@ upsertChannelSql ::
   UTCTime ->
   Maybe LnChanStatus ->
   Lnd.Channel ->
+  Maybe Lnd.SingleChanBackupBlob ->
   ReaderT Psql.SqlBackend m (Entity LnChan)
-upsertChannelSql ct mSS chan =
+upsertChannelSql ct mSS chan mBak =
   maybeM
     (upsert mempty)
     (upsert . getOtherUpdates)
@@ -106,6 +109,7 @@ upsertChannelSql ct mSS chan =
               lnChanFundingVout = vout,
               lnChanClosingTxId = Nothing,
               lnChanExtId = extId,
+              lnChanBak = mBak,
               lnChanStatus = ss,
               lnChanInsertedAt = ct,
               lnChanUpdatedAt = ct,
@@ -120,6 +124,10 @@ upsertChannelSql ct mSS chan =
               LnChanUpdatedAt
                 Psql.=. Psql.val ct
             ]
+            <> maybe
+              mempty
+              (\x -> [LnChanBak Psql.=. Psql.val (Just x)])
+              mBak
             <> otherUpdates
       lazyUpdateSwapStatus chanEnt
       pure chanEnt
@@ -173,6 +181,7 @@ upsertChannelPointSql ct ss (Lnd.ChannelPoint txid vout) =
               lnChanFundingTxId = txid,
               lnChanFundingVout = vout,
               lnChanExtId = Nothing,
+              lnChanBak = Nothing,
               lnChanClosingTxId = Nothing,
               lnChanStatus = ss,
               lnChanInsertedAt = ct,
@@ -210,6 +219,7 @@ closedChannelUpsert ct close =
             lnChanFundingVout = fundVout,
             lnChanClosingTxId = closeTxId,
             lnChanExtId = extId,
+            lnChanBak = Nothing,
             lnChanStatus = ss,
             lnChanInsertedAt = ct,
             lnChanUpdatedAt = ct,
@@ -244,7 +254,7 @@ persistChannelUpdateSql (Lnd.ChannelEventUpdate channelEvent _) = do
   ct <- getCurrentTime
   case channelEvent of
     Lnd.ChannelEventUpdateChannelOpenChannel chan ->
-      upsertChannelSql ct (Just LnChanStatusOpened) chan
+      upsertChannelSql ct (Just LnChanStatusOpened) chan Nothing
     Lnd.ChannelEventUpdateChannelActiveChannel cp ->
       upsertChannelPointSql ct LnChanStatusActive cp
     Lnd.ChannelEventUpdateChannelInactiveChannel cp ->
@@ -261,9 +271,9 @@ persistChannelUpdateSql (Lnd.ChannelEventUpdate channelEvent _) = do
 persistOpenedChannelsSql ::
   ( MonadIO m
   ) =>
-  [Lnd.Channel] ->
+  [(Lnd.Channel, Maybe Lnd.SingleChanBackupBlob)] ->
   ReaderT Psql.SqlBackend m [Entity LnChan]
 persistOpenedChannelsSql cs = do
   ct <- getCurrentTime
-  forM (sortOn Channel.channelPoint cs) $
-    upsertChannelSql ct Nothing
+  forM (sortOn (Channel.channelPoint . fst) cs) $
+    uncurry (upsertChannelSql ct Nothing)
