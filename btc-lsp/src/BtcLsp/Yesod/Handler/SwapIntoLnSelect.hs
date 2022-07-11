@@ -175,12 +175,6 @@ newSwapWidget swapInfo =
           Just $
             MsgProxy userPub
         ),
-        ( MsgSwapIntoLnFundProof,
-          MsgProxy
-            . toHex
-            . coerce
-            <$> swapIntoLnFundProof
-        ),
         ( MsgSwapIntoLnFundAddress,
           Just
             . MsgProxy

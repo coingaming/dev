@@ -50,7 +50,6 @@ createIgnoreSql userEnt fundAddr feeAndChangeAddr refundAddr expAt chanPrivacy =
         swapIntoLnUserId = entityKey userEnt,
         swapIntoLnFundAddress = fundAddr,
         swapIntoLnLspFeeAndChangeAddress = feeAndChangeAddr,
-        swapIntoLnFundProof = Nothing,
         swapIntoLnRefundAddress = refundAddr,
         swapIntoLnChanCapUser = Money 0,
         swapIntoLnChanCapLsp = Money 0,
@@ -206,16 +205,13 @@ updateSucceededSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
-  Maybe RPreimage ->
   ReaderT Psql.SqlBackend m ()
-updateSucceededSql sid rp = do
+updateSucceededSql sid = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
       row
-      [ SwapIntoLnFundProof
-          Psql.=. Psql.val rp,
-        SwapIntoLnStatus
+      [ SwapIntoLnStatus
           Psql.=. Psql.val SwapSucceeded,
         SwapIntoLnUpdatedAt
           Psql.=. Psql.val ct
