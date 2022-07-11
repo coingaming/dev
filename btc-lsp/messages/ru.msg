@@ -50,7 +50,7 @@ SwapExpired: Срок истёк
 
 SwapUtxoUnspent: Не потрачено
 SwapUtxoUnspentDust: Пыль
-SwapUtxoUnspentChanReserve: Зарезервировано для свопа
+SwapUtxoUnspentChanReserve: Зарезервировано
 SwapUtxoSpentChan: Потрачено для канала
 SwapUtxoSpentChanSwapped: Потрачено для свопа
 SwapUtxoSpentRefund: Возвращено
@@ -116,136 +116,136 @@ HomeSmallHeader: Лайтнинг Сервис Провайдер
 # OpenChanR
 #
 
-OpenChanInstruction: To open a payment channel to the ЛСП, scan the QR code with your lightning wallet or manually copy the URI of the lightning node below.
+OpenChanInstruction: Чтобы открыть исходящий канал к ЛСП, отсканируйте куар код своим лайтнинг кошельком, или вручную скопируйте адрес лайтнинг ноды находящийся ниже.
 
 #
 # SwapIntoLnCreateR
 #
 
-SwapIntoLnFailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
-SwapIntoLnFailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
-SwapIntoLnFailureRefundOnChainAddressIsNotValid: Provided on-chain refund address is not valid. ЛСП accepts only native segwit bech32 bitcoin addresses.
-SwapIntoLnFailureRefundOnChainAddressIsNotSegwit: Provided on-chain refund address is not native segwit bech32 address. ЛСП accepts only native segwit bech32 bitcoin addresses.
+SwapIntoLnFailureFundLnInvoiceHasNonZeroAmt: Предоставленный инвойс запрашивает не нулевое количество сатоши. Только нулевые инвойсы принимаются для свопов.
+SwapIntoLnFailureFundLnInvoiceExpiresTooSoon: Предоставленный инвойс истекает слишком рано. Пожалуйста установите срок оплаты как минимум в одну неделю.
+SwapIntoLnFailureRefundOnChainAddressIsNotValid: Предоставленный он-чейн адрес для возврата не валиден. ЛСП принимает только нативные segwit bech32 адреса.
+SwapIntoLnFailureRefundOnChainAddressIsNotSegwit: Предоставленный он-чейн адрес для возврата не является нативным segwit bech32 адресом. ЛСП принимает только нативные segwit bech32 адреса.
 
 #
 # SwapIntoLnSelectR
 #
 
-SwapIntoLnHeaderInfo: Swap Info
-SwapIntoLnHeaderUtxos: Swap Coins
-SwapIntoLnHeaderChans: Swap Channels
+SwapIntoLnHeaderInfo: Информация свопа
+SwapIntoLnHeaderUtxos: Монеты свопа
+SwapIntoLnHeaderChans: Каналы свопа
 
-SwapIntoLnTotalOnChainReceived: Total On-Chain Received
-SwapIntoLnTotalOnChainReserved: Total On-Chain Reserved
-SwapIntoLnTotalOnChainSwapped: Total On-Chain Swapped
-SwapIntoLnTotalOnChainRefunded: Total On-Chain Refunded
-SwapIntoLnTotalOnChainDust: Total On-Chain Dust
-SwapIntoLnFeeLsp: ЛСП Service Fee
-SwapIntoLnChanCapUser: User's Outgoing Capacity
-SwapIntoLnChanCapLsp: User's Incoming Capacity *
-SwapIntoLnChanCapTotal: Total Channel Capacity
-SwapIntoLnFeeMiner: Channel Mining Fee
-SwapIntoLnUuid: Swap Uuid
-SwapIntoLnUserId: User Pub Key
-SwapIntoLnFundInvoice: Swap Invoice
-SwapIntoLnFundInvHash: Swap Invoice Hash
-SwapIntoLnFundAddress: Swap Fund Address
-SwapIntoLnFundProof: Swap Invoice Preimage
-SwapIntoLnRefundAddress: Swap Refund Address
+SwapIntoLnTotalOnChainReceived: Итого получено он-чейн
+SwapIntoLnTotalOnChainReserved: Итого зарезервировано он-чейн
+SwapIntoLnTotalOnChainSwapped: Итого обменяно он-чейн
+SwapIntoLnTotalOnChainRefunded: Итого возвращено он-чейн
+SwapIntoLnTotalOnChainDust: Итого пыль он-чейн
+SwapIntoLnFeeLsp: Комиссия ЛСП
+SwapIntoLnChanCapUser: Исходящая ликвидность пользователя
+SwapIntoLnChanCapLsp: Входящая ликвидность пользователя  *
+SwapIntoLnChanCapTotal: Общая ликвидность канала
+SwapIntoLnFeeMiner: Комиссия майнеров
+SwapIntoLnUuid: Идентификатор свопа
+SwapIntoLnUserId: Публичный ключ пользователя
+SwapIntoLnFundInvoice: Инвойс свопа
+SwapIntoLnFundInvHash: Хеш инвойса свопа
+SwapIntoLnFundAddress: Адрес финансирования свопа
+SwapIntoLnFundProof: Прообраз инвойса свопа
+SwapIntoLnRefundAddress: Адрес возврата свопа
 
-SwapIntoLnInfoShort: Step 1/5 - Swap Info
-SwapIntoLnWaitingFundChainShort: Step 2/5 - Swap Funding
-SwapIntoLnFundedShort: Step 3/5 - Peer Connection
-SwapIntoLnWaitingChanShort: Step 4/5 - Channel Opening
-SwapIntoLnWaitingFundLnShort: Step 4/5 - Lightning Funding
-SwapIntoLnSucceededShort: Step 5/5 - Swap Succeeded
-SwapIntoLnExpiredShort: Swap Expired!
+SwapIntoLnInfoShort: Шаг 1/5 - Информация свопа
+SwapIntoLnWaitingFundChainShort: Шаг 2/5 - Финансирование свопа
+SwapIntoLnFundedShort: Шаг 3/5 - Соединение с нодой
+SwapIntoLnWaitingChanShort: Шаг 4/5 - Открытие канала
+SwapIntoLnWaitingFundLnShort: Шаг 4/5 - Финансирование канала
+SwapIntoLnSucceededShort: Шаг 5/5 - Своп успешно выполнен
+SwapIntoLnExpiredShort: Срок свопа истёк!
 
-SwapIntoLnInfoLong: To request a balanced channel with ЛСП, provide a lightning invoice with a zero requested amount and an expiration time of at least one week. ЛСП also needs emergency on-chain refund address.
-SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: ЛСП is waiting for the swap to be funded. Please send between #{minAmt} and #{maxAmt} satoshi to the on-chain swap address:
-SwapIntoLnFundedLong: The swap is successfully funded. ЛСП is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
-SwapIntoLnWaitingChanLong: ЛСП initiated lightning channel. Waiting for the channel being opened.
-SwapIntoLnWaitingFundLnLong: Lightning channel has been opened. Now ЛСП is settling swap lightning invoice.
-SwapIntoLnSucceededLong: Swap succeeded!
-SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded to refund on-chain address.
+SwapIntoLnInfoLong: Для того чтобы запросить балансный канал с ЛСП, предоставьте лайтнинг инвойс с нулевым количеством сатоши и сроком оплаты в одну неделю или более. ЛСП также требует наличие он-чейн адреса для экстренного возврата.
+SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: ЛСП ожидает оплаты свопа. Пожалуйста отправьте от #{minAmt} до #{maxAmt} сатоши на он-чейн адрес:
+SwapIntoLnFundedLong: Своп успешно оплачен. ЛСП ожидает входящего соединения от вашей лайтнинг ноды. Используйте предоставленный ниже адрес для соединения вашей лайтнинг ноды с ЛСП:
+SwapIntoLnWaitingChanLong: ЛСП открывает канал. Подождите пока канал не откроется.
+SwapIntoLnWaitingFundLnLong: Лайтнинг канал открыт. ЛСП оплачивает своп инвойс.
+SwapIntoLnSucceededLong: Своп успешно выполнен!
+SwapIntoLnExpiredLong: Срок свопа истёк и все предоставленные средства будут отправлены на он-чейн адрес вощврата.
 
 #
 # Disclaimer
 #
 
-DisclaimerTos0: By continuing to use the ЛСП, you agree to the service
-DisclaimerTos1: terms and conditions
-DisclaimerCommitmentFee: * The actual value of the input capacity provided to the user by ЛСП is slightly less than the theoretical value, because ЛСП handles the commitment fee of the lightning channel, which can vary. The value of the commitment fee depends on the state of the bitcoin network at any given time.
+DisclaimerTos0: Продолжая использовать ЛСП, вы соглашаетесь с
+DisclaimerTos1: условиями сервиса
+DisclaimerCommitmentFee: * Реальное значение входящей ликвидности предоставленной пользователю ЛСП всегда немного меньше теоретического значения, так как ЛСП оплачивает коммитмент комиссию использования лайтнинг канала. Значение этой комиссии может варьироваться и зависит от состояния биткоин сети в каждый отдельно взятый момент времени.
 
 #
 # About
 #
 
-AboutGen0: General Info
-AboutGen1: ЛСП provides a number of infrastructural services for lightning network nodes and users:
-AboutGen2: Outbound channel to ЛСП
-AboutGen3: provides the ability to
-AboutGen4: send
-AboutGen5: lightning network payments. In this case, ЛСП works exactly like any other highly available and well-connected lightning node, providing payment routing and charging a regular lightning network fee with no additional fees.
-AboutGen6: Balanced channel with ЛСП
-AboutGen7: provides the ability to
-AboutGen8: send and receive
-AboutGen9: lightning network payments. In this case, ЛСП also provides incoming liquidity for the user, but charges an additional one-time fee for it.
-AboutGen10: The ЛСП software is open source. The source code can be found on github:
+AboutGen0: Общая информация
+AboutGen1: ЛСП предоставляет инфраструктурные сервисы для пользователей лайтнинг сети:
+AboutGen2: Исходящий канал к ЛСП
+AboutGen3: даёт возможность
+AboutGen4: отправлять
+AboutGen5: лайтнинг платежи. В этом случае ЛСП работает точно так же как и любая другая лайтнинг нода с хорошей связностью, предоставляя маршрутизацию для лайтнинг платежей без дополнительной комиссии.
+AboutGen6: Балансный канал с ЛСП
+AboutGen7: даёт возможность
+AboutGen8: отправлять и принимать
+AboutGen9: лайтнинг платежи. В этом случае ЛСП также предоставляет входящую ликвидность для пользователя, но берёт дополнительную единовременную комиссию за предоставленную ликвидность.
+AboutGen10: ЛСП это ПО с открытым исходным кодом. Исходный код размещён на сайте github:
 AboutGen11: https://github.com/coingaming/src
-AboutGen12: Pull requests and other contributions are welcome!
-AboutMathGen0: Balanced Channel Math
-AboutMathGen1: The user is able to swap on-chain bitcoins into a balanced lightning channel with ЛСП. For example, the user sends
+AboutGen12: Пулл реквесты и другие вклады приветствуются!
+AboutMathGen0: Математика балансного канала
+AboutMathGen1: Пользователь может обменять он-чейн биткоины на балансный канал с ЛСП. Например, пользователь отправляет
 AboutMathGen2: X
-AboutMathGen3: bitcoins to the on-chain swap address. After the swap, the user's lightning node will have
+AboutMathGen3: биткоинов на обменный он-чейн адрес. После обмена, лайтнинг нода пользователя будет иметь
 AboutMathGen4: X - LSP_FEE
-AboutMathGen5: bitcoins of outgoing liquidity,
+AboutMathGen5: биткоинов исходящей ликвидности,
 AboutMathGen6: X - LSP_FEE - COMMITMENT_FEE
-AboutMathGen7: bitcoins of incoming liquidity and the new lightning channel will have
+AboutMathGen7: биткоинов входящей ликвидности и новый лайтнинг канал будет иметь
 AboutMathGen8: 2 * (X - LSP_FEE)
-AboutMathGen9: bitcoins of total liquidity.
-AboutMathMinMax0: The minimum acceptable amount
+AboutMathGen9: биткоинов общей ликвидности.
+AboutMathMinMax0: Минимальное допустимое количество
 AboutMathMinMax1: X
-AboutMathMinMax2: for the swap is
+AboutMathMinMax2: для обмена равно
 AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
-AboutMathMinMax4: satoshi and the maximum is
+AboutMathMinMax4: сатоши, и максимальное количество равно
 AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}
-AboutMathMinMax6: satoshi. All UTXOs less than
+AboutMathMinMax6: сатоши. Все монеты меньше чем
 AboutMathMinMax7 dustLimit@MSat: #{dustLimit}
-AboutMathMinMax8: satoshi are considered dust and will be ignored.
-AboutMathLspFee0: The value of
+AboutMathMinMax8: сатоши считаются пылью и будут игнорироваться.
+AboutMathLspFee0: Значение
 AboutMathLspFee1: LSP_FEE
-AboutMathLspFee2: depends on the initial amount of
+AboutMathLspFee2: зависит от изначального количества
 AboutMathLspFee3: X
-AboutMathLspFee4: bitcoins that the user sent to the on-chain swap address. ЛСП charges
+AboutMathLspFee4: биткоинов которые пользователь отправил на он-чейн адрес обмена. ЛСП берёт
 AboutMathLspFee5 feeRate@FeeRate: #{feeRate}
-AboutMathLspFee6: of
+AboutMathLspFee6: от
 AboutMathLspFee7: X
-AboutMathLspFee8: as a fee, but not less than
+AboutMathLspFee8: в качестве комиссии, но комиссия не может быть менее
 AboutMathLspFee9 minFee@Money'Lsp'OnChain'Gain: #{minFee}
-AboutMathLspFee10: satoshi.
-AboutMathCommFee0: The value of
+AboutMathLspFee10: сатоши.
+AboutMathCommFee0: Значение
 AboutMathCommFee1: COMMITMENT_FEE
-AboutMathCommFee2: can vary, it depends on the state of the bitcoin network at any given time. It is a small percentage of the total channel capacity and is always processed by the ЛСП, so it never affects user's outgoing lightning balance.
-AboutExamples: Balanced Channel Examples
-AboutExamplesUserOnChainFunding: User's On-Chain Swap Funds
-AboutExamplesLspSwapFee: ЛСП Swap Fee
-AboutExamplesUserOutgoingCap: User's Outgoing Capacity
-AboutExamplesUserIncomingCap: User's Incoming Capacity *
-AboutExamplesTotalChanCap: Total Channel Capacity
-AboutSwap0: Balanced Channel Flow
-AboutSwap1: The creation of a balanced channel with ЛСП is implemented through on-chain to lightning swap. On the first step, the user provides ЛСП swap data:
-AboutSwap2: Swap Invoice
-AboutSwap3: - lightning invoice created by user's lightning node. This invoice is used to push swap liquidity to the user side of the payment channel after the channel is opened. ЛСП does not have any information about the swap size beforehand, so provided invoice must be zero-amount only. ЛСП also does not have any information about user's node availability during the swap period, so the expiration time of the invoice must be at least one week.
-AboutSwap4: Refund Address
-AboutSwap5: - emergency on-chain refund address, which is used by ЛСП for on-chain refunds in cases where bitcoins were sent to the on-chain swap address, but the swap has already succeeded or expired.
-AboutSwap6: Channel Privacy
-AboutSwap7: - the user can specify whether the new lightning channel should be public or private.
-AboutSwap8: On the next steps user needs to fund the on-chain swap address and receive a balanced channel with incoming and outgoing liquidity on the lightning network:
-AboutSwap9: The user or somebody else sends bitcoins to the on-chain swap address provided by ЛСП.
-AboutSwap10: After the swap has been successfully funded on-chain, the user's lightning node must connect to the ЛСП lightning node as a peer. ЛСП will provide the corresponding connection URI and QR code.
-AboutSwap11: When the user's lightning node is connected, the ЛСП starts to open the channel with it.
-AboutSwap12: Once the channel is opened, ЛСП sends the user's funds through the lightning network using the initial swap invoice. The user's lightning node must be online to receive the payment.
-AboutSwap13: After the successful swap, the user's lightning node has a balanced payment channel with the ЛСП's node and can send and receive lightning payments. If something goes wrong and the balanced channel cannot be opened, the user's bitcoins are refunded to the emergency on-chain refund address provided by the user.
-AboutDisclaimer0: Disclaimer
-AboutDisclaimer1: The lightning network is an experimental technology. Using Lightning Network in general and ЛСП in particular can lead to the loss of funds. The ЛСП software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
+AboutMathCommFee2: может варьироваться, оно зависит от состояния биткоин сети в отдельно взятый момент времени. Оно представляет собой небольшой процент от общей ликвидности канала и всегда оплачивается ЛСП, следовательно оно никогда не затрагивает значение исходящей ликвидности пользователя.
+AboutExamples: Примеры балансных каналов
+AboutExamplesUserOnChainFunding: Он-чейн платёж пользователя
+AboutExamplesLspSwapFee: Обменная комиссия ЛСП
+AboutExamplesUserOutgoingCap: Исходящая ликвидность пользователя
+AboutExamplesUserIncomingCap: Входящая ликвидность пользователя *
+AboutExamplesTotalChanCap: Общая ликвидность канала
+AboutSwap0: Открытие балансного канала
+AboutSwap1: Открытие балансного канала с ЛСП осуществояется через обмен он-чейн биткоин на лайтнинг биткоины. На первом этапе пользователь предоставляет для ЛСП данные для обмена:
+AboutSwap2: Обменный инвойс
+AboutSwap3: - лайтнинг инвойс созданный лайтнинг нодой пользователя. Этот инвойс используется для того чтобы перенести ликвидность на сторону пользователя после того как лайтнинг канал откроется.
+AboutSwap4: Адрес возврата
+AboutSwap5: - ончейн для экстренного возврата, который используется ЛСП для ончейн возврата в случаях когда биткоины были отправлены на ончейн адрес обмена, но процедура обмен уже была завершена или её срок истёк.
+AboutSwap6: Приватность канала
+AboutSwap7: - пользователь может указать каким должен быть новый лайтнинг канал - публичным или приватным.
+AboutSwap8: Далее пользователь должен отправить биткоины на ончейн адрес обмена и получить входящий балансный канал в лайтнинг сети:
+AboutSwap9: Пользователь или кто-либо ещё отправляет биткоины на ончейн адрес обмена предоставленный ЛСП.
+AboutSwap10: После того как процедура обмена была успешно оплачена ончейн, лайтнинг нода пользователя должна подключиться к лайтнинг ноде ЛСП. Для этого ЛСП предоставит соответствующий адрес и куар код.
+AboutSwap11: Когда лайтнинг нода пользователя подключится, ЛСП начнёт процедуру открытия лайтнинг канала.
+AboutSwap12: Когда лайтнинг канал откроется, ЛСП отправлит биткоины пользователю через этот канал используя предоставленный изначально обменный инвойс. Лайтнинг нода пользователя должна быть в сети чтобы получить этот платёж.
+AboutSwap13: После успешного обмена, лайтнинг нода пользователя имеет балансный канал с ЛСП и может как отправлять так и принимать лайтнинг платежи. Если что-то пошло не так и лайтнинг канал не может быть открыт, биткоины пользователя отправляются на предоставленный им ончейн адрес возврата.
+AboutDisclaimer0: Отказ от ответственности
+AboutDisclaimer1: Лайтнинг сеть - это экспериментальная технология. Использование лайтнинг сети в целом и ЛСП в частности может привести к потере средств. Программное обеспечение ЛСП предоставляется "как есть", без каких-либо гарантий, явно выраженных или подразумеваемых, включая гарантии товарной пригодности, соответствия по его конкретному назначению и отсутствия нарушений, но не ограничиваясь ими. Ни в каком случае авторы или правообладатели не несут ответственности по каким-либо искам, за ущерб или по иным требованиям, в том числе, при действии контракта, деликте или иной ситуации, возникшим из-за использования программного обеспечения или иных действий с программным обеспечением.
