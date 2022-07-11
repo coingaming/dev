@@ -4,9 +4,7 @@ set -e
 
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BTC_LSP_BUILD_DIR="$THIS_DIR/../btc-lsp/build"
-ELECTRS_CLIENT_BUILD_DIR="$THIS_DIR/../electrs-client/build"
 mkdir -p "$BTC_LSP_BUILD_DIR/build"
-mkdir -p "$ELECTRS_CLIENT_BUILD_DIR/build"
 
 pwd
 ls -la
@@ -25,10 +23,10 @@ docker load -q -i \
 
 echo "electrs ==> Docker electrs image verification"
 docker load -q -i \
-  "$ELECTRS_CLIENT_BUILD_DIR/docker-image-electrs.tar.gz" \
+  "$BTC_LSP_BUILD_DIR/docker-image-electrs.tar.gz" \
   | awk '{print $NF}' \
   | tr -d '\n' \
-  > "$ELECTRS_CLIENT_BUILD_DIR/docker-image-electrs.txt"
+  > "$BTC_LSP_BUILD_DIR/docker-image-electrs.txt"
 
 echo "integration ==> Docker integration image verification"
 docker load -q -i \
