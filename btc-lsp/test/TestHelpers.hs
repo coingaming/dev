@@ -12,7 +12,6 @@ import qualified BtcLsp.Storage.Model.Block as Block
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.User as User
 import qualified LndClient as Lnd
-import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (mine)
 import qualified LndClient.RPC.Silent as Lnd
@@ -37,24 +36,6 @@ genAddress own =
           }
     )
 
-genPayReq ::
-  TestOwner ->
-  ExceptT Failure (TestAppM 'LndLsp IO) Lnd.AddInvoiceResponse
-genPayReq owner =
-  withLndTestT
-    owner
-    Lnd.addInvoice
-    ( $
-        Lnd.AddInvoiceRequest
-          { Lnd.valueMsat = MSat 0,
-            Lnd.memo = Nothing,
-            Lnd.expiry =
-              Just
-                . Lnd.Seconds
-                $ 7 * 24 * 3600
-          }
-    )
-
 genUser ::
   TestOwner ->
   ExceptT Failure (TestAppM 'LndLsp IO) (Entity User)
@@ -68,7 +49,6 @@ createDummySwap ::
   ExceptT Failure (TestAppM 'LndLsp IO) (Entity SwapIntoLn)
 createDummySwap mExpAt = do
   usr <- genUser LndAlice
-  payReq <- genPayReq LndAlice
   fundAddr <- genAddress LndLsp
   changeAndFeeAddr <- genAddress LndLsp
   refundAddr <- genAddress LndAlice
@@ -80,8 +60,6 @@ createDummySwap mExpAt = do
   lift . runSql $
     SwapIntoLn.createIgnoreSql
       usr
-      (from $ Lnd.paymentRequest payReq)
-      (Lnd.rHash payReq)
       (from fundAddr)
       (from changeAndFeeAddr)
       (from refundAddr)

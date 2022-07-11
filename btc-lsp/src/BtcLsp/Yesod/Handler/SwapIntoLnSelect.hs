@@ -175,23 +175,6 @@ newSwapWidget swapInfo =
           Just $
             MsgProxy userPub
         ),
-        ( MsgSwapIntoLnFundInvoice,
-          Just
-            . MsgProxy
-            $ toText swapIntoLnFundInvoice
-        ),
-        ( MsgSwapIntoLnFundInvHash,
-          Just
-            . MsgProxy
-            . toText
-            $ into @RHashHex swapIntoLnFundInvHash
-        ),
-        ( MsgSwapIntoLnFundProof,
-          MsgProxy
-            . toHex
-            . coerce
-            <$> swapIntoLnFundProof
-        ),
         ( MsgSwapIntoLnFundAddress,
           Just
             . MsgProxy
