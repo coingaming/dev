@@ -15,12 +15,12 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Proto.BtcLsp.Data.HighLevel as Grpc
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Grpc
 import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.GetCfg_Fields as GetCfg
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 import qualified Proto.BtcLsp.Method.SwapIntoLn_Fields as SwapIntoLn
-import qualified Proto.BtcLsp.Data.HighLevel as Grpc
 
 swapIntoLn ::
   ( Env m
