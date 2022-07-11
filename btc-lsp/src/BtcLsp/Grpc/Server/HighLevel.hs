@@ -29,9 +29,15 @@ swapIntoLn ::
   SwapIntoLn.Request ->
   m SwapIntoLn.Response
 swapIntoLn userEnt req = do
-  f_loc <- liftIO $ getFieldLocation @SwapIntoLn.Request ["fund_ln_invoice"]
   res <- runExceptT $ do
-    fundInv <- fromReqT @Grpc.FundLnInvoice @(LnInvoice 'Fund) f_loc (req ^. SwapIntoLn.maybe'fundLnInvoice)
+    fundInv <-
+      fromReqT @Grpc.FundLnInvoice @(LnInvoice 'Fund)
+        $( mkFieldLocation
+             @SwapIntoLn.Request
+             [ "fund_ln_invoice"
+             ]
+         )
+        (req ^. SwapIntoLn.maybe'fundLnInvoice)
     privacy <-
       fromReqT
         $( mkFieldLocation
