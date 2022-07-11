@@ -12,11 +12,8 @@ User
 SwapIntoLn
   uuid (Uuid 'SwapIntoLnTable)
   userId UserId
-  fundInvoice (LnInvoice 'Fund)
-  fundInvHash RHash
   fundAddress (OnChainAddress 'Fund)
   lspFeeAndChangeAddress (OnChainAddress 'Gain)
-  fundProof RPreimage Maybe
   refundAddress (OnChainAddress 'Refund)
   chanCapUser (Money 'Usr 'Ln 'Fund)
   chanCapLsp (Money 'Lsp 'Ln 'Fund)
@@ -28,7 +25,6 @@ SwapIntoLn
   insertedAt UTCTime
   updatedAt UTCTime
   UniqueSwapIntoLnFundInvUuid uuid
-  UniqueSwapIntoLnFundInvHash fundInvHash
   UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic
 

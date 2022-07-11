@@ -15,6 +15,7 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
+import qualified Proto.BtcLsp.Data.HighLevel as Grpc
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Grpc
 import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.GetCfg_Fields as GetCfg
@@ -30,13 +31,13 @@ swapIntoLn ::
 swapIntoLn userEnt req = do
   res <- runExceptT $ do
     fundInv <-
-      fromReqT
+      fromReqT @Grpc.FundLnInvoice @(LnInvoice 'Fund)
         $( mkFieldLocation
              @SwapIntoLn.Request
              [ "fund_ln_invoice"
              ]
          )
-        $ req ^. SwapIntoLn.maybe'fundLnInvoice
+        (req ^. SwapIntoLn.maybe'fundLnInvoice)
     privacy <-
       fromReqT
         $( mkFieldLocation
@@ -45,10 +46,7 @@ swapIntoLn userEnt req = do
              ]
          )
         $ req ^? SwapIntoLn.privacy
-    fundInvLnd <-
-      withLndServerT
-        Lnd.decodePayReq
-        ($ from fundInv)
+    fundInvLnd <- withLndServerT Lnd.decodePayReq ($ from fundInv)
     unsafeRefundAddr <-
       fromReqT
         $( mkFieldLocation
@@ -59,7 +57,6 @@ swapIntoLn userEnt req = do
         $ req ^. SwapIntoLn.maybe'refundOnChainAddress
     swapIntoLnT
       userEnt
-      fundInv
       fundInvLnd
       unsafeRefundAddr
       privacy
@@ -82,25 +79,15 @@ swapIntoLnT ::
   ( Env m
   ) =>
   Entity User ->
-  LnInvoice 'Fund ->
   Lnd.PayReq ->
   UnsafeOnChainAddress 'Refund ->
   Privacy ->
   ExceptT SwapIntoLn.Response m (Entity SwapIntoLn)
-swapIntoLnT userEnt fundInv fundInvLnd unsafeRefundAddr chanPrivacy = do
+swapIntoLnT userEnt fundInvLnd unsafeRefundAddr chanPrivacy = do
   --
   -- TODO : Do not fail immediately, but collect
   -- all the input failures.
   --
-  futureExpiry <- getFutureTime Math.swapExpiryLimitInput
-  when
-    (Lnd.numMsat fundInvLnd /= MSat 0)
-    $ throwSpec
-      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
-  when
-    (Lnd.expiresAt fundInvLnd < futureExpiry)
-    $ throwSpec
-      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
   when
     ( Lnd.destination fundInvLnd
         /= userNodePubKey (entityVal userEnt)
@@ -141,8 +128,6 @@ swapIntoLnT userEnt fundInv fundInvLnd unsafeRefundAddr chanPrivacy = do
     . runSql
     . SwapIntoLn.createIgnoreSql
       userEnt
-      fundInv
-      (Lnd.paymentHash fundInvLnd)
       fundAddr
       (from feeAndChangeAddr)
       refundAddr

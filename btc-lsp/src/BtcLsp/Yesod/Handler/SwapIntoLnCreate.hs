@@ -84,7 +84,6 @@ postSwapIntoLnCreateR = do
                   (Lnd.destination fundInvLnd)
         Server.swapIntoLnT
           userEnt
-          fundInv
           fundInvLnd
           (swapRequestRefund req)
           (swapRequestPrivacy req)
