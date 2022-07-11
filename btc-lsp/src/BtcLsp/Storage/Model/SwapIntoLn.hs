@@ -29,15 +29,13 @@ createIgnoreSql ::
   ( MonadIO m
   ) =>
   Entity User ->
-  LnInvoice 'Fund ->
-  RHash ->
   OnChainAddress 'Fund ->
   OnChainAddress 'Gain ->
   OnChainAddress 'Refund ->
   UTCTime ->
   Privacy ->
   ReaderT Psql.SqlBackend m (Entity SwapIntoLn)
-createIgnoreSql userEnt fundInv fundHash fundAddr feeAndChangeAddr refundAddr expAt chanPrivacy = do
+createIgnoreSql userEnt fundAddr feeAndChangeAddr refundAddr expAt chanPrivacy = do
   ct <- getCurrentTime
   uuid <- newUuid
   --
@@ -46,12 +44,10 @@ createIgnoreSql userEnt fundInv fundHash fundAddr feeAndChangeAddr refundAddr ex
   -- into on-chain address.
   --
   Psql.upsertBy
-    (UniqueSwapIntoLnFundInvHash fundHash)
+    (UniqueSwapIntoLnFundAddress fundAddr)
     SwapIntoLn
       { swapIntoLnUuid = uuid,
         swapIntoLnUserId = entityKey userEnt,
-        swapIntoLnFundInvoice = fundInv,
-        swapIntoLnFundInvHash = fundHash,
         swapIntoLnFundAddress = fundAddr,
         swapIntoLnLspFeeAndChangeAddress = feeAndChangeAddr,
         swapIntoLnFundProof = Nothing,

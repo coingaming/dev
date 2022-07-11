@@ -12,6 +12,7 @@ module BtcLsp.Grpc.Combinator
     newInternalFailure,
     throwSpec,
     mkFieldLocation,
+    getFieldLocation,
     GrpcReq,
     GrpcRes,
   )

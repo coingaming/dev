@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.7.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 
@@ -69,7 +69,6 @@ library
       BtcLsp.Thread.Main
       BtcLsp.Thread.Refunder
       BtcLsp.Thread.Server
-      BtcLsp.Thread.SwapperIntoLn
       BtcLsp.Time
       BtcLsp.Yesod.Application
       BtcLsp.Yesod.Data.BootstrapColor
@@ -277,7 +276,6 @@ executable btc-lsp-exe
         BtcLsp.Thread.Main
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
-        BtcLsp.Thread.SwapperIntoLn
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -490,7 +488,6 @@ executable btc-lsp-integration
         BtcLsp.Thread.Main
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
-        BtcLsp.Thread.SwapperIntoLn
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -676,7 +673,6 @@ executable btc-lsp-prof
         BtcLsp.Thread.Main
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
-        BtcLsp.Thread.SwapperIntoLn
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
@@ -887,7 +883,6 @@ test-suite btc-lsp-test
         BtcLsp.Thread.Main
         BtcLsp.Thread.Refunder
         BtcLsp.Thread.Server
-        BtcLsp.Thread.SwapperIntoLn
         BtcLsp.Time
         BtcLsp.Yesod.Application
         BtcLsp.Yesod.Data.BootstrapColor
