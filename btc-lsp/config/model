@@ -14,7 +14,6 @@ SwapIntoLn
   userId UserId
   fundAddress (OnChainAddress 'Fund)
   lspFeeAndChangeAddress (OnChainAddress 'Gain)
-  fundProof RPreimage Maybe
   refundAddress (OnChainAddress 'Refund)
   chanCapUser (Money 'Usr 'Ln 'Fund)
   chanCapLsp (Money 'Lsp 'Ln 'Fund)
@@ -25,6 +24,7 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
+  UniqueSwapIntoLnFundInvUuid uuid
   UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic
 
