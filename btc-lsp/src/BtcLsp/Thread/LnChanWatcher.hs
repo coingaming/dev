@@ -18,43 +18,43 @@ syncChannelList :: (Env m) => m ()
 syncChannelList = do
   res <-
     runExceptT $ do
-      cs <-
+      openedChans <-
         withLndT
           LndSilent.listChannels
           ($ ListChannelsRequest False False False False Nothing)
-      mapM
-        ( \ch -> do
-            let cp =
-                  Lnd.channelPoint ch
-            let getBakT =
-                  Just . Bak.chanBackup
-                    <$> withLndT
-                      LndSilent.exportChannelBackup
-                      ($ Lnd.channelPoint ch)
-            mCh <-
-              lift
-                . (entityVal <<$>>)
-                . runSql
-                . LnChan.getByChannelPointSql (Lnd.fundingTxId cp)
-                $ Lnd.outputIndex cp
-            mBak <-
-              case mCh of
-                Nothing -> getBakT
-                Just (LnChan {lnChanBak = Nothing}) -> getBakT
-                Just {} -> pure Nothing
-            pure
-              ( ch,
-                mBak
-              )
-        )
-        cs
-  case res of
-    Left e ->
-      $(logTM) ErrorS . logStr $
-        "SyncChannelList failure " <> inspect e
-    Right xs ->
-      runSql . void $
-        LnChan.persistOpenedChannelsSql xs
+      openedChansBak <-
+        mapM
+          ( \ch -> do
+              let cp =
+                    Lnd.channelPoint ch
+              let getBakT =
+                    Just . Bak.chanBackup
+                      <$> withLndT
+                        LndSilent.exportChannelBackup
+                        ($ Lnd.channelPoint ch)
+              mCh <-
+                lift
+                  . (entityVal <<$>>)
+                  . runSql
+                  . LnChan.getByChannelPointSql (Lnd.fundingTxId cp)
+                  $ Lnd.outputIndex cp
+              mBak <-
+                case mCh of
+                  Nothing -> getBakT
+                  Just (LnChan {lnChanBak = Nothing}) -> getBakT
+                  Just {} -> pure Nothing
+              pure
+                ( ch,
+                  mBak
+                )
+          )
+          openedChans
+      lift . runSql . void $
+        LnChan.persistOpenedChannelsSql openedChansBak
+  whenLeft res $
+    $(logTM) ErrorS . logStr
+      . ("SyncChannelList failure " <>)
+      . inspect
 
 applyPoll :: (Env m) => m ()
 applyPoll =
