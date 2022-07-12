@@ -5,11 +5,8 @@ set -e
 THIS_DIR="$(dirname "$(realpath "$0")")"
 BTC_LSP_BUILD_DIR="$THIS_DIR/../btc-lsp/build"
 ELECTRS_CLIENT_BUILD_DIR="$THIS_DIR/../electrs-client/build"
-mkdir -p "$BTC_LSP_BUILD_DIR/build"
-mkdir -p "$ELECTRS_CLIENT_BUILD_DIR/build"
-
-pwd
-ls -la
+mkdir -p "$BTC_LSP_BUILD_DIR"
+mkdir -p "$ELECTRS_CLIENT_BUILD_DIR"
 
 echo "btc-lsp ==> Binaries build"
 nix-build btc-lsp/nix/docker.nix --out-link "$BTC_LSP_BUILD_DIR/docker-image-btc-lsp.tar.gz"
