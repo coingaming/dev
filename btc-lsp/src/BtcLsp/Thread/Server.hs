@@ -72,7 +72,7 @@ verifySigE ::
 verifySigE env waiReq pubNode (RawRequestBytes payload) = do
   pubDer <-
     maybeToRight
-      ( FailureGrpc $
+      ( FailureGrpcServer $
           "NodePubKey DER import failed from "
             <> inspectPlain pubNode
       )
@@ -82,7 +82,7 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
     Sig.sigToVerify (gsEnvSigHeaderName env) waiReq
   msg <-
     maybeToRight
-      ( FailureGrpc $
+      ( FailureGrpcServer $
           "Incorrect message from "
             <> inspectPlain payload
       )
@@ -91,7 +91,7 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
     then pure ()
     else
       Left
-        . FailureGrpc
+        . FailureGrpcServer
         $ "Signature verification failed with key "
           <> inspectPlain pubDer
           <> " signature "
