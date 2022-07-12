@@ -161,7 +161,7 @@ SwapIntoLnWaitingFundLnShort: Step 4/5 - Lightning Funding
 SwapIntoLnSucceededShort: Step 5/5 - Swap Succeeded
 SwapIntoLnExpiredShort: Swap Expired!
 
-SwapIntoLnInfoLong: To request a balanced channel with LSP, provide a lightning invoice with a zero requested amount and an expiration time of at least one week. LSP also needs emergency on-chain refund address.
+SwapIntoLnInfoLong: To request a balanced channel with LSP, provide any lightning invoice created by your node. LSP also needs emergency on-chain refund address.
 SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: LSP is waiting for the swap to be funded. Please send between #{minAmt} and #{maxAmt} satoshi to the on-chain swap address:
 SwapIntoLnFundedLong: The swap is successfully funded. LSP is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
 SwapIntoLnWaitingChanLong: LSP initiated lightning channel. Waiting for the channel being opened.
