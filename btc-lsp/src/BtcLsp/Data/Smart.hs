@@ -72,7 +72,7 @@ newOnChainAddress unsafeAddr = do
     Left e@(FailureInt (FailureBitcoind txt)) ->
       pure $
         if "Not a valid Bech32 or Base58 encoding" `T.isInfixOf` txt
-          then Left $ FailureSpec FailureNonValidAddr
+          then Left $ FailureInp FailureNonValidAddr
           else Left e
     Left e -> do
       $(logTM) WarningS . logStr $
@@ -83,7 +83,7 @@ newOnChainAddress unsafeAddr = do
       pure $
         if Btc.isWitness res
           then Right $ OnChainAddress txtAddr
-          else Left $ FailureSpec FailureNonSegwitAddr
+          else Left $ FailureInp FailureNonSegwitAddr
   where
     txtAddr = from unsafeAddr
 

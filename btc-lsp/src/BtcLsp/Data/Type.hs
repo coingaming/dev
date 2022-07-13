@@ -14,15 +14,13 @@ module BtcLsp.Data.Type
     LogFormat (..),
     YesodLog (..),
     MicroSeconds (..),
-    TaskRes (..),
-    Timing (..),
     SwapStatus (..),
     swapStatusChain,
     swapStatusLn,
     swapStatusFinal,
     Failure (..),
     FailureInternal (..),
-    FailureSpecific (..),
+    FailureInput (..),
     tryFailureE,
     tryFailureT,
     tryFromE,
@@ -62,7 +60,6 @@ import qualified Data.UUID.V4 as UUID
 import qualified LndClient as Lnd
 import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin.BlockChain as Btc
-import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Universum
 import qualified Witch
 
@@ -155,15 +152,6 @@ newtype MicroSeconds
     )
 
 instance Out MicroSeconds
-
-data TaskRes
-  = TaskResDoNotRetry
-  | TaskResRetryAfter MicroSeconds
-  deriving stock
-    ( Eq,
-      Ord,
-      Show
-    )
 
 newtype LnInvoice (mrel :: MoneyRelation)
   = LnInvoice Lnd.PaymentRequest
@@ -405,19 +393,8 @@ instance PathPiece SwapStatus where
     T.toLower
       . Universum.show
 
-data Timing
-  = Permanent
-  | Temporary
-  deriving stock
-    ( Generic,
-      Show,
-      Eq,
-      Ord
-    )
-
 data Failure
-  = FailureInput [Proto.InputFailure]
-  | FailureSpec FailureSpecific
+  = FailureInp FailureInput
   | FailureInt FailureInternal
   deriving stock
     ( Eq,
@@ -427,7 +404,7 @@ data Failure
 
 instance Out Failure
 
-data FailureSpecific
+data FailureInput
   = FailureNonce
   | FailureNonSegwitAddr
   | FailureNonValidAddr
@@ -437,7 +414,7 @@ data FailureSpecific
       Generic
     )
 
-instance Out FailureSpecific
+instance Out FailureInput
 
 data FailureInternal
   = FailureLnd Lnd.LndError

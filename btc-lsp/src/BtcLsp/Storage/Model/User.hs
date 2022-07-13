@@ -54,4 +54,4 @@ createVerifySql pub nonce = do
     else
       pure
         . Left
-        $ FailureSpec FailureNonce
+        $ FailureInp FailureNonce
