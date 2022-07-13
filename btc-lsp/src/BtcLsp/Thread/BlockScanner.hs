@@ -193,7 +193,7 @@ persistBlockT ::
   ExceptT Failure m ()
 persistBlockT blk utxos = do
   height <-
-    tryFromT $
+    tryFromT "persistBlockT block height" $
       Btc.vBlkHeight blk
   lift . runSql $ do
     blockId <-
@@ -249,7 +249,9 @@ scan ::
   ExceptT Failure m [Utxo]
 scan = do
   mBlk <- lift $ runSql Block.getLatestSql
-  cHeight <- tryFromT =<< withBtcT Btc.getBlockCount id
+  cHeight <-
+    tryFromT "BlockScanner block count"
+      =<< withBtcT Btc.getBlockCount id
   case mBlk of
     Nothing -> do
       $(logTM) DebugS . logStr $
@@ -266,7 +268,8 @@ scan = do
           $(logTM) WarningS . logStr $
             "Reorg detected from height = "
               <> inspect height
-          bHeight <- tryFromT height
+          bHeight <-
+            tryFromT "BlockScanner reorg block height" height
           withExceptT
             ( FailureInt
                 . FailurePrivate
@@ -340,7 +343,7 @@ compareHash ::
   Btc.BlockHeight ->
   ExceptT Failure m (Maybe Bool)
 compareHash height = do
-  w64h <- tryFromT height
+  w64h <- tryFromT "BlockScanner compareHash" height
   cHash <- withBtcT Btc.getBlockHash ($ height)
   lift
     . ( (== cHash)
