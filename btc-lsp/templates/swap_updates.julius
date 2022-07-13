@@ -2,10 +2,7 @@ async function subscribe() {
     let response = await fetch("@{SwapUpdatesR uuid sh}");
     if (response.status == 502) {
       await subscribe();
-    } else if (response.status != 200) {
-      document.location.reload(true)
     } else {
-      let message = await response.text();
       document.location.reload(true)
     }
   }

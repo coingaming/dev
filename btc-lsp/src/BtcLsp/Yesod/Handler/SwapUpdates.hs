@@ -18,13 +18,12 @@ import qualified Data.Digest.Pure.SHA as SHA
   ( bytestringDigest,
     sha256,
   )
+import qualified Universum as U
 
 getSwapUpdatesR :: Uuid 'SwapIntoLnTable -> SwapHash -> Handler (Maybe SwapHash)
 getSwapUpdatesR uuid swapHash = do
   app <- getYesod
-  sh <- getSwapUpdateRec app uuid swapHash 10000
-  print sh
-  return sh
+  getSwapUpdateRec app uuid swapHash 10000
 
 getSwapUpdateRec :: MonadHandler m => App -> Uuid 'SwapIntoLnTable -> SwapHash -> Integer -> m (Maybe SwapHash)
 getSwapUpdateRec app uuid swapHash counter = do
@@ -36,11 +35,9 @@ getSwapUpdateRec app uuid swapHash counter = do
     else return currentSwapUpdate
 
 getSwapUpdate :: MonadHandler m => App -> Uuid 'SwapIntoLnTable -> m (Maybe SwapHash)
-getSwapUpdate (App {appMRunner = UnliftIO run}) uuid = do
-  res <- liftIO $ run $ runSql $ SwapIntoLn.getByUuidSql uuid
-  return $ case res of
-        Just swapInfo -> Just $ SwapHash $ hashFunc swapInfo
-        Nothing -> Nothing
+getSwapUpdate (App {appMRunner = UnliftIO run}) uuid =
+  (SwapHash . hashFunc)
+    U.<<$>> (liftIO . run . runSql . SwapIntoLn.getByUuidSql) uuid
 
 hashFunc :: SwapIntoLn.SwapInfo -> Text
 hashFunc =
