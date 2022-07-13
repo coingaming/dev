@@ -80,6 +80,7 @@ getSwapIntoLnSelectR uuid = do
         let mChanWidget = newChanWidget swapInfoChan
         panelLayout color msgShort msgLong $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
+          let swapHashText :: Text = coerce swapHash
           $(widgetFile "swap_updates")
           $(widgetFile "swap_into_ln_select")
     )

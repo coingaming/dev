@@ -3,7 +3,13 @@ async function subscribe() {
     if (response.status == 502) {
       await subscribe();
     } else {
-      document.location.reload(true)
+      const hash = await response.text()
+      if ('#{swapHashText}' == hash) {
+        subscribe();
+      }
+      else {
+        document.location.reload(true)
+      }
     }
   }
 subscribe()
