@@ -23,14 +23,14 @@ import qualified Universum as U
 getSwapUpdatesR :: Uuid 'SwapIntoLnTable -> SwapHash -> Handler (Maybe SwapHash)
 getSwapUpdatesR uuid swapHash = do
   app <- getYesod
-  getSwapUpdateRec app uuid swapHash 10000
+  getSwapUpdateRec app uuid swapHash 60
 
 getSwapUpdateRec :: MonadHandler m => App -> Uuid 'SwapIntoLnTable -> SwapHash -> Integer -> m (Maybe SwapHash)
 getSwapUpdateRec app uuid swapHash counter = do
   currentSwapUpdate <- getSwapUpdate app uuid
   if Just swapHash == currentSwapUpdate && counter > 0
     then do
-      _ <- sleep5s
+      sleep5s
       getSwapUpdateRec app uuid swapHash (counter - 1)
     else return currentSwapUpdate
 
