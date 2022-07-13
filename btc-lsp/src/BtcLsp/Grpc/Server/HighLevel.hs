@@ -46,7 +46,8 @@ swapIntoLn userEnt req = do
              ]
          )
         $ req ^? SwapIntoLn.privacy
-    fundInvLnd <- withLndServerT Lnd.decodePayReq ($ from fundInv)
+    fundInvLnd <-
+      withLndServerT Lnd.decodePayReq ($ from fundInv)
     unsafeRefundAddr <-
       fromReqT
         $( mkFieldLocation
