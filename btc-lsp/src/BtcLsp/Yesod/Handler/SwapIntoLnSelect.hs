@@ -14,10 +14,11 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
 import qualified Data.UUID as UUID
+import qualified BtcLsp.Yesod.Handler.SwapUpdates as SU
 
 getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 getSwapIntoLnSelectR uuid = do
-  App {appMRunner = UnliftIO run} <- getYesod
+  app@App {appMRunner = UnliftIO run} <- getYesod
   nodeUri <- liftIO $ run getLndNodeUri
   nodeUriHex <-
     eitherM
@@ -78,6 +79,10 @@ getSwapIntoLnSelectR uuid = do
         let mChanWidget = newChanWidget swapInfoChan
         panelLayout color msgShort msgLong $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
+          su <- SU.getSwapUpdate app uuid
+          case su of
+            Just sh -> $(widgetFile "swap_updates")
+            Nothing -> pure ()
           $(widgetFile "swap_into_ln_select")
     )
     . liftIO

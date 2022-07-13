@@ -7,7 +7,7 @@
 
 module BtcLsp.Yesod.Handler.OpenChan where
 
-import BtcLsp.Class.Env
+import BtcLsp.Yesod.Data.BootstrapColor
 import BtcLsp.Yesod.Import
 
 getOpenChanR :: Handler Html

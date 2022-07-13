@@ -83,6 +83,7 @@ library
       BtcLsp.Yesod.Handler.OpenChan
       BtcLsp.Yesod.Handler.SwapIntoLnCreate
       BtcLsp.Yesod.Handler.SwapIntoLnSelect
+      BtcLsp.Yesod.Handler.SwapUpdates
       BtcLsp.Yesod.Import
       BtcLsp.Yesod.Import.NoFoundation
       BtcLsp.Yesod.Settings
@@ -290,6 +291,7 @@ executable btc-lsp-exe
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
+        BtcLsp.Yesod.Handler.SwapUpdates
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
@@ -500,6 +502,7 @@ executable btc-lsp-integration
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
+        BtcLsp.Yesod.Handler.SwapUpdates
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
@@ -685,6 +688,7 @@ executable btc-lsp-prof
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
+        BtcLsp.Yesod.Handler.SwapUpdates
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
@@ -893,6 +897,7 @@ test-suite btc-lsp-test
         BtcLsp.Yesod.Handler.OpenChan
         BtcLsp.Yesod.Handler.SwapIntoLnCreate
         BtcLsp.Yesod.Handler.SwapIntoLnSelect
+        BtcLsp.Yesod.Handler.SwapUpdates
         BtcLsp.Yesod.Import
         BtcLsp.Yesod.Import.NoFoundation
         BtcLsp.Yesod.Settings
