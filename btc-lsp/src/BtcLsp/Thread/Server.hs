@@ -30,8 +30,7 @@ import qualified Universum
 apply :: (Env m) => m ()
 apply = do
   env <- getGsEnv
-  withUnliftIO $ \run ->
-    runServer env $ handlers run
+  withUnliftIO $ runServer env . handlers
 
 handlers ::
   forall m.

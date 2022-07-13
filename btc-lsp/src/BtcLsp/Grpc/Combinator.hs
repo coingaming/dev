@@ -118,7 +118,7 @@ newInternalFailure ::
   forall res failure specific.
   ( GrpcRes res failure specific
   ) =>
-  Failure ->
+  FailureInternal ->
   res
 newInternalFailure hFailure =
   defMessage
@@ -129,16 +129,14 @@ newInternalFailure hFailure =
                   ]
          )
   where
-    --
-    -- TODO : complete exact match
-    --
     gFailure =
       defMessage
         & case hFailure of
-          FailureInt (FailureGrpcServer x) ->
-            Proto.grpcServer .~ x
-          _ ->
-            Proto.redacted .~ True
+          FailureGrpcServer x -> Proto.grpcServer .~ x
+          FailureGrpcClient {} -> Proto.redacted .~ True
+          FailureMath x -> Proto.math .~ x
+          FailurePrivate {} -> Proto.redacted .~ True
+          FailureRedacted -> Proto.redacted .~ True
 
 throwSpec ::
   forall a res failure specific m.

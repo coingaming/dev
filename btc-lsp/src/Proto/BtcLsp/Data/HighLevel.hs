@@ -9,10 +9,10 @@ module Proto.BtcLsp.Data.HighLevel (
         InputFailureKind(..), InputFailureKind(),
         InputFailureKind'UnrecognizedValue, InternalFailure(),
         InternalFailure'Either(..), _InternalFailure'Redacted,
-        _InternalFailure'GrpcServer, LnHost(), LnPeer(), LnPort(),
-        LnPubKey(), LocalBalance(), Nonce(), Privacy(..), Privacy(),
-        Privacy'UnrecognizedValue, RefundMoney(), RefundOnChainAddress(),
-        RemoteBalance()
+        _InternalFailure'GrpcServer, _InternalFailure'Math, LnHost(),
+        LnPeer(), LnPort(), LnPubKey(), LocalBalance(), Nonce(),
+        Privacy(..), Privacy(), Privacy'UnrecognizedValue, RefundMoney(),
+        RefundOnChainAddress(), RemoteBalance()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -1293,7 +1293,9 @@ instance Text.PrettyPrint.GenericPretty.Out InputFailureKind
          * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'redacted' @:: Lens' InternalFailure (Prelude.Maybe Prelude.Bool)@
          * 'Proto.BtcLsp.Data.HighLevel_Fields.redacted' @:: Lens' InternalFailure Prelude.Bool@
          * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'grpcServer' @:: Lens' InternalFailure (Prelude.Maybe Data.Text.Text)@
-         * 'Proto.BtcLsp.Data.HighLevel_Fields.grpcServer' @:: Lens' InternalFailure Data.Text.Text@ -}
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.grpcServer' @:: Lens' InternalFailure Data.Text.Text@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.maybe'math' @:: Lens' InternalFailure (Prelude.Maybe Data.Text.Text)@
+         * 'Proto.BtcLsp.Data.HighLevel_Fields.math' @:: Lens' InternalFailure Data.Text.Text@ -}
 data InternalFailure
   = InternalFailure'_constructor {_InternalFailure'either :: !(Prelude.Maybe InternalFailure'Either),
                                   _InternalFailure'_unknownFields :: !Data.ProtoLens.FieldSet}
@@ -1307,7 +1309,8 @@ instance Prelude.Show InternalFailure where
 instance Text.PrettyPrint.GenericPretty.Out InternalFailure
 data InternalFailure'Either
   = InternalFailure'Redacted !Prelude.Bool |
-    InternalFailure'GrpcServer !Data.Text.Text
+    InternalFailure'GrpcServer !Data.Text.Text |
+    InternalFailure'Math !Data.Text.Text
   deriving stock (Prelude.Show,
                   Prelude.Eq,
                   Prelude.Ord,
@@ -1376,6 +1379,32 @@ instance Data.ProtoLens.Field.HasField InternalFailure "grpcServer" Data.Text.Te
                       _otherwise -> Prelude.Nothing)
               (\ _ y__ -> Prelude.fmap InternalFailure'GrpcServer y__))
            (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
+instance Data.ProtoLens.Field.HasField InternalFailure "maybe'math" (Prelude.Maybe Data.Text.Text) where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InternalFailure'either
+           (\ x__ y__ -> x__ {_InternalFailure'either = y__}))
+        (Lens.Family2.Unchecked.lens
+           (\ x__
+              -> case x__ of
+                   (Prelude.Just (InternalFailure'Math x__val)) -> Prelude.Just x__val
+                   _otherwise -> Prelude.Nothing)
+           (\ _ y__ -> Prelude.fmap InternalFailure'Math y__))
+instance Data.ProtoLens.Field.HasField InternalFailure "math" Data.Text.Text where
+  fieldOf _
+    = (Prelude..)
+        (Lens.Family2.Unchecked.lens
+           _InternalFailure'either
+           (\ x__ y__ -> x__ {_InternalFailure'either = y__}))
+        ((Prelude..)
+           (Lens.Family2.Unchecked.lens
+              (\ x__
+                 -> case x__ of
+                      (Prelude.Just (InternalFailure'Math x__val)) -> Prelude.Just x__val
+                      _otherwise -> Prelude.Nothing)
+              (\ _ y__ -> Prelude.fmap InternalFailure'Math y__))
+           (Data.ProtoLens.maybeLens Data.ProtoLens.fieldDefault))
 instance Data.ProtoLens.Message InternalFailure where
   messageName _
     = Data.Text.pack "BtcLsp.Data.HighLevel.InternalFailure"
@@ -1384,7 +1413,8 @@ instance Data.ProtoLens.Message InternalFailure where
       \\SIInternalFailure\DC2\FS\n\
       \\bredacted\CAN\SOH \SOH(\bH\NULR\bredacted\DC2!\n\
       \\vgrpc_server\CAN\STX \SOH(\tH\NULR\n\
-      \grpcServerB\b\n\
+      \grpcServer\DC2\DC4\n\
+      \\EOTmath\CAN\ETX \SOH(\tH\NULR\EOTmathB\b\n\
       \\ACKeither"
   packedFileDescriptor _ = packedFileDescriptor
   fieldsByTag
@@ -1405,10 +1435,19 @@ instance Data.ProtoLens.Message InternalFailure where
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'grpcServer")) ::
               Data.ProtoLens.FieldDescriptor InternalFailure
+        math__field_descriptor
+          = Data.ProtoLens.FieldDescriptor
+              "math"
+              (Data.ProtoLens.ScalarField Data.ProtoLens.StringField ::
+                 Data.ProtoLens.FieldTypeDescriptor Data.Text.Text)
+              (Data.ProtoLens.OptionalField
+                 (Data.ProtoLens.Field.field @"maybe'math")) ::
+              Data.ProtoLens.FieldDescriptor InternalFailure
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, redacted__field_descriptor),
-           (Data.ProtoLens.Tag 2, grpcServer__field_descriptor)]
+           (Data.ProtoLens.Tag 2, grpcServer__field_descriptor),
+           (Data.ProtoLens.Tag 3, math__field_descriptor)]
   unknownFields
     = Lens.Family2.Unchecked.lens
         _InternalFailure'_unknownFields
@@ -1459,6 +1498,18 @@ instance Data.ProtoLens.Message InternalFailure where
                                        "grpc_server"
                                 loop
                                   (Lens.Family2.set (Data.ProtoLens.Field.field @"grpcServer") y x)
+                        26
+                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
+                                       (do value <- do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
+                                                       Data.ProtoLens.Encoding.Bytes.getBytes
+                                                         (Prelude.fromIntegral len)
+                                           Data.ProtoLens.Encoding.Bytes.runEither
+                                             (case Data.Text.Encoding.decodeUtf8' value of
+                                                (Prelude.Left err)
+                                                  -> Prelude.Left (Prelude.show err)
+                                                (Prelude.Right r) -> Prelude.Right r))
+                                       "math"
+                                loop (Lens.Family2.set (Data.ProtoLens.Field.field @"math") y x)
                         wire
                           -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
                                         wire
@@ -1490,6 +1541,16 @@ instance Data.ProtoLens.Message InternalFailure where
                                   (Data.ProtoLens.Encoding.Bytes.putVarInt
                                      (Prelude.fromIntegral (Data.ByteString.length bs)))
                                   (Data.ProtoLens.Encoding.Bytes.putBytes bs))
+                          Data.Text.Encoding.encodeUtf8 v)
+                (Prelude.Just (InternalFailure'Math v))
+                  -> (Data.Monoid.<>)
+                       (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
+                       ((Prelude..)
+                          (\ bs
+                             -> (Data.Monoid.<>)
+                                  (Data.ProtoLens.Encoding.Bytes.putVarInt
+                                     (Prelude.fromIntegral (Data.ByteString.length bs)))
+                                  (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                           Data.Text.Encoding.encodeUtf8 v))
              (Data.ProtoLens.Encoding.Wire.buildFieldSet
                 (Lens.Family2.view Data.ProtoLens.unknownFields _x))
@@ -1502,6 +1563,7 @@ instance Control.DeepSeq.NFData InternalFailure where
 instance Control.DeepSeq.NFData InternalFailure'Either where
   rnf (InternalFailure'Redacted x__) = Control.DeepSeq.rnf x__
   rnf (InternalFailure'GrpcServer x__) = Control.DeepSeq.rnf x__
+  rnf (InternalFailure'Math x__) = Control.DeepSeq.rnf x__
 _InternalFailure'Redacted ::
   Data.ProtoLens.Prism.Prism' InternalFailure'Either Prelude.Bool
 _InternalFailure'Redacted
@@ -1519,6 +1581,15 @@ _InternalFailure'GrpcServer
       (\ p__
          -> case p__ of
               (InternalFailure'GrpcServer p__val) -> Prelude.Just p__val
+              _otherwise -> Prelude.Nothing)
+_InternalFailure'Math ::
+  Data.ProtoLens.Prism.Prism' InternalFailure'Either Data.Text.Text
+_InternalFailure'Math
+  = Data.ProtoLens.Prism.prism'
+      InternalFailure'Math
+      (\ p__
+         -> case p__ of
+              (InternalFailure'Math p__val) -> Prelude.Just p__val
               _otherwise -> Prelude.Nothing)
 {- | Fields :
      
@@ -2743,11 +2814,12 @@ packedFileDescriptor
     \\EOTkind\CAN\STX \SOH(\SO2'.BtcLsp.Data.HighLevel.InputFailureKindR\EOTkind\"\RS\n\
     \\n\
     \FieldIndex\DC2\DLE\n\
-    \\ETXval\CAN\SOH \SOH(\rR\ETXval\"\\\n\
+    \\ETXval\CAN\SOH \SOH(\rR\ETXval\"r\n\
     \\SIInternalFailure\DC2\FS\n\
     \\bredacted\CAN\SOH \SOH(\bH\NULR\bredacted\DC2!\n\
     \\vgrpc_server\CAN\STX \SOH(\tH\NULR\n\
-    \grpcServerB\b\n\
+    \grpcServer\DC2\DC4\n\
+    \\EOTmath\CAN\ETX \SOH(\tH\NULR\EOTmathB\b\n\
     \\ACKeither*\\\n\
     \\DLEInputFailureKind\DC2\f\n\
     \\bREQUIRED\DLE\NUL\DC2\r\n\
@@ -2757,8 +2829,8 @@ packedFileDescriptor
     \\aPrivacy\DC2\n\
     \\n\
     \\ACKPUBLIC\DLE\NUL\DC2\v\n\
-    \\aPRIVATE\DLE\SOHJ\238\CAN\n\
-    \\ACK\DC2\EOT\NUL\NUL~\SOH\n\
+    \\aPRIVATE\DLE\SOHJ\165\EM\n\
+    \\ACK\DC2\EOT\NUL\NUL\DEL\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \P\n\
@@ -3139,12 +3211,12 @@ packedFileDescriptor
     \\ENQ\ENQ\SOH\STX\SOH\STX\DC2\ETXv\f\r\n\
     \\n\
     \\n\
-    \\STX\EOT\DC2\DC2\EOTy\NUL~\SOH\n\
+    \\STX\EOT\DC2\DC2\EOTy\NUL\DEL\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\DC2\SOH\DC2\ETXy\b\ETB\n\
     \\f\n\
-    \\EOT\EOT\DC2\b\NUL\DC2\EOTz\STX}\ETX\n\
+    \\EOT\EOT\DC2\b\NUL\DC2\EOTz\STX~\ETX\n\
     \\f\n\
     \\ENQ\EOT\DC2\b\NUL\SOH\DC2\ETXz\b\SO\n\
     \\v\n\
@@ -3163,4 +3235,13 @@ packedFileDescriptor
     \\f\n\
     \\ENQ\EOT\DC2\STX\SOH\SOH\DC2\ETX|\v\SYN\n\
     \\f\n\
-    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\ETX|\EM\SUBb\ACKproto3"
+    \\ENQ\EOT\DC2\STX\SOH\ETX\DC2\ETX|\EM\SUB\n\
+    \\v\n\
+    \\EOT\EOT\DC2\STX\STX\DC2\ETX}\EOT\DC4\n\
+    \\f\n\
+    \\ENQ\EOT\DC2\STX\STX\ENQ\DC2\ETX}\EOT\n\
+    \\n\
+    \\f\n\
+    \\ENQ\EOT\DC2\STX\STX\SOH\DC2\ETX}\v\SI\n\
+    \\f\n\
+    \\ENQ\EOT\DC2\STX\STX\ETX\DC2\ETX}\DC2\DC3b\ACKproto3"

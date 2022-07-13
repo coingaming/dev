@@ -101,7 +101,8 @@ class
     (a -> m (Either Lnd.LndError b)) ->
     ExceptT res m b
   withLndServerT method =
-    withExceptT newInternalFailure . withLndT method
+    withExceptT (const $ newInternalFailure FailureRedacted)
+      . withLndT method
   withBtc ::
     (Btc.Client -> a) ->
     (a -> IO b) ->

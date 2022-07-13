@@ -56,6 +56,11 @@ lnPubKey ::
    Data.ProtoLens.Field.HasField s "lnPubKey" a) =>
   Lens.Family2.LensLike' f s a
 lnPubKey = Data.ProtoLens.Field.field @"lnPubKey"
+math ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "math" a) =>
+  Lens.Family2.LensLike' f s a
+math = Data.ProtoLens.Field.field @"math"
 maybe'either ::
   forall f s a.
   (Prelude.Functor f,
@@ -80,6 +85,12 @@ maybe'lnPubKey ::
    Data.ProtoLens.Field.HasField s "maybe'lnPubKey" a) =>
   Lens.Family2.LensLike' f s a
 maybe'lnPubKey = Data.ProtoLens.Field.field @"maybe'lnPubKey"
+maybe'math ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'math" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'math = Data.ProtoLens.Field.field @"maybe'math"
 maybe'nonce ::
   forall f s a.
   (Prelude.Functor f,

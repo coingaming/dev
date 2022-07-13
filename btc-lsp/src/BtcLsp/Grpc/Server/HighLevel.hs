@@ -97,11 +97,20 @@ swapIntoLnT userEnt fundInvLnd unsafeRefundAddr chanPrivacy = do
   refundAddr <-
     withExceptT
       ( \case
+          FailureInp FailureNonce ->
+            newGenFailure
+              Grpc.VERIFICATION_FAILED
+              $( mkFieldLocation
+                   @SwapIntoLn.Request
+                   [ "ctx",
+                     "nonce"
+                   ]
+               )
           FailureInp FailureNonSegwitAddr ->
             newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
           FailureInp FailureNonValidAddr ->
             newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
-          e ->
+          FailureInt e ->
             newInternalFailure e
       )
       $ Smart.newOnChainAddressT unsafeRefundAddr

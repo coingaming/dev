@@ -417,12 +417,11 @@ data FailureInput
 instance Out FailureInput
 
 data FailureInternal
-  = FailureLnd Lnd.LndError
-  | FailureGrpcServer Text
+  = FailureGrpcServer Text
   | FailureGrpcClient Text
   | FailureMath Text
-  | FailureBitcoind Text
   | FailurePrivate Text
+  | FailureRedacted
   deriving stock
     ( Eq,
       Show,

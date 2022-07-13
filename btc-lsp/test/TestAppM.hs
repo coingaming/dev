@@ -127,7 +127,7 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
         }
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
-    first (FailureInt . FailureLnd) <$> args (method lnd)
+    first (const $ FailureInt FailureRedacted) <$> args (method lnd)
   withBtc method args = do
     env <- asks $ Env.envBtc . testEnvLsp
     liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
@@ -135,7 +135,7 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
       exHandler :: (Exception e) => e -> Failure
       exHandler =
         FailureInt
-          . FailureBitcoind
+          . FailurePrivate
           . pack
           . displayException
 
@@ -213,7 +213,7 @@ withLndTestT ::
   ExceptT Failure m b
 withLndTestT owner method args = do
   env <- lift $ LndTest.getLndEnv owner
-  ExceptT $ first (FailureInt . FailureLnd) <$> args (method env)
+  ExceptT $ first (const $ FailureInt FailureRedacted) <$> args (method env)
 
 withTestEnv' ::
   ( MonadUnliftIO m
