@@ -95,21 +95,13 @@ class
   withLndT method =
     ExceptT . withLnd method
   withLndServerT ::
-    ( GrpcRes res failure specific internal
+    ( GrpcRes res failure specific
     ) =>
     (Lnd.LndEnv -> a) ->
     (a -> m (Either Lnd.LndError b)) ->
     ExceptT res m b
   withLndServerT method =
-    withExceptT
-      ( const $
-          defMessage
-            & field @"failure"
-              .~ ( defMessage
-                     & field @"internal" .~ [defMessage]
-                 )
-      )
-      . withLndT method
+    withExceptT newInternalFailure . withLndT method
   withBtc ::
     (Btc.Client -> a) ->
     (a -> IO b) ->

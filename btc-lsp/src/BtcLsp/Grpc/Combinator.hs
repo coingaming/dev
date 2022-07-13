@@ -33,22 +33,21 @@ type GrpcReq req =
   ( HasField req "maybe'ctx" (Maybe Proto.Ctx)
   )
 
-type GrpcRes res failure specific internal =
+type GrpcRes res failure specific =
   ( HasField res "ctx" Proto.Ctx,
     HasField res "failure" failure,
     HasField failure "generic" [Proto.InputFailure],
     HasField failure "specific" [specific],
-    HasField failure "internal" [internal],
+    HasField failure "internal" [Proto.InternalFailure],
     Message res,
-    Message failure,
-    Message internal
+    Message failure
   )
 
 fromReqT ::
-  forall a b res failure specific internal m.
+  forall a b res failure specific m.
   ( From a b,
     'False ~ (a == b),
-    GrpcRes res failure specific internal,
+    GrpcRes res failure specific,
     Monad m
   ) =>
   ReversedFieldLocation ->
@@ -59,10 +58,10 @@ fromReqT loc =
     . fromReqE loc
 
 fromReqE ::
-  forall a b res failure specific internal.
+  forall a b res failure specific.
   ( From a b,
     'False ~ (a == b),
-    GrpcRes res failure specific internal
+    GrpcRes res failure specific
   ) =>
   ReversedFieldLocation ->
   Maybe a ->
@@ -83,8 +82,8 @@ fromReqE loc =
              )
 
 newGenFailure ::
-  forall res failure specific internal.
-  ( GrpcRes res failure specific internal
+  forall res failure specific.
+  ( GrpcRes res failure specific
   ) =>
   Proto.InputFailureKind ->
   ReversedFieldLocation ->
@@ -101,8 +100,8 @@ newGenFailure kind loc =
          )
 
 newSpecFailure ::
-  forall res failure specific internal.
-  ( GrpcRes res failure specific internal
+  forall res failure specific.
+  ( GrpcRes res failure specific
   ) =>
   specific ->
   res
@@ -117,7 +116,7 @@ newSpecFailure spec =
 
 newInternalFailure ::
   forall res failure specific.
-  ( GrpcRes res failure specific Proto.InternalFailure
+  ( GrpcRes res failure specific
   ) =>
   Failure ->
   res
@@ -142,8 +141,8 @@ newInternalFailure hFailure =
             Proto.redacted .~ True
 
 throwSpec ::
-  forall a res failure specific internal m.
-  ( GrpcRes res failure specific internal,
+  forall a res failure specific m.
+  ( GrpcRes res failure specific,
     Monad m
   ) =>
   specific ->

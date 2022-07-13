@@ -52,7 +52,7 @@ handlers run gsEnv body =
   where
     runHandler ::
       ( GrpcReq req,
-        GrpcRes res failure specific internal,
+        GrpcRes res failure specific,
         Out req,
         Out res
       ) =>
@@ -106,7 +106,7 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
 
 withMiddleware ::
   ( GrpcReq req,
-    GrpcRes res failure specific internal,
+    GrpcRes res failure specific,
     Env m,
     Out req,
     Out res
