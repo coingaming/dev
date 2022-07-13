@@ -1,5 +1,5 @@
 async function subscribe() {
-    let response = await fetch("@{SwapUpdatesR uuid sh}");
+    let response = await fetch("@{SwapUpdatesR uuid swapHash}");
     if (response.status == 502) {
       await subscribe();
     } else {
