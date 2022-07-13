@@ -44,7 +44,6 @@ module BtcLsp.Data.Type
     RowQty (..),
     PsbtUtxo (..),
     SwapHash (..),
---    SwapUpdate (..),
   )
 where
 
@@ -209,13 +208,6 @@ newtype SwapHash = SwapHash Text
 instance Out SwapHash
 
 instance ToJSON SwapHash
-
---data SwapUpdate = SwapUpdate SwapHash | SwapUpdateError Text
---  deriving stock
---    ( Eq,
---      Show,
---      Generic
---    )
 
 instance ToTypedContent (Maybe SwapHash) where
   toTypedContent = toTypedContent . toJSON
