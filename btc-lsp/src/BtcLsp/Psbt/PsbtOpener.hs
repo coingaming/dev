@@ -60,10 +60,12 @@ mapLeaseUtxosToPsbtUtxo lockedUtxos = do
   case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of
     Just us -> pure us
     Nothing -> do
-      $(logTM) DebugS $
-        logStr $
-          "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
-      throwE . FailureInt $ FailureRedacted "Cannot find utxo in unspent list"
+      $(logTM) DebugS
+        . logStr
+        $ "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
+      throwE
+        . FailureInt
+        $ FailurePrivate "Cannot find utxo in unspent list"
 
 fundChanPsbt ::
   (Env m) =>
@@ -136,7 +138,7 @@ openChannelPsbt utxos toPubKey changeAddress lspFee private = do
       $(logTM) ErrorS $ logStr $ "Open channel failed" <> inspect e
       void . T.atomically . T.writeTChan chan $ LndSubFail
   case res of
-    Left e -> throwE . FailureInt . FailureRedacted $ inspect e
+    Left e -> throwE . FailureInt . FailurePrivate $ inspect e
     Right _ -> do
       fundA <- lift . spawnLink $ runExceptT $ fundStep pcid chan
       pure $ OpenChannelPsbtResult chan fundA
@@ -163,5 +165,5 @@ openChannelPsbt utxos toPubKey changeAddress lspFee private = do
         LndSubFail -> do
           void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid)
           void $ lockUtxos (getOutPoint <$> utxos)
-          throwE (FailureInt $ FailureRedacted "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
-        _ -> throwE (FailureInt $ FailureRedacted "Unexpected update")
+          throwE (FailureInt $ FailurePrivate "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
+        _ -> throwE (FailureInt $ FailurePrivate "Unexpected update")

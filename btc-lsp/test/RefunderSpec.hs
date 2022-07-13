@@ -37,7 +37,7 @@ refundSucceded swp preTrs = do
       sequence $
         ( except
             . maybeToRight
-              (FailureInt $ FailureRedacted "missing txid")
+              (FailureInt $ FailurePrivate "missing txid")
         )
           . swapUtxoRefundTxId
           . entityVal

@@ -37,7 +37,7 @@ spec = do
     lift $ mine 1 LndLsp
     expectedAmt <-
       except
-        . first (const (FailureInt $ FailureRedacted "expectedAmt overflow"))
+        . first (const (FailureInt $ FailurePrivate "expectedAmt overflow"))
         . Math.trySatToMsat
         $ amt * 2
     utxos <- BlockScanner.scan
@@ -62,7 +62,7 @@ spec = do
         (\h -> h trAddr amt Nothing Nothing)
     lift $ mine 1 LndLsp
     expectedAmt <-
-      except . first (const (FailureInt $ FailureRedacted "expectedAmt overflow"))
+      except . first (const (FailureInt $ FailurePrivate "expectedAmt overflow"))
         . Math.trySatToMsat
         $ amt * 2
     utxos <- BlockScanner.scan

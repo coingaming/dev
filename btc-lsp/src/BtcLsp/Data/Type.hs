@@ -443,9 +443,9 @@ data FailureInternal
   = FailureLnd Lnd.LndError
   | FailureGrpcServer Text
   | FailureGrpcClient Text
-  | FailureTryFrom Text
+  | FailureMath Text
   | FailureBitcoind Text
-  | FailureRedacted Text
+  | FailurePrivate Text
   deriving stock
     ( Eq,
       Show,
@@ -465,7 +465,7 @@ tryFailureE ::
 tryFailureE =
   first $
     FailureInt
-      . FailureTryFrom
+      . FailureMath
       . Universum.show
 
 tryFailureT ::

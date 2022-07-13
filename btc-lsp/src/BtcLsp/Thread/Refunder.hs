@@ -76,7 +76,7 @@ sendUtxos feeRate utxos addr txLabel = do
         feeRate
   let finalOutputAmt = totalInputsAmt - estFee
   when (finalOutputAmt < Math.trxDustLimit) . throwE $
-    FailureInt . FailureRedacted $
+    FailureInt . FailurePrivate $
       "Final output amount "
         <> inspectPlain finalOutputAmt
         <> " = "
@@ -109,7 +109,7 @@ sendUtxos feeRate utxos addr txLabel = do
       )
   if null $ PT.publishError ptRes
     then pure $ SendUtxosResult decodedTrx totalInputsAmt estFee
-    else throwE . FailureInt $ FailureRedacted "Failed to publish refund transaction"
+    else throwE . FailureInt $ FailurePrivate "Failed to publish refund transaction"
   where
     totalInputsAmt =
       sum $ getAmt <$> utxos
