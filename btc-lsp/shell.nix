@@ -7,7 +7,7 @@ with (import ./nix/haskell.nix);
 let proto = import ./nix/proto-lens-protoc.nix;
     ideBuildInputs =
       if withHaskellIde
-      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/ba6c0091debe147b1a23ecdae97efd42312f9b4f") {bundle = ["dhall" "haskell"]; vimBackground = "light"; })]
+      then [(import (fetchTarball "https://github.com/21it/ultimate-haskell-ide/tarball/e0e0d992723cce4b2ecbd8ae4f54c4e4fea38792") {bundle = ["dhall" "haskell"]; vimBackground = "light"; })]
       else [];
 in
 (project { inherit profile; }).shellFor {

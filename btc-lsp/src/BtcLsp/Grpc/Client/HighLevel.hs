@@ -33,7 +33,7 @@ swapIntoLn ::
   SwapIntoLn.Request ->
   m (Either Failure SwapIntoLn.Response)
 swapIntoLn env req = withRunInIO $ \run ->
-  first FailureGrpc
+  first FailureGrpcClient
     <$> runUnary
       (RPC :: RPC Service "swapIntoLn")
       env
@@ -59,7 +59,7 @@ getCfg ::
   GetCfg.Request ->
   m (Either Failure GetCfg.Response)
 getCfg env req = withRunInIO $ \run ->
-  first FailureGrpc
+  first FailureGrpcClient
     <$> runUnary
       (RPC :: RPC Service "getCfg")
       env

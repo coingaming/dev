@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module BtcLsp.Data.Smart
   ( OnChainAddress,
     unsafeNewOnChainAddress,
@@ -66,17 +68,22 @@ newOnChainAddress ::
   m (Either Failure (OnChainAddress mrel))
 newOnChainAddress unsafeAddr = do
   eRes <- withBtc Btc.getAddrInfo ($ txtAddr)
-  pure $ case eRes of
-    Left e@(FailureBitcoind (OtherError txt)) ->
-      if "Not a valid Bech32 or Base58 encoding" `T.isInfixOf` txt
-        then Left FailureNonValidAddr
-        else Left e
-    Left e ->
-      Left e
+  case eRes of
+    Left e@(FailureBitcoind txt) ->
+      pure $
+        if "Not a valid Bech32 or Base58 encoding" `T.isInfixOf` txt
+          then Left FailureNonValidAddr
+          else Left e
+    Left e -> do
+      $(logTM) WarningS . logStr $
+        "newOnChainAddress unexpected failure " <> inspect e
+      pure $
+        Left e
     Right res ->
-      if Btc.isWitness res
-        then Right $ OnChainAddress txtAddr
-        else Left FailureNonSegwitAddr
+      pure $
+        if Btc.isWitness res
+          then Right $ OnChainAddress txtAddr
+          else Left FailureNonSegwitAddr
   where
     txtAddr = from unsafeAddr
 

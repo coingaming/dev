@@ -25,7 +25,6 @@ module BtcLsp.Data.Type
     tryFailureT,
     tryFromE,
     tryFromT,
-    RpcError (..),
     SocketAddress (..),
     BlkHash (..),
     BlkHeight (..),
@@ -429,18 +428,15 @@ data Failure
   = FailureNonce
   | FailureInput [Proto.InputFailure]
   | FailureLnd Lnd.LndError
-  | --
-    -- TODO : do proper input/internal
-    -- failure proto messages instead.
-    --
-    FailureGrpc Text
+  | FailureGrpcServer Text
+  | FailureGrpcClient Text
   | --
     -- NOTE : can not use SomeException there
     -- because need Eq instance.
     --
     FailureTryFrom Text
   | FailureInternal Text
-  | FailureBitcoind RpcError
+  | FailureBitcoind Text
   | FailureNonSegwitAddr
   | FailureNonValidAddr
   deriving stock
@@ -501,20 +497,6 @@ tryFromT ::
   ExceptT Failure m target
 tryFromT =
   except . tryFromE
-
-data RpcError
-  = RpcNoAddress
-  | RpcJsonDecodeError
-  | RpcHexDecodeError
-  | CannotSyncBlockchain
-  | OtherError Text
-  deriving stock
-    ( Eq,
-      Generic,
-      Show
-    )
-
-instance Out RpcError
 
 data SocketAddress = SocketAddress
   { socketAddressHost :: HostName,

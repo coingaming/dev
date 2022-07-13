@@ -133,7 +133,7 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
     where
       exHandler :: (Exception e) => e -> Failure
-      exHandler = FailureBitcoind . OtherError . pack . displayException
+      exHandler = FailureBitcoind . pack . displayException
 
 instance (MonadUnliftIO m) => Katip (TestAppM owner m) where
   getLogEnv =
