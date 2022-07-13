@@ -33,7 +33,7 @@ message Response {
   message Failure {
     repeated .BtcLsp.Data.HighLevel.InputFailure generic = 1;
     repeated InputFailure specific = 2;
-    repeated InternalFailure internal = 3;
+    repeated .BtcLsp.Data.HighLevel.InternalFailure internal = 3;
 
     enum InputFailure {
       FUND_LN_INVOICE_HAS_NON_ZERO_AMT = 0;
@@ -41,13 +41,6 @@ message Response {
       FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE = 2;
       REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID = 3;
       REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT = 4;
-    }
-
-    message InternalFailure {
-      oneof either {
-        bool redacted = 1;
-        string grpc_server = 2;
-      }
     }
   }
 }

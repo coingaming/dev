@@ -17,6 +17,7 @@ module BtcLsp.Grpc.Combinator
   )
 where
 
+import BtcLsp.Data.Type
 import BtcLsp.Import.External as Ext
 import Data.Map as Map
 import Data.ProtoLens.Field
@@ -115,19 +116,30 @@ newSpecFailure spec =
          )
 
 newInternalFailure ::
-  forall res failure specific internal.
-  ( GrpcRes res failure specific internal
+  forall res failure specific.
+  ( GrpcRes res failure specific Proto.InternalFailure
   ) =>
-  internal ->
+  Failure ->
   res
-newInternalFailure int =
+newInternalFailure hFailure =
   defMessage
     & field @"failure"
       .~ ( defMessage
              & field @"internal"
-               .~ [ int
+               .~ [ gFailure
                   ]
          )
+  where
+    --
+    -- TODO : complete exact match
+    --
+    gFailure =
+      defMessage
+        & case hFailure of
+          FailureInt (FailureGrpcServer x) ->
+            Proto.grpcServer .~ x
+          _ ->
+            Proto.redacted .~ True
 
 throwSpec ::
   forall a res failure specific internal m.

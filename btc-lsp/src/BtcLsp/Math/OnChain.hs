@@ -27,7 +27,7 @@ trySatToMsat ::
   Btc.BTC ->
   Either Failure MSat
 trySatToMsat =
-  first (FailureTryFrom . Universum.show)
+  first (FailureInt . FailureTryFrom . Universum.show)
     . ( from @Word64
           `composeTryRhs` tryFrom @Integer
             `composeTryLhs` ((* 1000) . from)
@@ -37,7 +37,7 @@ tryMsatToSat ::
   MSat ->
   Either Failure Btc.BTC
 tryMsatToSat =
-  first (FailureTryFrom . Universum.show)
+  first (FailureInt . FailureTryFrom . Universum.show)
     . ( tryFrom @Rational @Btc.BTC
           `composeTryLhs` ((% 100000000000) . via @Word64)
       )

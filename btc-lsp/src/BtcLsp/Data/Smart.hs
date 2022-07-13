@@ -69,10 +69,10 @@ newOnChainAddress ::
 newOnChainAddress unsafeAddr = do
   eRes <- withBtc Btc.getAddrInfo ($ txtAddr)
   case eRes of
-    Left e@(FailureBitcoind txt) ->
+    Left e@(FailureInt (FailureBitcoind txt)) ->
       pure $
         if "Not a valid Bech32 or Base58 encoding" `T.isInfixOf` txt
-          then Left FailureNonValidAddr
+          then Left $ FailureSpec FailureNonValidAddr
           else Left e
     Left e -> do
       $(logTM) WarningS . logStr $
@@ -83,7 +83,7 @@ newOnChainAddress unsafeAddr = do
       pure $
         if Btc.isWitness res
           then Right $ OnChainAddress txtAddr
-          else Left FailureNonSegwitAddr
+          else Left $ FailureSpec FailureNonSegwitAddr
   where
     txtAddr = from unsafeAddr
 

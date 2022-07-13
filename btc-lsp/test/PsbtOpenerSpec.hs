@@ -79,7 +79,7 @@ spec = do
       Just c -> do
         liftIO $ do
           shouldBe expectedRemoteBalance (CH.remoteBalance c)
-      Nothing -> throwE $ FailureInternal "Failed to open channel with psbt"
+      Nothing -> throwE . FailureInt $ FailureRedacted "Failed to open channel with psbt"
 
   itEnvT "PsbtOpener subscription exception" $ do
     amt <- lift getSwapIntoLnMinAmt

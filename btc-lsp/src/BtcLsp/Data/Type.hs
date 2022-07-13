@@ -21,6 +21,8 @@ module BtcLsp.Data.Type
     swapStatusLn,
     swapStatusFinal,
     Failure (..),
+    FailureInternal (..),
+    FailureSpecific (..),
     tryFailureE,
     tryFailureT,
     tryFromE,
@@ -413,30 +415,20 @@ data Timing
       Ord
     )
 
-data Error a = Error
-  { unTiming :: Timing,
-    unError :: a
-  }
+data Failure
+  = FailureInput [Proto.InputFailure]
+  | FailureSpec FailureSpecific
+  | FailureInt FailureInternal
   deriving stock
-    ( Generic,
+    ( Eq,
       Show,
-      Eq,
-      Ord
+      Generic
     )
 
-data Failure
+instance Out Failure
+
+data FailureSpecific
   = FailureNonce
-  | FailureInput [Proto.InputFailure]
-  | FailureLnd Lnd.LndError
-  | FailureGrpcServer Text
-  | FailureGrpcClient Text
-  | --
-    -- NOTE : can not use SomeException there
-    -- because need Eq instance.
-    --
-    FailureTryFrom Text
-  | FailureInternal Text
-  | FailureBitcoind Text
   | FailureNonSegwitAddr
   | FailureNonValidAddr
   deriving stock
@@ -445,7 +437,22 @@ data Failure
       Generic
     )
 
-instance Out Failure
+instance Out FailureSpecific
+
+data FailureInternal
+  = FailureLnd Lnd.LndError
+  | FailureGrpcServer Text
+  | FailureGrpcClient Text
+  | FailureTryFrom Text
+  | FailureBitcoind Text
+  | FailureRedacted Text
+  deriving stock
+    ( Eq,
+      Show,
+      Generic
+    )
+
+instance Out FailureInternal
 
 tryFailureE ::
   forall source target.
@@ -457,7 +464,9 @@ tryFailureE ::
   Either Failure target
 tryFailureE =
   first $
-    FailureTryFrom . Universum.show
+    FailureInt
+      . FailureTryFrom
+      . Universum.show
 
 tryFailureT ::
   forall source target m.

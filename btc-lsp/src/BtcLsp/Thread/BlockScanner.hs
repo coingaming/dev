@@ -268,7 +268,8 @@ scan = do
               <> inspect height
           bHeight <- tryFromT height
           withExceptT
-            ( FailureInternal
+            ( FailureInt
+                . FailureRedacted
                 . ("Block scanner failed due to bad status " <>)
                 . inspectPlain
             )

@@ -97,12 +97,12 @@ swapIntoLnT userEnt fundInvLnd unsafeRefundAddr chanPrivacy = do
   refundAddr <-
     withExceptT
       ( \case
-          FailureNonSegwitAddr ->
+          FailureSpec FailureNonSegwitAddr ->
             newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
-          FailureNonValidAddr ->
+          FailureSpec FailureNonValidAddr ->
             newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
-          _ ->
-            newInternalFailure defMessage
+          e ->
+            newInternalFailure e
       )
       $ Smart.newOnChainAddressT unsafeRefundAddr
   fundAddr <-
