@@ -60,10 +60,12 @@ mapLeaseUtxosToPsbtUtxo lockedUtxos = do
   case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of
     Just us -> pure us
     Nothing -> do
-      $(logTM) DebugS $
-        logStr $
-          "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
-      throwE $ FailureInternal "Cannot find utxo in unspent list"
+      $(logTM) DebugS
+        . logStr
+        $ "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
+      throwE
+        . FailureInt
+        $ FailurePrivate "Cannot find utxo in unspent list"
 
 fundChanPsbt ::
   (Env m) =>
@@ -87,9 +89,14 @@ fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
   let selectedInputsAmt = sumAmt lspUtxos
   $(logTM) DebugS $ logStr $ "Coins sum by lsp" <> inspect selectedInputsAmt
   let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
-  numInps <- tryFromT (length allInputs)
-  estFee <- tryFailureT $ Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
+  numInps <-
+    tryFromT "Psbt funding inputs length" (length allInputs)
+  estFee <-
+    tryFailureT "Psbt funding fee estimator" $
+      Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
+  --
   -- TODO: find exact additional cost of open trx
+  --
   let fee = estFee + MSat 50000
   $(logTM) DebugS $ logStr $ "Est fee:" <> inspect fee
   let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
@@ -136,7 +143,7 @@ openChannelPsbt utxos toPubKey changeAddress lspFee private = do
       $(logTM) ErrorS $ logStr $ "Open channel failed" <> inspect e
       void . T.atomically . T.writeTChan chan $ LndSubFail
   case res of
-    Left e -> throwE $ FailureInternal $ inspect e
+    Left e -> throwE . FailureInt . FailurePrivate $ inspect e
     Right _ -> do
       fundA <- lift . spawnLink $ runExceptT $ fundStep pcid chan
       pure $ OpenChannelPsbtResult chan fundA
@@ -163,5 +170,5 @@ openChannelPsbt utxos toPubKey changeAddress lspFee private = do
         LndSubFail -> do
           void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid)
           void $ lockUtxos (getOutPoint <$> utxos)
-          throwE (FailureInternal "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
-        _ -> throwE (FailureInternal "Unexpected update")
+          throwE (FailureInt $ FailurePrivate "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
+        _ -> throwE (FailureInt $ FailurePrivate "Unexpected update")

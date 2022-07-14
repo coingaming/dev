@@ -13,4 +13,5 @@
 /outbound OpenChanR GET
 /balanced/create SwapIntoLnCreateR GET POST
 /balanced/select/#Uuid'SwapIntoLnTable SwapIntoLnSelectR GET
+/balanced/swapupdates/#Uuid'SwapIntoLnTable/#SwapHash SwapUpdatesR GET
 /about AboutR GET

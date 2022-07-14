@@ -47,10 +47,10 @@ spec = do
         --
         liftIO $ length cs1 `shouldBe` 1
       Just ch ->
-        throwE . FailureInternal $
+        throwE . FailureInt . FailurePrivate $
           "Impossible empty ch " <> inspect ch
       Nothing ->
-        throwE . FailureInternal $
+        throwE . FailureInt . FailurePrivate $
           "Impossible empty cp " <> inspect cp
   where
     getChansT :: (Env m) => ExceptT Failure m [Lnd.Channel]

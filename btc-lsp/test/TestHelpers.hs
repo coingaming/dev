@@ -76,7 +76,7 @@ putLatestBlockToDB :: ExceptT Failure (TestAppM 'LndLsp IO) (Btc.BlockVerbose, E
 putLatestBlockToDB = do
   blk <- getLatestBlock
   height <-
-    tryFromT $
+    tryFromT "putLatestBlockToDB block height" $
       Btc.vBlkHeight blk
   k <-
     lift . runSql $

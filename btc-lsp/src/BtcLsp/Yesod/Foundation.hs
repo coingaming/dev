@@ -15,9 +15,11 @@ import qualified BtcLsp.Class.Env as Class
 import BtcLsp.Yesod.Data.BootstrapColor
 import qualified BtcLsp.Yesod.Data.Language
 import BtcLsp.Yesod.Import.NoFoundation
+import BtcLsp.Yesod.TH (mkMessageNoFallback)
 import Control.Monad.Logger (LogSource)
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Kind as Kind
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import qualified Data.Text.Encoding as TE
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet (hamletFile)
@@ -56,7 +58,7 @@ data App = forall m.
     appMRunner :: UnliftIO m
   }
 
-mkMessage "App" "messages" "en"
+mkMessageNoFallback "App" "messages" $ "en" :| ["ru"]
 
 data MenuItem = MenuItem
   { menuItemLabel :: AppMessage,
@@ -155,6 +157,7 @@ instance Yesod App where
   isAuthorized SwapIntoLnCreateR {} _ = pure Authorized
   isAuthorized SwapIntoLnSelectR {} _ = pure Authorized
   isAuthorized AboutR _ = pure Authorized
+  isAuthorized SwapUpdatesR {} _ = pure Authorized
 
   -- This function creates static content files in the static folder
   -- and names them based on a hash of their content. This allows
@@ -220,6 +223,7 @@ instance YesodBreadcrumbs App where
         SwapIntoLnCreateR -> MsgSwapIntoLnCreateRLinkShort
         SwapIntoLnSelectR x -> MsgSwapIntoLnSelectRLinkShort x
         AboutR -> MsgAboutRLinkShort
+        SwapUpdatesR _ _ -> MsgNothing
       getParent :: Route App -> Maybe (Route App)
       getParent = \case
         StaticR {} -> Nothing
@@ -232,6 +236,7 @@ instance YesodBreadcrumbs App where
         SwapIntoLnCreateR -> Just HomeR
         SwapIntoLnSelectR {} -> Just SwapIntoLnCreateR
         AboutR -> Just HomeR
+        SwapUpdatesR _ _ -> Nothing
 
 -- How to run database actions.
 instance YesodPersist App where

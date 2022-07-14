@@ -23,6 +23,7 @@ import BtcLsp.Yesod.Handler.Language
 import BtcLsp.Yesod.Handler.OpenChan
 import BtcLsp.Yesod.Handler.SwapIntoLnCreate
 import BtcLsp.Yesod.Handler.SwapIntoLnSelect
+import BtcLsp.Yesod.Handler.SwapUpdates
 import BtcLsp.Yesod.Import
 import Control.Monad.Logger (liftLoc)
 import Language.Haskell.TH.Syntax (qLocation)

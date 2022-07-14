@@ -82,26 +82,6 @@ jobs:
         asset_path: ./btc-lsp/build/docker-image-btc-lsp.txt
         asset_name: docker-image-btc-lsp.txt
         asset_content_type: text/plain
-    - name: Upload electrs docker image
-      if: github.ref_type == 'tag'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./btc-lsp/build/docker-image-electrs.tar.gz
-        asset_name: docker-image-electrs.tar.gz
-        asset_content_type: application/gzip
-    - name: Upload electrs docker image version
-      if: github.ref_type == 'tag'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./btc-lsp/build/docker-image-electrs.txt
-        asset_name: docker-image-electrs.txt
-        asset_content_type: text/plain
     - name: Upload integration docker image
       if: github.ref_type == 'tag'
       uses: actions/upload-release-asset@v1
@@ -121,6 +101,26 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./btc-lsp/build/docker-image-integration.txt
         asset_name: docker-image-integration.txt
+        asset_content_type: text/plain
+    - name: Upload electrs docker image
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./electrs-client/build/docker-image-electrs.tar.gz
+        asset_name: docker-image-electrs.tar.gz
+        asset_content_type: application/gzip
+    - name: Upload electrs docker image version
+      if: github.ref_type == 'tag'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./electrs-client/build/docker-image-electrs.txt
+        asset_name: docker-image-electrs.txt
         asset_content_type: text/plain
     - name: Save cache
       run: |

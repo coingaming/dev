@@ -34,6 +34,12 @@ fieldLocation ::
    Data.ProtoLens.Field.HasField s "fieldLocation" a) =>
   Lens.Family2.LensLike' f s a
 fieldLocation = Data.ProtoLens.Field.field @"fieldLocation"
+grpcServer ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "grpcServer" a) =>
+  Lens.Family2.LensLike' f s a
+grpcServer = Data.ProtoLens.Field.field @"grpcServer"
 host ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "host" a) =>
@@ -50,6 +56,23 @@ lnPubKey ::
    Data.ProtoLens.Field.HasField s "lnPubKey" a) =>
   Lens.Family2.LensLike' f s a
 lnPubKey = Data.ProtoLens.Field.field @"lnPubKey"
+math ::
+  forall f s a.
+  (Prelude.Functor f, Data.ProtoLens.Field.HasField s "math" a) =>
+  Lens.Family2.LensLike' f s a
+math = Data.ProtoLens.Field.field @"math"
+maybe'either ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'either" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'either = Data.ProtoLens.Field.field @"maybe'either"
+maybe'grpcServer ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'grpcServer" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'grpcServer = Data.ProtoLens.Field.field @"maybe'grpcServer"
 maybe'host ::
   forall f s a.
   (Prelude.Functor f,
@@ -62,6 +85,12 @@ maybe'lnPubKey ::
    Data.ProtoLens.Field.HasField s "maybe'lnPubKey" a) =>
   Lens.Family2.LensLike' f s a
 maybe'lnPubKey = Data.ProtoLens.Field.field @"maybe'lnPubKey"
+maybe'math ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'math" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'math = Data.ProtoLens.Field.field @"maybe'math"
 maybe'nonce ::
   forall f s a.
   (Prelude.Functor f,
@@ -80,6 +109,12 @@ maybe'pubKey ::
    Data.ProtoLens.Field.HasField s "maybe'pubKey" a) =>
   Lens.Family2.LensLike' f s a
 maybe'pubKey = Data.ProtoLens.Field.field @"maybe'pubKey"
+maybe'redacted ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "maybe'redacted" a) =>
+  Lens.Family2.LensLike' f s a
+maybe'redacted = Data.ProtoLens.Field.field @"maybe'redacted"
 maybe'val ::
   forall f s a.
   (Prelude.Functor f,
@@ -101,6 +136,12 @@ pubKey ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "pubKey" a) =>
   Lens.Family2.LensLike' f s a
 pubKey = Data.ProtoLens.Field.field @"pubKey"
+redacted ::
+  forall f s a.
+  (Prelude.Functor f,
+   Data.ProtoLens.Field.HasField s "redacted" a) =>
+  Lens.Family2.LensLike' f s a
+redacted = Data.ProtoLens.Field.field @"redacted"
 val ::
   forall f s a.
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "val" a) =>

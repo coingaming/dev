@@ -12,12 +12,13 @@ import qualified BtcLsp.Math.Swap as Math
 import BtcLsp.Storage.Model
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import BtcLsp.Yesod.Data.Widget
+import qualified BtcLsp.Yesod.Handler.SwapUpdates as SU
 import BtcLsp.Yesod.Import
 import qualified Data.UUID as UUID
 
 getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 getSwapIntoLnSelectR uuid = do
-  App {appMRunner = UnliftIO run} <- getYesod
+  app@App {appMRunner = UnliftIO run} <- getYesod
   nodeUri <- liftIO $ run getLndNodeUri
   nodeUriHex <-
     eitherM
@@ -29,6 +30,7 @@ getSwapIntoLnSelectR uuid = do
     maybeM badMethod pure
       . pure
       $ toQr nodeUriHex
+  swapHash <- maybeM notFound pure (SU.getSwapUpdate app uuid)
   maybeM
     notFound
     ( \swapInfo@SwapIntoLn.SwapInfo {..} -> do
@@ -78,6 +80,7 @@ getSwapIntoLnSelectR uuid = do
         let mChanWidget = newChanWidget swapInfoChan
         panelLayout color msgShort msgLong $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
+          $(widgetFile "swap_updates")
           $(widgetFile "swap_into_ln_select")
     )
     . liftIO

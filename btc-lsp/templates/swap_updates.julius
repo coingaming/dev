@@ -1,0 +1,15 @@
+async function subscribe() {
+    let response = await fetch("@{SwapUpdatesR uuid swapHash}");
+    if (response.status == 502) {
+      await subscribe();
+    } else {
+      const hash = await response.text()
+      if ('#{swapHash}' == hash) {
+        subscribe();
+      }
+      else {
+        document.location.reload(true)
+      }
+    }
+  }
+subscribe()
