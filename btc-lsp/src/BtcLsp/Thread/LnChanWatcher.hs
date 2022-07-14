@@ -68,8 +68,11 @@ syncChannelList = do
             <$> nonSwapList
       let nonSwapChans =
             filter
-              ( (`Set.member` nonSwapSet)
-                  . Lnd.channelPoint
+              ( \x ->
+                  ( Lnd.channelPoint x
+                      `Set.member` nonSwapSet
+                  )
+                    && not (Lnd.prv x)
               )
               openedChans
       lift
