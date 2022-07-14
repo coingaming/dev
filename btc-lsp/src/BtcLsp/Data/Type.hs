@@ -42,6 +42,7 @@ module BtcLsp.Data.Type
     Vbyte (..),
     RowQty (..),
     PsbtUtxo (..),
+    SwapHash (..),
   )
 where
 
@@ -63,6 +64,8 @@ import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Universum
 import qualified Witch
+import Yesod.Core
+import Text.Julius (ToJavascript)
 
 newtype Nonce
   = Nonce Word64
@@ -189,6 +192,27 @@ instance From Text (LnInvoice mrel) where
 instance From (LnInvoice mrel) Text where
   from =
     via @Lnd.PaymentRequest
+
+newtype SwapHash = SwapHash Text
+  deriving newtype
+    ( Eq,
+      Show,
+      Read,
+      PathPiece,
+      ToJavascript,
+      ToJSON
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out SwapHash
+
+instance ToTypedContent (Maybe SwapHash) where
+  toTypedContent = toTypedContent . toJSON
+
+instance ToContent (Maybe SwapHash) where
+  toContent = toContent . toJSON
 
 data LnInvoiceStatus
   = LnInvoiceStatusNew
