@@ -30,7 +30,7 @@ getSwapIntoLnSelectR uuid = do
     maybeM badMethod pure
       . pure
       $ toQr nodeUriHex
-  swapHash <- maybeM badMethod pure (SU.getSwapUpdate app uuid)
+  swapHash <- maybeM notFound pure (SU.getSwapUpdate app uuid)
   maybeM
     notFound
     ( \swapInfo@SwapIntoLn.SwapInfo {..} -> do
@@ -80,7 +80,6 @@ getSwapIntoLnSelectR uuid = do
         let mChanWidget = newChanWidget swapInfoChan
         panelLayout color msgShort msgLong $ do
           setTitleI $ MsgSwapIntoLnSelectRTitle swapIntoLnUuid
-          let swapHashText :: Text = coerce swapHash
           $(widgetFile "swap_updates")
           $(widgetFile "swap_into_ln_select")
     )

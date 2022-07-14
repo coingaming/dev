@@ -67,6 +67,7 @@ import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Universum
 import qualified Witch
 import Yesod.Core
+import Text.Julius (ToJavascript)
 
 newtype Nonce
   = Nonce Word64
@@ -199,15 +200,15 @@ newtype SwapHash = SwapHash Text
     ( Eq,
       Show,
       Read,
-      PathPiece
+      PathPiece,
+      ToJavascript,
+      ToJSON
     )
   deriving stock
     ( Generic
     )
 
 instance Out SwapHash
-
-instance ToJSON SwapHash
 
 instance ToTypedContent (Maybe SwapHash) where
   toTypedContent = toTypedContent . toJSON

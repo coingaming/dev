@@ -4,7 +4,7 @@ async function subscribe() {
       await subscribe();
     } else {
       const hash = await response.text()
-      if ('#{swapHashText}' == hash) {
+      if ('#{swapHash}' == hash) {
         subscribe();
       }
       else {
