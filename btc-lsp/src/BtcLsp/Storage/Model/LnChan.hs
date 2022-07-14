@@ -84,9 +84,9 @@ getActiveNonSwapSql =
         ( ( row Psql.^. LnChanStatus
               Psql.==. Psql.val LnChanStatusActive
           )
-            Psql.&&. ( row Psql.^. LnChanSwapIntoLnId
-                         Psql.==. Psql.val Nothing
-                     )
+            Psql.&&. Psql.isNothing
+              ( row Psql.^. LnChanSwapIntoLnId
+              )
         )
       pure row
 
