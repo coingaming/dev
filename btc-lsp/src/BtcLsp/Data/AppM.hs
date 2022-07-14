@@ -71,8 +71,8 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
       exHandler :: (Exception e) => e -> Failure
       exHandler =
         FailureInt . FailurePrivate . pack . displayException
-  alertLocalBalance amt = do
-    lim <- asks Env.envMinLocalExtBalance
+  monitorTotalExtOutgoingLiquidity amt = do
+    lim <- asks Env.envMinTotalExtOutgoingLiquidity
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough outgoing liquidity to the external "
@@ -81,8 +81,8 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
           <> " but minimum is "
           <> inspect lim
           <> "."
-  alertRemoteBalance amt = do
-    lim <- asks Env.envMinRemoteExtBalance
+  monitorTotalExtIncomingLiquidity amt = do
+    lim <- asks Env.envMinTotalExtIncomingLiquidity
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough incoming liquidity from the external "

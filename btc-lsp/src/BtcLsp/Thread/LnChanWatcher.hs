@@ -73,11 +73,11 @@ syncChannelList = do
               )
               openedChans
       lift
-        . alertLocalBalance
+        . monitorTotalExtOutgoingLiquidity
         . sum
         $ Lnd.localBalance <$> nonSwapChans
       lift
-        . alertRemoteBalance
+        . monitorTotalExtIncomingLiquidity
         . sum
         $ Lnd.remoteBalance <$> nonSwapChans
   whenLeft res $

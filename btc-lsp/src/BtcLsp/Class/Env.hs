@@ -113,5 +113,5 @@ class
     ExceptT Failure m b
   withBtcT method =
     ExceptT . withBtc method
-  alertLocalBalance :: MSat -> m ()
-  alertRemoteBalance :: MSat -> m ()
+  monitorTotalExtOutgoingLiquidity :: MSat -> m ()
+  monitorTotalExtIncomingLiquidity :: MSat -> m ()
