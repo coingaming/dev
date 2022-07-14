@@ -8,6 +8,7 @@ where
 
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
+import qualified Data.Set as Set
 import qualified LndClient.Data.Channel as Lnd hiding (outputIndex)
 import qualified LndClient.Data.ChannelBackup as Bak
 import qualified LndClient.Data.ChannelPoint as Lnd
@@ -22,6 +23,12 @@ syncChannelList = do
         withLndT
           LndSilent.listChannels
           ($ ListChannelsRequest False False False False Nothing)
+      --
+      -- TODO : get list of channels which are opened
+      -- according database status, but not in openedChans
+      -- list according lnd. Need to check are they closed
+      -- and update status.
+      --
       openedChansBak <-
         mapM
           ( \ch -> do
@@ -49,8 +56,30 @@ syncChannelList = do
                 )
           )
           openedChans
-      lift . runSql . void $
-        LnChan.persistOpenedChannelsSql openedChansBak
+      nonSwapSet <- lift . runSql $ do
+        void $ LnChan.persistOpenedChannelsSql openedChansBak
+        nonSwapList <- LnChan.getActiveNonSwapSql
+        pure . fromList $
+          ( \(Entity {entityVal = x}) ->
+              Lnd.ChannelPoint
+                (lnChanFundingTxId x)
+                (lnChanFundingVout x)
+          )
+            <$> nonSwapList
+      let nonSwapChans =
+            filter
+              ( (`Set.member` nonSwapSet)
+                  . Lnd.channelPoint
+              )
+              openedChans
+      lift
+        . alertLocalBalance
+        . sum
+        $ Lnd.localBalance <$> nonSwapChans
+      lift
+        . alertRemoteBalance
+        . sum
+        $ Lnd.remoteBalance <$> nonSwapChans
   whenLeft res $
     $(logTM) ErrorS . logStr
       . ("SyncChannelList failure " <>)

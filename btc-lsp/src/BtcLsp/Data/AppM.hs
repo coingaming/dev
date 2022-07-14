@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Data.AppM
   ( runApp,
@@ -70,6 +71,26 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
       exHandler :: (Exception e) => e -> Failure
       exHandler =
         FailureInt . FailurePrivate . pack . displayException
+  alertLocalBalance amt = do
+    lim <- asks Env.envMinLocalExtBalance
+    when (amt < lim) $
+      $(logTM) CriticalS . logStr $
+        "Not enough outgoing liquidity to the external "
+          <> "lightning network, got "
+          <> inspect amt
+          <> " but minimum is "
+          <> inspect lim
+          <> "."
+  alertRemoteBalance amt = do
+    lim <- asks Env.envMinRemoteExtBalance
+    when (amt < lim) $
+      $(logTM) CriticalS . logStr $
+        "Not enough incoming liquidity from the external "
+          <> "lightning network, got "
+          <> inspect amt
+          <> " but minimum is "
+          <> inspect lim
+          <> "."
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool

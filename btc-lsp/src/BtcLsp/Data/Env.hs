@@ -46,6 +46,8 @@ import qualified Network.Bitcoin as Btc
 data Env = Env
   { -- | General
     envSQLPool :: Pool Psql.SqlBackend,
+    envMinLocalExtBalance :: MSat,
+    envMinRemoteExtBalance :: MSat,
     -- | Logging
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
@@ -67,6 +69,8 @@ data Env = Env
 data RawConfig = RawConfig
   { -- | General
     rawConfigLibpqConnStr :: Psql.ConnectionString,
+    rawConfigMinLocalExtBalance :: MSat,
+    rawConfigMinRemoteExtBalance :: MSat,
     -- | Logging
     rawConfigLogEnv :: Text,
     rawConfigLogFormat :: LogFormat,
@@ -118,6 +122,8 @@ readRawConfig =
     RawConfig
       -- General
       <$> E.var (E.str <=< E.nonempty) "LSP_LIBPQ_CONN_STR" opts
+      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_LOCAL_EXT_BALANCE" (opts <> E.def 0)
+      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_REMOTE_EXT_BALANCE" (opts <> E.def 0)
       -- Logging
       <*> E.var (E.str <=< E.nonempty) "LSP_LOG_ENV" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts
@@ -197,6 +203,8 @@ withEnv rc this = do
             Env
               { -- General
                 envSQLPool = pool,
+                envMinLocalExtBalance = rawConfigMinLocalExtBalance rc,
+                envMinRemoteExtBalance = rawConfigMinRemoteExtBalance rc,
                 -- Logging
                 envKatipLE = le,
                 envKatipCTX = katipCtx,
