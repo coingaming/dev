@@ -56,12 +56,6 @@ generic ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "generic" a) =>
   Lens.Family2.LensLike' f s a
 generic = Data.ProtoLens.Field.field @"generic"
-grpcServer ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "grpcServer" a) =>
-  Lens.Family2.LensLike' f s a
-grpcServer = Data.ProtoLens.Field.field @"grpcServer"
 internal ::
   forall f s a.
   (Prelude.Functor f,
@@ -100,12 +94,6 @@ maybe'fundOnChainAddress ::
   Lens.Family2.LensLike' f s a
 maybe'fundOnChainAddress
   = Data.ProtoLens.Field.field @"maybe'fundOnChainAddress"
-maybe'grpcServer ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'grpcServer" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'grpcServer = Data.ProtoLens.Field.field @"maybe'grpcServer"
 maybe'minFundMoney ::
   forall f s a.
   (Prelude.Functor f,
@@ -113,12 +101,6 @@ maybe'minFundMoney ::
   Lens.Family2.LensLike' f s a
 maybe'minFundMoney
   = Data.ProtoLens.Field.field @"maybe'minFundMoney"
-maybe'redacted ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "maybe'redacted" a) =>
-  Lens.Family2.LensLike' f s a
-maybe'redacted = Data.ProtoLens.Field.field @"maybe'redacted"
 maybe'refundOnChainAddress ::
   forall f s a.
   (Prelude.Functor f,
@@ -143,12 +125,6 @@ privacy ::
   (Prelude.Functor f, Data.ProtoLens.Field.HasField s "privacy" a) =>
   Lens.Family2.LensLike' f s a
 privacy = Data.ProtoLens.Field.field @"privacy"
-redacted ::
-  forall f s a.
-  (Prelude.Functor f,
-   Data.ProtoLens.Field.HasField s "redacted" a) =>
-  Lens.Family2.LensLike' f s a
-redacted = Data.ProtoLens.Field.field @"redacted"
 refundOnChainAddress ::
   forall f s a.
   (Prelude.Functor f,

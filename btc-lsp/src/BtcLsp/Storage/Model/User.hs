@@ -52,5 +52,6 @@ createVerifySql pub nonce = do
             UserUpdatedAt Psql.=. Psql.val ct
           ]
     else
-      pure $
-        Left FailureNonce
+      pure
+        . Left
+        $ FailureInp FailureNonce

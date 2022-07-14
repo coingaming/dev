@@ -30,8 +30,7 @@ import qualified Universum
 apply :: (Env m) => m ()
 apply = do
   env <- getGsEnv
-  withUnliftIO $ \run ->
-    runServer env $ handlers run
+  withUnliftIO $ runServer env . handlers
 
 handlers ::
   forall m.
@@ -52,7 +51,7 @@ handlers run gsEnv body =
   where
     runHandler ::
       ( GrpcReq req,
-        GrpcRes res failure specific internal,
+        GrpcRes res failure specific,
         Out req,
         Out res
       ) =>
@@ -72,7 +71,7 @@ verifySigE ::
 verifySigE env waiReq pubNode (RawRequestBytes payload) = do
   pubDer <-
     maybeToRight
-      ( FailureGrpcServer $
+      ( FailureInt . FailureGrpcServer $
           "NodePubKey DER import failed from "
             <> inspectPlain pubNode
       )
@@ -82,7 +81,7 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
     Sig.sigToVerify (gsEnvSigHeaderName env) waiReq
   msg <-
     maybeToRight
-      ( FailureGrpcServer $
+      ( FailureInt . FailureGrpcServer $
           "Incorrect message from "
             <> inspectPlain payload
       )
@@ -91,6 +90,7 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
     then pure ()
     else
       Left
+        . FailureInt
         . FailureGrpcServer
         $ "Signature verification failed with key "
           <> inspectPlain pubDer
@@ -105,7 +105,7 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
 
 withMiddleware ::
   ( GrpcReq req,
-    GrpcRes res failure specific internal,
+    GrpcRes res failure specific,
     Env m,
     Out req,
     Out res

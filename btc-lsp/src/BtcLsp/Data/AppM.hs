@@ -62,13 +62,14 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
         }
   withLnd method args = do
     lnd <- asks Env.envLnd
-    first FailureLnd <$> args (method lnd)
+    first (const $ FailureInt FailureRedacted) <$> args (method lnd)
   withBtc method args = do
     env <- asks Env.envBtc
     liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
     where
       exHandler :: (Exception e) => e -> Failure
-      exHandler = FailureBitcoind . pack . displayException
+      exHandler =
+        FailureInt . FailurePrivate . pack . displayException
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
   getSqlPool = asks envSQLPool

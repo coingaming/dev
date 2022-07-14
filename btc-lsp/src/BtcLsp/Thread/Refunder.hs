@@ -67,16 +67,16 @@ sendUtxos ::
   TxLabel ->
   ExceptT Failure m SendUtxosResult
 sendUtxos feeRate utxos addr txLabel = do
-  inQty <- tryFromT $ length utxos
+  inQty <- tryFromT "SendUtxos length" $ length utxos
   estFee <-
-    tryFailureT $
+    tryFailureT "SendUtxos fee estimator" $
       Math.trxEstFee
         (Math.InQty inQty)
         (Math.OutQty 1)
         feeRate
   let finalOutputAmt = totalInputsAmt - estFee
   when (finalOutputAmt < Math.trxDustLimit) . throwE $
-    FailureInternal $
+    FailureInt . FailurePrivate $
       "Final output amount "
         <> inspectPlain finalOutputAmt
         <> " = "
@@ -109,7 +109,7 @@ sendUtxos feeRate utxos addr txLabel = do
       )
   if null $ PT.publishError ptRes
     then pure $ SendUtxosResult decodedTrx totalInputsAmt estFee
-    else throwE $ FailureInternal "Failed to publish refund transaction"
+    else throwE . FailureInt $ FailurePrivate "Failed to publish refund transaction"
   where
     totalInputsAmt =
       sum $ getAmt <$> utxos

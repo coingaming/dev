@@ -51,7 +51,7 @@ sigToVerify :: SigHeaderName -> Request -> Either Failure C.Sig
 sigToVerify sigHeaderName waiReq = do
   (_, b64sig) <-
     maybeToRight
-      ( FailureGrpcServer $
+      ( FailureInt . FailureGrpcServer $
           "Missing "
             <> sigHeaderNameText
             <> " header"
@@ -61,7 +61,7 @@ sigToVerify sigHeaderName waiReq = do
   let sigDer =
         B64.decodeLenient b64sig
   maybeToRight
-    ( FailureGrpcServer $
+    ( FailureInt . FailureGrpcServer $
         "Signature "
           <> sigHeaderNameText
           <> " import from der payload "

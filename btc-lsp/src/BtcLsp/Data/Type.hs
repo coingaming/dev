@@ -14,13 +14,13 @@ module BtcLsp.Data.Type
     LogFormat (..),
     YesodLog (..),
     MicroSeconds (..),
-    TaskRes (..),
-    Timing (..),
     SwapStatus (..),
     swapStatusChain,
     swapStatusLn,
     swapStatusFinal,
     Failure (..),
+    FailureInternal (..),
+    FailureInput (..),
     tryFailureE,
     tryFailureT,
     tryFromE,
@@ -61,7 +61,6 @@ import qualified Data.UUID.V4 as UUID
 import qualified LndClient as Lnd
 import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin.BlockChain as Btc
-import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Universum
 import qualified Witch
 import Yesod.Core
@@ -156,15 +155,6 @@ newtype MicroSeconds
     )
 
 instance Out MicroSeconds
-
-data TaskRes
-  = TaskResDoNotRetry
-  | TaskResRetryAfter MicroSeconds
-  deriving stock
-    ( Eq,
-      Ord,
-      Show
-    )
 
 newtype LnInvoice (mrel :: MoneyRelation)
   = LnInvoice Lnd.PaymentRequest
@@ -427,42 +417,9 @@ instance PathPiece SwapStatus where
     T.toLower
       . Universum.show
 
-data Timing
-  = Permanent
-  | Temporary
-  deriving stock
-    ( Generic,
-      Show,
-      Eq,
-      Ord
-    )
-
-data Error a = Error
-  { unTiming :: Timing,
-    unError :: a
-  }
-  deriving stock
-    ( Generic,
-      Show,
-      Eq,
-      Ord
-    )
-
 data Failure
-  = FailureNonce
-  | FailureInput [Proto.InputFailure]
-  | FailureLnd Lnd.LndError
-  | FailureGrpcServer Text
-  | FailureGrpcClient Text
-  | --
-    -- NOTE : can not use SomeException there
-    -- because need Eq instance.
-    --
-    FailureTryFrom Text
-  | FailureInternal Text
-  | FailureBitcoind Text
-  | FailureNonSegwitAddr
-  | FailureNonValidAddr
+  = FailureInp FailureInput
+  | FailureInt FailureInternal
   deriving stock
     ( Eq,
       Show,
@@ -471,17 +428,48 @@ data Failure
 
 instance Out Failure
 
+data FailureInput
+  = FailureNonce
+  | FailureNonSegwitAddr
+  | FailureNonValidAddr
+  deriving stock
+    ( Eq,
+      Show,
+      Generic
+    )
+
+instance Out FailureInput
+
+data FailureInternal
+  = FailureGrpcServer Text
+  | FailureGrpcClient Text
+  | FailureMath Text
+  | FailurePrivate Text
+  | FailureRedacted
+  deriving stock
+    ( Eq,
+      Show,
+      Generic
+    )
+
+instance Out FailureInternal
+
 tryFailureE ::
   forall source target.
   ( Show source,
     Typeable source,
     Typeable target
   ) =>
+  Text ->
   Either (TryFromException source target) target ->
   Either Failure target
-tryFailureE =
+tryFailureE label =
   first $
-    FailureTryFrom . Universum.show
+    FailureInt
+      . FailureMath
+      . (label <>)
+      . (" " <>)
+      . Universum.show
 
 tryFailureT ::
   forall source target m.
@@ -490,10 +478,11 @@ tryFailureT ::
     Typeable target,
     Monad m
   ) =>
+  Text ->
   Either (TryFromException source target) target ->
   ExceptT Failure m target
-tryFailureT =
-  except . tryFailureE
+tryFailureT label =
+  except . tryFailureE label
 
 tryFromE ::
   forall source target.
@@ -503,10 +492,11 @@ tryFromE ::
     TryFrom source target,
     'False ~ (source == target)
   ) =>
+  Text ->
   source ->
   Either Failure target
-tryFromE =
-  tryFailureE . tryFrom
+tryFromE label =
+  tryFailureE label . tryFrom
 
 tryFromT ::
   forall source target m.
@@ -517,10 +507,11 @@ tryFromT ::
     Monad m,
     'False ~ (source == target)
   ) =>
+  Text ->
   source ->
   ExceptT Failure m target
-tryFromT =
-  except . tryFromE
+tryFromT label =
+  except . tryFromE label
 
 data SocketAddress = SocketAddress
   { socketAddressHost :: HostName,

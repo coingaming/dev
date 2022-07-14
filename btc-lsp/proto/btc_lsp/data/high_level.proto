@@ -118,3 +118,11 @@ enum Privacy {
   PUBLIC = 0;
   PRIVATE = 1;
 }
+
+message InternalFailure {
+  oneof either {
+    bool redacted = 1;
+    string grpc_server = 2;
+    string math = 3;
+  }
+}

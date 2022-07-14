@@ -7,8 +7,7 @@ module Proto.BtcLsp.Method.SwapFromLn (
         Request(), Response(), Response'Either(..), _Response'Success',
         _Response'Failure', Response'Failure(),
         Response'Failure'InputFailure(..), Response'Failure'InputFailure(),
-        Response'Failure'InputFailure'UnrecognizedValue,
-        Response'Failure'InternalFailure(), Response'Success()
+        Response'Failure'InputFailure'UnrecognizedValue, Response'Success()
     ) where
 import qualified Data.ProtoLens.Runtime.Control.DeepSeq as Control.DeepSeq
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Prism as Data.ProtoLens.Prism
@@ -368,12 +367,11 @@ instance Data.ProtoLens.Message Response where
       \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.SuccessH\NULR\asuccess\DC2F\n\
       \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.FailureH\NULR\afailure\SUBd\n\
       \\aSuccess\DC2Y\n\
-      \\DC4fund_ln_hodl_invoice\CAN\SOH \SOH(\v2(.BtcLsp.Data.HighLevel.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\165\STX\n\
+      \\DC4fund_ln_hodl_invoice\CAN\SOH \SOH(\v2(.BtcLsp.Data.HighLevel.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\254\SOH\n\
       \\aFailure\DC2=\n\
       \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
-      \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapFromLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
-      \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapFromLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-      \\SIInternalFailure\"\ESC\n\
+      \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapFromLn.Response.Failure.InputFailureR\bspecific\DC2B\n\
+      \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"\ESC\n\
       \\fInputFailure\DC2\v\n\
       \\aDEFAULT\DLE\NULB\b\n\
       \\ACKeither"
@@ -547,12 +545,12 @@ _Response'Failure'
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.vec'generic' @:: Lens' Response'Failure (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure)@
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.specific' @:: Lens' Response'Failure [Response'Failure'InputFailure]@
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.vec'specific' @:: Lens' Response'Failure (Data.Vector.Vector Response'Failure'InputFailure)@
-         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.internal' @:: Lens' Response'Failure [Response'Failure'InternalFailure]@
-         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.vec'internal' @:: Lens' Response'Failure (Data.Vector.Vector Response'Failure'InternalFailure)@ -}
+         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.internal' @:: Lens' Response'Failure [Proto.BtcLsp.Data.HighLevel.InternalFailure]@
+         * 'Proto.BtcLsp.Method.SwapFromLn_Fields.vec'internal' @:: Lens' Response'Failure (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InternalFailure)@ -}
 data Response'Failure
   = Response'Failure'_constructor {_Response'Failure'generic :: !(Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InputFailure),
                                    _Response'Failure'specific :: !(Data.Vector.Vector Response'Failure'InputFailure),
-                                   _Response'Failure'internal :: !(Data.Vector.Vector Response'Failure'InternalFailure),
+                                   _Response'Failure'internal :: !(Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InternalFailure),
                                    _Response'Failure'_unknownFields :: !Data.ProtoLens.FieldSet}
   deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
 instance Prelude.Show Response'Failure where
@@ -594,7 +592,7 @@ instance Data.ProtoLens.Field.HasField Response'Failure "vec'specific" (Data.Vec
            _Response'Failure'specific
            (\ x__ y__ -> x__ {_Response'Failure'specific = y__}))
         Prelude.id
-instance Data.ProtoLens.Field.HasField Response'Failure "internal" [Response'Failure'InternalFailure] where
+instance Data.ProtoLens.Field.HasField Response'Failure "internal" [Proto.BtcLsp.Data.HighLevel.InternalFailure] where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -603,7 +601,7 @@ instance Data.ProtoLens.Field.HasField Response'Failure "internal" [Response'Fai
         (Lens.Family2.Unchecked.lens
            Data.Vector.Generic.toList
            (\ _ y__ -> Data.Vector.Generic.fromList y__))
-instance Data.ProtoLens.Field.HasField Response'Failure "vec'internal" (Data.Vector.Vector Response'Failure'InternalFailure) where
+instance Data.ProtoLens.Field.HasField Response'Failure "vec'internal" (Data.Vector.Vector Proto.BtcLsp.Data.HighLevel.InternalFailure) where
   fieldOf _
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
@@ -617,9 +615,8 @@ instance Data.ProtoLens.Message Response'Failure where
     = "\n\
       \\aFailure\DC2=\n\
       \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
-      \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapFromLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
-      \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapFromLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-      \\SIInternalFailure\"\ESC\n\
+      \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapFromLn.Response.Failure.InputFailureR\bspecific\DC2B\n\
+      \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"\ESC\n\
       \\fInputFailure\DC2\v\n\
       \\aDEFAULT\DLE\NUL"
   packedFileDescriptor _ = packedFileDescriptor
@@ -645,7 +642,7 @@ instance Data.ProtoLens.Message Response'Failure where
           = Data.ProtoLens.FieldDescriptor
               "internal"
               (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Response'Failure'InternalFailure)
+                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.InternalFailure)
               (Data.ProtoLens.RepeatedField
                  Data.ProtoLens.Unpacked
                  (Data.ProtoLens.Field.field @"internal")) ::
@@ -670,7 +667,7 @@ instance Data.ProtoLens.Message Response'Failure where
         loop ::
           Response'Failure
           -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.BtcLsp.Data.HighLevel.InputFailure
-             -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Response'Failure'InternalFailure
+             -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Proto.BtcLsp.Data.HighLevel.InternalFailure
                 -> Data.ProtoLens.Encoding.Growing.Growing Data.Vector.Vector Data.ProtoLens.Encoding.Growing.RealWorld Response'Failure'InputFailure
                    -> Data.ProtoLens.Encoding.Bytes.Parser Response'Failure
         loop x mutable'generic mutable'internal mutable'specific
@@ -911,76 +908,6 @@ instance Control.DeepSeq.NFData Response'Failure'InputFailure where
   rnf x__ = Prelude.seq x__ ()
 instance Text.PrettyPrint.GenericPretty.Out Response'Failure'InputFailure
 {- | Fields :
-      -}
-data Response'Failure'InternalFailure
-  = Response'Failure'InternalFailure'_constructor {_Response'Failure'InternalFailure'_unknownFields :: !Data.ProtoLens.FieldSet}
-  deriving stock (Prelude.Eq, Prelude.Ord, GHC.Generics.Generic)
-instance Prelude.Show Response'Failure'InternalFailure where
-  showsPrec _ __x __s
-    = Prelude.showChar
-        '{'
-        (Prelude.showString
-           (Data.ProtoLens.showMessageShort __x) (Prelude.showChar '}' __s))
-instance Text.PrettyPrint.GenericPretty.Out Response'Failure'InternalFailure
-instance Data.ProtoLens.Message Response'Failure'InternalFailure where
-  messageName _
-    = Data.Text.pack
-        "BtcLsp.Method.SwapFromLn.Response.Failure.InternalFailure"
-  packedMessageDescriptor _
-    = "\n\
-      \\SIInternalFailure"
-  packedFileDescriptor _ = packedFileDescriptor
-  fieldsByTag = let in Data.Map.fromList []
-  unknownFields
-    = Lens.Family2.Unchecked.lens
-        _Response'Failure'InternalFailure'_unknownFields
-        (\ x__ y__
-           -> x__ {_Response'Failure'InternalFailure'_unknownFields = y__})
-  defMessage
-    = Response'Failure'InternalFailure'_constructor
-        {_Response'Failure'InternalFailure'_unknownFields = []}
-  parseMessage
-    = let
-        loop ::
-          Response'Failure'InternalFailure
-          -> Data.ProtoLens.Encoding.Bytes.Parser Response'Failure'InternalFailure
-        loop x
-          = do end <- Data.ProtoLens.Encoding.Bytes.atEnd
-               if end then
-                   do (let missing = []
-                       in
-                         if Prelude.null missing then
-                             Prelude.return ()
-                         else
-                             Prelude.fail
-                               ((Prelude.++)
-                                  "Missing required fields: "
-                                  (Prelude.show (missing :: [Prelude.String]))))
-                      Prelude.return
-                        (Lens.Family2.over
-                           Data.ProtoLens.unknownFields (\ !t -> Prelude.reverse t) x)
-               else
-                   do tag <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                      case tag of {
-                        wire
-                          -> do !y <- Data.ProtoLens.Encoding.Wire.parseTaggedValueFromWire
-                                        wire
-                                loop
-                                  (Lens.Family2.over
-                                     Data.ProtoLens.unknownFields (\ !t -> (:) y t) x) }
-      in
-        (Data.ProtoLens.Encoding.Bytes.<?>)
-          (do loop Data.ProtoLens.defMessage) "InternalFailure"
-  buildMessage
-    = \ _x
-        -> Data.ProtoLens.Encoding.Wire.buildFieldSet
-             (Lens.Family2.view Data.ProtoLens.unknownFields _x)
-instance Control.DeepSeq.NFData Response'Failure'InternalFailure where
-  rnf
-    = \ x__
-        -> Control.DeepSeq.deepseq
-             (_Response'Failure'InternalFailure'_unknownFields x__) ()
-{- | Fields :
      
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.fundLnHodlInvoice' @:: Lens' Response'Success Proto.BtcLsp.Data.HighLevel.FundLnHodlInvoice@
          * 'Proto.BtcLsp.Method.SwapFromLn_Fields.maybe'fundLnHodlInvoice' @:: Lens' Response'Success (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundLnHodlInvoice)@ -}
@@ -1114,22 +1041,21 @@ packedFileDescriptor
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2?\n\
     \\n\
     \fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\tfundMoney\DC2\\\n\
-    \\NAKfund_on_chain_address\CAN\ETX \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\"\224\EOT\n\
+    \\NAKfund_on_chain_address\CAN\ETX \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\"\185\EOT\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
     \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.SuccessH\NULR\asuccess\DC2F\n\
     \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapFromLn.Response.FailureH\NULR\afailure\SUBd\n\
     \\aSuccess\DC2Y\n\
-    \\DC4fund_ln_hodl_invoice\CAN\SOH \SOH(\v2(.BtcLsp.Data.HighLevel.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\165\STX\n\
+    \\DC4fund_ln_hodl_invoice\CAN\SOH \SOH(\v2(.BtcLsp.Data.HighLevel.FundLnHodlInvoiceR\DC1fundLnHodlInvoice\SUB\254\SOH\n\
     \\aFailure\DC2=\n\
     \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
-    \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapFromLn.Response.Failure.InputFailureR\bspecific\DC2V\n\
-    \\binternal\CAN\ETX \ETX(\v2:.BtcLsp.Method.SwapFromLn.Response.Failure.InternalFailureR\binternal\SUB\DC1\n\
-    \\SIInternalFailure\"\ESC\n\
+    \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapFromLn.Response.Failure.InputFailureR\bspecific\DC2B\n\
+    \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"\ESC\n\
     \\fInputFailure\DC2\v\n\
     \\aDEFAULT\DLE\NULB\b\n\
-    \\ACKeitherJ\150\a\n\
-    \\ACK\DC2\EOT\NUL\NUL%\SOH\n\
+    \\ACKeitherJ\246\ACK\n\
+    \\ACK\DC2\EOT\NUL\NUL!\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1169,7 +1095,7 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\tDE\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\f\NUL%\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\f\NUL!\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\SOH\SOH\DC2\ETX\f\b\DLE\n\
@@ -1215,7 +1141,7 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\NAKDE\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\CAN\STX$\ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT\CAN\STX \ETX\n\
     \\f\n\
     \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX\CAN\n\
     \\DC1\n\
@@ -1240,15 +1166,15 @@ packedFileDescriptor
     \\SO\n\
     \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\SUB%&\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX\ESC\EOT*\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX\ESC\EOTA\n\
     \\SO\n\
     \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX\ESC\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX\ESC\r\FS\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX\ESC\r3\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX\ESC\GS%\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX\ESC4<\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX\ESC()\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX\ESC?@\n\
     \\SO\n\
     \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT\GS\EOT\US\ENQ\n\
     \\SO\n\
@@ -1258,8 +1184,4 @@ packedFileDescriptor
     \\DLE\n\
     \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX\RS\ACK\r\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX\RS\DLE\DC1\n\
-    \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\ETX\NUL\DC2\EOT!\EOT#\ENQ\n\
-    \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\ETX\NUL\SOH\DC2\ETX!\f\ESCb\ACKproto3"
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX\RS\DLE\DC1b\ACKproto3"
