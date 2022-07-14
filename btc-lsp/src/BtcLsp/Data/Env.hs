@@ -46,8 +46,8 @@ import qualified Network.Bitcoin as Btc
 data Env = Env
   { -- | General
     envSQLPool :: Pool Psql.SqlBackend,
-    envMinTotalExtOutgoingLiquidity :: MSat,
-    envMinTotalExtIncomingLiquidity :: MSat,
+    envMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
+    envMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
     -- | Logging
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
@@ -69,8 +69,8 @@ data Env = Env
 data RawConfig = RawConfig
   { -- | General
     rawConfigLibpqConnStr :: Psql.ConnectionString,
-    rawConfigMinTotalExtOutgoingLiquidity :: MSat,
-    rawConfigMinTotalExtIncomingLiquidity :: MSat,
+    rawConfigMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
+    rawConfigMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
     -- | Logging
     rawConfigLogEnv :: Text,
     rawConfigLogFormat :: LogFormat,
@@ -122,8 +122,8 @@ readRawConfig =
     RawConfig
       -- General
       <$> E.var (E.str <=< E.nonempty) "LSP_LIBPQ_CONN_STR" opts
-      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_TOTAL_EXT_OUTGOING_LIQUIDITY" (opts <> E.def 0)
-      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_TOTAL_EXT_INCOMING_LIQUIDITY" (opts <> E.def 0)
+      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_TOTAL_EXT_OUTGOING_LIQUIDITY_MSAT" (opts <> E.def 0)
+      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_TOTAL_EXT_INCOMING_LIQUIDITY_MSAT" (opts <> E.def 0)
       -- Logging
       <*> E.var (E.str <=< E.nonempty) "LSP_LOG_ENV" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts

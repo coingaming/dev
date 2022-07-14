@@ -1,5 +1,6 @@
 module BtcLsp.Data.Kind
-  ( MoneyRelation (..),
+  ( Direction (..),
+    MoneyRelation (..),
     BitcoinLayer (..),
     Owner (..),
     Table (..),
@@ -7,6 +8,16 @@ module BtcLsp.Data.Kind
 where
 
 import BtcLsp.Import.External
+
+data Direction
+  = Outgoing
+  | Incoming
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Generic
+    )
 
 data MoneyRelation
   = Fund

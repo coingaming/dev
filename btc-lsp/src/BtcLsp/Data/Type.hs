@@ -7,6 +7,7 @@ module BtcLsp.Data.Type
     LnInvoice (..),
     LnInvoiceStatus (..),
     LnChanStatus (..),
+    Liquidity (..),
     Money (..),
     FeeRate (..),
     UnsafeOnChainAddress (..),
@@ -61,10 +62,10 @@ import qualified Data.UUID.V4 as UUID
 import qualified LndClient as Lnd
 import qualified LndClient.Data.OutPoint as OP
 import qualified Network.Bitcoin.BlockChain as Btc
+import Text.Julius (ToJavascript)
 import qualified Universum
 import qualified Witch
 import Yesod.Core
-import Text.Julius (ToJavascript)
 
 newtype Nonce
   = Nonce Word64
@@ -236,6 +237,22 @@ data LnChanStatus
     )
 
 instance Out LnChanStatus
+
+newtype Liquidity (dir :: Direction) = Liquidity
+  { unLiquidity :: MSat
+  }
+  deriving newtype
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Num
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out (Liquidity dir)
 
 newtype
   Money
