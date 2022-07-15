@@ -147,9 +147,7 @@ SwapIntoLnFeeMiner: Channel Mining Fee
 SwapIntoLnUuid: Swap Uuid
 SwapIntoLnUserId: User Pub Key
 SwapIntoLnFundInvoice: Swap Invoice
-SwapIntoLnFundInvHash: Swap Invoice Hash
 SwapIntoLnFundAddress: Swap Fund Address
-SwapIntoLnFundProof: Swap Invoice Preimage
 SwapIntoLnRefundAddress: Swap Refund Address
 
 SwapIntoLnInfoShort: Step 1/5 - Swap Info

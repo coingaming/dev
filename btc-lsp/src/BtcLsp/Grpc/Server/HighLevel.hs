@@ -12,8 +12,8 @@ import qualified BtcLsp.Data.Smart as Smart
 import BtcLsp.Import
 import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
+import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
-import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Grpc
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Grpc
@@ -30,14 +30,6 @@ swapIntoLn ::
   m SwapIntoLn.Response
 swapIntoLn userEnt req = do
   res <- runExceptT $ do
-    fundInv <-
-      fromReqT @Grpc.FundLnInvoice @(LnInvoice 'Fund)
-        $( mkFieldLocation
-             @SwapIntoLn.Request
-             [ "fund_ln_invoice"
-             ]
-         )
-        (req ^. SwapIntoLn.maybe'fundLnInvoice)
     privacy <-
       fromReqT
         $( mkFieldLocation
@@ -46,8 +38,6 @@ swapIntoLn userEnt req = do
              ]
          )
         $ req ^? SwapIntoLn.privacy
-    fundInvLnd <-
-      withLndServerT Lnd.decodePayReq ($ from fundInv)
     unsafeRefundAddr <-
       fromReqT
         $( mkFieldLocation
@@ -58,7 +48,6 @@ swapIntoLn userEnt req = do
         $ req ^. SwapIntoLn.maybe'refundOnChainAddress
     swapIntoLnT
       userEnt
-      fundInvLnd
       unsafeRefundAddr
       privacy
   pure $ case res of
@@ -80,21 +69,14 @@ swapIntoLnT ::
   ( Env m
   ) =>
   Entity User ->
-  Lnd.PayReq ->
   UnsafeOnChainAddress 'Refund ->
   Privacy ->
   ExceptT SwapIntoLn.Response m (Entity SwapIntoLn)
-swapIntoLnT userEnt fundInvLnd unsafeRefundAddr chanPrivacy = do
+swapIntoLnT userEnt unsafeRefundAddr chanPrivacy = do
   --
   -- TODO : Do not fail immediately, but collect
   -- all the input failures.
   --
-  when
-    ( Lnd.destination fundInvLnd
-        /= userNodePubKey (entityVal userEnt)
-    )
-    $ throwSpec
-      SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
   refundAddr <-
     withExceptT
       ( \case
@@ -134,6 +116,10 @@ swapIntoLnT userEnt fundInvLnd unsafeRefundAddr chanPrivacy = do
               Lnd.account = Nothing
             }
       )
+  expAt <-
+    getFutureTime
+      . Lnd.Seconds
+      $ 7 * 24 * 60 * 60
   lift
     . runSql
     . SwapIntoLn.createIgnoreSql
@@ -141,7 +127,7 @@ swapIntoLnT userEnt fundInvLnd unsafeRefundAddr chanPrivacy = do
       fundAddr
       (from feeAndChangeAddr)
       refundAddr
-      (Lnd.expiresAt fundInvLnd)
+      expAt
     $ chanPrivacy
 
 getCfg ::

@@ -13,7 +13,6 @@ import qualified BtcLsp.Storage.Model.LnChan as L
 import qualified BtcLsp.Storage.Model.SwapIntoLn as S
 import qualified BtcLsp.Storage.Model.SwapUtxo as SU
 import qualified LndClient as Lnd
-import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.Channel as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
 import LndClient.LndTest (lazyConnectNodes, mine)
@@ -105,21 +104,6 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                    )
   itMainT @'LndLsp "Server SwapIntoLn" $ do
     gcEnv <- lift getGCEnv
-    fundInv <-
-      from . Lnd.paymentRequest
-        <$> withLndTestT
-          LndAlice
-          Lnd.addInvoice
-          ( $
-              Lnd.AddInvoiceRequest
-                { Lnd.valueMsat = MSat 0,
-                  Lnd.memo = Nothing,
-                  Lnd.expiry =
-                    Just
-                      . Lnd.Seconds
-                      $ 7 * 24 * 3600
-                }
-          )
     refundAddr <- from <$> genAddress LndAlice
     res0 <-
       Client.swapIntoLnT
@@ -129,8 +113,6 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
         =<< setGrpcCtxT
           LndAlice
           ( defMessage
-              & SwapIntoLn.fundLnInvoice
-                .~ from @(LnInvoice 'Fund) fundInv
               & SwapIntoLn.refundOnChainAddress
                 .~ from @(OnChainAddress 'Refund) refundAddr
           )

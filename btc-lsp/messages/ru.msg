@@ -147,9 +147,7 @@ SwapIntoLnFeeMiner: Комиссия майнеров
 SwapIntoLnUuid: Идентификатор обмена
 SwapIntoLnUserId: Публичный ключ пользователя
 SwapIntoLnFundInvoice: Инвойс обмена
-SwapIntoLnFundInvHash: Хеш инвойса обмена
 SwapIntoLnFundAddress: Адрес оплаты обмена
-SwapIntoLnFundProof: Прообраз инвойса обмена
 SwapIntoLnRefundAddress: Адрес возврата обмена
 
 SwapIntoLnInfoShort: Шаг 1/5 - Информация обмена
