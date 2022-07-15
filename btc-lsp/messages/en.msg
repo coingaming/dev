@@ -40,7 +40,6 @@ InputFailure: Something went wrong. Please check the input data and try again.
 SwapWaitingFundChain: Waiting for funding
 SwapWaitingPeer: Waiting for the peer
 SwapWaitingChan: Waiting for the channel
-SwapWaitingFundLn: Paying the swap invoice
 SwapSucceeded: Succeeded
 SwapExpired: Expired
 
@@ -157,7 +156,6 @@ SwapIntoLnInfoShort: Step 1/5 - Swap Info
 SwapIntoLnWaitingFundChainShort: Step 2/5 - Swap Funding
 SwapIntoLnFundedShort: Step 3/5 - Peer Connection
 SwapIntoLnWaitingChanShort: Step 4/5 - Channel Opening
-SwapIntoLnWaitingFundLnShort: Step 4/5 - Lightning Funding
 SwapIntoLnSucceededShort: Step 5/5 - Swap Succeeded
 SwapIntoLnExpiredShort: Swap Expired!
 
@@ -165,7 +163,6 @@ SwapIntoLnInfoLong: To request a balanced channel with LSP, provide any lightnin
 SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: LSP is waiting for the swap to be funded. Please send between #{minAmt} and #{maxAmt} satoshi to the on-chain swap address:
 SwapIntoLnFundedLong: The swap is successfully funded. LSP is waiting for your lightning node being connected as a peer. Use the URI below to establish connection from your lightning node:
 SwapIntoLnWaitingChanLong: LSP initiated lightning channel. Waiting for the channel being opened.
-SwapIntoLnWaitingFundLnLong: Lightning channel has been opened. Now LSP is settling swap lightning invoice.
 SwapIntoLnSucceededLong: Swap succeeded!
 SwapIntoLnExpiredLong: Swap has been expired, and all the funds will be refunded to refund on-chain address.
 

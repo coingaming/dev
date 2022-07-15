@@ -4,12 +4,10 @@ module BtcLsp.Storage.Model.SwapIntoLn
   ( createIgnoreSql,
     updateWaitingPeerSql,
     updateWaitingChanSql,
-    updateWaitingFundLnSql,
     updateExpiredSql,
     updateSucceededSql,
     getSwapsWaitingPeerSql,
     getSwapsWaitingChanSql,
-    getSwapsWaitingLnFundSql,
     getSwapsAboutToExpirySql,
     updateSucceededWithoutInvoiceSql,
     getByUuidSql,
@@ -121,29 +119,6 @@ updateWaitingChanSql id0 = do
                      Psql.==. Psql.val SwapWaitingPeer
                  )
 
-updateWaitingFundLnSql ::
-  ( MonadIO m
-  ) =>
-  SwapIntoLnId ->
-  ReaderT Psql.SqlBackend m ()
-updateWaitingFundLnSql id0 = do
-  ct <- getCurrentTime
-  Psql.update $ \row -> do
-    Psql.set
-      row
-      [ SwapIntoLnStatus
-          Psql.=. Psql.val SwapWaitingFundLn,
-        SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
-      ]
-    Psql.where_ $
-      ( row Psql.^. SwapIntoLnId
-          Psql.==. Psql.val id0
-      )
-        Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapWaitingChan
-                 )
-
 updateExpiredSql ::
   ( MonadIO m,
     KatipContext m
@@ -221,7 +196,7 @@ updateSucceededSql sid = do
           Psql.==. Psql.val sid
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
-                     Psql.==. Psql.val SwapWaitingFundLn
+                     Psql.==. Psql.val SwapWaitingChan
                  )
 
 getSwapsWaitingPeerSql ::
@@ -281,47 +256,6 @@ getSwapsWaitingChanSql =
       -- Maybe limits, some proper retries etc.
       --
       pure (swap, user)
-
-getSwapsWaitingLnFundSql ::
-  ( MonadIO m
-  ) =>
-  ReaderT
-    Psql.SqlBackend
-    m
-    [ ( Entity SwapIntoLn,
-        Entity User,
-        Entity LnChan
-      )
-    ]
-getSwapsWaitingLnFundSql =
-  Psql.select $
-    Psql.from $
-      \( swap
-           `Psql.InnerJoin` user
-           `Psql.InnerJoin` chan
-         ) -> do
-          Psql.on
-            ( Psql.just (swap Psql.^. SwapIntoLnId)
-                Psql.==. chan Psql.^. LnChanSwapIntoLnId
-            )
-          Psql.on
-            ( swap Psql.^. SwapIntoLnUserId
-                Psql.==. user Psql.^. UserId
-            )
-          Psql.where_
-            ( ( chan Psql.^. LnChanStatus
-                  Psql.==. Psql.val LnChanStatusActive
-              )
-                Psql.&&. ( swap Psql.^. SwapIntoLnStatus
-                             Psql.==. Psql.val SwapWaitingFundLn
-                         )
-            )
-          --
-          -- TODO : some sort of exp backoff in case
-          -- where user node is offline for a long time.
-          -- Maybe limits, some proper retries etc.
-          --
-          pure (swap, user, chan)
 
 getSwapsAboutToExpirySql ::
   ( MonadIO m

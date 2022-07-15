@@ -40,7 +40,6 @@ InputFailure: Произошла ошибка. Пожалуйста провер
 SwapWaitingFundChain: Ожидание оплаты
 SwapWaitingPeer: Ожидание соединения
 SwapWaitingChan: Ожидание канала
-SwapWaitingFundLn: Оплата инвойса
 SwapSucceeded: Успешно завершено
 SwapExpired: Срок истёк
 
@@ -157,7 +156,6 @@ SwapIntoLnInfoShort: Шаг 1/5 - Информация обмена
 SwapIntoLnWaitingFundChainShort: Шаг 2/5 - Оплата обмена
 SwapIntoLnFundedShort: Шаг 3/5 - Соединение с узлом
 SwapIntoLnWaitingChanShort: Шаг 4/5 - Открытие канала
-SwapIntoLnWaitingFundLnShort: Шаг 4/5 - Оплата канала
 SwapIntoLnSucceededShort: Шаг 5/5 - Обмен успешно выполнен
 SwapIntoLnExpiredShort: Срок обмена истёк!
 
@@ -165,7 +163,6 @@ SwapIntoLnInfoLong: Для того чтобы запросить балансн
 SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: ЛСП ожидает оплаты обмена. Пожалуйста отправьте от #{minAmt} до #{maxAmt} сатоши на ончейн адрес:
 SwapIntoLnFundedLong: Обмен успешно оплачен. ЛСП ожидает входящего соединения от вашего лайтнинг узла. Используйте предоставленный ниже адрес для соединения вашего лайтнинг узла с ЛСП:
 SwapIntoLnWaitingChanLong: ЛСП открывает канал. Подождите пока канал откроется.
-SwapIntoLnWaitingFundLnLong: Лайтнинг канал открыт. ЛСП оплачивает инвойс обмена.
 SwapIntoLnSucceededLong: Обмен успешно выполнен!
 SwapIntoLnExpiredLong: Срок обмена истёк и все предоставленные средства будут отправлены на ончейн адрес возврата.
 
