@@ -113,3 +113,5 @@ class
     ExceptT Failure m b
   withBtcT method =
     ExceptT . withBtc method
+  monitorTotalExtOutgoingLiquidity :: Liquidity 'Outgoing -> m ()
+  monitorTotalExtIncomingLiquidity :: Liquidity 'Incoming -> m ()
