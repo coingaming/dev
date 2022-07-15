@@ -73,6 +73,7 @@ syncChannelList = do
                       `Set.member` nonSwapSet
                   )
                     && not (Lnd.prv x)
+                    && Lnd.active x
               )
               openedChans
       lift
