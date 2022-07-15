@@ -142,6 +142,11 @@ aForm =
       (bfs MsgSwapIntoLnRefundAddress)
       Nothing
     <*> areq
-      (selectField optionsEnum)
+      ( selectField $
+          optionsPairs
+            [ (MsgChanPublic, Public),
+              (MsgChanPrivate, Private)
+            ]
+      )
       (bfs MsgChannelPrivacy)
-      (Just Private)
+      (Just Public)
