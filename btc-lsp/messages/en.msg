@@ -121,8 +121,6 @@ OpenChanInstruction: To open a payment channel to the LSP, scan the QR code with
 # SwapIntoLnCreateR
 #
 
-SwapIntoLnFailureFundLnInvoiceHasNonZeroAmt: Provided swap invoice has non-zero amount requested. Only zero amount lightning invoices are accepted for the swaps.
-SwapIntoLnFailureFundLnInvoiceExpiresTooSoon: Provided swap invoice expires too soon. Please set the expiration time to at least one week.
 SwapIntoLnFailureRefundOnChainAddressIsNotValid: Provided on-chain refund address is not valid. LSP accepts only native segwit bech32 bitcoin addresses.
 SwapIntoLnFailureRefundOnChainAddressIsNotSegwit: Provided on-chain refund address is not native segwit bech32 address. LSP accepts only native segwit bech32 bitcoin addresses.
 
@@ -231,7 +229,7 @@ AboutExamplesTotalChanCap: Total Channel Capacity
 AboutSwap0: Balanced Channel Flow
 AboutSwap1: The creation of a balanced channel with LSP is implemented through on-chain to lightning swap. On the first step, the user provides LSP swap data:
 AboutSwap2: Swap Invoice
-AboutSwap3: - lightning invoice created by user's lightning node. This invoice is used to push swap liquidity to the user side of the payment channel after the channel is opened. LSP does not have any information about the swap size beforehand, so provided invoice must be zero-amount only. LSP also does not have any information about user's node availability during the swap period, so the expiration time of the invoice must be at least one week.
+AboutSwap3: - lightning invoice created by user's lightning node. This invoice is used to identify the user's node.
 AboutSwap4: Refund Address
 AboutSwap5: - emergency on-chain refund address, which is used by LSP for on-chain refunds in cases where bitcoins were sent to the on-chain swap address, but the swap has already succeeded or expired.
 AboutSwap6: Channel Privacy
