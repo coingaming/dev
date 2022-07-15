@@ -602,7 +602,6 @@ data SwapUtxoStatus
   = SwapUtxoUnspent
   | SwapUtxoUnspentDust
   | SwapUtxoUnspentChanReserve
-  | SwapUtxoSpentChan
   | SwapUtxoSpentChanSwapped
   | SwapUtxoSpentRefund
   | SwapUtxoOrphan

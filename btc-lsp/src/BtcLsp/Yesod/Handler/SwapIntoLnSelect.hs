@@ -101,8 +101,7 @@ newSwapWidget swapInfo =
             . MsgSatoshi
             $ totalOnChainAmt
               ( `elem`
-                  [ SwapUtxoUnspentChanReserve,
-                    SwapUtxoSpentChan
+                  [ SwapUtxoUnspentChanReserve
                   ]
               )
               swapInfo
@@ -304,7 +303,6 @@ swapUtxoStatusMsg = \case
   SwapUtxoUnspent -> MsgSwapUtxoUnspent
   SwapUtxoUnspentDust -> MsgSwapUtxoUnspentDust
   SwapUtxoUnspentChanReserve -> MsgSwapUtxoUnspentChanReserve
-  SwapUtxoSpentChan -> MsgSwapUtxoSpentChan
   SwapUtxoSpentChanSwapped -> MsgSwapUtxoSpentChanSwapped
   SwapUtxoSpentRefund -> MsgSwapUtxoSpentRefund
   SwapUtxoOrphan -> MsgSwapUtxoOrphan

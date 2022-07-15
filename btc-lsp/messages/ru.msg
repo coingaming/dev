@@ -50,7 +50,6 @@ SwapExpired: Срок истёк
 SwapUtxoUnspent: Не потрачено
 SwapUtxoUnspentDust: Пыль
 SwapUtxoUnspentChanReserve: Зарезервировано для обмена
-SwapUtxoSpentChan: Потрачено на канал
 SwapUtxoSpentChanSwapped: Потрачено на обмен
 SwapUtxoSpentRefund: Возвращено
 SwapUtxoOrphan: Реорганизовано
