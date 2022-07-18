@@ -5,6 +5,7 @@ module BtcLsp.Storage.Model.LnChan
     getByChannelPointSql,
     persistChannelUpdateSql,
     persistOpenedChannelsSql,
+    persistClosedChannelsSql,
     getBySwapIdSql,
     getActiveNonSwapSql,
   )
@@ -14,6 +15,7 @@ import BtcLsp.Import
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Util as Util
+import qualified Data.Set as Set
 import qualified LndClient.Data.Channel as Channel
 import qualified LndClient.Data.Channel as Lnd
 import qualified LndClient.Data.ChannelBackup as Lnd
@@ -295,3 +297,43 @@ persistOpenedChannelsSql cs = do
   ct <- getCurrentTime
   forM (sortOn (Channel.channelPoint . fst) cs) $
     uncurry (upsertChannelSql ct Nothing)
+
+getNonClosedSql ::
+  ( MonadIO m
+  ) =>
+  ReaderT Psql.SqlBackend m [Entity LnChan]
+getNonClosedSql =
+  Psql.select $
+    Psql.from $ \row -> do
+      Psql.where_
+        ( row Psql.^. LnChanStatus
+            Psql.!=. Psql.val LnChanStatusClosed
+        )
+      pure row
+
+persistClosedChannelsSql ::
+  ( MonadIO m
+  ) =>
+  [Lnd.ChannelCloseSummary] ->
+  ReaderT Psql.SqlBackend m [Entity LnChan]
+persistClosedChannelsSql [] = pure mempty
+persistClosedChannelsSql csRaw = do
+  ct <- getCurrentTime
+  nonClosedList <- getNonClosedSql
+  let nonClosedSet =
+        fromList $
+          ( \(Entity {entityVal = x}) ->
+              Lnd.ChannelPoint
+                (lnChanFundingTxId x)
+                (lnChanFundingVout x)
+          )
+            <$> nonClosedList
+  let csUpd =
+        sortOn CloseChannel.chPoint $
+          filter
+            ( (`Set.member` nonClosedSet)
+                . CloseChannel.chPoint
+            )
+            csRaw
+  forM csUpd $
+    closedChannelUpsert ct
