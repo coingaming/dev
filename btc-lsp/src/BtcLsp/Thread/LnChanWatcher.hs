@@ -12,6 +12,7 @@ import qualified Data.Set as Set
 import qualified LndClient.Data.Channel as Lnd hiding (outputIndex)
 import qualified LndClient.Data.ChannelBackup as Bak
 import qualified LndClient.Data.ChannelPoint as Lnd
+import LndClient.Data.ClosedChannels (ClosedChannelsRequest (..))
 import LndClient.Data.ListChannels
 import qualified LndClient.RPC.Silent as LndSilent
 
@@ -56,8 +57,21 @@ syncChannelList = do
                 )
           )
           openedChans
+      closedChans <-
+        withLndT
+          LndSilent.closedChannels
+          ( $
+              ClosedChannelsRequest
+                False
+                False
+                False
+                False
+                False
+                False
+          )
       nonSwapSet <- lift . runSql $ do
         void $ LnChan.persistOpenedChannelsSql openedChansBak
+        void $ LnChan.persistClosedChannelsSql closedChans
         nonSwapList <- LnChan.getActiveNonSwapSql
         pure . fromList $
           ( \(Entity {entityVal = x}) ->

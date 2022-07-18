@@ -135,7 +135,11 @@ testFun = do
     let r =
           and
             <$> sequence
-              [ (== LnChanStatusFullyResolved)
+              [ ( `elem`
+                    [ LnChanStatusFullyResolved,
+                      LnChanStatusClosed
+                    ]
+                )
                   . lnChanStatus
                   <$> ch
               ]
