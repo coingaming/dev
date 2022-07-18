@@ -11,7 +11,31 @@ import qualified Database.Persist.Migration as PsqlMig
 import qualified Database.Persist.Migration.Postgres as PsqlMig
 
 migrateBefore :: PsqlMig.Migration
-migrateBefore = []
+migrateBefore =
+  [ 1 PsqlMig.~> 2
+      PsqlMig.:= [ dropFundInvHashConstraint,
+                   dropFundInvoice,
+                   dropFundInvHash,
+                   dropFundProof
+                 ]
+  ]
+  where
+    dropFundInvHashConstraint =
+      PsqlMig.RawOperation "Drop fund_inv_hash unique constraint" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE IF EXISTS swap_into_ln DROP CONSTRAINT IF EXISTS unique_swap_into_ln_fund_inv_hash" []]
+    dropFundInvoice =
+      PsqlMig.RawOperation "Drop fund_invoice" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE IF EXISTS swap_into_ln DROP COLUMN IF EXISTS fund_invoice" []]
+    dropFundInvHash =
+      PsqlMig.RawOperation "Drop fund_inv_hash" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE IF EXISTS swap_into_ln DROP COLUMN IF EXISTS fund_inv_hash" []]
+    dropFundProof =
+      PsqlMig.RawOperation "Drop fund_proof" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE IF EXISTS swap_into_ln DROP COLUMN IF EXISTS fund_proof" []]
 
 --
 -- TODO : add all needed indexes
