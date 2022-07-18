@@ -55,11 +55,6 @@ getSwapIntoLnSelectR uuid = do
                     MsgSwapIntoLnWaitingChanLong,
                     Info
                   )
-                SwapWaitingFundLn ->
-                  ( MsgSwapIntoLnWaitingFundLnShort,
-                    MsgSwapIntoLnWaitingFundLnLong,
-                    Info
-                  )
                 SwapSucceeded ->
                   ( MsgSwapIntoLnSucceededShort,
                     MsgSwapIntoLnSucceededLong,
@@ -106,8 +101,7 @@ newSwapWidget swapInfo =
             . MsgSatoshi
             $ totalOnChainAmt
               ( `elem`
-                  [ SwapUtxoUnspentChanReserve,
-                    SwapUtxoSpentChan
+                  [ SwapUtxoUnspentChanReserve
                   ]
               )
               swapInfo
@@ -296,7 +290,6 @@ swapStatusMsg = \case
   SwapWaitingFundChain -> MsgSwapWaitingFundChain
   SwapWaitingPeer -> MsgSwapWaitingPeer
   SwapWaitingChan -> MsgSwapWaitingChan
-  SwapWaitingFundLn -> MsgSwapWaitingFundLn
   SwapSucceeded -> MsgSwapSucceeded
   SwapExpired -> MsgSwapExpired
 
@@ -310,7 +303,6 @@ swapUtxoStatusMsg = \case
   SwapUtxoUnspent -> MsgSwapUtxoUnspent
   SwapUtxoUnspentDust -> MsgSwapUtxoUnspentDust
   SwapUtxoUnspentChanReserve -> MsgSwapUtxoUnspentChanReserve
-  SwapUtxoSpentChan -> MsgSwapUtxoSpentChan
   SwapUtxoSpentChanSwapped -> MsgSwapUtxoSpentChanSwapped
   SwapUtxoSpentRefund -> MsgSwapUtxoSpentRefund
   SwapUtxoOrphan -> MsgSwapUtxoOrphan

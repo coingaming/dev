@@ -138,6 +138,26 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
           . FailurePrivate
           . pack
           . displayException
+  monitorTotalExtOutgoingLiquidity amt = do
+    lim <- asks $ envMinTotalExtOutgoingLiquidity . testEnvLsp
+    when (amt < lim) $
+      $(logTM) CriticalS . logStr $
+        "Not enough outgoing liquidity to the external "
+          <> "lightning network, got "
+          <> inspect amt
+          <> " but minimum is "
+          <> inspect lim
+          <> "."
+  monitorTotalExtIncomingLiquidity amt = do
+    lim <- asks $ envMinTotalExtIncomingLiquidity . testEnvLsp
+    when (amt < lim) $
+      $(logTM) CriticalS . logStr $
+        "Not enough incoming liquidity from the external "
+          <> "lightning network, got "
+          <> inspect amt
+          <> " but minimum is "
+          <> inspect lim
+          <> "."
 
 instance (MonadUnliftIO m) => Katip (TestAppM owner m) where
   getLogEnv =

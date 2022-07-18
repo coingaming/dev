@@ -81,7 +81,6 @@ openChanSql (Entity swapKey _) userEnt = do
                 (ChannelPoint.fundingTxId cp)
                 (ChannelPoint.outputIndex cp)
                 >> SwapIntoLn.updateWaitingChanSql swapKey
-                >> SwapUtxo.updateSpentChanSql swapKey
                 >> SwapUtxo.updateSpentChanSwappedSql swapKey
           )
           cpEither

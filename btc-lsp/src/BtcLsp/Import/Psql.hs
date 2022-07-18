@@ -27,6 +27,7 @@ import Database.Esqueleto.Legacy as X
     desc,
     from,
     in_,
+    isNothing,
     just,
     limit,
     locking,

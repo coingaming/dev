@@ -40,7 +40,6 @@ InputFailure: Произошла ошибка. Пожалуйста провер
 SwapWaitingFundChain: Ожидание оплаты
 SwapWaitingPeer: Ожидание соединения
 SwapWaitingChan: Ожидание канала
-SwapWaitingFundLn: Оплата инвойса
 SwapSucceeded: Успешно завершено
 SwapExpired: Срок истёк
 
@@ -51,7 +50,6 @@ SwapExpired: Срок истёк
 SwapUtxoUnspent: Не потрачено
 SwapUtxoUnspentDust: Пыль
 SwapUtxoUnspentChanReserve: Зарезервировано для обмена
-SwapUtxoSpentChan: Потрачено на канал
 SwapUtxoSpentChanSwapped: Потрачено на обмен
 SwapUtxoSpentRefund: Возвращено
 SwapUtxoOrphan: Реорганизовано
@@ -122,8 +120,6 @@ OpenChanInstruction: Чтобы открыть исходящий канал к 
 # SwapIntoLnCreateR
 #
 
-SwapIntoLnFailureFundLnInvoiceHasNonZeroAmt: Предоставленный инвойс запрашивает не нулевое количество сатоши. Только нулевые инвойсы принимаются для обмена.
-SwapIntoLnFailureFundLnInvoiceExpiresTooSoon: Предоставленный инвойс истекает слишком рано. Пожалуйста установите срок оплаты как минимум в одну неделю.
 SwapIntoLnFailureRefundOnChainAddressIsNotValid: Предоставленный ончейн адрес для возврата не валиден. ЛСП принимает только нативные segwit bech32 адреса.
 SwapIntoLnFailureRefundOnChainAddressIsNotSegwit: Предоставленный ончейн адрес для возврата не является нативным segwit bech32 адресом. ЛСП принимает только нативные segwit bech32 адреса.
 
@@ -148,16 +144,13 @@ SwapIntoLnFeeMiner: Комиссия майнеров
 SwapIntoLnUuid: Идентификатор обмена
 SwapIntoLnUserId: Публичный ключ пользователя
 SwapIntoLnFundInvoice: Инвойс обмена
-SwapIntoLnFundInvHash: Хеш инвойса обмена
 SwapIntoLnFundAddress: Адрес оплаты обмена
-SwapIntoLnFundProof: Прообраз инвойса обмена
 SwapIntoLnRefundAddress: Адрес возврата обмена
 
 SwapIntoLnInfoShort: Шаг 1/5 - Информация обмена
 SwapIntoLnWaitingFundChainShort: Шаг 2/5 - Оплата обмена
 SwapIntoLnFundedShort: Шаг 3/5 - Соединение с узлом
 SwapIntoLnWaitingChanShort: Шаг 4/5 - Открытие канала
-SwapIntoLnWaitingFundLnShort: Шаг 4/5 - Оплата канала
 SwapIntoLnSucceededShort: Шаг 5/5 - Обмен успешно выполнен
 SwapIntoLnExpiredShort: Срок обмена истёк!
 
@@ -165,7 +158,6 @@ SwapIntoLnInfoLong: Для того чтобы запросить балансн
 SwapIntoLnWaitingFundChainLong minAmt@Money'Usr'OnChain'Fund maxAmt@Money'Usr'OnChain'Fund: ЛСП ожидает оплаты обмена. Пожалуйста отправьте от #{minAmt} до #{maxAmt} сатоши на ончейн адрес:
 SwapIntoLnFundedLong: Обмен успешно оплачен. ЛСП ожидает входящего соединения от вашего лайтнинг узла. Используйте предоставленный ниже адрес для соединения вашего лайтнинг узла с ЛСП:
 SwapIntoLnWaitingChanLong: ЛСП открывает канал. Подождите пока канал откроется.
-SwapIntoLnWaitingFundLnLong: Лайтнинг канал открыт. ЛСП оплачивает инвойс обмена.
 SwapIntoLnSucceededLong: Обмен успешно выполнен!
 SwapIntoLnExpiredLong: Срок обмена истёк и все предоставленные средства будут отправлены на ончейн адрес возврата.
 
@@ -236,7 +228,7 @@ AboutExamplesTotalChanCap: Общая ликвидность канала
 AboutSwap0: Открытие балансного канала
 AboutSwap1: Открытие балансного канала с ЛСП осуществояется через обмен ончейн биткоинов на лайтнинг биткоины. На первом этапе пользователь предоставляет для ЛСП данные для обмена:
 AboutSwap2: Обменный инвойс
-AboutSwap3: - лайтнинг инвойс созданный лайтнинг узлом пользователя. Этот инвойс используется для того чтобы перенести ликвидность на сторону пользователя после того как лайтнинг канал откроется.
+AboutSwap3: - лайтнинг инвойс созданный лайтнинг узлом пользователя. Этот инвойс используется для того чтобы идентифицировать пользователя.
 AboutSwap4: Адрес возврата
 AboutSwap5: - ончейн адрес для экстренного возврата, который используется ЛСП для ончейн возврата в случаях когда биткоины были отправлены на ончейн адрес обмена, но процедура обмена уже была завершена или её срок истёк.
 AboutSwap6: Приватность канала

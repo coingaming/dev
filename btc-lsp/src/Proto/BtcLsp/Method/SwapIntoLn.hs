@@ -42,14 +42,11 @@ import qualified Proto.BtcLsp.Data.HighLevel
      
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.ctx' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.Ctx@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'ctx' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.Ctx)@
-         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.fundLnInvoice' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.FundLnInvoice@
-         * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'fundLnInvoice' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundLnInvoice)@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.refundOnChainAddress' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.maybe'refundOnChainAddress' @:: Lens' Request (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress)@
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.privacy' @:: Lens' Request Proto.BtcLsp.Data.HighLevel.Privacy@ -}
 data Request
   = Request'_constructor {_Request'ctx :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.Ctx),
-                          _Request'fundLnInvoice :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundLnInvoice),
                           _Request'refundOnChainAddress :: !(Prelude.Maybe Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress),
                           _Request'privacy :: !Proto.BtcLsp.Data.HighLevel.Privacy,
                           _Request'_unknownFields :: !Data.ProtoLens.FieldSet}
@@ -72,20 +69,6 @@ instance Data.ProtoLens.Field.HasField Request "maybe'ctx" (Prelude.Maybe Proto.
     = (Prelude..)
         (Lens.Family2.Unchecked.lens
            _Request'ctx (\ x__ y__ -> x__ {_Request'ctx = y__}))
-        Prelude.id
-instance Data.ProtoLens.Field.HasField Request "fundLnInvoice" Proto.BtcLsp.Data.HighLevel.FundLnInvoice where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Request'fundLnInvoice
-           (\ x__ y__ -> x__ {_Request'fundLnInvoice = y__}))
-        (Data.ProtoLens.maybeLens Data.ProtoLens.defMessage)
-instance Data.ProtoLens.Field.HasField Request "maybe'fundLnInvoice" (Prelude.Maybe Proto.BtcLsp.Data.HighLevel.FundLnInvoice) where
-  fieldOf _
-    = (Prelude..)
-        (Lens.Family2.Unchecked.lens
-           _Request'fundLnInvoice
-           (\ x__ y__ -> x__ {_Request'fundLnInvoice = y__}))
         Prelude.id
 instance Data.ProtoLens.Field.HasField Request "refundOnChainAddress" Proto.BtcLsp.Data.HighLevel.RefundOnChainAddress where
   fieldOf _
@@ -112,8 +95,7 @@ instance Data.ProtoLens.Message Request where
   packedMessageDescriptor _
     = "\n\
       \\aRequest\DC2,\n\
-      \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2L\n\
-      \\SIfund_ln_invoice\CAN\STX \SOH(\v2$.BtcLsp.Data.HighLevel.FundLnInvoiceR\rfundLnInvoice\DC2b\n\
+      \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2b\n\
       \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\DC28\n\
       \\aprivacy\CAN\EOT \SOH(\SO2\RS.BtcLsp.Data.HighLevel.PrivacyR\aprivacy"
   packedFileDescriptor _ = packedFileDescriptor
@@ -126,14 +108,6 @@ instance Data.ProtoLens.Message Request where
                  Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.Ctx)
               (Data.ProtoLens.OptionalField
                  (Data.ProtoLens.Field.field @"maybe'ctx")) ::
-              Data.ProtoLens.FieldDescriptor Request
-        fundLnInvoice__field_descriptor
-          = Data.ProtoLens.FieldDescriptor
-              "fund_ln_invoice"
-              (Data.ProtoLens.MessageField Data.ProtoLens.MessageType ::
-                 Data.ProtoLens.FieldTypeDescriptor Proto.BtcLsp.Data.HighLevel.FundLnInvoice)
-              (Data.ProtoLens.OptionalField
-                 (Data.ProtoLens.Field.field @"maybe'fundLnInvoice")) ::
               Data.ProtoLens.FieldDescriptor Request
         refundOnChainAddress__field_descriptor
           = Data.ProtoLens.FieldDescriptor
@@ -154,7 +128,6 @@ instance Data.ProtoLens.Message Request where
       in
         Data.Map.fromList
           [(Data.ProtoLens.Tag 1, ctx__field_descriptor),
-           (Data.ProtoLens.Tag 2, fundLnInvoice__field_descriptor),
            (Data.ProtoLens.Tag 3, refundOnChainAddress__field_descriptor),
            (Data.ProtoLens.Tag 4, privacy__field_descriptor)]
   unknownFields
@@ -164,7 +137,6 @@ instance Data.ProtoLens.Message Request where
   defMessage
     = Request'_constructor
         {_Request'ctx = Prelude.Nothing,
-         _Request'fundLnInvoice = Prelude.Nothing,
          _Request'refundOnChainAddress = Prelude.Nothing,
          _Request'privacy = Data.ProtoLens.fieldDefault,
          _Request'_unknownFields = []}
@@ -196,15 +168,6 @@ instance Data.ProtoLens.Message Request where
                                              (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
                                        "ctx"
                                 loop (Lens.Family2.set (Data.ProtoLens.Field.field @"ctx") y x)
-                        18
-                          -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
-                                       (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
-                                           Data.ProtoLens.Encoding.Bytes.isolate
-                                             (Prelude.fromIntegral len) Data.ProtoLens.parseMessage)
-                                       "fund_ln_invoice"
-                                loop
-                                  (Lens.Family2.set
-                                     (Data.ProtoLens.Field.field @"fundLnInvoice") y x)
                         26
                           -> do y <- (Data.ProtoLens.Encoding.Bytes.<?>)
                                        (do len <- Data.ProtoLens.Encoding.Bytes.getVarInt
@@ -252,12 +215,12 @@ instance Data.ProtoLens.Message Request where
              ((Data.Monoid.<>)
                 (case
                      Lens.Family2.view
-                       (Data.ProtoLens.Field.field @"maybe'fundLnInvoice") _x
+                       (Data.ProtoLens.Field.field @"maybe'refundOnChainAddress") _x
                  of
                    Prelude.Nothing -> Data.Monoid.mempty
                    (Prelude.Just _v)
                      -> (Data.Monoid.<>)
-                          (Data.ProtoLens.Encoding.Bytes.putVarInt 18)
+                          (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
                           ((Prelude..)
                              (\ bs
                                 -> (Data.Monoid.<>)
@@ -266,36 +229,20 @@ instance Data.ProtoLens.Message Request where
                                      (Data.ProtoLens.Encoding.Bytes.putBytes bs))
                              Data.ProtoLens.encodeMessage _v))
                 ((Data.Monoid.<>)
-                   (case
-                        Lens.Family2.view
-                          (Data.ProtoLens.Field.field @"maybe'refundOnChainAddress") _x
-                    of
-                      Prelude.Nothing -> Data.Monoid.mempty
-                      (Prelude.Just _v)
-                        -> (Data.Monoid.<>)
-                             (Data.ProtoLens.Encoding.Bytes.putVarInt 26)
-                             ((Prelude..)
-                                (\ bs
-                                   -> (Data.Monoid.<>)
-                                        (Data.ProtoLens.Encoding.Bytes.putVarInt
-                                           (Prelude.fromIntegral (Data.ByteString.length bs)))
-                                        (Data.ProtoLens.Encoding.Bytes.putBytes bs))
-                                Data.ProtoLens.encodeMessage _v))
-                   ((Data.Monoid.<>)
-                      (let
-                         _v = Lens.Family2.view (Data.ProtoLens.Field.field @"privacy") _x
-                       in
-                         if (Prelude.==) _v Data.ProtoLens.fieldDefault then
-                             Data.Monoid.mempty
-                         else
-                             (Data.Monoid.<>)
-                               (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                   (let
+                      _v = Lens.Family2.view (Data.ProtoLens.Field.field @"privacy") _x
+                    in
+                      if (Prelude.==) _v Data.ProtoLens.fieldDefault then
+                          Data.Monoid.mempty
+                      else
+                          (Data.Monoid.<>)
+                            (Data.ProtoLens.Encoding.Bytes.putVarInt 32)
+                            ((Prelude..)
                                ((Prelude..)
-                                  ((Prelude..)
-                                     Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
-                                  Prelude.fromEnum _v))
-                      (Data.ProtoLens.Encoding.Wire.buildFieldSet
-                         (Lens.Family2.view Data.ProtoLens.unknownFields _x)))))
+                                  Data.ProtoLens.Encoding.Bytes.putVarInt Prelude.fromIntegral)
+                               Prelude.fromEnum _v))
+                   (Data.ProtoLens.Encoding.Wire.buildFieldSet
+                      (Lens.Family2.view Data.ProtoLens.unknownFields _x))))
 instance Control.DeepSeq.NFData Request where
   rnf
     = \ x__
@@ -304,10 +251,8 @@ instance Control.DeepSeq.NFData Request where
              (Control.DeepSeq.deepseq
                 (_Request'ctx x__)
                 (Control.DeepSeq.deepseq
-                   (_Request'fundLnInvoice x__)
-                   (Control.DeepSeq.deepseq
-                      (_Request'refundOnChainAddress x__)
-                      (Control.DeepSeq.deepseq (_Request'privacy x__) ()))))
+                   (_Request'refundOnChainAddress x__)
+                   (Control.DeepSeq.deepseq (_Request'privacy x__) ())))
 {- | Fields :
      
          * 'Proto.BtcLsp.Method.SwapIntoLn_Fields.ctx' @:: Lens' Response Proto.BtcLsp.Data.HighLevel.Ctx@
@@ -413,15 +358,13 @@ instance Data.ProtoLens.Message Response where
       \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\175\SOH\n\
       \\aSuccess\DC2\\\n\
       \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2F\n\
-      \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\193\ETX\n\
+      \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\211\STX\n\
       \\aFailure\DC2=\n\
       \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
       \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2B\n\
-      \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"\221\SOH\n\
-      \\fInputFailure\DC2$\n\
-      \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
-      \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
-      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX\DC2(\n\
+      \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"p\n\
+      \\fInputFailure\DC2\v\n\
+      \\aDEFAULT\DLE\NUL\DC2(\n\
       \$REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID\DLE\ETX\DC2)\n\
       \%REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT\DLE\EOTB\b\n\
       \\ACKeither"
@@ -666,11 +609,9 @@ instance Data.ProtoLens.Message Response'Failure where
       \\aFailure\DC2=\n\
       \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
       \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2B\n\
-      \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"\221\SOH\n\
-      \\fInputFailure\DC2$\n\
-      \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
-      \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
-      \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX\DC2(\n\
+      \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"p\n\
+      \\fInputFailure\DC2\v\n\
+      \\aDEFAULT\DLE\NUL\DC2(\n\
       \$REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID\DLE\ETX\DC2)\n\
       \%REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT\DLE\EOT"
   packedFileDescriptor _ = packedFileDescriptor
@@ -904,9 +845,7 @@ newtype Response'Failure'InputFailure'UnrecognizedValue
                   GHC.Generics.Generic)
 instance Text.PrettyPrint.GenericPretty.Out Response'Failure'InputFailure'UnrecognizedValue
 data Response'Failure'InputFailure
-  = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT |
-    Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON |
-    Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE |
+  = Response'Failure'DEFAULT |
     Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID |
     Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT |
     Response'Failure'InputFailure'Unrecognized !Response'Failure'InputFailure'UnrecognizedValue
@@ -915,13 +854,7 @@ data Response'Failure'InputFailure
                   Prelude.Ord,
                   GHC.Generics.Generic)
 instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
-  maybeToEnum 0
-    = Prelude.Just Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
-  maybeToEnum 1
-    = Prelude.Just Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
-  maybeToEnum 2
-    = Prelude.Just
-        Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  maybeToEnum 0 = Prelude.Just Response'Failure'DEFAULT
   maybeToEnum 3
     = Prelude.Just
         Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
@@ -933,12 +866,7 @@ instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
         (Response'Failure'InputFailure'Unrecognized
            (Response'Failure'InputFailure'UnrecognizedValue
               (Prelude.fromIntegral k)))
-  showEnum Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
-    = "FUND_LN_INVOICE_HAS_NON_ZERO_AMT"
-  showEnum Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
-    = "FUND_LN_INVOICE_EXPIRES_TOO_SOON"
-  showEnum Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
-    = "FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE"
+  showEnum Response'Failure'DEFAULT = "DEFAULT"
   showEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
     = "REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID"
   showEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
@@ -947,13 +875,7 @@ instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
     (Response'Failure'InputFailure'Unrecognized (Response'Failure'InputFailure'UnrecognizedValue k))
     = Prelude.show k
   readEnum k
-    | (Prelude.==) k "FUND_LN_INVOICE_HAS_NON_ZERO_AMT"
-    = Prelude.Just Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
-    | (Prelude.==) k "FUND_LN_INVOICE_EXPIRES_TOO_SOON"
-    = Prelude.Just Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
-    | (Prelude.==) k "FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE"
-    = Prelude.Just
-        Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    | (Prelude.==) k "DEFAULT" = Prelude.Just Response'Failure'DEFAULT
     | (Prelude.==) k "REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID"
     = Prelude.Just
         Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
@@ -963,7 +885,7 @@ instance Data.ProtoLens.MessageEnum Response'Failure'InputFailure where
     | Prelude.otherwise
     = (Prelude.>>=) (Text.Read.readMaybe k) Data.ProtoLens.maybeToEnum
 instance Prelude.Bounded Response'Failure'InputFailure where
-  minBound = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+  minBound = Response'Failure'DEFAULT
   maxBound = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
 instance Prelude.Enum Response'Failure'InputFailure where
   toEnum k__
@@ -973,10 +895,7 @@ instance Prelude.Enum Response'Failure'InputFailure where
               "toEnum: unknown value for enum InputFailure: "
               (Prelude.show k__)))
         Prelude.id (Data.ProtoLens.maybeToEnum k__)
-  fromEnum Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT = 0
-  fromEnum Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON = 1
-  fromEnum Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
-    = 2
+  fromEnum Response'Failure'DEFAULT = 0
   fromEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID = 3
   fromEnum Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT = 4
   fromEnum
@@ -985,26 +904,18 @@ instance Prelude.Enum Response'Failure'InputFailure where
   succ Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
     = Prelude.error
         "Response'Failure'InputFailure.succ: bad argument Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT. This value would be out of bounds."
-  succ Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
-    = Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
-  succ Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
-    = Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
-  succ Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+  succ Response'Failure'DEFAULT
     = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
   succ Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
     = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
   succ (Response'Failure'InputFailure'Unrecognized _)
     = Prelude.error
         "Response'Failure'InputFailure.succ: bad argument: unrecognized value"
-  pred Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+  pred Response'Failure'DEFAULT
     = Prelude.error
-        "Response'Failure'InputFailure.pred: bad argument Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT. This value would be out of bounds."
-  pred Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
-    = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
-  pred Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
-    = Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON
+        "Response'Failure'InputFailure.pred: bad argument Response'Failure'DEFAULT. This value would be out of bounds."
   pred Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
-    = Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE
+    = Response'Failure'DEFAULT
   pred Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
     = Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
   pred (Response'Failure'InputFailure'Unrecognized _)
@@ -1015,7 +926,7 @@ instance Prelude.Enum Response'Failure'InputFailure where
   enumFromThen = Data.ProtoLens.Message.Enum.messageEnumFromThen
   enumFromThenTo = Data.ProtoLens.Message.Enum.messageEnumFromThenTo
 instance Data.ProtoLens.FieldDefault Response'Failure'InputFailure where
-  fieldDefault = Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT
+  fieldDefault = Response'Failure'DEFAULT
 instance Control.DeepSeq.NFData Response'Failure'InputFailure where
   rnf x__ = Prelude.seq x__ ()
 instance Text.PrettyPrint.GenericPretty.Out Response'Failure'InputFailure
@@ -1202,31 +1113,28 @@ instance Control.DeepSeq.NFData Response'Success where
 packedFileDescriptor :: Data.ByteString.ByteString
 packedFileDescriptor
   = "\n\
-    \!btc_lsp/method/swap_into_ln.proto\DC2\CANBtcLsp.Method.SwapIntoLn\SUB\GSbtc_lsp/data/high_level.proto\"\163\STX\n\
+    \!btc_lsp/method/swap_into_ln.proto\DC2\CANBtcLsp.Method.SwapIntoLn\SUB\GSbtc_lsp/data/high_level.proto\"\213\SOH\n\
     \\aRequest\DC2,\n\
-    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2L\n\
-    \\SIfund_ln_invoice\CAN\STX \SOH(\v2$.BtcLsp.Data.HighLevel.FundLnInvoiceR\rfundLnInvoice\DC2b\n\
+    \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2b\n\
     \\ETBrefund_on_chain_address\CAN\ETX \SOH(\v2+.BtcLsp.Data.HighLevel.RefundOnChainAddressR\DC4refundOnChainAddress\DC28\n\
-    \\aprivacy\CAN\EOT \SOH(\SO2\RS.BtcLsp.Data.HighLevel.PrivacyR\aprivacy\"\200\ACK\n\
+    \\aprivacy\CAN\EOT \SOH(\SO2\RS.BtcLsp.Data.HighLevel.PrivacyR\aprivacy\"\218\ENQ\n\
     \\bResponse\DC2,\n\
     \\ETXctx\CAN\SOH \SOH(\v2\SUB.BtcLsp.Data.HighLevel.CtxR\ETXctx\DC2F\n\
     \\asuccess\CAN\STX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.SuccessH\NULR\asuccess\DC2F\n\
     \\afailure\CAN\ETX \SOH(\v2*.BtcLsp.Method.SwapIntoLn.Response.FailureH\NULR\afailure\SUB\175\SOH\n\
     \\aSuccess\DC2\\\n\
     \\NAKfund_on_chain_address\CAN\SOH \SOH(\v2).BtcLsp.Data.HighLevel.FundOnChainAddressR\DC2fundOnChainAddress\DC2F\n\
-    \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\193\ETX\n\
+    \\SOmin_fund_money\CAN\STX \SOH(\v2 .BtcLsp.Data.HighLevel.FundMoneyR\fminFundMoney\SUB\211\STX\n\
     \\aFailure\DC2=\n\
     \\ageneric\CAN\SOH \ETX(\v2#.BtcLsp.Data.HighLevel.InputFailureR\ageneric\DC2S\n\
     \\bspecific\CAN\STX \ETX(\SO27.BtcLsp.Method.SwapIntoLn.Response.Failure.InputFailureR\bspecific\DC2B\n\
-    \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"\221\SOH\n\
-    \\fInputFailure\DC2$\n\
-    \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT\DLE\NUL\DC2$\n\
-    \ FUND_LN_INVOICE_EXPIRES_TOO_SOON\DLE\SOH\DC2,\n\
-    \(FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE\DLE\STX\DC2(\n\
+    \\binternal\CAN\ETX \ETX(\v2&.BtcLsp.Data.HighLevel.InternalFailureR\binternal\"p\n\
+    \\fInputFailure\DC2\v\n\
+    \\aDEFAULT\DLE\NUL\DC2(\n\
     \$REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID\DLE\ETX\DC2)\n\
     \%REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT\DLE\EOTB\b\n\
-    \\ACKeitherJ\219\v\n\
-    \\ACK\DC2\EOT\NUL\NUL-\SOH\n\
+    \\ACKeitherJ\149\SO\n\
+    \\ACK\DC2\EOT\NUL\NUL8\SOH\n\
     \\b\n\
     \\SOH\f\DC2\ETX\NUL\NUL\DLE\n\
     \\b\n\
@@ -1235,7 +1143,7 @@ packedFileDescriptor
     \\STX\ETX\NUL\DC2\ETX\EOT\NUL'\n\
     \\n\
     \\n\
-    \\STX\EOT\NUL\DC2\EOT\ACK\NUL\SI\SOH\n\
+    \\STX\EOT\NUL\DC2\EOT\ACK\NUL\DC4\SOH\n\
     \\n\
     \\n\
     \\ETX\EOT\NUL\SOH\DC2\ETX\ACK\b\SI\n\
@@ -1247,157 +1155,151 @@ packedFileDescriptor
     \\ENQ\EOT\NUL\STX\NUL\SOH\DC2\ETX\a\GS \n\
     \\f\n\
     \\ENQ\EOT\NUL\STX\NUL\ETX\DC2\ETX\a#$\n\
-    \\183\SOH\n\
-    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\f\STX;\SUB\169\SOH SwapIntoLn invoice always should be zero amount\n\
-    \ to decouple invoice from amount received by\n\
-    \ FundOnChainAddress. Also expiration limit should be\n\
-    \ as high as possible.\n\
+    \\166\ETX\n\
+    \\EOT\EOT\NUL\STX\SOH\DC2\ETX\DC2\STXJ\SUB\152\ETX\n\
+    \ NOTE : Removed as redundant data after adopting\n\
+    \ psbt-based channel opening procedure. Before there wasn't\n\
+    \ much control over UTXOs, so it was not possible to safely\n\
+    \ use push_sat, so fund_ln_invoice was a workaround used to\n\
+    \ push liquidity. With precise UTXO control this is not\n\
+    \ the issue anymore, bitcoin network solves double spend\n\
+    \ problem.\n\
+    \\n\
+    \ .BtcLsp.Data.HighLevel.FundLnInvoice fund_ln_invoice = 2;\n\
     \\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\f\STX&\n\
+    \\ENQ\EOT\NUL\STX\SOH\ACK\DC2\ETX\DC2\STX-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\f'6\n\
+    \\ENQ\EOT\NUL\STX\SOH\SOH\DC2\ETX\DC2.E\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\f9:\n\
+    \\ENQ\EOT\NUL\STX\SOH\ETX\DC2\ETX\DC2HI\n\
     \\v\n\
-    \\EOT\EOT\NUL\STX\STX\DC2\ETX\r\STXJ\n\
+    \\EOT\EOT\NUL\STX\STX\DC2\ETX\DC3\STX-\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\r\STX-\n\
+    \\ENQ\EOT\NUL\STX\STX\ACK\DC2\ETX\DC3\STX \n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\r.E\n\
+    \\ENQ\EOT\NUL\STX\STX\SOH\DC2\ETX\DC3!(\n\
     \\f\n\
-    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\rHI\n\
-    \\v\n\
-    \\EOT\EOT\NUL\STX\ETX\DC2\ETX\SO\STX-\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ACK\DC2\ETX\SO\STX \n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\SOH\DC2\ETX\SO!(\n\
-    \\f\n\
-    \\ENQ\EOT\NUL\STX\ETX\ETX\DC2\ETX\SO+,\n\
+    \\ENQ\EOT\NUL\STX\STX\ETX\DC2\ETX\DC3+,\n\
     \\n\
     \\n\
-    \\STX\EOT\SOH\DC2\EOT\DC1\NUL-\SOH\n\
+    \\STX\EOT\SOH\DC2\EOT\SYN\NUL8\SOH\n\
     \\n\
     \\n\
-    \\ETX\EOT\SOH\SOH\DC2\ETX\DC1\b\DLE\n\
+    \\ETX\EOT\SOH\SOH\DC2\ETX\SYN\b\DLE\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\DC2\STX%\n\
+    \\EOT\EOT\SOH\STX\NUL\DC2\ETX\ETB\STX%\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\DC2\STX\FS\n\
+    \\ENQ\EOT\SOH\STX\NUL\ACK\DC2\ETX\ETB\STX\FS\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\DC2\GS \n\
+    \\ENQ\EOT\SOH\STX\NUL\SOH\DC2\ETX\ETB\GS \n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\DC2#$\n\
+    \\ENQ\EOT\SOH\STX\NUL\ETX\DC2\ETX\ETB#$\n\
     \\f\n\
-    \\EOT\EOT\SOH\b\NUL\DC2\EOT\DC4\STX\ETB\ETX\n\
+    \\EOT\EOT\SOH\b\NUL\DC2\EOT\EM\STX\FS\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX\DC4\b\SO\n\
+    \\ENQ\EOT\SOH\b\NUL\SOH\DC2\ETX\EM\b\SO\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\NAK\EOT\CAN\n\
+    \\EOT\EOT\SOH\STX\SOH\DC2\ETX\SUB\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\NAK\EOT\v\n\
+    \\ENQ\EOT\SOH\STX\SOH\ACK\DC2\ETX\SUB\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\NAK\f\DC3\n\
+    \\ENQ\EOT\SOH\STX\SOH\SOH\DC2\ETX\SUB\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\NAK\SYN\ETB\n\
+    \\ENQ\EOT\SOH\STX\SOH\ETX\DC2\ETX\SUB\SYN\ETB\n\
     \\v\n\
-    \\EOT\EOT\SOH\STX\STX\DC2\ETX\SYN\EOT\CAN\n\
+    \\EOT\EOT\SOH\STX\STX\DC2\ETX\ESC\EOT\CAN\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\SYN\EOT\v\n\
+    \\ENQ\EOT\SOH\STX\STX\ACK\DC2\ETX\ESC\EOT\v\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\SYN\f\DC3\n\
+    \\ENQ\EOT\SOH\STX\STX\SOH\DC2\ETX\ESC\f\DC3\n\
     \\f\n\
-    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\SYN\SYN\ETB\n\
+    \\ENQ\EOT\SOH\STX\STX\ETX\DC2\ETX\ESC\SYN\ETB\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\EM\STX\RS\ETX\n\
+    \\EOT\EOT\SOH\ETX\NUL\DC2\EOT\RS\STX#\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\EM\n\
+    \\ENQ\EOT\SOH\ETX\NUL\SOH\DC2\ETX\RS\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\SUB\EOTH\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\NUL\DC2\ETX\US\EOTH\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\SUB\EOT-\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ACK\DC2\ETX\US\EOT-\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\SUB.C\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\SOH\DC2\ETX\US.C\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\SUBFG\n\
+    \\a\EOT\SOH\ETX\NUL\STX\NUL\ETX\DC2\ETX\USFG\n\
     \{\n\
-    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\GS\EOT8\SUBl Minimal expected swap amount. Swap will not happen\n\
+    \\ACK\EOT\SOH\ETX\NUL\STX\SOH\DC2\ETX\"\EOT8\SUBl Minimal expected swap amount. Swap will not happen\n\
     \ until address balance is more or equal than FundMoney.\n\
     \\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\GS\EOT$\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ACK\DC2\ETX\"\EOT$\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\GS%3\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\SOH\DC2\ETX\"%3\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\GS67\n\
+    \\a\EOT\SOH\ETX\NUL\STX\SOH\ETX\DC2\ETX\"67\n\
     \\f\n\
-    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT \STX,\ETX\n\
+    \\EOT\EOT\SOH\ETX\SOH\DC2\EOT%\STX7\ETX\n\
     \\f\n\
-    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX \n\
+    \\ENQ\EOT\SOH\ETX\SOH\SOH\DC2\ETX%\n\
     \\DC1\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX!\EOT=\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\NUL\DC2\ETX&\EOT=\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX!\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\EOT\DC2\ETX&\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX!\r0\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ACK\DC2\ETX&\r0\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX!18\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\SOH\DC2\ETX&18\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX!;<\n\
+    \\a\EOT\SOH\ETX\SOH\STX\NUL\ETX\DC2\ETX&;<\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX\"\EOT'\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\SOH\DC2\ETX'\EOT'\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX\"\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\EOT\DC2\ETX'\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX\"\r\EM\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ACK\DC2\ETX'\r\EM\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX\"\SUB\"\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\SOH\DC2\ETX'\SUB\"\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX\"%&\n\
+    \\a\EOT\SOH\ETX\SOH\STX\SOH\ETX\DC2\ETX'%&\n\
     \\r\n\
-    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX#\EOTA\n\
+    \\ACK\EOT\SOH\ETX\SOH\STX\STX\DC2\ETX(\EOTA\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX#\EOT\f\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\EOT\DC2\ETX(\EOT\f\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX#\r3\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ACK\DC2\ETX(\r3\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX#4<\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\SOH\DC2\ETX(4<\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX#?@\n\
+    \\a\EOT\SOH\ETX\SOH\STX\STX\ETX\DC2\ETX(?@\n\
     \\SO\n\
-    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT%\EOT+\ENQ\n\
+    \\ACK\EOT\SOH\ETX\SOH\EOT\NUL\DC2\EOT*\EOT6\ENQ\n\
     \\SO\n\
-    \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX%\t\NAK\n\
+    \\a\EOT\SOH\ETX\SOH\EOT\NUL\SOH\DC2\ETX*\t\NAK\n\
     \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\DC2\ETX&\ACK+\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\DC2\ETX+\ACK\DC2\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX&\ACK&\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\SOH\DC2\ETX+\ACK\r\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX&)*\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\NUL\STX\DC2\ETX+\DLE\DC1\n\
+    \\250\SOH\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\DC2\ETX4\ACK/\SUB\232\SOH\n\
+    \ NOTE : Removed together with fund_ln_invoice\n\
+    \ field from request as errors associated with\n\
+    \ this field.\n\
+    \\n\
+    \ FUND_LN_INVOICE_HAS_NON_ZERO_AMT = 0;\n\
+    \ FUND_LN_INVOICE_EXPIRES_TOO_SOON = 1;\n\
+    \ FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE = 2;\n\
+    \\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\SOH\DC2\ETX4\ACK*\n\
+    \\DLE\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\STX\DC2\ETX4-.\n\
     \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\DC2\ETX'\ACK+\n\
+    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\DC2\ETX5\ACK0\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\SOH\DC2\ETX'\ACK&\n\
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\SOH\DC2\ETX5\ACK+\n\
     \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\SOH\STX\DC2\ETX')*\n\
-    \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\DC2\ETX(\ACK3\n\
-    \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\SOH\DC2\ETX(\ACK.\n\
-    \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\STX\DC2\ETX(12\n\
-    \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\ETX\DC2\ETX)\ACK/\n\
-    \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\ETX\SOH\DC2\ETX)\ACK*\n\
-    \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\ETX\STX\DC2\ETX)-.\n\
-    \\SI\n\
-    \\b\EOT\SOH\ETX\SOH\EOT\NUL\STX\EOT\DC2\ETX*\ACK0\n\
-    \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\EOT\SOH\DC2\ETX*\ACK+\n\
-    \\DLE\n\
-    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\EOT\STX\DC2\ETX*./b\ACKproto3"
+    \\t\EOT\SOH\ETX\SOH\EOT\NUL\STX\STX\STX\DC2\ETX5./b\ACKproto3"
