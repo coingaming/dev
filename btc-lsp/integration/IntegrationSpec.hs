@@ -10,8 +10,6 @@ import BtcLsp.Grpc.Client.LowLevel
 import BtcLsp.Grpc.Orphan ()
 import BtcLsp.Import hiding (setGrpcCtx, setGrpcCtxT)
 import qualified BtcLsp.Thread.Main as Main
-import qualified LndClient as Lnd
-import qualified LndClient.Data.AddInvoice as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
 import qualified LndClient.Data.NewAddress as Lnd
 import qualified LndClient.Data.SendCoins as Lnd
@@ -32,21 +30,6 @@ spec = do
     sleep300ms
     gcEnv <- getGCEnv
     res0 <- runExceptT $ do
-      fundInv <-
-        from . Lnd.paymentRequest
-          <$> withLndTestT
-            LndAlice
-            Lnd.addInvoice
-            ( $
-                Lnd.AddInvoiceRequest
-                  { Lnd.valueMsat = MSat 0,
-                    Lnd.memo = Nothing,
-                    Lnd.expiry =
-                      Just
-                        . Lnd.Seconds
-                        $ 7 * 24 * 3600
-                  }
-            )
       refundAddr <-
         from
           <$> withLndTestT
@@ -65,8 +48,6 @@ spec = do
         =<< setGrpcCtxT
           LndAlice
           ( defMessage
-              & SwapIntoLn.fundLnInvoice
-                .~ from @(LnInvoice 'Fund) fundInv
               & SwapIntoLn.refundOnChainAddress
                 .~ from @(OnChainAddress 'Refund) refundAddr
           )

@@ -2,7 +2,6 @@ module BtcLsp.Storage.Model.SwapUtxo
   ( createIgnoreManySql,
     getSpendableUtxosBySwapIdSql,
     updateUnspentChanReserveSql,
-    updateSpentChanSql,
     updateSpentChanSwappedSql,
     updateRefundedSql,
     updateOrphanSql,
@@ -77,29 +76,6 @@ updateUnspentChanReserveSql ids = do
                  )
   pure $ from res
 
-updateSpentChanSql ::
-  ( MonadIO m
-  ) =>
-  SwapIntoLnId ->
-  ReaderT Psql.SqlBackend m ()
-updateSpentChanSql id0 = do
-  ct <- getCurrentTime
-  Psql.update $ \row -> do
-    Psql.set
-      row
-      [ SwapUtxoStatus Psql.=. Psql.val SwapUtxoSpentChan,
-        SwapUtxoUpdatedAt Psql.=. Psql.val ct
-      ]
-    Psql.where_ $
-      ( row Psql.^. SwapUtxoSwapIntoLnId
-          Psql.==. Psql.val id0
-      )
-        Psql.&&. ( row Psql.^. SwapUtxoStatus
-                     `Psql.in_` Psql.valList
-                       [ SwapUtxoUnspentChanReserve
-                       ]
-                 )
-
 updateSpentChanSwappedSql ::
   ( MonadIO m
   ) =>
@@ -119,7 +95,7 @@ updateSpentChanSwappedSql id0 = do
       )
         Psql.&&. ( row Psql.^. SwapUtxoStatus
                      `Psql.in_` Psql.valList
-                       [ SwapUtxoSpentChan
+                       [ SwapUtxoUnspentChanReserve
                        ]
                  )
 

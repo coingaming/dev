@@ -387,9 +387,6 @@ data SwapStatus
   | -- | Waiting channel opening trx
     -- to be mined with some confirmations.
     SwapWaitingChan
-  | -- | Waiting funding LN invoice
-    -- to be paid by SwapperIntoLn.
-    SwapWaitingFundLn
   | -- | Final statuses
     SwapSucceeded
   | SwapExpired
@@ -413,8 +410,7 @@ swapStatusChain =
 
 swapStatusLn :: [SwapStatus]
 swapStatusLn =
-  [ SwapWaitingChan,
-    SwapWaitingFundLn
+  [ SwapWaitingChan
   ]
 
 swapStatusFinal :: [SwapStatus]
@@ -606,7 +602,6 @@ data SwapUtxoStatus
   = SwapUtxoUnspent
   | SwapUtxoUnspentDust
   | SwapUtxoUnspentChanReserve
-  | SwapUtxoSpentChan
   | SwapUtxoSpentChanSwapped
   | SwapUtxoSpentRefund
   | SwapUtxoOrphan

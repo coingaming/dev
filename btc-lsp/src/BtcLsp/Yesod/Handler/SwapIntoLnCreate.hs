@@ -84,7 +84,6 @@ postSwapIntoLnCreateR = do
                   (Lnd.destination fundInvLnd)
         Server.swapIntoLnT
           userEnt
-          fundInvLnd
           (swapRequestRefund req)
           (swapRequestPrivacy req)
       case eSwap of
@@ -104,11 +103,7 @@ explainFailure res =
   maybe
     MsgInputFailure
     ( \case
-        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_HAS_NON_ZERO_AMT ->
-          MsgSwapIntoLnFailureFundLnInvoiceHasNonZeroAmt
-        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_EXPIRES_TOO_SOON ->
-          MsgSwapIntoLnFailureFundLnInvoiceExpiresTooSoon
-        SwapIntoLn.Response'Failure'FUND_LN_INVOICE_SIGNATURE_IS_NOT_GENUINE ->
+        SwapIntoLn.Response'Failure'DEFAULT ->
           MsgInputFailure
         SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID ->
           MsgSwapIntoLnFailureRefundOnChainAddressIsNotValid
@@ -147,6 +142,11 @@ aForm =
       (bfs MsgSwapIntoLnRefundAddress)
       Nothing
     <*> areq
-      (selectField optionsEnum)
+      ( selectField $
+          optionsPairs
+            [ (MsgChanPublic, Public),
+              (MsgChanPrivate, Private)
+            ]
+      )
       (bfs MsgChannelPrivacy)
-      (Just Private)
+      (Just Public)
