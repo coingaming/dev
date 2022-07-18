@@ -5,7 +5,6 @@ module BtcLsp.Thread.BlockScanner
   ( apply,
     scan,
     Utxo (..),
-    newLockId,
     extractRelatedUtxoFromBlock,
     mapVout,
   )
