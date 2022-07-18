@@ -11,38 +11,20 @@ import qualified Database.Persist.Migration as PsqlMig
 import qualified Database.Persist.Migration.Postgres as PsqlMig
 
 migrateBefore :: PsqlMig.Migration
-migrateBefore = do
-  let dropFundInvHashConstraint =
-        PsqlMig.RawOperation "Drop fund_inv_hash unique constraint" $
-          lift . return $
-            [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP CONSTRAINT IF EXISTS unique_swap_into_ln_fund_inv_hash" []]
-  let dropFundInvoice =
-        PsqlMig.RawOperation "Drop fund_invoice" $
-          lift . return $
-            [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP COLUMN IF EXISTS fund_invoice" []]
-  let dropFundInvHash =
-        PsqlMig.RawOperation "Drop fund_inv_hash" $
-          lift . return $
-            [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP COLUMN IF EXISTS fund_inv_hash" []]
-  let dropFundProof =
-        PsqlMig.RawOperation "Drop fund_proof" $
-          lift . return $
-            [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP COLUMN IF EXISTS fund_proof" []]
-
-  [ 1 PsqlMig.~> 2
-      PsqlMig.:= [ dropFundInvHashConstraint,
-                   dropFundInvoice,
-                   dropFundInvHash,
-                   dropFundProof
-                 ]
-    ]
+migrateBefore = []
 
 --
 -- TODO : add all needed indexes
 --
 migrateAfter :: PsqlMig.Migration
 migrateAfter =
-  [ 0 PsqlMig.~> 1 PsqlMig.:= [lnChanSearchIndexes]
+  [ 0 PsqlMig.~> 1 PsqlMig.:= [lnChanSearchIndexes],
+    1 PsqlMig.~> 2
+      PsqlMig.:= [ dropFundInvHashConstraint,
+                   dropFundInvoice,
+                   dropFundInvHash,
+                   dropFundProof
+                 ]
   ]
   where
     lnChanSearchIndexesSql :: Text
@@ -54,6 +36,22 @@ migrateAfter =
       PsqlMig.RawOperation "Create LnChan search indexes" $
         lift . return $
           [PsqlMig.MigrateSql lnChanSearchIndexesSql []]
+    dropFundInvHashConstraint =
+      PsqlMig.RawOperation "Drop fund_inv_hash unique constraint" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP CONSTRAINT IF EXISTS unique_swap_into_ln_fund_inv_hash" []]
+    dropFundInvoice =
+      PsqlMig.RawOperation "Drop fund_invoice" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP COLUMN IF EXISTS fund_invoice" []]
+    dropFundInvHash =
+      PsqlMig.RawOperation "Drop fund_inv_hash" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP COLUMN IF EXISTS fund_inv_hash" []]
+    dropFundProof =
+      PsqlMig.RawOperation "Drop fund_proof" $
+        lift . return $
+          [PsqlMig.MigrateSql "ALTER TABLE swap_into_ln DROP COLUMN IF EXISTS fund_proof" []]
 
 migrateAll :: (Storage m, KatipContext m) => m ()
 migrateAll = do
