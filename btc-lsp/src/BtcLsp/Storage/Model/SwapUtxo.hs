@@ -181,9 +181,15 @@ updateRefundBlockIdSql ::
   ( MonadIO m
   ) =>
   BlockId ->
-  TxId 'Funding ->
   ReaderT Psql.SqlBackend m ()
-updateRefundBlockIdSql blkId txId = do
+updateRefundBlockIdSql blkId = do
+  utxos <- Psql.select $
+    Psql.from $ \row -> do
+      Psql.where_
+        ( row Psql.^. SwapUtxoBlockId
+            Psql.==. Psql.val blkId
+        )
+      pure row
   Psql.update $ \row -> do
     Psql.set
       row
@@ -192,7 +198,7 @@ updateRefundBlockIdSql blkId txId = do
       ]
     Psql.where_ $
       row Psql.^. SwapUtxoRefundTxId
-        Psql.==. Psql.val (Just txId)
+        `Psql.in_` Psql.valList (Just <$> (swapUtxoTxid . entityVal <$> utxos))
         Psql.&&. ( row Psql.^. SwapUtxoStatus
                      Psql.==. Psql.val SwapUtxoSpentRefund
                  )
