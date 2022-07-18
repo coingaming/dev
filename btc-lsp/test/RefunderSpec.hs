@@ -1,6 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
-
 module RefunderSpec
   ( spec,
   )
@@ -108,6 +105,7 @@ spec = do
     sleep1s -- Let Refunder to refund UTXO
     res <- lift $ waitCond 10 (refundSucceded swp) []
     liftIO $ res `shouldSatisfy` fst
+
 --  ============================================================================
 --  Following test is break LeaseOutput lnd method (LeaseOutput Breaks specifies how)
 --  ============================================================================
