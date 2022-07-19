@@ -58,13 +58,13 @@ psbtShim pcid =
       PS.noPublish = False
     }
 
-fundPsbtReq :: FP.TxTemplate -> FP.FundPsbtRequest
-fundPsbtReq tmpl =
+fundPsbtReq :: [OP.OutPoint] -> Map Text MSat -> FP.FundPsbtRequest
+fundPsbtReq inputs outputs =
   FP.FundPsbtRequest
     { FP.account = "",
-      FP.template = tmpl,
-      FP.minConfs = 2,
-      FP.spendUnconfirmed = False,
+      FP.template = FP.TxTemplate inputs outputs,
+      FP.minConfs = 0,
+      FP.spendUnconfirmed = True,
       FP.fee = FP.SatPerVbyte 1
     }
 
@@ -117,7 +117,7 @@ shimCancelReq pcid =
 finalizePsbt :: (Env m) => Lnd.Psbt -> ExceptT Failure m FNP.FinalizePsbtResponse
 finalizePsbt psbt = withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (coerce psbt) "")
 
-unspendUtxoLookup :: (Env m) => ExceptT Failure m (Map Lnd.OutPoint LU.Utxo)
+unspendUtxoLookup :: (Env m) => ExceptT Failure m (Map OP.OutPoint LU.Utxo)
 unspendUtxoLookup = do
   allUtxos <- LU.utxos <$> withLndT Lnd.listUnspent ($ LU.ListUnspentRequest 0 maxBound "")
   pure $ foldr (\u acc -> M.insert (LU.outpoint u) u acc) M.empty allUtxos

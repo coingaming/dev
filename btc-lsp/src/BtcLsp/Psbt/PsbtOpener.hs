@@ -39,7 +39,7 @@ sumAmt utxos = sum $ getAmt <$> utxos
 autoSelectUtxos :: Env m => OnChainAddress 'Fund -> MSat -> ExceptT Failure m FP.FundPsbtResponse
 autoSelectUtxos addr amt = withLndT Lnd.fundPsbt ($ req)
   where
-    req = fundPsbtReq $ FP.TxTemplate [] (M.fromList [(unOnChainAddress addr, amt)])
+    req = fundPsbtReq [] (M.fromList [(unOnChainAddress addr, amt)])
 
 utxoLeaseToPsbtUtxo :: Map OP.OutPoint LU.Utxo -> FP.UtxoLease -> Maybe PsbtUtxo
 utxoLeaseToPsbtUtxo l ul = psbtUtxo . LU.amountSat <$> M.lookup op l
@@ -109,7 +109,7 @@ fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
           else
             [ (unOnChainAddress chanFundAddr, userFundingAmt * 2 + changeAmt)
             ]
-  let req = fundPsbtReq $ FP.TxTemplate allInputs (M.fromList outputs)
+  let req = fundPsbtReq allInputs (M.fromList outputs)
   releaseUtxosPsbtLocks (userUtxos <> lspUtxos)
   psbt <- withLndT Lnd.fundPsbt ($ req)
   pure $ Lnd.Psbt $ FP.fundedPsbt psbt
