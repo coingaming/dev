@@ -33,7 +33,6 @@ import qualified LndClient.Data.FundingStateStep as FSS
 import qualified LndClient.Data.LeaseOutput as LO
 import qualified LndClient.Data.ListUnspent as LU
 import qualified LndClient.Data.OpenChannel as Lnd
-import qualified LndClient.Data.OutPoint as Lnd
 import qualified LndClient.Data.OutPoint as OP
 import qualified LndClient.Data.PsbtShim as PS
 import qualified LndClient.Data.ReleaseOutput as RO
