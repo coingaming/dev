@@ -48,6 +48,7 @@ data Env = Env
     envSQLPool :: Pool Psql.SqlBackend,
     envMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
     envMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
+    envMinTotalOnChainLiquidity :: MSat,
     -- | Logging
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
@@ -71,6 +72,7 @@ data RawConfig = RawConfig
     rawConfigLibpqConnStr :: Psql.ConnectionString,
     rawConfigMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
     rawConfigMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
+    rawConfigMinTotalOnChainLiquidity :: MSat,
     -- | Logging
     rawConfigLogEnv :: Text,
     rawConfigLogFormat :: LogFormat,
@@ -124,6 +126,7 @@ readRawConfig =
       <$> E.var (E.str <=< E.nonempty) "LSP_LIBPQ_CONN_STR" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_TOTAL_EXT_OUTGOING_LIQUIDITY_MSAT" (opts <> E.def 0)
       <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_TOTAL_EXT_INCOMING_LIQUIDITY_MSAT" (opts <> E.def 0)
+      <*> E.var (E.auto <=< E.nonempty) "LSP_MIN_TOTAL_ON_CHAIN_LIQUIDITY_MSAT" (opts <> E.def 0)
       -- Logging
       <*> E.var (E.str <=< E.nonempty) "LSP_LOG_ENV" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_FORMAT" opts
@@ -207,6 +210,8 @@ withEnv rc this = do
                   rawConfigMinTotalExtOutgoingLiquidity rc,
                 envMinTotalExtIncomingLiquidity =
                   rawConfigMinTotalExtIncomingLiquidity rc,
+                envMinTotalOnChainLiquidity =
+                  rawConfigMinTotalOnChainLiquidity rc,
                 -- Logging
                 envKatipLE = le,
                 envKatipCTX = katipCtx,

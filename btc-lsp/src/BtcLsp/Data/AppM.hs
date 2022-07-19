@@ -10,6 +10,7 @@ where
 import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
+import qualified LndClient.Data.WalletBalance as Lnd
 import qualified UnliftIO.Exception as UnIO
 
 newtype AppM m a = AppM
@@ -88,6 +89,15 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
         "Not enough incoming liquidity from the external "
           <> "lightning network, got "
           <> inspect amt
+          <> " but minimum is "
+          <> inspect lim
+          <> "."
+  monitorTotalOnChainLiquidity wal = do
+    lim <- asks Env.envMinTotalOnChainLiquidity
+    when (Lnd.totalBalance wal < lim) $
+      $(logTM) CriticalS . logStr $
+        "Not enough onchain liquidity, got "
+          <> inspect wal
           <> " but minimum is "
           <> inspect lim
           <> "."

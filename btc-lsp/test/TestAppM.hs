@@ -44,6 +44,7 @@ import LndClient (LndEnv (..))
 import qualified LndClient as Lnd
 import qualified LndClient.Data.GetInfo as GetInfo
 import qualified LndClient.Data.SignMessage as Lnd
+import qualified LndClient.Data.WalletBalance as Lnd
 import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
 import qualified LndClient.RPC.Silent as Lnd
@@ -155,6 +156,15 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
         "Not enough incoming liquidity from the external "
           <> "lightning network, got "
           <> inspect amt
+          <> " but minimum is "
+          <> inspect lim
+          <> "."
+  monitorTotalOnChainLiquidity wal = do
+    lim <- asks $ envMinTotalOnChainLiquidity . testEnvLsp
+    when (Lnd.totalBalance wal < lim) $
+      $(logTM) CriticalS . logStr $
+        "Not enough onchain liquidity, got "
+          <> inspect wal
           <> " but minimum is "
           <> inspect lim
           <> "."
