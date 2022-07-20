@@ -132,3 +132,5 @@ instance Out (Ratio Natural) where
     docPrec x . into @Rational
   doc =
     docPrec 0
+
+instance Out (Psql.BackendKey Psql.SqlBackend)

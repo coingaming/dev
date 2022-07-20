@@ -10,7 +10,6 @@
 {-# LANGUAGE NoStrictData #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-name-shadowing #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module BtcLsp.Storage.Model where
 
@@ -43,8 +42,6 @@ instance HasTable SwapIntoLn where
 
 instance HasTable Block where
   getTable = const BlockTable
-
-instance Out (Psql.BackendKey Psql.SqlBackend)
 
 deriving stock instance Generic (Psql.Key User)
 

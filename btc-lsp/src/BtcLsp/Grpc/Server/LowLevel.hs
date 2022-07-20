@@ -1,3 +1,7 @@
+--
+-- NOTE : requestBody is deprecated
+-- but we need it.
+--
 {-# OPTIONS_GHC -Wno-deprecations #-}
 
 module BtcLsp.Grpc.Server.LowLevel
