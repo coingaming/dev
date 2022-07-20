@@ -49,5 +49,4 @@ hashFunc =
     . L.fromStrict
     . C8.pack
     . show
-    . entityVal
-    . SwapIntoLn.swapInfoSwap
+    . (\x -> x {SwapIntoLn.swapInfoChan = []})
