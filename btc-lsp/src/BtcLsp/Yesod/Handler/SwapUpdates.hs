@@ -40,7 +40,7 @@ getSwapUpdate (App {appMRunner = UnliftIO run}) uuid =
     U.<<$>> (liftIO . run . runSql . SwapIntoLn.getByUuidSql) uuid
 
 hashFunc :: SwapIntoLn.SwapInfo -> Text
-hashFunc = do
+hashFunc =
   decodeUtf8
     . B64.encode
     . L.toStrict
