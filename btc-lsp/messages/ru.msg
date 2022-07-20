@@ -140,7 +140,6 @@ SwapIntoLnFeeLsp: Комиссия ЛСП
 SwapIntoLnChanCapUser: Исходящая ликвидность пользователя
 SwapIntoLnChanCapLsp: Входящая ликвидность пользователя  *
 SwapIntoLnChanCapTotal: Общая ликвидность канала
-SwapIntoLnFeeMiner: Комиссия майнеров
 SwapIntoLnUuid: Идентификатор обмена
 SwapIntoLnUserId: Публичный ключ пользователя
 SwapIntoLnFundInvoice: Инвойс обмена

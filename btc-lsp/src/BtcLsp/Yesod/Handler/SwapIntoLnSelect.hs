@@ -144,11 +144,6 @@ newSwapWidget swapInfo =
             $ from swapIntoLnChanCapUser
               + from swapIntoLnChanCapLsp
         ),
-        ( MsgSwapIntoLnFeeMiner,
-          Just
-            . MsgSatoshi
-            $ from swapIntoLnFeeMiner
-        ),
         ( MsgChannelPrivacy,
           Just $
             chanPrivacyMsg swapIntoLnPrivacy

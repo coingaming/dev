@@ -140,7 +140,6 @@ SwapIntoLnFeeLsp: LSP Service Fee
 SwapIntoLnChanCapUser: User's Outgoing Capacity
 SwapIntoLnChanCapLsp: User's Incoming Capacity *
 SwapIntoLnChanCapTotal: Total Channel Capacity
-SwapIntoLnFeeMiner: Channel Mining Fee
 SwapIntoLnUuid: Swap Uuid
 SwapIntoLnUserId: User Pub Key
 SwapIntoLnFundInvoice: Swap Invoice
