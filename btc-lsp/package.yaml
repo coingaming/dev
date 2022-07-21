@@ -260,6 +260,7 @@ tests:
     - base
     - witch
     - lnd-client
+    - extra
     - envparse
     - network-bitcoin
     - unliftio

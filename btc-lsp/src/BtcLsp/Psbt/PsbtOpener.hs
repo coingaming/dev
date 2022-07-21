@@ -21,6 +21,7 @@ import BtcLsp.Psbt.Utils
     shimCancelReq,
     unspendUtxoLookup,
   )
+import Control.Concurrent.Extra
 import qualified Data.Map as M
 import qualified LndClient as Lnd
 import qualified LndClient.Data.ChannelPoint as Lnd
@@ -69,36 +70,41 @@ mapLeaseUtxosToPsbtUtxo lockedUtxos = do
 
 fundChanPsbt ::
   (Env m) =>
+  Lnd.PendingChannelId ->
   [PsbtUtxo] ->
   OnChainAddress 'Fund ->
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
   ExceptT Failure m Lnd.Psbt
-fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
+fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee = do
   let userFundingAmt = sumAmt userUtxos - coerce lspFee
+
+  let pcidTag = "[pcid:" <> inspect pcid <> "] "
 
   $(logTM) DebugS $
     logStr $
-      "UserAmt:"
+      pcidTag
+        <> "UserAmt:"
         <> inspect (sumAmt userUtxos)
         <> " LspFee:"
         <> inspect lspFee
 
   lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
+  $(logTM) DebugS $ logStr $ pcidTag <> "Selected Lsp utxos:" <> inspect (FP.lockedUtxos lspFunded)
   lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
   let selectedInputsAmt = sumAmt lspUtxos
-  $(logTM) DebugS $ logStr $ "Coins sum by lsp" <> inspect selectedInputsAmt
+  $(logTM) DebugS $ logStr $ pcidTag <> "Coins sum by lsp" <> inspect selectedInputsAmt
   let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
   numInps <-
-    tryFromT "Psbt funding inputs length" (length allInputs)
+    tryFromT (pcidTag <> "Psbt funding inputs length") (length allInputs)
   estFee <-
-    tryFailureT "Psbt funding fee estimator" $
+    tryFailureT (pcidTag <> "Psbt funding fee estimator") $
       Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
   --
   -- TODO: find exact additional cost of open trx
   --
   let fee = estFee + MSat 50000
-  $(logTM) DebugS $ logStr $ "Est fee:" <> inspect fee
+  $(logTM) DebugS $ logStr $ pcidTag <> "Est fee:" <> inspect fee
   let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
   let outputs =
         if changeAmt > Math.trxDustLimit
@@ -114,6 +120,22 @@ fundChanPsbt userUtxos chanFundAddr changeAddr lspFee = do
   psbt <- withLndT Lnd.fundPsbt ($ req)
   pure $ Lnd.Psbt $ FP.fundedPsbt psbt
 
+fundChanPsbtLocked ::
+  (Env m) =>
+  Lock ->
+  Lnd.PendingChannelId ->
+  [PsbtUtxo] ->
+  OnChainAddress 'Fund ->
+  OnChainAddress 'Gain ->
+  Money 'Lsp 'OnChain 'Gain ->
+  ExceptT Failure m Lnd.Psbt
+fundChanPsbtLocked lock pcid userUtxos chanFundAddr changeAddr lspFee = do
+  psbtE <- lift . withUnliftIO $ \(UnliftIO run) ->
+    liftIO $
+      withLock lock $
+        run $ runExceptT $ fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee
+  except psbtE
+
 data OpenUpdateEvt = LndUpdate Lnd.OpenStatusUpdate | LndSubFail deriving stock (Generic)
 
 instance Out OpenUpdateEvt
@@ -125,13 +147,14 @@ data OpenChannelPsbtResult = OpenChannelPsbtResult
 
 openChannelPsbt ::
   Env m =>
+  Lock ->
   [PsbtUtxo] ->
   NodePubKey ->
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
   Privacy ->
   ExceptT Failure m OpenChannelPsbtResult
-openChannelPsbt utxos toPubKey changeAddress lspFee private = do
+openChannelPsbt lock utxos toPubKey changeAddress lspFee private = do
   chan <- lift T.newTChanIO
   pcid <- Lnd.newPendingChanId
   let openChannelRequest =
@@ -155,7 +178,7 @@ openChannelPsbt utxos toPubKey changeAddress lspFee private = do
       case upd of
         LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdatePsbtFund (Lnd.ReadyForPsbtFunding faddr famt _)))) -> do
           $(logTM) DebugS $ logStr $ "Chan ready for funding at addr:" <> inspect faddr <> " with amt:" <> inspect famt
-          psbt' <- fundChanPsbt utxos (unsafeNewOnChainAddress faddr) (coerce changeAddress) lspFee
+          psbt' <- fundChanPsbtLocked lock pcid utxos (unsafeNewOnChainAddress faddr) (coerce changeAddress) lspFee
           void $ withLndT Lnd.fundingStateStep ($ psbtVerifyReq pcid psbt')
           sPsbtResp <- finalizePsbt psbt'
           $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp

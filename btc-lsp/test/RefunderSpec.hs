@@ -98,7 +98,8 @@ spec = do
                     . entityVal
                     $ swp,
                 SendCoins.amount =
-                  from amt
+                  from amt,
+                SendCoins.sendAll = False
               }
         )
     lift $ mine 1 LndLsp
