@@ -15,6 +15,7 @@ import BtcLsp.Import.External
 import Data.ProtoLens.Field
 import qualified LndClient as Lnd
 import qualified LndClient.Data.GetInfo as Lnd
+import qualified LndClient.Data.WalletBalance as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
@@ -115,3 +116,4 @@ class
     ExceptT . withBtc method
   monitorTotalExtOutgoingLiquidity :: Liquidity 'Outgoing -> m ()
   monitorTotalExtIncomingLiquidity :: Liquidity 'Incoming -> m ()
+  monitorTotalOnChainLiquidity :: Lnd.WalletBalance -> m ()

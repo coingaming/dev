@@ -23,6 +23,7 @@ import qualified Data.Vector as V
 import LndClient (txIdParser)
 import qualified LndClient.Data.FundPsbt as FP
 import qualified LndClient.Data.OutPoint as OP
+import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
@@ -37,7 +38,8 @@ apply =
           . inspect
       )
       maybeFunded
-      $ runExceptT scan
+      . runExceptT
+      $ monitorOnChainLiquidity >> scan
     sleep300ms
 
 maybeFunded :: (Env m) => [Utxo] -> m ()
@@ -394,3 +396,11 @@ maybeSwap =
   runSql
     . SwapIntoLn.getByFundAddressSql
     . Smart.unsafeNewOnChainAddress
+
+monitorOnChainLiquidity ::
+  ( Env m
+  ) =>
+  ExceptT Failure m ()
+monitorOnChainLiquidity =
+  withLndT Lnd.walletBalance id
+    >>= lift . monitorTotalOnChainLiquidity
