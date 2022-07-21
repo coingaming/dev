@@ -215,6 +215,7 @@ executables:
     - aeson
     - bytestring
     - vector
+    - extra
     - QuickCheck
     - hspec
     source-dirs:

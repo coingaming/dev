@@ -75,7 +75,7 @@ spec = do
           LndAlice
           Lnd.sendCoins
           ( \h ->
-              h (Lnd.SendCoinsRequest fundAddr (MSat 200000000))
+              h (Lnd.SendCoinsRequest fundAddr (MSat 200000000) False)
           )
       lift $
         LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)

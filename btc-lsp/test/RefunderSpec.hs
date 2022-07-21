@@ -86,7 +86,7 @@ spec = do
     swp <-
       createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
-    sleep1s -- Let Expirer to expiry the swap
+    sleep5s -- Let Expirer to expiry the swap
     void $
       withLndT
         Lnd.sendCoins
