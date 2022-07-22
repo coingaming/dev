@@ -1,2 +1,9 @@
---restart=cabal.project
---restart=package.yaml
+--restart=btc-lsp/cabal.project
+--restart=btc-lsp/package.yaml
+--restart=btc-lsp/proto/
+--restart=btc-lsp/integration/
+--restart=btc-lsp/config/
+--restart=btc-lsp/messages/
+--restart=btc-lsp/static/css/
+--restart=btc-lsp/static/fonts/
+--restart=btc-lsp/templates/
