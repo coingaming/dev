@@ -159,7 +159,6 @@ spec = do
 
     openChanRes1 <- PO.openChannelPsbt psbtFlowLock psbtUtxos1 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
 
-    -- Pray for sync
     sleep5s
 
     void . lift . spawnLink $
