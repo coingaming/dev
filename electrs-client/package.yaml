@@ -1,22 +1,17 @@
 name:                electrs-client
 version:             0.1.0.0
-github:              "githubuser/electrs-client"
+github:              "coingaming/src"
 license:             BSD3
-author:              "Mikhail Prushinskiy"
-maintainer:          "mikhail.prushinskiy@heathmont.net"
-copyright:           "2022 Heathmont"
+author:              "21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>"
+maintainer:          "21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>"
+copyright:           "2022 Yolo <hello@coingaming.io>"
+synopsis:            Electrs client library for Haskell
+description:         You can find documentation at <https://hackage.haskell.org/package/electrs-client>
+homepage:            https://github.com/coingaming/src
+category:            Electrs, Bitcoin, Finance, Network, Payments
 
 extra-source-files:
 - CHANGELOG.md
-
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/electrs-client#readme>
 
 default-extensions:
 - NoImplicitPrelude

@@ -7,19 +7,19 @@ cabal-version: 1.12
 name:                electrs-client
 version:             0.1.0.0
 description:         Please see the README on GitHub at <https://github.com/githubuser/electrs-client#readme>
-homepage:            https://github.com/githubuser/electrs-client#readme
-bug-reports:         https://github.com/githubuser/electrs-client/issues
+homepage:            https://github.com/coingaming/src#readme
+bug-reports:         https://github.com/coingaming/src/issues
 license:             BSD3
 build-type:          Simple
-author:              Mikhail Prushinskiy
-maintainer:          mikhail.prushinskiy@heathmont.net
-copyright:           2022 Heathmont
+author:              21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>
+maintainer:          21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>
+copyright:           2022 Yolo <hello@coingaming.io>
 extra-source-files:
     CHANGELOG.md
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/electrs-client
+  location: https://github.com/coingaming/src
 
 library
   exposed-modules:
