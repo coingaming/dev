@@ -1,33 +1,7 @@
-packages:
-  btc-lsp/
-  network-bitcoin/
-  generic-pretty-instances/
-  electrs-client/
-
-index-state: 2022-04-06T00:00:00Z
+packages: *.cabal
 
 package witch
   flags: +remove-time
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/lnd-client.git
-  --sha256: 0jgpcf8bmwr569688mvl54kq73gz0gqlmh743x0fg2gidaazhp8z
-  tag: 5bc771db50bd1300ee5b27bda1ee7fc73ee73388
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/proto-lens.git
-  tag: 7e75e2c95d9bf608965ff8335ee618978181034a
-  --sha256: 11k3y5p7m771n48d5qkzm5dj2rzdc0b26ixm35yh71rvrbxszhnf
-  subdir: proto-lens
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/proto-lens.git
-  tag: 7e75e2c95d9bf608965ff8335ee618978181034a
-  --sha256: 11k3y5p7m771n48d5qkzm5dj2rzdc0b26ixm35yh71rvrbxszhnf
-  subdir: proto-lens-runtime
 
 source-repository-package
   type: git
@@ -37,41 +11,14 @@ source-repository-package
 
 source-repository-package
   type: git
-  location: https://github.com/coingaming/http2-client.git
-  tag: 59df9dcaddf56930aca88e37efece280475f823e
-  --sha256: 19gmql3hy0k4i71kiipkayp0fzjjbwgc2y5f5mrcnicnarfq0w4r
+  location: https://github.com/coingaming/src.git
+  tag: bd13f5e66383aa56366bb075d19ae38e737aa9cd
+  --sha256: 0dyp954h1qhrrylzvdr31i3rgn5s8hkj8r8aaf3wkzjc6jrll41z
+  subdir: generic-pretty-instances
 
 source-repository-package
   type: git
-  location: https://github.com/coingaming/http2-grpc-haskell.git
-  tag: 4037e853bb73e9c547fce31a11cf633a09907228
-  --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: http2-client-grpc
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/http2-grpc-haskell.git
-  tag: 4037e853bb73e9c547fce31a11cf633a09907228
-  --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: http2-grpc-types
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/http2-grpc-haskell.git
-  tag: 4037e853bb73e9c547fce31a11cf633a09907228
-  --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: http2-grpc-proto-lens
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/http2-grpc-haskell.git
-  tag: 4037e853bb73e9c547fce31a11cf633a09907228
-  --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: http2-grpc-proto3-wire
-
-source-repository-package
-  type: git
-  location: https://github.com/coingaming/http2-grpc-haskell.git
-  tag: 4037e853bb73e9c547fce31a11cf633a09907228
-  --sha256: 1hliz5v0jw3i84fgm7y3q4blzcfkfx1ml1xcc52hks2jsnv5d9is
-  subdir: warp-grpc
+  location: https://github.com/coingaming/src.git
+  tag: 3b731f3e7835276d3a15448880eeb8795b196fdb
+  --sha256: 1dil468r4s9sjvg7lhs2jx80y8v74aiapsvlyhvk1d6cihhzp5f3
+  subdir: network-bitcoin

@@ -25,8 +25,7 @@ newtype OnChainAddress (mrel :: MoneyRelation)
     ( Eq,
       Ord,
       Show,
-      Read,
-      PathPiece
+      Read
     )
   deriving stock
     ( Generic

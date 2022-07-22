@@ -64,15 +64,14 @@ _deps: &deps
   - transformers
   - unbounded-delays
   - GenericPretty
+  - generic-pretty-instances
   - bytestring
   - text
   - hex-text
   - network-bitcoin
   - SHA
-  - lnd-client
   - network
   - envparse
-  - yesod-core >=1.6 && <1.7
   - aeson >=1.4 && <1.6
 
 _optimized: &optimized
@@ -87,15 +86,12 @@ _optimized: &optimized
   ld-options:
   - -fuse-ld=gold
 
-# The library contains all of our application code. The executable
-# defined below is just a thin wrapper.
 library:
   <<: *deps
   source-dirs:
   - src
   ghc-options:
   - -fwarn-tabs
-  - -O2
 
 tests:
   electrs-client-test:
