@@ -1,13 +1,13 @@
 name:                generic-pretty-instances
 version:             0.1.0.0
-github:              "coingaming/hs/generic-pretty-instances"
+github:              "coingaming/src"
 license:             BSD3
-author:              "Ilja Tkachuk <21it@protonmail.com>"
-maintainer:          "Ilja Tkachuk <21it@protonmail.com>"
-copyright:           "2021 Coingaming <hello@coingaming.io>"
+author:              "21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>"
+maintainer:          "21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>"
+copyright:           "2022 Yolo <hello@coingaming.io>"
 synopsis:            "GenericPretty canonical instances"
 description:         You can find documentation at <https://hackage.haskell.org/package/generic-pretty-instances>
-homepage:            https://github.com/coingaming/hs/generic-pretty-instances
+homepage:            https://github.com/coingaming/src
 category:            Text, Generics, Pretty Printer
 
 extra-source-files:

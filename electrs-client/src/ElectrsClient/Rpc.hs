@@ -32,6 +32,21 @@ newtype BlockHeader = BlockHeader Text
 
 instance Out BlockHeader
 
+newtype MSat = MSat Word64
+  deriving newtype
+    ( Eq,
+      Num,
+      Ord,
+      FromJSON,
+      Show,
+      Read
+    )
+  deriving stock
+    ( Generic
+    )
+
+instance Out MSat
+
 data Balance = Balance
   { confirmed :: MSat,
     unconfirmed :: MSat

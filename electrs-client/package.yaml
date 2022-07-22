@@ -1,22 +1,17 @@
 name:                electrs-client
 version:             0.1.0.0
-github:              "githubuser/electrs-client"
+github:              "coingaming/src"
 license:             BSD3
-author:              "Mikhail Prushinskiy"
-maintainer:          "mikhail.prushinskiy@heathmont.net"
-copyright:           "2022 Heathmont"
+author:              "21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>"
+maintainer:          "21it <21it@tuta.io>, Mikhail Prushinskiy <mprushinsky@gmail.com>, Artem Markov <drownbes@gmail.com>"
+copyright:           "2022 Yolo <hello@coingaming.io>"
+synopsis:            Electrs client library for Haskell
+description:         You can find documentation at <https://hackage.haskell.org/package/electrs-client>
+homepage:            https://github.com/coingaming/src
+category:            Electrs, Bitcoin, Finance, Network, Payments
 
 extra-source-files:
 - CHANGELOG.md
-
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/electrs-client#readme>
 
 default-extensions:
 - NoImplicitPrelude
@@ -69,15 +64,14 @@ _deps: &deps
   - transformers
   - unbounded-delays
   - GenericPretty
+  - generic-pretty-instances
   - bytestring
   - text
   - hex-text
   - network-bitcoin
   - SHA
-  - lnd-client
   - network
   - envparse
-  - yesod-core >=1.6 && <1.7
   - aeson >=1.4 && <1.6
 
 _optimized: &optimized
@@ -92,15 +86,12 @@ _optimized: &optimized
   ld-options:
   - -fuse-ld=gold
 
-# The library contains all of our application code. The executable
-# defined below is just a thin wrapper.
 library:
   <<: *deps
   source-dirs:
   - src
   ghc-options:
   - -fwarn-tabs
-  - -O2
 
 tests:
   electrs-client-test:

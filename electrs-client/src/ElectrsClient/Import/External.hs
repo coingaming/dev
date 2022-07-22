@@ -21,10 +21,8 @@ import Data.Aeson as X
   )
 import Data.Coerce as X (coerce)
 import Data.Text as X (pack, unpack)
-import LndClient as X
-  ( MSat (..),
-  )
 import Text.PrettyPrint.GenericPretty as X (Out (..))
+import Text.PrettyPrint.GenericPretty.Instance as X ()
 import Universum as X hiding
   ( atomically,
     bracket,
@@ -46,4 +44,3 @@ import UnliftIO as X
     withRunInIO,
     withUnliftIO,
   )
-import Yesod.Core as X (PathPiece (..), showIntegral)
