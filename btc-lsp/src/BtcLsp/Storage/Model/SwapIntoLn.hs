@@ -167,7 +167,6 @@ updateRevertInPsbtThreadSql id0 = do
                      Psql.==. Psql.val SwapInPsbtThread
                  )
 
-
 updateExpiredSql ::
   ( MonadIO m,
     KatipContext m

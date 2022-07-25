@@ -32,17 +32,21 @@ apply = do
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
-    swaps <- runSql $ filter
+    swaps <-
+      runSql $
+        filter
           ( \x ->
               Set.member
                 (userNodePubKey . entityVal $ snd x)
                 peerSet
           )
           <$> SwapIntoLn.getSwapsWaitingPeerSql
-    mapM_ (\(swp, usr) -> spawnLink $ do
-      void $ runSql $ SwapIntoLn.updateInPsbtThreadSql $ entityKey swp
-      r <- runSql $ openChanSql lock swp usr
-      whenLeft r $ pure $ runSql $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp)
+    mapM_
+      ( \(swp, usr) -> spawnLink $ do
+          void $ runSql $ SwapIntoLn.updateInPsbtThreadSql $ entityKey swp
+          r <- runSql $ openChanSql lock swp usr
+          whenLeft r $ pure $ runSql $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
+      )
       swaps
     sleep300ms
 
