@@ -42,10 +42,11 @@ apply = do
           )
           <$> SwapIntoLn.getSwapsWaitingPeerSql
     mapM_
-      ( \(swp, usr) -> spawnLink $ do
+      ( \(swp, usr) -> do
           void $ runSql $ SwapIntoLn.updateInPsbtThreadSql $ entityKey swp
-          r <- runSql $ openChanSql lock swp usr
-          whenLeft r $ pure $ runSql $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
+          spawnLink $ do
+            r <- runSql $ openChanSql lock swp usr
+            whenLeft r $ pure $ runSql $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
       )
       swaps
     sleep300ms
