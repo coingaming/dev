@@ -76,35 +76,31 @@ fundChanPsbt ::
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
   ExceptT Failure m Lnd.Psbt
-fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee = do
+fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee = katipAddContext (sl "pcid" (inspect pcid)) $ do
   let userFundingAmt = sumAmt userUtxos - coerce lspFee
-
-  let pcidTag = "[pcid:" <> inspect pcid <> "] "
-
   $(logTM) DebugS $
     logStr $
-      pcidTag
-        <> "UserAmt:"
+      "UserAmt:"
         <> inspect (sumAmt userUtxos)
         <> " LspFee:"
         <> inspect lspFee
 
   lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
-  $(logTM) DebugS $ logStr $ pcidTag <> "Selected Lsp utxos:" <> inspect (FP.lockedUtxos lspFunded)
+  $(logTM) DebugS $ logStr $ "Selected Lsp utxos:" <> inspect (FP.lockedUtxos lspFunded)
   lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
   let selectedInputsAmt = sumAmt lspUtxos
-  $(logTM) DebugS $ logStr $ pcidTag <> "Coins sum by lsp" <> inspect selectedInputsAmt
+  $(logTM) DebugS $ logStr $ "Coins sum by lsp" <> inspect selectedInputsAmt
   let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
   numInps <-
-    tryFromT (pcidTag <> "Psbt funding inputs length") (length allInputs)
+    tryFromT "Psbt funding inputs length" (length allInputs)
   estFee <-
-    tryFailureT (pcidTag <> "Psbt funding fee estimator") $
+    tryFailureT "Psbt funding fee estimator" $
       Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
   --
   -- TODO: find exact additional cost of open trx
   --
   let fee = estFee + MSat 50000
-  $(logTM) DebugS $ logStr $ pcidTag <> "Est fee:" <> inspect fee
+  $(logTM) DebugS $ logStr $ "Est fee:" <> inspect fee
   let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
   let outputs =
         if changeAmt > Math.trxDustLimit

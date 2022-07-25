@@ -103,6 +103,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                             )
                    )
   itMainT @'LndLsp "Server SwapIntoLn" $ do
+    lift $ mine 200 LndLsp
     gcEnv <- lift getGCEnv
     refundAddr <- from <$> genAddress LndAlice
     res0 <-

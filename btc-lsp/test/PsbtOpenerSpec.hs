@@ -170,5 +170,3 @@ spec = do
     liftIO $ do
       shouldSatisfy chanEither0 isRight
       shouldSatisfy chanEither1 isRight
-    lift $ mine 200 LndLsp
-    pure ()
