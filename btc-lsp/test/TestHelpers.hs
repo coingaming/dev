@@ -4,6 +4,9 @@ module TestHelpers
     getLatestBlock,
     putLatestBlockToDB,
     waitCond,
+    transferCoins,
+    transferAllCoins,
+    transferCoinsToAddr,
   )
 where
 
@@ -13,6 +16,7 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.User as User
 import qualified LndClient as Lnd
 import qualified LndClient.Data.NewAddress as Lnd
+import qualified LndClient.Data.SendCoins as SendCoins
 import LndClient.LndTest (mine)
 import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
@@ -104,3 +108,42 @@ waitCond times condition st = do
           sleep1s
           mine 1 LndLsp
           waitCond (times - 1) condition newSt
+
+transferCoinsRaw ::
+  Bool ->
+  MSat ->
+  TestOwner ->
+  TestOwner ->
+  ExceptT Failure (TestAppM 'LndLsp IO) ()
+transferCoinsRaw allCoins amt fromOwner toOwner = do
+  toAddr <- genAddress toOwner
+  void $
+    withLndTestT
+      fromOwner
+      Lnd.sendCoins
+      ($ SendCoins.SendCoinsRequest {SendCoins.addr = coerce toAddr, SendCoins.amount = amt, SendCoins.sendAll = allCoins})
+
+transferAllCoins ::
+  TestOwner ->
+  TestOwner ->
+  ExceptT Failure (TestAppM 'LndLsp IO) ()
+transferAllCoins = transferCoinsRaw True (MSat 0)
+
+transferCoins ::
+  MSat ->
+  TestOwner ->
+  TestOwner ->
+  ExceptT Failure (TestAppM 'LndLsp IO) ()
+transferCoins = transferCoinsRaw False
+
+transferCoinsToAddr ::
+  MSat ->
+  TestOwner ->
+  Text ->
+  ExceptT Failure (TestAppM 'LndLsp IO) ()
+transferCoinsToAddr amt fromOwner toAddr = do
+  void $
+    withLndTestT
+      fromOwner
+      Lnd.sendCoins
+      ($ SendCoins.SendCoinsRequest {SendCoins.addr = coerce toAddr, SendCoins.amount = amt, SendCoins.sendAll = False})

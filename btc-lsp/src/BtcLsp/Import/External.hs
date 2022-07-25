@@ -13,6 +13,7 @@ import Control.Concurrent.Async as X
     wait,
     waitAnyCancel,
     waitAnySTM,
+    waitBoth,
   )
 import Control.Concurrent.STM as X (atomically)
 import Control.Concurrent.STM.TChan as X
@@ -149,6 +150,7 @@ import UnliftIO as X
     bracket,
     finally,
     race,
+    toIO,
     withRunInIO,
     withUnliftIO,
   )

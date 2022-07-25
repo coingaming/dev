@@ -34,7 +34,7 @@ let
     protocol.wumbo-channels=true
 
     [Application Options]
-
+    maxpendingchannels=50
     listen=0.0.0.0:${toString port}
     rpclisten=localhost:${toString rpcport}
     restlisten=0.0.0.0:${toString restport}

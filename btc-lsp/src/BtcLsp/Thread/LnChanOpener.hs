@@ -12,6 +12,7 @@ import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
 import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
+import Control.Concurrent.Extra
 import qualified Data.Set as Set
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.Peer as Peer
@@ -30,6 +31,7 @@ apply =
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
+    lock <- liftIO newLock
     runSql $ do
       swaps <-
         filter
@@ -40,7 +42,7 @@ apply =
           )
           <$> SwapIntoLn.getSwapsWaitingPeerSql
       mapM_
-        (uncurry openChanSql)
+        (uncurry (openChanSql lock))
         swaps
     sleep300ms
 
@@ -53,10 +55,11 @@ apply =
 openChanSql ::
   ( Env m
   ) =>
+  Lock ->
   Entity SwapIntoLn ->
   Entity User ->
   ReaderT Psql.SqlBackend m ()
-openChanSql (Entity swapKey _) userEnt = do
+openChanSql lock (Entity swapKey _) userEnt = do
   res <-
     SwapIntoLn.withLockedRowSql swapKey (== SwapWaitingPeer) $
       \swapVal -> do
@@ -64,6 +67,7 @@ openChanSql (Entity swapKey _) userEnt = do
         cpEither <- lift . runExceptT $ do
           r <-
             PO.openChannelPsbt
+              lock
               (swapUtxoToPsbtUtxo . entityVal <$> utxos)
               (userNodePubKey $ entityVal userEnt)
               (coerce $ swapIntoLnLspFeeAndChangeAddress swapVal)

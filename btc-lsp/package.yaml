@@ -210,6 +210,7 @@ executables:
     - aeson
     - bytestring
     - vector
+    - extra
     - QuickCheck
     - hspec
     source-dirs:
@@ -255,6 +256,7 @@ tests:
     - base
     - witch
     - lnd-client
+    - extra
     - envparse
     - network-bitcoin
     - unliftio

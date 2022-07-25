@@ -5,7 +5,6 @@ where
 
 import BtcLsp.Import hiding (setGrpcCtxT)
 import BtcLsp.Storage.Model.SwapUtxo (getUtxosBySwapIdSql)
-import Data.List (intersect)
 import qualified Data.Vector as V
 import LndClient (txIdParser)
 import qualified LndClient as Lnd
@@ -31,10 +30,6 @@ import TestOrphan ()
 --import LndClient.RPC.Katip
 --import Universum
 
-allIn :: Eq a => [a] -> [a] -> Bool
-allIn ax bx =
-  intersect ax bx == ax
-
 refundSucceded ::
   Entity SwapIntoLn ->
   [TxId 'Funding] ->
@@ -54,15 +49,14 @@ refundSucceded swp preTrs = do
           . swapUtxoRefundTxId
           . entityVal
           <$> utxos
-    trsInBlock' <-
-      fmap (txIdParser . Btc.unTransactionID . Btc.decTxId)
-        . V.toList
-        . Btc.vSubTransactions
-        <$> getLatestBlock
-    trsInBlock <-
-      liftLndResult $ sequence trsInBlock'
+    blk <- getLatestBlock
+    let trsInBlock' =
+          fmap (txIdParser . Btc.unTransactionID . Btc.decTxId)
+            . V.toList
+            . Btc.vSubTransactions
+            $ blk
+    trsInBlock <- liftLndResult $ sequence trsInBlock'
     let foundTrs = (from <$> trsInBlock) <> preTrs
-    let allRefundTxsOnChain = allIn (nubOrd refIds) foundTrs
     let utxosMakedRefunded =
           notNull utxos
             && all
@@ -71,10 +65,7 @@ refundSucceded swp preTrs = do
                   . entityVal
               )
               utxos
-    pure
-      ( allRefundTxsOnChain && utxosMakedRefunded,
-        foundTrs
-      )
+    pure (not (null refIds) && utxosMakedRefunded, foundTrs)
   pure $
     fromRight (False, preTrs) res
 
@@ -86,7 +77,7 @@ spec = do
     swp <-
       createDummySwap . Just
         =<< getFutureTime (Lnd.Seconds 5)
-    sleep1s -- Let Expirer to expiry the swap
+    sleep5s -- Let Expirer to expiry the swap
     void $
       withLndT
         Lnd.sendCoins
@@ -98,7 +89,8 @@ spec = do
                     . entityVal
                     $ swp,
                 SendCoins.amount =
-                  from amt
+                  from amt,
+                SendCoins.sendAll = False
               }
         )
     lift $ mine 1 LndLsp

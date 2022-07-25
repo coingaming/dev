@@ -444,6 +444,7 @@ executable btc-lsp-integration
     , base
     , bytestring
     , envparse
+    , extra
     , hspec
     , lnd-client
     , network-bitcoin
@@ -844,6 +845,7 @@ test-suite btc-lsp-test
     , base
     , bytestring
     , envparse
+    , extra
     , hspec
     , lnd-client
     , network-bitcoin
