@@ -6,6 +6,9 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateWaitingChanSql,
     updateExpiredSql,
     updateSucceededSql,
+    updateInPsbtThreadSql,
+    updateRevertInPsbtThreadSql,
+    updateRevertAllInPsbtThreadSql,
     getSwapsWaitingPeerSql,
     getSwapsWaitingChanSql,
     getSwapsAboutToExpirySql,
@@ -116,8 +119,73 @@ updateWaitingChanSql id0 = do
           Psql.==. Psql.val id0
       )
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     Psql.==. Psql.val SwapInPsbtThread
+                 )
+
+updateInPsbtThreadSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateInPsbtThreadSql id0 = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapInPsbtThread,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val id0
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
                      Psql.==. Psql.val SwapWaitingPeer
                  )
+
+updateRevertInPsbtThreadSql ::
+  ( MonadIO m
+  ) =>
+  SwapIntoLnId ->
+  ReaderT Psql.SqlBackend m ()
+updateRevertInPsbtThreadSql id0 = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapWaitingPeer,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_ $
+      ( row Psql.^. SwapIntoLnId
+          Psql.==. Psql.val id0
+      )
+        Psql.&&. ( row Psql.^. SwapIntoLnStatus
+                     Psql.==. Psql.val SwapInPsbtThread
+                 )
+
+updateRevertAllInPsbtThreadSql ::
+  ( MonadIO m
+  ) =>
+  ReaderT Psql.SqlBackend m ()
+updateRevertAllInPsbtThreadSql = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapWaitingPeer,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_
+      ( row Psql.^. SwapIntoLnStatus
+          Psql.==. Psql.val SwapInPsbtThread
+      )
 
 updateExpiredSql ::
   ( MonadIO m,
