@@ -183,9 +183,9 @@ updateRevertAllInPsbtThreadSql = do
           Psql.=. Psql.val ct
       ]
     Psql.where_
-     ( row Psql.^. SwapIntoLnStatus
-       Psql.==. Psql.val SwapInPsbtThread
-     )
+      ( row Psql.^. SwapIntoLnStatus
+          Psql.==. Psql.val SwapInPsbtThread
+      )
 
 updateExpiredSql ::
   ( MonadIO m,
