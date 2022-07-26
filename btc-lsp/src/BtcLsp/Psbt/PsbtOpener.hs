@@ -2,6 +2,7 @@
 
 module BtcLsp.Psbt.PsbtOpener
   ( openChannelPsbt,
+    abortChannelPsbt,
     OpenChannelPsbtResult (..),
     OpenUpdateEvt (..),
   )
@@ -141,8 +142,13 @@ data OpenChannelPsbtResult = OpenChannelPsbtResult
     fundAsync :: Async (Either Failure Lnd.ChannelPoint)
   }
 
+abortChannelPsbt :: Env m => Lnd.PendingChannelId -> m ()
+abortChannelPsbt p =
+  void $ runExceptT $ withLndT Lnd.fundingStateStep ($ shimCancelReq p)
+
 openChannelPsbt ::
   Env m =>
+  Lnd.PendingChannelId ->
   Lock ->
   [PsbtUtxo] ->
   NodePubKey ->
@@ -150,9 +156,8 @@ openChannelPsbt ::
   Money 'Lsp 'OnChain 'Gain ->
   Privacy ->
   ExceptT Failure m OpenChannelPsbtResult
-openChannelPsbt lock utxos toPubKey changeAddress lspFee private = do
+openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
   chan <- lift T.newTChanIO
-  pcid <- Lnd.newPendingChanId
   let openChannelRequest =
         openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt) private
   let subUpdates u = void . T.atomically . T.writeTChan chan $ LndUpdate u
@@ -164,11 +169,11 @@ openChannelPsbt lock utxos toPubKey changeAddress lspFee private = do
   case res of
     Left e -> throwE . FailureInt . FailurePrivate $ inspect e
     Right _ -> do
-      fundA <- lift . spawnLink $ runExceptT $ fundStep pcid chan
+      fundA <- lift . spawnLink $ runExceptT $ fundStep chan
       pure $ OpenChannelPsbtResult chan fundA
   where
     amt = sumAmt utxos - coerce lspFee
-    fundStep pcid chan = do
+    fundStep chan = do
       upd <- T.atomically $ T.readTChan chan
       $(logTM) DebugS $ logStr $ "Got chan status update" <> inspect upd
       case upd of
@@ -179,15 +184,15 @@ openChannelPsbt lock utxos toPubKey changeAddress lspFee private = do
           sPsbtResp <- finalizePsbt psbt'
           $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp
           void $ withLndT Lnd.fundingStateStep ($ psbtFinalizeReq pcid (Lnd.Psbt $ FNP.signedPsbt sPsbtResp))
-          fundStep pcid chan
+          fundStep chan
         LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanPending p))) -> do
           $(logTM) DebugS $ logStr $ "Chan is pending... mining..." <> inspect p
-          fundStep pcid chan
+          fundStep chan
         LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp)))) -> do
           $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
           pure cp
         LndSubFail -> do
-          void $ withLndT Lnd.fundingStateStep ($ shimCancelReq pcid)
+          lift $ abortChannelPsbt pcid
           void $ lockUtxos (getOutPoint <$> utxos)
           throwE (FailureInt $ FailurePrivate "Lnd subscription failed. Trying to cancel psbt flow. Its ok if cancel fails")
         _ -> throwE (FailureInt $ FailurePrivate "Unexpected update")

@@ -16,6 +16,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     getByUuidSql,
     getByFundAddressSql,
     withLockedRowSql,
+    getSwapsInPsbtThreadSql,
     UtxoInfo (..),
     SwapInfo (..),
   )
@@ -25,6 +26,7 @@ import BtcLsp.Import hiding (Storage (..))
 import qualified BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Math.Swap as Math
 import qualified BtcLsp.Storage.Util as Util
+import qualified LndClient as Lnd
 
 createIgnoreSql ::
   ( MonadIO m
@@ -58,6 +60,7 @@ createIgnoreSql userEnt fundAddr feeAndChangeAddr refundAddr expAt chanPrivacy =
         swapIntoLnFeeMiner = Money 0,
         swapIntoLnStatus = SwapWaitingFundChain,
         swapIntoLnPrivacy = chanPrivacy,
+        swapIntoLnPsbtPendingChanId = Nothing,
         swapIntoLnExpiresAt = expAt,
         swapIntoLnInsertedAt = ct,
         swapIntoLnUpdatedAt = ct
@@ -126,8 +129,9 @@ updateInPsbtThreadSql ::
   ( MonadIO m
   ) =>
   SwapIntoLnId ->
+  Lnd.PendingChannelId ->
   ReaderT Psql.SqlBackend m ()
-updateInPsbtThreadSql id0 = do
+updateInPsbtThreadSql id0 pcid = do
   ct <- getCurrentTime
   Psql.update $ \row -> do
     Psql.set
@@ -135,7 +139,9 @@ updateInPsbtThreadSql id0 = do
       [ SwapIntoLnStatus
           Psql.=. Psql.val SwapInPsbtThread,
         SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
+          Psql.=. Psql.val ct,
+        SwapIntoLnPsbtPendingChanId
+          Psql.=. Psql.val (Just pcid)
       ]
     Psql.where_ $
       ( row Psql.^. SwapIntoLnId
@@ -158,7 +164,9 @@ updateRevertInPsbtThreadSql id0 = do
       [ SwapIntoLnStatus
           Psql.=. Psql.val SwapWaitingPeer,
         SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
+          Psql.=. Psql.val ct,
+        SwapIntoLnPsbtPendingChanId
+          Psql.=. Psql.val Nothing
       ]
     Psql.where_ $
       ( row Psql.^. SwapIntoLnId
@@ -180,12 +188,31 @@ updateRevertAllInPsbtThreadSql = do
       [ SwapIntoLnStatus
           Psql.=. Psql.val SwapWaitingPeer,
         SwapIntoLnUpdatedAt
-          Psql.=. Psql.val ct
+          Psql.=. Psql.val ct,
+        SwapIntoLnPsbtPendingChanId
+          Psql.=. Psql.val Nothing
       ]
     Psql.where_
       ( row Psql.^. SwapIntoLnStatus
           Psql.==. Psql.val SwapInPsbtThread
       )
+
+getSwapsInPsbtThreadSql ::
+  ( MonadIO m
+  ) =>
+  ReaderT
+    Psql.SqlBackend
+    m
+    [Entity SwapIntoLn]
+getSwapsInPsbtThreadSql =
+  Psql.select $
+    Psql.from $ \swap -> do
+      Psql.locking Psql.ForUpdate
+      Psql.where_
+        ( swap Psql.^. SwapIntoLnStatus
+            Psql.==. Psql.val SwapInPsbtThread
+        )
+      pure swap
 
 updateExpiredSql ::
   ( MonadIO m,

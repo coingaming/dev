@@ -2,6 +2,7 @@
 
 module BtcLsp.Thread.LnChanOpener
   ( apply,
+    cleanupInPsbtThreadChannels,
   )
 where
 
@@ -14,6 +15,7 @@ import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import Control.Concurrent.Extra
 import qualified Data.Set as Set
+import qualified LndClient as Lnd
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.Peer as Peer
 import qualified LndClient.RPC.Silent as LndSilent
@@ -43,14 +45,26 @@ apply = do
           <$> SwapIntoLn.getSwapsWaitingPeerSql
     mapM_
       ( \(swp, usr) -> do
-          void $ runSql $ SwapIntoLn.updateInPsbtThreadSql $ entityKey swp
+          pcid <- Lnd.newPendingChanId
+          void $ runSql $ SwapIntoLn.updateInPsbtThreadSql (entityKey swp) pcid
           spawnLink $
             runSql $ do
-              r <- openChanSql lock swp usr
+              r <- openChanSql pcid lock swp usr
               whenLeft r $ pure $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
       )
       swaps
     sleep300ms
+
+cleanupInPsbtThreadChannels :: Env m => m ()
+cleanupInPsbtThreadChannels = runSql $ do
+  swaps <- SwapIntoLn.getSwapsInPsbtThreadSql
+  mapM_ abortChan swaps
+  SwapIntoLn.updateRevertAllInPsbtThreadSql
+  where
+    abortChan (Entity _ swp) = do
+      case swapIntoLnPsbtPendingChanId swp of
+        Just pcid -> lift $ PO.abortChannelPsbt pcid
+        Nothing -> pure ()
 
 --
 -- TODO : Do not open channel in case where
@@ -61,11 +75,12 @@ apply = do
 openChanSql ::
   ( Env m
   ) =>
+  Lnd.PendingChannelId ->
   Lock ->
   Entity SwapIntoLn ->
   Entity User ->
   ReaderT Psql.SqlBackend m (Either (Entity SwapIntoLn) ())
-openChanSql lock (Entity swapKey _) userEnt = do
+openChanSql pcid lock (Entity swapKey _) userEnt = do
   res <-
     SwapIntoLn.withLockedRowSql swapKey (== SwapInPsbtThread) $
       \swapVal -> do
@@ -73,6 +88,7 @@ openChanSql lock (Entity swapKey _) userEnt = do
         cpEither <- lift . runExceptT $ do
           r <-
             PO.openChannelPsbt
+              pcid
               lock
               (swapUtxoToPsbtUtxo . entityVal <$> utxos)
               (userNodePubKey $ entityVal userEnt)

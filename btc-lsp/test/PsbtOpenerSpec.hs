@@ -11,6 +11,7 @@ import BtcLsp.Psbt.Utils (swapUtxoToPsbtUtxo)
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import Control.Concurrent.Extra
+import qualified LndClient as Lnd
 import qualified LndClient.Data.Channel as CH
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
@@ -55,7 +56,8 @@ spec = do
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     lock <- liftIO newLock
-    openChanRes <- PO.openChannelPsbt lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+    pcid <- Lnd.newPendingChanId
+    openChanRes <- PO.openChannelPsbt pcid lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
     void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
@@ -100,8 +102,9 @@ spec = do
     profitAddr <- genAddress LndLsp
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     lock <- liftIO newLock
+    pcid <- Lnd.newPendingChanId
     openChanRes <-
-      PO.openChannelPsbt lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+      PO.openChannelPsbt pcid lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
     void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
@@ -151,13 +154,15 @@ spec = do
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos0) (TxId "dummy refund tx")
     let psbtUtxos0 = swapUtxoToPsbtUtxo . entityVal <$> utxos0
 
-    openChanRes0 <- PO.openChannelPsbt psbtFlowLock psbtUtxos0 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+    pcid0 <- Lnd.newPendingChanId
+    openChanRes0 <- PO.openChannelPsbt pcid0 psbtFlowLock psbtUtxos0 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
 
     utxos1 <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swp1Id
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos1) (TxId "dummy refund tx")
     let psbtUtxos1 = swapUtxoToPsbtUtxo . entityVal <$> utxos1
 
-    openChanRes1 <- PO.openChannelPsbt psbtFlowLock psbtUtxos1 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+    pcid1 <- Lnd.newPendingChanId
+    openChanRes1 <- PO.openChannelPsbt pcid1 psbtFlowLock psbtUtxos1 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
 
     sleep5s
 
