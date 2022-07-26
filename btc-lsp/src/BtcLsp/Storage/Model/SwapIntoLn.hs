@@ -8,6 +8,7 @@ module BtcLsp.Storage.Model.SwapIntoLn
     updateSucceededSql,
     updateInPsbtThreadSql,
     updateRevertInPsbtThreadSql,
+    updateRevertAllInPsbtThreadSql,
     getSwapsWaitingPeerSql,
     getSwapsWaitingChanSql,
     getSwapsAboutToExpirySql,
@@ -166,6 +167,25 @@ updateRevertInPsbtThreadSql id0 = do
         Psql.&&. ( row Psql.^. SwapIntoLnStatus
                      Psql.==. Psql.val SwapInPsbtThread
                  )
+
+updateRevertAllInPsbtThreadSql ::
+  ( MonadIO m
+  ) =>
+  ReaderT Psql.SqlBackend m ()
+updateRevertAllInPsbtThreadSql = do
+  ct <- getCurrentTime
+  Psql.update $ \row -> do
+    Psql.set
+      row
+      [ SwapIntoLnStatus
+          Psql.=. Psql.val SwapWaitingPeer,
+        SwapIntoLnUpdatedAt
+          Psql.=. Psql.val ct
+      ]
+    Psql.where_
+     ( row Psql.^. SwapIntoLnStatus
+       Psql.==. Psql.val SwapInPsbtThread
+     )
 
 updateExpiredSql ::
   ( MonadIO m,

@@ -44,9 +44,9 @@ apply = do
     mapM_
       ( \(swp, usr) -> do
           void $ runSql $ SwapIntoLn.updateInPsbtThreadSql $ entityKey swp
-          spawnLink $ do
-            r <- runSql $ openChanSql lock swp usr
-            whenLeft r $ pure $ runSql $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
+          spawnLink $ runSql $ do
+            r <- openChanSql lock swp usr
+            whenLeft r $ pure $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
       )
       swaps
     sleep300ms
