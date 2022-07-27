@@ -24,6 +24,7 @@ SwapIntoLn
   expiresAt UTCTime
   insertedAt UTCTime
   updatedAt UTCTime
+  psbtPendingChanId Lnd.PendingChannelId Maybe
   UniqueSwapIntoLnFundInvUuid uuid
   UniqueSwapIntoLnFundAddress fundAddress
   deriving Eq Show Generic

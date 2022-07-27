@@ -21,6 +21,7 @@ import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import Database.Persist.Quasi
 import Database.Persist.TH
+import qualified LndClient as Lnd
 import qualified LndClient.Data.ChannelBackup as Lnd
 
 -- You can define all of your database entities in the entities file.

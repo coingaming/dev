@@ -11,7 +11,6 @@ import BtcLsp.Data.AppM (runApp)
 import qualified BtcLsp.Data.Env as Env
 import BtcLsp.Import
 import qualified BtcLsp.Storage.Migration as Storage
-import qualified BtcLsp.Storage.Model.SwapIntoLn as Storage
 import qualified BtcLsp.Thread.BlockScanner as BlockScanner
 import qualified BtcLsp.Thread.Expirer as Expirer
 import qualified BtcLsp.Thread.LnChanOpener as LnChanOpener
@@ -72,7 +71,7 @@ apply = do
       $(logTM) InfoS "Running postgres migrations..."
       Storage.migrateAll
       $(logTM) InfoS "Reverting SwapInPsbtThread -> SwapWaitingPeer"
-      void $ runSql Storage.updateRevertAllInPsbtThreadSql
+      void LnChanOpener.cleanupInPsbtThreadChannels
       log <- getYesodLog
       pool <- getSqlPool
       $(logTM) InfoS "Spawning lsp threads..."
