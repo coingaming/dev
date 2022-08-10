@@ -69,12 +69,6 @@ deriving newtype instance PathPiece Lnd.PaymentRequest
 
 instance Out Btc.Block
 
-instance Out Natural where
-  docPrec x =
-    docPrec x . into @Integer
-  doc =
-    docPrec 0
-
 instance Out PortNumber where
   docPrec x =
     docPrec x . toInteger

@@ -118,6 +118,10 @@ instance Out Int64 where
   docPrec n = docPrec n . fromIntegral @Int64 @Integer
   doc = doc . fromIntegral @Int64 @Integer
 
+instance Out Natural where
+  docPrec n = docPrec n . fromIntegral @Natural @Integer
+  doc = doc . fromIntegral @Natural @Integer
+
 instance Out Text where
   docPrec n = docPrec n . T.unpack
   doc = doc . T.unpack
