@@ -43,6 +43,8 @@ Library
     Network.Bitcoin.RawTransaction
     Network.Bitcoin.Types
     Network.Bitcoin.Wallet
+    Network.Bitcoin.BtcEnv
+    Network.Bitcoin.BtcMultiEnv
 
   Build-depends:
     aeson >= 0.8,
@@ -58,7 +60,8 @@ Library
     base == 4.*,
     time >= 1.4.2,
     http-client >= 0.4.6,
-    network-uri
+    network-uri,
+    transformers
 
 Source-repository head
   type: git

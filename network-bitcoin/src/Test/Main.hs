@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE LambdaCase          #-}
+{-# LANGUAGE FlexibleInstances   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections       #-}
 
@@ -6,6 +8,7 @@
 module Main where
 
 
+import           Network.Bitcoin.BtcEnv
 import           Control.Monad            (void)
 import           Data.Either              (isRight)
 import           Data.Text                (Text)
@@ -24,7 +27,8 @@ import           Test.Tasty.QuickCheck
 
 main :: IO ()
 main = defaultMain . testGroup "network-bitcoin tests" $
-    [ canGenerateBlocks
+    [ canCreateWalletAndGetBalance
+    , canGenerateBlocks
     , canListUnspent
     , canGetBlock
     , canGetOutputInfo
@@ -38,8 +42,31 @@ main = defaultMain . testGroup "network-bitcoin tests" $
 client :: IO Client
 client = getClient "http://127.0.0.1:18443" "developer" "developer"
 
+instance BtcEnv IO where
+  getBtcCfg =
+    pure BtcCfg
+      { btcCfgHost = "http://127.0.0.1:18443" ,
+        btcCfgUsername = "developer" ,
+        btcCfgPassword = "developer",
+        btcCfgAutoLoadWallet = Just defaultWalletCfg
+      }
+  getBtcClient =
+    client
+
 
 nbTest name = testProperty name . once . monadicIO
+
+
+assertRight :: (Show a) => Either a b -> b
+assertRight = \case
+    Left e -> error $ "Got left " <> show e
+    Right res -> res
+
+
+canCreateWalletAndGetBalance :: TestTree
+canCreateWalletAndGetBalance = nbTest "getBalance" $ do
+    res <- run $ withBtc getBalance id
+    assert $ assertRight res >= 0
 
 
 canGenerateBlocks :: TestTree

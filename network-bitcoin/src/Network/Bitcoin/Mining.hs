@@ -36,10 +36,6 @@ import           Control.Monad
 import           Data.Aeson               as A
 import           Network.Bitcoin.Internal
 import           Network.Bitcoin.Wallet   (getNewAddress)
-import           Network.HTTP.Client      (HttpException (..),
-                                           HttpExceptionContent (..),
-                                           responseStatus)
-import           Network.HTTP.Types       (status500)
 
 -- | Returns whether or not bitcoind is generating bitcoins.
 getGenerate :: Client -- ^ bitcoind RPC client
@@ -80,10 +76,12 @@ generate client blocks maxTries =
     callApi client "generate" args `catch` onFail
   where
     args = tj blocks : maybe [] (pure . tj) maxTries
-    onFail (HttpExceptionRequest _ (StatusCodeException rsp _))
-        | responseStatus rsp == status500
-        = getNewAddress client Nothing >>= flip (generateToAddress client blocks) maxTries
-    onFail e = throw e
+    -- https://github.com/bitcoin/bitcoin/blob/48174c0f287b19931ca110670610bd03a03eb914/src/rpc/protocol.h#L39
+    onFail (BitcoinApiError (-1) _) =
+      getNewAddress client Nothing
+        >>= flip (generateToAddress client blocks) maxTries
+    onFail e =
+      throw e
 
 -- | The generatetoaddress RPC mines blocks immediately to a specified address.
 --   See https://bitcoin.org/en/developer-reference#generatetoaddress for more details.

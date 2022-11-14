@@ -51,8 +51,6 @@ let
   init = writeShellScriptBin "init" ''
     echo "init"
     export PATH="${lib.makeBinPath [cli]}"
-    bitcoin-cli createwallet "testwallet"
-    bitcoin-cli generatetoaddress 1 "$(bitcoin-cli getnewaddress)"
     bitcoin-cli getblockchaininfo '';
   stop = writeShellScriptBin "stop" ''
     echo "Stop"
