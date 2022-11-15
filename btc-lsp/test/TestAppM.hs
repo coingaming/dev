@@ -20,8 +20,6 @@ module TestAppM
     withLndTestT,
     getPubKeyT,
     setGrpcCtxT,
-    withBtc2,
-    withBtc2T,
     forkThread,
     mainTestSetup,
   )
@@ -38,6 +36,7 @@ import qualified BtcLsp.Thread.Main as Main
 import Data.Aeson (eitherDecodeStrict)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8 hiding (filter, length)
+import Data.List.Extra as Import (enumerate)
 import Data.ProtoLens.Field
 import qualified Env as E
 import LndClient (LndEnv (..))
@@ -49,15 +48,15 @@ import LndClient.LndTest as ReExport (LndTest)
 import qualified LndClient.LndTest as LndTest
 import qualified LndClient.RPC.Silent as Lnd
 import Network.Bitcoin as Btc (Client, getClient)
+import qualified Network.Bitcoin as Btc
+import Network.Bitcoin.BtcMultiEnv (BtcMultiEnv)
+import qualified Network.Bitcoin.BtcMultiEnv
+import qualified Network.Bitcoin.BtcMultiEnv as BtcMultiEnv
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
 import Test.QuickCheck
-import UnliftIO.Concurrent
-  ( ThreadId,
-    forkFinally,
-  )
-import qualified UnliftIO.Exception as UnIO
+import UnliftIO.Concurrent (ThreadId, forkFinally)
 import Prelude (show)
 
 data TestOwner
@@ -105,6 +104,36 @@ runTestApp :: TestEnv owner -> TestAppM owner m a -> m a
 runTestApp env app =
   runReaderT (unTestAppM app) env
 
+instance (MonadUnliftIO m) => BtcEnv (TestAppM 'LndLsp m) Failure where
+  getBtcCfg = asks $ envBtcCfg . testEnvLsp
+  getBtcClient = asks $ envBtc . testEnvLsp
+  getBtcFailureMaker =
+    pure $
+      FailureInt
+        . FailurePrivate
+        . pack
+        . show
+
+instance (MonadUnliftIO m) => BtcMultiEnv (TestAppM owner m) Failure TestOwner where
+  getBtcCfg =
+    --
+    -- NOTE : getBtcCfg is just a placeholder here,
+    -- not used really, so details do not matter much.
+    --
+    const . asks $
+      envBtcCfg . testEnvLsp
+  getBtcClient owner =
+    asks $
+      case owner of
+        LndLsp -> testEnvBtc
+        LndAlice -> testEnvBtc2
+  getBtcFailureMaker =
+    const . pure $
+      FailureInt
+        . FailurePrivate
+        . pack
+        . show
+
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =
     asks $ envGrpcServer . testEnvLsp
@@ -129,16 +158,6 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   withLnd method args = do
     lnd <- asks $ envLnd . testEnvLsp
     first (const $ FailureInt FailureRedacted) <$> args (method lnd)
-  withBtc method args = do
-    env <- asks $ Env.envBtc . testEnvLsp
-    liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
-    where
-      exHandler :: (Exception e) => e -> Failure
-      exHandler =
-        FailureInt
-          . FailurePrivate
-          . pack
-          . displayException
   monitorTotalExtOutgoingLiquidity amt = do
     lim <- asks $ envMinTotalExtOutgoingLiquidity . testEnvLsp
     when (amt < lim) $
@@ -211,28 +230,18 @@ instance (MonadUnliftIO m) => Storage (TestAppM owner m) where
     pool <- getSqlPool
     Psql.runSqlPool query pool
 
-withTestEnv :: (MonadUnliftIO m) => TestAppM owner m a -> m a
+withTestEnv ::
+  ( MonadUnliftIO m,
+    BtcMultiEnv (TestAppM owner m) Failure TestOwner
+  ) =>
+  TestAppM owner m a ->
+  m a
 withTestEnv action =
   withTestEnv' $ \env ->
-    runTestApp env $
-      LndTest.setupZeroChannels proxyOwner >> action
-
-withBtc2 ::
-  (MonadReader (TestEnv owner) m, MonadUnliftIO m) =>
-  (Client -> t) ->
-  (t -> IO b) ->
-  m (Either a b)
-withBtc2 method args = do
-  env <- asks testEnvBtc2
-  liftIO $ Right <$> args (method env)
-
-withBtc2T ::
-  (MonadReader (TestEnv owner) m, MonadUnliftIO m) =>
-  (Client -> t) ->
-  (t -> IO a) ->
-  ExceptT e m a
-withBtc2T method =
-  ExceptT . withBtc2 method
+    runTestApp env $ do
+      LndTest.setupZeroChannels proxyOwner
+      lazyMineBitcoindCoins
+      action
 
 withLndTestT ::
   ( LndTest m owner
@@ -556,3 +565,27 @@ cleanTestDbSql =
         <> "COMMENT ON SCHEMA public IS 'standard public schema';"
     )
     []
+
+lazyMineBitcoindCoins ::
+  forall owner m.
+  ( Enum owner,
+    Bounded owner,
+    KatipContext m,
+    BtcMultiEnv m Failure owner
+  ) =>
+  m ()
+lazyMineBitcoindCoins = do
+  res <- runExceptT . forM_ (enumerate :: [owner]) $ \owner -> do
+    bal <-
+      BtcMultiEnv.withBtcT owner Btc.getBalance id
+    when (bal < 1) . void $ do
+      $logTM WarningS . logStr $
+        "lazyMineBitcoindCoins ==> got "
+          <> inspect bal
+          <> " btc and mining additional coins"
+      BtcMultiEnv.withBtcT
+        owner
+        Btc.generate
+        $ \f -> f 105 Nothing
+  whenLeft res $ \e ->
+    error $ "lazyMineBitcoindCoins ==> failed " <> inspect e

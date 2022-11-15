@@ -11,7 +11,7 @@ import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient.Data.WalletBalance as Lnd
-import qualified UnliftIO.Exception as UnIO
+import qualified Universum
 
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
@@ -41,6 +41,20 @@ instance (MonadIO m) => KatipContext (AppM m) where
   localKatipNamespace f (AppM m) =
     AppM (local (\s -> s {envKatipNS = f (envKatipNS s)}) m)
 
+instance (MonadUnliftIO m) => BtcEnv (AppM m) Failure where
+  getBtcCfg = asks Env.envBtcCfg
+  getBtcClient = asks Env.envBtc
+
+  --
+  -- TODO : better Failure types and implementation,
+  -- avoid Show.
+  --
+  getBtcFailureMaker =
+    pure $
+      FailureInt
+        . FailurePrivate
+        . Universum.show
+
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =
     asks Env.envGrpcServer
@@ -65,13 +79,6 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
   withLnd method args = do
     lnd <- asks Env.envLnd
     first (const $ FailureInt FailureRedacted) <$> args (method lnd)
-  withBtc method args = do
-    env <- asks Env.envBtc
-    liftIO $ first exHandler <$> UnIO.tryAny (args $ method env)
-    where
-      exHandler :: (Exception e) => e -> Failure
-      exHandler =
-        FailureInt . FailurePrivate . pack . displayException
   monitorTotalExtOutgoingLiquidity amt = do
     lim <- asks Env.envMinTotalExtOutgoingLiquidity
     when (amt < lim) $

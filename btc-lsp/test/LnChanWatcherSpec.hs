@@ -92,7 +92,7 @@ testFun = do
         lndFrom
         (openChannelRequest toPubKey)
   isPendingOpenOk <-
-    tryTimes 3 1 $
+    tryTimes 5 1 $
       justTrue
         . fmap
           ( (== LnChanStatusPendingOpen)
@@ -101,14 +101,14 @@ testFun = do
           )
         <$> queryChannel cp
   mine 10 LndLsp
-  isOpenedOk <- tryTimes 3 1 $ do
+  isOpenedOk <- tryTimes 5 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r =
           and
             <$> sequence
               [(== LnChanStatusActive) . lnChanStatus <$> ch]
     pure $ justTrue r
-  isBackedUp <- tryTimes 3 1 $ do
+  isBackedUp <- tryTimes 5 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r =
           and
@@ -122,7 +122,7 @@ testFun = do
           (const $ pure ())
           lndFrom
           (closeChannelRequest cp)
-  isInactivedOk <- tryTimes 3 1 $ do
+  isInactivedOk <- tryTimes 5 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r =
           and
@@ -130,7 +130,7 @@ testFun = do
               [(== LnChanStatusInactive) . lnChanStatus <$> ch]
     pure $ justTrue r
   mine 10 LndLsp
-  isClosedOk <- tryTimes 3 1 $ do
+  isClosedOk <- tryTimes 5 1 $ do
     ch <- fmap entityVal <$> queryChannel cp
     let r =
           and

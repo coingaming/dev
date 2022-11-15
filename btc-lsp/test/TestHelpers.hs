@@ -146,4 +146,10 @@ transferCoinsToAddr amt fromOwner toAddr = do
     withLndTestT
       fromOwner
       Lnd.sendCoins
-      ($ SendCoins.SendCoinsRequest {SendCoins.addr = coerce toAddr, SendCoins.amount = amt, SendCoins.sendAll = False})
+      ( $
+          SendCoins.SendCoinsRequest
+            { SendCoins.addr = coerce toAddr,
+              SendCoins.amount = amt,
+              SendCoins.sendAll = False
+            }
+      )

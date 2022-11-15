@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wall #-}
 
@@ -16,6 +18,7 @@ import Control.Exception (Handler (..), catches)
 import Control.Monad (void)
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Except
+import Data.Bifunctor (first)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import GHC.Generics (Generic)
@@ -24,15 +27,17 @@ import Network.Bitcoin.Wallet (WalletCfg)
 import qualified Network.Bitcoin.Wallet as Wallet
 import Network.HTTP.Client (HttpException)
 
-class (MonadIO m) => BtcEnv m where
+class (MonadIO m) => BtcEnv m e | m -> e where
   getBtcCfg :: m BtcCfg
   getBtcClient :: m Client
-  withBtc :: (Client -> a) -> (a -> IO b) -> m (Either BtcFailure b)
+  getBtcFailureMaker :: m (BtcFailure -> e)
+  withBtc :: (Client -> a) -> (a -> IO b) -> m (Either e b)
   withBtc method args = do
     cfg <- getBtcCfg
     client <- getBtcClient
-    tryBtcMethod cfg client method args
-  withBtcT :: (Client -> a) -> (a -> IO b) -> ExceptT BtcFailure m b
+    failureMaker <- getBtcFailureMaker
+    first failureMaker <$> tryBtcMethod cfg client method args
+  withBtcT :: (Client -> a) -> (a -> IO b) -> ExceptT e m b
   withBtcT method =
     ExceptT . withBtc method
 

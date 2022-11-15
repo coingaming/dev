@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections       #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 
 module Main where
@@ -42,7 +43,7 @@ main = defaultMain . testGroup "network-bitcoin tests" $
 client :: IO Client
 client = getClient "http://127.0.0.1:18443" "developer" "developer"
 
-instance BtcEnv IO where
+instance BtcEnv IO BtcFailure where
   getBtcCfg =
     pure BtcCfg
       { btcCfgHost = "http://127.0.0.1:18443" ,
@@ -52,6 +53,8 @@ instance BtcEnv IO where
       }
   getBtcClient =
     client
+  getBtcFailureMaker =
+    pure id
 
 
 nbTest name = testProperty name . once . monadicIO

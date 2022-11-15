@@ -17,14 +17,14 @@ import qualified LndClient as Lnd
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.Data.WalletBalance as Lnd
 import qualified LndClient.RPC.Katip as Lnd
-import qualified Network.Bitcoin as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 
 class
   ( MonadUnliftIO m,
     KatipContext m,
-    Storage m
+    Storage m,
+    BtcEnv m Failure
   ) =>
   Env m
   where
@@ -104,16 +104,6 @@ class
   withLndServerT method =
     withExceptT (const $ newInternalFailure FailureRedacted)
       . withLndT method
-  withBtc ::
-    (Btc.Client -> a) ->
-    (a -> IO b) ->
-    m (Either Failure b)
-  withBtcT ::
-    (Btc.Client -> a) ->
-    (a -> IO b) ->
-    ExceptT Failure m b
-  withBtcT method =
-    ExceptT . withBtc method
   monitorTotalExtOutgoingLiquidity :: Liquidity 'Outgoing -> m ()
   monitorTotalExtIncomingLiquidity :: Liquidity 'Incoming -> m ()
   monitorTotalOnChainLiquidity :: Lnd.WalletBalance -> m ()
