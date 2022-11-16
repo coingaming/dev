@@ -36,6 +36,8 @@ import           Control.Monad
 import           Data.Aeson               as A
 import           Network.Bitcoin.Internal
 import           Network.Bitcoin.Wallet   (getNewAddress)
+import           Numeric.Natural          (Natural)
+import           Control.Concurrent       (threadDelay)
 
 -- | Returns whether or not bitcoind is generating bitcoins.
 getGenerate :: Client -- ^ bitcoind RPC client
@@ -95,10 +97,21 @@ generateToAddress :: Client
                                --   are tried to create the requested number
                                --   of blocks. Default is 1000000
                   -> IO [HexString]
-generateToAddress client blocks address Nothing =
-    callApi client "generatetoaddress" [ tj blocks, tj address ]
-generateToAddress client blocks address (Just maxTries) =
-    callApi client "generatetoaddress" [ tj blocks, tj address, tj maxTries ]
+generateToAddress client blocks address maxTries =
+    action `catch` onFail 10
+  where
+    args = tj blocks : tj address : maybe [] (pure . tj) maxTries
+    action = callApi client "generatetoaddress" args
+    -- https://github.com/bitcoin/bitcoin/issues/24730
+    onFail :: Natural -> BitcoinException -> IO [HexString]
+    onFail 0 e =
+      throw e
+    onFail attempt (BitcoinApiError (-32603) "ProcessNewBlock, block not accepted") = do
+      -- sleep 0.1 sec and retry
+      threadDelay 100000
+      action `catch` onFail (attempt - 1)
+    onFail _ e =
+      throw e
 
 -- | Returns a recent hashes per second performance measurement while
 --   generating.
