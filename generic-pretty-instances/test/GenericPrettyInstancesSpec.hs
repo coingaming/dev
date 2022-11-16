@@ -1,5 +1,3 @@
-{-# LANGUAGE StandaloneDeriving #-}
-
 module GenericPrettyInstancesSpec (spec) where
 
 import Test.Hspec
@@ -11,7 +9,7 @@ import Text.PrettyPrint.GenericPretty.Util
 import Universum hiding (show)
 
 newtype Username = Username String
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance Out Username
 
@@ -19,7 +17,7 @@ data Configuration = Configuration
   { username :: Username,
     localHost :: String
   }
-  deriving stock Generic
+  deriving stock (Generic)
 
 instance Out Configuration
 
