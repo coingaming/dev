@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings  #-}
 {-# OPTIONS_GHC -Wall #-}
@@ -14,6 +15,7 @@ module Network.Bitcoin.Types ( Client
                              ) where
 
 import           Control.Exception
+import           GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import           Data.Fixed
 import           Data.Text            (Text)
@@ -41,7 +43,7 @@ data BitcoinException = BitcoinApiError Int Text
                       | BitcoinResultTypeError BL.ByteString
                       -- ^ The raw JSON returned, if we can't figure out what
                       --   actually went wrong.
-    deriving ( Show, Read, Ord, Eq, Typeable )
+    deriving ( Show, Read, Ord, Eq, Typeable, Generic )
 
 instance Exception BitcoinException
 
