@@ -11,8 +11,7 @@ import Text.PrettyPrint.GenericPretty.Util
 import Universum hiding (show)
 
 newtype Username = Username String
-
-deriving stock instance Generic Username
+  deriving stock Generic
 
 instance Out Username
 
@@ -20,8 +19,7 @@ data Configuration = Configuration
   { username :: Username,
     localHost :: String
   }
-
-deriving stock instance Generic Configuration
+  deriving stock Generic
 
 instance Out Configuration
 

@@ -84,5 +84,4 @@ plainStyle =
     { PrettySimple.outputOptionsPageWidth = 100000,
       PrettySimple.outputOptionsCompact = True,
       PrettySimple.outputOptionsCompactParens = True
-      --PrettySimple.outputOptionsStringStyle = PrettySimple.Literal
     }
