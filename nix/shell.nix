@@ -20,6 +20,7 @@ in
     nixPkgs.netcat-gnu
     nixPkgs.socat
     nixPkgs.ormolu
+    nixPkgs.niv
     proto.protoc-haskell-bin
     deps.startAll
     deps.stopAll
