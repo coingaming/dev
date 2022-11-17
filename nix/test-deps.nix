@@ -144,6 +144,7 @@ in
   preCommitTest = nixPkgs.writeShellScriptBin "pre-commit-test" ''
     set -euo pipefail
     ${styleTest}/bin/style-test
+  '';
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e
 
