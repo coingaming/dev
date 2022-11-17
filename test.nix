@@ -6,6 +6,7 @@ let
   nixPkgs = project.nixPkgs;
   deps = import ./nix/test-deps.nix {
     repoDir = builtins.toString ./.;
+    dataDir = ".";
   };
   networkBitcoinTest = p.network-bitcoin.components.tests.network-bitcoin-tests;
   genericPrettyInstancesTest = p.generic-pretty-instances.components.tests.generic-pretty-instances-test;

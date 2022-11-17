@@ -1,6 +1,7 @@
-{ repoDir }:
+{ repoDir,
+  dataDir ? "${repoDir}/build",
+}:
 let
-  dataDir = "${repoDir}/build";
   project =  (import ./project.nix);
   nixPkgs = project.nixPkgs;
   prjSrc = project.prjSrc;
