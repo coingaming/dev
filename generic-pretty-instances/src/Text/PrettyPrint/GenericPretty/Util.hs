@@ -32,8 +32,8 @@ inspectGen =
   inspectStyleGen simpleStyle
 
 inspectPlain :: (Out a) => a -> T.Text
-inspectPlain =
-  inspectStyle plainStyle
+inspectPlain a =
+  T.replace "\n" "" (inspectStyle plainStyle a)
 
 inspectStrPlain :: (Out a) => a -> String
 inspectStrPlain =
