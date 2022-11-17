@@ -141,10 +141,6 @@ in
       -o -path './electrs-client/test/*' \) \
       -name '*.hs' )
   '';
-  preCommitTest = nixPkgs.writeShellScriptBin "pre-commit-test" ''
-    set -euo pipefail
-    ${styleTest}/bin/style-test
-  '';
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e
 
@@ -181,6 +177,6 @@ in
 
     echo "==> mined enough blocks"
   '';
-  inherit envFile startAll bitcoindConf;
+  inherit envFile startAll bitcoindConf ormoluTest hlintTest styleTest;
 }
 

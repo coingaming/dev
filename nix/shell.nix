@@ -30,6 +30,7 @@ in
     deps.ormoluFormat
     deps.ormoluTest
     deps.hlintTest
+    deps.styleTest
     deps.mine
     nixBitcoin.lndinit
   ];
