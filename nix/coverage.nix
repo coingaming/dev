@@ -3,12 +3,17 @@ let
   project = import ./project.nix;
   src = project.prjSrc;
   repoDir = builtins.toString ./..;
-  deps = import ./test-deps.nix {inherit repoDir;};
+  deps = import ./test-deps.nix {
+    inherit repoDir;
+  };
   nixPkgs = project.nixPkgs;
   projectWithCov = project.project {
     src = repoDir;
     extraModules = [{
       packages.btc-lsp.components.library.doCoverage = true;
+      packages.btc-lsp.components.tests.btc-lsp-test.preCheck = ''
+        source ${deps.envFile}
+      '';
     }];
   };
   exeVer = projectWithCov.btc-lsp.components.exes.btc-lsp-exe.version;

@@ -5,7 +5,6 @@ let
   src = project.prjSrc;
   nixPkgs = project.nixPkgs;
   deps = import ./nix/test-deps.nix {
-    dataDir = ".";
     repoDir = builtins.toString ./.;
   };
   networkBitcoinTest = p.network-bitcoin.components.tests.network-bitcoin-tests;

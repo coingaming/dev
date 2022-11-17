@@ -3,7 +3,6 @@ let
   proto = import ./proto-lens-protoc.nix;
   repoDir = builtins.toString ./..;
   deps = import ./test-deps.nix {
-    dataDir = "./build";
     inherit repoDir;
   };
 in
