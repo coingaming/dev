@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module BtcLsp.Storage.Model.User
   ( createVerifySql,
   )
