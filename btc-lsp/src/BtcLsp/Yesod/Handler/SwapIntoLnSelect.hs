@@ -208,7 +208,7 @@ newSwapWidget swapInfo =
 totalOnChainAmt ::
   (SwapUtxoStatus -> Bool) ->
   SwapIntoLn.SwapInfo ->
-  MSat
+  Msat
 totalOnChainAmt only =
   from
     . sum
@@ -244,8 +244,8 @@ newUtxoWidget utxos =
               ),
               ( MsgVout,
                 MsgProxy
-                  . inspectPlain @Word32
-                  $ coerce swapUtxoVout
+                  . inspectPlain
+                  $ unVout swapUtxoVout
               ),
               ( MsgInsertedAt,
                 MsgUtcTime swapUtxoInsertedAt
@@ -272,8 +272,8 @@ newChanWidget chans =
               ),
               ( MsgVout,
                 MsgProxy
-                  . inspectPlain @Word32
-                  $ coerce lnChanFundingVout
+                  . inspectPlain
+                  $ unVout lnChanFundingVout
               ),
               ( MsgInsertedAt,
                 MsgUtcTime lnChanInsertedAt

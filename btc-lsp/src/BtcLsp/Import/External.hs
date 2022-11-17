@@ -104,7 +104,7 @@ import Katip.Format.Time as X
 import LndClient as X
   ( ChanId (..),
     LndError (..),
-    MSat (..),
+    Msat (..),
     NodePubKey (..),
     RHash (..),
     RPreimage (..),

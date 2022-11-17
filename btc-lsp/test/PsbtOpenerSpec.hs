@@ -27,15 +27,15 @@ import TestHelpers
 import TestOrphan ()
 import qualified UnliftIO.STM as T
 
-sendAmt :: Env m => Text -> MSat -> ExceptT Failure m ()
+sendAmt :: Env m => Text -> Msat -> ExceptT Failure m ()
 sendAmt addr amt =
   void $
     withLndT
       Lnd.sendCoins
       ($ SendCoins.SendCoinsRequest {SendCoins.addr = addr, SendCoins.amount = amt, SendCoins.sendAll = False})
 
-lspFee :: MSat
-lspFee = MSat 20000 * 1000
+lspFee :: Msat
+lspFee = Msat 20000 * 1000
 
 spec :: Spec
 spec = do
@@ -78,7 +78,7 @@ spec = do
         )
     $(logTM) DebugS $ logStr $ "Channel is opened:" <> inspect chnls
     let (openedChanMaybe :: Maybe CH.Channel) = find (\c -> CH.channelPoint c == chan) chnls
-    let (expectedRemoteBalance :: MSat) = coerce (20 * amt) - lspFee
+    let (expectedRemoteBalance :: Msat) = coerce (20 * amt) - lspFee
     case openedChanMaybe of
       Just c -> do
         liftIO $ do
@@ -133,7 +133,7 @@ spec = do
     let swp1Id = entityKey swp1
     let swp1Addr = swapIntoLnFundAddress . entityVal $ swp1
 
-    let amt = MSat (50000 * 1000)
+    let amt = Msat (50000 * 1000)
     void $ transferCoinsToAddr amt LndAlice (from swp0Addr)
     void $ transferCoinsToAddr amt LndAlice (from swp1Addr)
 

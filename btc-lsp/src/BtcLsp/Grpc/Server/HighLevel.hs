@@ -57,11 +57,12 @@ swapIntoLn userEnt req = do
         & SwapIntoLn.success
           .~ ( defMessage
                  & SwapIntoLn.fundOnChainAddress
-                   .~ from (swapIntoLnFundAddress swap)
+                   .~ toProto (swapIntoLnFundAddress swap)
                  & SwapIntoLn.minFundMoney
-                   .~ from @MSat
-                     ( from (swapIntoLnChanCapUser swap)
-                         + from (swapIntoLnFeeLsp swap)
+                   .~ toProto @(Money 'Usr 'OnChain 'Fund)
+                     ( Money $
+                         unMoney (swapIntoLnChanCapUser swap)
+                           + unMoney (swapIntoLnFeeLsp swap)
                      )
              )
 
@@ -147,22 +148,22 @@ getCfg _ _ = do
                & GetCfg.lspLnNodes
                  .~ [ defMessage
                         & Grpc.pubKey
-                          .~ from pub
+                          .~ toProto pub
                         & Grpc.host
-                          .~ from (socketAddressHost sa)
+                          .~ toProto (socketAddressHost sa)
                         & Grpc.port
-                          .~ from (socketAddressPort sa)
+                          .~ toProto (socketAddressPort sa)
                     ]
                & GetCfg.swapIntoLnMinAmt
-                 .~ from swapMinAmt
+                 .~ toProto swapMinAmt
                & GetCfg.swapIntoLnMaxAmt
-                 .~ from Math.swapLnMaxAmt
+                 .~ toProto Math.swapLnMaxAmt
                & GetCfg.swapFromLnMinAmt
-                 .~ from swapMinAmt
+                 .~ toProto swapMinAmt
                & GetCfg.swapFromLnMaxAmt
-                 .~ from Math.swapLnMaxAmt
+                 .~ toProto Math.swapLnMaxAmt
                & GetCfg.swapLnFeeRate
-                 .~ from Math.swapLnFeeRate
+                 .~ toProto Math.swapLnFeeRate
                & GetCfg.swapLnMinFee
-                 .~ from Math.swapLnMinFee
+                 .~ toProto Math.swapLnMinFee
            )

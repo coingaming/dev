@@ -50,7 +50,7 @@ spec = do
     withRunInIO $ \run0 ->
       pure . monadicIO $ do
         swp <-
-          from @MSat <$> pick arbitrary
+          from @Msat <$> pick arbitrary
         maybeM
           (assert $ swp < minSwp)
           ( \res -> do
@@ -82,9 +82,9 @@ spec = do
       )
       satMsat
   where
-    satMsat :: [(Btc.BTC, MSat)]
+    satMsat :: [(Btc.BTC, Msat)]
     satMsat =
-      [ (0.00000001, MSat 1000),
-        (0.00000101, MSat 101000),
-        (1.00000101, MSat 100000101000)
+      [ (0.00000001, Msat 1000),
+        (0.00000101, Msat 101000),
+        (1.00000101, Msat 100000101000)
       ]

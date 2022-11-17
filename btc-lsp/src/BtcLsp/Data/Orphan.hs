@@ -55,13 +55,13 @@ instance From Text Lnd.PaymentRequest
 
 instance From Lnd.PaymentRequest Text
 
-instance From Word64 MSat
+instance From Natural Msat
 
-instance From MSat Word64
+instance From Msat Natural
 
-instance From Word64 Lnd.Seconds
+instance From Natural Lnd.Seconds
 
-instance From Lnd.Seconds Word64
+instance From Lnd.Seconds Natural
 
 deriving stock instance Generic Btc.Block
 
@@ -95,13 +95,13 @@ instance Out SomeException where
   doc =
     docPrec 0
 
-instance From Word32 (Vout 'Funding)
+instance From Natural (Vout 'Funding)
 
 instance From ByteString (TxId 'Funding)
 
 instance TryFrom Integer (Vout 'Funding) where
   tryFrom =
-    from @Word32
+    from @Natural
       `composeTryRhs` tryFrom
 
 instance PathPiece UTCTime where
@@ -114,12 +114,12 @@ instance PathPiece UTCTime where
     pack
       . Time.formatISO8601
 
-instance ToMessage MSat where
+instance ToMessage Msat where
   toMessage =
     T.displayRational 1
       . (/ 1000)
       . via @Integer
-      . into @Word64
+      . into @Natural
 
 instance Out (Ratio Natural) where
   docPrec x =

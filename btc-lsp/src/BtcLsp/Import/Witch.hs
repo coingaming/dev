@@ -22,6 +22,7 @@ import Witch as X
   ( From,
     TryFrom,
     TryFromException (..),
+    unsafeFrom,
     withSource,
     withTarget,
   )

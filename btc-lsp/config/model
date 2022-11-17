@@ -68,8 +68,8 @@ LnChan
   -- with combination of totalSatoshisSent,
   -- totalSatoshisReceived and transactedAt.
   --
-  totalSatoshisSent MSat
-  totalSatoshisReceived MSat
+  totalSatoshisSent Msat
+  totalSatoshisReceived Msat
   status LnChanStatus
   insertedAt UTCTime
   updatedAt UTCTime

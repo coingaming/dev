@@ -111,7 +111,7 @@ waitCond times condition st = do
 
 transferCoinsRaw ::
   Bool ->
-  MSat ->
+  Msat ->
   TestOwner ->
   TestOwner ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()
@@ -127,17 +127,17 @@ transferAllCoins ::
   TestOwner ->
   TestOwner ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()
-transferAllCoins = transferCoinsRaw True (MSat 0)
+transferAllCoins = transferCoinsRaw True (Msat 0)
 
 transferCoins ::
-  MSat ->
+  Msat ->
   TestOwner ->
   TestOwner ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()
 transferCoins = transferCoinsRaw False
 
 transferCoinsToAddr ::
-  MSat ->
+  Msat ->
   TestOwner ->
   Text ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()

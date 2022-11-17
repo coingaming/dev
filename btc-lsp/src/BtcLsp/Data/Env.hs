@@ -50,7 +50,7 @@ data Env = Env
     envSQLPool :: Pool Psql.SqlBackend,
     envMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
     envMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
-    envMinTotalOnChainLiquidity :: MSat,
+    envMinTotalOnChainLiquidity :: Msat,
     -- | Logging
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
@@ -61,7 +61,7 @@ data Env = Env
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
     envSwapIntoLnMinAmt :: Money 'Usr 'OnChain 'Fund,
-    envMsatPerByte :: Maybe MSat,
+    envMsatPerByte :: Maybe Msat,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
@@ -75,7 +75,7 @@ data RawConfig = RawConfig
     rawConfigLibpqConnStr :: Psql.ConnectionString,
     rawConfigMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
     rawConfigMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
-    rawConfigMinTotalOnChainLiquidity :: MSat,
+    rawConfigMinTotalOnChainLiquidity :: Msat,
     -- | Logging
     rawConfigLogEnv :: Text,
     rawConfigLogFormat :: LogFormat,
@@ -88,7 +88,7 @@ data RawConfig = RawConfig
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
     rawConfigMinChanCap :: Money 'Chan 'Ln 'Fund,
-    rawConfigMsatPerByte :: Maybe MSat,
+    rawConfigMsatPerByte :: Maybe Msat,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Bitcoind

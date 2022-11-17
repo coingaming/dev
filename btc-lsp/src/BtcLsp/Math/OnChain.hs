@@ -25,42 +25,42 @@ import qualified Universum
 
 trySatToMsat ::
   Btc.BTC ->
-  Either Failure MSat
+  Either Failure Msat
 trySatToMsat =
   first (FailureInt . FailureMath . Universum.show)
-    . ( from @Word64
+    . ( from @Natural
           `composeTryRhs` tryFrom @Integer
             `composeTryLhs` ((* 1000) . from)
       )
 
 tryMsatToSat ::
-  MSat ->
+  Msat ->
   Either Failure Btc.BTC
 tryMsatToSat =
   first (FailureInt . FailureMath . Universum.show)
     . ( tryFrom @Rational @Btc.BTC
-          `composeTryLhs` ((% 100000000000) . via @Word64)
+          `composeTryLhs` ((% 100000000000) . via @Natural)
       )
 
 trySatToMsatT ::
   ( Monad m
   ) =>
   Btc.BTC ->
-  ExceptT Failure m MSat
+  ExceptT Failure m Msat
 trySatToMsatT =
   except . trySatToMsat
 
 tryMsatToSatT ::
   ( Monad m
   ) =>
-  MSat ->
+  Msat ->
   ExceptT Failure m Btc.BTC
 tryMsatToSatT =
   except . tryMsatToSat
 
-trxDustLimit :: MSat
+trxDustLimit :: Msat
 trxDustLimit =
-  MSat $ 546 * 1000
+  Msat $ 546 * 1000
 
 --
 -- NOTE : estimations are for the P2WPKH only
@@ -138,9 +138,9 @@ trxEstFee ::
   InQty ->
   OutQty ->
   SatPerVbyte ->
-  Either (TryFromException Natural MSat) MSat
+  Msat
 trxEstFee inQty outQty satPerVbyte =
-  (from @Word64 `composeTryRhs` tryFrom)
+  from @Natural
     . (* 1000)
     . (ceiling :: Ratio Natural -> Natural)
     $ from (trxEstSize inQty outQty) * from satPerVbyte

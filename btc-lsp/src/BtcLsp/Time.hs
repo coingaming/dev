@@ -39,7 +39,7 @@ addSeconds =
     . fromRational
     . toRational
     . secondsToDiffTime
-    . via @Word64
+    . via @Natural
 
 subSeconds :: Lnd.Seconds -> UTCTime -> UTCTime
 subSeconds =
@@ -48,7 +48,7 @@ subSeconds =
     . toRational
     . secondsToDiffTime
     . (* (-1))
-    . via @Word64
+    . via @Natural
 
 swapExpiryLimit :: Lnd.Seconds
 swapExpiryLimit =

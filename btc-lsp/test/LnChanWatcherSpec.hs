@@ -24,8 +24,8 @@ openChannelRequest ::
 openChannelRequest nodePubkey =
   OpenChannel.OpenChannelRequest
     { OpenChannel.nodePubkey = nodePubkey,
-      OpenChannel.localFundingAmount = MSat 200000000,
-      OpenChannel.pushMSat = Just $ MSat 10000000,
+      OpenChannel.localFundingAmount = Msat 200000000,
+      OpenChannel.pushMSat = Just $ Msat 10000000,
       OpenChannel.targetConf = Nothing,
       OpenChannel.mSatPerByte = Nothing,
       OpenChannel.private = Nothing,

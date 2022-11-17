@@ -27,7 +27,7 @@ createVerifySql pub nonce = do
   let zeroRow =
         User
           { userNodePubKey = pub,
-            userLatestNonce = from @Word64 0,
+            userLatestNonce = Nonce 0,
             userInsertedAt = ct,
             userUpdatedAt = ct
           }

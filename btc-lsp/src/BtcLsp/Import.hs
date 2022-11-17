@@ -4,7 +4,9 @@ module BtcLsp.Import
 where
 
 import BtcLsp.Class.Env as X (Env (..))
+import BtcLsp.Class.FromProto as X (FromProto (..))
 import BtcLsp.Class.Storage as X (Storage (..))
+import BtcLsp.Class.ToProto as X (ToProto (..))
 import BtcLsp.Data.Env as X (readRawConfig, withEnv)
 import BtcLsp.Data.Kind as X
 import BtcLsp.Data.Orphan as X ()

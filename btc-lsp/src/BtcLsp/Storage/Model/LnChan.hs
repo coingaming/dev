@@ -47,8 +47,8 @@ createUpdateSql swapId txid vout = do
         lnChanInsertedAt = ct,
         lnChanUpdatedAt = ct,
         lnChanTransactedAt = ct,
-        lnChanTotalSatoshisReceived = MSat 0,
-        lnChanTotalSatoshisSent = MSat 0
+        lnChanTotalSatoshisReceived = Msat 0,
+        lnChanTotalSatoshisSent = Msat 0
       }
     [ LnChanSwapIntoLnId Psql.=. Psql.val (Just swapId),
       LnChanUpdatedAt Psql.=. Psql.val ct
@@ -207,8 +207,8 @@ upsertChannelPointSql ct ss (Lnd.ChannelPoint txid vout) =
               lnChanInsertedAt = ct,
               lnChanUpdatedAt = ct,
               lnChanTransactedAt = ct,
-              lnChanTotalSatoshisReceived = MSat 0,
-              lnChanTotalSatoshisSent = MSat 0
+              lnChanTotalSatoshisReceived = Msat 0,
+              lnChanTotalSatoshisSent = Msat 0
             }
           [ LnChanStatus
               Psql.=. Psql.val ss,
@@ -244,8 +244,8 @@ closedChannelUpsert ct close =
             lnChanInsertedAt = ct,
             lnChanUpdatedAt = ct,
             lnChanTransactedAt = ct,
-            lnChanTotalSatoshisReceived = MSat 0,
-            lnChanTotalSatoshisSent = MSat 0
+            lnChanTotalSatoshisReceived = Msat 0,
+            lnChanTotalSatoshisSent = Msat 0
           }
         [ LnChanExtId
             Psql.=. Psql.val extId,

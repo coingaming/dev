@@ -534,10 +534,8 @@ setGrpcCtxT owner message = do
     message
       & field @"ctx"
         .~ ( defMessage
-               & Proto.nonce
-                 .~ from @Nonce @Proto.Nonce nonce
-               & Proto.lnPubKey
-                 .~ from @Lnd.NodePubKey @Proto.LnPubKey pubKey
+               & Proto.nonce .~ toProto nonce
+               & Proto.lnPubKey .~ toProto pubKey
            )
 
 forkThread ::

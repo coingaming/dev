@@ -6,6 +6,7 @@ module BtcLsp.Class.Env
 where
 
 import BtcLsp.Class.Storage
+import BtcLsp.Class.ToProto
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Combinator
@@ -30,7 +31,7 @@ class
   where
   getGsEnv :: m GSEnv
   getSwapIntoLnMinAmt :: m (Money 'Usr 'OnChain 'Fund)
-  getMsatPerByte :: m (Maybe MSat)
+  getMsatPerByte :: m (Maybe Msat)
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLndP2PSocketAddress :: m SocketAddress
   getLndNodeUri :: m NodeUri
@@ -74,9 +75,9 @@ class
         & field @"ctx"
           .~ ( defMessage
                  & Proto.nonce
-                   .~ from @Nonce @Proto.Nonce nonce
+                   .~ toProto @Nonce @Proto.Nonce nonce
                  & Proto.lnPubKey
-                   .~ from @Lnd.NodePubKey @Proto.LnPubKey pubKey
+                   .~ toProto @Lnd.NodePubKey @Proto.LnPubKey pubKey
              )
   setGrpcCtxT ::
     ( HasField msg "ctx" Proto.Ctx
