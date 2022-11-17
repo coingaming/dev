@@ -89,6 +89,11 @@ let
   hlintTest = nixPkgs.writeShellScriptBin "hlint-test" ''
     ${nixPkgs.hlint}/bin/hlint . --ignore-glob=btc-lsp/src/Proto
   '';
+  styleTest = nixPkgs.writeShellScriptBin "style-test" ''
+    set -euo pipefail
+    ${hlintTest}/bin/hlint-test
+    ${ormoluTest}/bin/ormolu-test
+  '';
 in
 {
   cliAlias = nixPkgs.writeShellScriptBin "cli-alias" ''
@@ -135,11 +140,6 @@ in
       -o -path './electrs-client/src/*' \
       -o -path './electrs-client/test/*' \) \
       -name '*.hs' )
-  '';
-  styleTest = nixPkgs.writeShellScriptBin "style-test" ''
-    set -euo pipefail
-    ${hlintTest}/bin/hlint-test
-    ${ormoluTest}/bin/ormolu-test
   '';
   preCommitTest = nixPkgs.writeShellScriptBin "pre-commit-test" ''
     set -euo pipefail
