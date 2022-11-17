@@ -17,7 +17,6 @@ import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Data.Text as T
-import qualified LndClient.Data.NewAddress as Lnd
 import qualified Network.Bitcoin.Wallet as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.LowLevel as Proto
@@ -39,12 +38,6 @@ newtype OnChainAddress (mrel :: MoneyRelation) = OnChainAddress
     )
 
 instance Out (OnChainAddress mrel)
-
-instance From (OnChainAddress mrel) Text
-
-instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
-
-instance From Lnd.NewAddressResponse (OnChainAddress 'Gain)
 
 unOnChainAddress :: OnChainAddress mrel -> Text
 unOnChainAddress = unOnChainAddress0

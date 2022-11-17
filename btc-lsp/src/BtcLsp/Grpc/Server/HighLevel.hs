@@ -91,15 +91,17 @@ swapIntoLnT userEnt unsafeRefundAddr chanPrivacy = do
                    ]
                )
           FailureInp FailureNonSegwitAddr ->
-            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
+            newSpecFailure
+              SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
           FailureInp FailureNonValidAddr ->
-            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+            newSpecFailure
+              SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
           FailureInt e ->
             newInternalFailure e
       )
       $ Smart.newOnChainAddressT unsafeRefundAddr
-  fundAddr <-
-    from
+  unsafeFundAddr <-
+    UnsafeOnChainAddress . Lnd.address
       <$> withLndServerT
         Lnd.newAddress
         ( $
@@ -108,15 +110,30 @@ swapIntoLnT userEnt unsafeRefundAddr chanPrivacy = do
                 Lnd.account = Nothing
               }
         )
-  feeAndChangeAddr <-
-    withLndServerT
-      Lnd.newAddress
-      ( $
-          Lnd.NewAddressRequest
-            { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-              Lnd.account = Nothing
-            }
+  fundAddr :: OnChainAddress 'Fund <-
+    withExceptT
+      ( newInternalFailure
+          . FailurePrivate
+          . inspectPlain
       )
+      $ newOnChainAddressT unsafeFundAddr
+  unsafeFeeAndChangeAddr <-
+    UnsafeOnChainAddress . Lnd.address
+      <$> withLndServerT
+        Lnd.newAddress
+        ( $
+            Lnd.NewAddressRequest
+              { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                Lnd.account = Nothing
+              }
+        )
+  feeAndChangeAddr :: OnChainAddress 'Gain <-
+    withExceptT
+      ( newInternalFailure
+          . FailurePrivate
+          . inspectPlain
+      )
+      $ newOnChainAddressT unsafeFeeAndChangeAddr
   expAt <-
     getFutureTime
       . Lnd.Seconds
@@ -126,7 +143,7 @@ swapIntoLnT userEnt unsafeRefundAddr chanPrivacy = do
     . SwapIntoLn.createIgnoreSql
       userEnt
       fundAddr
-      (from feeAndChangeAddr)
+      feeAndChangeAddr
       refundAddr
       expAt
     $ chanPrivacy

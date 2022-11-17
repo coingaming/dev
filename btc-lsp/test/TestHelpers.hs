@@ -64,9 +64,9 @@ createDummySwap mExpAt = do
   lift . runSql $
     SwapIntoLn.createIgnoreSql
       usr
-      (from fundAddr)
-      (from changeAndFeeAddr)
-      (from refundAddr)
+      (unsafeNewOnChainAddress $ Lnd.address fundAddr)
+      (unsafeNewOnChainAddress $ Lnd.address changeAndFeeAddr)
+      (unsafeNewOnChainAddress $ Lnd.address refundAddr)
       expAt
       Public
 

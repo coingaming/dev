@@ -22,7 +22,7 @@ spec = do
     wbal <- withBtcT Btc.getBalance id
     let amt = wbal / 10
     trAddr <-
-      from
+      unOnChainAddress
         . swapIntoLnFundAddress
         . entityVal
         <$> createDummySwap Nothing
@@ -47,7 +47,7 @@ spec = do
     wbal <- withBtcT Btc.getBalance id
     let amt = wbal / 10
     trAddr <-
-      from
+      unOnChainAddress
         . swapIntoLnFundAddress
         . entityVal
         <$> createDummySwap Nothing
@@ -75,7 +75,7 @@ spec = do
     swapEnt <-
       createDummySwap Nothing
     let trAddr =
-          from
+          unOnChainAddress
             . swapIntoLnFundAddress
             $ entityVal swapEnt
     satsToSend <-
