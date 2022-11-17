@@ -1,4 +1,4 @@
-{ dataDir }:
+{ dataDir, repoDir }:
 let
   project =  (import ./project.nix);
   nixPkgs = project.nixPkgs;
@@ -75,6 +75,29 @@ let
     echo "test-deps ==> done"
   '';
   envFile = lspEnv.exportEnvFile;
+  spawnTestEnv = nixPkgs.writeShellScriptBin "spawn-test-env" ''
+    set -euo pipefail
+    ${nixPkgs.hpack}/bin/hpack ${repoDir}/btc-lsp
+    ${nixPkgs.hpack}/bin/hpack ${repoDir}/electrs-client
+    (${nixPkgs.util-linux}/bin/setsid ${startAll}/bin/start-test-deps & wait)
+  '';
+  coverageTest = nixPkgs.writeShellScriptBin "coverage-test" ''
+    set -euo pipefail
+    ${spawnTestEnv}/bin/spawn-test-env
+    ${nixPkgs.nix}/bin/nix-build \
+      --show-trace \
+      --option sandbox false \
+      ${repoDir}/nix/coverage.nix
+  '';
+  coverageHtml = nixPkgs.writeShellScriptBin "coverage-html" ''
+    set -euo pipefail
+    ${spawnTestEnv}/bin/spawn-test-env
+    ${nixPkgs.nix}/bin/nix-build \
+      --show-trace \
+      --option sandbox false \
+      --arg exitOnLowCoverage false \
+      ${repoDir}/nix/coverage.nix
+  '';
 in
 {
   cliAlias = nixPkgs.writeShellScriptBin "cli-alias" ''
@@ -172,6 +195,11 @@ in
 
     echo "==> mined enough blocks"
   '';
-  inherit envFile startAll bitcoindConf;
+  inherit envFile
+          startAll
+          bitcoindConf
+          spawnTestEnv
+          coverageTest
+          coverageHtml;
 }
 

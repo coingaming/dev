@@ -1,7 +1,11 @@
 with (import ./project.nix);
 let
   proto = import ./proto-lens-protoc.nix;
-  deps = import ./test-deps.nix {dataDir = "./build";};
+  repoDir = builtins.toString ./..;
+  deps = import ./test-deps.nix {
+    dataDir = "./build";
+    inherit repoDir;
+  };
 in
   (project {}).shellFor {
   withHoogle = true;
@@ -31,6 +35,8 @@ in
     deps.ormoluTest
     deps.hlintTest
     deps.mine
+    deps.coverageTest
+    deps.coverageHtml
     nixBitcoin.lndinit
   ];
   tools = {

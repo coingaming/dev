@@ -2,19 +2,16 @@ let
   header = (import ./header.nix);
   pkgs = header.pkgs;
   prjSrc = pkgs.haskell-nix.haskellLib.cleanGit {
-    name = "coins-src-all";
+    name = "src-all";
     src = ../.;
   };
 in
 {
-  pkgs = pkgs;
+  inherit pkgs prjSrc;
   nixPkgs = header.nixPkgs;
   nixPkgsLegacy = header.nixPkgsLegacy;
   nixBitcoin = header.nixBitcoin;
-  prjSrc = pkgs.haskell-nix.haskellLib.cleanGit {
-    name = "coins-src-all";
-    src = ../.;
-  };
+  expectedTestCoveragePercent="55";
   project = {}: pkgs.haskell-nix.project {
     projectFileName = "cabal.project";
     src = prjSrc;
@@ -24,6 +21,9 @@ in
         pkgs.haskellPackages.hspec-discover
       ];
       packages.btc-lsp.components.tests.btc-lsp-test.build-tools = [
+        pkgs.haskellPackages.hspec-discover
+      ];
+      packages.btc-lsp.components.exes.btc-lsp-integration.build-tools = [
         pkgs.haskellPackages.hspec-discover
       ];
       packages.electrs-client.components.tests.electrs-client-test.build-tools = [
