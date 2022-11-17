@@ -12,9 +12,12 @@ in
   nixPkgsLegacy = header.nixPkgsLegacy;
   nixBitcoin = header.nixBitcoin;
   expectedTestCoveragePercent="55";
-  project = {}: pkgs.haskell-nix.project {
+  project = {
+    src ? prjSrc,
+    extraModules ? []
+  }: pkgs.haskell-nix.project {
+    inherit src;
     projectFileName = "cabal.project";
-    src = prjSrc;
     compiler-nix-name = header.compiler-nix-name;
     modules = [{
       packages.generic-pretty-instances.components.tests.generic-pretty-instances-test.build-tools = [
@@ -29,6 +32,6 @@ in
       packages.electrs-client.components.tests.electrs-client-test.build-tools = [
         pkgs.haskellPackages.hspec-discover
       ];
-    }];
+    }] ++ extraModules;
   };
 }
