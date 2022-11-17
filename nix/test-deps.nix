@@ -136,6 +136,14 @@ in
   hlintTest = nixPkgs.writeShellScriptBin "hlint-test" ''
     ${nixPkgs.hlint}/bin/hlint . --ignore-glob=btc-lsp/src/Proto
   '';
+  styleTest = nixPkgs.writeShellScriptBin "style-test" ''
+    set -euo pipefail
+    ${hlintTest}/bin/hlint-test
+    ${ormoluTest}/bin/ormolu-test
+  '';
+  preCommitTest = nixPkgs.writeShellScriptBin "pre-commit-test" ''
+    set -euo pipefail
+    ${styleTest}/bin/style-test
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e
 
