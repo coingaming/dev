@@ -64,9 +64,9 @@ createDummySwap mExpAt = do
   lift . runSql $
     SwapIntoLn.createIgnoreSql
       usr
-      (from fundAddr)
-      (from changeAndFeeAddr)
-      (from refundAddr)
+      (unsafeNewOnChainAddress $ Lnd.address fundAddr)
+      (unsafeNewOnChainAddress $ Lnd.address changeAndFeeAddr)
+      (unsafeNewOnChainAddress $ Lnd.address refundAddr)
       expAt
       Public
 
@@ -111,7 +111,7 @@ waitCond times condition st = do
 
 transferCoinsRaw ::
   Bool ->
-  MSat ->
+  Msat ->
   TestOwner ->
   TestOwner ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()
@@ -127,17 +127,17 @@ transferAllCoins ::
   TestOwner ->
   TestOwner ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()
-transferAllCoins = transferCoinsRaw True (MSat 0)
+transferAllCoins = transferCoinsRaw True (Msat 0)
 
 transferCoins ::
-  MSat ->
+  Msat ->
   TestOwner ->
   TestOwner ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()
 transferCoins = transferCoinsRaw False
 
 transferCoinsToAddr ::
-  MSat ->
+  Msat ->
   TestOwner ->
   Text ->
   ExceptT Failure (TestAppM 'LndLsp IO) ()
@@ -146,4 +146,10 @@ transferCoinsToAddr amt fromOwner toAddr = do
     withLndTestT
       fromOwner
       Lnd.sendCoins
-      ($ SendCoins.SendCoinsRequest {SendCoins.addr = coerce toAddr, SendCoins.amount = amt, SendCoins.sendAll = False})
+      ( $
+          SendCoins.SendCoinsRequest
+            { SendCoins.addr = coerce toAddr,
+              SendCoins.amount = amt,
+              SendCoins.sendAll = False
+            }
+      )

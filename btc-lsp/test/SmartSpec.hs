@@ -27,7 +27,7 @@ spec = do
                 }
           )
     res <- Smart.newOnChainAddressT $ from raw
-    liftIO $ raw `shouldBe` from res
+    liftIO $ raw `shouldBe` unOnChainAddress res
   itEnv @'LndLsp "newOnChainAddressT fails" $ do
     res <- runExceptT $ do
       raw <-

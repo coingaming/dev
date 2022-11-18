@@ -7,6 +7,7 @@ module BtcLsp.Yesod.Handler.SwapIntoLnSelect
   )
 where
 
+import BtcLsp.Data.Smart
 import BtcLsp.Data.Type
 import qualified BtcLsp.Math.Swap as Math
 import BtcLsp.Storage.Model
@@ -74,7 +75,7 @@ getSwapIntoLnSelectR uuid = do
           maybeM badMethod pure
             . pure
             . toQr
-            $ from swapIntoLnFundAddress
+            $ unOnChainAddress swapIntoLnFundAddress
         let mSwapWidget = newSwapWidget swapInfo
         let mUtxoWidget = newUtxoWidget swapInfoUtxo
         let mChanWidget = newChanWidget swapInfoChan
@@ -175,12 +176,12 @@ newSwapWidget swapInfo =
         ( MsgSwapIntoLnFundAddress,
           Just
             . MsgProxy
-            $ toText swapIntoLnFundAddress
+            $ unOnChainAddress swapIntoLnFundAddress
         ),
         ( MsgSwapIntoLnRefundAddress,
           Just
             . MsgProxy
-            $ toText swapIntoLnRefundAddress
+            $ unOnChainAddress swapIntoLnRefundAddress
         ),
         ( MsgInsertedAt,
           Just $
@@ -208,7 +209,7 @@ newSwapWidget swapInfo =
 totalOnChainAmt ::
   (SwapUtxoStatus -> Bool) ->
   SwapIntoLn.SwapInfo ->
-  MSat
+  Msat
 totalOnChainAmt only =
   from
     . sum
@@ -244,8 +245,8 @@ newUtxoWidget utxos =
               ),
               ( MsgVout,
                 MsgProxy
-                  . inspectPlain @Word32
-                  $ coerce swapUtxoVout
+                  . inspectPlain
+                  $ unVout swapUtxoVout
               ),
               ( MsgInsertedAt,
                 MsgUtcTime swapUtxoInsertedAt
@@ -272,8 +273,8 @@ newChanWidget chans =
               ),
               ( MsgVout,
                 MsgProxy
-                  . inspectPlain @Word32
-                  $ coerce lnChanFundingVout
+                  . inspectPlain
+                  $ unVout lnChanFundingVout
               ),
               ( MsgInsertedAt,
                 MsgUtcTime lnChanInsertedAt

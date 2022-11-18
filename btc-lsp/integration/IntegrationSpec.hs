@@ -30,8 +30,8 @@ spec = do
     sleep300ms
     gcEnv <- getGCEnv
     res0 <- runExceptT $ do
-      refundAddr <-
-        from
+      refundAddr :: OnChainAddress 'Refund <-
+        unsafeNewOnChainAddress . Lnd.address
           <$> withLndTestT
             LndAlice
             Lnd.newAddress
@@ -49,7 +49,7 @@ spec = do
           LndAlice
           ( defMessage
               & SwapIntoLn.refundOnChainAddress
-                .~ from @(OnChainAddress 'Refund) refundAddr
+                .~ toProto refundAddr
           )
     liftIO $
       res0
@@ -75,7 +75,7 @@ spec = do
           LndAlice
           Lnd.sendCoins
           ( \h ->
-              h (Lnd.SendCoinsRequest fundAddr (MSat 200000000) False)
+              h (Lnd.SendCoinsRequest fundAddr (Msat 200000000) False)
           )
       lift $
         LndTest.lazyConnectNodes (Proxy :: Proxy TestOwner)

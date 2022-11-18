@@ -57,11 +57,12 @@ swapIntoLn userEnt req = do
         & SwapIntoLn.success
           .~ ( defMessage
                  & SwapIntoLn.fundOnChainAddress
-                   .~ from (swapIntoLnFundAddress swap)
+                   .~ toProto (swapIntoLnFundAddress swap)
                  & SwapIntoLn.minFundMoney
-                   .~ from @MSat
-                     ( from (swapIntoLnChanCapUser swap)
-                         + from (swapIntoLnFeeLsp swap)
+                   .~ toProto @(Money 'Usr 'OnChain 'Fund)
+                     ( Money $
+                         unMoney (swapIntoLnChanCapUser swap)
+                           + unMoney (swapIntoLnFeeLsp swap)
                      )
              )
 
@@ -90,15 +91,17 @@ swapIntoLnT userEnt unsafeRefundAddr chanPrivacy = do
                    ]
                )
           FailureInp FailureNonSegwitAddr ->
-            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
+            newSpecFailure
+              SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_SEGWIT
           FailureInp FailureNonValidAddr ->
-            newSpecFailure SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
+            newSpecFailure
+              SwapIntoLn.Response'Failure'REFUND_ON_CHAIN_ADDRESS_IS_NOT_VALID
           FailureInt e ->
             newInternalFailure e
       )
       $ Smart.newOnChainAddressT unsafeRefundAddr
-  fundAddr <-
-    from
+  unsafeFundAddr <-
+    UnsafeOnChainAddress . Lnd.address
       <$> withLndServerT
         Lnd.newAddress
         ( $
@@ -107,15 +110,30 @@ swapIntoLnT userEnt unsafeRefundAddr chanPrivacy = do
                 Lnd.account = Nothing
               }
         )
-  feeAndChangeAddr <-
-    withLndServerT
-      Lnd.newAddress
-      ( $
-          Lnd.NewAddressRequest
-            { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
-              Lnd.account = Nothing
-            }
+  fundAddr :: OnChainAddress 'Fund <-
+    withExceptT
+      ( newInternalFailure
+          . FailurePrivate
+          . inspectPlain
       )
+      $ newOnChainAddressT unsafeFundAddr
+  unsafeFeeAndChangeAddr <-
+    UnsafeOnChainAddress . Lnd.address
+      <$> withLndServerT
+        Lnd.newAddress
+        ( $
+            Lnd.NewAddressRequest
+              { Lnd.addrType = Lnd.WITNESS_PUBKEY_HASH,
+                Lnd.account = Nothing
+              }
+        )
+  feeAndChangeAddr :: OnChainAddress 'Gain <-
+    withExceptT
+      ( newInternalFailure
+          . FailurePrivate
+          . inspectPlain
+      )
+      $ newOnChainAddressT unsafeFeeAndChangeAddr
   expAt <-
     getFutureTime
       . Lnd.Seconds
@@ -125,7 +143,7 @@ swapIntoLnT userEnt unsafeRefundAddr chanPrivacy = do
     . SwapIntoLn.createIgnoreSql
       userEnt
       fundAddr
-      (from feeAndChangeAddr)
+      feeAndChangeAddr
       refundAddr
       expAt
     $ chanPrivacy
@@ -147,22 +165,22 @@ getCfg _ _ = do
                & GetCfg.lspLnNodes
                  .~ [ defMessage
                         & Grpc.pubKey
-                          .~ from pub
+                          .~ toProto pub
                         & Grpc.host
-                          .~ from (socketAddressHost sa)
+                          .~ toProto (socketAddressHost sa)
                         & Grpc.port
-                          .~ from (socketAddressPort sa)
+                          .~ toProto (socketAddressPort sa)
                     ]
                & GetCfg.swapIntoLnMinAmt
-                 .~ from swapMinAmt
+                 .~ toProto swapMinAmt
                & GetCfg.swapIntoLnMaxAmt
-                 .~ from Math.swapLnMaxAmt
+                 .~ toProto Math.swapLnMaxAmt
                & GetCfg.swapFromLnMinAmt
-                 .~ from swapMinAmt
+                 .~ toProto swapMinAmt
                & GetCfg.swapFromLnMaxAmt
-                 .~ from Math.swapLnMaxAmt
+                 .~ toProto Math.swapLnMaxAmt
                & GetCfg.swapLnFeeRate
-                 .~ from Math.swapLnFeeRate
+                 .~ toProto Math.swapLnFeeRate
                & GetCfg.swapLnMinFee
-                 .~ from Math.swapLnMinFee
+                 .~ toProto Math.swapLnMinFee
            )

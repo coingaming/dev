@@ -9,7 +9,6 @@ module BtcLsp.Import.Witch
     into,
     via,
     tryFrom,
-    tryVia,
     composeTry,
     composeTryRhs,
     composeTryLhs,
@@ -22,6 +21,7 @@ import Witch as X
   ( From,
     TryFrom,
     TryFromException (..),
+    unsafeFrom,
     withSource,
     withTarget,
   )
@@ -68,19 +68,6 @@ tryFrom ::
   Either (TryFromException source target) target
 tryFrom =
   Witch.tryFrom @source @target
-
-tryVia ::
-  forall through source target.
-  ( TryFrom source through,
-    TryFrom through target,
-    'False ~ (source == through),
-    'False ~ (through == target)
-  ) =>
-  source ->
-  Either (TryFromException source target) target
-tryVia =
-  tryFrom @through
-    `composeTry` tryFrom
 
 composeTry ::
   forall through source target.

@@ -104,7 +104,7 @@ import Katip.Format.Time as X
 import LndClient as X
   ( ChanId (..),
     LndError (..),
-    MSat (..),
+    Msat (..),
     NodePubKey (..),
     RHash (..),
     RPreimage (..),
@@ -117,6 +117,7 @@ import LndClient.Util as X
     txIdHex,
     withSpawnLink,
   )
+import Network.Bitcoin.BtcEnv as X (BtcCfg (..), BtcEnv (..))
 import Network.GRPC.Client as X (CompressMode (..))
 import Network.HTTP2.Client2 as X (HostName, PortNumber)
 import Text.Casing as X (camel)

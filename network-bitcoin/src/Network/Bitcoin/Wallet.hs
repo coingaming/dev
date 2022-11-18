@@ -69,6 +69,11 @@ module Network.Bitcoin.Wallet ( Client
                               , getAddrInfo
                               , AddrInfo(..)
                               , ScrPubKey(..)
+                              , WalletCfg (..)
+                              , WalletRes (..)
+                              , defaultWalletCfg
+                              , createWallet
+                              , loadWallet
                               ) where
 
 import           Control.Exception              (throw)
@@ -841,3 +846,70 @@ instance FromJSON AddrInfo where
 newtype ScrPubKey = ScrPubKey Text
   deriving stock (Show, Read, Eq, Ord)
   deriving newtype (FromJSON)
+
+data WalletCfg = WalletCfg
+  { walletCfgWalletName :: Text,
+    walletCfgDisablePrivateKeys :: Maybe Bool,
+    walletCfgBlank :: Maybe Bool,
+    walletCfgPassphrase :: Maybe Text,
+    walletCfgAvoidReuse :: Maybe Bool,
+    walletCfgDescriptors :: Maybe Bool,
+    walletCfgLoadOnStartup :: Maybe Bool
+  }
+  deriving stock
+    ( Eq,
+      Ord,
+      Show
+    )
+
+data WalletRes = WalletRes
+  { walletResName :: Text,
+    walletResWarning :: Text
+  }
+  deriving stock
+    ( Eq,
+      Ord,
+      Show
+    )
+
+instance FromJSON WalletRes where
+  parseJSON (Object o) =
+    WalletRes
+      <$> o .: "name"
+      <*> o .: "warning"
+  parseJSON _ = mzero
+
+defaultWalletCfg :: WalletCfg
+defaultWalletCfg =
+  WalletCfg
+    { walletCfgWalletName = "defaultwallet",
+      walletCfgDisablePrivateKeys = Nothing,
+      walletCfgBlank = Nothing,
+      walletCfgPassphrase = Nothing,
+      walletCfgAvoidReuse = Nothing,
+      walletCfgDescriptors = Nothing,
+      walletCfgLoadOnStartup = Nothing
+    }
+
+createWallet :: Client -> WalletCfg -> IO WalletRes
+createWallet client cfg =
+  callApi
+    client
+    "createwallet"
+    [ tj $ walletCfgWalletName cfg,
+      tj $ walletCfgDisablePrivateKeys cfg,
+      tj $ walletCfgBlank cfg,
+      tj $ walletCfgPassphrase cfg,
+      tj $ walletCfgAvoidReuse cfg,
+      tj $ walletCfgDescriptors cfg,
+      tj $ walletCfgLoadOnStartup cfg
+    ]
+
+loadWallet :: Client -> Text -> Maybe Bool -> IO WalletRes
+loadWallet client walletName loadOnStartup =
+  callApi
+    client
+    "loadwallet"
+    [ tj walletName,
+      tj loadOnStartup
+    ]

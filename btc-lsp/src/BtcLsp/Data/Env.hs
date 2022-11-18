@@ -42,13 +42,15 @@ import qualified LndClient as Lnd
 import qualified LndClient.Data.SignMessage as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
+import qualified Network.Bitcoin.BtcEnv as Btc
+import qualified Network.Bitcoin.Wallet as Btc
 
 data Env = Env
   { -- | General
     envSQLPool :: Pool Psql.SqlBackend,
     envMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
     envMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
-    envMinTotalOnChainLiquidity :: MSat,
+    envMinTotalOnChainLiquidity :: Msat,
     -- | Logging
     envKatipNS :: Namespace,
     envKatipCTX :: LogContexts,
@@ -59,12 +61,13 @@ data Env = Env
     envLndP2PHost :: HostName,
     envLndP2PPort :: PortNumber,
     envSwapIntoLnMinAmt :: Money 'Usr 'OnChain 'Fund,
-    envMsatPerByte :: Maybe MSat,
+    envMsatPerByte :: Maybe Msat,
     envLndPubKey :: MVar Lnd.NodePubKey,
     -- | Grpc
     envGrpcServer :: GSEnv,
     -- | Bitcoind
-    envBtc :: Btc.Client
+    envBtc :: Btc.Client,
+    envBtcCfg :: BtcCfg
   }
 
 data RawConfig = RawConfig
@@ -72,7 +75,7 @@ data RawConfig = RawConfig
     rawConfigLibpqConnStr :: Psql.ConnectionString,
     rawConfigMinTotalExtOutgoingLiquidity :: Liquidity 'Outgoing,
     rawConfigMinTotalExtIncomingLiquidity :: Liquidity 'Incoming,
-    rawConfigMinTotalOnChainLiquidity :: MSat,
+    rawConfigMinTotalOnChainLiquidity :: Msat,
     -- | Logging
     rawConfigLogEnv :: Text,
     rawConfigLogFormat :: LogFormat,
@@ -85,7 +88,7 @@ data RawConfig = RawConfig
     rawConfigLndP2PHost :: HostName,
     rawConfigLndP2PPort :: PortNumber,
     rawConfigMinChanCap :: Money 'Chan 'Ln 'Fund,
-    rawConfigMsatPerByte :: Maybe MSat,
+    rawConfigMsatPerByte :: Maybe Msat,
     -- | Grpc
     rawConfigGrpcServerEnv :: GSEnv,
     -- | Bitcoind
@@ -192,13 +195,18 @@ withEnv rc this = do
   let lnd = rawConfigLndEnv rc
   bracket newLogEnv rmLogEnv $ \le ->
     bracket newSqlPool rmSqlPool $ \pool -> do
-      let rBtc = rawConfigBtcEnv rc
-      btc <-
-        liftIO $
-          Btc.getClient
-            (from $ bitcoindEnvHost rBtc)
-            (from $ bitcoindEnvUsername rBtc)
-            (from $ bitcoindEnvPassword rBtc)
+      let btcRaw = rawConfigBtcEnv rc
+      let btcCfg =
+            BtcCfg
+              { btcCfgHost = bitcoindEnvHost btcRaw,
+                btcCfgUsername = bitcoindEnvUsername btcRaw,
+                btcCfgPassword = bitcoindEnvPassword btcRaw,
+                --
+                -- TODO : pass params from btcRaw
+                --
+                btcCfgAutoLoadWallet = Just Btc.defaultWalletCfg
+              }
+      btc <- Btc.newBtcClient btcCfg
       runKatipContextT le katipCtx katipNs
         . withUnliftIO
         $ \(UnliftIO run) ->
@@ -232,7 +240,8 @@ withEnv rc this = do
                     { gsEnvSigner = run . signT lnd,
                       gsEnvLogger = run . $(logTM) DebugS . logStr
                     },
-                envBtc = btc
+                envBtc = btc,
+                envBtcCfg = btcCfg
               }
   where
     rmLogEnv :: LogEnv -> m ()

@@ -6,6 +6,7 @@ module BtcLsp.Class.Env
 where
 
 import BtcLsp.Class.Storage
+import BtcLsp.Class.ToProto
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Grpc.Combinator
@@ -17,20 +18,20 @@ import qualified LndClient as Lnd
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.Data.WalletBalance as Lnd
 import qualified LndClient.RPC.Katip as Lnd
-import qualified Network.Bitcoin as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 
 class
   ( MonadUnliftIO m,
     KatipContext m,
-    Storage m
+    Storage m,
+    BtcEnv m Failure
   ) =>
   Env m
   where
   getGsEnv :: m GSEnv
   getSwapIntoLnMinAmt :: m (Money 'Usr 'OnChain 'Fund)
-  getMsatPerByte :: m (Maybe MSat)
+  getMsatPerByte :: m (Maybe Msat)
   getLspPubKeyVar :: m (MVar Lnd.NodePubKey)
   getLndP2PSocketAddress :: m SocketAddress
   getLndNodeUri :: m NodeUri
@@ -74,9 +75,9 @@ class
         & field @"ctx"
           .~ ( defMessage
                  & Proto.nonce
-                   .~ from @Nonce @Proto.Nonce nonce
+                   .~ toProto @Nonce @Proto.Nonce nonce
                  & Proto.lnPubKey
-                   .~ from @Lnd.NodePubKey @Proto.LnPubKey pubKey
+                   .~ toProto @Lnd.NodePubKey @Proto.LnPubKey pubKey
              )
   setGrpcCtxT ::
     ( HasField msg "ctx" Proto.Ctx
@@ -104,16 +105,6 @@ class
   withLndServerT method =
     withExceptT (const $ newInternalFailure FailureRedacted)
       . withLndT method
-  withBtc ::
-    (Btc.Client -> a) ->
-    (a -> IO b) ->
-    m (Either Failure b)
-  withBtcT ::
-    (Btc.Client -> a) ->
-    (a -> IO b) ->
-    ExceptT Failure m b
-  withBtcT method =
-    ExceptT . withBtc method
   monitorTotalExtOutgoingLiquidity :: Liquidity 'Outgoing -> m ()
   monitorTotalExtIncomingLiquidity :: Liquidity 'Incoming -> m ()
   monitorTotalOnChainLiquidity :: Lnd.WalletBalance -> m ()

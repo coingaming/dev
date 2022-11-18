@@ -1,7 +1,10 @@
 with (import ./project.nix);
 let
   proto = import ./proto-lens-protoc.nix;
-  deps = import ./test-deps.nix {dataDir = "./build";};
+  repoDir = builtins.toString ./..;
+  deps = import ./test-deps.nix {
+    inherit repoDir;
+  };
 in
   (project {}).shellFor {
   withHoogle = true;
@@ -20,6 +23,7 @@ in
     nixPkgs.netcat-gnu
     nixPkgs.socat
     nixPkgs.ormolu
+    nixPkgs.niv
     proto.protoc-haskell-bin
     deps.startAll
     deps.stopAll
@@ -32,6 +36,8 @@ in
     deps.hlintTest
     deps.styleTest
     deps.mine
+    deps.coverageTest
+    deps.coverageHtml
     nixBitcoin.lndinit
   ];
   tools = {

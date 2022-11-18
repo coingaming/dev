@@ -35,10 +35,10 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified UnliftIO.Exception as UE
 import qualified UnliftIO.STM as T
 
-sumAmt :: [PsbtUtxo] -> MSat
+sumAmt :: [PsbtUtxo] -> Msat
 sumAmt utxos = sum $ getAmt <$> utxos
 
-autoSelectUtxos :: Env m => OnChainAddress 'Fund -> MSat -> ExceptT Failure m FP.FundPsbtResponse
+autoSelectUtxos :: Env m => OnChainAddress 'Fund -> Msat -> ExceptT Failure m FP.FundPsbtResponse
 autoSelectUtxos addr amt = withLndT Lnd.fundPsbt ($ req)
   where
     req = fundPsbtReq [] (M.fromList [(unOnChainAddress addr, amt)])
@@ -94,13 +94,12 @@ fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee = katipAddContext (sl
   let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
   numInps <-
     tryFromT "Psbt funding inputs length" (length allInputs)
-  estFee <-
-    tryFailureT "Psbt funding fee estimator" $
-      Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
+  let estFee =
+        Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
   --
   -- TODO: find exact additional cost of open trx
   --
-  let fee = estFee + MSat 50000
+  let fee = estFee + Msat 50000
   $(logTM) DebugS $ logStr $ "Est fee:" <> inspect fee
   let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
   let outputs =

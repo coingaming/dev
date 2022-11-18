@@ -99,7 +99,7 @@ maybeFundSwap swapId = do
       . inspect
 
 data Utxo = Utxo
-  { utxoAmt :: MSat,
+  { utxoAmt :: Msat,
     utxoVout :: Vout 'Funding,
     utxoTxId :: TxId 'Funding,
     utxoSwapId :: SwapIntoLnId,
@@ -151,7 +151,7 @@ handleAddr addr amt vout txid = do
 newUtxo ::
   ( Env m
   ) =>
-  Either Failure MSat ->
+  Either Failure Msat ->
   Either (TryFromException Integer (Vout 'Funding)) (Vout 'Funding) ->
   Either LndError ByteString ->
   Entity SwapIntoLn ->
@@ -380,7 +380,8 @@ scanOneBlock height = do
 --
 
 utxoToOutPoint :: Utxo -> OP.OutPoint
-utxoToOutPoint u = OP.OutPoint (coerce $ utxoTxId u) (coerce $ utxoVout u)
+utxoToOutPoint u =
+  OP.OutPoint (unTxId $ utxoTxId u) (unsafeFrom . unVout $ utxoVout u)
 
 lockUtxo' :: Env m => Utxo -> ExceptT Failure m Utxo
 lockUtxo' u = do

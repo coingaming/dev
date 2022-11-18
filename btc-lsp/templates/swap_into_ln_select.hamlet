@@ -1,7 +1,7 @@
 $if swapIntoLnStatus == SwapWaitingFundChain
-  <img .img-responsive.center-block.small-margin-bottom src=#{fundAddrQr} alt=#{toText swapIntoLnFundAddress}>
+  <img .img-responsive.center-block.small-margin-bottom src=#{fundAddrQr} alt=#{unOnChainAddress swapIntoLnFundAddress}>
   <div .input-group.extra-large-margin-bottom>
-    <input .form-control id=#{htmlUuid} type="text" value=#{toText swapIntoLnFundAddress} readonly>
+    <input .form-control id=#{htmlUuid} type="text" value=#{unOnChainAddress swapIntoLnFundAddress} readonly>
     <span .input-group-btn>
       <button .btn.btn-primary type="button" data-clipboard-target="##{htmlUuid}" autofocus>
         _{MsgCopy}

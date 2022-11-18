@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module RpcSpec
   ( spec,
   )
@@ -8,8 +10,29 @@ import ElectrsClient.Helper
 import ElectrsClient.Import.External
 import ElectrsClient.Rpc as Rpc
 import ElectrsClient.Type
-import Network.Bitcoin
+import qualified Network.Bitcoin as Btc
+import qualified Network.Bitcoin.BtcEnv as Btc
+import qualified Network.Bitcoin.Wallet as Btc
 import Test.Hspec
+import Prelude (show)
+
+instance Btc.BtcEnv IO RpcError where
+  getBtcCfg = do
+    rc <- readRawConfig
+    let btcdEnv = rawConfigBtcEnv rc
+    pure
+      Btc.BtcCfg
+        { Btc.btcCfgHost = bitcoindEnvHost btcdEnv,
+          Btc.btcCfgUsername = bitcoindEnvUsername btcdEnv,
+          Btc.btcCfgPassword = bitcoindEnvPassword btcdEnv,
+          Btc.btcCfgAutoLoadWallet = Just Btc.defaultWalletCfg
+        }
+  getBtcClient =
+    Btc.getBtcCfg
+      >>= Btc.newBtcClient
+  getBtcFailureMaker =
+    pure $
+      OtherError . pack . show
 
 spec :: Spec
 spec = do
@@ -23,16 +46,12 @@ spec = do
       rc <- liftIO readRawConfig
       let env = rawConfigElectrsEnv rc
       let btcdEnv = rawConfigBtcEnv rc
-      btcClient <-
-        liftIO $
-          getClient
-            (unpack . bitcoindEnvHost $ btcdEnv)
-            (encodeUtf8 . bitcoindEnvUsername $ btcdEnv)
-            (encodeUtf8 . bitcoindEnvPassword $ btcdEnv)
-      addr <- liftIO $ getNewAddress btcClient Nothing
-      _ <- liftIO $ generateToAddress btcClient 3 addr Nothing
-      _ <- runExceptT $ waitTillLastBlockProcessedT btcClient env 100
-      Rpc.getBalance env btcdEnv (Left $ OnChainAddress addr)
+      runExceptT $ do
+        addr <- Btc.withBtcT Btc.getNewAddress ($ Nothing)
+        void $ Btc.withBtcT Btc.generateToAddress $ \f -> f 3 addr Nothing
+        btcClient <- lift Btc.getBtcClient
+        waitTillLastBlockProcessedT btcClient env 100
+        ExceptT $ Rpc.getBalance env btcdEnv (Left $ OnChainAddress addr)
     elecBal `shouldSatisfy` isRight
     case elecBal of
       Right bal -> confirmed bal `shouldSatisfy` (> 0)

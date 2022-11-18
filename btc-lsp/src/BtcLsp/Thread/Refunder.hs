@@ -44,8 +44,8 @@ apply =
 
 data SendUtxosResult = SendUtxosResult
   { getGetDecTrx :: Btc.DecodedRawTransaction,
-    getTotalAmt :: MSat,
-    getFee :: MSat
+    getTotalAmt :: Msat,
+    getFee :: Msat
   }
 
 newtype TxLabel = TxLabel
@@ -68,12 +68,11 @@ sendUtxos ::
   ExceptT Failure m SendUtxosResult
 sendUtxos feeRate utxos addr txLabel = do
   inQty <- tryFromT "SendUtxos length" $ length utxos
-  estFee <-
-    tryFailureT "SendUtxos fee estimator" $
-      Math.trxEstFee
-        (Math.InQty inQty)
-        (Math.OutQty 1)
-        feeRate
+  let estFee =
+        Math.trxEstFee
+          (Math.InQty inQty)
+          (Math.OutQty 1)
+          feeRate
   let finalOutputAmt = totalInputsAmt - estFee
   when (finalOutputAmt < Math.trxDustLimit) . throwE $
     FailureInt . FailurePrivate $
@@ -118,7 +117,7 @@ newFundPsbtReq ::
   Math.SatPerVbyte ->
   [PsbtUtxo] ->
   OnChainAddress 'Refund ->
-  MSat ->
+  Msat ->
   FP.FundPsbtRequest
 newFundPsbtReq feeRate utxos' outAddr est = do
   let mtpl =

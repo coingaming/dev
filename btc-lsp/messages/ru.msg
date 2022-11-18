@@ -22,7 +22,7 @@ Iso3166v1: ru
 Copy: копировать
 Continue: Продолжить
 Amount: Количество
-Satoshi msat@MSat: #{toMessage msat} сатоши
+Satoshi msat@Msat: #{toMessage msat} сатоши
 Status: Статус
 ExpiresAt: Истекает
 InsertedAt: Создано
@@ -202,7 +202,7 @@ AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
 AboutMathMinMax4: сатоши, и максимальное количество равно
 AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}
 AboutMathMinMax6: сатоши. Все монеты меньше чем
-AboutMathMinMax7 dustLimit@MSat: #{dustLimit}
+AboutMathMinMax7 dustLimit@Msat: #{dustLimit}
 AboutMathMinMax8: сатоши считаются пылью и будут игнорироваться.
 AboutMathLspFee0: Значение
 AboutMathLspFee1: КОМИССИЯ_ЛСП

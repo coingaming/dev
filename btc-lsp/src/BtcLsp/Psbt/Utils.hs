@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module BtcLsp.Psbt.Utils
   ( swapUtxoToPsbtUtxo,
     psbtShim,
@@ -43,10 +45,10 @@ swapUtxoToPsbtUtxo :: SwapUtxo -> PsbtUtxo
 swapUtxoToPsbtUtxo x =
   PsbtUtxo
     ( OP.OutPoint
-        (coerce $ swapUtxoTxid x)
-        (coerce $ swapUtxoVout x)
+        (unTxId $ swapUtxoTxid x)
+        (unsafeFrom @Natural @Word32 . unVout $ swapUtxoVout x)
     )
-    (coerce $ swapUtxoAmount x)
+    (unMoney $ swapUtxoAmount x)
     (swapUtxoLockId x)
 
 psbtShim :: Lnd.PendingChannelId -> PS.PsbtShim
@@ -57,7 +59,7 @@ psbtShim pcid =
       PS.noPublish = False
     }
 
-fundPsbtReq :: [OP.OutPoint] -> Map Text MSat -> FP.FundPsbtRequest
+fundPsbtReq :: [OP.OutPoint] -> Map Text Msat -> FP.FundPsbtRequest
 fundPsbtReq inputs outputs =
   FP.FundPsbtRequest
     { FP.account = "",

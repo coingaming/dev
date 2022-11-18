@@ -22,7 +22,7 @@ Iso3166v1: gb
 Copy: copy
 Continue: Continue
 Amount: Amount
-Satoshi msat@MSat: #{toMessage msat} satoshi
+Satoshi msat@Msat: #{toMessage msat} satoshi
 Status: Status
 ExpiresAt: Expires at
 InsertedAt: Inserted at
@@ -202,7 +202,7 @@ AboutMathMinMax3 minAmt@Money'Usr'OnChain'Fund: #{minAmt}
 AboutMathMinMax4: satoshi and the maximum is
 AboutMathMinMax5 maxAmt@Money'Usr'OnChain'Fund: #{maxAmt}
 AboutMathMinMax6: satoshi. All UTXOs less than
-AboutMathMinMax7 dustLimit@MSat: #{dustLimit}
+AboutMathMinMax7 dustLimit@Msat: #{dustLimit}
 AboutMathMinMax8: satoshi are considered dust and will be ignored.
 AboutMathLspFee0: The value of
 AboutMathLspFee1: LSP_FEE

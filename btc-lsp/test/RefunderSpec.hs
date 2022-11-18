@@ -84,7 +84,7 @@ spec = do
         ( $
             SendCoins.SendCoinsRequest
               { SendCoins.addr =
-                  from
+                  unOnChainAddress
                     . swapIntoLnFundAddress
                     . entityVal
                     $ swp,
