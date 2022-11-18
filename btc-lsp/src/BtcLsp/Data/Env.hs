@@ -204,7 +204,8 @@ withEnv rc this = do
                 --
                 -- TODO : pass params from btcRaw
                 --
-                btcCfgAutoLoadWallet = Just Btc.defaultWalletCfg
+                btcCfgAutoLoadWallet =
+                  Just Btc.defaultAutoLoadWalletCfg
               }
       btc <- Btc.newBtcClient btcCfg
       runKatipContextT le katipCtx katipNs

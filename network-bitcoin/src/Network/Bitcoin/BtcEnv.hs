@@ -17,7 +17,6 @@ import Control.Exception (Handler (..), catches)
 import Control.Monad (void)
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Except
-import Data.Bifunctor (first)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import GHC.Generics (Generic)
@@ -29,13 +28,13 @@ import Network.HTTP.Client (HttpException)
 class (MonadIO m) => BtcEnv m e | m -> e where
   getBtcCfg :: m BtcCfg
   getBtcClient :: m Client
-  getBtcFailureMaker :: m (BtcFailure -> e)
+  handleBtcFailure :: BtcFailure -> m e
   withBtc :: (Client -> a) -> (a -> IO b) -> m (Either e b)
   withBtc method args = do
     cfg <- getBtcCfg
     client <- getBtcClient
-    failureMaker <- getBtcFailureMaker
-    first failureMaker <$> tryBtcMethod cfg client method args
+    tryBtcMethod cfg client method args
+      >>= either (fmap Left . handleBtcFailure) (pure . Right)
   withBtcT :: (Client -> a) -> (a -> IO b) -> ExceptT e m b
   withBtcT method =
     ExceptT . withBtc method
