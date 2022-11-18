@@ -27,6 +27,7 @@ module Network.Bitcoin.Internal ( module Network.Bitcoin.Types
 
 import           Control.Exception
 import           Control.Monad
+import           Control.Applicative
 import           Data.Aeson
 import qualified Data.ByteString           as BS
 import           Data.Maybe
@@ -40,27 +41,27 @@ import           Network.HTTP.Types.Header
 
 -- | RPC calls return an error object. It can either be empty; or have an
 --   error message + error code.
-data BitcoinRpcError = NoError -- ^ All good.
-                     | BitcoinRpcError Int Text -- ^ Error code + error message.
-    deriving ( Show, Read, Ord, Eq )
+data BitcoinRpcFailure
+  = BitcoinRpcFailure Int Text
+  deriving (Show, Read, Ord, Eq)
 
-instance FromJSON BitcoinRpcError where
-    parseJSON (Object v) = BitcoinRpcError <$> v .: "code"
-                                           <*> v .: "message"
-    parseJSON Null       = return NoError
-    parseJSON _ = mzero
+instance FromJSON BitcoinRpcFailure where
+  parseJSON (Object v) = BitcoinRpcFailure <$> v .: "code" <*> v .: "message"
+  parseJSON _ = mzero
 
 -- | A response from bitcoind will contain the result of the JSON-RPC call, and
 --   an error. The error should be null if a valid response was received.
-data BitcoinRpcResponse a = BitcoinRpcResponse { btcResult :: a
-                                               , btcError  :: BitcoinRpcError
-                                               }
-    deriving ( Show, Read, Ord, Eq )
+data BitcoinRpcResponse a
+  = BitcoinRpcError BitcoinRpcFailure
+  | BitcoinRpcResult a
+  deriving (Show, Read, Ord, Eq)
 
 instance FromJSON a => FromJSON (BitcoinRpcResponse a) where
-    parseJSON (Object v) = BitcoinRpcResponse <$> v .: "result"
-                                              <*> v .: "error"
-    parseJSON _          = mzero
+  parseJSON (Object v) =
+    (BitcoinRpcError <$> v .: "error")
+      <|> (BitcoinRpcResult <$> v .: "result")
+  parseJSON _ =
+    mzero
 
 -- | 'getClient' takes a url, rpc username, and rpc password
 --   and returns a Client that can be used to make API calls. Each
@@ -74,7 +75,7 @@ getClient :: String
 getClient url user pass = do
     url' <- parseUrlThrow url
     mgr <- newManager defaultManagerSettings
-    let baseReq = applyBasicAuth user pass url'
+    let baseReq = setRequestIgnoreStatus $ applyBasicAuth user pass url'
             { method = "POST"
             , requestHeaders = [(hContentType, "application/json")] }
     return $ \r -> do
@@ -102,9 +103,9 @@ callApi client cmd params = readVal =<< client jsonRpcReqBody
     where
         readVal bs = do
             case decode' bs of
-                         Just r@BitcoinRpcResponse {btcError=NoError}
-                             -> return $ btcResult r
-                         Just BitcoinRpcResponse {btcError=BitcoinRpcError code msg}
+                         Just (BitcoinRpcResult r)
+                             -> return r
+                         Just (BitcoinRpcError (BitcoinRpcFailure code msg))
                              -> throw $ BitcoinApiError code msg
                          Nothing
                              -> throw $ BitcoinResultTypeError bs

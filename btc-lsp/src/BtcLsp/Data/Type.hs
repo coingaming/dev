@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Data.Type
-  ( Nonce,
+  ( Nonce (..),
     newNonce,
     LnInvoice (..),
     LnInvoiceStatus (..),
@@ -67,8 +67,9 @@ import qualified Universum
 import qualified Witch
 import Yesod.Core
 
-newtype Nonce
-  = Nonce Word64
+newtype Nonce = Nonce
+  { unNonce :: Word64
+  }
   deriving newtype
     ( Eq,
       Ord,
@@ -82,10 +83,6 @@ newtype Nonce
     )
 
 instance Out Nonce
-
-instance From Nonce Word64
-
-instance From Word64 Nonce
 
 newNonce :: (MonadIO m) => m Nonce
 newNonce =
@@ -157,8 +154,9 @@ newtype MicroSeconds
 
 instance Out MicroSeconds
 
-newtype LnInvoice (mrel :: MoneyRelation)
-  = LnInvoice Lnd.PaymentRequest
+newtype LnInvoice (mrel :: MoneyRelation) = LnInvoice
+  { unLnInvoice :: Lnd.PaymentRequest
+  }
   deriving newtype
     ( Eq,
       Show,
@@ -239,7 +237,7 @@ data LnChanStatus
 instance Out LnChanStatus
 
 newtype Liquidity (dir :: Direction) = Liquidity
-  { unLiquidity :: MSat
+  { unLiquidity :: Msat
   }
   deriving newtype
     ( Eq,
@@ -259,7 +257,7 @@ newtype
     (owner :: Owner)
     (btcl :: BitcoinLayer)
     (mrel :: MoneyRelation) = Money
-  { unMoney :: MSat
+  { unMoney :: Msat
   }
   deriving newtype
     ( Eq,
@@ -276,30 +274,22 @@ newtype
 
 instance Out (Money owner btcl mrel)
 
-instance From MSat (Money owner btcl mrel)
+instance From Msat (Money owner btcl mrel)
 
-instance From (Money owner btcl mrel) MSat
+instance From (Money owner btcl mrel) Msat
 
-instance From Word64 (Money owner btcl mrel) where
+instance From Natural (Money owner btcl mrel) where
   from =
-    via @MSat
-
-instance From (Money owner btcl mrel) Word64 where
-  from =
-    via @MSat
-
-instance TryFrom Natural (Money owner btcl mrel) where
-  tryFrom =
-    from @Word64 `composeTryRhs` tryFrom
+    via @Msat
 
 instance From (Money owner btcl mrel) Natural where
   from =
-    via @Word64
+    via @Msat
 
 instance TryFrom (Ratio Natural) (Money owner btcl mrel) where
   tryFrom =
-    tryFrom @Natural
-      `composeTry` tryFrom
+    from @Natural
+      `composeTryRhs` tryFrom
 
 instance From (Money owner btcl mrel) (Ratio Natural) where
   from =
@@ -320,8 +310,9 @@ instance ToMessage (Money owner btcl mrel) where
       . (/ 1000)
       . from
 
-newtype FeeRate
-  = FeeRate (Ratio Word64)
+newtype FeeRate = FeeRate
+  { unFeeRate :: Ratio Natural
+  }
   deriving newtype
     ( Eq,
       Ord,
@@ -331,29 +322,13 @@ newtype FeeRate
     ( Generic
     )
 
-instance From (Ratio Word64) FeeRate
-
-instance From FeeRate (Ratio Word64)
-
-instance From FeeRate (Ratio Natural) where
-  from =
-    via @(Ratio Word64)
-
-instance TryFrom Rational FeeRate where
-  tryFrom =
-    from @(Ratio Word64)
-      `composeTryRhs` tryFrom
-
-instance From FeeRate Rational where
-  from =
-    via @(Ratio Word64)
-
 instance ToMessage FeeRate where
   toMessage =
     (<> "%")
       . T.displayRational 1
       . (* 100)
-      . from
+      . from @(Ratio Natural) @Rational
+      . unFeeRate
 
 newtype UnsafeOnChainAddress (mrel :: MoneyRelation)
   = UnsafeOnChainAddress Text
@@ -813,7 +788,7 @@ instance Out RowQty
 
 data PsbtUtxo = PsbtUtxo
   { getOutPoint :: OP.OutPoint,
-    getAmt :: MSat,
+    getAmt :: Msat,
     getLockId :: Maybe UtxoLockId
   }
   deriving stock (Show, Generic)

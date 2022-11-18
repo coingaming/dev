@@ -22,7 +22,7 @@ spec = do
     wbal <- withBtcT Btc.getBalance id
     let amt = wbal / 10
     trAddr <-
-      from
+      unOnChainAddress
         . swapIntoLnFundAddress
         . entityVal
         <$> createDummySwap Nothing
@@ -41,13 +41,13 @@ spec = do
         . Math.trySatToMsat
         $ amt * 2
     utxos <- BlockScanner.scan
-    let gotAmt :: MSat = sum $ BlockScanner.utxoAmt <$> utxos
+    let gotAmt :: Msat = sum $ BlockScanner.utxoAmt <$> utxos
     liftIO $ expectedAmt `shouldBe` gotAmt
   itEnvT @'LndLsp "Block scanner works with 2 blocks" $ do
     wbal <- withBtcT Btc.getBalance id
     let amt = wbal / 10
     trAddr <-
-      from
+      unOnChainAddress
         . swapIntoLnFundAddress
         . entityVal
         <$> createDummySwap Nothing
@@ -75,7 +75,7 @@ spec = do
     swapEnt <-
       createDummySwap Nothing
     let trAddr =
-          from
+          unOnChainAddress
             . swapIntoLnFundAddress
             $ entityVal swapEnt
     satsToSend <-

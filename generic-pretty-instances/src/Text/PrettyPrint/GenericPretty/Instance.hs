@@ -11,6 +11,7 @@ where
 import qualified Control.Exception as Exception
 import qualified Crypto.Secp256k1 as Secp256k1
 import Data.ByteString.Base16 as B16 (encode)
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Fixed as Fixed
 import qualified Data.ProtoLens.Runtime.Data.ProtoLens.Encoding.Wire as Wire
@@ -133,6 +134,10 @@ instance Out TL.Text where
 instance Out ByteString where
   docPrec n = docPrec n . newBsDoc
   doc = doc . newBsDoc
+
+instance Out BL.ByteString where
+  docPrec n = docPrec n . BL.toStrict
+  doc = doc . BL.toStrict
 
 instance (Out a) => Out (Vector a) where
   docPrec n = docPrec n . toList

@@ -1,26 +1,25 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Data.Smart
   ( OnChainAddress,
-    unsafeNewOnChainAddress,
     unOnChainAddress,
+    unsafeNewOnChainAddress,
     newOnChainAddress,
     newOnChainAddressT,
   )
 where
 
 import BtcLsp.Class.Env
+import BtcLsp.Class.ToProto
 import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
-import BtcLsp.Grpc.Orphan
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
 import qualified Data.Text as T
-import qualified LndClient.Data.NewAddress as Lnd
 import qualified Network.Bitcoin.Wallet as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.LowLevel as Proto
-import qualified Witch
 
 newtype OnChainAddress (mrel :: MoneyRelation) = OnChainAddress
   { unOnChainAddress0 :: Text
@@ -40,26 +39,11 @@ newtype OnChainAddress (mrel :: MoneyRelation) = OnChainAddress
 
 instance Out (OnChainAddress mrel)
 
-instance From (OnChainAddress mrel) Text
-
-instance From Lnd.NewAddressResponse (OnChainAddress 'Fund)
-
-instance From Lnd.NewAddressResponse (OnChainAddress 'Gain)
-
-instance From (OnChainAddress mrel) Proto.OnChainAddress where
-  from = intoProto
-
-instance From (OnChainAddress 'Refund) Proto.RefundOnChainAddress where
-  from = intoProto
-
-instance From (OnChainAddress 'Fund) Proto.FundOnChainAddress where
-  from = intoProto
+unOnChainAddress :: OnChainAddress mrel -> Text
+unOnChainAddress = unOnChainAddress0
 
 unsafeNewOnChainAddress :: Text -> OnChainAddress mrel
 unsafeNewOnChainAddress = OnChainAddress
-
-unOnChainAddress :: OnChainAddress mrel -> Text
-unOnChainAddress = unOnChainAddress0
 
 newOnChainAddress ::
   ( Env m
@@ -97,3 +81,18 @@ newOnChainAddressT ::
   ExceptT Failure m (OnChainAddress mrel)
 newOnChainAddressT =
   ExceptT . newOnChainAddress
+
+instance ToProto (OnChainAddress mrel) Proto.OnChainAddress where
+  toProto =
+    newProtoVal
+      . unOnChainAddress
+
+instance ToProto (OnChainAddress 'Fund) Proto.FundOnChainAddress where
+  toProto =
+    newProtoVal
+      . toProto @(OnChainAddress 'Fund) @Proto.OnChainAddress
+
+instance ToProto (OnChainAddress 'Refund) Proto.RefundOnChainAddress where
+  toProto =
+    newProtoVal
+      . toProto @(OnChainAddress 'Refund) @Proto.OnChainAddress

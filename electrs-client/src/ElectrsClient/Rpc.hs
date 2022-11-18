@@ -11,7 +11,7 @@ module ElectrsClient.Rpc
   )
 where
 
-import Data.Aeson (decode, encode, withObject, (.:))
+import Data.Aeson (eitherDecode, encode, withObject, (.:))
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.Digest.Pure.SHA as SHA
 import ElectrsClient.Client as Client
@@ -81,9 +81,13 @@ callRpc m r env = do
   pure $ join $ second (second result . lazyDecode) msgReply
   where
     lazyDecode :: FromJSON resp => ByteString -> Either RpcError resp
-    lazyDecode = maybeToRight RpcJsonDecodeError . decode . BS.fromStrict
+    lazyDecode bs =
+      first (RpcJsonDecodeError bs . pack)
+        . eitherDecode
+        $ BS.fromStrict bs
     lazyEncode :: ToJSON req => RpcRequest req -> ByteString
-    lazyEncode = BS.toStrict . encode
+    lazyEncode =
+      BS.toStrict . encode
 
 version :: MonadUnliftIO m => ElectrsEnv -> () -> m (Either RpcError [Text])
 version env () = callRpc Version ["" :: Text, "1.4" :: Text] env

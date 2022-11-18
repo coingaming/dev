@@ -87,16 +87,6 @@ fromTextField =
     txtField :: Field m Text
     txtField = textField
 
-toText ::
-  ( From a Text,
-    'False ~ (Text == a),
-    'False ~ (a == Text)
-  ) =>
-  a ->
-  Text
-toText =
-  from
-
 newListWidget ::
   [[(AppMessage, AppMessage)]] ->
   Maybe Widget

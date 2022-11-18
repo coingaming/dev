@@ -72,7 +72,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                        & GetCfg.lspLnNodes
                          .~ [ defMessage
                                 & Proto.pubKey
-                                  .~ from pub
+                                  .~ toProto pub
                                 & Proto.host
                                   .~ ( defMessage
                                          & Proto.val .~ "127.0.0.1"
@@ -115,7 +115,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
           LndAlice
           ( defMessage
               & SwapIntoLn.refundOnChainAddress
-                .~ from @(OnChainAddress 'Refund) refundAddr
+                .~ toProto @(OnChainAddress 'Refund) refundAddr
           )
 
     liftIO $

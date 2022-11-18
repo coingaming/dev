@@ -42,7 +42,7 @@ swapExpiryLimitInternal =
 
 swapLnMaxAmt :: Money 'Usr btcl 'Fund
 swapLnMaxAmt =
-  Money $ MSat 10000000000
+  Money $ Msat 10000000000
 
 swapLnFeeRate :: FeeRate
 swapLnFeeRate =
@@ -50,7 +50,7 @@ swapLnFeeRate =
 
 swapLnMinFee :: Money 'Lsp btcl 'Gain
 swapLnMinFee =
-  Money $ MSat 2000000
+  Money $ Msat 2000000
 
 newSwapCapM ::
   ( Env m
@@ -67,23 +67,23 @@ newSwapCapM usrAmt = do
           SwapCap
             { swapCapUsr = usrLn,
               swapCapLsp = coerce usrLn,
-              swapCapFee = from @Word64 $ ceiling feeRat
+              swapCapFee = from @Natural $ ceiling feeRat
             }
   where
-    usrFin :: Ratio Word64
+    usrFin :: Ratio Natural
     usrFin =
       from usrAmt % 1
-    feeRat :: Ratio Word64
+    feeRat :: Ratio Natural
     feeRat =
-      from @Word64
+      from @Natural
         . (* 1000)
         . ceiling
         . (/ 1000)
         . max (from swapLnMinFee % 1)
-        $ usrFin * from swapLnFeeRate
+        $ usrFin * unFeeRate swapLnFeeRate
     usrLn :: Money 'Usr 'Ln 'Fund
     usrLn =
-      from @Word64
+      from @Natural
         . floor
         $ usrFin - feeRat
 
@@ -91,21 +91,21 @@ newSwapIntoLnMinAmt ::
   Money 'Chan 'Ln 'Fund ->
   Money 'Usr 'OnChain 'Fund
 newSwapIntoLnMinAmt minCap =
-  from @Word64
+  from @Natural
     . (* 1000)
     . ceiling
     $ usrInitMsat / 1000
   where
-    minFee :: Ratio Word64
+    minFee :: Ratio Natural
     minFee =
       from swapLnMinFee % 1
-    usrFin :: Ratio Word64
+    usrFin :: Ratio Natural
     usrFin =
       from minCap % 2
-    usrPerc :: Ratio Word64
+    usrPerc :: Ratio Natural
     usrPerc =
-      usrFin / (1 - from swapLnFeeRate)
-    usrInitMsat :: Ratio Word64
+      usrFin / (1 - unFeeRate swapLnFeeRate)
+    usrInitMsat :: Ratio Natural
     usrInitMsat =
       if usrPerc - usrFin >= minFee
         then usrPerc

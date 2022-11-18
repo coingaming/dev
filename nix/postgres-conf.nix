@@ -19,9 +19,9 @@ let
     cp -f ${postgresqlconf} ${workDir}/postgresql.conf
   '';
   init = writeShellScriptBin "init" ''
-    ${postgresql}/bin/createuser -s postgres -h "/tmp"
-    ${postgresql}/bin/createdb -h localhost lsp
-    ${postgresql}/bin/createdb -h localhost lsp-test
+    ${postgresql}/bin/createuser -s postgres -h "/tmp" || true
+    ${postgresql}/bin/createdb -h localhost lsp || true
+    ${postgresql}/bin/createdb -h localhost lsp-test || true
   '';
   start = writeShellScriptBin "start" ''
     ${postgresql}/bin/postgres -D ${workDir} > ${workDir}/postgres.log 2>&1 &

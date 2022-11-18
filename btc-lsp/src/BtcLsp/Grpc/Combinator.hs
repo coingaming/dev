@@ -17,6 +17,7 @@ module BtcLsp.Grpc.Combinator
   )
 where
 
+import BtcLsp.Class.FromProto
 import BtcLsp.Data.Type
 import BtcLsp.Import.External as Ext
 import Data.Map as Map
@@ -45,8 +46,7 @@ type GrpcRes res failure specific =
 
 fromReqT ::
   forall a b res failure specific m.
-  ( From a b,
-    'False ~ (a == b),
+  ( FromProto a b,
     GrpcRes res failure specific,
     Monad m
   ) =>
@@ -59,15 +59,14 @@ fromReqT loc =
 
 fromReqE ::
   forall a b res failure specific.
-  ( From a b,
-    'False ~ (a == b),
+  ( FromProto a b,
     GrpcRes res failure specific
   ) =>
   ReversedFieldLocation ->
   Maybe a ->
   Either res b
 fromReqE loc =
-  (from <$>)
+  (fromProto <$>)
     . maybeToRight msg
   where
     msg =

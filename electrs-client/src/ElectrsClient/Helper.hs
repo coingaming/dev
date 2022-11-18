@@ -36,16 +36,26 @@ waitTillLastBlockProcessedT ::
   ExceptT RpcError m ()
 waitTillLastBlockProcessedT _ _ 0 =
   throwE CannotSyncBlockchain
-waitTillLastBlockProcessedT client env decr = do
-  liftIO $ Delay.delay 300
-  bHeight <- liftIO $ getBlockCount client
-  bHash <- liftIO $ getBlockHash client bHeight
-  bHeader <- ExceptT $ Rpc.blockHeader env $ BlkHeight $ fromInteger bHeight
-  if (doubleSha256AndReverse <$> TH.decodeHex (coerce bHeader))
-    == TH.decodeHex (coerce $ Rpc.BlockHeader bHash)
-    then return ()
-    else waitTillLastBlockProcessedT client env (decr - 1)
+waitTillLastBlockProcessedT client env decr =
+  flip catchE onFailure $ do
+    bHeight <- liftIO $ getBlockCount client
+    bHash <- liftIO $ getBlockHash client bHeight
+    bHeader <- ExceptT $ Rpc.blockHeader env $ BlkHeight $ fromInteger bHeight
+    unless
+      ( (doubleSha256AndReverse <$> TH.decodeHex (coerce bHeader))
+          == TH.decodeHex (coerce $ Rpc.BlockHeader bHash)
+      )
+      sleepAndRetry
   where
+    sleepAndRetry = do
+      liftIO $ Delay.delay 300
+      waitTillLastBlockProcessedT client env $ decr - 1
+    onFailure = \case
+      --
+      -- TODO : identify out of sync failure better
+      --
+      RpcJsonDecodeError {} -> sleepAndRetry
+      e -> throwE e
     doubleSha256AndReverse =
       BS.toStrict
         . BS.reverse

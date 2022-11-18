@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module TestOrphan () where
@@ -15,4 +16,6 @@ instance From (OnChainAddress 'Refund) Lnd.NewAddressResponse where
   from =
     coerce . unOnChainAddress
 
-deriving newtype instance Arbitrary MSat
+instance Arbitrary Msat where
+  arbitrary =
+    Msat . from <$> arbitrary @Word64

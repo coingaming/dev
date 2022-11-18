@@ -32,7 +32,9 @@ flag ghcid
 library
   exposed-modules:
       BtcLsp.Class.Env
+      BtcLsp.Class.FromProto
       BtcLsp.Class.Storage
+      BtcLsp.Class.ToProto
       BtcLsp.Data.AppM
       BtcLsp.Data.Env
       BtcLsp.Data.Kind
@@ -241,7 +243,9 @@ executable btc-lsp-exe
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
+        BtcLsp.Class.FromProto
         BtcLsp.Class.Storage
+        BtcLsp.Class.ToProto
         BtcLsp.Data.AppM
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
@@ -457,7 +461,9 @@ executable btc-lsp-integration
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
+        BtcLsp.Class.FromProto
         BtcLsp.Class.Storage
+        BtcLsp.Class.ToProto
         BtcLsp.Data.AppM
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
@@ -644,7 +650,9 @@ executable btc-lsp-prof
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
+        BtcLsp.Class.FromProto
         BtcLsp.Class.Storage
+        BtcLsp.Class.ToProto
         BtcLsp.Data.AppM
         BtcLsp.Data.Env
         BtcLsp.Data.Kind
@@ -858,7 +866,9 @@ test-suite btc-lsp-test
   if flag(ghcid)
     other-modules:
         BtcLsp.Class.Env
+        BtcLsp.Class.FromProto
         BtcLsp.Class.Storage
+        BtcLsp.Class.ToProto
         BtcLsp.Data.AppM
         BtcLsp.Data.Env
         BtcLsp.Data.Kind

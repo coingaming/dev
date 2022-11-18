@@ -9,7 +9,7 @@ import ElectrsClient.Import.External
 
 data RpcError
   = RpcNoAddress
-  | RpcJsonDecodeError
+  | RpcJsonDecodeError ByteString Text
   | RpcHexDecodeError
   | CannotSyncBlockchain
   | OtherError Text
