@@ -72,6 +72,7 @@ module Network.Bitcoin.Wallet ( Client
                               , WalletCfg (..)
                               , WalletRes (..)
                               , defaultWalletCfg
+                              , defaultAutoLoadWalletCfg
                               , createWallet
                               , loadWallet
                               ) where
@@ -889,6 +890,12 @@ defaultWalletCfg =
       walletCfgAvoidReuse = Nothing,
       walletCfgDescriptors = Nothing,
       walletCfgLoadOnStartup = Nothing
+    }
+
+defaultAutoLoadWalletCfg :: WalletCfg
+defaultAutoLoadWalletCfg =
+  defaultWalletCfg
+    { walletCfgLoadOnStartup = Just True
     }
 
 createWallet :: Client -> WalletCfg -> IO WalletRes
