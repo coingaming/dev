@@ -11,7 +11,6 @@ import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient.Data.WalletBalance as Lnd
-import qualified Universum
 
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
@@ -44,16 +43,7 @@ instance (MonadIO m) => KatipContext (AppM m) where
 instance (MonadUnliftIO m) => BtcEnv (AppM m) Failure where
   getBtcCfg = asks Env.envBtcCfg
   getBtcClient = asks Env.envBtc
-
-  --
-  -- TODO : better Failure types and implementation,
-  -- avoid Show.
-  --
-  getBtcFailureMaker =
-    pure $
-      FailureInt
-        . FailurePrivate
-        . Universum.show
+  handleBtcFailure = handleBtcFailureGen
 
 instance (MonadUnliftIO m) => I.Env (AppM m) where
   getGsEnv =

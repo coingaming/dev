@@ -53,8 +53,8 @@ instance BtcEnv IO BtcFailure where
       }
   getBtcClient =
     client
-  getBtcFailureMaker =
-    pure id
+  handleBtcFailure =
+    pure
 
 
 nbTest name = testProperty name . once . monadicIO

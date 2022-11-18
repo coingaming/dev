@@ -107,12 +107,7 @@ runTestApp env app =
 instance (MonadUnliftIO m) => BtcEnv (TestAppM 'LndLsp m) Failure where
   getBtcCfg = asks $ envBtcCfg . testEnvLsp
   getBtcClient = asks $ envBtc . testEnvLsp
-  getBtcFailureMaker =
-    pure $
-      FailureInt
-        . FailurePrivate
-        . pack
-        . show
+  handleBtcFailure = handleBtcFailureGen
 
 instance (MonadUnliftIO m) => BtcMultiEnv (TestAppM owner m) Failure TestOwner where
   getBtcCfg =
@@ -127,12 +122,8 @@ instance (MonadUnliftIO m) => BtcMultiEnv (TestAppM owner m) Failure TestOwner w
       case owner of
         LndLsp -> testEnvBtc
         LndAlice -> testEnvBtc2
-  getBtcFailureMaker =
-    const . pure $
-      FailureInt
-        . FailurePrivate
-        . pack
-        . show
+  handleBtcFailure =
+    const handleBtcFailureGen
 
 instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   getGsEnv =

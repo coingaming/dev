@@ -22,6 +22,7 @@ module BtcLsp.Data.Type
     Failure (..),
     FailureInternal (..),
     FailureInput (..),
+    handleBtcFailureGen,
     tryFailureE,
     tryFailureT,
     tryFromE,
@@ -330,8 +331,9 @@ instance ToMessage FeeRate where
       . from @(Ratio Natural) @Rational
       . unFeeRate
 
-newtype UnsafeOnChainAddress (mrel :: MoneyRelation)
-  = UnsafeOnChainAddress Text
+newtype UnsafeOnChainAddress (mrel :: MoneyRelation) = UnsafeOnChainAddress
+  { unUnsafeOnChainAddress :: Text
+  }
   deriving newtype
     ( Eq,
       Ord,
@@ -444,6 +446,24 @@ data FailureInternal
     )
 
 instance Out FailureInternal
+
+handleBtcFailureGen :: (KatipContext m) => BtcFailure -> m Failure
+handleBtcFailureGen e = do
+  let failureText = Universum.show e :: Text
+  let failureData = handleBtcFailureText failureText
+  let sev =
+        if failureData == FailureInp FailureNonValidAddr
+          then DebugS
+          else ErrorS
+  $logTM sev . logStr $ "Bitcoind failure " <> failureText
+  pure failureData
+
+handleBtcFailureText :: Text -> Failure
+handleBtcFailureText txt =
+  if ("Not a valid Bech32 or Base58 encoding" `T.isInfixOf` txt)
+    || ("Invalid checksum" `T.isInfixOf` txt)
+    then FailureInp FailureNonValidAddr
+    else FailureInt FailureRedacted
 
 tryFailureE ::
   forall source target.

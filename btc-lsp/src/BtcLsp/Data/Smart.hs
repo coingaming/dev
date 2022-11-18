@@ -16,7 +16,6 @@ import BtcLsp.Data.Kind
 import BtcLsp.Data.Type
 import BtcLsp.Import.External
 import qualified BtcLsp.Import.Psql as Psql
-import qualified Data.Text as T
 import qualified Network.Bitcoin.Wallet as Btc
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.LowLevel as Proto
@@ -51,28 +50,18 @@ newOnChainAddress ::
   UnsafeOnChainAddress mrel ->
   m (Either Failure (OnChainAddress mrel))
 newOnChainAddress unsafeAddr = do
-  eRes <- withBtc Btc.getAddrInfo ($ txtAddr)
-  case eRes of
-    Left e@(FailureInt (FailurePrivate txt)) ->
-      if ("Not a valid Bech32 or Base58 encoding" `T.isInfixOf` txt)
-        || ("Invalid checksum" `T.isInfixOf` txt)
-        then pure . Left $ FailureInp FailureNonValidAddr
-        else do
-          $(logTM) WarningS . logStr $
-            "newOnChainAddress unexpected private failure " <> inspect e
-          pure $ Left e
-    Left e -> do
-      $(logTM) WarningS . logStr $
-        "newOnChainAddress unexpected failure " <> inspect e
-      pure $
-        Left e
-    Right res ->
-      pure $
-        if Btc.isWitness res
-          then Right $ OnChainAddress txtAddr
-          else Left $ FailureInp FailureNonSegwitAddr
+  eRes <-
+    withBtc Btc.getAddrInfo ($ txtAddr)
+  pure $
+    eRes
+      >>= ( \res ->
+              if Btc.isWitness res
+                then Right $ OnChainAddress txtAddr
+                else Left $ FailureInp FailureNonSegwitAddr
+          )
   where
-    txtAddr = from unsafeAddr
+    txtAddr =
+      unUnsafeOnChainAddress unsafeAddr
 
 newOnChainAddressT ::
   ( Env m

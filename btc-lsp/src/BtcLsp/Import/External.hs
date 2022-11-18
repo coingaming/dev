@@ -117,7 +117,11 @@ import LndClient.Util as X
     txIdHex,
     withSpawnLink,
   )
-import Network.Bitcoin.BtcEnv as X (BtcCfg (..), BtcEnv (..))
+import Network.Bitcoin.BtcEnv as X
+  ( BtcCfg (..),
+    BtcEnv (..),
+    BtcFailure (..),
+  )
 import Network.GRPC.Client as X (CompressMode (..))
 import Network.HTTP2.Client2 as X (HostName, PortNumber)
 import Text.Casing as X (camel)
