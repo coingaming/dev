@@ -34,6 +34,7 @@ in
     deps.ormoluFormat
     deps.ormoluTest
     deps.hlintTest
+    deps.styleTest
     deps.mine
     deps.coverageTest
     deps.coverageHtml

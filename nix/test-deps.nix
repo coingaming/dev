@@ -77,6 +77,25 @@ let
     echo "test-deps ==> done"
   '';
   envFile = lspEnv.exportEnvFile;
+  ormoluTest = nixPkgs.writeShellScriptBin "ormolu-test" ''
+    ${nixPkgs.ormolu}/bin/ormolu --mode check $( find . \( \
+      -path './btc-lsp/src/BtcLsp/*' \
+      -o -path './btc-lsp/test/*' \
+      -o -path './btc-lsp/integration/*' \
+      -o -path './generic-pretty-instances/src/*' \
+      -o -path './generic-pretty-instances/test/*' \
+      -o -path './electrs-client/src/*' \
+      -o -path './electrs-client/test/*' \) \
+      -name '*.hs' )
+  '';
+  hlintTest = nixPkgs.writeShellScriptBin "hlint-test" ''
+    ${nixPkgs.hlint}/bin/hlint . --ignore-glob=btc-lsp/src/Proto
+  '';
+  styleTest = nixPkgs.writeShellScriptBin "style-test" ''
+    set -euo pipefail
+    ${hlintTest}/bin/hlint-test
+    ${ormoluTest}/bin/ormolu-test
+  '';
   spawnTestEnv = nixPkgs.writeShellScriptBin "spawn-test-env" ''
     set -euo pipefail
     ${nixPkgs.hpack}/bin/hpack ${repoDir}/btc-lsp
@@ -147,20 +166,6 @@ in
       -o -path './electrs-client/test/*' \) \
       -name '*.hs' )
   '';
-  ormoluTest = nixPkgs.writeShellScriptBin "ormolu-test" ''
-    ${nixPkgs.ormolu}/bin/ormolu --mode check $( find . \( \
-      -path './btc-lsp/src/BtcLsp/*' \
-      -o -path './btc-lsp/test/*' \
-      -o -path './btc-lsp/integration/*' \
-      -o -path './generic-pretty-instances/src/*' \
-      -o -path './generic-pretty-instances/test/*' \
-      -o -path './electrs-client/src/*' \
-      -o -path './electrs-client/test/*' \) \
-      -name '*.hs' )
-  '';
-  hlintTest = nixPkgs.writeShellScriptBin "hlint-test" ''
-    ${nixPkgs.hlint}/bin/hlint . --ignore-glob=btc-lsp/src/Proto
-  '';
   mine = nixPkgs.writeShellScriptBin "mine" ''
     set -e
 
@@ -200,6 +205,9 @@ in
   inherit envFile
           startAll
           bitcoindConf
+          ormoluTest
+          hlintTest
+          styleTest
           spawnTestEnv
           coverageTest
           coverageHtml;
