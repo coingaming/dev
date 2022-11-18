@@ -30,9 +30,8 @@ instance Btc.BtcEnv IO RpcError where
   getBtcClient =
     Btc.getBtcCfg
       >>= Btc.newBtcClient
-  getBtcFailureMaker =
-    pure $
-      OtherError . pack . show
+  handleBtcFailure =
+    pure . OtherError . pack . show
 
 spec :: Spec
 spec = do
