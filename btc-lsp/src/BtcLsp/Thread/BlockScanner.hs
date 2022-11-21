@@ -252,7 +252,7 @@ scan = do
       =<< withBtcT Btc.getBlockCount id
   case mBlk of
     Nothing -> do
-      $(logTM) DebugS . logStr $
+      $(logTM) InfoS . logStr $
         "Found no blocks, scanning height = "
           <> inspect cHeight
       scanOneBlock cHeight
@@ -298,7 +298,7 @@ scannerStep acc cur end =
   if cur > end
     then pure acc
     else do
-      $(logTM) DebugS . logStr $
+      $(logTM) InfoS . logStr $
         "Scanner step cur = "
           <> inspect cur
           <> " end = "
@@ -363,7 +363,7 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  $(logTM) DebugS . logStr $
+  $(logTM) InfoS . logStr $
     "Got new block with height = "
       <> inspect height
       <> " and hash = "
