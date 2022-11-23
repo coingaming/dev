@@ -62,9 +62,12 @@ mapLeaseUtxosToPsbtUtxo lockedUtxos = do
   case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of
     Just us -> pure us
     Nothing -> do
-      $(logTM) DebugS
+      $logTM DebugS
         . logStr
-        $ "Cannot find utxo in utxos:" <> inspect lockedUtxos <> " lookupMap: " <> inspect l
+        $ "Cannot find utxo in utxos:"
+          <> inspect @Text lockedUtxos
+          <> " lookupMap: "
+          <> inspect l
       throwE
         . FailureInt
         $ FailurePrivate "Cannot find utxo in unspent list"
@@ -77,44 +80,50 @@ fundChanPsbt ::
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
   ExceptT Failure m Lnd.Psbt
-fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee = katipAddContext (sl "pcid" (inspect pcid)) $ do
-  let userFundingAmt = sumAmt userUtxos - coerce lspFee
-  $(logTM) DebugS $
-    logStr $
-      "UserAmt:"
-        <> inspect (sumAmt userUtxos)
+fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee =
+  katipAddContext (sl "pcid" (inspect @Text pcid)) $ do
+    let userFundingAmt = sumAmt userUtxos - coerce lspFee
+    $logTM DebugS
+      . logStr
+      $ "UserAmt:"
+        <> inspect @Text (sumAmt userUtxos)
         <> " LspFee:"
         <> inspect lspFee
 
-  lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
-  $(logTM) DebugS $ logStr $ "Selected Lsp utxos:" <> inspect (FP.lockedUtxos lspFunded)
-  lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
-  let selectedInputsAmt = sumAmt lspUtxos
-  $(logTM) DebugS $ logStr $ "Coins sum by lsp" <> inspect selectedInputsAmt
-  let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
-  numInps <-
-    tryFromT "Psbt funding inputs length" (length allInputs)
-  let estFee =
-        Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
-  --
-  -- TODO: find exact additional cost of open trx
-  --
-  let fee = estFee + Msat 50000
-  $(logTM) DebugS $ logStr $ "Est fee:" <> inspect fee
-  let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
-  let outputs =
-        if changeAmt > Math.trxDustLimit
-          then
-            [ (unOnChainAddress chanFundAddr, userFundingAmt * 2),
-              (unOnChainAddress changeAddr, changeAmt)
-            ]
-          else
-            [ (unOnChainAddress chanFundAddr, userFundingAmt * 2 + changeAmt)
-            ]
-  let req = fundPsbtReq allInputs (M.fromList outputs)
-  releaseUtxosPsbtLocks (userUtxos <> lspUtxos)
-  psbt <- withLndT Lnd.fundPsbt ($ req)
-  pure $ Lnd.Psbt $ FP.fundedPsbt psbt
+    lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
+    $logTM DebugS
+      . logStr
+      $ "Selected Lsp utxos:"
+        <> inspect @Text (FP.lockedUtxos lspFunded)
+    lspUtxos <- mapLeaseUtxosToPsbtUtxo $ FP.lockedUtxos lspFunded
+    let selectedInputsAmt = sumAmt lspUtxos
+    $logTM DebugS
+      . logStr
+      $ "Coins sum by lsp" <> inspect @Text selectedInputsAmt
+    let allInputs = getOutPoint <$> (userUtxos <> lspUtxos)
+    numInps <-
+      tryFromT "Psbt funding inputs length" (length allInputs)
+    let estFee =
+          Math.trxEstFee (Math.InQty numInps) (Math.OutQty 2) Math.minFeeRate
+    --
+    -- TODO: find exact additional cost of open trx
+    --
+    let fee = estFee + Msat 50000
+    $logTM DebugS . logStr $ "Est fee:" <> inspect @Text fee
+    let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
+    let outputs =
+          if changeAmt > Math.trxDustLimit
+            then
+              [ (unOnChainAddress chanFundAddr, userFundingAmt * 2),
+                (unOnChainAddress changeAddr, changeAmt)
+              ]
+            else
+              [ (unOnChainAddress chanFundAddr, userFundingAmt * 2 + changeAmt)
+              ]
+    let req = fundPsbtReq allInputs (M.fromList outputs)
+    releaseUtxosPsbtLocks (userUtxos <> lspUtxos)
+    psbt <- withLndT Lnd.fundPsbt ($ req)
+    pure $ Lnd.Psbt $ FP.fundedPsbt psbt
 
 fundChanPsbtLocked ::
   (Env m) =>
@@ -163,7 +172,7 @@ openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
   res <- lift . UE.tryAny . spawnLink $ do
     r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
     whenLeft r $ \e -> do
-      $(logTM) ErrorS $ logStr $ "Open channel failed" <> inspect e
+      $logTM ErrorS . logStr $ "Open channel failed" <> inspect @Text e
       void . T.atomically . T.writeTChan chan $ LndSubFail
   case res of
     Left e -> throwE . FailureInt . FailurePrivate $ inspect e
@@ -174,21 +183,26 @@ openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
     amt = sumAmt utxos - coerce lspFee
     fundStep chan = do
       upd <- T.atomically $ T.readTChan chan
-      $(logTM) DebugS $ logStr $ "Got chan status update" <> inspect upd
+      $logTM DebugS . logStr $ "Got chan status update" <> inspect @Text upd
       case upd of
         LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdatePsbtFund (Lnd.ReadyForPsbtFunding faddr famt _)))) -> do
-          $(logTM) DebugS $ logStr $ "Chan ready for funding at addr:" <> inspect faddr <> " with amt:" <> inspect famt
+          $logTM DebugS
+            . logStr
+            $ "Chan ready for funding at addr:"
+              <> inspect @Text faddr
+              <> " with amt:"
+              <> inspect famt
           psbt' <- fundChanPsbtLocked lock pcid utxos (unsafeNewOnChainAddress faddr) (coerce changeAddress) lspFee
           void $ withLndT Lnd.fundingStateStep ($ psbtVerifyReq pcid psbt')
           sPsbtResp <- finalizePsbt psbt'
-          $(logTM) DebugS $ logStr $ "Used psbt for funding:" <> inspect sPsbtResp
+          $logTM DebugS . logStr $ "Used psbt for funding:" <> inspect @Text sPsbtResp
           void $ withLndT Lnd.fundingStateStep ($ psbtFinalizeReq pcid (Lnd.Psbt $ FNP.signedPsbt sPsbtResp))
           fundStep chan
         LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanPending p))) -> do
-          $(logTM) DebugS $ logStr $ "Chan is pending... mining..." <> inspect p
+          $logTM DebugS . logStr $ "Chan is pending... mining..." <> inspect @Text p
           fundStep chan
         LndUpdate (Lnd.OpenStatusUpdate _ (Just (Lnd.OpenStatusUpdateChanOpen (Lnd.ChannelOpenUpdate cp)))) -> do
-          $(logTM) DebugS $ logStr $ "Chan is open" <> inspect cp
+          $logTM DebugS . logStr $ "Chan is open" <> inspect @Text cp
           pure cp
         LndSubFail -> do
           lift $ abortChannelPsbt pcid

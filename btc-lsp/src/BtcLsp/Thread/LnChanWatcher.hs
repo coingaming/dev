@@ -101,9 +101,9 @@ syncChannelList = do
         . sum
         $ Lnd.remoteBalance <$> nonSwapChans
   whenLeft res $
-    $(logTM) ErrorS . logStr
+    $logTM ErrorS . logStr
       . ("SyncChannelList failure " <>)
-      . inspect
+      . inspect @Text
 
 applyPoll :: (Env m) => m ()
 applyPoll =

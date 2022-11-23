@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module BtcLsp.Class.ToProto
   ( ToProto (..),
     newProtoVal,

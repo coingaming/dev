@@ -27,10 +27,10 @@ apply = do
     ePeerList <-
       withLnd LndSilent.listPeers id
     whenLeft ePeerList $
-      $(logTM) ErrorS
+      $logTM ErrorS
         . logStr
         . ("ListPeers procedure failed: " <>)
-        . inspect
+        . inspect @Text
     let peerSet =
           Set.fromList $
             Peer.pubKey <$> fromRight [] ePeerList
@@ -97,9 +97,9 @@ openChanSql pcid lock (Entity swapKey _) userEnt = do
               (swapIntoLnPrivacy swapVal)
           liftIO (wait $ PO.fundAsync r) >>= except
         either
-          ( $(logTM) ErrorS . logStr
+          ( $logTM ErrorS . logStr
               . ("OpenChan procedure failed: " <>)
-              . inspect
+              . inspect @Text
           )
           ( \cp ->
               LnChan.createUpdateSql
@@ -111,8 +111,8 @@ openChanSql pcid lock (Entity swapKey _) userEnt = do
           )
           cpEither
   whenLeft res $
-    $(logTM) ErrorS
+    $logTM ErrorS
       . logStr
       . ("Channel opening failed due to wrong status " <>)
-      . inspect
+      . inspect @Text
   pure res

@@ -130,6 +130,7 @@ library
       DerivingVia
       ExistentialQuantification
       InstanceSigs
+      TypeApplications
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -fwarn-tabs -O2
   build-depends:
       GenericPretty
@@ -234,6 +235,7 @@ executable btc-lsp-exe
       DerivingVia
       ExistentialQuantification
       InstanceSigs
+      TypeApplications
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -440,6 +442,7 @@ executable btc-lsp-integration
       DerivingVia
       ExistentialQuantification
       InstanceSigs
+      TypeApplications
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -main-is Integration -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -641,6 +644,7 @@ executable btc-lsp-prof
       DerivingVia
       ExistentialQuantification
       InstanceSigs
+      TypeApplications
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -prof -fprof-auto "-with-rtsopts=-N -s -p -h -xt" -fexternal-interpreter -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:
@@ -845,6 +849,7 @@ test-suite btc-lsp-test
       DerivingVia
       ExistentialQuantification
       InstanceSigs
+      TypeApplications
   ghc-options: -Weverything -Werror -Wno-missing-exported-signatures -Wno-missing-import-lists -Wno-missed-specialisations -Wno-all-missed-specialisations -Wno-unsafe -Wno-safe -Wno-missing-local-signatures -Wno-missing-export-lists -O2 -optc-O3 -funfolding-use-threshold=16 -threaded -rtsopts -with-rtsopts=-N -optl-fuse-ld=gold
   ld-options: -fuse-ld=gold
   build-depends:

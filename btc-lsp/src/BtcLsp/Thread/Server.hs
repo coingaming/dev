@@ -1,6 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Thread.Server
   ( apply,

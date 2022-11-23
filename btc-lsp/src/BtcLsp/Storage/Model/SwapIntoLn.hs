@@ -241,10 +241,10 @@ updateExpiredSql rowId = do
                        ]
                  )
   when (qty /= 1)
-    . $(logTM) ErrorS
+    . $logTM ErrorS
     . logStr
     $ "Wrong expiry update result "
-      <> inspect qty
+      <> inspect @Text qty
       <> " for the swap "
       <> inspect rowId
 

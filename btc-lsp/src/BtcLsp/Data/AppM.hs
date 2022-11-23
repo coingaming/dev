@@ -75,7 +75,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
       $(logTM) CriticalS . logStr $
         "Not enough outgoing liquidity to the external "
           <> "lightning network, got "
-          <> inspect amt
+          <> inspect @Text amt
           <> " but minimum is "
           <> inspect lim
           <> "."
@@ -85,7 +85,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
       $(logTM) CriticalS . logStr $
         "Not enough incoming liquidity from the external "
           <> "lightning network, got "
-          <> inspect amt
+          <> inspect @Text amt
           <> " but minimum is "
           <> inspect lim
           <> "."
@@ -94,7 +94,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     when (Lnd.totalBalance wal < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough onchain liquidity, got "
-          <> inspect wal
+          <> inspect @Text wal
           <> " but minimum is "
           <> inspect lim
           <> "."

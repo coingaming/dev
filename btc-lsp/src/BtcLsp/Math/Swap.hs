@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module BtcLsp.Math.Swap
   ( SwapCap (..),
     swapExpiryLimitInput,

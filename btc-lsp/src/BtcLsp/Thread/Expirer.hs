@@ -35,7 +35,7 @@ updateExpiredSwapSql rowId = do
       . const
       $ SwapIntoLn.updateExpiredSql rowId
   whenLeft res $
-    $(logTM) ErrorS
+    $logTM ErrorS
       . logStr
       . ("Expiry update failed for the swap " <>)
-      . inspect
+      . inspect @Text

@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module BtcLsp.Grpc.Orphan () where

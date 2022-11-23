@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module MathSpec
   ( spec,
   )

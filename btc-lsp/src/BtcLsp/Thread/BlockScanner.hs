@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Thread.BlockScanner
   ( apply,
@@ -33,9 +32,9 @@ apply :: (Env m) => m ()
 apply =
   forever $ do
     eitherM
-      ( $(logTM) ErrorS
+      ( $logTM ErrorS
           . logStr
-          . inspect
+          . inspect @Text
       )
       maybeFunded
       . runExceptT
@@ -60,16 +59,16 @@ maybeFundSwap swapId = do
       us <- SwapUtxo.getSpendableUtxosBySwapIdSql swapId
       let amt = sum $ swapUtxoAmount . entityVal <$> us
       mCap <- lift $ newSwapCapM amt
-      $(logTM) DebugS . logStr $
+      $logTM DebugS . logStr $
         maybe
           ( "Not enough funds for "
-              <> inspect swapId
+              <> inspect @Text swapId
               <> " with amt = "
               <> inspect amt
           )
           ( \cap ->
               "Marking funded "
-                <> inspect swapId
+                <> inspect @Text swapId
                 <> " with amt = "
                 <> inspect amt
                 <> " and cap = "
@@ -83,9 +82,9 @@ maybeFundSwap swapId = do
         if qty /= from (length us)
           then do
             Psql.transactionUndo
-            $(logTM) ErrorS . logStr $
+            $logTM ErrorS . logStr $
               "Funding update "
-                <> inspect swapVal
+                <> inspect @Text swapVal
                 <> " failed for UTXOs "
                 <> inspect us
           else
@@ -93,10 +92,10 @@ maybeFundSwap swapId = do
               swapId
               swapCap
   whenLeft res $
-    $(logTM) WarningS
+    $logTM WarningS
       . logStr
       . ("Funding failed due to wrong status " <>)
-      . inspect
+      . inspect @Text
 
 data Utxo = Utxo
   { utxoAmt :: Msat,
@@ -119,9 +118,9 @@ mapVout txid txout@(Btc.TxOut amt vout (Btc.StandardScriptPubKey _ _ _ _ addrsV)
   case V.toList addrsV of
     [addr] -> handleAddr addr amt vout txid
     _ -> do
-      $(logTM) ErrorS . logStr $
+      $logTM ErrorS . logStr $
         "Unsupported address vector in txid = "
-          <> inspect txid
+          <> inspect @Text txid
           <> " and txout = "
           <> Universum.show txout
       pure Nothing
@@ -160,13 +159,13 @@ newUtxo (Right amt) (Right n) (Right txid) swp =
   pure . Just $
     Utxo amt n (from txid) (entityKey swp) Nothing
 newUtxo amt vout txid swp = do
-  $(logTM) ErrorS . logStr $
+  $logTM ErrorS . logStr $
     "TryFrom overflow error amt = "
       <> Universum.show amt
       <> " vout = "
       <> Universum.show vout
       <> " txid = "
-      <> inspect txid
+      <> inspect @Text txid
       <> " and swap = "
       <> inspect swp
   pure Nothing
@@ -215,10 +214,10 @@ persistBlockT blk utxos = do
             newSwapUtxo ct blockId <$> utxos
           SwapUtxo.updateRefundBlockIdSql blockId
     whenLeft res $
-      $(logTM) ErrorS
+      $logTM ErrorS
         . logStr
         . ("UTXOs are not persisted for the block " <>)
-        . inspect
+        . inspect @Text
 
 newSwapUtxo :: UTCTime -> BlockId -> Utxo -> SwapUtxo
 newSwapUtxo ct blkId utxo = do
@@ -252,9 +251,9 @@ scan = do
       =<< withBtcT Btc.getBlockCount id
   case mBlk of
     Nothing -> do
-      $(logTM) InfoS . logStr $
+      $logTM InfoS . logStr $
         "Found no blocks, scanning height = "
-          <> inspect cHeight
+          <> inspect @Text cHeight
       scanOneBlock cHeight
     Just lBlk -> do
       reorgDetected <- detectReorg lBlk
@@ -263,9 +262,9 @@ scan = do
           let known = from . blockHeight $ entityVal lBlk
           scannerStep [] (1 + known) $ from cHeight
         Just height -> do
-          $(logTM) WarningS . logStr $
+          $logTM WarningS . logStr $
             "Reorg detected from height = "
-              <> inspect height
+              <> inspect @Text height
           bHeight <-
             tryFromT "BlockScanner reorg block height" height
           withExceptT
@@ -298,9 +297,9 @@ scannerStep acc cur end =
   if cur > end
     then pure acc
     else do
-      $(logTM) InfoS . logStr $
+      $logTM InfoS . logStr $
         "Scanner step cur = "
-          <> inspect cur
+          <> inspect @Text cur
           <> " end = "
           <> inspect end
           <> " got utxos qty = "
@@ -363,9 +362,9 @@ scanOneBlock ::
 scanOneBlock height = do
   hash <- withBtcT Btc.getBlockHash ($ from height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
-  $(logTM) InfoS . logStr $
+  $logTM InfoS . logStr $
     "Got new block with height = "
-      <> inspect height
+      <> inspect @Text height
       <> " and hash = "
       <> inspect hash
   utxos <- lift $ extractRelatedUtxoFromBlock blk

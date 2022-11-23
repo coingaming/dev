@@ -49,7 +49,10 @@ spec = do
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
     void BlockScanner.scan
-    $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee)
+    $logTM DebugS
+      . logStr
+      $ "Expected remote balance:"
+        <> inspect @Text (coerce (20 * amt) - lspFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
@@ -63,7 +66,7 @@ spec = do
       mine 1 LndLsp
     chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
     chan <- except chanEither
-    $(logTM) DebugS $ logStr $ "Channel is opened:" <> inspect chan
+    $logTM DebugS $ logStr $ "Channel is opened:" <> inspect @Text chan
     chnls <-
       withLndT
         Lnd.listChannels
@@ -76,7 +79,7 @@ spec = do
                 ListChannels.peer = Nothing
               }
         )
-    $(logTM) DebugS $ logStr $ "Channel is opened:" <> inspect chnls
+    $logTM DebugS $ logStr $ "Channel is opened:" <> inspect @Text chnls
     let (openedChanMaybe :: Maybe CH.Channel) = find (\c -> CH.channelPoint c == chan) chnls
     let (expectedRemoteBalance :: Msat) = coerce (20 * amt) - lspFee
     case openedChanMaybe of
@@ -95,7 +98,9 @@ spec = do
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
     void BlockScanner.scan
-    $(logTM) DebugS $ logStr $ "Expected remote balance:" <> inspect (coerce (20 * amt) - lspFee)
+    $logTM DebugS
+      . logStr
+      $ "Expected remote balance:" <> inspect @Text (coerce (20 * amt) - lspFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
@@ -110,7 +115,7 @@ spec = do
       mine 1 LndLsp
     void . T.atomically . T.writeTChan (PO.tchan openChanRes) $ PO.LndSubFail
     chanEither <- liftIO $ wait $ PO.fundAsync openChanRes
-    $(logTM) ErrorS $ logStr $ "Fails with:" <> inspect chanEither
+    $logTM ErrorS $ logStr $ "Fails with:" <> inspect @Text chanEither
     leases <- withLndT Lnd.listLeases ($ LL.ListLeasesRequest) <&> LL.lockedUtxos
     let allLockedAfterFail = all (\pu -> isJust $ find (\l -> LL.outpoint l == Just (getOutPoint pu)) leases) psbtUtxos
     liftIO $ do

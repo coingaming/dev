@@ -270,7 +270,7 @@ persistChannelUpdateSql ::
   Lnd.ChannelEventUpdate ->
   ReaderT Psql.SqlBackend m (Entity LnChan)
 persistChannelUpdateSql (Lnd.ChannelEventUpdate channelEvent _) = do
-  $(logTM) DebugS . logStr $ inspect channelEvent
+  $logTM DebugS . logStr $ inspect @Text channelEvent
   ct <- getCurrentTime
   case channelEvent of
     Lnd.ChannelEventUpdateChannelOpenChannel chan ->

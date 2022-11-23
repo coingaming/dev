@@ -270,7 +270,7 @@ withEnv rc this = do
         Left e -> do
           $logTM ErrorS . logStr $
             "Server ==> signing procedure failed "
-              <> inspect e
+              <> inspect @Text e
           pure Nothing
         Right sig0 -> do
           let sig = coerce sig0
@@ -282,5 +282,5 @@ withEnv rc this = do
               <> " got signature of "
               <> inspect (BS.length sig)
               <> " bytes "
-              <> inspect sig
+              <> inspect @Text sig
           pure . Just $ Sig.LndSig sig

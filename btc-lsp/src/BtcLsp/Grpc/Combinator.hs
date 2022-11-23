@@ -2,7 +2,6 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Grpc.Combinator
   ( fromReqT,
@@ -253,7 +252,7 @@ getFieldLocation0 acc0 (n : ns) =
             else
               fieldFail $
                 "scalar got extra tags "
-                  <> inspectStrPlain ns
+                  <> inspectPlain @String ns
     Nothing ->
       fieldFail "not found"
   where
