@@ -467,7 +467,9 @@ waitForChannelStatus ::
   m (Either Expectation LnChan)
 waitForChannelStatus _ _ expectedStatus 0 =
   pure . Left . expectationFailure $
-    "waiting for channel " <> inspectStr expectedStatus <> " tries exceeded"
+    "waiting for channel "
+      <> inspectStrPlain expectedStatus
+      <> " tries exceeded"
 waitForChannelStatus txid vout expectedStatus tries = do
   let loop = waitForChannelStatus txid vout expectedStatus (tries - 1)
   dbChannel <- runSql $ LnChan.getByChannelPointSql txid vout

@@ -1,13 +1,7 @@
 module Text.PrettyPrint.GenericPretty.Util
   ( inspect,
-    inspectStr,
-    inspectGen,
     inspectPlain,
-    inspectStrPlain,
-    inspectGenPlain,
     inspectStyle,
-    inspectStyleStr,
-    inspectStyleGen,
   )
 where
 
@@ -19,69 +13,36 @@ import Text.PrettyPrint.GenericPretty (Out)
 import qualified Text.PrettyPrint.GenericPretty as GenericPretty
 import Universum hiding (show)
 
-inspect :: (Out a) => a -> T.Text
+inspect :: forall txt src. (Out src, IsString txt) => src -> txt
 inspect =
-  inspectStyle simpleStyle
+  inspectStyle
+    PrettySimple.defaultOutputOptionsDarkBg
 
-inspectStr :: (Out a) => a -> String
-inspectStr =
-  inspectStyleStr simpleStyle
-
-inspectGen :: (Out a, IsString b) => a -> b
-inspectGen =
-  inspectStyleGen simpleStyle
-
-inspectPlain :: (Out a) => a -> T.Text
-inspectPlain a =
-  T.replace "\n" "" (inspectStyle plainStyle a)
-
-inspectStrPlain :: (Out a) => a -> String
-inspectStrPlain =
-  inspectStyleStr plainStyle
-
-inspectGenPlain :: (Out a, IsString b) => a -> b
-inspectGenPlain =
-  inspectStyleGen plainStyle
+inspectPlain :: forall txt src. (Out src, IsString txt) => src -> txt
+inspectPlain =
+  fromString
+    . T.unpack
+    . T.replace "\n" ""
+    . inspectStyle
+      PrettySimple.defaultOutputOptionsNoColor
+        { PrettySimple.outputOptionsPageWidth = 100000,
+          PrettySimple.outputOptionsCompact = True,
+          PrettySimple.outputOptionsCompactParens = True
+        }
 
 inspectStyle ::
-  (Out a) =>
+  forall txt src.
+  ( Out src,
+    IsString txt
+  ) =>
   PrettySimple.OutputOptions ->
-  a ->
-  T.Text
+  src ->
+  txt
 inspectStyle style =
-  TL.toStrict
+  fromString
+    . TL.unpack
     . PrettySimple.pStringOpt style
     . GenericPretty.prettyStyle
       Pretty.style
         { Pretty.mode = Pretty.OneLineMode
         }
-
-inspectStyleStr ::
-  (Out a) =>
-  PrettySimple.OutputOptions ->
-  a ->
-  String
-inspectStyleStr style =
-  T.unpack . inspectStyle style
-
-inspectStyleGen ::
-  ( Out a,
-    IsString b
-  ) =>
-  PrettySimple.OutputOptions ->
-  a ->
-  b
-inspectStyleGen style =
-  fromString . inspectStyleStr style
-
-simpleStyle :: PrettySimple.OutputOptions
-simpleStyle =
-  PrettySimple.defaultOutputOptionsDarkBg
-
-plainStyle :: PrettySimple.OutputOptions
-plainStyle =
-  PrettySimple.defaultOutputOptionsNoColor
-    { PrettySimple.outputOptionsPageWidth = 100000,
-      PrettySimple.outputOptionsCompact = True,
-      PrettySimple.outputOptionsCompactParens = True
-    }

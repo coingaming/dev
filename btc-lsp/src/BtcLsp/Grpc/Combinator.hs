@@ -253,7 +253,7 @@ getFieldLocation0 acc0 (n : ns) =
             else
               fieldFail $
                 "scalar got extra tags "
-                  <> inspectStr ns
+                  <> inspectStrPlain ns
     Nothing ->
       fieldFail "not found"
   where

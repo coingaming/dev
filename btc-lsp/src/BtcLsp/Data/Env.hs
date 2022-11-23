@@ -268,7 +268,7 @@ withEnv rc this = do
             }
       case eSig of
         Left e -> do
-          $(logTM) ErrorS . logStr $
+          $logTM ErrorS . logStr $
             "Server ==> signing procedure failed "
               <> inspect e
           pure Nothing
