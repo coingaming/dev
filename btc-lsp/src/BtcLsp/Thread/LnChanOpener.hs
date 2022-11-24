@@ -49,11 +49,24 @@ apply = do
           pcid <- Lnd.newPendingChanId
           void $ runSql $ SwapIntoLn.updateInPsbtThreadSql (entityKey swp) pcid
           spawnLink $
-            Retry.retrying (Retry.fullJitterBackoff 500) (\_ res -> pure $ isRight res) $ \_ -> do
-              runSql $ do
-                r <- openChanSql pcid lock swp usr
-                whenLeft r $ pure $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
-                pure r
+            Retry.retrying
+              (Retry.fullJitterBackoff 1000)
+              ( \rs res -> do
+                  $(logTM) DebugS . logStr $
+                    ( "Retrying openchan attemp number:"
+                        <> inspect (Retry.rsIterNumber rs)
+                        <> " prev delay microseconds:"
+                        <> inspect (Retry.rsPreviousDelay rs)
+                        <> " swap:"
+                        <> inspect swp
+                    )
+                  pure $ isRight res
+              )
+              $ \_ -> do
+                runSql $ do
+                  r <- openChanSql pcid lock swp usr
+                  whenLeft r $ pure $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
+                  pure r
       )
       swaps
     sleep300ms
