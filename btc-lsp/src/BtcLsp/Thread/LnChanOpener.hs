@@ -14,6 +14,7 @@ import qualified BtcLsp.Storage.Model.LnChan as LnChan
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 import qualified BtcLsp.Storage.Model.SwapUtxo as SwapUtxo
 import Control.Concurrent.Extra
+import qualified Control.Retry as Retry
 import qualified Data.Set as Set
 import qualified LndClient as Lnd
 import qualified LndClient.Data.ChannelPoint as ChannelPoint
@@ -48,9 +49,24 @@ apply = do
           pcid <- Lnd.newPendingChanId
           void $ runSql $ SwapIntoLn.updateInPsbtThreadSql (entityKey swp) pcid
           spawnLink $
-            runSql $ do
-              r <- openChanSql pcid lock swp usr
-              whenLeft r $ pure $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
+            Retry.retrying
+              (Retry.fullJitterBackoff 1000)
+              ( \rs res -> do
+                  $(logTM) DebugS . logStr $
+                    ( "Retrying openchan attemp number:"
+                        <> inspect (Retry.rsIterNumber rs)
+                        <> " prev delay microseconds:"
+                        <> inspect (Retry.rsPreviousDelay rs)
+                        <> " swap:"
+                        <> inspect swp
+                    )
+                  pure $ isRight res
+              )
+              $ \_ -> do
+                runSql $ do
+                  r <- openChanSql pcid lock swp usr
+                  whenLeft r $ pure $ SwapIntoLn.updateRevertInPsbtThreadSql $ entityKey swp
+                  pure r
       )
       swaps
     sleep300ms

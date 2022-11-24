@@ -108,6 +108,7 @@ _deps: &deps
   - async
   - stm
   - resource-pool
+  - retry
   # th
   - template-haskell
   # crypto
