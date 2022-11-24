@@ -125,15 +125,13 @@ import Network.Bitcoin.BtcEnv as X
 import Network.GRPC.Client as X (CompressMode (..))
 import Network.HTTP2.Client2 as X (HostName, PortNumber)
 import Text.Casing as X (camel)
-import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as X
-  ( PrettyLog (..),
+  ( GenericPrettyEnv (..),
+    Out (..),
+    PrettyLog (..),
     SecretVision (..),
     inspect,
-    inspectGenPlain,
     inspectPlain,
-    inspectStr,
-    inspectStrPlain,
   )
 import Text.PrettyPrint.GenericPretty.Instance as X ()
 import Text.Shakespeare.I18N as X (ToMessage (..))

@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Text.PrettyPrint.GenericPretty.Class
       Text.PrettyPrint.GenericPretty.Import
       Text.PrettyPrint.GenericPretty.Instance
       Text.PrettyPrint.GenericPretty.Type
@@ -68,6 +69,7 @@ test-suite generic-pretty-instances-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Text.PrettyPrint.GenericPretty.Class
       Text.PrettyPrint.GenericPretty.Import
       Text.PrettyPrint.GenericPretty.Instance
       Text.PrettyPrint.GenericPretty.Type

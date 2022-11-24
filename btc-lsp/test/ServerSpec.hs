@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module ServerSpec
   ( spec,
   )

@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module BtcLsp.Math.OnChain
   ( trySatToMsat,
     tryMsatToSat,

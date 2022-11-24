@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
-
 module BtcLsp.Psbt.Utils
   ( swapUtxoToPsbtUtxo,
     psbtShim,

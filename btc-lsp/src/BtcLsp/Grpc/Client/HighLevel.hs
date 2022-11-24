@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Grpc.Client.HighLevel
   ( swapIntoLn,
@@ -126,18 +125,18 @@ verifySig msg sig compressMode = do
       )
   case res of
     Left e -> do
-      $(logTM) ErrorS . logStr $
+      $logTM ErrorS . logStr $
         "Client ==> signature verification failed "
-          <> inspect e
+          <> inspect @Text e
       pure False
     Right x ->
       if coerce x
         then pure True
         else do
-          $(logTM) ErrorS . logStr $
+          $logTM ErrorS . logStr $
             "Client ==> signature verification failed "
               <> "for message of "
-              <> inspect (BS.length msgWire)
+              <> inspect @Text (BS.length msgWire)
               <> " bytes "
               <> inspect msgWire
               <> " with signature of "

@@ -42,7 +42,7 @@ main = do
             logStr $
               title
                 <> " = "
-                <> inspect
+                <> inspect @Text
                   ( SecretLog (Env.rawConfigLogSecrets cfg) x
                   )
       let btc = Env.rawConfigBtcEnv cfg
@@ -92,21 +92,21 @@ apply = do
         . void
         $ waitAnyCancel xs
     else
-      $(logTM) ErrorS . logStr $
+      $logTM ErrorS . logStr $
         "Can not unlock wallet, got "
-          <> inspect unlocked
+          <> inspect @Text unlocked
   $(logTM) ErrorS "Lsp terminates!"
 
 waitForBitcoindSync :: (Env m) => m ()
 waitForBitcoindSync =
   eitherM
     ( \e -> do
-        $(logTM) ErrorS . logStr $ inspect e
+        $logTM ErrorS . logStr $ inspect @Text e
         waitAndRetry
     )
     ( \x ->
         when (Btc.bciInitialBlockDownload x) $ do
-          $(logTM) InfoS . logStr $ "Waiting IBD: " <> inspect x
+          $logTM InfoS . logStr $ "Waiting IBD: " <> inspect @Text x
           waitAndRetry
     )
     $ withBtc Btc.getBlockChainInfo id
@@ -119,12 +119,12 @@ waitForLndSync :: (Env m) => m ()
 waitForLndSync =
   eitherM
     ( \e -> do
-        $(logTM) ErrorS . logStr $ inspect e
+        $logTM ErrorS . logStr $ inspect @Text e
         waitAndRetry
     )
     ( \x ->
         unless (Lnd.syncedToChain x) $ do
-          $(logTM) InfoS . logStr $ "Waiting Lnd: " <> inspect x
+          $logTM InfoS . logStr $ "Waiting Lnd: " <> inspect @Text x
           waitAndRetry
     )
     $ withLnd Lnd.getInfo id

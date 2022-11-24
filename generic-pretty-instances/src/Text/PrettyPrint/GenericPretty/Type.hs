@@ -23,8 +23,8 @@ instance (Out a) => Out (PrettyLog a) where
   docPrec n = \case
     PrettyLog x -> docPrec n x
     SecretLog SecretVisible x -> docPrec n x
-    SecretLog SecretHidden _ -> "SECRET"
+    SecretLog SecretHidden _ -> "<REDACTED>"
   doc = \case
     PrettyLog x -> doc x
     SecretLog SecretVisible x -> doc x
-    SecretLog SecretHidden _ -> "SECRET"
+    SecretLog SecretHidden _ -> "<REDACTED>"

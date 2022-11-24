@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module TestAppM
   ( runTestApp,
@@ -152,29 +151,29 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
   monitorTotalExtOutgoingLiquidity amt = do
     lim <- asks $ envMinTotalExtOutgoingLiquidity . testEnvLsp
     when (amt < lim) $
-      $(logTM) CriticalS . logStr $
+      $logTM CriticalS . logStr $
         "Not enough outgoing liquidity to the external "
           <> "lightning network, got "
-          <> inspect amt
+          <> inspect @Text amt
           <> " but minimum is "
           <> inspect lim
           <> "."
   monitorTotalExtIncomingLiquidity amt = do
     lim <- asks $ envMinTotalExtIncomingLiquidity . testEnvLsp
     when (amt < lim) $
-      $(logTM) CriticalS . logStr $
+      $logTM CriticalS . logStr $
         "Not enough incoming liquidity from the external "
           <> "lightning network, got "
-          <> inspect amt
+          <> inspect @Text amt
           <> " but minimum is "
           <> inspect lim
           <> "."
   monitorTotalOnChainLiquidity wal = do
     lim <- asks $ envMinTotalOnChainLiquidity . testEnvLsp
     when (Lnd.totalBalance wal < lim) $
-      $(logTM) CriticalS . logStr $
+      $logTM CriticalS . logStr $
         "Not enough onchain liquidity, got "
-          <> inspect wal
+          <> inspect @Text wal
           <> " but minimum is "
           <> inspect lim
           <> "."
@@ -330,15 +329,15 @@ signT env msg = do
         }
   case eSig of
     Left e -> do
-      $(logTM) ErrorS . logStr $
+      $logTM ErrorS . logStr $
         "Client ==> signing procedure failed "
-          <> inspect e
+          <> inspect @Text e
       pure Nothing
     Right sig0 -> do
       let sig = coerce sig0
-      $(logTM) DebugS . logStr $
+      $logTM DebugS . logStr $
         "Client ==> signing procedure succeeded for msg of "
-          <> inspect (BS.length $ Sig.unMsgToSign msg)
+          <> inspect @Text (BS.length $ Sig.unMsgToSign msg)
           <> " bytes "
           <> inspect msg
           <> " got signature of "
@@ -467,7 +466,9 @@ waitForChannelStatus ::
   m (Either Expectation LnChan)
 waitForChannelStatus _ _ expectedStatus 0 =
   pure . Left . expectationFailure $
-    "waiting for channel " <> inspectStr expectedStatus <> " tries exceeded"
+    "waiting for channel "
+      <> inspectPlain expectedStatus
+      <> " tries exceeded"
 waitForChannelStatus txid vout expectedStatus tries = do
   let loop = waitForChannelStatus txid vout expectedStatus (tries - 1)
   dbChannel <- runSql $ LnChan.getByChannelPointSql txid vout
@@ -570,7 +571,7 @@ lazyMineBitcoindCoins = do
     when (bal < 1) . void $ do
       $logTM WarningS . logStr $
         "lazyMineBitcoindCoins ==> got "
-          <> inspect bal
+          <> inspect @Text bal
           <> " btc and mining additional coins"
       BtcMultiEnv.withBtcT
         owner

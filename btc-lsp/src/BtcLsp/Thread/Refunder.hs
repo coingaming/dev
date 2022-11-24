@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Thread.Refunder
   ( apply,
@@ -147,26 +146,26 @@ processRefundSql utxos@(x : _) = do
     (`elem` swapStatusFinal)
     . const
     $ do
-      $(logTM) DebugS . logStr $
+      $logTM DebugS . logStr $
         "Start refunding utxos:"
-          <> inspect refUtxos
+          <> inspect @Text refUtxos
           <> " to address:"
           <> inspect refAddr
       eitherM
         ( \e -> do
             Psql.transactionUndo
-            $(logTM) ErrorS . logStr $
+            $logTM ErrorS . logStr $
               "Failed to refund utxos:"
-                <> inspect refUtxos
+                <> inspect @Text refUtxos
                 <> " to address:"
                 <> inspect refAddr
                 <> " with error:"
                 <> inspect e
         )
         ( \(SendUtxosResult rtx total fee) -> do
-            $(logTM) DebugS . logStr $
+            $logTM DebugS . logStr $
               "Successfully refunded utxos: "
-                <> inspect refUtxos
+                <> inspect @Text refUtxos
                 <> " to address:"
                 <> inspect refAddr
                 <> " on chain rawTx:"
@@ -184,8 +183,8 @@ processRefundSql utxos@(x : _) = do
                   (from rtxid)
               Left e -> do
                 Psql.transactionUndo
-                $(logTM) ErrorS . logStr $
-                  "Failed to convert txid:" <> inspect e
+                $logTM ErrorS . logStr $
+                  "Failed to convert txid:" <> inspect @Text e
         )
         . lift
         . runExceptT
@@ -195,10 +194,10 @@ processRefundSql utxos@(x : _) = do
           (coerce refAddr)
           (TxLabel $ "refund to " <> unOnChainAddress refAddr)
   whenLeft res $
-    $(logTM) ErrorS
+    $logTM ErrorS
       . logStr
       . ("No refund due to wrong status " <>)
-      . inspect
+      . inspect @Text
   where
     refAddr = swapIntoLnRefundAddress $ entityVal $ snd x
     refUtxos = swapUtxoToPsbtUtxo . entityVal . fst <$> utxos

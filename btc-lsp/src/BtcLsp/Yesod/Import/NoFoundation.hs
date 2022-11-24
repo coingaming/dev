@@ -36,13 +36,10 @@ import BtcLsp.Yesod.Settings as Import
 import BtcLsp.Yesod.Settings.StaticFiles as Import
 import ClassyPrelude.Yesod as Import
 import Data.Type.Equality as Import (type (==))
-import Text.PrettyPrint.GenericPretty as Import (Out (..))
 import Text.PrettyPrint.GenericPretty.Import as Import
-  ( inspect,
-    inspectGenPlain,
+  ( Out (..),
+    inspect,
     inspectPlain,
-    inspectStr,
-    inspectStrPlain,
   )
 import Text.PrettyPrint.GenericPretty.Instance as Import ()
 import Yesod.Auth as Import

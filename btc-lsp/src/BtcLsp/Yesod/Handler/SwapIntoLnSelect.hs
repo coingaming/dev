@@ -1,6 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeApplications #-}
 
 module BtcLsp.Yesod.Handler.SwapIntoLnSelect
   ( getSwapIntoLnSelectR,
@@ -228,7 +227,7 @@ newUtxoWidget utxos =
               entityVal $ SwapIntoLn.utxoInfoBlock row
          in [ ( MsgBlock,
                 MsgProxy
-                  . inspectPlain @Word64
+                  . inspectPlain @Text @Word64
                   $ from blockHeight
               ),
               ( MsgAmount,
