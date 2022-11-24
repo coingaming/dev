@@ -54,11 +54,11 @@ apply = do
               ( \rs res -> do
                   $(logTM) DebugS . logStr $
                     ( "Retrying openchan attemp number:"
-                        <> inspect (Retry.rsIterNumber rs)
+                        <> inspect @Text (Retry.rsIterNumber rs)
                         <> " prev delay microseconds:"
-                        <> inspect (Retry.rsPreviousDelay rs)
+                        <> inspect @Text (Retry.rsPreviousDelay rs)
                         <> " swap:"
-                        <> inspect swp
+                        <> inspect @Text swp
                     )
                   pure $ isRight res
               )
