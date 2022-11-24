@@ -178,6 +178,7 @@ library
     , qrcode-core
     , qrcode-juicypixels
     , resource-pool
+    , retry
     , scientific
     , secp256k1-haskell
     , shakespeare ==2.0.*
@@ -366,6 +367,7 @@ executable btc-lsp-exe
       , qrcode-core
       , qrcode-juicypixels
       , resource-pool
+      , retry
       , scientific
       , secp256k1-haskell
       , shakespeare ==2.0.*
@@ -584,6 +586,7 @@ executable btc-lsp-integration
       , qrcode-core
       , qrcode-juicypixels
       , resource-pool
+      , retry
       , scientific
       , secp256k1-haskell
       , shakespeare ==2.0.*
@@ -773,6 +776,7 @@ executable btc-lsp-prof
       , qrcode-core
       , qrcode-juicypixels
       , resource-pool
+      , retry
       , scientific
       , secp256k1-haskell
       , shakespeare ==2.0.*
@@ -989,6 +993,7 @@ test-suite btc-lsp-test
       , qrcode-core
       , qrcode-juicypixels
       , resource-pool
+      , retry
       , scientific
       , secp256k1-haskell
       , shakespeare ==2.0.*
