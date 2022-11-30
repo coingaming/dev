@@ -13,6 +13,7 @@ import qualified BtcLsp.Storage.Model.SwapUtxo as SU
 import qualified LndClient as Lnd
 import qualified LndClient.Data.Channel as Lnd
 import qualified LndClient.Data.ListChannels as ListChannels
+import qualified LndClient.Data.NewAddress as Lnd
 import LndClient.LndTest (lazyConnectNodes, mine)
 import qualified LndClient.RPC.Silent as Lnd
 import qualified Network.Bitcoin as Btc
@@ -103,7 +104,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
   itMainT @'LndLsp "Server SwapIntoLn" $ do
     lift $ mine 200 LndLsp
     gcEnv <- lift getGCEnv
-    refundAddr <- from <$> genAddress LndAlice
+    refundAddr <- unsafeNewOnChainAddress . Lnd.address <$> genAddress LndAlice
     res0 <-
       Client.swapIntoLnT
         gcEnv

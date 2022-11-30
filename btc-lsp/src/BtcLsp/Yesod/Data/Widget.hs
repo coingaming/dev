@@ -6,8 +6,7 @@ import BtcLsp.Yesod.Import
 import GHC.Exts (IsList (..))
 import Yesod.Form.Bootstrap3
 
-newtype HtmlClassAttr
-  = HtmlClassAttr [Text]
+newtype HtmlClassAttr = HtmlClassAttr {unHtmlClassAttr :: [Text]}
   deriving newtype
     ( Eq,
       Ord,
@@ -24,8 +23,8 @@ instance Out HtmlClassAttr
 
 instance IsList HtmlClassAttr where
   type Item HtmlClassAttr = Text
-  fromList = coerce
-  toList = coerce
+  fromList = HtmlClassAttr
+  toList = unHtmlClassAttr
 
 --
 -- TODO : use bootstrap tabs/panels to provide

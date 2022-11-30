@@ -191,7 +191,7 @@ processRefundSql utxos@(x : _) = do
         $ sendUtxos
           Math.minFeeRate
           refUtxos
-          (coerce refAddr)
+          refAddr
           (TxLabel $ "refund to " <> unOnChainAddress refAddr)
   whenLeft res $
     $logTM ErrorS

@@ -536,8 +536,9 @@ data SocketAddress = SocketAddress
 
 instance Out SocketAddress
 
-newtype BlkHash
-  = BlkHash Btc.BlockHash
+newtype BlkHash = BlkHash
+  { unBlkHash :: Btc.BlockHash
+  }
   deriving stock (Eq, Ord, Show, Generic)
   deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
 
@@ -547,8 +548,9 @@ instance From Btc.BlockHash BlkHash
 
 instance From BlkHash Btc.BlockHash
 
-newtype BlkHeight
-  = BlkHeight Word64
+newtype BlkHeight = BlkHeight
+  { unBlkHeight :: Word64
+  }
   deriving stock
     ( Eq,
       Ord,
@@ -648,11 +650,11 @@ instance TryFrom NodePubKey NodePubKeyHex where
                           )
                           . TE.decodeUtf8'
                           . B16.encode
-                          . coerce
+                          . unNodePubKey
                       )
       $ src
 
-newtype UtxoLockId = UtxoLockId ByteString
+newtype UtxoLockId = UtxoLockId {unUtxoLockId :: ByteString}
   deriving newtype (Eq, Ord, Show, Read)
   deriving stock (Generic)
 
@@ -731,7 +733,7 @@ instance From RHash RHashHex where
     RHashHex
       . decodeUtf8
       . B16.encode
-      . coerce
+      . unRHash
 
 instance From RHashHex RHash where
   from =

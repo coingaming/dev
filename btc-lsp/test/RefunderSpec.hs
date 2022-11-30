@@ -177,7 +177,7 @@ spec = do
 --      UtxoLockId
 --    newLockId0 (Right txid0) (Right vout0) = do
 --      let txid1 :: TxId 'Funding = from txid0
---      let txid = L.fromStrict $ coerce txid1
+--      let txid = L.fromStrict $ Lnd.unTxId txid1
 --          vout = Universum.show vout0
 --      UtxoLockId
 --        . L.toStrict
@@ -191,8 +191,8 @@ spec = do
 --      OP.OutPoint
 --    newOutPoint (Right txid0) (Right vout0) = do
 --      let txid1 :: TxId 'Funding = from txid0
---      let txid = coerce txid1
---          vout = coerce vout0
+--      let txid = Lnd.unTxId txid1
+--          vout = Lnd.unVout vout0
 --      OP.OutPoint txid vout
 --    newOutPoint _ _ = error "newOutPoint error"
 

@@ -77,8 +77,8 @@ openChannelReq ::
 openChannelReq pcid toNode totalFundAmt pushAmt private =
   Lnd.OpenChannelRequest
     { Lnd.nodePubkey = toNode,
-      Lnd.localFundingAmount = coerce totalFundAmt,
-      Lnd.pushMSat = Just $ coerce pushAmt,
+      Lnd.localFundingAmount = unMoney totalFundAmt,
+      Lnd.pushMSat = Just $ unMoney pushAmt,
       Lnd.targetConf = Nothing,
       Lnd.mSatPerByte = Nothing,
       Lnd.private = Just $ private == Private,
@@ -114,7 +114,7 @@ shimCancelReq pcid =
     FSC.FundingShimCancel {FSC.pendingChanId = pcid}
 
 finalizePsbt :: (Env m) => Lnd.Psbt -> ExceptT Failure m FNP.FinalizePsbtResponse
-finalizePsbt psbt = withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (coerce psbt) "")
+finalizePsbt psbt = withLndT Lnd.finalizePsbt ($ FNP.FinalizePsbtRequest (Lnd.unPsbt psbt) "")
 
 unspendUtxoLookup :: (Env m) => ExceptT Failure m (Map OP.OutPoint LU.Utxo)
 unspendUtxoLookup = do
@@ -137,7 +137,7 @@ releaseUtxosPsbtLocks =
                   Lnd.releaseOutput
                   ( $
                       RO.ReleaseOutputRequest
-                        (coerce lid)
+                        (unUtxoLockId lid)
                         (Just $ getOutPoint refUtxo)
                   )
           )
@@ -162,7 +162,7 @@ newLockId u =
     . SHA.sha256
     $ txid <> ":" <> vout
   where
-    txid = L.fromStrict . coerce $ OP.txid u
+    txid = L.fromStrict $ OP.txid u
     vout = Universum.show $ OP.outputIndex u
 
 lockUtxo :: (Env m) => OP.OutPoint -> ExceptT Failure m FP.UtxoLease
@@ -170,10 +170,10 @@ lockUtxo op = do
   void $
     withLndT
       Lnd.leaseOutput
-      ($ LO.LeaseOutputRequest (coerce lockId) (Just op) expS)
+      ($ LO.LeaseOutputRequest (unUtxoLockId lockId) (Just op) expS)
   pure
     FP.UtxoLease
-      { FP.id = coerce lockId,
+      { FP.id = unUtxoLockId lockId,
         FP.expiration = expS,
         FP.outpoint = op
       }

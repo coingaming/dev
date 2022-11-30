@@ -284,7 +284,7 @@ scan = do
               Block.updateOrphanHigherSql bHeight
               SwapUtxo.revertRefundedSql (entityKey <$> blks)
               SwapUtxo.updateOrphanSql (entityKey <$> blks)
-          scannerStep [] (1 + coerce bHeight) $ from cHeight
+          scannerStep [] (1 + (unBlkHeight bHeight)) $ from cHeight
 
 scannerStep ::
   ( Env m
@@ -344,7 +344,7 @@ compareHash height = do
   cHash <- withBtcT Btc.getBlockHash ($ height)
   lift
     . ( (== cHash)
-          . coerce
+          . unBlkHash
           . blockHash
           . entityVal
           <<$>>

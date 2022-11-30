@@ -108,8 +108,8 @@ openChanSql pcid lock (Entity swapKey _) userEnt = do
               lock
               (swapUtxoToPsbtUtxo . entityVal <$> utxos)
               (userNodePubKey $ entityVal userEnt)
-              (coerce $ swapIntoLnLspFeeAndChangeAddress swapVal)
-              (coerce swapIntoLnFeeLsp swapVal)
+              (swapIntoLnLspFeeAndChangeAddress swapVal)
+              (swapIntoLnFeeLsp swapVal)
               (swapIntoLnPrivacy swapVal)
           liftIO (wait $ PO.fundAsync r) >>= except
         either

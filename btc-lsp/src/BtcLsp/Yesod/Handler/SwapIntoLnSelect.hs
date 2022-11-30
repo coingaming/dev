@@ -15,6 +15,7 @@ import BtcLsp.Yesod.Data.Widget
 import qualified BtcLsp.Yesod.Handler.SwapUpdates as SU
 import BtcLsp.Yesod.Import
 import qualified Data.UUID as UUID
+import qualified LndClient as Lnd
 
 getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 getSwapIntoLnSelectR uuid = do
@@ -200,7 +201,7 @@ newSwapWidget swapInfo =
         SwapIntoLn.swapInfoSwap swapInfo
     userPub =
       toHex
-        . coerce
+        . unNodePubKey
         . userNodePubKey
         . entityVal
         $ SwapIntoLn.swapInfoUser swapInfo
@@ -240,7 +241,7 @@ newUtxoWidget utxos =
               ( MsgTxId,
                 MsgProxy
                   . txIdHex
-                  $ coerce swapUtxoTxid
+                  $ Lnd.unTxId swapUtxoTxid
               ),
               ( MsgVout,
                 MsgProxy
@@ -268,7 +269,7 @@ newChanWidget chans =
               ( MsgTxId,
                 MsgProxy
                   . txIdHex
-                  $ coerce lnChanFundingTxId
+                  $ Lnd.unTxId lnChanFundingTxId
               ),
               ( MsgVout,
                 MsgProxy

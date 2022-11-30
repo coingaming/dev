@@ -56,8 +56,7 @@ instance TryFrom ByteString SigHeaderName where
     from @Text
       `composeTryRhs` tryFrom
 
-newtype TlsCert (rel :: GRel)
-  = TlsCert Text
+newtype TlsCert (rel :: GRel) = TlsCert {unTlsCert :: Text}
   deriving newtype
     ( Eq,
       Ord,
@@ -65,8 +64,7 @@ newtype TlsCert (rel :: GRel)
       FromJSON
     )
 
-newtype TlsKey (rel :: GRel)
-  = TlsKey Text
+newtype TlsKey (rel :: GRel) = TlsKey {unTlsKey :: Text}
   deriving newtype
     ( Eq,
       Ord,

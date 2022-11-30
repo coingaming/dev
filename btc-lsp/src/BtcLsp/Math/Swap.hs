@@ -64,7 +64,7 @@ newSwapCapM usrAmt = do
         Just
           SwapCap
             { swapCapUsr = usrLn,
-              swapCapLsp = coerce usrLn,
+              swapCapLsp = Money . unMoney $ usrLn,
               swapCapFee = from @Natural $ ceiling feeRat
             }
   where

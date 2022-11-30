@@ -62,8 +62,8 @@ runServer env handlers =
     (Encrypted, Just tls) ->
       runTLS
         ( tlsSettingsMemory
-            (TE.encodeUtf8 . coerce $ tlsCert tls)
-            (TE.encodeUtf8 . coerce $ tlsKey tls)
+            (TE.encodeUtf8 . unTlsCert $ tlsCert tls)
+            (TE.encodeUtf8 . unTlsKey $ tlsKey tls)
         )
         (setPort port defaultSettings)
     (Encrypted, Nothing) ->
