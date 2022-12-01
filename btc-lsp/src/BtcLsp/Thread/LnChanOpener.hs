@@ -50,7 +50,7 @@ apply = do
           void $ runSql $ SwapIntoLn.updateInPsbtThreadSql (entityKey swp) pcid
           spawnLink $
             Retry.retrying
-              (Retry.fullJitterBackoff 1000)
+              (Retry.capDelay (3600 * 1000000) $ Retry.fullJitterBackoff 1000)
               ( \rs res -> do
                   $(logTM) DebugS . logStr $
                     ( "Retrying openchan attemp number:"
