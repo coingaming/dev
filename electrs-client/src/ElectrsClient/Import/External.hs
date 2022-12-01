@@ -19,7 +19,6 @@ import Data.Aeson as X
     fromJSON,
     genericParseJSON,
   )
-import Data.Coerce as X (coerce)
 import Data.Text as X (pack, unpack)
 import Text.PrettyPrint.GenericPretty as X (Out (..))
 import Text.PrettyPrint.GenericPretty.Instance as X ()

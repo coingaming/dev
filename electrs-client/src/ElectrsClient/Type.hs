@@ -19,8 +19,7 @@ data RpcError
       Show
     )
 
-newtype OnChainAddress (mrel :: MoneyRelation)
-  = OnChainAddress Text
+newtype OnChainAddress (mrel :: MoneyRelation) = OnChainAddress {unOnChainAddress :: Text}
   deriving newtype
     ( Eq,
       Ord,
