@@ -24,7 +24,7 @@ getSwapIntoLnSelectR uuid = do
   nodeUriHex <-
     eitherM
       (const badMethod)
-      (pure . from @NodeUriHex @Text)
+      (pure . unNodeUriHex)
       . pure
       $ tryFrom nodeUri
   nodeUriQr <-
@@ -229,7 +229,7 @@ newUtxoWidget utxos =
          in [ ( MsgBlock,
                 MsgProxy
                   . inspectPlain @Text @Word64
-                  $ from blockHeight
+                  $ unBlkHeight blockHeight
               ),
               ( MsgAmount,
                 MsgSatoshi $

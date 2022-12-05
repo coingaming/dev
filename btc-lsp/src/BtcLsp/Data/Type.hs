@@ -262,36 +262,6 @@ newtype
 
 instance Out (Money owner btcl mrel)
 
---instance From Msat (Money owner btcl mrel)
---
---instance From (Money owner btcl mrel) Msat
---
---instance From Natural (Money owner btcl mrel) where
---  from =
---    via @Msat
---
---instance From (Money owner btcl mrel) Natural where
---  from =
---    via @Msat
---
---instance TryFrom (Ratio Natural) (Money owner btcl mrel) where
---  tryFrom =
---    from @Natural
---      `composeTryRhs` tryFrom
---
---instance From (Money owner btcl mrel) (Ratio Natural) where
---  from =
---    via @Natural
---
---instance TryFrom Rational (Money owner btcl mrel) where
---  tryFrom =
---    tryFrom @(Ratio Natural)
---      `composeTry` tryFrom
---
---instance From (Money owner btcl mrel) Rational where
---  from =
---    via @(Ratio Natural)
-
 instance ToMessage (Money owner btcl mrel) where
   toMessage =
     T.displayRational 1
@@ -549,22 +519,8 @@ instance Out BlkHeight
 
 instance ToJSON BlkHeight
 
-instance From Word64 BlkHeight
-
-instance From BlkHeight Word64
-
-instance From BlkHeight Natural where
-  from =
-    via @Word64
-
 instance TryFrom Btc.BlockHeight BlkHeight where
-  tryFrom =
-    from @Word64
-      `composeTryRhs` tryFrom
-
-instance From BlkHeight Btc.BlockHeight where
-  from =
-    via @Word64
+  tryFrom = BlkHeight `composeTryRhs` tryFrom
 
 data BlkStatus
   = BlkConfirmed
@@ -611,20 +567,13 @@ data Privacy
 
 instance Out Privacy
 
-newtype NodePubKeyHex
-  = NodePubKeyHex Text
+newtype NodePubKeyHex = NodePubKeyHex {unNodePubKeyHex :: Text}
   deriving newtype (Eq, Ord, Show, Read, IsString)
   deriving stock (Generic)
 
-instance Out NodePubKeyHex
-
-instance From NodePubKeyHex Text
-
-instance From Text NodePubKeyHex
-
 instance TryFrom NodePubKey NodePubKeyHex where
   tryFrom src =
-    from
+    NodePubKeyHex
       `composeTryRhs` ( first
                           ( TryFromException src
                               . Just
@@ -655,24 +604,17 @@ data NodeUri = NodeUri
 
 instance Out NodeUri
 
-newtype NodeUriHex
-  = NodeUriHex Text
+newtype NodeUriHex = NodeUriHex {unNodeUriHex :: Text}
   deriving newtype (Eq, Ord, Show, Read, IsString)
   deriving stock (Generic)
-
-instance Out NodeUriHex
-
-instance From NodeUriHex Text
-
-instance From Text NodeUriHex
 
 instance TryFrom NodeUri NodeUriHex where
   tryFrom src =
     bimap
       (withTarget @NodeUriHex . withSource src)
       ( \pubHex ->
-          from @Text $
-            from pubHex
+          NodeUriHex $
+            unNodePubKeyHex pubHex
               <> "@"
               <> from host
               <> ":"
