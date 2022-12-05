@@ -149,7 +149,7 @@ spec = forM_ [Compressed, Uncompressed] $ \compressMode -> do
                   let expectedRemoteBalance = swapIntoLnChanCapUser $ entityVal swp
                   dbChans <- runSql $ L.getBySwapIdSql $ entityKey swp
                   let chanExistInDb = length dbChans == 1
-                  let openedChanWithRightCap = isJust $ find (\c -> Lnd.remoteBalance c == from expectedRemoteBalance) lndChans
+                  let openedChanWithRightCap = isJust $ find (\c -> Lnd.remoteBalance c == unMoney expectedRemoteBalance) lndChans
                   pure (swapInDbSuccess && allUtxosMarkedAsUsed && openedChanWithRightCap && chanExistInDb, ())
                 _ -> pure (False, ())
           )

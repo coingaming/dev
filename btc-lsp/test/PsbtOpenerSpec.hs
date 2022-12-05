@@ -44,8 +44,8 @@ spec = do
     swp <- createDummySwap Nothing
     let swpId = entityKey swp
     let swpAddr = swapIntoLnFundAddress . entityVal $ swp
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
     void BlockScanner.scan
@@ -93,8 +93,8 @@ spec = do
     swp <- createDummySwap Nothing
     let swpId = entityKey swp
     let swpAddr = swapIntoLnFundAddress . entityVal $ swp
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
     void BlockScanner.scan

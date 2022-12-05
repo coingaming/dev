@@ -79,7 +79,7 @@ maybeFundSwap swapId = do
         qty <-
           SwapUtxo.updateUnspentChanReserveSql $
             entityKey <$> us
-        if qty /= from (length us)
+        if qty /= (RowQty . from @Int @Int64 . length $ us)
           then do
             Psql.transactionUndo
             $logTM ErrorS . logStr $
@@ -203,7 +203,7 @@ persistBlockT blk utxos = do
       entityKey
         <$> Block.createUpdateConfirmedSql
           height
-          (from $ Btc.vBlockHash blk)
+          (BlkHash $ Btc.vBlockHash blk)
     ct <-
       getCurrentTime
     res <-
@@ -226,7 +226,7 @@ newSwapUtxo ct blkId utxo = do
       swapUtxoBlockId = blkId,
       swapUtxoTxid = utxoTxId utxo,
       swapUtxoVout = utxoVout utxo,
-      swapUtxoAmount = from amt,
+      swapUtxoAmount = Money amt,
       swapUtxoStatus =
         if amt >= Math.trxDustLimit
           then SwapUtxoUnspent

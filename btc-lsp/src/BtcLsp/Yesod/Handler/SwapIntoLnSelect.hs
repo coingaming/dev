@@ -132,23 +132,23 @@ newSwapWidget swapInfo =
         ( MsgSwapIntoLnFeeLsp,
           Just
             . MsgSatoshi
-            $ from swapIntoLnFeeLsp
+            $ unMoney swapIntoLnFeeLsp
         ),
         ( MsgSwapIntoLnChanCapUser,
           Just
             . MsgSatoshi
-            $ from swapIntoLnChanCapUser
+            $ unMoney swapIntoLnChanCapUser
         ),
         ( MsgSwapIntoLnChanCapLsp,
           Just
             . MsgSatoshi
-            $ from swapIntoLnChanCapLsp
+            $ unMoney swapIntoLnChanCapLsp
         ),
         ( MsgSwapIntoLnChanCapTotal,
           Just
             . MsgSatoshi
-            $ from swapIntoLnChanCapUser
-              + from swapIntoLnChanCapLsp
+            $ unMoney swapIntoLnChanCapUser
+              + unMoney swapIntoLnChanCapLsp
         ),
         ( MsgChannelPrivacy,
           Just $
@@ -211,7 +211,7 @@ totalOnChainAmt ::
   SwapIntoLn.SwapInfo ->
   Msat
 totalOnChainAmt only =
-  from
+  unMoney
     . sum
     . fmap swapUtxoAmount
     . filter (only . swapUtxoStatus)
@@ -233,7 +233,7 @@ newUtxoWidget utxos =
               ),
               ( MsgAmount,
                 MsgSatoshi $
-                  from swapUtxoAmount
+                  unMoney swapUtxoAmount
               ),
               ( MsgStatus,
                 swapUtxoStatusMsg swapUtxoStatus

@@ -60,24 +60,22 @@ bfsDisabled msg =
 fromTextField ::
   forall m a.
   ( Monad m,
-    From Text a,
-    From a Text,
-    'False ~ (Text == a),
-    'False ~ (a == Text),
     RenderMessage (HandlerSite m) FormMessage
   ) =>
+  (Text -> a) ->
+  (a -> Text) ->
   Field m a
-fromTextField =
+fromTextField constructr accsr =
   Field
     { fieldParse = \f xs ->
-        ((from <$>) <$>) <$> fieldParse txtField f xs,
+        ((constructr <$>) <$>) <$> fieldParse txtField f xs,
       fieldView = \theId fieldName attrs val isReq ->
         fieldView
           txtField
           theId
           fieldName
           attrs
-          (from <$> val)
+          (accsr <$> val)
           isReq,
       fieldEnctype =
         fieldEnctype txtField

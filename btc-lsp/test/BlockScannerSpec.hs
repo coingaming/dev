@@ -117,6 +117,6 @@ spec = do
       length dbUtxosDust
         `shouldBe` 1
       sum (swapUtxoAmount <$> dbUtxosSpendable)
-        `shouldBe` from (amt0 + amt1)
+        `shouldBe` Money (amt0 + amt1)
       sum (swapUtxoAmount <$> dbUtxosDust)
-        `shouldBe` from amt2
+        `shouldBe` Money amt2

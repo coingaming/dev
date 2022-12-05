@@ -170,18 +170,6 @@ newtype LnInvoice (mrel :: MoneyRelation) = LnInvoice
 
 instance Out (LnInvoice mrel)
 
-instance From Lnd.PaymentRequest (LnInvoice mrel)
-
-instance From (LnInvoice mrel) Lnd.PaymentRequest
-
-instance From Text (LnInvoice mrel) where
-  from =
-    via @Lnd.PaymentRequest
-
-instance From (LnInvoice mrel) Text where
-  from =
-    via @Lnd.PaymentRequest
-
 newtype SwapHash = SwapHash Text
   deriving newtype
     ( Eq,
@@ -274,41 +262,43 @@ newtype
 
 instance Out (Money owner btcl mrel)
 
-instance From Msat (Money owner btcl mrel)
-
-instance From (Money owner btcl mrel) Msat
-
-instance From Natural (Money owner btcl mrel) where
-  from =
-    via @Msat
-
-instance From (Money owner btcl mrel) Natural where
-  from =
-    via @Msat
-
-instance TryFrom (Ratio Natural) (Money owner btcl mrel) where
-  tryFrom =
-    from @Natural
-      `composeTryRhs` tryFrom
-
-instance From (Money owner btcl mrel) (Ratio Natural) where
-  from =
-    via @Natural
-
-instance TryFrom Rational (Money owner btcl mrel) where
-  tryFrom =
-    tryFrom @(Ratio Natural)
-      `composeTry` tryFrom
-
-instance From (Money owner btcl mrel) Rational where
-  from =
-    via @(Ratio Natural)
+--instance From Msat (Money owner btcl mrel)
+--
+--instance From (Money owner btcl mrel) Msat
+--
+--instance From Natural (Money owner btcl mrel) where
+--  from =
+--    via @Msat
+--
+--instance From (Money owner btcl mrel) Natural where
+--  from =
+--    via @Msat
+--
+--instance TryFrom (Ratio Natural) (Money owner btcl mrel) where
+--  tryFrom =
+--    from @Natural
+--      `composeTryRhs` tryFrom
+--
+--instance From (Money owner btcl mrel) (Ratio Natural) where
+--  from =
+--    via @Natural
+--
+--instance TryFrom Rational (Money owner btcl mrel) where
+--  tryFrom =
+--    tryFrom @(Ratio Natural)
+--      `composeTry` tryFrom
+--
+--instance From (Money owner btcl mrel) Rational where
+--  from =
+--    via @(Ratio Natural)
 
 instance ToMessage (Money owner btcl mrel) where
   toMessage =
     T.displayRational 1
       . (/ 1000)
-      . from
+      . fromIntegral
+      . unMsat
+      . unMoney
 
 newtype FeeRate = FeeRate
   { unFeeRate :: Ratio Natural
@@ -347,10 +337,6 @@ newtype UnsafeOnChainAddress (mrel :: MoneyRelation) = UnsafeOnChainAddress
     )
 
 instance Out (UnsafeOnChainAddress mrel)
-
-instance From Text (UnsafeOnChainAddress mrel)
-
-instance From (UnsafeOnChainAddress mrel) Text
 
 data SwapStatus
   = -- | Waiting on-chain funding trx with
@@ -544,10 +530,6 @@ newtype BlkHash = BlkHash
 
 instance Out BlkHash
 
-instance From Btc.BlockHash BlkHash
-
-instance From BlkHash Btc.BlockHash
-
 newtype BlkHeight = BlkHeight
   { unBlkHeight :: Word64
   }
@@ -719,10 +701,6 @@ newtype RHashHex = RHashHex
 
 instance Out RHashHex
 
-instance From RHashHex Text
-
-instance From Text RHashHex
-
 instance From RHash RHashHex where
   from =
     --
@@ -789,10 +767,6 @@ newtype Vbyte = Vbyte
 
 instance Out Vbyte
 
-instance From Vbyte (Ratio Natural)
-
-instance From (Ratio Natural) Vbyte
-
 newtype RowQty = RowQty
   { unRowQty :: Int64
   }
@@ -815,14 +789,6 @@ data PsbtUtxo = PsbtUtxo
   deriving stock (Show, Generic)
 
 instance Out PsbtUtxo
-
-instance From RowQty Int64
-
-instance From Int64 RowQty
-
-instance From Int RowQty where
-  from =
-    via @Int64
 
 --
 -- NOTE :  we're taking advantage of

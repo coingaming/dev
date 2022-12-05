@@ -48,7 +48,7 @@ spec = do
     withRunInIO $ \run0 ->
       pure . monadicIO $ do
         swp <-
-          from @Msat <$> pick arbitrary
+          Money <$> pick arbitrary
         maybeM
           (assert $ swp < minSwp)
           ( \res -> do

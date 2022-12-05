@@ -89,7 +89,7 @@ spec = do
                     . entityVal
                     $ swp,
                 SendCoins.amount =
-                  from amt,
+                  unMoney amt,
                 SendCoins.sendAll = False
               }
         )

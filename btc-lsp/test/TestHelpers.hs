@@ -86,7 +86,7 @@ putLatestBlockToDB = do
     lift . runSql $
       Block.createUpdateConfirmedSql
         height
-        (from $ Btc.vBlockHash blk)
+        (BlkHash $ Btc.vBlockHash blk)
   pure (blk, k)
 
 waitCond ::

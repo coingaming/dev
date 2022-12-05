@@ -43,24 +43,24 @@ newExamplesWidget minAmt = do
     $ ( \(fundAmt, Math.SwapCap {..}) ->
           [ ( MsgAboutExamplesUserOnChainFunding,
               MsgSatoshi $
-                from fundAmt
+                unMoney fundAmt
             ),
             ( MsgAboutExamplesLspSwapFee,
               MsgSatoshi $
-                from swapCapFee
+                unMoney swapCapFee
             ),
             ( MsgAboutExamplesUserOutgoingCap,
               MsgSatoshi $
-                from swapCapUsr
+                unMoney swapCapUsr
             ),
             ( MsgAboutExamplesUserIncomingCap,
               MsgSatoshi $
-                from swapCapLsp
+                unMoney swapCapLsp
             ),
             ( MsgAboutExamplesTotalChanCap,
               MsgSatoshi $
-                from swapCapUsr
-                  + from swapCapLsp
+                unMoney swapCapUsr
+                  + unMoney swapCapLsp
             )
           ]
       )
