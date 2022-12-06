@@ -256,7 +256,6 @@ tests:
     main: Main.hs
     dependencies:
     - base
-    - witch
     - lnd-client
     - extra
     - envparse
