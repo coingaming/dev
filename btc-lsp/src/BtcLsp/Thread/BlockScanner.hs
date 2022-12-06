@@ -284,7 +284,7 @@ scan = do
               Block.updateOrphanHigherSql bHeight
               SwapUtxo.revertRefundedSql (entityKey <$> blks)
               SwapUtxo.updateOrphanSql (entityKey <$> blks)
-          scannerStep [] (1 + (unBlkHeight bHeight)) $ unBlkHeight cHeight
+          scannerStep [] (1 + unBlkHeight bHeight) $ unBlkHeight cHeight
 
 scannerStep ::
   ( Env m
