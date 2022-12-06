@@ -407,8 +407,6 @@ itEnvT testName expr =
             liftIO $ res `shouldSatisfy` isRight
         )
 
--- Fix mineInitialCoins in Lnd to check wallet balance of the node
--- Look at example in lazyMineBitcoindCoins
 itMainT ::
   forall owner e.
   ( Show e,
