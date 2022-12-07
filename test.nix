@@ -35,6 +35,7 @@ in {
     retCode="$?"
     set -e
     whoami
+    ls -la /home/runner/work
     ls -la $logsdir
     cp ./lnd-alice/stdout.log "$logsdir/lnd-alice.stdout.log"
     cp ./lnd-bob/stdout.log "$logsdir/lnd-bob.stdout.log"
