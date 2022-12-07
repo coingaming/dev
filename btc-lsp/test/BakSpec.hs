@@ -16,7 +16,7 @@ import TestAppM
 
 spec :: Spec
 spec = do
-  focus . itMainT @'LndLsp "Static Channel Backup" $ do
+  itMainT @'LndLsp "Static Channel Backup" $ do
     cp <- lift $ setupOneChannel LndLsp LndAlice
     sleep1s
     mCh <-
