@@ -20,9 +20,10 @@ in {
     buildInputs=[nixPkgs.ps];
   }) ''
     set -x
-    logsdir="${log}"
-    echo "$logsdir"
     mkdir $out
+    mkdir -p $out/logs
+    logsdir="$out/logs"
+    echo "$logsdir"
     ${deps.bitcoindConf.up}/bin/up
     ${networkBitcoinTest}/bin/network-bitcoin-tests 2>&1 | tee $out/network-bitcoin-test.log
     ${deps.bitcoindConf.down}/bin/down
