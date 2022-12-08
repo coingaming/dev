@@ -12,10 +12,8 @@ jobs:
     - name: Ensure cache dir exists
       run: |
         whoami
-        ls -la /tmp/nix_ci_cache
         mkdir -p /tmp/nix_ci_cache
         sudo chown -R $USER:$USER /tmp/nix_ci_cache
-        du -sh /tmp/nix_ci_cache
     - uses: cachix/install-nix-action@v18
       with:
         nix_path: nixpkgs=channel:nixos-22.11
