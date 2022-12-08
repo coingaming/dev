@@ -28,7 +28,7 @@ jobs:
           substituters = https://cache.nixos.org file:///tmp/nix_ci_cache https://hydra.iohk.io
           trusted-substituters = file:///tmp/nix_ci_cache
           trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-          post-build-hook = ./nix/upload-to-cache.sh
+          post-build-hook = ${{ github.workspace }}/nix/upload-to-cache.sh
     - uses: actions/cache@v3
       with:
         path: /tmp/nix_ci_cache
