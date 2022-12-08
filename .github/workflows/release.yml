@@ -36,6 +36,7 @@ jobs:
         restore-keys: cache-${{ runner.os }}-${{ matrix.configuration }}-
     - name: Test all
       run: |
+        which nix
         mkdir -p ${{ github.workspace }}/logs
         chmod -R 777 ${{ github.workspace }}/logs
         logsdir="${{ github.workspace }}/logs"
