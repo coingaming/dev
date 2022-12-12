@@ -12,17 +12,15 @@ let
   genericPrettyInstancesTest = p.generic-pretty-instances.components.tests.generic-pretty-instances-test;
   btcLspTest = p.btc-lsp.components.tests.btc-lsp-test;
   electrsClientTest = p.electrs-client.components.tests.electrs-client-test;
-in {
-  generic-pretty-instances-test = nixPkgs.runCommand "generic-pretty-instances-test" {} ''
-    ${genericPrettyInstancesTest}/bin/generic-pretty-instances-test 2>&1 | tee $out
-  '';
-  stateful-test = nixPkgs.runCommand "stateful-test" ({
-    buildInputs=[nixPkgs.ps];
-  }) ''
+  stateful-test = nixPkgs.writeShellScriptBin "stateful-test" ''
     set -x
-    logsdir="${log}"
+    out=${log}
+    mkdir -p $out/logs
+    logsdir="$out/logs"
     echo "$logsdir"
-    mkdir $out
+
+    ${genericPrettyInstancesTest}/bin/generic-pretty-instances-test 2>&1 | tee $out/generic-pretty-instances-test.log
+
     ${deps.bitcoindConf.up}/bin/up
     ${networkBitcoinTest}/bin/network-bitcoin-tests 2>&1 | tee $out/network-bitcoin-test.log
     ${deps.bitcoindConf.down}/bin/down
@@ -35,6 +33,7 @@ in {
     retCode="$?"
     set -e
     whoami
+    pwd
     ls -la $logsdir
     cp ./lnd-alice/stdout.log "$logsdir/lnd-alice.stdout.log"
     cp ./lnd-bob/stdout.log "$logsdir/lnd-bob.stdout.log"
@@ -51,7 +50,7 @@ in {
     ${electrsClientTest}/bin/electrs-client-test 2>&1 | tee $out/electrs-test.log
     ${deps.stopElectrs}/bin/stop-test-electrs
   '';
-  ormolu-test = nixPkgs.runCommand "ormolu-test" {} ''
+  ormolu-test = nixPkgs.writeShellScriptBin "ormolu-test" ''
     ${nixPkgs.ormolu}/bin/ormolu --mode check $( find ${src} \( \
       -path '${src}/btc-lsp/src/BtcLsp/*' \
       -o -path '${src}/btc-lsp/test/*' \
@@ -61,10 +60,13 @@ in {
       -o -path '${src}/electrs-client/src/*' \
       -o -path '${src}/electrs-client/test/*' \) \
       -name '*.hs' )
-    mkdir $out
   '';
-  hlint-test = nixPkgs.runCommand "hlint-test" {} ''
+  hlint-test = nixPkgs.writeShellScriptBin "hlint-test" ''
     ${nixPkgs.hlint}/bin/hlint ${src} --ignore-glob=${src}/btc-lsp/src/Proto
-    mkdir $out
   '';
-}
+in
+  nixPkgs.writeShellScriptBin "all-tests" ''
+    ${ormolu-test}/bin/ormolu-test
+    ${hlint-test}/bin/hlint-test
+    ${stateful-test}/bin/stateful-test
+  ''

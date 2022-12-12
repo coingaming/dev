@@ -9,9 +9,14 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v2
-    - uses: cachix/install-nix-action@v15
+    - name: Ensure cache dir exists
+      run: |
+        whoami
+        mkdir -p /tmp/nix_ci_cache
+        sudo chown -R $USER:$USER /tmp/nix_ci_cache
+    - uses: cachix/install-nix-action@v18
       with:
-        nix_path: nixpkgs=channel:nixos-21.11
+        nix_path: nixpkgs=channel:nixos-22.11
         extra_nix_config: |
           system-features = kvm
           http2 = false
@@ -23,21 +28,24 @@ jobs:
           substituters = https://cache.nixos.org file:///tmp/nix_ci_cache https://hydra.iohk.io
           trusted-substituters = file:///tmp/nix_ci_cache
           trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-    - uses: actions/cache@v2
+          post-build-hook = ${{ github.workspace }}/nix/upload-to-cache.sh
+    - uses: actions/cache@v3
       with:
         path: /tmp/nix_ci_cache
         key: cache-${{ runner.os }}-${{ matrix.configuration }}-${{ github.sha }}
         restore-keys: cache-${{ runner.os }}-${{ matrix.configuration }}-
     - name: Test all
       run: |
+        which nix
         mkdir -p ${{ github.workspace }}/logs
         chmod -R 777 ${{ github.workspace }}/logs
         logsdir="${{ github.workspace }}/logs"
         nix-build --option sandbox false --show-trace --pure ./test.nix --argstr log "$logsdir"
+        ./result/bin/all-tests
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
-        name: lnd-logs
+        name: test-logs
         path: ${{ github.workspace }}/logs/
     - name: Release all
       run: ./nix/ci-release.sh
@@ -122,11 +130,3 @@ jobs:
         asset_path: ./electrs-client/build/docker-image-electrs.txt
         asset_name: docker-image-electrs.txt
         asset_content_type: text/plain
-    - name: Save cache
-      run: |
-        whoami
-        ls -la /tmp/nix_ci_cache
-        mkdir -p /tmp/nix_ci_cache
-        sudo chown -R $USER:$USER /tmp/nix_ci_cache
-        nix copy --no-check-sigs --to file:///tmp/nix_ci_cache --all
-        du -sh /tmp/nix_ci_cache
