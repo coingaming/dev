@@ -82,7 +82,7 @@ fundChanPsbt ::
   ExceptT Failure m Lnd.Psbt
 fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee =
   katipAddContext (sl "pcid" (inspect @Text pcid)) $ do
-    let userFundingAmt = sumAmt userUtxos - coerce lspFee
+    let userFundingAmt = sumAmt userUtxos - unMoney lspFee
     $logTM DebugS
       . logStr
       $ "UserAmt:"
@@ -90,7 +90,7 @@ fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee =
         <> " LspFee:"
         <> inspect lspFee
 
-    lspFunded <- autoSelectUtxos (coerce chanFundAddr) userFundingAmt
+    lspFunded <- autoSelectUtxos chanFundAddr userFundingAmt
     $logTM DebugS
       . logStr
       $ "Selected Lsp utxos:"
@@ -110,7 +110,7 @@ fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee =
     --
     let fee = estFee + Msat 50000
     $logTM DebugS . logStr $ "Est fee:" <> inspect @Text fee
-    let changeAmt = selectedInputsAmt - userFundingAmt + coerce lspFee - fee
+    let changeAmt = selectedInputsAmt - userFundingAmt + unMoney lspFee - fee
     let outputs =
           if changeAmt > Math.trxDustLimit
             then
@@ -167,7 +167,7 @@ openChannelPsbt ::
 openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
   chan <- lift T.newTChanIO
   let openChannelRequest =
-        openChannelReq pcid toPubKey (coerce (2 * amt)) (coerce amt) private
+        openChannelReq pcid toPubKey (Money (2 * amt)) (Money amt) private
   let subUpdates u = void . T.atomically . T.writeTChan chan $ LndUpdate u
   res <- lift . UE.tryAny . spawnLink $ do
     r <- withLnd (Lnd.openChannel subUpdates) ($ openChannelRequest)
@@ -180,7 +180,7 @@ openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
       fundA <- lift . spawnLink $ runExceptT $ fundStep chan
       pure $ OpenChannelPsbtResult chan fundA
   where
-    amt = sumAmt utxos - coerce lspFee
+    amt = sumAmt utxos - unMoney lspFee
     fundStep chan = do
       upd <- T.atomically $ T.readTChan chan
       $logTM DebugS . logStr $ "Got chan status update" <> inspect @Text upd
@@ -192,7 +192,7 @@ openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
               <> inspect @Text faddr
               <> " with amt:"
               <> inspect famt
-          psbt' <- fundChanPsbtLocked lock pcid utxos (unsafeNewOnChainAddress faddr) (coerce changeAddress) lspFee
+          psbt' <- fundChanPsbtLocked lock pcid utxos (unsafeNewOnChainAddress faddr) changeAddress lspFee
           void $ withLndT Lnd.fundingStateStep ($ psbtVerifyReq pcid psbt')
           sPsbtResp <- finalizePsbt psbt'
           $logTM DebugS . logStr $ "Used psbt for funding:" <> inspect @Text sPsbtResp

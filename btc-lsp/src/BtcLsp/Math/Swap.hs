@@ -64,24 +64,24 @@ newSwapCapM usrAmt = do
         Just
           SwapCap
             { swapCapUsr = usrLn,
-              swapCapLsp = coerce usrLn,
-              swapCapFee = from @Natural $ ceiling feeRat
+              swapCapLsp = Money . unMoney $ usrLn,
+              swapCapFee = fromInteger $ ceiling feeRat
             }
   where
     usrFin :: Ratio Natural
     usrFin =
-      from usrAmt % 1
+      (unMsat . unMoney $ usrAmt) % 1
     feeRat :: Ratio Natural
     feeRat =
       from @Natural
         . (* 1000)
         . ceiling
         . (/ 1000)
-        . max (from swapLnMinFee % 1)
+        . max ((unMsat . unMoney $ swapLnMinFee) % 1)
         $ usrFin * unFeeRate swapLnFeeRate
     usrLn :: Money 'Usr 'Ln 'Fund
     usrLn =
-      from @Natural
+      fromInteger
         . floor
         $ usrFin - feeRat
 
@@ -89,17 +89,17 @@ newSwapIntoLnMinAmt ::
   Money 'Chan 'Ln 'Fund ->
   Money 'Usr 'OnChain 'Fund
 newSwapIntoLnMinAmt minCap =
-  from @Natural
+  fromInteger
     . (* 1000)
     . ceiling
     $ usrInitMsat / 1000
   where
     minFee :: Ratio Natural
     minFee =
-      from swapLnMinFee % 1
+      (unMsat . unMoney $ swapLnMinFee) % 1
     usrFin :: Ratio Natural
     usrFin =
-      from minCap % 2
+      (unMsat . unMoney $ minCap) % 2
     usrPerc :: Ratio Natural
     usrPerc =
       usrFin / (1 - unFeeRate swapLnFeeRate)

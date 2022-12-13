@@ -19,6 +19,7 @@ import BtcLsp.Storage.Model.User as User
 import BtcLsp.Yesod.Data.Widget
 import BtcLsp.Yesod.Import
 import Lens.Micro
+import qualified LndClient as Lnd
 import qualified LndClient.Data.PayReq as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Proto.BtcLsp.Data.HighLevel as Proto
@@ -63,7 +64,7 @@ postSwapIntoLnCreateR = do
         fundInvLnd <-
           withLndServerT
             Lnd.decodePayReq
-            ($ from fundInv)
+            ($ unLnInvoice fundInv)
         userEnt <-
           withExceptT
             ( const $
@@ -133,11 +134,11 @@ aForm :: AForm Handler SwapRequest
 aForm =
   SwapRequest
     <$> areq
-      fromTextField
+      (fromTextField (LnInvoice . Lnd.PaymentRequest) (Lnd.unPaymentRequest . unLnInvoice))
       (bfsAutoFocus MsgSwapIntoLnFundInvoice)
       Nothing
     <*> areq
-      fromTextField
+      (fromTextField UnsafeOnChainAddress unUnsafeOnChainAddress)
       (bfs MsgSwapIntoLnRefundAddress)
       Nothing
     <*> areq

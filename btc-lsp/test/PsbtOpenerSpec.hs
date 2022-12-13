@@ -44,15 +44,15 @@ spec = do
     swp <- createDummySwap Nothing
     let swpId = entityKey swp
     let swpAddr = swapIntoLnFundAddress . entityVal $ swp
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
     void BlockScanner.scan
     $logTM DebugS
       . logStr
       $ "Expected remote balance:"
-        <> inspect @Text (coerce (20 * amt) - lspFee)
+        <> inspect @Text (unMoney (20 * amt) - lspFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
@@ -60,7 +60,7 @@ spec = do
     Lnd.GetInfoResponse alicePubKey _ _ <- withLndTestT LndAlice Lnd.getInfo id
     lock <- liftIO newLock
     pcid <- Lnd.newPendingChanId
-    openChanRes <- PO.openChannelPsbt pcid lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+    openChanRes <- PO.openChannelPsbt pcid lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (Money lspFee) Public
     void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
@@ -81,7 +81,7 @@ spec = do
         )
     $logTM DebugS $ logStr $ "Channel is opened:" <> inspect @Text chnls
     let (openedChanMaybe :: Maybe CH.Channel) = find (\c -> CH.channelPoint c == chan) chnls
-    let (expectedRemoteBalance :: Msat) = coerce (20 * amt) - lspFee
+    let (expectedRemoteBalance :: Msat) = unMoney (20 * amt) - lspFee
     case openedChanMaybe of
       Just c -> do
         liftIO $ do
@@ -93,14 +93,14 @@ spec = do
     swp <- createDummySwap Nothing
     let swpId = entityKey swp
     let swpAddr = swapIntoLnFundAddress . entityVal $ swp
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
-    void $ sendAmt (unOnChainAddress swpAddr) (from (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
+    void $ sendAmt (unOnChainAddress swpAddr) (unMoney (10 * amt))
     void putLatestBlockToDB
     lift $ mine 4 LndLsp
     void BlockScanner.scan
     $logTM DebugS
       . logStr
-      $ "Expected remote balance:" <> inspect @Text (coerce (20 * amt) - lspFee)
+      $ "Expected remote balance:" <> inspect @Text (unMoney (20 * amt) - lspFee)
     utxos <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swpId
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos) (TxId "dummy refund tx")
     let psbtUtxos = swapUtxoToPsbtUtxo . entityVal <$> utxos
@@ -109,7 +109,7 @@ spec = do
     lock <- liftIO newLock
     pcid <- Lnd.newPendingChanId
     openChanRes <-
-      PO.openChannelPsbt pcid lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+      PO.openChannelPsbt pcid lock psbtUtxos alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (Money lspFee) Public
     void . lift . spawnLink $ do
       sleep1s
       mine 1 LndLsp
@@ -160,14 +160,14 @@ spec = do
     let psbtUtxos0 = swapUtxoToPsbtUtxo . entityVal <$> utxos0
 
     pcid0 <- Lnd.newPendingChanId
-    openChanRes0 <- PO.openChannelPsbt pcid0 psbtFlowLock psbtUtxos0 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+    openChanRes0 <- PO.openChannelPsbt pcid0 psbtFlowLock psbtUtxos0 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (Money lspFee) Public
 
     utxos1 <- lift $ runSql $ SwapUtxo.getSpendableUtxosBySwapIdSql swp1Id
     void $ lift $ runSql $ SwapUtxo.updateRefundedSql (entityKey <$> utxos1) (TxId "dummy refund tx")
     let psbtUtxos1 = swapUtxoToPsbtUtxo . entityVal <$> utxos1
 
     pcid1 <- Lnd.newPendingChanId
-    openChanRes1 <- PO.openChannelPsbt pcid1 psbtFlowLock psbtUtxos1 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (coerce lspFee) Public
+    openChanRes1 <- PO.openChannelPsbt pcid1 psbtFlowLock psbtUtxos1 alicePubKey (unsafeNewOnChainAddress $ Lnd.address profitAddr) (Money lspFee) Public
 
     sleep5s
 

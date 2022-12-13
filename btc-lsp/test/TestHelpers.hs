@@ -86,7 +86,7 @@ putLatestBlockToDB = do
     lift . runSql $
       Block.createUpdateConfirmedSql
         height
-        (from $ Btc.vBlockHash blk)
+        (BlkHash $ Btc.vBlockHash blk)
   pure (blk, k)
 
 waitCond ::
@@ -121,7 +121,7 @@ transferCoinsRaw allCoins amt fromOwner toOwner = do
     withLndTestT
       fromOwner
       Lnd.sendCoins
-      ($ SendCoins.SendCoinsRequest {SendCoins.addr = coerce toAddr, SendCoins.amount = amt, SendCoins.sendAll = allCoins})
+      ($ SendCoins.SendCoinsRequest {SendCoins.addr = Lnd.address toAddr, SendCoins.amount = amt, SendCoins.sendAll = allCoins})
 
 transferAllCoins ::
   TestOwner ->
@@ -148,7 +148,7 @@ transferCoinsToAddr amt fromOwner toAddr = do
       Lnd.sendCoins
       ( $
           SendCoins.SendCoinsRequest
-            { SendCoins.addr = coerce toAddr,
+            { SendCoins.addr = toAddr,
               SendCoins.amount = amt,
               SendCoins.sendAll = False
             }

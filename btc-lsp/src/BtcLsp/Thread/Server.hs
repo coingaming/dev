@@ -75,7 +75,7 @@ verifySigE env waiReq pubNode (RawRequestBytes payload) = do
             <> inspectPlain pubNode
       )
       . C.importPubKey
-      $ coerce pubNode
+      $ unNodePubKey pubNode
   sig <-
     Sig.sigToVerify (gsEnvSigHeaderName env) waiReq
   msg <-

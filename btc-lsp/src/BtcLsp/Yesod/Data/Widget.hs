@@ -6,8 +6,7 @@ import BtcLsp.Yesod.Import
 import GHC.Exts (IsList (..))
 import Yesod.Form.Bootstrap3
 
-newtype HtmlClassAttr
-  = HtmlClassAttr [Text]
+newtype HtmlClassAttr = HtmlClassAttr {unHtmlClassAttr :: [Text]}
   deriving newtype
     ( Eq,
       Ord,
@@ -24,8 +23,8 @@ instance Out HtmlClassAttr
 
 instance IsList HtmlClassAttr where
   type Item HtmlClassAttr = Text
-  fromList = coerce
-  toList = coerce
+  fromList = HtmlClassAttr
+  toList = unHtmlClassAttr
 
 --
 -- TODO : use bootstrap tabs/panels to provide
@@ -61,24 +60,22 @@ bfsDisabled msg =
 fromTextField ::
   forall m a.
   ( Monad m,
-    From Text a,
-    From a Text,
-    'False ~ (Text == a),
-    'False ~ (a == Text),
     RenderMessage (HandlerSite m) FormMessage
   ) =>
+  (Text -> a) ->
+  (a -> Text) ->
   Field m a
-fromTextField =
+fromTextField constructr accsr =
   Field
     { fieldParse = \f xs ->
-        ((from <$>) <$>) <$> fieldParse txtField f xs,
+        ((constructr <$>) <$>) <$> fieldParse txtField f xs,
       fieldView = \theId fieldName attrs val isReq ->
         fieldView
           txtField
           theId
           fieldName
           attrs
-          (from <$> val)
+          (accsr <$> val)
           isReq,
       fieldEnctype =
         fieldEnctype txtField

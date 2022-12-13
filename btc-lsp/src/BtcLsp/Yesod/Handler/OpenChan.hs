@@ -16,7 +16,7 @@ getOpenChanR = do
   nodeUriHex <-
     eitherM
       (const badMethod)
-      (pure . from @NodeUriHex @Text)
+      (pure . unNodeUriHex)
       . pure
       $ tryFrom nodeUri
   qrCodeSrc <-

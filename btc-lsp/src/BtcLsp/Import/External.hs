@@ -45,7 +45,6 @@ import Data.Aeson as X
     fromJSON,
     genericParseJSON,
   )
-import Data.Coerce as X (coerce)
 import Data.Containers.ListUtils as X (nubOrd)
 import Data.Either.Extra as X (fromEither)
 import Data.EitherR as X (flipET, handleE)

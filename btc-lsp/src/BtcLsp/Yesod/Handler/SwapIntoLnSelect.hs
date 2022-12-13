@@ -15,6 +15,7 @@ import BtcLsp.Yesod.Data.Widget
 import qualified BtcLsp.Yesod.Handler.SwapUpdates as SU
 import BtcLsp.Yesod.Import
 import qualified Data.UUID as UUID
+import qualified LndClient as Lnd
 
 getSwapIntoLnSelectR :: Uuid 'SwapIntoLnTable -> Handler Html
 getSwapIntoLnSelectR uuid = do
@@ -23,7 +24,7 @@ getSwapIntoLnSelectR uuid = do
   nodeUriHex <-
     eitherM
       (const badMethod)
-      (pure . from @NodeUriHex @Text)
+      (pure . unNodeUriHex)
       . pure
       $ tryFrom nodeUri
   nodeUriQr <-
@@ -131,23 +132,23 @@ newSwapWidget swapInfo =
         ( MsgSwapIntoLnFeeLsp,
           Just
             . MsgSatoshi
-            $ from swapIntoLnFeeLsp
+            $ unMoney swapIntoLnFeeLsp
         ),
         ( MsgSwapIntoLnChanCapUser,
           Just
             . MsgSatoshi
-            $ from swapIntoLnChanCapUser
+            $ unMoney swapIntoLnChanCapUser
         ),
         ( MsgSwapIntoLnChanCapLsp,
           Just
             . MsgSatoshi
-            $ from swapIntoLnChanCapLsp
+            $ unMoney swapIntoLnChanCapLsp
         ),
         ( MsgSwapIntoLnChanCapTotal,
           Just
             . MsgSatoshi
-            $ from swapIntoLnChanCapUser
-              + from swapIntoLnChanCapLsp
+            $ unMoney swapIntoLnChanCapUser
+              + unMoney swapIntoLnChanCapLsp
         ),
         ( MsgChannelPrivacy,
           Just $
@@ -200,7 +201,7 @@ newSwapWidget swapInfo =
         SwapIntoLn.swapInfoSwap swapInfo
     userPub =
       toHex
-        . coerce
+        . unNodePubKey
         . userNodePubKey
         . entityVal
         $ SwapIntoLn.swapInfoUser swapInfo
@@ -210,7 +211,7 @@ totalOnChainAmt ::
   SwapIntoLn.SwapInfo ->
   Msat
 totalOnChainAmt only =
-  from
+  unMoney
     . sum
     . fmap swapUtxoAmount
     . filter (only . swapUtxoStatus)
@@ -228,11 +229,11 @@ newUtxoWidget utxos =
          in [ ( MsgBlock,
                 MsgProxy
                   . inspectPlain @Text @Word64
-                  $ from blockHeight
+                  $ unBlkHeight blockHeight
               ),
               ( MsgAmount,
                 MsgSatoshi $
-                  from swapUtxoAmount
+                  unMoney swapUtxoAmount
               ),
               ( MsgStatus,
                 swapUtxoStatusMsg swapUtxoStatus
@@ -240,7 +241,7 @@ newUtxoWidget utxos =
               ( MsgTxId,
                 MsgProxy
                   . txIdHex
-                  $ coerce swapUtxoTxid
+                  $ Lnd.unTxId swapUtxoTxid
               ),
               ( MsgVout,
                 MsgProxy
@@ -268,7 +269,7 @@ newChanWidget chans =
               ( MsgTxId,
                 MsgProxy
                   . txIdHex
-                  $ coerce lnChanFundingTxId
+                  $ Lnd.unTxId lnChanFundingTxId
               ),
               ( MsgVout,
                 MsgProxy

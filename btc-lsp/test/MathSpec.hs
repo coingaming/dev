@@ -48,7 +48,7 @@ spec = do
     withRunInIO $ \run0 ->
       pure . monadicIO $ do
         swp <-
-          from @Msat <$> pick arbitrary
+          Money <$> pick arbitrary
         maybeM
           (assert $ swp < minSwp)
           ( \res -> do
@@ -59,10 +59,10 @@ spec = do
               assert $ usr > 0
               assert $ lsp > 0
               assert $ fee > 0
-              assert $ usr > coerce fee
-              assert $ lsp > coerce fee
-              assert $ usr == coerce lsp
-              assert $ (usr + coerce fee) == coerce swp
+              assert $ usr > (Money . unMoney $ fee)
+              assert $ lsp > (Money . unMoney $ fee)
+              assert $ usr == (Money . unMoney $ lsp)
+              assert $ (usr + (Money . unMoney $ fee)) == (Money . unMoney $ swp)
           )
           . liftIO
           . run0

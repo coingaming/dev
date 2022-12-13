@@ -42,8 +42,8 @@ waitTillLastBlockProcessedT client env decr =
     bHash <- liftIO $ getBlockHash client bHeight
     bHeader <- ExceptT $ Rpc.blockHeader env $ BlkHeight $ fromInteger bHeight
     unless
-      ( (doubleSha256AndReverse <$> TH.decodeHex (coerce bHeader))
-          == TH.decodeHex (coerce $ Rpc.BlockHeader bHash)
+      ( (doubleSha256AndReverse <$> TH.decodeHex (unBlockHeader bHeader))
+          == TH.decodeHex (unBlockHeader $ Rpc.BlockHeader bHash)
       )
       sleepAndRetry
   where

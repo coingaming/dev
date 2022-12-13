@@ -30,7 +30,7 @@ spec = do
         $ fromIntegral blockCount
     let blk1 = unsafeHead $ entityVal <$> blkList1
     blockHash1 <- withBtcT LndLsp Btc.getBlockHash ($ blockCount)
-    liftIO $ from (blockHash blk1) `shouldBe` blockHash1
+    liftIO $ unBlkHash (blockHash blk1) `shouldBe` blockHash1
 
     void $ withBtcT LndLsp Btc.setNetworkActive ($ True)
     _ <- lift waitTillNodesSynchronized
@@ -42,7 +42,7 @@ spec = do
         $ fromIntegral blockCount
     let blk2 = unsafeHead $ entityVal <$> blkList2
     blockHash2 <- withBtcT LndLsp Btc.getBlockHash ($ blockCount)
-    liftIO $ from (blockHash blk2) `shouldBe` blockHash2
+    liftIO $ unBlkHash (blockHash blk2) `shouldBe` blockHash2
 
 unsafeHead :: [Block] -> Block
 unsafeHead blkList = do

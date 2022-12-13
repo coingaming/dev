@@ -26,7 +26,7 @@ import qualified Text.Hex as TH
 newtype ScriptHash = ScriptHash Text
   deriving stock (Generic)
 
-newtype BlockHeader = BlockHeader Text
+newtype BlockHeader = BlockHeader {unBlockHeader :: Text}
   deriving newtype (Eq)
   deriving stock (Generic)
 
@@ -112,7 +112,7 @@ getScriptHash bEnv addr = runExceptT $ do
         (encodeUtf8 $ bitcoindEnvUsername bEnv)
         (encodeUtf8 $ bitcoindEnvPassword bEnv)
 
-  BtcW.AddrInfo _ sp _ _ <- liftIO $ BtcW.getAddrInfo btcClient (coerce addr)
+  BtcW.AddrInfo _ sp _ _ <- liftIO $ BtcW.getAddrInfo btcClient (unOnChainAddress addr)
   decodeSp sp
   where
     decodeSp :: (MonadUnliftIO m) => BtcW.ScrPubKey -> ExceptT RpcError m ScriptHash
@@ -122,7 +122,7 @@ getScriptHash bEnv addr = runExceptT $ do
         . second sha256AndReverse
         . maybeToRight RpcHexDecodeError
         . TH.decodeHex
-        . coerce
+        . BtcW.unScrPubKey
     sha256AndReverse =
       ScriptHash
         . TH.encodeHex

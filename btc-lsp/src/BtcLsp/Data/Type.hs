@@ -170,18 +170,6 @@ newtype LnInvoice (mrel :: MoneyRelation) = LnInvoice
 
 instance Out (LnInvoice mrel)
 
-instance From Lnd.PaymentRequest (LnInvoice mrel)
-
-instance From (LnInvoice mrel) Lnd.PaymentRequest
-
-instance From Text (LnInvoice mrel) where
-  from =
-    via @Lnd.PaymentRequest
-
-instance From (LnInvoice mrel) Text where
-  from =
-    via @Lnd.PaymentRequest
-
 newtype SwapHash = SwapHash Text
   deriving newtype
     ( Eq,
@@ -274,41 +262,13 @@ newtype
 
 instance Out (Money owner btcl mrel)
 
-instance From Msat (Money owner btcl mrel)
-
-instance From (Money owner btcl mrel) Msat
-
-instance From Natural (Money owner btcl mrel) where
-  from =
-    via @Msat
-
-instance From (Money owner btcl mrel) Natural where
-  from =
-    via @Msat
-
-instance TryFrom (Ratio Natural) (Money owner btcl mrel) where
-  tryFrom =
-    from @Natural
-      `composeTryRhs` tryFrom
-
-instance From (Money owner btcl mrel) (Ratio Natural) where
-  from =
-    via @Natural
-
-instance TryFrom Rational (Money owner btcl mrel) where
-  tryFrom =
-    tryFrom @(Ratio Natural)
-      `composeTry` tryFrom
-
-instance From (Money owner btcl mrel) Rational where
-  from =
-    via @(Ratio Natural)
-
 instance ToMessage (Money owner btcl mrel) where
   toMessage =
     T.displayRational 1
       . (/ 1000)
-      . from
+      . fromIntegral
+      . unMsat
+      . unMoney
 
 newtype FeeRate = FeeRate
   { unFeeRate :: Ratio Natural
@@ -347,10 +307,6 @@ newtype UnsafeOnChainAddress (mrel :: MoneyRelation) = UnsafeOnChainAddress
     )
 
 instance Out (UnsafeOnChainAddress mrel)
-
-instance From Text (UnsafeOnChainAddress mrel)
-
-instance From (UnsafeOnChainAddress mrel) Text
 
 data SwapStatus
   = -- | Waiting on-chain funding trx with
@@ -536,19 +492,17 @@ data SocketAddress = SocketAddress
 
 instance Out SocketAddress
 
-newtype BlkHash
-  = BlkHash Btc.BlockHash
+newtype BlkHash = BlkHash
+  { unBlkHash :: Btc.BlockHash
+  }
   deriving stock (Eq, Ord, Show, Generic)
   deriving newtype (Psql.PersistField, Psql.PersistFieldSql)
 
 instance Out BlkHash
 
-instance From Btc.BlockHash BlkHash
-
-instance From BlkHash Btc.BlockHash
-
-newtype BlkHeight
-  = BlkHeight Word64
+newtype BlkHeight = BlkHeight
+  { unBlkHeight :: Word64
+  }
   deriving stock
     ( Eq,
       Ord,
@@ -565,22 +519,8 @@ instance Out BlkHeight
 
 instance ToJSON BlkHeight
 
-instance From Word64 BlkHeight
-
-instance From BlkHeight Word64
-
-instance From BlkHeight Natural where
-  from =
-    via @Word64
-
 instance TryFrom Btc.BlockHeight BlkHeight where
-  tryFrom =
-    from @Word64
-      `composeTryRhs` tryFrom
-
-instance From BlkHeight Btc.BlockHeight where
-  from =
-    via @Word64
+  tryFrom = BlkHeight `composeTryRhs` tryFrom
 
 data BlkStatus
   = BlkConfirmed
@@ -627,20 +567,13 @@ data Privacy
 
 instance Out Privacy
 
-newtype NodePubKeyHex
-  = NodePubKeyHex Text
+newtype NodePubKeyHex = NodePubKeyHex {unNodePubKeyHex :: Text}
   deriving newtype (Eq, Ord, Show, Read, IsString)
   deriving stock (Generic)
 
-instance Out NodePubKeyHex
-
-instance From NodePubKeyHex Text
-
-instance From Text NodePubKeyHex
-
 instance TryFrom NodePubKey NodePubKeyHex where
   tryFrom src =
-    from
+    NodePubKeyHex
       `composeTryRhs` ( first
                           ( TryFromException src
                               . Just
@@ -648,11 +581,11 @@ instance TryFrom NodePubKey NodePubKeyHex where
                           )
                           . TE.decodeUtf8'
                           . B16.encode
-                          . coerce
+                          . unNodePubKey
                       )
       $ src
 
-newtype UtxoLockId = UtxoLockId ByteString
+newtype UtxoLockId = UtxoLockId {unUtxoLockId :: ByteString}
   deriving newtype (Eq, Ord, Show, Read)
   deriving stock (Generic)
 
@@ -671,24 +604,17 @@ data NodeUri = NodeUri
 
 instance Out NodeUri
 
-newtype NodeUriHex
-  = NodeUriHex Text
+newtype NodeUriHex = NodeUriHex {unNodeUriHex :: Text}
   deriving newtype (Eq, Ord, Show, Read, IsString)
   deriving stock (Generic)
-
-instance Out NodeUriHex
-
-instance From NodeUriHex Text
-
-instance From Text NodeUriHex
 
 instance TryFrom NodeUri NodeUriHex where
   tryFrom src =
     bimap
       (withTarget @NodeUriHex . withSource src)
       ( \pubHex ->
-          from @Text $
-            from pubHex
+          NodeUriHex $
+            unNodePubKeyHex pubHex
               <> "@"
               <> from host
               <> ":"
@@ -717,10 +643,6 @@ newtype RHashHex = RHashHex
 
 instance Out RHashHex
 
-instance From RHashHex Text
-
-instance From Text RHashHex
-
 instance From RHash RHashHex where
   from =
     --
@@ -731,7 +653,7 @@ instance From RHash RHashHex where
     RHashHex
       . decodeUtf8
       . B16.encode
-      . coerce
+      . unRHash
 
 instance From RHashHex RHash where
   from =
@@ -787,10 +709,6 @@ newtype Vbyte = Vbyte
 
 instance Out Vbyte
 
-instance From Vbyte (Ratio Natural)
-
-instance From (Ratio Natural) Vbyte
-
 newtype RowQty = RowQty
   { unRowQty :: Int64
   }
@@ -813,14 +731,6 @@ data PsbtUtxo = PsbtUtxo
   deriving stock (Show, Generic)
 
 instance Out PsbtUtxo
-
-instance From RowQty Int64
-
-instance From Int64 RowQty
-
-instance From Int RowQty where
-  from =
-    via @Int64
 
 --
 -- NOTE :  we're taking advantage of

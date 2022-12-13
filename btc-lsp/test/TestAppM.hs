@@ -334,7 +334,7 @@ signT env msg = do
           <> inspect @Text e
       pure Nothing
     Right sig0 -> do
-      let sig = coerce sig0
+      let sig = Lnd.unSignMessageResponse sig0
       $logTM DebugS . logStr $
         "Client ==> signing procedure succeeded for msg of "
           <> inspect @Text (BS.length $ Sig.unMsgToSign msg)

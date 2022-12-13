@@ -74,7 +74,7 @@ updateUnspentChanReserveSql ids = do
                          SwapUtxoUnspentChanReserve
                        ]
                  )
-  pure $ from res
+  pure . RowQty $ res
 
 updateSpentChanSwappedSql ::
   ( MonadIO m

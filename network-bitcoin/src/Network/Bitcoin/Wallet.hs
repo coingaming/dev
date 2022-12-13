@@ -844,7 +844,7 @@ instance FromJSON AddrInfo where
         <*> o .:  "iswitness"
     parseJSON _ = mzero
 
-newtype ScrPubKey = ScrPubKey Text
+newtype ScrPubKey = ScrPubKey {unScrPubKey :: Text}
   deriving stock (Show, Read, Eq, Ord)
   deriving newtype (FromJSON)
 

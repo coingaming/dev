@@ -130,7 +130,7 @@ verifySig msg sig compressMode = do
           <> inspect @Text e
       pure False
     Right x ->
-      if coerce x
+      if Lnd.unVerifyMessageResponse x
         then pure True
         else do
           $logTM ErrorS . logStr $

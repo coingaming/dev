@@ -24,7 +24,7 @@ spec = do
                   Lnd.account = Nothing
                 }
           )
-    res <- Smart.newOnChainAddressT $ from raw
+    res <- Smart.newOnChainAddressT $ UnsafeOnChainAddress raw
     liftIO $ raw `shouldBe` unOnChainAddress res
   itEnv @'LndLsp "newOnChainAddressT fails" $ do
     res <- runExceptT $ do
@@ -39,11 +39,11 @@ spec = do
                     Lnd.account = Nothing
                   }
             )
-      Smart.newOnChainAddressT $ from raw
+      Smart.newOnChainAddressT $ UnsafeOnChainAddress raw
     liftIO $
       res `shouldBe` Left (FailureInp FailureNonSegwitAddr)
   itEnv @'LndLsp "newOnChainAddressT throws" $ do
     res <-
-      Smart.newOnChainAddress $ from @Text "hello"
+      Smart.newOnChainAddress $ UnsafeOnChainAddress "hello"
     liftIO $
       res `shouldBe` Left (FailureInp FailureNonValidAddr)

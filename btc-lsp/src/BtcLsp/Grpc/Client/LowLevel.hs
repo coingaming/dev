@@ -21,7 +21,6 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Base64 as B64
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.CaseInsensitive as CI
-import Data.Coerce (coerce)
 import Data.ProtoLens (Message)
 import Data.ProtoLens.Encoding (encodeMessage)
 import Data.ProtoLens.Service.Types (HasMethod, HasMethodImpl (..))
@@ -66,8 +65,7 @@ instance FromJSON GCEnv where
             <*> pure (const $ pure Nothing)
       )
 
-newtype GCPort
-  = GCPort PortNumber
+newtype GCPort = GCPort {unGCPort :: PortNumber}
   deriving newtype
     ( Enum,
       Eq,
@@ -175,7 +173,7 @@ makeClient env req tlsEnabled = do
   case mSignature of
     Just signature ->
       setupGrpcClient $
-        (grpcClientConfigSimple (gcEnvHost env) (coerce $ gcEnvPort env) tlsEnabled)
+        (grpcClientConfigSimple (gcEnvHost env) (unGCPort $ gcEnvPort env) tlsEnabled)
           { _grpcClientConfigCompression = compression,
             _grpcClientConfigHeaders =
               [ ( sigHeaderName,

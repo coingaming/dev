@@ -19,7 +19,6 @@ import BtcLsp.Import.External as Import
     RPreimage (..),
     TxId (..),
     Vout (..),
-    coerce,
     eitherM,
     formatAsLogTime,
     maybeM,

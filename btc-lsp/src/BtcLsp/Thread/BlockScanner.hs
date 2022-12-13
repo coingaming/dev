@@ -79,7 +79,7 @@ maybeFundSwap swapId = do
         qty <-
           SwapUtxo.updateUnspentChanReserveSql $
             entityKey <$> us
-        if qty /= from (length us)
+        if qty /= (RowQty . from @Int @Int64 . length $ us)
           then do
             Psql.transactionUndo
             $logTM ErrorS . logStr $
@@ -203,7 +203,7 @@ persistBlockT blk utxos = do
       entityKey
         <$> Block.createUpdateConfirmedSql
           height
-          (from $ Btc.vBlockHash blk)
+          (BlkHash $ Btc.vBlockHash blk)
     ct <-
       getCurrentTime
     res <-
@@ -226,7 +226,7 @@ newSwapUtxo ct blkId utxo = do
       swapUtxoBlockId = blkId,
       swapUtxoTxid = utxoTxId utxo,
       swapUtxoVout = utxoVout utxo,
-      swapUtxoAmount = from amt,
+      swapUtxoAmount = Money amt,
       swapUtxoStatus =
         if amt >= Math.trxDustLimit
           then SwapUtxoUnspent
@@ -259,8 +259,8 @@ scan = do
       reorgDetected <- detectReorg lBlk
       case reorgDetected of
         Nothing -> do
-          let known = from . blockHeight $ entityVal lBlk
-          scannerStep [] (1 + known) $ from cHeight
+          let known = unBlkHeight . blockHeight $ entityVal lBlk
+          scannerStep [] (1 + known) $ unBlkHeight cHeight
         Just height -> do
           $logTM WarningS . logStr $
             "Reorg detected from height = "
@@ -284,7 +284,7 @@ scan = do
               Block.updateOrphanHigherSql bHeight
               SwapUtxo.revertRefundedSql (entityKey <$> blks)
               SwapUtxo.updateOrphanSql (entityKey <$> blks)
-          scannerStep [] (1 + coerce bHeight) $ from cHeight
+          scannerStep [] (1 + unBlkHeight bHeight) $ unBlkHeight cHeight
 
 scannerStep ::
   ( Env m
@@ -319,8 +319,7 @@ detectReorg blk = do
       then Nothing
       else Just cReorgHeight
   where
-    cHeight =
-      from . blockHeight $ entityVal blk
+    cHeight = toInteger . unBlkHeight . blockHeight $ entityVal blk
 
 checkReorgHeight ::
   ( Env m
@@ -344,7 +343,7 @@ compareHash height = do
   cHash <- withBtcT Btc.getBlockHash ($ height)
   lift
     . ( (== cHash)
-          . coerce
+          . unBlkHash
           . blockHash
           . entityVal
           <<$>>
@@ -360,7 +359,7 @@ scanOneBlock ::
   BlkHeight ->
   ExceptT Failure m [Utxo]
 scanOneBlock height = do
-  hash <- withBtcT Btc.getBlockHash ($ from height)
+  hash <- withBtcT Btc.getBlockHash ($ toInteger . unBlkHeight $ height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
   $logTM InfoS . logStr $
     "Got new block with height = "

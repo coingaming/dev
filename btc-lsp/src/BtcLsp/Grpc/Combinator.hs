@@ -150,8 +150,7 @@ throwSpec =
 -- TH FieldIndex combinators
 --
 
-newtype FieldIndex
-  = FieldIndex Word32
+newtype FieldIndex = FieldIndex {unFieldIndex :: Word32}
   deriving newtype
     ( Eq,
       Ord,
@@ -178,7 +177,7 @@ instance From ReversedFieldLocation [Proto.FieldIndex] where
   from (ReversedFieldLocation xs) =
     ( \x ->
         defMessage
-          & Proto.val .~ coerce x
+          & Proto.val .~ unFieldIndex x
     )
       <$> Ext.reverse xs
 

@@ -141,4 +141,4 @@ trxEstFee inQty outQty satPerVbyte =
   from @Natural
     . (* 1000)
     . (ceiling :: Ratio Natural -> Natural)
-    $ from (trxEstSize inQty outQty) * from satPerVbyte
+    $ unVbyte (trxEstSize inQty outQty) * unSatPerVbyte satPerVbyte
