@@ -74,13 +74,14 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     first (const $ FailureInt FailureRedacted) <$> args (method lnd)
   monitorTotalExtOutgoingLiquidity amt = do
     lim <- asks Env.envMinTotalExtOutgoingLiquidity
+    inspect' <- getInspect
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough outgoing liquidity to the external "
           <> "lightning network, got "
-          <> inspect @Text amt
+          <> (inspect' amt :: Text)
           <> " but minimum is "
-          <> inspect lim
+          <> inspect' lim
           <> "."
   monitorTotalExtIncomingLiquidity amt = do
     lim <- asks Env.envMinTotalExtIncomingLiquidity
@@ -95,12 +96,13 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
           <> "."
   monitorTotalOnChainLiquidity wal = do
     lim <- asks Env.envMinTotalOnChainLiquidity
+    inspect' <- getInspect
     when (Lnd.totalBalance wal < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough onchain liquidity, got "
-          <> inspect @Text wal
+          <> (inspect' . Lnd.totalBalance $ wal :: Text)
           <> " but minimum is "
-          <> inspect lim
+          <> inspect' lim
           <> "."
 
 instance (MonadUnliftIO m) => Storage (AppM m) where
