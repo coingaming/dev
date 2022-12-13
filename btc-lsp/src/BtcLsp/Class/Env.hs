@@ -36,6 +36,7 @@ class
   getLspPubKey :: m Lnd.NodePubKey
   getLspLndEnv :: m Lnd.LndEnv
   getYesodLog :: m YesodLog
+  getLogStyle:: m LogStyle
   getLndNodeUri =
     NodeUri <$> getLspPubKey <*> getLndP2PSocketAddress
   getLspPubKey = do

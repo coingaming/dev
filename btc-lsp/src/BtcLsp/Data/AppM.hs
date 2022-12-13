@@ -11,6 +11,7 @@ import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient.Data.WalletBalance as Lnd
+import qualified Text.Pretty.Simple as PrettySimple
 
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
@@ -81,13 +82,14 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
           <> "."
   monitorTotalExtIncomingLiquidity amt = do
     lim <- asks Env.envMinTotalExtIncomingLiquidity
+    getInspect' <- getInspect
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough incoming liquidity from the external "
           <> "lightning network, got "
-          <> inspect @Text amt
+          <> getInspect' amt
           <> " but minimum is "
-          <> inspect lim
+          <> getInspect' lim
           <> "."
   monitorTotalOnChainLiquidity wal = do
     lim <- asks Env.envMinTotalOnChainLiquidity
@@ -104,3 +106,11 @@ instance (MonadUnliftIO m) => Storage (AppM m) where
   runSql query = do
     pool <- asks envSQLPool
     Psql.runSqlPool query pool
+
+instance GenericPrettyEnv (AppM m) where
+  getStyle = do
+    logStyle <- getLogStyle
+    case logStyle of
+      DarkBg -> pure PrettySimple.defaultOutputOptionsDarkBg
+      LightBg -> pure PrettySimple.defaultOutputOptionsLightBg
+      NoColor -> pure PrettySimple.defaultOutputOptionsNoColor
