@@ -137,6 +137,8 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     asks $ envLnd . testEnvLsp
   getYesodLog =
     asks $ envYesodLog . testEnvLsp
+  getLogStyle =
+    asks $ envLogStyle . testEnvLsp
   getLndP2PSocketAddress = do
     host <- asks $ envLndP2PHost . testEnvLsp
     port <- asks $ envLndP2PPort . testEnvLsp

@@ -56,6 +56,7 @@ data Env = Env
     envKatipCTX :: LogContexts,
     envKatipLE :: LogEnv,
     envYesodLog :: YesodLog,
+    envLogStyle :: LogStyle,
     -- | Lnd
     envLnd :: Lnd.LndEnv,
     envLndP2PHost :: HostName,
@@ -83,7 +84,7 @@ data RawConfig = RawConfig
     rawConfigLogSeverity :: Severity,
     rawConfigLogSecrets :: SecretVision,
     rawConfigLogYesod :: YesodLog,
-    rawConfigLogStyle :: LogStyle
+    rawConfigLogStyle :: LogStyle,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,

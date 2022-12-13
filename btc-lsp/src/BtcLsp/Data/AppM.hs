@@ -59,6 +59,8 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     asks Env.envLnd
   getYesodLog =
     asks Env.envYesodLog
+  getLogStyle =
+    asks Env.envLogStyle
   getLndP2PSocketAddress = do
     host <- asks Env.envLndP2PHost
     port <- asks Env.envLndP2PPort
@@ -82,14 +84,14 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
           <> "."
   monitorTotalExtIncomingLiquidity amt = do
     lim <- asks Env.envMinTotalExtIncomingLiquidity
-    getInspect' <- getInspect
+    inspect' <- getInspect
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough incoming liquidity from the external "
           <> "lightning network, got "
-          <> getInspect' amt
+          <> (inspect' amt :: Text)
           <> " but minimum is "
-          <> getInspect' lim
+          <> inspect' lim
           <> "."
   monitorTotalOnChainLiquidity wal = do
     lim <- asks Env.envMinTotalOnChainLiquidity
@@ -107,7 +109,7 @@ instance (MonadUnliftIO m) => Storage (AppM m) where
     pool <- asks envSQLPool
     Psql.runSqlPool query pool
 
-instance GenericPrettyEnv (AppM m) where
+instance (MonadIO m, MonadUnliftIO m) => GenericPrettyEnv (AppM m) where
   getStyle = do
     logStyle <- getLogStyle
     case logStyle of

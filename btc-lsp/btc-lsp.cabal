@@ -174,6 +174,7 @@ library
     , persistent-migration
     , persistent-postgresql >=2.13.2.1
     , pretty
+    , pretty-simple
     , proto-lens
     , proto-lens-runtime
     , qrcode-core
@@ -364,6 +365,7 @@ executable btc-lsp-exe
       , persistent-migration
       , persistent-postgresql >=2.13.2.1
       , pretty
+      , pretty-simple
       , proto-lens
       , proto-lens-runtime
       , qrcode-core
@@ -583,6 +585,7 @@ executable btc-lsp-integration
       , persistent-migration
       , persistent-postgresql >=2.13.2.1
       , pretty
+      , pretty-simple
       , proto-lens
       , proto-lens-runtime
       , qrcode-core
@@ -774,6 +777,7 @@ executable btc-lsp-prof
       , persistent-migration
       , persistent-postgresql >=2.13.2.1
       , pretty
+      , pretty-simple
       , proto-lens
       , proto-lens-runtime
       , qrcode-core
@@ -991,6 +995,7 @@ test-suite btc-lsp-test
       , persistent-migration
       , persistent-postgresql >=2.13.2.1
       , pretty
+      , pretty-simple
       , proto-lens
       , proto-lens-runtime
       , qrcode-core
