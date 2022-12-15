@@ -54,9 +54,10 @@ utxoLeaseToPsbtUtxo l ul = psbtUtxo . LU.amountSat <$> M.lookup op l
           getOutPoint = op
         }
 
-mapLeaseUtxosToPsbtUtxo :: Env m => [FP.UtxoLease] -> ExceptT Failure m [PsbtUtxo]
+mapLeaseUtxosToPsbtUtxo :: (Env m, GenericPrettyEnv m) => [FP.UtxoLease] -> ExceptT Failure m [PsbtUtxo]
 mapLeaseUtxosToPsbtUtxo lockedUtxos = do
   releaseUtxosLocks lockedUtxos
+  Inspect inspect <- lift getInspect
   l <- unspendUtxoLookup
   newLockedUtxos <- lockUtxos (FP.outpoint <$> lockedUtxos)
   case sequence $ utxoLeaseToPsbtUtxo l <$> newLockedUtxos of
@@ -73,14 +74,15 @@ mapLeaseUtxosToPsbtUtxo lockedUtxos = do
         $ FailurePrivate "Cannot find utxo in unspent list"
 
 fundChanPsbt ::
-  (Env m) =>
+  (Env m, GenericPrettyEnv m) =>
   Lnd.PendingChannelId ->
   [PsbtUtxo] ->
   OnChainAddress 'Fund ->
   OnChainAddress 'Gain ->
   Money 'Lsp 'OnChain 'Gain ->
   ExceptT Failure m Lnd.Psbt
-fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee =
+fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee = do
+  Inspect inspect <- lift getInspect
   katipAddContext (sl "pcid" (inspect @Text pcid)) $ do
     let userFundingAmt = sumAmt userUtxos - unMoney lspFee
     $logTM DebugS
@@ -126,7 +128,7 @@ fundChanPsbt pcid userUtxos chanFundAddr changeAddr lspFee =
     pure $ Lnd.Psbt $ FP.fundedPsbt psbt
 
 fundChanPsbtLocked ::
-  (Env m) =>
+  (Env m, GenericPrettyEnv m) =>
   Lock ->
   Lnd.PendingChannelId ->
   [PsbtUtxo] ->
@@ -155,7 +157,7 @@ abortChannelPsbt p =
   void $ runExceptT $ withLndT Lnd.fundingStateStep ($ shimCancelReq p)
 
 openChannelPsbt ::
-  Env m =>
+  (Env m, GenericPrettyEnv m) =>
   Lnd.PendingChannelId ->
   Lock ->
   [PsbtUtxo] ->
@@ -165,6 +167,7 @@ openChannelPsbt ::
   Privacy ->
   ExceptT Failure m OpenChannelPsbtResult
 openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
+  Inspect inspect <- lift getInspect
   chan <- lift T.newTChanIO
   let openChannelRequest =
         openChannelReq pcid toPubKey (Money (2 * amt)) (Money amt) private
@@ -182,6 +185,7 @@ openChannelPsbt pcid lock utxos toPubKey changeAddress lspFee private = do
   where
     amt = sumAmt utxos - unMoney lspFee
     fundStep chan = do
+      Inspect inspect <- lift getInspect
       upd <- T.atomically $ T.readTChan chan
       $logTM DebugS . logStr $ "Got chan status update" <> inspect @Text upd
       case upd of

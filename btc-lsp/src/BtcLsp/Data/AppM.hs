@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Data.AppM
@@ -74,35 +75,35 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     first (const $ FailureInt FailureRedacted) <$> args (method lnd)
   monitorTotalExtOutgoingLiquidity amt = do
     lim <- asks Env.envMinTotalExtOutgoingLiquidity
-    inspect' <- getInspect
+    Inspect inspect <- getInspect
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough outgoing liquidity to the external "
           <> "lightning network, got "
-          <> (inspect' amt :: Text)
+          <> inspect @Text amt
           <> " but minimum is "
-          <> inspect' lim
+          <> inspect lim
           <> "."
   monitorTotalExtIncomingLiquidity amt = do
     lim <- asks Env.envMinTotalExtIncomingLiquidity
-    inspect' <- getInspect
+    Inspect inspect <- getInspect
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough incoming liquidity from the external "
           <> "lightning network, got "
-          <> (inspect' amt :: Text)
+          <> inspect @Text amt
           <> " but minimum is "
-          <> inspect' lim
+          <> inspect lim
           <> "."
   monitorTotalOnChainLiquidity wal = do
     lim <- asks Env.envMinTotalOnChainLiquidity
-    inspect' <- getInspect
+    Inspect inspect <- getInspect
     when (Lnd.totalBalance wal < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough onchain liquidity, got "
-          <> (inspect' . Lnd.totalBalance $ wal :: Text)
+          <> inspect @Text wal
           <> " but minimum is "
-          <> inspect' lim
+          <> inspect lim
           <> "."
 
 instance (MonadUnliftIO m) => Storage (AppM m) where

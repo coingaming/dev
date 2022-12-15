@@ -16,8 +16,9 @@ import LndClient.Data.ClosedChannels (ClosedChannelsRequest (..))
 import LndClient.Data.ListChannels
 import qualified LndClient.RPC.Silent as LndSilent
 
-syncChannelList :: (Env m) => m ()
+syncChannelList :: (Env m, GenericPrettyEnv m) => m ()
 syncChannelList = do
+  Inspect inspect <- getInspect
   res <-
     runExceptT $ do
       openedChans <-
@@ -105,13 +106,13 @@ syncChannelList = do
       . ("SyncChannelList failure " <>)
       . inspect @Text
 
-applyPoll :: (Env m) => m ()
+applyPoll :: (Env m, GenericPrettyEnv m) => m ()
 applyPoll =
   forever $
     syncChannelList
       >> sleep300ms
 
-applySub :: (Env m) => m ()
+applySub :: (Env m, GenericPrettyEnv m) => m ()
 applySub =
   forever $ do
     lnd <- getLspLndEnv

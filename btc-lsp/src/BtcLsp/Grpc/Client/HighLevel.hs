@@ -26,7 +26,8 @@ import qualified Proto.BtcLsp.Method.GetCfg as GetCfg
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 
 swapIntoLn ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   GCEnv ->
   SwapIntoLn.Request ->
@@ -43,7 +44,8 @@ swapIntoLn env req = withRunInIO $ \run ->
       req
 
 swapIntoLnT ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   GCEnv ->
   SwapIntoLn.Request ->
@@ -52,7 +54,8 @@ swapIntoLnT env =
   ExceptT . swapIntoLn env
 
 getCfg ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   GCEnv ->
   GetCfg.Request ->
@@ -69,7 +72,8 @@ getCfg env req = withRunInIO $ \run ->
       req
 
 getCfgT ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   GCEnv ->
   GetCfg.Request ->
@@ -81,6 +85,7 @@ getCfgT env =
 -- but it is used for testing purposes only!
 verifySig ::
   ( Env m,
+    GenericPrettyEnv m,
     Message msg,
     HasField msg "ctx" Proto.Ctx
   ) =>
@@ -89,6 +94,7 @@ verifySig ::
   CompressMode ->
   m Bool
 verifySig msg sig compressMode = do
+  Inspect inspect <- getInspect
   let msgEncoded =
         encodeMessage msg
   let msgChunk =

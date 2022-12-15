@@ -1,5 +1,8 @@
+{-# LANGUAGE RankNTypes #-}
+
 module Text.PrettyPrint.GenericPretty.Class
   ( GenericPrettyEnv (..),
+    Inspect (..),
   )
 where
 
@@ -9,6 +12,8 @@ import qualified Text.PrettyPrint.GenericPretty.Type as Type
 import qualified Text.PrettyPrint.GenericPretty.Util as Util
 import Universum hiding (show)
 
+newtype Inspect = Inspect {unInspect :: forall txt src. (Out src, IsString txt) => src -> txt}
+
 class (MonadIO m) => GenericPrettyEnv m where
   getStyle :: m PrettySimple.OutputOptions
   getStyle =
@@ -16,18 +21,13 @@ class (MonadIO m) => GenericPrettyEnv m where
   getSecretVision :: m Type.SecretVision
   getSecretVision =
     pure Type.SecretHidden
-  getInspect :: forall b a. (Out a, IsString b) => m (a -> b)
-  getInspect =
-    Util.inspectStyle <$> getStyle
-  getInspectSecret :: forall b a. (Out a, IsString b) => m (a -> b)
+  getInspect :: m Inspect
+  getInspect = do
+    style <- getStyle
+    pure Inspect {unInspect = Util.inspectStyle style}
+  getInspectSecret :: m Inspect
   getInspectSecret = do
     secretVision <- getSecretVision
     case secretVision of
       Type.SecretVisible -> getInspect
-      Type.SecretHidden -> pure $ const "<REDACTED>"
-  inspectM :: forall b a. (Out a, IsString b) => a -> m b
-  inspectM x =
-    ($ x) <$> getInspect
-  inspectSecretM :: forall b a. (Out a, IsString b) => a -> m b
-  inspectSecretM x =
-    ($ x) <$> getInspectSecret
+      Type.SecretHidden -> pure Inspect {unInspect = const "<REDACTED>"}

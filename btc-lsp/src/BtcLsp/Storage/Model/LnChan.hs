@@ -265,11 +265,13 @@ closedChannelUpsert ct close =
     uniq = UniqueLnChan fundTxId fundVout
 
 persistChannelUpdateSql ::
-  ( KatipContext m
+  ( KatipContext m,
+    GenericPrettyEnv m
   ) =>
   Lnd.ChannelEventUpdate ->
   ReaderT Psql.SqlBackend m (Entity LnChan)
 persistChannelUpdateSql (Lnd.ChannelEventUpdate channelEvent _) = do
+  Inspect inspect <- lift getInspect
   $logTM DebugS . logStr $ inspect @Text channelEvent
   ct <- getCurrentTime
   case channelEvent of

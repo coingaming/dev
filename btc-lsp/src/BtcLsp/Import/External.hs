@@ -126,10 +126,10 @@ import Network.HTTP2.Client2 as X (HostName, PortNumber)
 import Text.Casing as X (camel)
 import Text.PrettyPrint.GenericPretty.Import as X
   ( GenericPrettyEnv (..),
+    Inspect (..),
     Out (..),
     PrettyLog (..),
     SecretVision (..),
-    inspect,
     inspectPlain,
   )
 import Text.PrettyPrint.GenericPretty.Instance as X ()

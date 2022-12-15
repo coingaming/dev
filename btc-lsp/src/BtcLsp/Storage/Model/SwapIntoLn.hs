@@ -216,12 +216,14 @@ getSwapsInPsbtThreadSql =
 
 updateExpiredSql ::
   ( MonadIO m,
-    KatipContext m
+    KatipContext m,
+    GenericPrettyEnv m
   ) =>
   SwapIntoLnId ->
   ReaderT Psql.SqlBackend m ()
 updateExpiredSql rowId = do
   ct <- getCurrentTime
+  Inspect inspect <- lift getInspect
   qty <- Psql.updateCount $ \row -> do
     Psql.set
       row

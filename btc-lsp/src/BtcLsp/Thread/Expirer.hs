@@ -10,7 +10,7 @@ import BtcLsp.Import
 import BtcLsp.Import.Psql as Psql
 import qualified BtcLsp.Storage.Model.SwapIntoLn as SwapIntoLn
 
-apply :: (Env m) => m ()
+apply :: (Env m, GenericPrettyEnv m) => m ()
 apply =
   forever $ do
     runSql $
@@ -23,11 +23,13 @@ apply =
     sleep300ms
 
 updateExpiredSwapSql ::
-  ( KatipContext m
+  ( KatipContext m,
+    GenericPrettyEnv m
   ) =>
   SwapIntoLnId ->
   ReaderT Psql.SqlBackend m ()
 updateExpiredSwapSql rowId = do
+  Inspect inspect <- lift getInspect
   res <-
     SwapIntoLn.withLockedRowSql
       rowId

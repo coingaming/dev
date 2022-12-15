@@ -44,6 +44,7 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BtcEnv as Btc
 import qualified Network.Bitcoin.Wallet as Btc
+import Text.PrettyPrint.GenericPretty.Import (inspect)
 
 data Env = Env
   { -- | General

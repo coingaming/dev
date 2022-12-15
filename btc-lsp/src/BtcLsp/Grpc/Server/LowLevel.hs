@@ -26,6 +26,7 @@ import Network.HTTP2.Server hiding (Request)
 import Network.Wai
 import Network.Wai.Handler.Warp as Warp
 import Network.Wai.Handler.WarpTLS (runTLS, tlsSettingsMemory)
+import Text.PrettyPrint.GenericPretty.Import (inspect)
 
 data GSEnv = GSEnv
   { gsEnvPort :: Int,
