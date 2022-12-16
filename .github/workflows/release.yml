@@ -33,8 +33,8 @@ jobs:
           cores = 2
           max-jobs = 4
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          substituters = https://cache.nixos.org file:///tmp/nix_ci_cache https://cache.iog.io ssh://cache_coinix
-          trusted-substituters = file:///tmp/nix_ci_cache ssh://cache_coinix
+          substituters = https://cache.nixos.org file:///tmp/nix_ci_cache https://cache.iog.io ssh://nix_ssh@ixos.dev.testenv.io
+          trusted-substituters = file:///tmp/nix_ci_cache ssh://nix_ssh@ixos.dev.testenv.io
           trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
           trusted-users = nix-ssh
           post-build-hook = ${{ github.workspace }}/nix/upload-to-cache.sh
@@ -51,6 +51,7 @@ jobs:
         chmod -R 777 ${{ github.workspace }}/logs
         logsdir="${{ github.workspace }}/logs"
         sudo cp /home/runner/.ssh/config /etc/ssh/ssh_config.d/coinix.conf
+        export NIX_SSHOPTS="-i /home/runner/.ssh/github_action_ed25519"
         nix-build --option sandbox false --show-trace --pure ./test.nix --argstr log "$logsdir"
         ./result/bin/all-tests
     - uses: actions/upload-artifact@v3
