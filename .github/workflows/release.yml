@@ -53,6 +53,8 @@ jobs:
         logsdir="${{ github.workspace }}/logs"
         sudo cp /home/runner/.ssh/config /etc/ssh/ssh_config.d/coinix.conf
         export NIX_SSHOPTS="-i /home/runner/.ssh/github_action_ed25519"
+        nix store ping --store ssh://nix-ssh@nixos.dev.testenv.io
+        nix store ping --store ssh://cache_coinix
         nix-build --option sandbox false --show-trace --pure ./test.nix --argstr log "$logsdir"
         ./result/bin/all-tests
     - uses: actions/upload-artifact@v3
