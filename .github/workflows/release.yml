@@ -50,7 +50,7 @@ jobs:
         mkdir -p ${{ github.workspace }}/logs
         chmod -R 777 ${{ github.workspace }}/logs
         logsdir="${{ github.workspace }}/logs"
-        cat /etc/ssh/ssh_config
+        sudo cat /home/runner/.ssh/config >> /etc/ssh/ssh_config
         nix-build --option sandbox false --show-trace --pure ./test.nix --argstr log "$logsdir"
         ./result/bin/all-tests
     - uses: actions/upload-artifact@v3
