@@ -50,7 +50,7 @@ jobs:
         mkdir -p ${{ github.workspace }}/logs
         chmod -R 777 ${{ github.workspace }}/logs
         logsdir="${{ github.workspace }}/logs"
-        export NIX_SSHOPTS=PATH=$HOME/.nix-profile/bin:$PATH
+        ls -la /home/
         nix-build --option sandbox false --show-trace --pure ./test.nix --argstr log "$logsdir"
         ./result/bin/all-tests
     - uses: actions/upload-artifact@v3
