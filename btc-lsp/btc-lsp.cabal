@@ -870,6 +870,7 @@ test-suite btc-lsp-test
     , hspec
     , lnd-client
     , network-bitcoin
+    , pretty-simple
     , proto-lens
     , unliftio
     , vector
