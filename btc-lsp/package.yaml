@@ -215,6 +215,7 @@ executables:
     - extra
     - QuickCheck
     - hspec
+    - generic-pretty-instances
     source-dirs:
     - integration
     - test
