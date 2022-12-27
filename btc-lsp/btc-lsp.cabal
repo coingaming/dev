@@ -866,6 +866,7 @@ test-suite btc-lsp-test
     , bytestring
     , envparse
     , extra
+    , generic-pretty-instances
     , hspec
     , lnd-client
     , network-bitcoin

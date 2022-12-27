@@ -267,6 +267,7 @@ tests:
     - vector
     - QuickCheck
     - hspec
+    - generic-pretty-instances
     source-dirs:
     - test
     <<: *optimized
