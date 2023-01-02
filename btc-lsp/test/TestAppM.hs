@@ -55,6 +55,8 @@ import qualified Proto.BtcLsp.Data.HighLevel as Proto
 import qualified Proto.BtcLsp.Data.HighLevel_Fields as Proto
 import Test.Hspec
 import Test.QuickCheck
+import qualified Text.Pretty.Simple as PrettySimple
+import Text.PrettyPrint.GenericPretty.Import (inspect)
 import UnliftIO.Concurrent (ThreadId, forkFinally)
 import Prelude (show)
 
@@ -137,6 +139,8 @@ instance (MonadUnliftIO m) => I.Env (TestAppM 'LndLsp m) where
     asks $ envLnd . testEnvLsp
   getYesodLog =
     asks $ envYesodLog . testEnvLsp
+  getLogStyle =
+    asks $ envLogStyle . testEnvLsp
   getLndP2PSocketAddress = do
     host <- asks $ envLndP2PHost . testEnvLsp
     port <- asks $ envLndP2PPort . testEnvLsp
@@ -373,7 +377,8 @@ itEnv testName expr =
 
 itMain ::
   forall owner.
-  ( I.Env (TestAppM owner IO)
+  ( I.Env (TestAppM owner IO),
+    GenericPrettyEnv (TestAppM owner IO)
   ) =>
   String ->
   TestAppM owner IO () ->
@@ -410,7 +415,8 @@ itEnvT testName expr =
 itMainT ::
   forall owner e.
   ( Show e,
-    I.Env (TestAppM owner IO)
+    I.Env (TestAppM owner IO),
+    GenericPrettyEnv (TestAppM owner IO)
   ) =>
   String ->
   ExceptT e (TestAppM owner IO) () ->
@@ -579,3 +585,11 @@ lazyMineBitcoindCoins = do
         $ \f -> f 105 Nothing
   whenLeft res $ \e ->
     error $ "lazyMineBitcoindCoins ==> failed " <> inspect e
+
+instance (MonadIO m, MonadUnliftIO m) => GenericPrettyEnv (TestAppM 'LndLsp m) where
+  getStyle = do
+    logStyle <- getLogStyle
+    case logStyle of
+      DarkBg -> pure PrettySimple.defaultOutputOptionsDarkBg
+      LightBg -> pure PrettySimple.defaultOutputOptionsLightBg
+      NoColor -> pure PrettySimple.defaultOutputOptionsNoColor

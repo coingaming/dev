@@ -22,6 +22,7 @@ import Katip
 import qualified LndClient.Data.GetInfo as Lnd
 import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin.BlockChain as Btc
+import Text.PrettyPrint.GenericPretty.Import (inspect)
 
 main :: IO ()
 main = do
@@ -58,7 +59,7 @@ main = do
   withEnv cfg $
     \env -> runApp env apply
 
-apply :: (Env m) => m ()
+apply :: (Env m, GenericPrettyEnv m) => m ()
 apply = do
   $(logTM) InfoS "Waiting for bitcoind..."
   waitForBitcoindSync

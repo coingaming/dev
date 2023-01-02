@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module BtcLsp.Data.AppM
@@ -11,6 +12,7 @@ import BtcLsp.Data.Env as Env (Env (..))
 import BtcLsp.Import as I
 import qualified BtcLsp.Import.Psql as Psql
 import qualified LndClient.Data.WalletBalance as Lnd
+import qualified Text.Pretty.Simple as PrettySimple
 
 newtype AppM m a = AppM
   { unAppM :: ReaderT Env.Env m a
@@ -58,6 +60,8 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     asks Env.envLnd
   getYesodLog =
     asks Env.envYesodLog
+  getLogStyle =
+    asks Env.envLogStyle
   getLndP2PSocketAddress = do
     host <- asks Env.envLndP2PHost
     port <- asks Env.envLndP2PPort
@@ -71,6 +75,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
     first (const $ FailureInt FailureRedacted) <$> args (method lnd)
   monitorTotalExtOutgoingLiquidity amt = do
     lim <- asks Env.envMinTotalExtOutgoingLiquidity
+    Inspect inspect <- getInspect
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough outgoing liquidity to the external "
@@ -81,6 +86,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
           <> "."
   monitorTotalExtIncomingLiquidity amt = do
     lim <- asks Env.envMinTotalExtIncomingLiquidity
+    Inspect inspect <- getInspect
     when (amt < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough incoming liquidity from the external "
@@ -91,6 +97,7 @@ instance (MonadUnliftIO m) => I.Env (AppM m) where
           <> "."
   monitorTotalOnChainLiquidity wal = do
     lim <- asks Env.envMinTotalOnChainLiquidity
+    Inspect inspect <- getInspect
     when (Lnd.totalBalance wal < lim) $
       $(logTM) CriticalS . logStr $
         "Not enough onchain liquidity, got "
@@ -104,3 +111,11 @@ instance (MonadUnliftIO m) => Storage (AppM m) where
   runSql query = do
     pool <- asks envSQLPool
     Psql.runSqlPool query pool
+
+instance (MonadIO m, MonadUnliftIO m) => GenericPrettyEnv (AppM m) where
+  getStyle = do
+    logStyle <- getLogStyle
+    case logStyle of
+      DarkBg -> pure PrettySimple.defaultOutputOptionsDarkBg
+      LightBg -> pure PrettySimple.defaultOutputOptionsLightBg
+      NoColor -> pure PrettySimple.defaultOutputOptionsNoColor

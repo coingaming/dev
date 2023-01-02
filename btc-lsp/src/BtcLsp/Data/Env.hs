@@ -44,6 +44,7 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.BtcEnv as Btc
 import qualified Network.Bitcoin.Wallet as Btc
+import Text.PrettyPrint.GenericPretty.Import (inspect)
 
 data Env = Env
   { -- | General
@@ -56,6 +57,7 @@ data Env = Env
     envKatipCTX :: LogContexts,
     envKatipLE :: LogEnv,
     envYesodLog :: YesodLog,
+    envLogStyle :: LogStyle,
     -- | Lnd
     envLnd :: Lnd.LndEnv,
     envLndP2PHost :: HostName,
@@ -83,6 +85,7 @@ data RawConfig = RawConfig
     rawConfigLogSeverity :: Severity,
     rawConfigLogSecrets :: SecretVision,
     rawConfigLogYesod :: YesodLog,
+    rawConfigLogStyle :: LogStyle,
     -- | Lnd
     rawConfigLndEnv :: Lnd.LndEnv,
     rawConfigLndP2PHost :: HostName,
@@ -137,6 +140,7 @@ readRawConfig =
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SEVERITY" opts
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_SECRET" (opts <> E.def SecretHidden)
       <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_YESOD" (opts <> E.def YesodLogNoMain)
+      <*> E.var (E.auto <=< E.nonempty) "LSP_LOG_STYLE" (opts <> E.def DarkBg)
       -- Lnd
       <*> E.var (parseFromJSON <=< E.nonempty) "LSP_LND_ENV" opts
       <*> E.var (E.str <=< E.nonempty) "LSP_LND_P2P_HOST" opts
@@ -226,6 +230,7 @@ withEnv rc this = do
                 envKatipCTX = katipCtx,
                 envKatipNS = katipNs,
                 envYesodLog = rawConfigLogYesod rc,
+                envLogStyle = rawConfigLogStyle rc,
                 -- Lnd
                 envLnd = lnd,
                 envLndP2PHost = rawConfigLndP2PHost rc,

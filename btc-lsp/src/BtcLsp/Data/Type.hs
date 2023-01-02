@@ -12,6 +12,7 @@ module BtcLsp.Data.Type
     UnsafeOnChainAddress (..),
     Seconds (..),
     LogFormat (..),
+    LogStyle (..),
     YesodLog (..),
     MicroSeconds (..),
     SwapStatus (..),
@@ -110,6 +111,18 @@ data LogFormat
   | JSON
   deriving stock
     ( Read
+    )
+
+data LogStyle
+  = DarkBg
+  | LightBg
+  | NoColor
+  deriving stock
+    ( Eq,
+      Ord,
+      Show,
+      Read,
+      Generic
     )
 
 data YesodLog

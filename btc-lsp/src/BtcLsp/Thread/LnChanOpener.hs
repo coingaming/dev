@@ -21,8 +21,9 @@ import qualified LndClient.Data.ChannelPoint as ChannelPoint
 import qualified LndClient.Data.Peer as Peer
 import qualified LndClient.RPC.Silent as LndSilent
 
-apply :: (Env m) => m ()
+apply :: (Env m, GenericPrettyEnv m) => m ()
 apply = do
+  Inspect inspect <- getInspect
   lock <- liftIO newLock
   forever $ do
     ePeerList <-
@@ -89,7 +90,8 @@ cleanupInPsbtThreadChannels = runSql $ do
 -- opening chans per user.
 --
 openChanSql ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   Lnd.PendingChannelId ->
   Lock ->
@@ -97,6 +99,7 @@ openChanSql ::
   Entity User ->
   ReaderT Psql.SqlBackend m (Either (Entity SwapIntoLn) ())
 openChanSql pcid lock (Entity swapKey _) userEnt = do
+  Inspect inspect <- lift getInspect
   res <-
     SwapIntoLn.withLockedRowSql swapKey (== SwapInPsbtThread) $
       \swapVal -> do

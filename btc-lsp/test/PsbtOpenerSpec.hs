@@ -40,6 +40,7 @@ lspFee = Msat 20000 * 1000
 spec :: Spec
 spec = do
   itEnvT "PsbtOpener Spec" $ do
+    Inspect inspect <- lift getInspect
     amt <- lift getSwapIntoLnMinAmt
     swp <- createDummySwap Nothing
     let swpId = entityKey swp
@@ -89,6 +90,7 @@ spec = do
       Nothing -> throwE . FailureInt $ FailurePrivate "Failed to open channel with psbt"
 
   itEnvT "PsbtOpener subscription exception" $ do
+    Inspect inspect <- lift getInspect
     amt <- lift getSwapIntoLnMinAmt
     swp <- createDummySwap Nothing
     let swpId = entityKey swp

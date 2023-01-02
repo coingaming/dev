@@ -30,7 +30,7 @@ import qualified LndClient.RPC.Katip as Lnd
 import qualified Network.Bitcoin as Btc
 import qualified Network.Bitcoin.Types as Btc
 
-apply :: (Env m) => m ()
+apply :: (Env m, GenericPrettyEnv m) => m ()
 apply =
   forever $ do
     runSql $
@@ -135,12 +135,14 @@ newFundPsbtReq feeRate utxos' outAddr est = do
     }
 
 processRefundSql ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   [(Entity SwapUtxo, Entity SwapIntoLn)] ->
   ReaderT Psql.SqlBackend m ()
 processRefundSql [] = pure ()
 processRefundSql utxos@(x : _) = do
+  Inspect inspect <- lift getInspect
   res <- SwapIntoLn.withLockedRowSql
     (entityKey $ snd x)
     (`elem` swapStatusFinal)

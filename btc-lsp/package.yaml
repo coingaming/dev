@@ -88,6 +88,7 @@ _deps: &deps
   - pretty
   - GenericPretty
   - generic-pretty-instances
+  - pretty-simple
   # lens
   - microlens
   # bytes
@@ -214,6 +215,8 @@ executables:
     - extra
     - QuickCheck
     - hspec
+    - generic-pretty-instances
+    - pretty-simple
     source-dirs:
     - integration
     - test
@@ -266,6 +269,8 @@ tests:
     - vector
     - QuickCheck
     - hspec
+    - generic-pretty-instances
+    - pretty-simple
     source-dirs:
     - test
     <<: *optimized

@@ -26,14 +26,15 @@ import qualified Proto.BtcLsp.Method.SwapFromLn as SwapFromLn
 import qualified Proto.BtcLsp.Method.SwapIntoLn as SwapIntoLn
 import qualified Universum
 
-apply :: (Env m) => m ()
+apply :: (Env m, GenericPrettyEnv m) => m ()
 apply = do
   env <- getGsEnv
   withUnliftIO $ runServer env . handlers
 
 handlers ::
   forall m.
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   UnliftIO m ->
   GSEnv ->
@@ -106,6 +107,7 @@ withMiddleware ::
   ( GrpcReq req,
     GrpcRes res failure specific,
     Env m,
+    GenericPrettyEnv m,
     Out req,
     Out res
   ) =>
@@ -184,22 +186,26 @@ withMiddleware (UnliftIO run) gsEnv body handler waiReq req =
     case userE of
       Right user -> do
         res <- setGrpcCtx =<< handler user req
-        $(logTM) DebugS . logStr $ debugMsg res
+        debugMsg' <- debugMsg res
+        $(logTM) DebugS . logStr $ debugMsg'
         pure res
       Left e -> do
-        $(logTM) DebugS . logStr $ debugMsg e
+        debugMsg' <- debugMsg e
+        $(logTM) DebugS . logStr $ debugMsg'
         pure e
   where
-    debugMsg :: (Out a) => a -> Text
-    debugMsg x =
-      "Got input "
-        <> inspect body
-        <> " with Wai request "
-        <> Universum.show waiReq
-        <> " and decoded "
-        <> inspect req
-        <> " producing result "
-        <> inspect x
+    debugMsg :: (Out a, GenericPrettyEnv m) => a -> m Text
+    debugMsg x = do
+      Inspect inspect <- getInspect
+      pure $
+        "Got input "
+          <> inspect body
+          <> " with Wai request "
+          <> Universum.show waiReq
+          <> " and decoded "
+          <> inspect req
+          <> " producing result "
+          <> inspect x
 
 swapFromLn ::
   ( Monad m

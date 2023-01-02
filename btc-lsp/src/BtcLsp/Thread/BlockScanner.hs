@@ -28,9 +28,10 @@ import qualified Network.Bitcoin.BlockChain as Btc
 import qualified Network.Bitcoin.Types as Btc
 import qualified Universum
 
-apply :: (Env m) => m ()
+apply :: (Env m, GenericPrettyEnv m) => m ()
 apply =
   forever $ do
+    Inspect inspect <- getInspect
     eitherM
       ( $logTM ErrorS
           . logStr
@@ -41,7 +42,7 @@ apply =
       $ monitorOnChainLiquidity >> scan
     sleep300ms
 
-maybeFunded :: (Env m) => [Utxo] -> m ()
+maybeFunded :: (Env m, GenericPrettyEnv m) => [Utxo] -> m ()
 maybeFunded [] =
   pure ()
 maybeFunded utxos =
@@ -49,8 +50,9 @@ maybeFunded utxos =
     . nubOrd
     $ utxoSwapId <$> utxos
 
-maybeFundSwap :: (Env m) => SwapIntoLnId -> m ()
+maybeFundSwap :: (Env m, GenericPrettyEnv m) => SwapIntoLnId -> m ()
 maybeFundSwap swapId = do
+  Inspect inspect <- getInspect
   res <- runSql
     . SwapIntoLn.withLockedRowSql
       swapId
@@ -107,7 +109,8 @@ data Utxo = Utxo
   deriving stock (Show)
 
 mapVout ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   Btc.TransactionID ->
   Btc.TxOut ->
@@ -118,6 +121,7 @@ mapVout txid txout@(Btc.TxOut amt vout (Btc.StandardScriptPubKey _ _ _ _ addrsV)
   case V.toList addrsV of
     [addr] -> handleAddr addr amt vout txid
     _ -> do
+      Inspect inspect <- getInspect
       $logTM ErrorS . logStr $
         "Unsupported address vector in txid = "
           <> inspect @Text txid
@@ -128,7 +132,8 @@ mapVout _ (Btc.TxOut _ _ Btc.NonStandardScriptPubKey {}) =
   pure Nothing
 
 handleAddr ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   Btc.Address ->
   Btc.BTC ->
@@ -148,7 +153,8 @@ handleAddr addr amt vout txid = do
       pure Nothing
 
 newUtxo ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   Either Failure Msat ->
   Either (TryFromException Integer (Vout 'Funding)) (Vout 'Funding) ->
@@ -159,6 +165,7 @@ newUtxo (Right amt) (Right n) (Right txid) swp =
   pure . Just $
     Utxo amt n (from txid) (entityKey swp) Nothing
 newUtxo amt vout txid swp = do
+  Inspect inspect <- getInspect
   $logTM ErrorS . logStr $
     "TryFrom overflow error amt = "
       <> Universum.show amt
@@ -171,7 +178,8 @@ newUtxo amt vout txid swp = do
   pure Nothing
 
 extractRelatedUtxoFromBlock ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   Btc.BlockVerbose ->
   m [Utxo]
@@ -189,12 +197,14 @@ extractRelatedUtxoFromBlock blk =
 
 persistBlockT ::
   ( Storage m,
-    Env m
+    Env m,
+    GenericPrettyEnv m
   ) =>
   Btc.BlockVerbose ->
   [Utxo] ->
   ExceptT Failure m ()
 persistBlockT blk utxos = do
+  Inspect inspect <- lift getInspect
   height <-
     tryFromT "persistBlockT block height" $
       Btc.vBlkHeight blk
@@ -241,10 +251,12 @@ newSwapUtxo ct blkId utxo = do
     amt = utxoAmt utxo
 
 scan ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   ExceptT Failure m [Utxo]
 scan = do
+  Inspect inspect <- lift getInspect
   mBlk <- lift $ runSql Block.getLatestSql
   cHeight <-
     tryFromT "BlockScanner block count"
@@ -287,7 +299,8 @@ scan = do
           scannerStep [] (1 + unBlkHeight bHeight) $ unBlkHeight cHeight
 
 scannerStep ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   [Utxo] ->
   Word64 ->
@@ -297,6 +310,7 @@ scannerStep acc cur end =
   if cur > end
     then pure acc
     else do
+      Inspect inspect <- lift getInspect
       $logTM InfoS . logStr $
         "Scanner step cur = "
           <> inspect @Text cur
@@ -354,11 +368,13 @@ compareHash height = do
     $ BlkHeight w64h
 
 scanOneBlock ::
-  ( Env m
+  ( Env m,
+    GenericPrettyEnv m
   ) =>
   BlkHeight ->
   ExceptT Failure m [Utxo]
 scanOneBlock height = do
+  Inspect inspect <- lift getInspect
   hash <- withBtcT Btc.getBlockHash ($ toInteger . unBlkHeight $ height)
   blk <- withBtcT Btc.getBlockVerbose ($ hash)
   $logTM InfoS . logStr $
